@@ -1,4 +1,5 @@
-import { MarkdownRenderer, StructuredSynthesis } from './index';
+import MarkdownRenderer from './MarkdownRenderer';
+import StructuredSynthesis from './StructuredSynthesis';
 import type { Round } from './RoundTimeline';
 
 interface RoundCardProps {
