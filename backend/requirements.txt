@@ -15,4 +15,4 @@ pydantic[email]
 python-dotenv
 
 # Axiotic consensus library (CC-BY-4.0)
-consensus @ git+https://github.com/axiotic-ai/symphonia.git@main
+consensus @ git+https://github.com/axiotic-ai/consensus.git@main
