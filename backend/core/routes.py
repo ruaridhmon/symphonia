@@ -326,8 +326,10 @@ def generate_summary(
 
     for i, r in enumerate(responses, 1):
         prompt_content += f"\nResponse {i}:\n"
+        # Parse answers if stored as JSON string
+        answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
         for q_idx, q_text in enumerate(questions, 1):
-            answer = r.answers.get(f'q{q_idx}', 'No answer')
+            answer = answers.get(f'q{q_idx}', 'No answer')
             prompt_content += f"  - Q: {q_text}\n"
             prompt_content += f"    A: {answer}\n"
 
@@ -1096,7 +1098,8 @@ def synthesise_simple(
     blocks = []
     for i, r in enumerate(items, start=1):
         parts = []
-        for key, val in r.answers.items():
+        answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
+        for key, val in answers.items():
             clean = str(val).replace("\n", "<br/>")
             parts.append(f"<p><strong>{key}</strong>: {clean}</p>")
 
