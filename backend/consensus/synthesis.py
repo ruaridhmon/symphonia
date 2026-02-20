@@ -122,3 +122,7 @@ class OpenRouterSynthesis:
 # Backwards-compat helper
 def make_openrouter_synthesis(analysts: int = 3, model: str = "anthropic/claude-opus-4-6") -> OpenRouterSynthesis:
     return OpenRouterSynthesis(analysts=analysts, model=model)
+
+# Backwards compatibility alias
+CommitteeSynthesiser = OpenRouterSynthesis
+
