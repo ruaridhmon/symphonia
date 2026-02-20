@@ -7,11 +7,27 @@ export default function App() {
   const { isAdmin } = useAuth();
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-neutral-900 font-sans flex flex-col">
+    <div
+      className="min-h-screen flex flex-col transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--background)',
+        color: 'var(--foreground)',
+        fontFamily: 'var(--font-family)',
+      }}
+    >
       <Header />
-      {isAdmin ? <AdminDashboard /> : <UserDashboard />}
-      <footer className="bg-white border-t text-center py-4 text-sm text-neutral-500">
-        © {new Date().getFullYear()}
+      <main className="flex-1">
+        {isAdmin ? <AdminDashboard /> : <UserDashboard />}
+      </main>
+      <footer
+        className="border-t text-center py-4 text-sm transition-colors duration-200"
+        style={{
+          backgroundColor: 'var(--card)',
+          borderColor: 'var(--border)',
+          color: 'var(--muted-foreground)',
+        }}
+      >
+        © {new Date().getFullYear()} Symphonia
       </footer>
     </div>
   );

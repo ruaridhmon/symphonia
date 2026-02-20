@@ -1,3 +1,109 @@
+/* ------------------------------------------------------------------ */
+/* Google Fonts — Inter                                               */
+/* ------------------------------------------------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ------------------------------------------------------------------ */
+/* Tailwind layers                                                    */
+/* ------------------------------------------------------------------ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* CSS Custom Property fallbacks                                      */
+/* These are overridden at runtime by ThemeProvider.                   */
+/* Axiotic Dark is the default fallback.                              */
+/* ------------------------------------------------------------------ */
+:root {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+  --card-shadow: none;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #fbbf24;
+  --accent-foreground: #0f172a;
+  --accent-hover: #f59e0b;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #22c55e;
+  --border: rgba(148,163,184,0.1);
+  --input: rgba(148,163,184,0.1);
+  --ring: #fbbf24;
+  --radius: 0.75rem;
+  --font-family: 'Inter', sans-serif;
+}
+
+/* ------------------------------------------------------------------ */
+/* Base styles                                                        */
+/* ------------------------------------------------------------------ */
+*,
+*::before,
+*::after {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: dark;
+}
+
+html[data-theme="axiotic-light"],
+html[data-theme="apple"] {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ------------------------------------------------------------------ */
+/* Smooth theme transition                                            */
+/* Applied to key properties that change between themes.              */
+/* ------------------------------------------------------------------ */
+body,
+header,
+footer,
+main,
+.theme-transition {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* ------------------------------------------------------------------ */
+/* Utility: focus ring using theme accent                             */
+/* ------------------------------------------------------------------ */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dropdown animation (used by ThemeToggle)                           */
+/* ------------------------------------------------------------------ */
+@keyframes fadeInSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInSlideDown 0.15s ease-out;
+}
