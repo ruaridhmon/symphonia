@@ -10,7 +10,6 @@ import { saveAs } from 'file-saver';
 import { API_BASE_URL } from './config';
 import {
 	LoadingButton,
-	SynthesisDisplay,
 	SynthesisProgress,
 	RoundTimeline,
 	RoundCard,
