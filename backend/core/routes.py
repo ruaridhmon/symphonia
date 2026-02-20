@@ -1001,16 +1001,25 @@ def get_rounds(
         .all()
     )
 
-    return [
-        {
+    result = []
+    for r in rounds:
+        response_count = (
+            db.query(Response)
+            .filter(Response.round_id == r.id)
+            .count()
+        )
+        result.append({
             "id": r.id,
             "round_number": r.round_number,
             "synthesis": r.synthesis,
+            "synthesis_json": r.synthesis_json,
             "is_active": r.is_active,
-            "questions": r.questions or []
-        }
-        for r in rounds
-    ]
+            "questions": r.questions or [],
+            "convergence_score": r.convergence_score,
+            "response_count": response_count,
+        })
+
+    return result
 
 
 # ---------------------------------------------------------

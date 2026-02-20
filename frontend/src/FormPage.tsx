@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from './config'
+import { LoadingButton, MarkdownRenderer } from './components'
 
 type Form = {
   id: number
@@ -37,6 +38,8 @@ export default function FormPage() {
   const [responses, setResponses] = useState<Record<string, string>>({})
 
   const [hasSubmitted, setHasSubmitted] = useState(false)
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [mode, setMode] = useState('loading') // loading, filling, reviewing
 
@@ -192,31 +195,41 @@ export default function FormPage() {
 
 
 
-    await fetch(`${API_BASE_URL}/submit`, {
+    setIsSubmitting(true)
 
-      method: 'POST',
+    try {
 
-      headers: {
+      await fetch(`${API_BASE_URL}/submit`, {
 
-        'Content-Type': 'application/x-www-form-urlencoded',
+        method: 'POST',
 
-        Authorization: `Bearer ${token}`
+        headers: {
 
-      },
+          'Content-Type': 'application/x-www-form-urlencoded',
 
-      body: new URLSearchParams({
+          Authorization: `Bearer ${token}`
 
-        form_id: id,
+        },
 
-        answers: JSON.stringify(responses)
+        body: new URLSearchParams({
+
+          form_id: id,
+
+          answers: JSON.stringify(responses)
+
+        })
 
       })
 
-    })
 
 
+      navigate('/waiting')
 
-    navigate('/waiting')
+    } finally {
+
+      setIsSubmitting(false)
+
+    }
 
   }
 
@@ -225,7 +238,12 @@ export default function FormPage() {
   if (!form || mode === 'loading') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground text-lg">Loading…</p>
+        <div className="waiting-orbit">
+          <div className="waiting-orbit-dot" />
+          <div className="waiting-orbit-dot" />
+          <div className="waiting-orbit-dot" />
+          <div className="waiting-orbit-dot" />
+        </div>
       </div>
     )
   }
@@ -272,17 +290,11 @@ export default function FormPage() {
 
         {previousSynthesis && (
 
-          <div className="mb-6 p-4 highlight-box rounded-lg">
+          <div className="mb-6 p-4 highlight-box rounded-lg fade-in">
 
-            <h2 className="font-semibold mb-2">Synthesis from the previous round</h2>
+            <h2 className="font-semibold mb-2 text-foreground">Synthesis from the previous round</h2>
 
-            <div
-
-              className="prose prose-sm"
-
-              dangerouslySetInnerHTML={{ __html: previousSynthesis }}
-
-            />
+            <MarkdownRenderer content={previousSynthesis} />
 
           </div>
 
@@ -320,9 +332,13 @@ export default function FormPage() {
 
             })}
 
-            <button
+            <LoadingButton
 
-              className="btn btn-success w-full py-3 text-base"
+              variant="success"
+
+              size="lg"
+
+              className="w-full"
 
               onClick={() => setMode('filling')}
 
@@ -330,7 +346,7 @@ export default function FormPage() {
 
               Edit Response
 
-            </button>
+            </LoadingButton>
 
           </div>
 
@@ -378,9 +394,17 @@ export default function FormPage() {
 
             })}
 
-            <button
+            <LoadingButton
 
-              className="btn btn-accent w-full py-3 text-base"
+              variant="accent"
+
+              size="lg"
+
+              className="w-full"
+
+              loading={isSubmitting}
+
+              loadingText="Submitting…"
 
               onClick={submitForm}
 
@@ -388,7 +412,7 @@ export default function FormPage() {
 
               {hasSubmitted ? 'Update Response' : 'Submit'}
 
-            </button>
+            </LoadingButton>
 
           </>
 
