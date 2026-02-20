@@ -123,13 +123,44 @@ Replace raw HTML/Tailwind with Radix UI + shadcn/ui components from brand pack:
 - `Separator` (visual content breaks)
 - `Skeleton` (loading states)
 
-### 1.3 Theme Switching
+### 1.3 Theme Options
 
-- `data-theme` attribute on `<html>` (dark default)
-- CSS custom properties from brand pack
+Three themes. Admin selects default per deployment. Users can switch.
+
+**Axiotic Dark** (default for internal/demo):
+- Slate-950 `#020617` bg, amber-400 `#fbbf24` accent
+- The signature Axiotic identity
+
+**Axiotic Light:**
+- Slate-50 `#f8fafc` bg, amber-600 `#d97706` accent
+- Clean alternative for mixed audiences
+
+**Apple / Government** (default for government deployments):
+- Background: `#ffffff` (pure white)
+- Secondary bg: `#f5f5f7` (Apple's signature warm gray)
+- Card: `#ffffff` with `0 1px 3px rgba(0,0,0,0.08)` shadow (no borders — shadows only)
+- Foreground: `#1d1d1f` (Apple near-black)
+- Secondary text: `#86868b` (Apple gray)
+- Accent: `#0071e3` (Apple blue — trust, authority, action)
+- Accent hover: `#0077ED`
+- Destructive: `#ff3b30` (iOS red)
+- Success: `#34c759` (iOS green)
+- Font: `SF Pro Display` (headings) + `SF Pro Text` (body), fallback `system-ui, -apple-system, sans-serif`
+- Radius: `12px` (Apple's rounded aesthetic)
+- Border: none on cards — use elevation/shadow hierarchy instead
+- Generous whitespace, large touch targets, minimal visual elements
+- No particle backgrounds, no animations beyond subtle fades
+
+**Why Apple for government:** It signals competence, trustworthiness, and modernity without being flashy. Every civil servant uses an iPhone — this feels native, familiar, and professional. Zero learning curve for the visual language.
+
+### 1.4 Theme Switching
+
+- `data-theme` attribute on `<html>` (`axiotic-dark` | `axiotic-light` | `apple`)
+- CSS custom properties per theme
 - `localStorage` persistence
-- Sun/moon toggle in header
+- Toggle in header (icon or dropdown)
 - Zero-flash: set theme before first paint via inline `<script>`
+- Admin can lock theme per deployment (hide toggle for end users)
 
 ### 1.4 Page Redesign
 
