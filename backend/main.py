@@ -10,13 +10,13 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from consensus import routes as consensus_routes
-from consensus.otp_routes import router as otp_router
-from consensus.otp_auth import OTPAuthMiddleware, validate_session, SESSION_COOKIE_NAME
-from consensus.db import engine, SessionLocal
-from consensus.models import Base, User, UserFormUnlock
-from consensus.auth import get_password_hash
-from consensus.ws import ws_manager
+from core import routes as core_routes
+from core.otp_routes import router as otp_router
+from core.otp_auth import OTPAuthMiddleware, validate_session, SESSION_COOKIE_NAME
+from core.db import engine, SessionLocal
+from core.models import Base, User, UserFormUnlock
+from core.auth import get_password_hash
+from core.ws import ws_manager
 
 # Frontend dist directory (built with `npm run build`)
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
@@ -40,8 +40,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. OTP Authentication (protects all routes except /otp/*)
-app.add_middleware(OTPAuthMiddleware)
+# 2. OTP Authentication (DISABLED - using Cloudflare Access instead)
+# app.add_middleware(OTPAuthMiddleware)
 
 # =============================================================================
 # ROUTES
@@ -51,7 +51,7 @@ app.add_middleware(OTPAuthMiddleware)
 app.include_router(otp_router)
 
 # Main application routes (protected by OTP middleware)
-app.include_router(consensus_routes.router)
+app.include_router(core_routes.router)
 
 # =============================================================================
 # DATABASE INIT
@@ -61,7 +61,7 @@ Base.metadata.create_all(bind=engine)
 
 with SessionLocal() as db:
     admin_email = os.environ.get("ADMIN_EMAIL", "antreas@axiotic.ai")
-    admin_password = os.environ.get("ADMIN_PASSWORD", "change-me-now")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "test123")
     admin = db.query(User).filter(User.email == admin_email).first()
     if not admin:
         db.add(User(
@@ -70,8 +70,8 @@ with SessionLocal() as db:
             is_admin=True
         ))
     else:
+        # Only update is_admin, don't overwrite password
         admin.is_admin = True
-        admin.hashed_password = get_password_hash(admin_password)
 
     # Also ensure samuel@axiotic.ai exists as admin
     sam_email = "samuel@axiotic.ai"
@@ -79,7 +79,7 @@ with SessionLocal() as db:
     if not sam:
         db.add(User(
             email=sam_email,
-            hashed_password=get_password_hash("change-me-now"),
+            hashed_password=get_password_hash("test123"),
             is_admin=True,
         ))
     else:
@@ -125,22 +125,13 @@ if FRONTEND_DIR.exists():
     @app.get("/")
     async def serve_spa_root(request: Request):
         """Serve the SPA index.html for the root path."""
-        # Check if user is authenticated via OTP
-        token = request.cookies.get(SESSION_COOKIE_NAME)
-        email = validate_session(token)
-        
-        if not email:
-            # Redirect to OTP login
-            from fastapi.responses import RedirectResponse
-            return RedirectResponse(url="/otp/login", status_code=302)
-        
-        # Serve the SPA
+        # Auth handled by Cloudflare Access
         return FileResponse(str(FRONTEND_DIR / "index.html"))
     
     @app.get("/{full_path:path}")
     async def serve_spa_catchall(request: Request, full_path: str):
         """Catch-all route for SPA - serves index.html for client-side routing."""
-        # Skip API routes and OTP routes
+        # Skip API routes
         if full_path.startswith(("otp/", "api/", "ws", "docs", "openapi")):
             return {"detail": "Not Found"}
         
@@ -149,15 +140,7 @@ if FRONTEND_DIR.exists():
         if static_file.exists() and static_file.is_file():
             return FileResponse(str(static_file))
         
-        # Check if user is authenticated via OTP
-        token = request.cookies.get(SESSION_COOKIE_NAME)
-        email = validate_session(token)
-        
-        if not email:
-            # Redirect to OTP login
-            from fastapi.responses import RedirectResponse
-            return RedirectResponse(url="/otp/login", status_code=302)
-        
+        # Auth handled by Cloudflare Access
         # For all other paths, serve index.html (SPA routing)
         index_html = FRONTEND_DIR / "index.html"
         if index_html.exists():

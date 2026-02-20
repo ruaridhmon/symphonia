@@ -21,8 +21,8 @@ from .auth import (
     get_current_user,
     get_current_admin_user,
 )
-from .synthesis import CommitteeSynthesiser, FlowMode
-from consensus.ws import ws_manager
+from .synthesis import CommitteeSynthesiser, FlowMode, get_synthesiser
+from core.ws import ws_manager
 
 load_dotenv()
 
@@ -441,7 +441,7 @@ async def synthesise_committee(
 
     # Run committee synthesis
     api_key = os.getenv("OPENROUTER_API_KEY", "")
-    synthesiser = CommitteeSynthesiser(
+    synthesiser = get_synthesiser(
         api_key=api_key,
         n_analysts=payload.n_analysts,
     )
@@ -1147,3 +1147,108 @@ async def send_email(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed: {str(e)}")
+
+
+# ---------------------------------------------------------
+# ATLAS: UX TESTING DATA SEEDER
+# ---------------------------------------------------------
+
+@router.post("/atlas/seed")
+def seed_atlas_data(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user)
+):
+    """Seed the database with test forms for UX testing."""
+    import uuid
+    
+    test_forms = [
+        {
+            "title": "🧪 Round 1: Fresh Form",
+            "questions": [
+                {"id": "q1", "type": "text", "label": "What is your main concern?", "required": True},
+                {"id": "q2", "type": "textarea", "label": "Describe your perspective in detail", "required": True},
+                {"id": "q3", "type": "select", "label": "Priority level", "options": ["Low", "Medium", "High", "Critical"], "required": True},
+            ]
+        },
+        {
+            "title": "📊 Round 2: With Responses",
+            "questions": [
+                {"id": "q1", "type": "text", "label": "What solution do you propose?", "required": True},
+                {"id": "q2", "type": "rating", "label": "Rate your confidence (1-5)", "required": True},
+                {"id": "q3", "type": "textarea", "label": "Additional comments", "required": False},
+            ],
+            "seed_responses": [
+                {"q1": "Implement automated testing", "q2": "4", "q3": "This would significantly reduce bugs"},
+                {"q1": "Hire more developers", "q2": "3", "q3": "We need more hands on deck"},
+                {"q1": "Improve documentation", "q2": "5", "q3": "Clear docs prevent misunderstandings"},
+            ]
+        },
+        {
+            "title": "🎯 Multi-Round Delphi",
+            "questions": [
+                {"id": "q1", "type": "text", "label": "Final recommendation", "required": True},
+                {"id": "q2", "type": "textarea", "label": "Justification", "required": True},
+            ],
+            "rounds": 3,
+            "seed_responses": [
+                {"q1": "Consensus reached on Option A", "q2": "After 3 rounds, experts converged on this approach"},
+            ]
+        },
+    ]
+    
+    created_forms = []
+    
+    for form_data in test_forms:
+        # Check if form with this title already exists
+        existing = db.query(FormModel).filter(FormModel.title == form_data["title"]).first()
+        if existing:
+            created_forms.append({"id": existing.id, "title": existing.title, "status": "exists"})
+            continue
+        
+        # Create form with unique join_code
+        form = FormModel(
+            title=form_data["title"],
+            questions=form_data["questions"],
+            join_code=str(uuid.uuid4())[:8]
+        )
+        db.add(form)
+        db.flush()
+        
+        # Create initial round
+        num_rounds = form_data.get("rounds", 1)
+        for round_num in range(1, num_rounds + 1):
+            round_obj = RoundModel(form_id=form.id, round_number=round_num)
+            db.add(round_obj)
+            db.flush()
+            
+            # Seed responses if this is the last round and we have seed data
+            if round_num == num_rounds and "seed_responses" in form_data:
+                for i, resp_data in enumerate(form_data["seed_responses"]):
+                    # Create a test user for this response if needed
+                    test_email = f"test_user_{i+1}@atlas.test"
+                    test_user = db.query(User).filter(User.email == test_email).first()
+                    if not test_user:
+                        test_user = User(
+                            email=test_email,
+                            hashed_password=get_password_hash("test123"),
+                            is_admin=False
+                        )
+                        db.add(test_user)
+                        db.flush()
+                    
+                    response = Response(
+                        user_id=test_user.id,
+                        form_id=form.id,
+                        round_id=round_obj.id,
+                        answers=json.dumps(resp_data)
+                    )
+                    db.add(response)
+        
+        created_forms.append({"id": form.id, "title": form.title, "status": "created"})
+    
+    db.commit()
+    
+    return {
+        "message": "Atlas data seeded",
+        "forms": created_forms
+    }
