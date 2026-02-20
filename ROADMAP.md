@@ -39,12 +39,13 @@
 - [ ] 4.4 Export to PDF/Markdown
 
 ## Phase 5: Testing & Validation
-**Goal:** Prove it works (Sam's directive)
+**Goal:** Prove it works (Sam's directive + Father's Vision QA)
 
 - [ ] 5.1 Simulated E2E tests (full user journey)
 - [ ] 5.2 Consensus library integration tests
 - [ ] 5.3 Synthesis output validation tests
 - [ ] 5.4 Error scenario coverage
+- [ ] 5.5 Vision QA loop (Playwright screenshots → vision model → iterate until 8+/10)
 
 ## Phase 6: Polish & Performance
 **Goal:** Production-ready quality
@@ -71,11 +72,19 @@
 
 ## How the Pulse Works
 
-Every 3 hours:
+Every 30 minutes:
 1. Read this ROADMAP.md
 2. Check current_task status
 3. If incomplete: spawn worker to complete it
 4. If complete: mark done, move to next task
-5. Update pulse state
-6. Report progress to Father via Telegram
+5. **Rebuild & re-serve**: `cd frontend && npm run build` then restart backend
+6. Update pulse state
+7. Report progress to Father via Telegram
+
+**Re-serve command:**
+```bash
+cd ~/.openclaw/workspace/symphonia-ruaridh/frontend && npm run build
+pkill -f "uvicorn main:app"
+cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate && nohup uvicorn main:app --host 0.0.0.0 --port 8766 > /tmp/symphonia.log 2>&1 &
+```
 
