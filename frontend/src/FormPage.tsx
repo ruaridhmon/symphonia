@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from './config'
-import { LoadingButton, MarkdownRenderer } from './components'
+import { LoadingButton, SynthesisDisplay } from './components'
 
 type Form = {
   id: number
@@ -290,11 +290,15 @@ export default function FormPage() {
 
         {previousSynthesis && (
 
-          <div className="mb-6 p-4 highlight-box rounded-lg fade-in">
+          <div className="mb-6 fade-in">
 
-            <h2 className="font-semibold mb-2 text-foreground">Synthesis from the previous round</h2>
+            <SynthesisDisplay
 
-            <MarkdownRenderer content={previousSynthesis} />
+              content={previousSynthesis}
+
+              title="Synthesis from the previous round"
+
+            />
 
           </div>
 

@@ -10,32 +10,14 @@ import { saveAs } from 'file-saver';
 import { API_BASE_URL } from './config';
 import {
 	LoadingButton,
-	MarkdownRenderer,
+	SynthesisDisplay,
 	SynthesisProgress,
 	RoundTimeline,
+	RoundCard,
 	StructuredSynthesis,
 	SynthesisModeSelector,
 } from './components';
-
 // ─── Types ──────────────────────────────────────────────
-
-type Round = {
-	id: number;
-	round_number: number;
-	synthesis: string;
-	is_active: boolean;
-	questions: string[];
-};
-
-type Form = {
-	id: number;
-	title: string;
-	questions: string[];
-	allow_join: boolean;
-	join_code: string;
-};
-
-type SynthesisMode = 'simple' | 'committee' | 'ttd';
 
 type StructuredSynthesisData = {
 	agreements: any[];
@@ -49,6 +31,18 @@ type StructuredSynthesisData = {
 	areas_of_disagreement?: string[];
 	uncertainties?: string[];
 };
+
+// Round type imported from components/RoundTimeline
+
+type Form = {
+	id: number;
+	title: string;
+	questions: string[];
+	allow_join: boolean;
+	join_code: string;
+};
+
+type SynthesisMode = 'simple' | 'committee' | 'ttd';
 
 // ─── Component ──────────────────────────────────────────
 
@@ -194,8 +188,11 @@ export default function SummaryPage() {
 					id: x.id,
 					round_number: x.round_number,
 					synthesis: x.synthesis || '',
+					synthesis_json: x.synthesis_json || null,
 					is_active: !!x.is_active,
 					questions: Array.isArray(x.questions) ? x.questions : [],
+					convergence_score: x.convergence_score ?? null,
+					response_count: x.response_count ?? 0,
 				})
 			);
 			setRounds(mapped);
@@ -203,6 +200,12 @@ export default function SummaryPage() {
 			const active = mapped.find((x) => x.is_active) || null;
 			setActiveRound(active);
 			setViewingRound(active);
+
+			// If the active round already has structured data, load it
+			if (active?.synthesis_json) {
+				setStructuredData(active.synthesis_json);
+				setConvergenceScore(active.convergence_score ?? undefined);
+			}
 
 			if (active && editor) {
 				editor.commands.setContent(active.synthesis || '');
@@ -232,9 +235,14 @@ export default function SummaryPage() {
 		} else if (editor) {
 			editor.commands.setContent('');
 		}
-		// Clear structured data when switching rounds
-		setStructuredData(null);
-		setConvergenceScore(undefined);
+		// Load structured data if the round has it, otherwise clear
+		if (round.synthesis_json) {
+			setStructuredData(round.synthesis_json);
+			setConvergenceScore(round.convergence_score ?? undefined);
+		} else {
+			setStructuredData(null);
+			setConvergenceScore(undefined);
+		}
 	}
 
 	// ─── Actions ──────────────────────────────────────────
@@ -481,7 +489,7 @@ export default function SummaryPage() {
 						body: JSON.stringify({
 							model: selectedModel,
 							mode: 'ai_assisted',
-							n_analysts: 3,
+							n_analysts: synthesisMode === 'ttd' ? 5 : 3,
 						}),
 					}
 				);
@@ -658,20 +666,15 @@ export default function SummaryPage() {
 							)}
 						</div>
 
-						{/* Past round read-only synthesis view */}
-						{viewingRound &&
-							!isViewingActive &&
-							viewingRound.synthesis && (
-								<div className="card p-5 slide-up">
-									<h2 className="text-base font-semibold mb-3 text-foreground">
-										📖 Saved Synthesis (Round{' '}
-										{viewingRound.round_number})
-									</h2>
-									<MarkdownRenderer
-										content={viewingRound.synthesis}
-									/>
-								</div>
-							)}
+						{/* Past round detail card */}
+						{viewingRound && !isViewingActive && (
+							<div className="slide-up" key={`round-card-${viewingRound.id}`}>
+								<RoundCard
+									round={viewingRound}
+									isCurrentRound={false}
+								/>
+							</div>
+						)}
 
 						{/* Next Round Questions (only when viewing active round) */}
 						{isViewingActive && (
