@@ -9,7 +9,10 @@ import aiosmtplib
 import json
 import os
 
-from .models import User, Response, ArchivedResponse, Feedback, FormModel, RoundModel, UserFormUnlock
+from .models import (
+    User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
+    UserFormUnlock, FollowUp, FollowUpResponse,
+)
 from .auth import (
     get_db,
     get_password_hash,
@@ -18,6 +21,7 @@ from .auth import (
     get_current_user,
     get_current_admin_user,
 )
+from .synthesis import CommitteeSynthesiser, FlowMode
 from consensus.ws import ws_manager
 
 load_dotenv()
@@ -348,6 +352,317 @@ def generate_summary(
         print(f"Error calling OpenRouter: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to generate summary: {e}")
 
+
+
+# ---------------------------------------------------------
+# COMMITTEE SYNTHESIS
+# ---------------------------------------------------------
+
+class CommitteeSynthesisPayload(BaseModel):
+    model: str = "anthropic/claude-sonnet-4-5"
+    mode: str = "human_only"  # "human_only" | "ai_assisted"
+    n_analysts: int = 3
+
+
+@router.post("/forms/{form_id}/synthesise_committee")
+async def synthesise_committee(
+    form_id: int,
+    payload: CommitteeSynthesisPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Run committee-based synthesis on the active round's responses.
+
+    Uses N independent LLM analysts + a meta-synthesiser to produce
+    structured synthesis with agreements, disagreements, nuances,
+    and optionally follow-up probe questions.
+    """
+    active_round = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .first()
+    )
+
+    if not active_round:
+        raise HTTPException(status_code=400, detail="No active round")
+
+    # Fetch questions for the active round
+    questions = active_round.questions or []
+    if not questions:
+        form = db.query(FormModel).filter(FormModel.id == form_id).first()
+        if form:
+            questions = form.questions or []
+
+    if not questions:
+        raise HTTPException(status_code=400, detail="No questions found for this round")
+
+    # Fetch responses for the active round
+    responses = (
+        db.query(Response)
+        .filter(Response.round_id == active_round.id)
+        .order_by(Response.created_at.asc())
+        .all()
+    )
+
+    if not responses:
+        raise HTTPException(status_code=404, detail="No responses to synthesise")
+
+    # Format responses for the synthesis engine
+    response_dicts = [
+        {
+            "answers": r.answers,
+            "email": r.user.email if r.user else f"Expert {i}",
+        }
+        for i, r in enumerate(responses)
+    ]
+
+    # Parse flow mode
+    try:
+        flow_mode = FlowMode(payload.mode)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid mode: {payload.mode}. Use 'human_only' or 'ai_assisted'.",
+        )
+
+    # Build progress callback for WebSocket updates
+    async def progress_callback(stage: str, step: int, total: int):
+        for conn in ws_manager.active_connections.copy():
+            try:
+                await conn.send_json({
+                    "type": "synthesis_progress",
+                    "form_id": form_id,
+                    "stage": stage,
+                    "step": step,
+                    "total_steps": total,
+                })
+            except Exception:
+                ws_manager.disconnect(conn)
+
+    # Run committee synthesis
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    synthesiser = CommitteeSynthesiser(
+        api_key=api_key,
+        n_analysts=payload.n_analysts,
+    )
+
+    result = await synthesiser.run(
+        questions=questions,
+        responses=response_dicts,
+        model=payload.model,
+        mode=flow_mode,
+        progress_callback=progress_callback,
+    )
+
+    # Store results on the round
+    result_dict = result.to_dict()
+    active_round.synthesis_json = result_dict
+    active_round.provenance = result.provenance
+    active_round.flow_mode = payload.mode
+
+    # Compute a simple convergence score: avg confidence from confidence_map
+    confidences = list(result.confidence_map.values())
+    if confidences:
+        active_round.convergence_score = sum(confidences) / len(confidences)
+
+    # Also store a text synthesis for backwards compatibility
+    text_parts = []
+    if result.agreements:
+        text_parts.append("<h3>Agreements</h3>")
+        for a in result.agreements:
+            text_parts.append(
+                f"<p><strong>{a.claim}</strong> "
+                f"(confidence: {a.confidence:.0%}) — {a.evidence_summary}</p>"
+            )
+    if result.disagreements:
+        text_parts.append("<h3>Disagreements</h3>")
+        for d in result.disagreements:
+            text_parts.append(f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>")
+            for pos in d.positions:
+                text_parts.append(
+                    f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
+                )
+            text_parts.append("</ul>")
+    if result.nuances:
+        text_parts.append("<h3>Nuances</h3>")
+        for n in result.nuances:
+            text_parts.append(f"<p><strong>{n.claim}</strong> — {n.context}</p>")
+
+    active_round.synthesis = "".join(text_parts) if text_parts else "Synthesis complete."
+
+    # If AI-assisted, store generated probes as FollowUp records
+    if flow_mode == FlowMode.AI_ASSISTED and result.follow_up_probes:
+        for probe in result.follow_up_probes:
+            follow_up = FollowUp(
+                round_id=active_round.id,
+                author_type="ai",
+                author_id=None,
+                question=probe.question,
+            )
+            db.add(follow_up)
+
+    db.commit()
+
+    # Broadcast completion
+    await ws_manager.broadcast_summary(active_round.synthesis)
+    for conn in ws_manager.active_connections.copy():
+        try:
+            await conn.send_json({
+                "type": "synthesis_complete",
+                "form_id": form_id,
+                "round_id": active_round.id,
+            })
+        except Exception:
+            ws_manager.disconnect(conn)
+
+    return {
+        "synthesis": result_dict,
+        "convergence_score": active_round.convergence_score,
+        "text_synthesis": active_round.synthesis,
+    }
+
+
+# ---------------------------------------------------------
+# FOLLOW-UPS
+# ---------------------------------------------------------
+
+class FollowUpCreatePayload(BaseModel):
+    question: str
+
+
+@router.get("/forms/{form_id}/follow_ups")
+def get_follow_ups(
+    form_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get all follow-up questions for the active round of a form."""
+    active_round = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .first()
+    )
+
+    if not active_round:
+        raise HTTPException(status_code=404, detail="No active round")
+
+    follow_ups = (
+        db.query(FollowUp)
+        .filter(FollowUp.round_id == active_round.id)
+        .order_by(FollowUp.created_at.asc())
+        .all()
+    )
+
+    result = []
+    for fu in follow_ups:
+        # Get author email for human-authored follow-ups
+        author_email = None
+        if fu.author_type == "human" and fu.author_id:
+            author = db.query(User).filter(User.id == fu.author_id).first()
+            if author:
+                author_email = author.email
+
+        responses = [
+            {
+                "id": r.id,
+                "author_type": r.author_type,
+                "author_id": r.author_id,
+                "author_email": (
+                    db.query(User).filter(User.id == r.author_id).first().email
+                    if r.author_type == "human" and r.author_id
+                    else None
+                ),
+                "response": r.response,
+                "created_at": r.created_at.isoformat(),
+            }
+            for r in fu.responses
+        ]
+
+        result.append({
+            "id": fu.id,
+            "round_id": fu.round_id,
+            "author_type": fu.author_type,
+            "author_id": fu.author_id,
+            "author_email": author_email,
+            "question": fu.question,
+            "created_at": fu.created_at.isoformat(),
+            "responses": responses,
+        })
+
+    return result
+
+
+@router.post("/forms/{form_id}/follow_ups")
+def create_follow_up(
+    form_id: int,
+    payload: FollowUpCreatePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Create a new follow-up question on the active round."""
+    active_round = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .first()
+    )
+
+    if not active_round:
+        raise HTTPException(status_code=400, detail="No active round")
+
+    follow_up = FollowUp(
+        round_id=active_round.id,
+        author_type="human",
+        author_id=user.id,
+        question=payload.question,
+    )
+    db.add(follow_up)
+    db.commit()
+    db.refresh(follow_up)
+
+    return {
+        "id": follow_up.id,
+        "round_id": follow_up.round_id,
+        "author_type": follow_up.author_type,
+        "author_id": follow_up.author_id,
+        "question": follow_up.question,
+        "created_at": follow_up.created_at.isoformat(),
+    }
+
+
+class FollowUpRespondPayload(BaseModel):
+    response: str
+
+
+@router.post("/follow_ups/{follow_up_id}/respond")
+def respond_to_follow_up(
+    follow_up_id: int,
+    payload: FollowUpRespondPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Respond to a follow-up question."""
+    follow_up = db.query(FollowUp).filter(FollowUp.id == follow_up_id).first()
+    if not follow_up:
+        raise HTTPException(status_code=404, detail="Follow-up not found")
+
+    response = FollowUpResponse(
+        follow_up_id=follow_up.id,
+        author_type="human",
+        author_id=user.id,
+        response=payload.response,
+    )
+    db.add(response)
+    db.commit()
+    db.refresh(response)
+
+    return {
+        "id": response.id,
+        "follow_up_id": response.follow_up_id,
+        "author_type": response.author_type,
+        "author_id": response.author_id,
+        "response": response.response,
+        "created_at": response.created_at.isoformat(),
+    }
 
 
 # ---------------------------------------------------------

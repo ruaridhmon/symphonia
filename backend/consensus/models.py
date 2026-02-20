@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, String, Boolean, JSON
+from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, String, Boolean, JSON, Float
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .db import Base
@@ -57,9 +57,16 @@ class RoundModel(Base):
     is_active = Column(Boolean, default=True)
     questions = Column(JSON, nullable=True)
 
+    # Committee synthesis fields
+    synthesis_json = Column(JSON, nullable=True)
+    provenance = Column(JSON, nullable=True)
+    flow_mode = Column(String, nullable=True, default="human_only")
+    convergence_score = Column(Float, nullable=True)
+
     form = relationship("FormModel", back_populates="rounds")
     responses = relationship("Response", back_populates="round")
     archived_responses = relationship("ArchivedResponse", back_populates="round")
+    follow_ups = relationship("FollowUp", back_populates="round", cascade="all, delete-orphan")
 
 
 class Response(Base):
@@ -106,3 +113,35 @@ class Feedback(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     user = relationship("User", back_populates="feedback_entries")
+
+
+class FollowUp(Base):
+    """A follow-up question posted during a Delphi round.
+
+    Can be authored by a human expert or by the AI synthesis engine.
+    """
+    __tablename__ = "follow_ups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False)
+    author_type = Column(String, nullable=False)  # "human" | "ai"
+    author_id = Column(Integer, nullable=True)  # user.id if human, None if ai
+    question = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    round = relationship("RoundModel", back_populates="follow_ups")
+    responses = relationship("FollowUpResponse", back_populates="follow_up", cascade="all, delete-orphan")
+
+
+class FollowUpResponse(Base):
+    """A response to a follow-up question."""
+    __tablename__ = "follow_up_responses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    follow_up_id = Column(Integer, ForeignKey("follow_ups.id"), nullable=False)
+    author_type = Column(String, nullable=False)  # "human" | "ai"
+    author_id = Column(Integer, nullable=True)  # user.id if human, None if ai
+    response = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    follow_up = relationship("FollowUp", back_populates="responses")
