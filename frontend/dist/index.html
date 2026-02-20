@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Symphonia — Collaborative Consensus</title>
+
+    <!-- Google Fonts preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Zero-flash theme script: sets data-theme + CSS vars BEFORE first paint -->
+    <script>
+      ;(function() {
+        var STORAGE_KEY = 'symphonia-theme';
+        var DEFAULT = 'axiotic-dark';
+        var VALID = ['axiotic-dark', 'axiotic-light', 'apple'];
+
+        var themes = {
+          'axiotic-dark': {
+            type: 'dark',
+            vars: {
+              '--background':'#020617','--foreground':'#f8fafc','--card':'#0f172a',
+              '--card-foreground':'#f8fafc','--card-shadow':'none',
+              '--secondary':'#1e293b','--secondary-foreground':'#f8fafc',
+              '--muted':'#1e293b','--muted-foreground':'#94a3b8',
+              '--accent':'#fbbf24','--accent-foreground':'#0f172a','--accent-hover':'#f59e0b',
+              '--destructive':'#ef4444','--destructive-foreground':'#ffffff',
+              '--success':'#22c55e',
+              '--border':'rgba(148,163,184,0.1)','--input':'rgba(148,163,184,0.1)',
+              '--ring':'#fbbf24','--radius':'0.75rem',
+              '--font-family':"'Inter', sans-serif"
+            }
+          },
+          'axiotic-light': {
+            type: 'light',
+            vars: {
+              '--background':'#f8fafc','--foreground':'#0f172a','--card':'#ffffff',
+              '--card-foreground':'#0f172a','--card-shadow':'none',
+              '--secondary':'#e2e8f0','--secondary-foreground':'#0f172a',
+              '--muted':'#f1f5f9','--muted-foreground':'#64748b',
+              '--accent':'#d97706','--accent-foreground':'#ffffff','--accent-hover':'#b45309',
+              '--destructive':'#d4183d','--destructive-foreground':'#ffffff',
+              '--success':'#16a34a',
+              '--border':'rgba(30,41,59,0.1)','--input':'rgba(30,41,59,0.1)',
+              '--ring':'#d97706','--radius':'0.75rem',
+              '--font-family':"'Inter', sans-serif"
+            }
+          },
+          'apple': {
+            type: 'light',
+            vars: {
+              '--background':'#ffffff','--foreground':'#1d1d1f','--card':'#ffffff',
+              '--card-foreground':'#1d1d1f','--card-shadow':'0 1px 3px rgba(0,0,0,0.08)',
+              '--secondary':'#f5f5f7','--secondary-foreground':'#1d1d1f',
+              '--muted':'#f5f5f7','--muted-foreground':'#86868b',
+              '--accent':'#0071e3','--accent-foreground':'#ffffff','--accent-hover':'#0077ED',
+              '--destructive':'#ff3b30','--destructive-foreground':'#ffffff',
+              '--success':'#34c759',
+              '--border':'rgba(0,0,0,0.04)','--input':'rgba(0,0,0,0.06)',
+              '--ring':'#0071e3','--radius':'12px',
+              '--font-family':"-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif"
+            }
+          }
+        };
+
+        try {
+          var stored = localStorage.getItem(STORAGE_KEY);
+          var id = (stored && VALID.indexOf(stored) !== -1) ? stored : DEFAULT;
+        } catch(e) {
+          var id = DEFAULT;
+        }
+
+        var t = themes[id];
+        var root = document.documentElement;
+        root.setAttribute('data-theme', id);
+
+        if (t.type === 'dark') {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+
+        var vars = t.vars;
+        for (var k in vars) {
+          if (vars.hasOwnProperty(k)) {
+            root.style.setProperty(k, vars[k]);
+          }
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-244b52d3.js"></script>
+    <link rel="stylesheet" href="/assets/index-27869855.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    
+  </body>
+</html>

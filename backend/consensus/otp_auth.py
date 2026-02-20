@@ -13,6 +13,7 @@ from email.message import EmailMessage
 from dataclasses import dataclass, field
 from fastapi import Request, HTTPException, Depends
 from fastapi.responses import RedirectResponse, JSONResponse
+from starlette.responses import RedirectResponse as StarletteRedirectResponse
 import aiosmtplib
 
 # =============================================================================
@@ -273,8 +274,9 @@ OTP_EXEMPT_PATHS = frozenset([
 
 # Prefixes that are exempt from OTP auth
 OTP_EXEMPT_PREFIXES = (
-    "/otp/",     # All OTP routes
-    "/static/",  # Static files
+    "/otp/",      # All OTP routes
+    "/static/",   # Static files
+    "/assets/",   # Frontend assets (JS, CSS)
 )
 
 
@@ -326,6 +328,9 @@ class OTPAuthMiddleware:
     """
     ASGI middleware that enforces OTP authentication on all routes
     except those in OTP_EXEMPT_PATHS.
+    
+    For browser requests (Accept: text/html), redirects to /otp/login.
+    For API requests, returns 401 JSON.
     """
     
     def __init__(self, app):
@@ -344,9 +349,10 @@ class OTPAuthMiddleware:
             await self.app(scope, receive, send)
             return
         
-        # Extract session cookie from headers
+        # Extract headers
         headers = dict(scope.get("headers", []))
         cookie_header = headers.get(b"cookie", b"").decode()
+        accept_header = headers.get(b"accept", b"").decode()
         
         # Parse cookies
         cookies = {}
@@ -364,14 +370,22 @@ class OTPAuthMiddleware:
             # Valid session - proceed
             await self.app(scope, receive, send)
         else:
-            # No valid session - return 401 JSON or redirect
-            response = JSONResponse(
-                status_code=401,
-                content={
-                    "error": "authentication_required",
-                    "message": "Please authenticate via OTP to access Symphonia",
-                    "login_url": "/otp/login",
-                    "allowed_emails": list(ALLOWED_EMAILS),
-                }
-            )
+            # No valid session
+            # Check if this is a browser request (wants HTML)
+            is_browser = "text/html" in accept_header
+            
+            if is_browser:
+                # Redirect to login page
+                response = StarletteRedirectResponse(url="/otp/login", status_code=302)
+            else:
+                # Return 401 JSON for API requests
+                response = JSONResponse(
+                    status_code=401,
+                    content={
+                        "error": "authentication_required",
+                        "message": "Please authenticate via OTP to access Symphonia",
+                        "login_url": "/otp/login",
+                        "allowed_emails": list(ALLOWED_EMAILS),
+                    }
+                )
             await response(scope, receive, send)

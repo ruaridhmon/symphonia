@@ -5,15 +5,21 @@ Protected by email OTP authentication.
 Only authorized emails can access the platform.
 """
 import os
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from pathlib import Path
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from consensus import routes as consensus_routes
 from consensus.otp_routes import router as otp_router
-from consensus.otp_auth import OTPAuthMiddleware
+from consensus.otp_auth import OTPAuthMiddleware, validate_session, SESSION_COOKIE_NAME
 from consensus.db import engine, SessionLocal
 from consensus.models import Base, User, UserFormUnlock
 from consensus.auth import get_password_hash
 from consensus.ws import ws_manager
+
+# Frontend dist directory (built with `npm run build`)
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 
 app = FastAPI(
     title="Symphonia",
@@ -106,12 +112,73 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 # =============================================================================
+# STATIC FILES & SPA ROUTING
+# =============================================================================
+
+# Mount static assets (JS, CSS, etc.) from the frontend build
+if FRONTEND_DIR.exists():
+    # Serve static assets under /assets
+    assets_dir = FRONTEND_DIR / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+    
+    @app.get("/")
+    async def serve_spa_root(request: Request):
+        """Serve the SPA index.html for the root path."""
+        # Check if user is authenticated via OTP
+        token = request.cookies.get(SESSION_COOKIE_NAME)
+        email = validate_session(token)
+        
+        if not email:
+            # Redirect to OTP login
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(url="/otp/login", status_code=302)
+        
+        # Serve the SPA
+        return FileResponse(str(FRONTEND_DIR / "index.html"))
+    
+    @app.get("/{full_path:path}")
+    async def serve_spa_catchall(request: Request, full_path: str):
+        """Catch-all route for SPA - serves index.html for client-side routing."""
+        # Skip API routes and OTP routes
+        if full_path.startswith(("otp/", "api/", "ws", "docs", "openapi")):
+            return {"detail": "Not Found"}
+        
+        # Check if it's a static file request
+        static_file = FRONTEND_DIR / full_path
+        if static_file.exists() and static_file.is_file():
+            return FileResponse(str(static_file))
+        
+        # Check if user is authenticated via OTP
+        token = request.cookies.get(SESSION_COOKIE_NAME)
+        email = validate_session(token)
+        
+        if not email:
+            # Redirect to OTP login
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(url="/otp/login", status_code=302)
+        
+        # For all other paths, serve index.html (SPA routing)
+        index_html = FRONTEND_DIR / "index.html"
+        if index_html.exists():
+            return FileResponse(str(index_html))
+        
+        return {"detail": "Not Found"}
+else:
+    print("⚠️  Frontend not built. Run `npm run build` in frontend/")
+
+
+# =============================================================================
 # LIFECYCLE
 # =============================================================================
 
 @app.on_event("startup")
 async def startup_event():
     print("✅ Symphonia backend started")
+    if FRONTEND_DIR.exists():
+        print(f"   Frontend: {FRONTEND_DIR}")
+    else:
+        print("   Frontend: NOT FOUND (run `npm run build` in frontend/)")
     print("   Login: /otp/login")
 
 
