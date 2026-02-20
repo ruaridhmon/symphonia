@@ -29,10 +29,24 @@ load_dotenv()
 
 router = APIRouter()
 
-client = OpenAI(
-    api_key=os.getenv("OPENROUTER_API_KEY"),
-    base_url="https://openrouter.ai/api/v1"
-)
+# Lazy client initialization to avoid startup crash when no API key
+_openai_client = None
+
+def get_openai_client():
+    global _openai_client
+    if _openai_client is None:
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            return None
+        _openai_client = OpenAI(
+            api_key=api_key,
+            base_url="https://openrouter.ai/api/v1"
+        )
+    return _openai_client
+
+# Keep 'client' for backwards compat but make it a property
+client = None  # Will be set lazily
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -336,8 +350,40 @@ def generate_summary(
     prompt_content += "\n--- End of Responses ---\n"
     prompt_content += "\nNow, please provide a concise synthesis of all the answers."
 
+    # Check for mock mode or missing API key
+    synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    
+    if synthesis_mode == "mock" or not api_key:
+        # Return mock synthesis for demo purposes
+        mock_summary = """## Synthesis Summary (Mock Mode)
+
+### Areas of Agreement
+- All experts recognize the need for AI governance frameworks
+- There is consensus that current measures are insufficient
+- Historical precedents provide some guidance, though with limitations
+
+### Areas of Divergence  
+- **Urðr (Past)**: Historical analogies (nuclear, aviation) are instructive
+- **Verðandi (Present)**: AI velocity exceeds historical precedents by 10-100x
+- **Skuld (Future)**: Historical models will fundamentally break; need new approaches
+
+### Emergent Insight
+The dimensional analysis reveals a **temporal paradox**: governance frameworks developed from historical patterns may be obsolete before implementation, yet we have no alternative methodology for anticipating truly novel scenarios.
+
+### Recommended Next Steps
+1. Establish adaptive governance mechanisms that can evolve
+2. Invest in safety research at higher ratios (currently estimated 10:1 capability:safety)
+3. Build international coordination before crisis events
+
+*[This is a mock synthesis demonstrating the UI flow. Enable OPENROUTER_API_KEY for real LLM synthesis.]*"""
+        return {"summary": mock_summary}
+
     try:
-        completion = client.chat.completions.create(
+        openai_client = get_openai_client()
+        if not openai_client:
+            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+        completion = openai_client.chat.completions.create(
             model=payload.model,
             messages=[
                 {
