@@ -10,12 +10,15 @@ import { saveAs } from 'file-saver';
 import { API_BASE_URL } from './config';
 import {
 	LoadingButton,
+	SynthesisDisplay,
 	SynthesisProgress,
 	RoundTimeline,
 	RoundCard,
 	StructuredSynthesis,
 	SynthesisModeSelector,
 } from './components';
+import type { Round } from './components';
+
 // ─── Types ──────────────────────────────────────────────
 
 type StructuredSynthesisData = {
@@ -30,8 +33,6 @@ type StructuredSynthesisData = {
 	areas_of_disagreement?: string[];
 	uncertainties?: string[];
 };
-
-// Round type imported from components/RoundTimeline
 
 type Form = {
 	id: number;
