@@ -38,14 +38,22 @@
 - [ ] 4.3 Comment threads on synthesis sections
 - [ ] 4.4 Export to PDF/Markdown
 
-## Phase 5: Polish & Performance
+## Phase 5: Testing & Validation
+**Goal:** Prove it works (Sam's directive)
+
+- [ ] 5.1 Simulated E2E tests (full user journey)
+- [ ] 5.2 Consensus library integration tests
+- [ ] 5.3 Synthesis output validation tests
+- [ ] 5.4 Error scenario coverage
+
+## Phase 6: Polish & Performance
 **Goal:** Production-ready quality
 
-- [ ] 5.1 Mobile responsive design
-- [ ] 5.2 Keyboard navigation
-- [ ] 5.3 Loading skeleton states
-- [ ] 5.4 Error boundaries with recovery
-- [ ] 5.5 Performance optimization (lazy loading, memoization)
+- [ ] 6.1 Mobile responsive design
+- [ ] 6.2 Keyboard navigation
+- [ ] 6.3 Loading skeleton states
+- [ ] 6.4 Error boundaries with recovery
+- [ ] 6.5 Performance optimization (lazy loading, memoization)
 
 ---
 
