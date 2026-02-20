@@ -17,14 +17,9 @@ Symphonia is a distributed expert synthesis platform for scientific consensus. I
 
 ## Architecture
 
-### Two Repos, One Product
+### Self-Contained Platform
 
-| Layer | Repo | Purpose |
-|-------|------|---------|
-| **Platform** | `ruaridhmon/symphonia` (this repo) | Web UI, auth, forms, rounds, user flows |
-| **Engine** | `axiotic-ai/consensus` | Synthesis pipeline — TTD/NSGA-II, graph extraction, narrative generation |
-
-Currently disconnected. The platform uses a naive single-shot OpenRouter call for synthesis. The engine has no UI. This redesign connects them.
+This repo is the **complete product** — UI, backend, and synthesis engine. Sam's `axiotic-ai/consensus` repo stays separate (library-only, no UI). We build our own committee-based synthesis directly in this codebase.
 
 ### Target Stack
 
@@ -39,15 +34,47 @@ Currently disconnected. The platform uses a naive single-shot OpenRouter call fo
 │  FastAPI + SQLAlchemy + PostgreSQL               │
 │  Auth (JWT) · Forms · Rounds · WebSocket         │
 ├─────────────────────────────────────────────────┤
-│              Synthesis Engine                     │
-│  axiotic-ai/consensus as Python dependency       │
-│  DiffusionStrategy (TTD + NSGA-II)              │
-│  Graph → Synthesis → Narrative pipeline          │
+│          Committee Synthesis Engine               │
+│  Built-in (no external dependency)               │
+│  N independent LLM committee members             │
+│  Agreement/disagreement/nuance extraction         │
+│  Follow-up question generation (AI + human)       │
 ├─────────────────────────────────────────────────┤
 │                   Infra                          │
 │  Docker Compose · PostgreSQL · Cloudflare Tunnel │
 └─────────────────────────────────────────────────┘
 ```
+
+---
+
+## Core UX Flow
+
+Two modes, build for BOTH:
+
+### Flow A: Human-Only Follow-ups
+```
+1. Experts sign in → answer structured survey questions
+2. AI synthesis: find agreements, disagreements, expose all nuance
+   (AI does NOT take a side — organises and reconciles only)
+3. Show outcome to experts
+4. Experts ask follow-up questions/comments
+   → Other HUMANS answer (no AI here)
+5. Repeat from 2
+```
+
+### Flow B: AI-Assisted Follow-ups
+```
+1. Experts sign in → answer structured survey questions  
+2. AI synthesis: find agreements, disagreements, expose all nuance
+3. Show outcome to experts
+4. Experts ask follow-ups + AI asks follow-ups
+   → AI probes disagreements to make them cleaner
+   → AI probes alignments to strengthen them
+   → Humans can also respond to each other and to AI
+5. Repeat from 2
+```
+
+**Admin configures which flow** when creating a form. Both share the same synthesis engine; the difference is whether AI participates in the follow-up/probing phase.
 
 ---
 
@@ -153,54 +180,86 @@ Replace raw HTML/Tailwind with Radix UI + shadcn/ui components from brand pack:
 
 ---
 
-## Phase 2: Engine Integration
+## Phase 2: Committee Synthesis Engine
 
-**Goal:** Replace the naive OpenRouter call with Sam's synthesis pipeline.
+**Goal:** Build our own committee-based synthesis engine directly in this repo. No external dependencies on axiotic-ai/consensus.
 
-### 2.1 Install `consensus` as Dependency
+### 2.1 Committee Architecture
 
-```bash
-# In backend/
-pip install git+https://github.com/axiotic-ai/consensus.git
+```
+Expert Responses (structured)
+    ↓
+┌─────────────────────────────────────────────────┐
+│  Committee of N Independent LLM Analysts         │
+│                                                   │
+│  Analyst 1 ──┐                                   │
+│  Analyst 2 ──┼── Each independently reads ALL    │
+│  Analyst 3 ──┤   expert responses and produces:  │
+│  ...         │   • Agreements found              │
+│  Analyst N ──┘   • Disagreements found           │
+│                  • Nuances/edge cases            │
+│                  • Gaps in reasoning              │
+│                  (NO position-taking)             │
+├─────────────────────────────────────────────────┤
+│  Meta-Synthesiser                                │
+│  Reads all N analyst outputs → produces final:   │
+│  • Confirmed agreements (N/N analysts agree)     │
+│  • Confirmed disagreements (with both sides)     │
+│  • Nuance spectrum (not binary)                  │
+│  • Confidence distribution                       │
+│  • Suggested follow-up probes                    │
+└─────────────────────────────────────────────────┘
+    ↓
+Structured Synthesis Output
+    ↓ (shown to experts)
+Follow-up Phase (Flow A: humans only, Flow B: AI + humans)
+    ↓
+Next Delphi Round
 ```
 
-Or add to `requirements.txt`:
-```
-consensus @ git+https://github.com/axiotic-ai/consensus.git
-```
+**Why committee:** Multiple independent LLM passes catch different nuances. No single model bias. Disagreements between analysts = genuine ambiguity in the data (diagnostic, not noise).
 
-### 2.2 New Synthesis Endpoint
+### 2.2 Backend Module: `backend/consensus/synthesis.py`
 
-Replace `generate_summary` in `routes.py` with:
+New module (separate from routes):
 
 ```python
-@router.post("/forms/{form_id}/synthesise_delphi")
-async def synthesise_delphi(
-    form_id: int,
-    strategy: str = "diffusion",  # diffusion | single_prompt | committee
-    model: str = "anthropic/claude-sonnet-4-5",
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
-):
-    """
-    Run full Delphi synthesis using axiotic-ai/consensus engine.
+class CommitteeSynthesiser:
+    """N independent LLM analysts + meta-synthesiser."""
     
-    1. Convert DB responses → ExpertResponse objects
-    2. Configure SynthesisPipeline with chosen strategy
-    3. Run pipeline → PipelineResult
-    4. Store synthesis + graph + narrative in round
-    5. Push via WebSocket
-    """
+    async def run(
+        self,
+        questions: list[dict],
+        responses: list[dict],
+        n_analysts: int = 3,
+        model: str = "anthropic/claude-sonnet-4-5",
+        mode: str = "human_only",  # or "ai_assisted"
+    ) -> SynthesisResult:
+        """
+        1. Fan out to N analysts (parallel)
+        2. Collect independent analyses
+        3. Meta-synthesise into structured output
+        4. If ai_assisted: generate follow-up probes
+        """
+
+class SynthesisResult:
+    agreements: list[Agreement]        # What experts agree on
+    disagreements: list[Disagreement]  # Both sides, no judgment
+    nuances: list[Nuance]             # Edge cases, caveats
+    confidence_map: dict               # Per-question confidence distribution
+    follow_up_probes: list[Probe]      # AI-generated (Flow B only)
+    provenance: dict                   # Which expert said what
 ```
 
 ### 2.3 Data Model Extensions
 
 Add to `models.py`:
-- `RoundModel.graph_json` — argumentation graph (JSON)
-- `RoundModel.narrative` — narrative output (Text)
+- `RoundModel.synthesis_json` — full structured synthesis (JSON)
 - `RoundModel.provenance` — source traceability (JSON)
-- `RoundModel.strategy_used` — which synthesis strategy ran
+- `RoundModel.flow_mode` — "human_only" or "ai_assisted"
 - `RoundModel.convergence_score` — numerical convergence metric
+- New table: `FollowUp` — follow-up questions/comments (from humans and/or AI)
+- New table: `FollowUpResponse` — answers to follow-ups
 
 ### 2.4 Structured Input Template
 
@@ -223,13 +282,28 @@ Extend `FormModel.questions` from simple strings to structured objects:
 }
 ```
 
-### 2.5 WebSocket Progress
+### 2.5 Follow-Up System
+
+**Flow A (human-only):**
+- After synthesis shown, experts can post follow-up questions/comments
+- Other experts can respond (threaded)
+- Admin triggers next synthesis round when ready
+
+**Flow B (AI-assisted):**
+- Everything from Flow A, PLUS:
+- AI generates targeted probes: "Expert 3 and Expert 7 disagree on X. Can you clarify Y?"
+- AI probes aim to sharpen disagreements and strengthen alignments
+- Experts respond to AI probes same as human questions
+- AI can summarise follow-up discussion before next round
+
+### 2.6 WebSocket Progress
 
 Stream synthesis progress to frontend:
 ```json
-{"type": "synthesis_progress", "stage": "graph_extraction", "step": 3, "total_steps": 10}
-{"type": "synthesis_progress", "stage": "synthesis_generation", "step": 1, "total_steps": 5}
+{"type": "synthesis_progress", "stage": "analyst_1_complete", "step": 1, "total_steps": 5}
+{"type": "synthesis_progress", "stage": "meta_synthesis", "step": 4, "total_steps": 5}
 {"type": "synthesis_complete", "round_id": 42}
+{"type": "follow_up_posted", "from": "ai", "question": "..."}
 ```
 
 ---
@@ -304,14 +378,21 @@ Phase 4.*  → Docker, tunnel, testing, docs                    [3 days]
 
 ---
 
+## Key Design Decisions (Confirmed)
+
+- ✅ **Committee-based synthesis** — our own implementation, NOT Sam's TTD/NSGA-II
+- ✅ **Repos stay separated** — no dependency on axiotic-ai/consensus
+- ✅ **Both UX flows** — human-only AND AI-assisted follow-ups
+- ✅ **AI never takes a side** — organises, reconciles, probes, but never judges
+
 ## Open Questions
 
 1. **Domain:** `symphonia.axiotic.ai`? Or separate branding?
 2. **Auth:** Keep simple JWT or upgrade to Cloudflare Access / OAuth?
 3. **Pilot question:** "What are the drivers of the current SEN crisis?" (from spec) — confirmed?
 4. **Target panel size:** 12 SAC members (from spec) — for pilot?
-5. **Model defaults:** Claude Sonnet 4.5 for synthesis, or allow admin to choose?
-6. **consensus engine:** Pin to a specific commit/tag, or track main?
+5. **Model defaults:** Claude Sonnet 4.5 for committee analysts, or allow admin to choose?
+6. **Committee size:** Default N=3 analysts? Or configurable per form?
 
 ---
 
