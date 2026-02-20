@@ -1,9 +1,8 @@
 """
-Synthesis adapter for Axiotic consensus library.
+Synthesis adapter for Axiotic consensus library (Worker A implementation).
 
-Provides a unified, type-safe async interface to the consensus library's
-synthesis strategies with proper error handling, timeout protection, and
-progress callbacks for WebSocket streaming.
+Provides a unified, type-safe interface to the consensus library's synthesis
+strategies with proper error handling, async correctness, and committee fallback.
 
 Strategies:
   - simple:    SinglePromptStrategy (fast, one-shot)
@@ -11,19 +10,17 @@ Strategies:
   - committee: CommitteeStrategy (multi-agent; falls back to TTD with warning)
   - mock:      MockSynthesis (no API calls, for UX testing)
 
-The adapter maps between the app's data structures and the library's domain
-models, using a lightweight ProseResponse bridge type that satisfies the
-library's duck-typed contract without depending on the frozen ExpertResponse
-domain model (which expects structured claims/evidence tuples).
-
-Byzantine-integrated from two independent implementations.
+The adapter maps between the app's data structures and the library's domain models,
+handling the mismatch between the library's frozen-dataclass ExpertResponse and the
+app's dict-based responses via a lightweight ProseResponse bridge type.
 """
 from __future__ import annotations
 
 import asyncio
 import logging
 import os
-from dataclasses import asdict, dataclass, field
+import time
+from dataclasses import dataclass, asdict, field
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -41,32 +38,6 @@ from typing import (
 
 logger = logging.getLogger(__name__)
 
-
-# =============================================================================
-# CUSTOM EXCEPTIONS
-# =============================================================================
-
-
-class SynthesisError(Exception):
-    """Base exception for all synthesis adapter errors."""
-
-
-class SynthesisConfigError(SynthesisError):
-    """Raised for invalid configuration (missing keys, bad mode, etc.)."""
-
-
-class SynthesisLibraryError(SynthesisError):
-    """Raised when the consensus library itself errors during a run."""
-
-
-class SynthesisTimeoutError(SynthesisError):
-    """Raised when synthesis exceeds the configured timeout."""
-
-
-class SynthesisResponseError(SynthesisError):
-    """Raised when app responses cannot be mapped to library domain models."""
-
-
 # =============================================================================
 # APP-LEVEL DATA STRUCTURES
 # =============================================================================
@@ -74,7 +45,6 @@ class SynthesisResponseError(SynthesisError):
 
 class FlowMode(str, Enum):
     """Delphi flow mode — determines whether AI-generated follow-ups are included."""
-
     HUMAN_ONLY = "human_only"
     AI_ASSISTED = "ai_assisted"
 
@@ -82,7 +52,6 @@ class FlowMode(str, Enum):
 @dataclass
 class Agreement:
     """A point of consensus among experts."""
-
     claim: str
     supporting_experts: List[int]
     confidence: float
@@ -92,7 +61,6 @@ class Agreement:
 @dataclass
 class Disagreement:
     """A point of divergence among experts."""
-
     topic: str
     positions: List[Dict[str, Any]]
     severity: str  # "low" | "moderate" | "high"
@@ -101,7 +69,6 @@ class Disagreement:
 @dataclass
 class Nuance:
     """A contextual qualification or uncertainty around a claim."""
-
     claim: str
     context: str
     relevant_experts: List[int]
@@ -110,7 +77,6 @@ class Nuance:
 @dataclass
 class Probe:
     """A follow-up question generated to resolve ambiguity."""
-
     question: str
     target_experts: List[int]
     rationale: str
@@ -124,7 +90,6 @@ class SynthesisResult:
     Fields are compatible with the route handler's serialisation and
     WebSocket broadcasting logic in routes.py.
     """
-
     agreements: List[Agreement]
     disagreements: List[Disagreement]
     nuances: List[Nuance]
@@ -142,7 +107,7 @@ class SynthesisResult:
     uncertainties: Optional[List[str]] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to JSON-serialisable dict, handling nested dataclasses."""
+        """Convert to JSON-serializable dict, handling nested dataclasses."""
         return asdict(self)
 
 
@@ -158,7 +123,6 @@ ProgressCallback = Optional[
 # =============================================================================
 # SYNTHESISER PROTOCOL (for duck-typing against routes.py)
 # =============================================================================
-
 
 @runtime_checkable
 class Synthesiser(Protocol):
@@ -178,7 +142,6 @@ class Synthesiser(Protocol):
 # BRIDGE TYPE: ProseResponse
 # =============================================================================
 
-
 @dataclass(frozen=True)
 class ProseResponse:
     """
@@ -190,35 +153,13 @@ class ProseResponse:
     This class satisfies that contract without depending on the frozen
     ``ExpertResponse`` domain model which expects structured claims/evidence.
     """
-
     expert_id: str
     response: str  # full text of the expert's answers
 
 
 # =============================================================================
-# SYNTHESIS CONTEXT (satisfies library's SynthesisContext protocol)
-# =============================================================================
-
-
-@dataclass(frozen=True)
-class AdapterSynthesisContext:
-    """
-    Satisfies the ``SynthesisContext`` protocol expected by the library's
-    strategy ``run()`` methods.  All attributes are explicitly typed.
-    """
-
-    study_id: str
-    round_id: str
-    question_id: str
-    question_text: str
-    code_version: str
-    force_restart: bool = False
-
-
-# =============================================================================
 # MOCK SYNTHESIS
 # =============================================================================
-
 
 class MockSynthesis:
     """Returns pre-baked synthesis results for UX testing without API costs."""
@@ -245,10 +186,10 @@ class MockSynthesis:
                 claim="Participants agree on the importance of structured communication",
                 supporting_experts=list(range(1, min(num_responses + 1, 4))),
                 confidence=0.85,
-                evidence_summary="Multiple responses emphasised clear documentation",
+                evidence_summary="Multiple responses emphasized clear documentation",
             ),
             Agreement(
-                claim="There is consensus on prioritising user experience",
+                claim="There is consensus on prioritizing user experience",
                 supporting_experts=list(range(1, min(num_responses + 1, 3))),
                 confidence=0.92,
                 evidence_summary="Responses consistently mentioned UX as key",
@@ -297,38 +238,68 @@ class MockSynthesis:
             agreements=agreements,
             disagreements=disagreements,
             nuances=nuances,
-            confidence_map={
-                "overall": 0.78,
-                "methodology": 0.85,
-                "conclusions": 0.72,
-            },
+            confidence_map={"overall": 0.78, "methodology": 0.85, "conclusions": 0.72},
             follow_up_probes=probes,
             provenance={"mode": "mock", "analysts": self.analysts},
             analyst_reports=[
                 {
                     "index": i,
-                    "payload": {
-                        "mode": "mock",
-                        "summary": f"Mock analyst {i + 1} report",
-                    },
+                    "payload": {"mode": "mock", "summary": f"Mock analyst {i + 1} report"},
                 }
                 for i in range(self.analysts)
             ],
             meta_synthesis_reasoning="[MOCK MODE] Simulated synthesis data for UX testing.",
-            narrative="[MOCK] Placeholder narrative for testing purposes.",
+            narrative="[MOCK] This is a placeholder narrative for testing purposes.",
         )
+
+
+# =============================================================================
+# SYNTHESIS CONTEXT (satisfies library's SynthesisContext protocol)
+# =============================================================================
+
+@dataclass(frozen=True)
+class AdapterContext:
+    """
+    Satisfies the ``SynthesisContext`` protocol expected by the library's
+    strategy ``run()`` methods.  All attributes are explicitly typed.
+    """
+    study_id: str
+    round_id: str
+    question_id: str
+    question_text: str
+    code_version: str
+    force_restart: bool = False
+
+
+# =============================================================================
+# CUSTOM EXCEPTIONS
+# =============================================================================
+
+class SynthesisError(Exception):
+    """Base exception for synthesis adapter errors."""
+
+
+class SynthesisConfigError(SynthesisError):
+    """Raised for invalid configuration (missing keys, bad mode, etc.)."""
+
+
+class SynthesisLibraryError(SynthesisError):
+    """Raised when the consensus library itself errors during a run."""
+
+
+class SynthesisTimeoutError(SynthesisError):
+    """Raised when synthesis exceeds the configured timeout."""
 
 
 # =============================================================================
 # LIBRARY ADAPTER
 # =============================================================================
 
-
 class ConsensusLibraryAdapter:
     """
     Adapts the Axiotic consensus library to the app's interface.
 
-    Key features:
+    Key improvements over the initial adapter:
       1. Uses ``ProseResponse`` bridge type instead of the domain ``ExpertResponse``
          which expects structured claims/evidence tuples.
       2. Uses the correct ``TTDConfig`` field name (``n_initial_drafts``).
@@ -336,10 +307,7 @@ class ConsensusLibraryAdapter:
       4. Wraps library calls in try/except with typed exceptions.
       5. Supports progress callbacks for WebSocket updates.
       6. Configurable timeout to prevent runaway synthesis.
-      7. Empty response guard for early error reporting.
     """
-
-    SUPPORTED_STRATEGIES = ("simple", "ttd", "committee")
 
     def __init__(
         self,
@@ -357,10 +325,9 @@ class ConsensusLibraryAdapter:
             n_denoise_steps: Number of denoising iterations for TTD.
             timeout_seconds: Maximum wall-clock time for a single synthesis run.
         """
-        if strategy not in self.SUPPORTED_STRATEGIES:
+        if strategy not in ("simple", "ttd", "committee"):
             raise SynthesisConfigError(
-                f"Unknown strategy '{strategy}'. "
-                f"Must be one of {self.SUPPORTED_STRATEGIES}."
+                f"Unknown strategy '{strategy}'. Must be 'simple', 'ttd', or 'committee'."
             )
 
         # If committee requested, log and degrade to TTD
@@ -384,7 +351,6 @@ class ConsensusLibraryAdapter:
         self._llm_client: Any = None
 
     # ------------------------------------------------------------------ init
-
     def _lazy_init(self) -> None:
         """Lazy-initialise the library strategy (import + construct)."""
         if self._strategy_instance is not None:
@@ -428,9 +394,7 @@ class ConsensusLibraryAdapter:
                 n_initial_drafts=self.n_drafts,
                 n_denoise_steps=self.n_denoise_steps,
             )
-            artefacts_dir = (
-                Path(__file__).resolve().parent.parent / "artefacts"
-            )
+            artefacts_dir = Path(__file__).resolve().parent.parent / "artefacts"
             artefacts_dir.mkdir(parents=True, exist_ok=True)
 
             self._strategy_instance = DiffusionStrategy(
@@ -439,111 +403,83 @@ class ConsensusLibraryAdapter:
                 ttd_config=ttd_config,
                 artefacts_dir=artefacts_dir,
             )
-
-        logger.info(
-            "Initialised %s strategy (model=%s, drafts=%d)",
-            self._effective_strategy,
-            self.model,
-            self.n_drafts,
-        )
+        # (no else needed — validated in __init__)
 
     @staticmethod
     def _resolve_prompts_dir() -> Path:
         """Locate the consensus library's prompts directory."""
-        candidates: list[Path] = []
-
-        # 0. Environment override (highest priority)
-        env_prompts = os.getenv("CONSENSUS_PROMPTS_DIR")
-        if env_prompts:
-            candidates.append(Path(env_prompts))
-
         try:
             import consensus
-
             package_dir = Path(consensus.__file__).resolve().parent
-            # 1. Sibling to the package's src directory
-            candidates.append(package_dir.parent / "prompts")
         except (ImportError, AttributeError) as exc:
             raise SynthesisConfigError(
                 f"Cannot locate consensus package directory: {exc}"
             ) from exc
 
-        # 2. Fallback: adjacent symphonia repo (dev-mode install)
-        candidates.append(
-            Path(__file__).resolve().parent.parent.parent.parent
-            / "symphonia"
-            / "prompts"
-        )
+        # Primary: sibling to the package's src directory
+        prompts_dir = package_dir.parent / "prompts"
+        if prompts_dir.is_dir():
+            return prompts_dir
 
-        for p in candidates:
-            if p.is_dir():
-                logger.debug("Resolved prompts_dir → %s", p)
-                return p
+        # Fallback: adjacent symphonia repo (dev-mode install)
+        fallback = Path(__file__).resolve().parent.parent.parent.parent / "symphonia" / "prompts"
+        if fallback.is_dir():
+            return fallback
 
-        searched = ", ".join(str(c) for c in candidates)
         raise SynthesisConfigError(
-            f"Could not find prompts directory. Searched: {searched}"
+            f"Could not find prompts directory. "
+            f"Checked: {prompts_dir}, {fallback}"
         )
 
     # --------------------------------------------------------- response prep
-
     @staticmethod
     def _build_prose_responses(
+        questions: List[Dict[str, Any]],
         responses: List[Dict[str, Any]],
     ) -> List[ProseResponse]:
         """
         Convert app-layer response dicts into ``ProseResponse`` objects
         that satisfy the library's duck-typed contract.
-
-        Raises:
-            SynthesisResponseError: If a response dict cannot be converted.
         """
         result: List[ProseResponse] = []
         for idx, resp in enumerate(responses):
-            expert_id = f"E{idx + 1}"
-            try:
-                if isinstance(resp, dict):
-                    answers = resp.get("answers", resp)
-                    if isinstance(answers, dict):
-                        lines: List[str] = [
-                            f"Q: {key}\nA: {val}"
-                            for key, val in answers.items()
-                            if val is not None and str(val).strip()
-                        ]
-                        text = (
-                            "\n\n".join(lines) if lines else "(no answers provided)"
-                        )
-                    elif isinstance(answers, str):
-                        text = answers
-                    else:
-                        text = str(answers)
+            if isinstance(resp, dict):
+                # Build readable Q/A text from the answers dict
+                answers = resp.get("answers", resp)
+                if isinstance(answers, dict):
+                    lines: List[str] = []
+                    for key, val in answers.items():
+                        if val:
+                            lines.append(f"Q: {key}\nA: {val}")
+                    text = "\n\n".join(lines) if lines else "(no answers)"
+                elif isinstance(answers, str):
+                    text = answers
                 else:
-                    text = str(resp)
+                    text = str(answers)
+            else:
+                text = str(resp)
 
-                result.append(ProseResponse(expert_id=expert_id, response=text))
-            except Exception as exc:
-                raise SynthesisResponseError(
-                    f"Could not convert response at index {idx}: {exc}"
-                ) from exc
-
+            result.append(
+                ProseResponse(
+                    expert_id=f"E{idx + 1}",
+                    response=text,
+                )
+            )
         return result
 
     @staticmethod
     def _build_question_text(questions: List[Dict[str, Any]]) -> str:
-        """Flatten question dicts into a numbered prompt string."""
+        """Flatten question dicts into a single prompt string."""
         parts: List[str] = []
-        for i, q in enumerate(questions, 1):
+        for q in questions:
             if isinstance(q, dict):
-                text = (
-                    q.get("label") or q.get("text") or q.get("id") or str(q)
-                )
+                text = q.get("label") or q.get("text") or q.get("id") or str(q)
             else:
                 text = str(q)
-            parts.append(f"{i}. {text}")
+            parts.append(text)
         return "\n".join(parts)
 
     # ----------------------------------------------------------- main entry
-
     async def run(
         self,
         questions: List[Dict[str, Any]],
@@ -556,36 +492,24 @@ class ConsensusLibraryAdapter:
         Run synthesis using the consensus library.
 
         Raises:
-            SynthesisResponseError: If responses are empty or cannot be mapped.
             SynthesisConfigError: Bad configuration (missing key, no prompts, etc.)
             SynthesisLibraryError: The library itself raised during synthesis.
             SynthesisTimeoutError: Synthesis exceeded ``timeout_seconds``.
         """
-        if not responses:
-            raise SynthesisResponseError("Cannot synthesise zero responses")
-
-        # Initialise on first call
-        try:
-            self._lazy_init()
-        except SynthesisError:
-            raise  # Already wrapped
-        except Exception as exc:
-            raise SynthesisConfigError(
-                f"Adapter initialisation failed: {exc}"
-            ) from exc
+        self._lazy_init()
 
         if progress_callback:
             await progress_callback("preparing", 1, 4)
 
-        prose_responses = self._build_prose_responses(responses)
+        prose_responses = self._build_prose_responses(questions, responses)
         question_text = self._build_question_text(questions)
 
-        context = AdapterSynthesisContext(
+        context = AdapterContext(
             study_id="runtime",
             round_id="1",
             question_id="q1",
             question_text=question_text,
-            code_version="adapter-v2",
+            code_version="adapter-v2-worker-a",
         )
 
         if progress_callback:
@@ -607,8 +531,7 @@ class ConsensusLibraryAdapter:
             )
         except NotImplementedError as exc:
             raise SynthesisLibraryError(
-                f"Strategy '{self._effective_strategy}' raised "
-                f"NotImplementedError: {exc}"
+                f"Strategy '{self._effective_strategy}' raised NotImplementedError: {exc}"
             ) from exc
         except Exception as exc:
             logger.exception("Consensus library error during synthesis")
@@ -619,13 +542,7 @@ class ConsensusLibraryAdapter:
         if progress_callback:
             await progress_callback("mapping_results", 3, 4)
 
-        # Map to app format
-        try:
-            result = self._map_to_app_format(library_result, len(responses))
-        except Exception as exc:
-            raise SynthesisLibraryError(
-                f"Failed to map library result to app format: {exc}"
-            ) from exc
+        result = self._map_to_app_format(library_result, len(responses))
 
         if progress_callback:
             await progress_callback("complete", 4, 4)
@@ -633,7 +550,6 @@ class ConsensusLibraryAdapter:
         return result
 
     # --------------------------------------------------------- result mapping
-
     def _map_to_app_format(
         self, result: Any, num_responses: int
     ) -> SynthesisResult:
@@ -650,88 +566,65 @@ class ConsensusLibraryAdapter:
 
         # --- Claims → Agreements / Disagreements ---
         for claim in synthesis.claims:
-            source_ids = _extract_expert_ids(claim.sources)
+            source_ids = self._extract_expert_ids(claim.sources)
 
             if claim.agreement_level in ("consensus", "majority"):
-                confidence = (
-                    0.9 if claim.agreement_level == "consensus" else 0.7
-                )
+                confidence = 0.9 if claim.agreement_level == "consensus" else 0.7
                 evidence = "; ".join(
                     s.quote for s in claim.sources if s.quote
                 )
-                agreements.append(
-                    Agreement(
-                        claim=claim.text,
-                        supporting_experts=source_ids
-                        or list(range(1, num_responses + 1)),
-                        confidence=confidence,
-                        evidence_summary=evidence
-                        or "Synthesised from expert responses",
-                    )
-                )
+                agreements.append(Agreement(
+                    claim=claim.text,
+                    supporting_experts=source_ids or list(range(1, num_responses + 1)),
+                    confidence=confidence,
+                    evidence_summary=evidence or "Synthesised from expert responses",
+                ))
             else:
                 # "divided" or "minority" → disagreement
                 positions: List[Dict[str, Any]] = [
                     {
                         "position": claim.text,
                         "experts": source_ids,
-                        "evidence": "; ".join(
-                            s.quote for s in claim.sources if s.quote
-                        )
-                        or "From synthesis",
+                        "evidence": "; ".join(s.quote for s in claim.sources if s.quote) or "From synthesis",
                     }
                 ]
                 for ca in claim.counterarguments:
-                    positions.append(
-                        {
-                            "position": ca,
-                            "experts": [],
-                            "evidence": "Counterargument identified in synthesis",
-                        }
-                    )
-                topic = (
-                    claim.text[:80] + "…"
-                    if len(claim.text) > 80
-                    else claim.text
-                )
-                disagreements.append(
-                    Disagreement(
-                        topic=topic,
-                        positions=positions,
-                        severity="moderate",
-                    )
-                )
+                    positions.append({
+                        "position": ca,
+                        "experts": [],
+                        "evidence": "Counterargument identified in synthesis",
+                    })
+                topic = claim.text[:80] + "…" if len(claim.text) > 80 else claim.text
+                disagreements.append(Disagreement(
+                    topic=topic,
+                    positions=positions,
+                    severity="moderate",
+                ))
 
         # --- Areas of agreement (deduplicated) ---
         existing_agreement_claims = {a.claim for a in agreements}
         for area in synthesis.areas_of_agreement:
             if area not in existing_agreement_claims:
-                agreements.append(
-                    Agreement(
-                        claim=area,
-                        supporting_experts=list(range(1, num_responses + 1)),
-                        confidence=0.8,
-                        evidence_summary="Identified as area of agreement",
-                    )
-                )
+                agreements.append(Agreement(
+                    claim=area,
+                    supporting_experts=list(range(1, num_responses + 1)),
+                    confidence=0.8,
+                    evidence_summary="Identified as area of agreement",
+                ))
 
         # --- Areas of disagreement (deduplicated) ---
         existing_disagreement_topics = {d.topic for d in disagreements}
         for area in synthesis.areas_of_disagreement:
             if area not in existing_disagreement_topics:
-                disagreements.append(
-                    Disagreement(
-                        topic=area,
-                        positions=[
-                            {
-                                "position": area,
-                                "experts": [],
-                                "evidence": "Identified as area of disagreement",
-                            }
-                        ],
-                        severity="moderate",
-                    )
-                )
+                disagreements.append(Disagreement(
+                    topic=area,
+                    positions=[{
+                        "position": area,
+                        "experts": [],
+                        "evidence": "Identified as area of disagreement",
+                    }],
+                    severity="moderate",
+                ))
 
         # --- Uncertainties → Nuances ---
         nuances: List[Nuance] = [
@@ -743,30 +636,21 @@ class ConsensusLibraryAdapter:
             for u in synthesis.uncertainties
         ]
 
-        # --- Confidence map (computed from claims) ---
+        # --- Confidence map ---
         num_claims = len(synthesis.claims)
         if num_claims > 0:
-            consensus_ratio = (
-                sum(
-                    1
-                    for c in synthesis.claims
-                    if c.agreement_level in ("consensus", "majority")
-                )
-                / num_claims
-            )
+            consensus_ratio = sum(
+                1 for c in synthesis.claims
+                if c.agreement_level in ("consensus", "majority")
+            ) / num_claims
         else:
             consensus_ratio = 0.5
 
-        n_agree = len(agreements)
-        n_disagree = len(disagreements)
-        total = n_agree + n_disagree
-
         confidence_map: Dict[str, float] = {
             "overall": round(consensus_ratio, 3),
-            "agreement_ratio": round(n_agree / total, 3) if total else 0.5,
             "n_claims": float(num_claims),
-            "n_agreements": float(n_agree),
-            "n_disagreements": float(n_disagree),
+            "n_agreements": float(len(agreements)),
+            "n_disagreements": float(len(disagreements)),
         }
 
         return SynthesisResult(
@@ -781,7 +665,7 @@ class ConsensusLibraryAdapter:
                 "model": synthesis.model,
                 "prompt_version": synthesis.prompt_version,
                 "code_version": synthesis.code_version,
-                "adapter_version": "v2-integrated",
+                "adapter_version": "worker-a-v2",
             },
             analyst_reports=[],
             meta_synthesis_reasoning=(
@@ -807,31 +691,27 @@ class ConsensusLibraryAdapter:
             uncertainties=list(synthesis.uncertainties),
         )
 
+    @staticmethod
+    def _extract_expert_ids(
+        sources: Sequence[Any],
+    ) -> List[int]:
+        """
+        Extract integer expert indices from source references.
 
-# =============================================================================
-# HELPERS
-# =============================================================================
-
-
-def _extract_expert_ids(sources: Sequence[Any]) -> List[int]:
-    """
-    Extract integer expert indices from source references.
-
-    Handles source_id format "E1", "E2", etc. and gracefully
-    skips unparseable IDs.
-    """
-    ids: List[int] = []
-    for s in sources:
-        sid: str = getattr(s, "source_id", "")
-        if isinstance(sid, str) and sid.startswith("E") and sid[1:].isdigit():
-            ids.append(int(sid[1:]))
-    return ids
+        Handles source_id format "E1", "E2", etc. and gracefully
+        skips unparseable IDs.
+        """
+        ids: List[int] = []
+        for s in sources:
+            sid: str = getattr(s, "source_id", "")
+            if sid.startswith("E") and sid[1:].isdigit():
+                ids.append(int(sid[1:]))
+        return ids
 
 
 # =============================================================================
 # FACTORY FUNCTION
 # =============================================================================
-
 
 def get_synthesiser(
     api_key: Optional[str] = None,
@@ -879,11 +759,7 @@ def get_synthesiser(
         return MockSynthesis(analysts=n_analysts, model="mock")
 
     if effective_mode in ("simple", "ttd", "committee"):
-        logger.info(
-            "🔬 Using %s synthesis strategy (model=%s)",
-            effective_mode.upper(),
-            model,
-        )
+        logger.info("🔬 Using %s synthesis strategy", effective_mode.upper())
         # Ensure the API key is available in the environment for lazy init
         if api_key and not os.getenv("OPENROUTER_API_KEY"):
             os.environ["OPENROUTER_API_KEY"] = api_key
