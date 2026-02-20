@@ -14,53 +14,62 @@
     <script>
       ;(function() {
         var STORAGE_KEY = 'symphonia-theme';
-        var DEFAULT = 'axiotic-dark';
+        var DEFAULT = 'axiotic-light';
         var VALID = ['axiotic-dark', 'axiotic-light', 'apple'];
 
         var themes = {
-          'axiotic-dark': {
-            type: 'dark',
-            vars: {
-              '--background':'#020617','--foreground':'#f8fafc','--card':'#0f172a',
-              '--card-foreground':'#f8fafc','--card-shadow':'none',
-              '--secondary':'#1e293b','--secondary-foreground':'#f8fafc',
-              '--muted':'#1e293b','--muted-foreground':'#94a3b8',
-              '--accent':'#fbbf24','--accent-foreground':'#0f172a','--accent-hover':'#f59e0b',
-              '--destructive':'#ef4444','--destructive-foreground':'#ffffff',
-              '--success':'#22c55e',
-              '--border':'rgba(148,163,184,0.1)','--input':'rgba(148,163,184,0.1)',
-              '--ring':'#fbbf24','--radius':'0.75rem',
-              '--font-family':"'Inter', sans-serif"
-            }
-          },
           'axiotic-light': {
             type: 'light',
             vars: {
-              '--background':'#f8fafc','--foreground':'#0f172a','--card':'#ffffff',
-              '--card-foreground':'#0f172a','--card-shadow':'none',
-              '--secondary':'#e2e8f0','--secondary-foreground':'#0f172a',
+              '--background':'#f8fafc','--foreground':'#0f172a',
+              '--card':'#ffffff','--card-foreground':'#0f172a',
+              '--card-shadow':'0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px rgba(0,0,0,0.06)',
+              '--card-shadow-lg':'0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05)',
+              '--secondary':'#f1f5f9','--secondary-foreground':'#0f172a',
               '--muted':'#f1f5f9','--muted-foreground':'#64748b',
-              '--accent':'#d97706','--accent-foreground':'#ffffff','--accent-hover':'#b45309',
-              '--destructive':'#d4183d','--destructive-foreground':'#ffffff',
+              '--accent':'#2563eb','--accent-foreground':'#ffffff','--accent-hover':'#1d4ed8',
+              '--destructive':'#dc2626','--destructive-foreground':'#ffffff',
               '--success':'#16a34a',
-              '--border':'rgba(30,41,59,0.1)','--input':'rgba(30,41,59,0.1)',
-              '--ring':'#d97706','--radius':'0.75rem',
-              '--font-family':"'Inter', sans-serif"
+              '--highlight':'#eff6ff','--highlight-foreground':'#1e40af','--highlight-border':'#bfdbfe',
+              '--border':'#e2e8f0','--input':'#e2e8f0',
+              '--ring':'#2563eb','--radius':'0.5rem',
+              '--font-family':"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+            }
+          },
+          'axiotic-dark': {
+            type: 'dark',
+            vars: {
+              '--background':'#0c1222','--foreground':'#e2e8f0',
+              '--card':'#151f32','--card-foreground':'#e2e8f0',
+              '--card-shadow':'0 1px 3px 0 rgba(0,0,0,0.3), 0 1px 2px -1px rgba(0,0,0,0.3)',
+              '--card-shadow-lg':'0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3)',
+              '--secondary':'#1c2b44','--secondary-foreground':'#e2e8f0',
+              '--muted':'#162032','--muted-foreground':'#94a3b8',
+              '--accent':'#3b82f6','--accent-foreground':'#ffffff','--accent-hover':'#60a5fa',
+              '--destructive':'#ef4444','--destructive-foreground':'#ffffff',
+              '--success':'#22c55e',
+              '--highlight':'#172554','--highlight-foreground':'#93c5fd','--highlight-border':'#1e3a5f',
+              '--border':'#1e2d47','--input':'#1c2b44',
+              '--ring':'#3b82f6','--radius':'0.5rem',
+              '--font-family':"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
             }
           },
           'apple': {
             type: 'light',
             vars: {
-              '--background':'#ffffff','--foreground':'#1d1d1f','--card':'#ffffff',
-              '--card-foreground':'#1d1d1f','--card-shadow':'0 1px 3px rgba(0,0,0,0.08)',
+              '--background':'#f5f5f7','--foreground':'#1d1d1f',
+              '--card':'#ffffff','--card-foreground':'#1d1d1f',
+              '--card-shadow':'0 1px 3px rgba(0,0,0,0.06)',
+              '--card-shadow-lg':'0 4px 6px -1px rgba(0,0,0,0.08)',
               '--secondary':'#f5f5f7','--secondary-foreground':'#1d1d1f',
               '--muted':'#f5f5f7','--muted-foreground':'#86868b',
-              '--accent':'#0071e3','--accent-foreground':'#ffffff','--accent-hover':'#0077ED',
+              '--accent':'#007aff','--accent-foreground':'#ffffff','--accent-hover':'#0056b3',
               '--destructive':'#ff3b30','--destructive-foreground':'#ffffff',
               '--success':'#34c759',
-              '--border':'rgba(0,0,0,0.04)','--input':'rgba(0,0,0,0.06)',
-              '--ring':'#0071e3','--radius':'12px',
-              '--font-family':"-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif"
+              '--highlight':'#e8f0fe','--highlight-foreground':'#0055d4','--highlight-border':'#a8c8f0',
+              '--border':'#d2d2d7','--input':'#d2d2d7',
+              '--ring':'#007aff','--radius':'0.625rem',
+              '--font-family':"-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', sans-serif"
             }
           }
         };

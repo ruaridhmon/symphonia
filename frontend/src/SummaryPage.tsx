@@ -42,20 +42,20 @@ export default function SummaryPage() {
 	const [activeRound, setActiveRound] = useState<Round | null>(null);
 	const [loading, setLoading] = useState(false);
 
-	const [responsesOpen, setResponsesOpen] = useState(false);
+	const [responsesOpen, setResponsesOpen] = useState(true);
 	const [responsesHTML, setResponsesHTML] = useState('');
 
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
 	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
 
-	const [selectedModel, setSelectedModel] = useState('openai/gpt-3.5-turbo');
+	const [selectedModel, setSelectedModel] = useState('anthropic/claude-opus-4-6');
 	const [isGenerating, setIsGenerating] = useState(false);
 
 	const models = [
-		'openai/gpt-3.5-turbo',
-		'google/gemini-pro',
-		'anthropic/claude-2',
-		'meta-llama/llama-2-70b-chat'
+		'anthropic/claude-opus-4-6',
+		'anthropic/claude-sonnet-4',
+		'openai/gpt-4o',
+		'google/gemini-2.0-flash',
 	];
 
 	const editor = useEditor({
@@ -69,7 +69,7 @@ export default function SummaryPage() {
 		content: '',
 		editorProps: {
 			attributes: {
-				class: 'prose prose-neutral max-w-none focus:outline-none'
+				class: 'prose prose-sm max-w-none focus:outline-none'
 			}
 		}
 	});
@@ -83,8 +83,51 @@ export default function SummaryPage() {
 
 	useEffect(() => {
 		if (!token || !formId) return;
-		loadAll();
+		loadAll().then(() => loadResponses());
 	}, [token, formId, authHeaders, editor]);
+
+	async function loadResponses() {
+		try {
+			const roundsWithResponses = await fetch(
+				`${API_BASE_URL}/forms/${formId}/rounds_with_responses`,
+				{ headers: authHeaders }
+			).then(r => r.json());
+
+			let html = '';
+			if (!roundsWithResponses || roundsWithResponses.length === 0) {
+				html = '<p style="color: var(--muted-foreground)">No responses yet for this form.</p>';
+			} else {
+				for (const round of roundsWithResponses) {
+					html += `<div style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--muted)">
+						<h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--foreground)">Round ${round.round_number}</h2>`;
+
+					if (round.responses.length === 0) {
+						html += '<p style="color: var(--muted-foreground)">No responses for this round.</p></div>';
+						continue;
+					}
+
+					for (const response of round.responses) {
+						let answers;
+						try {
+							answers = typeof response.answers === 'string' ? JSON.parse(response.answers) : response.answers;
+						} catch { answers = response.answers; }
+						
+						html += `<div style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--card); border-radius: 0.375rem; border: 1px solid var(--border)">
+							<div style="font-size: 0.75rem; color: var(--muted-foreground); margin-bottom: 0.5rem">${response.email}</div>`;
+						
+						for (const [key, value] of Object.entries(answers || {})) {
+							html += `<div style="margin-bottom: 0.5rem; color: var(--foreground)"><strong>${key}:</strong> ${value}</div>`;
+						}
+						html += '</div>';
+					}
+					html += '</div>';
+				}
+			}
+			setResponsesHTML(html);
+		} catch (e) {
+			console.error('Failed to load responses:', e);
+		}
+	}
 
 	async function loadAll() {
 		setLoading(true);
@@ -151,15 +194,15 @@ export default function SummaryPage() {
 
 		let html = '';
 		if (!roundsWithResponses || roundsWithResponses.length === 0) {
-			html = '<p class="text-neutral-600">No responses yet for this form.</p>';
+			html = '<p style="color: var(--muted-foreground)">No responses yet for this form.</p>';
 		} else {
 			for (const round of roundsWithResponses) {
-				html += `<div class="mb-8 p-4 border border-neutral-200 rounded-lg bg-neutral-50">
-                            <h2 class="text-xl font-bold mb-3 text-neutral-800">Round ${round.round_number}</h2>`;
+				html += `<div style="margin-bottom: 2rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--muted)">
+                            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--foreground)">Round ${round.round_number}</h2>`;
 
 				if (round.responses.length === 0) {
-					html += '<p class="text-neutral-600">No responses for this round.</p>';
-					html += `</div>`; // Close round div
+					html += '<p style="color: var(--muted-foreground)">No responses for this round.</p>';
+					html += `</div>`;
 					continue;
 				}
 
@@ -172,8 +215,8 @@ export default function SummaryPage() {
 				for (let i = 0; i < questions.length; i++) {
 					const question = questions[i];
 					const questionKey = `q${i + 1}`;
-					html += `<div class="mb-6 p-3 border-l-4 border-neutral-300 bg-white shadow-sm rounded">
-                                <h3 class="text-lg font-semibold mb-2 text-neutral-700">${question}</h3>`;
+					html += `<div style="margin-bottom: 1.5rem; padding: 0.75rem; border-left: 4px solid var(--accent); background: var(--card); border-radius: 0.375rem; box-shadow: var(--card-shadow)">
+                                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--foreground)">${question}</h3>`;
 
 					let hasAnswers = false;
 					for (const response of round.responses) {
@@ -181,9 +224,9 @@ export default function SummaryPage() {
 						if (answer) {
 							hasAnswers = true;
 							html += `
-                                <div class="pl-4 py-2 my-2 border-t border-neutral-100 last:border-b-0">
-                                    <p class="text-base text-neutral-800 leading-relaxed">${answer}</p>
-                                    <p class="text-xs text-neutral-500 mt-1 italic">
+                                <div style="padding: 0.5rem 1rem; margin: 0.5rem 0; border-top: 1px solid var(--border)">
+                                    <p style="font-size: 0.875rem; color: var(--foreground); line-height: 1.6">${answer}</p>
+                                    <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.25rem; font-style: italic">
                                         – ${response.email || 'Anonymous'}
                                     </p>
                                 </div>
@@ -191,11 +234,11 @@ export default function SummaryPage() {
 						}
 					}
 					if (!hasAnswers) {
-						html += `<p class="text-sm text-neutral-500 italic">No responses for this question.</p>`;
+						html += `<p style="font-size: 0.875rem; color: var(--muted-foreground); font-style: italic">No responses for this question.</p>`;
 					}
-					html += `</div>`; // Close question div
+					html += `</div>`;
 				}
-				html += `</div>`; // Close round div
+				html += `</div>`;
 			}
 		}
 
@@ -320,19 +363,25 @@ export default function SummaryPage() {
 		}
 	}
 
-	if (!form) return <div>Loading…</div>;
+	if (!form) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<p className="text-muted-foreground text-lg">Loading…</p>
+			</div>
+		);
+	}
 
 	return (
-		<div className="min-h-screen bg-neutral-100 text-neutral-900 font-sans flex flex-col">
-			<header className="bg-white border-b shadow-sm">
+		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
+			<header className="bg-card border-b border-border shadow-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
 					<div>
-						<h1 className="text-xl font-bold tracking-tight">Admin Workspace</h1>
-						<p className="text-sm text-neutral-500">
-							Logged in as <strong>{email}</strong>
+						<h1 className="text-xl font-bold tracking-tight text-foreground">Admin Workspace</h1>
+						<p className="text-sm text-muted-foreground mt-0.5">
+							Logged in as <strong className="text-foreground">{email}</strong>
 						</p>
 					</div>
-					<button onClick={logout} className="text-sm text-red-600 underline">
+					<button onClick={logout} className="text-sm text-destructive underline">
 						Log out
 					</button>
 				</div>
@@ -342,17 +391,17 @@ export default function SummaryPage() {
 				<div className="mb-4">
 					<button
 						onClick={() => navigate('/')}
-						className="text-sm text-blue-600 underline"
+						className="text-sm text-accent underline"
 					>
 						← Back to Dashboard
 					</button>
 				</div>
 
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 					{/* Main Content */}
 					<div className="lg:col-span-2 space-y-6">
-						<div className="bg-white border shadow rounded-xl p-6 min-h-[200px] lg:min-h-[300px]">
-							<h2 className="text-lg font-semibold mb-3">
+						<div className="card p-6 min-h-[200px] lg:min-h-[300px]">
+							<h2 className="text-lg font-semibold mb-3 text-foreground">
 								Synthesis for Round {activeRound?.round_number || ''}
 							</h2>
 							<div className="prose max-w-none">
@@ -360,20 +409,20 @@ export default function SummaryPage() {
 							</div>
 						</div>
 
-						<div className="bg-white border shadow rounded-xl p-6">
-							<h2 className="text-lg font-semibold">Next Round Questions</h2>
-							<div className="space-y-3">
+						<div className="card p-6">
+							<h2 className="text-lg font-semibold text-foreground">Next Round Questions</h2>
+							<div className="space-y-3 mt-3">
 								{nextRoundQuestions.map((q, index) => (
 									<div key={index} className="flex gap-2 items-center">
 										<input
 											type="text"
-											className="flex-1 border rounded px-3 py-2 text-sm"
+											className="flex-1 rounded-lg px-3 py-2 text-sm"
 											value={q}
 											onChange={e => updateNextQuestion(index, e.target.value)}
 											placeholder={`Question ${index + 1}`}
 										/>
 										<button
-											className="px-3 py-2 rounded bg-red-100 text-red-700 text-sm hover:bg-red-200"
+											className="btn btn-destructive px-3 py-2 text-sm opacity-80"
 											onClick={() => removeNextQuestion(index)}
 										>
 											Remove
@@ -383,7 +432,7 @@ export default function SummaryPage() {
 							</div>
 							<button
 								onClick={addNextQuestion}
-								className="mt-4 px-3 py-1 rounded bg-neutral-800 text-white text-sm hover:bg-neutral-900"
+								className="btn btn-secondary mt-4 text-sm"
 							>
 								Add Question
 							</button>
@@ -392,35 +441,35 @@ export default function SummaryPage() {
 
 					{/* Sidebar */}
 					<div className="lg:col-span-1 space-y-6">
-						<div className="bg-white border shadow rounded-xl p-4">
-							<h3 className="text-base font-semibold mb-2">Form Info</h3>
+						<div className="card p-4">
+							<h3 className="text-base font-semibold mb-2 text-foreground">Form Info</h3>
 							<div className="text-sm space-y-1">
-								<div>
+								<div className="text-foreground">
 									<strong>Form:</strong> {form.title}
 								</div>
-								<div>
-									<strong>Active round:</strong>{' '}
+								<div className="text-muted-foreground">
+									<strong className="text-foreground">Active round:</strong>{' '}
 									{activeRound ? `Round ${activeRound.round_number}` : 'None'}
 								</div>
 							</div>
 						</div>
-						<div className="bg-white border shadow rounded-xl p-4">
-							<h3 className="text-base font-semibold mb-3">Actions</h3>
+						<div className="card p-4">
+							<h3 className="text-base font-semibold mb-3 text-foreground">Actions</h3>
 							<div className="flex flex-col space-y-2">
 								<button
 									onClick={viewAllResponses}
-									className="w-full text-left bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
+									className="btn btn-accent w-full text-left justify-start"
 								>
 									{responsesOpen ? 'Hide Responses' : 'View All Responses'}
 								</button>
 								<button
 									onClick={downloadResponses}
-									className="w-full text-left bg-neutral-700 hover:bg-neutral-800 text-white px-3 py-2 rounded text-sm"
+									className="btn btn-secondary w-full text-left justify-start"
 								>
 									Download Responses
 								</button>
 								<button
-									className="w-full text-left bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded text-sm"
+									className="btn btn-success w-full text-left justify-start"
 									onClick={saveSynthesis}
 								>
 									Save Synthesis
@@ -428,7 +477,8 @@ export default function SummaryPage() {
 								<div className="pt-2">
 									<button
 										onClick={startNextRound}
-										className="w-full bg-blue-800 hover:bg-blue-900 text-white px-3 py-2 rounded font-semibold"
+										className="btn btn-accent w-full font-semibold"
+										style={{ backgroundColor: 'var(--accent-hover)' }}
 										disabled={loading}
 									>
 										Start Next Round
@@ -437,16 +487,16 @@ export default function SummaryPage() {
 							</div>
 						</div>
 
-						<div className="bg-white border shadow rounded-xl p-4">
-							<h3 className="text-base font-semibold mb-3">AI-Powered Synthesis</h3>
+						<div className="card p-4">
+							<h3 className="text-base font-semibold mb-3 text-foreground">AI-Powered Synthesis</h3>
 							<div className="space-y-3">
 								<div>
-									<label htmlFor="model-select" className="block text-sm font-medium text-neutral-700 mb-1">
+									<label htmlFor="model-select" className="block text-sm font-medium text-muted-foreground mb-1.5">
 										Choose a model
 									</label>
 									<select
 										id="model-select"
-										className="w-full border rounded px-3 py-2 text-sm"
+										className="w-full rounded-lg px-3 py-2 text-sm"
 										value={selectedModel}
 										onChange={e => setSelectedModel(e.target.value)}
 									>
@@ -459,27 +509,31 @@ export default function SummaryPage() {
 								</div>
 								<button
 									onClick={generateSummary}
-									className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded font-semibold text-sm"
+									className="btn w-full font-semibold text-sm"
+									style={{
+										backgroundColor: '#7c3aed',
+										color: '#ffffff',
+									}}
 									disabled={isGenerating}
 								>
-									{isGenerating ? 'Generating...' : 'Generate Summary'}
+									{isGenerating ? 'Generating…' : 'Generate Summary'}
 								</button>
 							</div>
 						</div>
 
 						{rounds.length > 0 && (
-							<div className="bg-white border shadow rounded-xl p-4">
-								<h3 className="text-base font-semibold mb-2">Round History</h3>
+							<div className="card p-4">
+								<h3 className="text-base font-semibold mb-2 text-foreground">Round History</h3>
 								<ul className="text-sm space-y-1">
 									{rounds.map(r => (
 										<li
 											key={r.id}
-											className="flex justify-between items-center border-b last:border-b-0 py-1"
+											className="flex justify-between items-center border-b border-border last:border-b-0 py-1.5"
 										>
-											<span>
+											<span className="text-foreground">
 												Round {r.round_number}{' '}
 												{r.is_active && (
-													<span className="text-green-600 font-semibold">
+													<span className="text-success font-semibold">
 														(active)
 													</span>
 												)}
@@ -487,8 +541,8 @@ export default function SummaryPage() {
 											<span
 												className={`text-xs px-2 py-0.5 rounded-full ${
 													r.synthesis
-														? 'bg-green-100 text-green-700'
-														: 'bg-neutral-100 text-neutral-500'
+														? 'bg-success/10 text-success'
+														: 'bg-muted text-muted-foreground'
 												}`}
 											>
 												{r.synthesis ? 'Synthesis' : 'No Synthesis'}
@@ -504,15 +558,19 @@ export default function SummaryPage() {
 
 			{responsesOpen &&
 				createPortal(
-					<div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-						<div className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-lg shadow-xl p-6 text-left">
-							<h3 className="text-xl font-semibold mb-4 text-neutral-800">All Responses</h3>
+					<div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+						style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+					>
+						<div className="card max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 text-left"
+							style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+						>
+							<h3 className="text-xl font-semibold mb-4 text-foreground">All Responses</h3>
 							<div
-								className="prose prose-sm max-w-none custom-prose"
+								className="prose prose-sm max-w-none"
 								dangerouslySetInnerHTML={{ __html: responsesHTML }}
 							/>
 							<button
-								className="mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+								className="btn btn-accent mt-6"
 								onClick={() => setResponsesOpen(false)}
 							>
 								Close
@@ -522,7 +580,7 @@ export default function SummaryPage() {
 					document.body
 				)}
 
-			<footer className="bg-white border-t text-center py-4 text-sm text-neutral-500 mt-8">
+			<footer className="bg-card border-t border-border text-center py-4 text-sm text-muted-foreground mt-8">
 				© {new Date().getFullYear()} – Summary workspace
 			</footer>
 		</div>

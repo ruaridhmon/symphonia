@@ -67,39 +67,39 @@ export default function WaitingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-neutral-900 font-sans flex flex-col">
-      <header className="bg-white border-b shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+    <div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
+      <header className="bg-card border-b border-border shadow-card">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold tracking-tight">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
               Collaborative Consensus
             </h1>
-            <p className="text-sm text-neutral-500">
-              Logged in as <strong>{email}</strong>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Logged in as <strong className="text-foreground">{email}</strong>
             </p>
           </div>
-          <button onClick={logout} className="text-sm text-red-600 underline">
+          <button onClick={logout} className="text-sm text-destructive underline">
             Log out
           </button>
         </div>
       </header>
 
-      <main className="flex-grow px-4 py-6 max-w-6xl mx-auto flex justify-center items-center">
-        <div className="bg-white border rounded-2xl shadow-lg p-10 max-w-3xl w-full text-center space-y-6">
-          <h2 className="text-2xl font-semibold">Thank you for your submission</h2>
-          <p className="text-lg text-neutral-700 max-w-md mx-auto">
+      <main className="flex-grow px-4 py-6 sm:py-8 max-w-6xl mx-auto flex justify-center items-center">
+        <div className="card-lg p-8 sm:p-10 max-w-3xl w-full text-center space-y-6">
+          <h2 className="text-2xl font-semibold text-foreground">Thank you for your submission</h2>
+          <p className="text-lg text-muted-foreground max-w-md mx-auto">
             Your response has been recorded. You will be notified when the next round begins.
           </p>
           <button
             onClick={() => navigate('/')}
-            className="mt-4 text-sm text-blue-600 underline"
+            className="mt-4 text-sm text-accent underline"
           >
             ← Back to Dashboard
           </button>
         </div>
       </main>
 
-      <footer className="bg-white border-t text-center py-4 text-sm text-neutral-500">
+      <footer className="bg-card border-t border-border text-center py-4 text-sm text-muted-foreground">
         © {new Date().getFullYear()} – Waiting for next round…
       </footer>
     </div>

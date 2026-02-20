@@ -109,23 +109,29 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100 text-neutral-900 font-sans flex flex-col">
-      <header className="bg-white border-b shadow-sm w-full">
-        <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col items-center justify-center text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2">SAC Collaborative Consensus</h1>
-          <div className="text-sm text-neutral-700 mb-1">Logged in as <strong>{email}</strong></div>
-          <button onClick={logout} className="text-sm text-red-600 underline">Log out</button>
+    <div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
+      <header className="bg-card border-b border-border shadow-card w-full">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex flex-col items-center justify-center text-center">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2 text-foreground">
+            SAC Collaborative Consensus
+          </h1>
+          <div className="text-sm text-muted-foreground mb-1">
+            Logged in as <strong className="text-foreground">{email}</strong>
+          </div>
+          <button onClick={logout} className="text-sm text-destructive underline">
+            Log out
+          </button>
         </div>
       </header>
 
-      <main className="flex-grow px-4 py-6 max-w-6xl mx-auto space-y-8">
-        <div className="bg-white border rounded-2xl shadow-lg p-10 max-w-3xl mx-auto space-y-6">
-          <h3 className="text-lg font-semibold">Final Synthesis</h3>
-          <div className="prose prose-neutral text-sm" dangerouslySetInnerHTML={{ __html: html }} />
+      <main className="flex-grow px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto space-y-6">
+        <div className="card-lg p-8 sm:p-10 max-w-3xl mx-auto space-y-6">
+          <h3 className="text-lg font-semibold text-foreground">Final Synthesis</h3>
+          <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white border rounded-2xl shadow-lg p-10 w-full space-y-6">
-          <h3 className="text-lg font-semibold">Post-Synthesis Feedback</h3>
+        <form onSubmit={handleSubmit} className="card-lg p-8 sm:p-10 w-full space-y-6">
+          <h3 className="text-lg font-semibold text-foreground">Post-Synthesis Feedback</h3>
 
           {[
             ['accuracy', 'Does this summary accurately reflect your viewpoint?'],
@@ -134,12 +140,12 @@ export default function ResultPage() {
             ['usability', 'How did you find using the platform?'],
           ].map(([name, label]) => (
             <div key={name}>
-              <label className="text-sm text-neutral-700 block mb-1">{label}</label>
+              <label className="text-sm text-muted-foreground block mb-1.5">{label}</label>
               <textarea
                 name={name}
                 rows={2}
                 onInput={autoResize}
-                className="w-full border rounded-lg px-4 py-2 resize-none overflow-hidden scroll-mt-24 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden scroll-mt-24 bg-muted"
                 onChange={handleChange}
                 value={responses[name]}
                 required
@@ -147,13 +153,13 @@ export default function ResultPage() {
             </div>
           ))}
 
-          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md">
+          <button type="submit" className="btn btn-accent w-full py-3 text-base">
             Submit Feedback
           </button>
         </form>
       </main>
 
-      <footer className="bg-white border-t text-center py-4 text-sm text-neutral-500">
+      <footer className="bg-card border-t border-border text-center py-4 text-sm text-muted-foreground">
         © {new Date().getFullYear()} – Final summary presented above
       </footer>
     </div>

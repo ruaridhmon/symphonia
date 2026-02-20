@@ -40,17 +40,22 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100 flex items-center justify-center">
-      <form onSubmit={handleRegister} className="bg-white p-10 rounded-xl shadow max-w-md w-full space-y-4">
-        <h1 className="text-xl font-semibold text-center">Register</h1>
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <form
+        onSubmit={handleRegister}
+        className="card-lg p-8 sm:p-10 max-w-md w-full space-y-5"
+      >
+        <h1 className="text-xl font-semibold text-center text-foreground">Register</h1>
+        {error && (
+          <p className="text-destructive text-sm text-center">{error}</p>
+        )}
         <input
           type="email"
           placeholder="Email"
           required
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg"
+          className="w-full px-4 py-2.5 rounded-lg"
         />
         <input
           type="password"
@@ -58,17 +63,17 @@ export default function Register() {
           required
           value={password}
           onChange={e => setPassword(e.target.value)}
-          className="w-full px-4 py-2 border rounded-lg"
+          className="w-full px-4 py-2.5 rounded-lg"
         />
         <button
           type="submit"
           disabled={isRegistering || isLoading}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg disabled:bg-blue-400"
+          className="btn btn-accent w-full py-2.5 text-base"
         >
-          {isRegistering ? 'Registering...' : 'Register & Login'}
+          {isRegistering ? 'Registering…' : 'Register & Login'}
         </button>
         <div className="text-sm text-center">
-          <Link to="/login" className="text-blue-600 underline">
+          <Link to="/login" className="text-accent underline">
             Already have an account? Login
           </Link>
         </div>

@@ -46,48 +46,58 @@ export default function AdminFormPage() {
     loadRounds()
   }
 
-  if (!form) return <div>Loading…</div>
+  if (!form) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground text-lg">Loading…</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-neutral-100 p-6">
-      <button onClick={() => navigate('/')} className="underline text-blue-600">
-        ← Back
-      </button>
+    <div className="min-h-screen bg-background px-4 sm:px-6 py-6 sm:py-8">
+      <div className="max-w-5xl mx-auto">
+        <button onClick={() => navigate('/')} className="text-accent underline text-sm">
+          ← Back
+        </button>
 
-      <h1 className="text-2xl font-bold my-4">{form.title}</h1>
+        <h1 className="text-2xl font-bold my-4 text-foreground">{form.title}</h1>
 
-      <h2 className="text-lg font-semibold mb-2">Rounds</h2>
+        <h2 className="text-lg font-semibold mb-3 text-foreground">Rounds</h2>
 
-      {rounds.map(r => (
-        <div key={r.id} className="border p-3 rounded mb-2 bg-white">
-          <p>Round {r.round_number}</p>
-          <p>{r.is_active ? 'Active' : 'Closed'}</p>
+        {rounds.map(r => (
+          <div key={r.id} className="card p-4 mb-2">
+            <p className="text-foreground font-medium">Round {r.round_number}</p>
+            <p className={r.is_active ? 'text-success font-medium' : 'text-muted-foreground'}>
+              {r.is_active ? 'Active' : 'Closed'}
+            </p>
+          </div>
+        ))}
+
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={closeRound}
+            className="btn btn-destructive px-5 py-2"
+          >
+            Close Current Round
+          </button>
+
+          <button
+            onClick={nextRound}
+            className="btn btn-accent px-5 py-2"
+          >
+            Open Next Round
+          </button>
         </div>
-      ))}
 
-      <div className="mt-4 space-x-4">
-        <button
-          onClick={closeRound}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg"
-        >
-          Close Current Round
-        </button>
-
-        <button
-          onClick={nextRound}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-        >
-          Open Next Round
-        </button>
-      </div>
-
-      <div className="mt-8">
-        <a
-          href={`/admin/form/${id}/summary`}
-          className="underline text-blue-600"
-        >
-          Open Summary Page
-        </a>
+        <div className="mt-8">
+          <a
+            href={`/admin/form/${id}/summary`}
+            className="text-accent underline text-sm"
+          >
+            Open Summary Page
+          </a>
+        </div>
       </div>
     </div>
   )

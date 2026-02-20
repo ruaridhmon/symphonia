@@ -72,48 +72,48 @@ export default function FormEditor() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-centre justify-centre">
-        Loading…
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground text-lg">Loading…</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-neutral-100">
-      <header className="bg-white border-b shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+    <div className="min-h-screen bg-background">
+      <header className="bg-card border-b border-border shadow-card">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+          <h1 className="text-xl font-bold tracking-tight text-foreground">{title}</h1>
           <button
             onClick={() => navigate('/')}
-            className="text-sm text-blue-600 underline"
+            className="text-sm text-accent underline"
           >
             ← Back to Dashboard
           </button>
         </div>
       </header>
 
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="bg-white shadow rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-4">Form Title</h2>
+      <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-5xl mx-auto">
+        <div className="card-lg p-6 sm:p-8 mb-6">
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Form Title</h2>
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full rounded-lg px-3 py-2.5"
           />
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6 mb-8">
-          <h2 className="text-lg font-semibold mb-4">Questions</h2>
+        <div className="card-lg p-6 sm:p-8 mb-6">
+          <h2 className="text-lg font-semibold mb-4 text-foreground">Questions</h2>
           <div className="space-y-4">
             {questions.map((q, i) => (
               <div key={i} className="flex items-center gap-2">
                 <input
                   value={q}
                   onChange={e => updateQuestion(i, e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full rounded-lg px-3 py-2.5"
                 />
                 <button
-                  className="text-red-600 text-sm underline"
+                  className="text-destructive text-sm underline font-medium"
                   type="button"
                   onClick={() => removeQuestion(i)}
                 >
@@ -125,16 +125,16 @@ export default function FormEditor() {
           <button
             onClick={addQuestion}
             type="button"
-            className="text-blue-600 underline mt-4"
+            className="text-accent underline mt-4 text-sm font-medium"
           >
             + Add question
           </button>
         </div>
         
-        <div className="bg-white shadow rounded-lg p-6 flex justify-end items-center space-x-4">
+        <div className="card-lg p-6 sm:p-8 flex justify-end items-center gap-3">
           <button
             onClick={saveForm}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg"
+            className="btn btn-accent px-6 py-2"
           >
             Save Edits
           </button>
@@ -148,7 +148,7 @@ export default function FormEditor() {
               })
               navigate('/')
             }}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg"
+            className="btn btn-destructive px-5 py-2"
           >
             Delete Form
           </button>

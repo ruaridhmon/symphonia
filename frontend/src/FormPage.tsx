@@ -222,15 +222,21 @@ export default function FormPage() {
 
 
 
-  if (!form || mode === 'loading') return <div>Loading…</div>
+  if (!form || mode === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground text-lg">Loading…</p>
+      </div>
+    )
+  }
 
 
 
   return (
 
-    <div className="min-h-screen bg-neutral-100 px-4 py-8">
+    <div className="min-h-screen bg-background px-4 py-6 sm:py-8">
 
-      <div className="max-w-3xl mx-auto bg-white p-6 shadow rounded-xl">
+      <div className="max-w-3xl mx-auto card-lg p-6 sm:p-8">
 
         <div className="mb-4">
 
@@ -238,7 +244,7 @@ export default function FormPage() {
 
             onClick={() => navigate('/')}
 
-            className="text-sm text-blue-600 underline"
+            className="text-sm text-accent underline"
 
           >
 
@@ -248,13 +254,13 @@ export default function FormPage() {
 
         </div>
 
-        <h1 className="text-2xl font-bold mb-1">{form.title}</h1>
+        <h1 className="text-2xl font-bold mb-1 text-foreground">{form.title}</h1>
 
 
 
         {activeRound && (
 
-          <p className="text-neutral-600 mb-4">
+          <p className="text-muted-foreground mb-4">
 
             Round {activeRound.round_number}
 
@@ -266,7 +272,7 @@ export default function FormPage() {
 
         {previousSynthesis && (
 
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="mb-6 p-4 highlight-box rounded-lg">
 
             <h2 className="font-semibold mb-2">Synthesis from the previous round</h2>
 
@@ -288,7 +294,9 @@ export default function FormPage() {
 
           <div>
 
-            <h2 className="text-lg font-semibold mb-4 border-b pb-2">Your Submitted Answers</h2>
+            <h2 className="text-lg font-semibold mb-4 border-b border-border pb-2 text-foreground">
+              Your Submitted Answers
+            </h2>
 
             {roundQuestions.map((q, i) => {
 
@@ -298,15 +306,11 @@ export default function FormPage() {
 
                 <div key={key} className="mb-6">
 
-                  <label className="block text-sm font-semibold text-neutral-800 mb-2">{q}</label>
+                  <label className="block text-sm font-semibold text-foreground mb-2">{q}</label>
 
-                  <div
+                  <div className="w-full rounded-lg px-4 py-3 bg-muted min-h-[4rem] whitespace-pre-wrap text-foreground border border-border">
 
-                    className="w-full border rounded-lg px-4 py-2 bg-neutral-50 min-h-[4rem] whitespace-pre-wrap"
-
-                  >
-
-                    {responses[key] || <span className="text-neutral-500">No answer provided</span>}
+                    {responses[key] || <span className="text-muted-foreground">No answer provided</span>}
 
                   </div>
 
@@ -318,7 +322,7 @@ export default function FormPage() {
 
             <button
 
-              className="w-full bg-green-600 text-white py-3 rounded-lg text-lg"
+              className="btn btn-success w-full py-3 text-base"
 
               onClick={() => setMode('filling')}
 
@@ -342,13 +346,13 @@ export default function FormPage() {
 
                 <div key={key} className="mb-6">
 
-                  <label className="block text-sm mb-2">{q}</label>
+                  <label className="block text-sm font-medium mb-2 text-foreground">{q}</label>
 
                   <textarea
 
                     rows={2}
 
-                    className="w-full border rounded-lg px-4 py-2 resize-none overflow-hidden bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
 
                     onInput={autoResize}
 
@@ -376,7 +380,7 @@ export default function FormPage() {
 
             <button
 
-              className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg"
+              className="btn btn-accent w-full py-3 text-base"
 
               onClick={submitForm}
 

@@ -6,14 +6,13 @@ export default function Header() {
 
   return (
     <header
-      className="border-b shadow-sm transition-colors duration-200"
+      className="border-b shadow-card"
       style={{
         backgroundColor: 'var(--card)',
         borderColor: 'var(--border)',
-        boxShadow: 'var(--card-shadow, none)',
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
         {/* Left: branding + user info */}
         <div>
           <h1
@@ -24,7 +23,7 @@ export default function Header() {
           </h1>
           {user && (
             <p
-              className="text-sm"
+              className="text-sm mt-0.5"
               style={{ color: 'var(--muted-foreground)' }}
             >
               Logged in as{' '}
@@ -39,7 +38,7 @@ export default function Header() {
           {user && (
             <button
               onClick={logout}
-              className="text-sm underline transition-colors duration-200"
+              className="text-sm underline"
               style={{ color: 'var(--destructive)' }}
             >
               Log out
