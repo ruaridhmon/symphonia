@@ -273,30 +273,45 @@ def make_synthesis(title: str, round_n: int, expert_ids: list, convergence: floa
     t = topic_snippets[key]
     n_experts = len(expert_ids)
 
+    # agreements — matches TypeScript Agreement interface
     agreements = []
-    for i, (claim, score) in enumerate(t["agreements"]):
+    for claim, score in t["agreements"]:
         supporting = random.sample(expert_ids, max(2, int(n_experts * score)))
         agreements.append({
             "claim": claim,
-            "expert_ids": [str(e) for e in supporting],
-            "agreement_score": round(score * convergence + random.uniform(-0.05, 0.05), 3),
+            "supporting_experts": supporting,           # number[], not string[]
+            "confidence": round(score * convergence + random.uniform(-0.05, 0.05), 3),
+            "evidence_summary": f"{len(supporting)} of {n_experts} experts supported this claim.",
+            "evidence_excerpts": [],
         })
 
+    # disagreements — matches TypeScript Disagreement / DisagreementPosition interface
     disagreements = []
     for topic, positions in t["disagreements"]:
-        split = n_experts // 2
+        split = max(1, n_experts // 2)
         group_a = expert_ids[:split]
-        group_b = expert_ids[split:]
+        group_b = expert_ids[split:] if len(expert_ids) > split else expert_ids[-1:]
+        severity = "high" if convergence < 0.65 else ("medium" if convergence < 0.82 else "low")
         disagreements.append({
             "topic": topic,
             "positions": [
-                {"stance": positions[0], "expert_ids": [str(e) for e in group_a]},
-                {"stance": positions[1], "expert_ids": [str(e) for e in group_b]},
+                {"position": positions[0], "experts": group_a,
+                 "evidence": f"{len(group_a)} experts held this position."},
+                {"position": positions[1], "experts": group_b,
+                 "evidence": f"{len(group_b)} experts held this position."},
             ],
-            "resolution": None if convergence < 0.8 else "Emerging consensus toward position A",
+            "severity": severity,
         })
 
-    nuances = [{"observation": n} for n in t["nuances"]]
+    # nuances — matches TypeScript Nuance interface
+    nuances = [
+        {
+            "claim": obs,
+            "context": "Raised by multiple experts as a complicating factor.",
+            "relevant_experts": random.sample(expert_ids, max(1, n_experts // 3)),
+        }
+        for obs in t["nuances"]
+    ]
 
     confidence_map = {str(e): round(random.uniform(0.6, 0.95), 2) for e in expert_ids}
 
@@ -313,7 +328,7 @@ def make_synthesis(title: str, round_n: int, expert_ids: list, convergence: floa
         "claims_raw": None,
         "areas_of_agreement": [a["claim"] for a in agreements],
         "areas_of_disagreement": [d["topic"] for d in disagreements],
-        "uncertainties": [n["observation"] for n in nuances[:1]],
+        "uncertainties": [n["claim"] for n in nuances[:1]],
         "emergent_insights": [],
         "minority_reports": [],
     }
