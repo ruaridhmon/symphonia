@@ -9,7 +9,7 @@ export type Round = {
   synthesis: string;
   synthesis_json?: any;
   is_active: boolean;
-  questions: string[];
+  questions: (string | Record<string, unknown>)[];
   convergence_score?: number | null;
   response_count?: number;
 };

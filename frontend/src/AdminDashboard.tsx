@@ -12,7 +12,7 @@ import { LoadingButton, SkeletonDashboard } from './components';
 export default function AdminDashboard() {
   const { token } = useAuth();
   
-  const [forms, setForms] = useState([]);
+  const [forms, setForms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newFormTitle, setNewFormTitle] = useState('');

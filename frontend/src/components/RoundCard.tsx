@@ -2,6 +2,7 @@ import { MessageSquare, BarChart3, HelpCircle, FileText } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 import StructuredSynthesis from './StructuredSynthesis';
 import type { Round } from './RoundTimeline';
+import { extractQuestionText } from '../utils/questions';
 
 interface RoundCardProps {
   round: Round;
@@ -94,7 +95,7 @@ export default function RoundCard({ round, isCurrentRound, expertLabels, formId,
           <ol className="round-detail-questions-list">
             {round.questions.map((q, i) => (
               <li key={i} className="round-detail-question-item">
-                {q}
+                {extractQuestionText(q)}
               </li>
             ))}
           </ol>
