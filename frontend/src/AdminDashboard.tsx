@@ -175,24 +175,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── Empty state ── */}
-        {forms.length === 0 && !error && (
-          <div className="text-center py-16">
-            <div className="text-4xl mb-4 opacity-40">📋</div>
-            <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--foreground)' }}>
-              No Consultations Yet
-            </h3>
-            <p className="text-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>
-              Create your first consultation to start gathering expert consensus.
-            </p>
-            <Link to="/admin/form/new">
-              <LoadingButton variant="accent" size="md">
-                <Plus size={18} className="mr-1.5" />
-                New Consultation
-              </LoadingButton>
-            </Link>
-          </div>
-        )}
+        {/* duplicate empty state removed */}
 
         {/* ── Existing forms table ── */}
         {forms.length > 0 && (

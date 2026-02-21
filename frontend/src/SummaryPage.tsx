@@ -31,6 +31,7 @@ import {
 	MarkdownRenderer,
 	DevilsAdvocate,
 	AudienceTranslation,
+	LoadingButton,
 	useToast,
 } from './components';
 
@@ -96,6 +97,7 @@ export default function SummaryPage() {
 	const [rounds, setRounds] = useState<Round[]>([]);
 	const [activeRound, setActiveRound] = useState<Round | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [loadError, setLoadError] = useState<string | null>(null);
 
 	// ── Responses modal ──
 	const [responsesOpen, setResponsesOpen] = useState(false);
@@ -193,6 +195,7 @@ export default function SummaryPage() {
 
 	async function loadAll() {
 		setLoading(true);
+		setLoadError(null);
 		try {
 			const f = await apiFetchForm(formId);
 			setForm(f as Form);
@@ -226,6 +229,8 @@ export default function SummaryPage() {
 			} else if (f && Array.isArray(f.questions)) {
 				setNextRoundQuestions(f.questions.map(extractQuestionText));
 			}
+		} catch (err) {
+			setLoadError((err as Error).message || 'Failed to load consultation data');
 		} finally {
 			setLoading(false);
 		}
@@ -425,6 +430,27 @@ export default function SummaryPage() {
 
 	// ─── Render ──────────────────────────────────────────────────────────────
 
+	if (loadError && !form) return (
+		<div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+			<div className="text-center max-w-md mx-auto px-4">
+				<div className="text-4xl mb-4">⚠️</div>
+				<h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+					Failed to Load
+				</h2>
+				<p className="text-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>
+					{loadError}
+				</p>
+				<div className="flex gap-3 justify-center">
+					<LoadingButton variant="accent" size="md" onClick={() => { loadAll(); loadResponses(); }}>
+						Retry
+					</LoadingButton>
+					<LoadingButton variant="secondary" size="md" onClick={() => navigate('/')}>
+						Back to Dashboard
+					</LoadingButton>
+				</div>
+			</div>
+		</div>
+	);
 	if (!form) return <SummaryLoadingSkeleton />;
 
 	return (

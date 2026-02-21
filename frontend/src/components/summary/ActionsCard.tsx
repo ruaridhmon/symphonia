@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { LoadingButton, ExportPanel } from '../index';
 import type { Round } from '../../types/summary';
 import type { SynthesisData } from '../../types/synthesis';
@@ -27,6 +28,19 @@ export default function ActionsCard({
   structuredSynthesisData,
   expertLabels,
 }: Props) {
+  const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleSave = useCallback(async () => {
+    setSaving(true);
+    try { await onSaveSynthesis(); } finally { setSaving(false); }
+  }, [onSaveSynthesis]);
+
+  const handleDownload = useCallback(async () => {
+    setDownloading(true);
+    try { await onDownloadResponses(); } finally { setDownloading(false); }
+  }, [onDownloadResponses]);
+
   return (
     <div className="card p-4">
       <h3
@@ -47,7 +61,9 @@ export default function ActionsCard({
         <LoadingButton
           variant="secondary"
           size="md"
-          onClick={onDownloadResponses}
+          onClick={handleDownload}
+          loading={downloading}
+          loadingText="Downloading…"
           className="w-full text-left justify-start"
         >
           Download Responses
@@ -55,7 +71,9 @@ export default function ActionsCard({
         <LoadingButton
           variant="success"
           size="md"
-          onClick={onSaveSynthesis}
+          onClick={handleSave}
+          loading={saving}
+          loadingText="Saving…"
           className="w-full text-left justify-start"
         >
           Save Synthesis
