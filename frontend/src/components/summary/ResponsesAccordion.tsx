@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, User, MessageSquare } from 'lucide-react';
 import { ResponseEditor } from '../index';
+import VoiceMirroring from '../VoiceMirroring';
 import type { Round, RoundWithResponses } from '../../types/summary';
 import { extractQuestionText } from '../../utils/questions';
 
@@ -8,6 +9,7 @@ type Props = {
   structuredRounds: RoundWithResponses[];
   rounds: Round[];
   formQuestions: (string | Record<string, unknown>)[];
+  formId: number;
   token: string;
   onResponseUpdated: (
     roundId: number,
@@ -24,6 +26,7 @@ export default function ResponsesAccordion({
   structuredRounds,
   rounds,
   formQuestions,
+  formId,
   token,
   onResponseUpdated,
 }: Props) {
@@ -197,19 +200,35 @@ export default function ResponsesAccordion({
                       No responses for this round yet.
                     </p>
                   ) : (
-                    <div className="space-y-3 pt-2">
-                      {round.responses.map(resp => (
-                        <ResponseEditor
-                          key={resp.id}
-                          response={resp}
+                    <>
+                      <div className="space-y-3 pt-2">
+                        {round.responses.map(resp => (
+                          <ResponseEditor
+                            key={resp.id}
+                            response={resp}
+                            questions={roundQuestions}
+                            token={token}
+                            onUpdated={updated =>
+                              onResponseUpdated(round.id, updated)
+                            }
+                          />
+                        ))}
+                      </div>
+
+                      {/* Voice Mirroring — AI clarifications */}
+                      <div className="pt-3">
+                        <VoiceMirroring
+                          formId={formId}
+                          roundId={round.id}
+                          responses={round.responses.map(r => ({
+                            id: r.id,
+                            email: r.email,
+                            answers: r.answers,
+                          }))}
                           questions={roundQuestions}
-                          token={token}
-                          onUpdated={updated =>
-                            onResponseUpdated(round.id, updated)
-                          }
                         />
-                      ))}
-                    </div>
+                      </div>
+                    </>
                   )}
                 </div>
               )}

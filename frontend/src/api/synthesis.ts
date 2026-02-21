@@ -110,3 +110,34 @@ export function translateSynthesis(
     { audience, synthesis_text: synthesisText }
   );
 }
+
+/* ── Voice Mirroring ── */
+
+export interface VoiceMirrorInput {
+  expert: string;
+  question: string;
+  answer: string;
+}
+
+export interface ClarifiedResponse {
+  expert: string;
+  question: string;
+  original: string;
+  clarified: string;
+}
+
+export interface VoiceMirrorResult {
+  clarified_responses: ClarifiedResponse[];
+}
+
+/** Clarify expert responses for accessibility */
+export function voiceMirror(
+  formId: number,
+  roundId: number,
+  responses: VoiceMirrorInput[]
+) {
+  return api.post<VoiceMirrorResult>(
+    `/forms/${formId}/rounds/${roundId}/voice_mirror`,
+    { responses }
+  );
+}

@@ -2377,6 +2377,133 @@ def translate_synthesis(
 
 
 # ---------------------------------------------------------
+# EXPERT VOICE MIRRORING
+# ---------------------------------------------------------
+
+
+class VoiceMirrorPayload(BaseModel):
+    """Payload for clarifying expert responses."""
+    responses: list[dict]  # [{"expert": "Expert 1", "question": "...", "answer": "..."}]
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/voice_mirror")
+def voice_mirror(
+    form_id: int,
+    round_id: int,
+    payload: VoiceMirrorPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Clarify expert statements for accessibility without changing meaning.
+
+    Takes expert responses and returns clarified versions that preserve
+    the original meaning and nuance while making them more readable.
+    """
+    # Verify round belongs to form
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    if not payload.responses:
+        raise HTTPException(status_code=400, detail="No responses provided to clarify")
+
+    # Check for mock mode
+    synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    if synthesis_mode == "mock" or not api_key:
+        clarified = []
+        for item in payload.responses:
+            clarified.append({
+                "expert": item.get("expert", "Unknown"),
+                "question": item.get("question", ""),
+                "original": item.get("answer", ""),
+                "clarified": f"[Mock clarification] {item.get('answer', '')}",
+            })
+        return {"clarified_responses": clarified}
+
+    # Build prompt
+    responses_block = ""
+    for i, item in enumerate(payload.responses, 1):
+        responses_block += (
+            f"\n--- Response {i} ---\n"
+            f"Expert: {item.get('expert', 'Unknown')}\n"
+            f"Question: {item.get('question', '')}\n"
+            f"Answer: {item.get('answer', '')}\n"
+        )
+
+    prompt = f"""You are an expert communications editor for a Delphi-style consensus platform. Your task is to clarify expert statements to make them more accessible to a broader audience, WITHOUT changing the meaning, position, or nuance of what the expert said.
+
+Rules:
+1. Preserve the expert's exact position and intent
+2. Simplify jargon and technical terms (add brief parenthetical explanations where needed)
+3. Break long, complex sentences into shorter, clearer ones
+4. Maintain all caveats, qualifications, and uncertainty language
+5. Do NOT add information the expert didn't provide
+6. Do NOT strengthen or weaken any claims
+7. If the original is already clear and accessible, return it with minimal changes
+
+--- Expert Responses to Clarify ---
+{responses_block}
+
+Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
+{{
+  "clarified_responses": [
+    {{
+      "expert": "Expert name",
+      "question": "The question text",
+      "original": "The original answer text",
+      "clarified": "The clarified version"
+    }}
+  ]
+}}"""
+
+    try:
+        openai_client = get_openai_client()
+        if not openai_client:
+            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+
+        completion = openai_client.chat.completions.create(
+            model="anthropic/claude-sonnet-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a communications editor specialising in making expert "
+                        "technical language accessible while preserving meaning. "
+                        "Always return valid JSON matching the requested schema."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        raw_output = completion.choices[0].message.content or ""
+
+        # Parse JSON
+        cleaned = raw_output.strip()
+        if cleaned.startswith("```"):
+            lines = cleaned.split("\n")
+            lines = [l for l in lines if not l.strip().startswith("```")]
+            cleaned = "\n".join(lines)
+
+        parsed = json.loads(cleaned)
+
+        return {"clarified_responses": parsed.get("clarified_responses", [])}
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Failed to parse voice mirroring response")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to clarify responses: {e}")
+
+
+# ---------------------------------------------------------
 # ATLAS: UX TESTING DATA SEEDER
 # ---------------------------------------------------------
 
