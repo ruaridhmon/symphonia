@@ -6,8 +6,19 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
-import { API_BASE_URL } from './config';
+import { BarChart3, Link2, MapPin, Sparkles } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
+import { useAuth } from './AuthContext';
+import { getMe } from './api/auth';
+import { getForm as apiFetchForm } from './api/forms';
+import { getRounds, getRoundsWithResponses, nextRound as apiNextRound } from './api/rounds';
+import { getResponses } from './api/responses';
+import {
+	getSynthesisVersions as apiGetSynthesisVersions,
+	activateVersion as apiActivateVersion,
+	generateSynthesis as apiGenerateSynthesis,
+	pushSummary as apiPushSummary,
+} from './api/synthesis';
 
 import {
 	RoundTimeline,
@@ -74,8 +85,8 @@ export default function SummaryPage() {
 	const formId = Number(id);
 	const { toastError, toastWarning, toastSuccess } = useToast();
 
-	const token = useMemo(() => localStorage.getItem('access_token') || '', []);
-	const authHeaders = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
+	const { token: rawToken, logout: authLogout } = useAuth();
+	const token = rawToken ?? '';
 
 	// ── Core state ──
 	const [email, setEmail] = useState('');
@@ -169,29 +180,24 @@ export default function SummaryPage() {
 
 	useEffect(() => {
 		if (!token) return;
-		fetch(`${API_BASE_URL}/me`, { headers: authHeaders })
-			.then(r => r.json())
+		getMe()
 			.then(d => setEmail(d.email || ''))
 			.catch(() => {});
-	}, [token, authHeaders]);
+	}, [token]);
 
 	useEffect(() => {
 		if (!token || !formId) return;
 		loadAll().then(() => loadResponses()).catch(() => {});
-	}, [token, formId, authHeaders, editor]);
+	}, [token, formId, editor]);
 
 	async function loadAll() {
 		setLoading(true);
 		try {
-			const formRes = await fetch(`${API_BASE_URL}/forms/${formId}`, { headers: authHeaders });
-			const f = await formRes.json();
-			setForm(f);
+			const f = await apiFetchForm(formId);
+			setForm(f as Form);
 
-			const roundsRes = await fetch(`${API_BASE_URL}/forms/${formId}/rounds`, { headers: authHeaders });
-			const list = await roundsRes.json();
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const mapped: Round[] = (Array.isArray(list) ? list : []).map((x: any) => ({
+			const list = await getRounds(formId);
+			const mapped: Round[] = (Array.isArray(list) ? list : []).map(x => ({
 				id: x.id,
 				round_number: x.round_number,
 				synthesis: x.synthesis || '',
@@ -226,23 +232,17 @@ export default function SummaryPage() {
 
 	async function loadResponses() {
 		try {
-			const response = await fetch(
-				`${API_BASE_URL}/forms/${formId}/rounds_with_responses`,
-				{ headers: authHeaders }
-			);
-			const data = await response.json();
+			const data = await getRoundsWithResponses(formId);
 			if (Array.isArray(data)) {
 				setStructuredRounds(
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				data.map((r: any) => ({
+					data.map(r => ({
 						id: r.id,
 						round_number: r.round_number,
 						synthesis: r.synthesis || '',
 						is_active: !!r.is_active,
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						responses: (r.responses || []).map((resp: any) => ({
+						responses: (r.responses || []).map(resp => ({
 							id: resp.id,
-							answers: typeof resp.answers === 'string' ? JSON.parse(resp.answers) : resp.answers || {},
+							answers: typeof resp.answers === 'string' ? JSON.parse(resp.answers as string) : resp.answers || {},
 							email: resp.email || null,
 							timestamp: resp.timestamp,
 							version: resp.version ?? 1,
@@ -256,19 +256,10 @@ export default function SummaryPage() {
 
 	async function loadSynthesisVersions(roundId: number) {
 		try {
-			const res = await fetch(
-				`${API_BASE_URL}/forms/${formId}/rounds/${roundId}/synthesis_versions`,
-				{ headers: authHeaders }
-			);
-			if (res.ok) {
-				const versions: SynthesisVersion[] = await res.json();
-				setSynthesisVersions(versions);
-				const active = versions.find(v => v.is_active);
-				setSelectedVersionId(active?.id || (versions.length > 0 ? versions[versions.length - 1].id : null));
-			} else {
-				setSynthesisVersions([]);
-				setSelectedVersionId(null);
-			}
+			const versions = await apiGetSynthesisVersions(formId, roundId);
+			setSynthesisVersions(versions);
+			const active = versions.find(v => v.is_active);
+			setSelectedVersionId(active?.id || (versions.length > 0 ? versions[versions.length - 1].id : null));
 		} catch {
 			setSynthesisVersions([]);
 			setSelectedVersionId(null);
@@ -278,7 +269,7 @@ export default function SummaryPage() {
 	// ─── Actions ─────────────────────────────────────────────────────────────
 
 	function logout() {
-		localStorage.clear();
+		authLogout();
 		navigate('/');
 	}
 
@@ -295,15 +286,7 @@ export default function SummaryPage() {
 		if (!activeRound || !formId) return;
 		const summary = editor?.getHTML() || '';
 		try {
-			const res = await fetch(`${API_BASE_URL}/forms/${formId}/push_summary`, {
-				method: 'POST',
-				headers: { ...authHeaders, 'Content-Type': 'application/json' },
-				body: JSON.stringify({ summary }),
-			});
-			if (!res.ok) {
-				const err = await res.json().catch(() => ({}));
-				throw new Error(err.detail || `Failed to save synthesis (HTTP ${res.status})`);
-			}
+			await apiPushSummary(formId, summary);
 			setHasSavedSynthesis(true);
 			toastSuccess('Synthesis saved');
 		} catch (err) {
@@ -320,15 +303,7 @@ export default function SummaryPage() {
 		}
 		setLoading(true);
 		try {
-			const res = await fetch(`${API_BASE_URL}/forms/${formId}/next_round`, {
-				method: 'POST',
-				headers: { ...authHeaders, 'Content-Type': 'application/json' },
-				body: JSON.stringify({ questions: cleaned }),
-			});
-			if (!res.ok) {
-				const err = await res.json().catch(() => ({}));
-				throw new Error(err.detail || `Failed to advance round (HTTP ${res.status})`);
-			}
+			await apiNextRound(formId, { questions: cleaned });
 			await loadAll();
 			await loadResponses();
 			setHasSavedSynthesis(false);
@@ -341,33 +316,32 @@ export default function SummaryPage() {
 	}
 
 	async function downloadResponses() {
-		const raw = await fetch(
-			`${API_BASE_URL}/form/${formId}/responses?all_rounds=true`,
-			{ headers: authHeaders }
-		).then(r => r.json());
+		try {
+			const raw = await getResponses(formId, true);
 
-		if (!Array.isArray(raw) || raw.length === 0) {
-			toastWarning('No responses to download');
-			return;
-		}
+			if (!Array.isArray(raw) || raw.length === 0) {
+				toastWarning('No responses to download');
+				return;
+			}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const paragraphs = raw.flatMap((r: any, i: number) => {
-			const header = new Paragraph({
-				children: [new TextRun({ text: `Response ${i + 1}`, bold: true })],
-				spacing: { after: 200 },
+			const paragraphs = raw.flatMap((r, i: number) => {
+				const header = new Paragraph({
+					children: [new TextRun({ text: `Response ${i + 1}`, bold: true })],
+					spacing: { after: 200 },
+				});
+				const qa = Object.entries(r.answers).flatMap(([k, v]: [string, unknown]) => [
+					new Paragraph({ children: [new TextRun({ text: k, bold: true })], spacing: { after: 80 } }),
+					new Paragraph({ text: String(v ?? ''), spacing: { after: 160 } }),
+				]);
+				return [header, ...qa, new Paragraph('')];
 			});
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const qa = Object.entries(r.answers).flatMap(([k, v]: any) => [
-				new Paragraph({ children: [new TextRun({ text: k, bold: true })], spacing: { after: 80 } }),
-				new Paragraph({ text: String(v ?? ''), spacing: { after: 160 } }),
-			]);
-			return [header, ...qa, new Paragraph('')];
-		});
 
-		const doc = new Document({ sections: [{ children: paragraphs }] });
-		const blob = await Packer.toBlob(doc);
-		saveAs(blob, 'responses.docx');
+			const doc = new Document({ sections: [{ children: paragraphs }] });
+			const blob = await Packer.toBlob(doc);
+			saveAs(blob, 'responses.docx');
+		} catch (err) {
+			toastError((err as Error).message || 'Failed to download responses');
+		}
 	}
 
 	async function generateSummary() {
@@ -381,29 +355,16 @@ export default function SummaryPage() {
 			setSynthesisStage('analyzing');
 			setSynthesisStep(1);
 
-			const res = await fetch(
-				`${API_BASE_URL}/forms/${formId}/rounds/${targetRound.id}/generate_synthesis`,
-				{
-					method: 'POST',
-					headers: { ...authHeaders, 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						model: selectedModel,
-						strategy: synthesisMode,
-						n_analysts: 3,
-						mode: 'human_only',
-					}),
-				}
-			);
+			const data = await apiGenerateSynthesis(formId, targetRound.id, {
+				model: selectedModel,
+				strategy: synthesisMode,
+				n_analysts: 3,
+				mode: 'human_only',
+			});
 
 			setSynthesisStage('synthesising');
 			setSynthesisStep(3);
 
-			if (!res.ok) {
-				const err = await res.json().catch(() => ({}));
-				throw new Error(err.detail || 'Failed to generate summary');
-			}
-
-			const data = await res.json();
 			setSynthesisStage('formatting');
 			setSynthesisStep(4);
 
@@ -439,20 +400,12 @@ export default function SummaryPage() {
 		if (!displayRound || !formId) return;
 		setIsGeneratingVersion(true);
 		try {
-			const res = await fetch(
-				`${API_BASE_URL}/forms/${formId}/rounds/${displayRound.id}/generate_synthesis`,
-				{
-					method: 'POST',
-					headers: { ...authHeaders, 'Content-Type': 'application/json' },
-					body: JSON.stringify({ model: selectedModel, strategy: synthesisMode, n_analysts: 3, mode: 'human_only' }),
-				}
-			);
-			if (!res.ok) {
-				const err = await res.json();
-				throw new Error(err.detail || 'Failed to generate synthesis version');
-			}
-
-			const data = await res.json();
+			const data = await apiGenerateSynthesis(formId, displayRound.id, {
+				model: selectedModel,
+				strategy: synthesisMode,
+				n_analysts: 3,
+				mode: 'human_only',
+			});
 
 			// Optimistic update: immediately reflect new synthesis in round state
 			if (data.synthesis_json) {
@@ -474,14 +427,7 @@ export default function SummaryPage() {
 
 	async function activateVersion(versionId: number) {
 		try {
-			const res = await fetch(`${API_BASE_URL}/synthesis_versions/${versionId}/activate`, {
-				method: 'PUT',
-				headers: { ...authHeaders, 'Content-Type': 'application/json' },
-			});
-			if (!res.ok) {
-				const err = await res.json();
-				throw new Error(err.detail || 'Failed to activate version');
-			}
+			await apiActivateVersion(versionId);
 			if (displayRound) await loadSynthesisVersions(displayRound.id);
 			await loadAll();
 		} catch (error) {
@@ -599,7 +545,7 @@ export default function SummaryPage() {
 						{structuredSynthesisData && (
 							<div className="card p-4 sm:p-6">
 								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<span>📊</span> Structured Analysis
+									<BarChart3 size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
 								</h2>
 								<StructuredSynthesis
 									data={structuredSynthesisData}
@@ -617,7 +563,7 @@ export default function SummaryPage() {
 						{structuredSynthesisData && (
 							<div className="card p-4 sm:p-6">
 								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<span>🔗</span> Expert Cross-Analysis
+									<Link2 size={20} style={{ color: 'var(--accent)' }} /> Expert Cross-Analysis
 								</h2>
 								<CrossMatrix
 									structuredData={structuredSynthesisData}
@@ -631,7 +577,7 @@ export default function SummaryPage() {
 						{structuredSynthesisData && (
 							<div className="card p-4 sm:p-6">
 								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<span>🗺️</span> Consensus Heatmap
+									<MapPin size={20} style={{ color: 'var(--accent)' }} /> Consensus Heatmap
 								</h2>
 								<ConsensusHeatmap
 									structuredData={structuredSynthesisData}
@@ -655,7 +601,7 @@ export default function SummaryPage() {
 						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
 							<div className="card p-4 sm:p-6">
 								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<span>✨</span> Emergent Insights
+									<Sparkles size={20} style={{ color: 'var(--accent)' }} /> Emergent Insights
 								</h2>
 								<EmergenceHighlights
 									insights={structuredSynthesisData.emergent_insights ?? []}

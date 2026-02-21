@@ -744,6 +744,9 @@ class ConsensusLibraryAdapter:
 
         agreements: List[Agreement] = []
         disagreements: List[Disagreement] = []
+        
+        # With only 1 expert, there CAN'T be disagreement - it's logically impossible
+        allow_disagreements = num_responses >= 2
 
         # --- Claims → Agreements / Disagreements ---
         for claim in synthesis.claims:
@@ -783,37 +786,50 @@ class ConsensusLibraryAdapter:
                     )
                 )
             else:
-                # "divided" or "minority" → disagreement
-                positions: List[Dict[str, Any]] = [
-                    {
-                        "position": claim.text,
-                        "experts": source_ids,
-                        "evidence": "; ".join(
-                            s.quote for s in claim.sources if s.quote
-                        )
-                        or "From synthesis",
-                    }
-                ]
-                for ca in claim.counterarguments:
-                    positions.append(
+                # "divided" or "minority" → disagreement (only if ≥2 experts)
+                if allow_disagreements:
+                    positions: List[Dict[str, Any]] = [
                         {
-                            "position": ca,
-                            "experts": [],
-                            "evidence": "Counterargument identified in synthesis",
+                            "position": claim.text,
+                            "experts": source_ids,
+                            "evidence": "; ".join(
+                                s.quote for s in claim.sources if s.quote
+                            )
+                            or "From synthesis",
                         }
+                    ]
+                    for ca in claim.counterarguments:
+                        positions.append(
+                            {
+                                "position": ca,
+                                "experts": [],
+                                "evidence": "Counterargument identified in synthesis",
+                            }
+                        )
+                    topic = (
+                        claim.text[:80] + "…"
+                        if len(claim.text) > 80
+                        else claim.text
                     )
-                topic = (
-                    claim.text[:80] + "…"
-                    if len(claim.text) > 80
-                    else claim.text
-                )
-                disagreements.append(
-                    Disagreement(
-                        topic=topic,
-                        positions=positions,
-                        severity="moderate",
+                    disagreements.append(
+                        Disagreement(
+                            topic=topic,
+                            positions=positions,
+                            severity="moderate",
+                        )
                     )
-                )
+                else:
+                    # Single expert: treat as agreement (they can't disagree with themselves)
+                    agreements.append(
+                        Agreement(
+                            claim=claim.text,
+                            supporting_experts=source_ids or [1],
+                            confidence=0.6,  # Lower confidence for single-expert
+                            evidence_summary="; ".join(
+                                s.quote for s in claim.sources if s.quote
+                            ) or "Single expert opinion",
+                        )
+                    )
 
         # --- Areas of agreement (deduplicated) ---
         existing_agreement_claims = {a.claim for a in agreements}
@@ -828,23 +844,24 @@ class ConsensusLibraryAdapter:
                     )
                 )
 
-        # --- Areas of disagreement (deduplicated) ---
-        existing_disagreement_topics = {d.topic for d in disagreements}
-        for area in synthesis.areas_of_disagreement:
-            if area not in existing_disagreement_topics:
-                disagreements.append(
-                    Disagreement(
-                        topic=area,
-                        positions=[
-                            {
-                                "position": area,
-                                "experts": [],
-                                "evidence": "Identified as area of disagreement",
-                            }
-                        ],
-                        severity="moderate",
+        # --- Areas of disagreement (deduplicated, only if ≥2 experts) ---
+        if allow_disagreements:
+            existing_disagreement_topics = {d.topic for d in disagreements}
+            for area in synthesis.areas_of_disagreement:
+                if area not in existing_disagreement_topics:
+                    disagreements.append(
+                        Disagreement(
+                            topic=area,
+                            positions=[
+                                {
+                                    "position": area,
+                                    "experts": [],
+                                    "evidence": "Identified as area of disagreement",
+                                }
+                            ],
+                            severity="moderate",
+                        )
                     )
-                )
 
         # --- Uncertainties → Nuances ---
         nuances: List[Nuance] = [

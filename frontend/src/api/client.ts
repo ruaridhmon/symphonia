@@ -25,16 +25,18 @@ async function apiClient<T>(
       // Throw to stop further processing
       throw new ApiError(401, 'Session expired. Please log in again.');
     }
-    throw new ApiError(response.status, await response.text());
+    throw new ApiError(response.status, await response.text(), response.headers);
   }
 
   return response.json();
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  public headers: Headers;
+  constructor(public status: number, message: string, headers?: Headers) {
     super(message);
     this.name = 'ApiError';
+    this.headers = headers ?? new Headers();
   }
 }
 

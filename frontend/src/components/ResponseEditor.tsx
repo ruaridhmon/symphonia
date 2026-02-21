@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { API_BASE_URL } from '../config';
+import { Pencil, Save, AlertTriangle } from 'lucide-react';
+import { ApiError } from '../api/client';
+import { updateResponse as apiUpdateResponse, forceUpdateResponse } from '../api/responses';
 import { extractQuestionText } from '../utils/questions';
 
 // ─── Types ───────────────────────────────────────────────
@@ -21,7 +23,8 @@ interface ConflictInfo {
 interface ResponseEditorProps {
   response: ResponseData;
   questions: (string | Record<string, unknown>)[];
-  token: string;
+  /** @deprecated Auth is handled by API client; prop kept for backward compatibility */
+  token?: string;
   onUpdated?: (updated: ResponseData) => void;
 }
 
@@ -30,7 +33,6 @@ interface ResponseEditorProps {
 export default function ResponseEditor({
   response,
   questions,
-  token,
   onUpdated,
 }: ResponseEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -76,27 +78,23 @@ export default function ResponseEditor({
       setSaving(true);
       setError(null);
 
-      const url = force
-        ? `${API_BASE_URL}/responses/${response.id}/force`
-        : `${API_BASE_URL}/responses/${response.id}`;
-
       try {
-        const res = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            answers: editedAnswers,
-            version: currentVersion,
-          }),
+        const apiFn = force ? forceUpdateResponse : apiUpdateResponse;
+        const updated = await apiFn(response.id, editedAnswers, currentVersion);
+        setCurrentVersion(updated.version);
+        setCurrentAnswers(updated.answers as Record<string, string>);
+        setIsEditing(false);
+        setEditedAnswers({});
+        setConflict(null);
+        onUpdated?.({
+          ...response,
+          answers: updated.answers as Record<string, string>,
+          version: updated.version,
         });
-
-        if (res.status === 409) {
-          // Conflict — someone else edited
+      } catch (e: unknown) {
+        if (e instanceof ApiError && e.status === 409) {
           const serverVersion = parseInt(
-            res.headers.get('X-Current-Version') || '0',
+            e.headers.get('X-Current-Version') || '0',
             10
           );
           setConflict({
@@ -105,27 +103,12 @@ export default function ResponseEditor({
           });
           return;
         }
-
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({ detail: 'Save failed' }));
-          setError(body.detail || `Error ${res.status}`);
-          return;
-        }
-
-        const updated: ResponseData = await res.json();
-        setCurrentVersion(updated.version);
-        setCurrentAnswers(updated.answers);
-        setIsEditing(false);
-        setEditedAnswers({});
-        setConflict(null);
-        onUpdated?.(updated);
-      } catch (e: unknown) {
         setError(e instanceof Error ? e.message : 'Network error');
       } finally {
         setSaving(false);
       }
     },
-    [editedAnswers, currentVersion, response.id, token, onUpdated]
+    [editedAnswers, currentVersion, response.id, onUpdated]
   );
 
   const forceSave = useCallback(() => saveEdits(true), [saveEdits]);
@@ -178,7 +161,7 @@ export default function ResponseEditor({
             }}
             title="Edit response"
           >
-            ✏️ Edit
+            <Pencil size={12} className="inline mr-1" /> Edit
           </button>
         </div>
 
@@ -247,7 +230,7 @@ export default function ResponseEditor({
               opacity: saving ? 0.6 : 1,
             }}
           >
-            {saving ? 'Saving…' : '💾 Save'}
+            {saving ? 'Saving…' : <><Save size={12} className="inline mr-1" /> Save</>}
           </button>
         </div>
       </div>
@@ -295,7 +278,7 @@ export default function ResponseEditor({
             border: '1px solid var(--destructive)',
           }}
         >
-          ⚠️ {error}
+          <AlertTriangle size={14} className="inline mr-1" /> {error}
         </div>
       )}
 
@@ -317,7 +300,7 @@ export default function ResponseEditor({
             }}
           >
             <div className="flex items-center gap-2">
-              <span className="text-2xl">⚠️</span>
+              <AlertTriangle size={24} style={{ color: 'var(--destructive)' }} />
               <h3
                 className="text-lg font-bold"
                 style={{ color: 'var(--foreground)' }}

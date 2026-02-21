@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { Link, Navigate } from 'react-router-dom';
-import { API_BASE_URL } from './config';
+import { ApiError } from './api/client';
+import { register as apiRegister } from './api/auth';
 import { LoadingButton, PasswordInput } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
@@ -19,28 +20,16 @@ export default function Register() {
     setIsRegistering(true);
 
     try {
-      let reg: Response;
       try {
-        reg = await fetch(`${API_BASE_URL}/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ email, password }),
-        });
-      } catch {
+        await apiRegister(email, password);
+      } catch (e) {
+        if (e instanceof ApiError) {
+          if (e.status === 409) throw new Error('An account with this email already exists.');
+          if (e.status === 422) throw new Error('Invalid email or password format.');
+          if (e.status >= 500) throw new Error('Server error — please try again later.');
+          throw new Error('Registration failed. Please try again.');
+        }
         throw new Error('Unable to reach the server. Please check your connection.');
-      }
-
-      if (!reg.ok) {
-        if (reg.status === 409) {
-          throw new Error('An account with this email already exists.');
-        }
-        if (reg.status === 422) {
-          throw new Error('Invalid email or password format.');
-        }
-        if (reg.status >= 500) {
-          throw new Error('Server error — please try again later.');
-        }
-        throw new Error('Registration failed. Please try again.');
       }
 
       await login(email, password);

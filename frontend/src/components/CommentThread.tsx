@@ -1,22 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MessageSquare } from 'lucide-react';
-import { API_BASE_URL } from '../config';
+import { MessageSquare, Pencil, Trash2, Reply } from 'lucide-react';
+import {
+	getComments as apiGetComments,
+	createComment as apiCreateComment,
+	updateComment as apiUpdateComment,
+	deleteComment as apiDeleteComment,
+} from '../api/comments';
+import type { Comment } from '../api/comments';
 
 // ─── Types ───────────────────────────────────────────────
-
-interface Comment {
-  id: number;
-  round_id: number;
-  section_type: string;
-  section_index: number | null;
-  parent_id: number | null;
-  author_id: number;
-  author_email: string | null;
-  body: string;
-  created_at: string | null;
-  updated_at: string | null;
-  replies: Comment[];
-}
 
 interface CommentThreadProps {
   formId: number;
@@ -96,14 +88,14 @@ function CommentItem({
                 style={styles.actionBtn}
                 title="Edit"
               >
-                ✏️
+                <Pencil size={12} />
               </button>
               <button
                 onClick={() => onDelete(comment.id)}
                 style={styles.actionBtn}
                 title="Delete"
               >
-                🗑️
+                <Trash2 size={12} />
               </button>
             </>
           )}
@@ -113,7 +105,7 @@ function CommentItem({
               style={styles.actionBtn}
               title="Reply"
             >
-              ↩️
+              <Reply size={12} />
             </button>
           )}
         </div>
@@ -211,20 +203,14 @@ export default function CommentThread({
   const fetchComments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/forms/${formId}/rounds/${roundId}/comments`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setComments(data);
-      }
+      const data = await apiGetComments(formId, roundId);
+      setComments(data);
     } catch {
       // Silently fail
     } finally {
       setLoading(false);
     }
-  }, [formId, roundId, token]);
+  }, [formId, roundId]);
 
   useEffect(() => {
     if (expanded) {
@@ -236,27 +222,15 @@ export default function CommentThread({
     if (!newBody.trim() || submitting) return;
     setSubmitting(true);
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/forms/${formId}/rounds/${roundId}/comments`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            section_type: sectionType,
-            section_index: sectionIndex,
-            parent_id: replyTo,
-            body: newBody.trim(),
-          }),
-        }
-      );
-      if (res.ok) {
-        setNewBody('');
-        setReplyTo(null);
-        await fetchComments();
-      }
+      await apiCreateComment(formId, roundId, {
+        section_type: sectionType,
+        section_index: sectionIndex,
+        parent_id: replyTo,
+        body: newBody.trim(),
+      });
+      setNewBody('');
+      setReplyTo(null);
+      await fetchComments();
     } catch {
       // Silently fail
     } finally {
@@ -266,17 +240,8 @@ export default function CommentThread({
 
   const handleEdit = async (commentId: number, newBodyText: string) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ body: newBodyText }),
-      });
-      if (res.ok) {
-        await fetchComments();
-      }
+      await apiUpdateComment(commentId, newBodyText);
+      await fetchComments();
     } catch {
       // Silently fail
     }
@@ -284,13 +249,8 @@ export default function CommentThread({
 
   const handleDelete = async (commentId: number) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        await fetchComments();
-      }
+      await apiDeleteComment(commentId);
+      await fetchComments();
     } catch {
       // Silently fail
     }

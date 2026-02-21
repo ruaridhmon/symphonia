@@ -1,4 +1,5 @@
 import { api } from './client';
+import type { SynthesisData } from '../types/synthesis';
 
 /* ── Types ── */
 
@@ -6,9 +7,9 @@ export interface Round {
   id: number;
   round_number: number;
   synthesis: string | null;
-  synthesis_json: Record<string, unknown> | null;
+  synthesis_json: SynthesisData | null;
   is_active: boolean;
-  questions: string[];
+  questions: (string | Record<string, unknown>)[];
   convergence_score: number | null;
   response_count: number;
 }
@@ -45,4 +46,30 @@ export function getActiveRound(formId: number) {
 /** Admin: advance to the next round */
 export function nextRound(formId: number, config?: RoundConfig) {
   return api.post<NextRoundResult>(`/forms/${formId}/next_round`, config);
+}
+
+/* ── Types for rounds with responses ── */
+
+export interface ResponseDetail {
+  id: number;
+  answers: Record<string, string>;
+  email: string | null;
+  timestamp: string;
+  version: number;
+  round_id: number;
+}
+
+export interface RoundWithResponses {
+  id: number;
+  round_number: number;
+  synthesis: string;
+  is_active: boolean;
+  responses: ResponseDetail[];
+}
+
+/** Get all rounds with their responses */
+export function getRoundsWithResponses(formId: number) {
+  return api.get<RoundWithResponses[]>(
+    `/forms/${formId}/rounds_with_responses`
+  );
 }

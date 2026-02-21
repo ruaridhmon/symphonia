@@ -13,6 +13,7 @@ export interface ResponseItem {
   user_id: number;
   round_id: number;
   answers: Record<string, string>;
+  version: number;
 }
 
 export interface HasSubmittedResult {
@@ -53,4 +54,28 @@ export function getResponses(formId: number, allRounds = false) {
   return api.get<ResponseItem[]>(
     `/form/${formId}/responses${allRounds ? '?all_rounds=true' : ''}`
   );
+}
+
+/** Admin: update a response's answers (with optimistic concurrency via version) */
+export function updateResponse(
+  responseId: number,
+  answers: Record<string, string>,
+  version: number
+) {
+  return api.put<ResponseItem>(`/responses/${responseId}`, {
+    answers,
+    version,
+  });
+}
+
+/** Admin: force-update a response (overwrite regardless of version conflict) */
+export function forceUpdateResponse(
+  responseId: number,
+  answers: Record<string, string>,
+  version: number
+) {
+  return api.put<ResponseItem>(`/responses/${responseId}/force`, {
+    answers,
+    version,
+  });
 }

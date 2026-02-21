@@ -1,5 +1,6 @@
 import { LoadingButton, ExportPanel } from '../index';
 import type { Round } from '../../types/summary';
+import type { SynthesisData } from '../../types/synthesis';
 
 type Props = {
   responsesOpen: boolean;
@@ -10,7 +11,7 @@ type Props = {
   loading: boolean;
   formTitle: string;
   rounds: Round[];
-  structuredSynthesisData: any;
+  structuredSynthesisData: SynthesisData | null;
   expertLabels: Record<number, string>;
 };
 

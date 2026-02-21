@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Map } from 'lucide-react';
-import { API_BASE_URL } from './config';
+import { seedAtlas } from './api/atlas';
+import { getForms } from './api/forms';
 
 interface TestForm {
   id: number;
@@ -12,31 +13,14 @@ export default function Atlas() {
   const navigate = useNavigate();
   const [forms, setForms] = useState<TestForm[]>([]);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
-  const token = localStorage.getItem('access_token');
 
   useEffect(() => {
     seedAndFetch();
   }, []);
 
   const seedAndFetch = async () => {
-    // Always seed first to ensure data exists
-    try {
-      await fetch(`${API_BASE_URL}/atlas/seed`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    } catch (e) {}
-    
-    // Then fetch forms
-    try {
-      const res = await fetch(`${API_BASE_URL}/forms`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setForms(await res.json());
-      }
-    } catch (e) {}
+    try { await seedAtlas(); } catch {}
+    try { setForms(await getForms()); } catch {}
     setLoading(false);
   };
 

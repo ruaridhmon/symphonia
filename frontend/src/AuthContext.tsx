@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { API_BASE_URL } from './config';
+import { ApiError } from './api/client';
+import { login as apiLogin } from './api/auth';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -43,28 +44,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    let res: Response;
+    let data;
     try {
-      res = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ username: email, password }),
-      });
-    } catch {
+      data = await apiLogin(email, password);
+    } catch (e) {
+      if (e instanceof ApiError) {
+        if (e.status === 401 || e.status === 403) throw new Error('Invalid email or password.');
+        if (e.status >= 500) throw new Error('Server error — please try again later.');
+        throw new Error('Login failed. Please try again.');
+      }
       throw new Error('Unable to reach the server. Please check your connection.');
     }
 
-    if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
-        throw new Error('Invalid email or password.');
-      }
-      if (res.status >= 500) {
-        throw new Error('Server error — please try again later.');
-      }
-      throw new Error('Login failed. Please try again.');
-    }
-
-    const data = await res.json();
     localStorage.setItem('access_token', data.access_token);
     localStorage.setItem('is_admin', data.is_admin ? 'true' : 'false');
     localStorage.setItem('email', data.email || email);
