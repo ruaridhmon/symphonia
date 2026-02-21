@@ -989,6 +989,20 @@ main,
   color: var(--accent);
 }
 
+/* Dimensional expert chips — color-coded by dimension */
+.expert-chip.dimension-past {
+  background-color: rgba(168, 85, 247, 0.12);
+  color: #a855f7;
+}
+.expert-chip.dimension-present {
+  background-color: rgba(59, 130, 246, 0.12);
+  color: var(--accent);
+}
+.expert-chip.dimension-future {
+  background-color: rgba(34, 197, 94, 0.12);
+  color: var(--success);
+}
+
 /* Confidence bar */
 .confidence-bar {
   display: flex;

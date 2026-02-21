@@ -49,6 +49,7 @@ interface SynthesisData {
 interface StructuredSynthesisProps {
   data: SynthesisData;
   convergenceScore?: number;
+  expertLabels?: Record<number, string>;
 }
 
 // ─── Sub-components ──────────────────────────────────────
@@ -121,7 +122,17 @@ function SeverityBadge({ severity }: { severity: string }) {
 
 // ─── Main Component ──────────────────────────────────────
 
-export default function StructuredSynthesis({ data, convergenceScore }: StructuredSynthesisProps) {
+// Helper to derive a dimension CSS class from an expert label
+function getDimensionClass(label?: string): string {
+  if (!label) return '';
+  const lower = label.toLowerCase();
+  if (lower.includes('past') || lower.includes('urðr') || lower.includes('urd')) return 'dimension-past';
+  if (lower.includes('present') || lower.includes('verðandi') || lower.includes('verdandi')) return 'dimension-present';
+  if (lower.includes('future') || lower.includes('skuld')) return 'dimension-future';
+  return '';
+}
+
+export default function StructuredSynthesis({ data, convergenceScore, expertLabels }: StructuredSynthesisProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     agreements: true,
     disagreements: true,
@@ -218,7 +229,9 @@ export default function StructuredSynthesis({ data, convergenceScore }: Structur
                   {a.supporting_experts.length > 0 && (
                     <div className="structured-card-experts">
                       {a.supporting_experts.map(id => (
-                        <span key={id} className="expert-chip">E{id}</span>
+                        <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
+                          {expertLabels?.[id] || `E${id}`}
+                        </span>
                       ))}
                     </div>
                   )}
@@ -260,7 +273,9 @@ export default function StructuredSynthesis({ data, convergenceScore }: Structur
                           {pos.experts.length > 0 && (
                             <div className="structured-card-experts">
                               {pos.experts.map(id => (
-                                <span key={id} className="expert-chip">E{id}</span>
+                                <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
+                                  {expertLabels?.[id] || `E${id}`}
+                                </span>
                               ))}
                             </div>
                           )}
@@ -322,7 +337,9 @@ export default function StructuredSynthesis({ data, convergenceScore }: Structur
                         Targets:
                       </span>
                       {p.target_experts.map(id => (
-                        <span key={id} className="expert-chip">E{id}</span>
+                        <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
+                          {expertLabels?.[id] || `E${id}`}
+                        </span>
                       ))}
                     </div>
                   )}

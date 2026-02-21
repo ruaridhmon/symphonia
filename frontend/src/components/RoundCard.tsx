@@ -5,9 +5,10 @@ import type { Round } from './RoundTimeline';
 interface RoundCardProps {
   round: Round;
   isCurrentRound: boolean;
+  expertLabels?: Record<number, string>;
 }
 
-export default function RoundCard({ round, isCurrentRound }: RoundCardProps) {
+export default function RoundCard({ round, isCurrentRound, expertLabels }: RoundCardProps) {
   const hasSynthesis = !!(round.synthesis && round.synthesis.trim());
   const hasStructured = !!(round.synthesis_json && typeof round.synthesis_json === 'object');
 
@@ -101,6 +102,7 @@ export default function RoundCard({ round, isCurrentRound }: RoundCardProps) {
             <StructuredSynthesis
               data={round.synthesis_json}
               convergenceScore={round.convergence_score ?? undefined}
+              expertLabels={expertLabels}
             />
           ) : (
             <div className="round-detail-synthesis-body">

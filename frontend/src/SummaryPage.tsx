@@ -88,6 +88,34 @@ export default function SummaryPage() {
 	// View mode for the selected round
 	const [viewingRound, setViewingRound] = useState<Round | null>(null);
 
+	// Expert labels
+	type ExpertLabelPreset = 'default' | 'temporal' | 'custom';
+	const [expertLabelPreset, setExpertLabelPreset] = useState<ExpertLabelPreset>('default');
+	const [customExpertLabels, setCustomExpertLabels] = useState<Record<number, string>>({});
+	const [expertLabelsOpen, setExpertLabelsOpen] = useState(false);
+
+	const temporalPresets: Record<number, string> = {
+		1: 'Urðr (Past)',
+		2: 'Verðandi (Present)',
+		3: 'Skuld (Future)',
+	};
+
+	const expertCount = activeRound?.response_count || 3;
+
+	const resolvedExpertLabels: Record<number, string> = useMemo(() => {
+		if (expertLabelPreset === 'temporal') {
+			const labels: Record<number, string> = {};
+			for (let i = 1; i <= expertCount; i++) {
+				labels[i] = temporalPresets[i] || `Expert ${i}`;
+			}
+			return labels;
+		}
+		if (expertLabelPreset === 'custom') {
+			return customExpertLabels;
+		}
+		return {};
+	}, [expertLabelPreset, customExpertLabels, expertCount]);
+
 	const wsRef = useRef<WebSocket | null>(null);
 
 	const models = [
@@ -635,6 +663,7 @@ export default function SummaryPage() {
 								<StructuredSynthesis
 									data={structuredData}
 									convergenceScore={convergenceScore}
+									expertLabels={resolvedExpertLabels}
 								/>
 							</div>
 						)}
@@ -672,6 +701,7 @@ export default function SummaryPage() {
 								<RoundCard
 									round={viewingRound}
 									isCurrentRound={false}
+									expertLabels={resolvedExpertLabels}
 								/>
 							</div>
 						)}
@@ -800,6 +830,77 @@ export default function SummaryPage() {
 								)}
 							</div>
 						)}
+
+						{/* Expert Labels */}
+						<div className="card p-4 fade-in">
+							<button
+								className="w-full flex items-center justify-between text-sm font-semibold text-foreground uppercase tracking-wider"
+								onClick={() => setExpertLabelsOpen(!expertLabelsOpen)}
+							>
+								<span>Expert Labels</span>
+								<span style={{ transform: expertLabelsOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>▸</span>
+							</button>
+							{expertLabelsOpen && (
+								<div className="mt-3 space-y-3 slide-down">
+									<div className="flex gap-1 flex-wrap">
+										{(['default', 'temporal', 'custom'] as const).map(preset => (
+											<button
+												key={preset}
+												className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+													expertLabelPreset === preset
+														? 'bg-accent text-white border-accent'
+														: 'border-border text-muted-foreground hover:border-accent'
+												}`}
+												onClick={() => setExpertLabelPreset(preset)}
+											>
+												{preset === 'default' ? 'Default' : preset === 'temporal' ? 'Temporal' : 'Custom'}
+											</button>
+										))}
+									</div>
+									{expertLabelPreset === 'temporal' && (
+										<div className="space-y-1.5">
+											{Array.from({ length: expertCount }, (_, i) => i + 1).map(id => (
+												<div key={id} className="flex items-center gap-2 text-xs">
+													<span className={`expert-chip ${
+														id === 1 ? 'dimension-past' : id === 2 ? 'dimension-present' : 'dimension-future'
+													}`}>
+														{temporalPresets[id] || `Expert ${id}`}
+													</span>
+												</div>
+											))}
+										</div>
+									)}
+									{expertLabelPreset === 'custom' && (
+										<div className="space-y-1.5">
+											{Array.from({ length: expertCount }, (_, i) => i + 1).map(id => (
+												<div key={id} className="flex items-center gap-2">
+													<span className="text-xs text-muted-foreground font-mono w-5 text-right flex-shrink-0">
+														{id}
+													</span>
+													<input
+														type="text"
+														className="flex-1 rounded-lg px-2 py-1 text-xs"
+														placeholder={`Expert ${id}`}
+														value={customExpertLabels[id] || ''}
+														onChange={(e) =>
+															setCustomExpertLabels(prev => ({
+																...prev,
+																[id]: e.target.value,
+															}))
+														}
+													/>
+												</div>
+											))}
+										</div>
+									)}
+									{expertLabelPreset === 'default' && (
+										<p className="text-xs text-muted-foreground">
+											Showing default E1, E2, E3… labels.
+										</p>
+									)}
+								</div>
+							)}
+						</div>
 
 						{/* Quick Info */}
 						<div className="card p-4 fade-in">
