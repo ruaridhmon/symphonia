@@ -158,14 +158,40 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 - [x] AuthLayout dark mode fix (hardcoded light gradient → CSS variable) — DONE (Pulse 12:36pm)
 - [x] Login/Register `htmlFor` + `autoComplete` attributes for accessibility — DONE (Pulse 12:36pm)
 
+### P11 — Complete API Client Migration & Final Cleanup
+- [x] SummaryPage → centralized API client (14 raw fetch calls eliminated) — DONE (Pulse 6:00pm)
+- [x] CommentThread → api/comments.ts (4 raw fetch calls eliminated, emoji → Lucide) — DONE (Pulse 6:00pm)
+- [x] ResponseEditor → API client with ApiError conflict detection (emoji → Lucide) — DONE (Pulse 6:00pm)
+- [x] Register.tsx → api/auth.ts (ApiError for status-specific messages) — DONE (Pulse 6:00pm)
+- [x] AuthContext.tsx → api/auth.ts (ApiError for status-specific messages) — DONE (Pulse 6:00pm)
+- [x] Atlas.tsx → api/atlas.ts + api/forms.ts — DONE (Pulse 6:00pm)
+- [x] Created api/auth.ts, api/synthesis.ts, api/comments.ts, api/atlas.ts, api/index.ts — DONE (Pulse 6:00pm)
+- [x] Extended api/rounds.ts (getRoundsWithResponses, SynthesisData types) — DONE (Pulse 6:00pm)
+- [x] Extended api/responses.ts (updateResponse, forceUpdateResponse, version field) — DONE (Pulse 6:00pm)
+- [x] Enhanced ApiError to carry response headers (conflict detection in ResponseEditor) — DONE (Pulse 6:00pm)
+- [x] SummaryPage emoji → Lucide: 📊→BarChart3, 🔗→Link2, 🗺️→MapPin, ✨→Sparkles — DONE (Pulse 6:00pm)
+- [x] CommentThread emoji → Lucide: ✏️→Pencil, 🗑️→Trash2, ↩️→Reply — DONE (Pulse 6:00pm)
+- [x] ResponseEditor emoji → Lucide: ✏️→Pencil, 💾→Save, ⚠️→AlertTriangle — DONE (Pulse 6:00pm)
+- [x] ActionsCard `any` → `SynthesisData | null` (last remaining any type) — DONE (Pulse 6:00pm)
+- [x] SummaryPage logout bug fix: was localStorage.clear(), now uses useAuth().logout — DONE (Pulse 6:00pm)
+- [x] Type alignment: api/rounds.ts Round uses SynthesisData, api/synthesis.ts SynthesisVersion aligned with types/summary.ts — DONE (Pulse 6:00pm)
+
+## Final Architecture Stats
+- **Zero** raw `fetch()` calls outside `api/` layer
+- **Zero** `any` types in production code
+- **Zero** emoji in production components (only in Atlas dev tool)
+- **100%** TypeScript — `tsc --noEmit` passes clean
+- **Full** API client layer: auth, forms, rounds, responses, synthesis, comments, atlas
+- **Centralized** auth via API client (token from localStorage, auto-redirect on 401)
+
 ## Pulse State
 ```json
 {
-  "last_run": "2026-02-21T16:51:00Z",
-  "current_task": "P10 type safety & architecture. FormPage API migration, shared synthesis types, type cleanup.",
+  "last_run": "2026-02-21T18:00:00Z",
+  "current_task": "P11 complete API client migration & final cleanup",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 26,
-  "status": "ALL PHASES COMPLETE + P10 TYPE SAFETY & ARCHITECTURE"
+  "pulse_direct_changes": 27,
+  "status": "ALL PHASES COMPLETE — ZERO RAW FETCH, ZERO ANY, ZERO EMOJI"
 }
 ```
