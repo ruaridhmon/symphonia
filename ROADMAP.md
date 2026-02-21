@@ -43,8 +43,8 @@
 
 - [x] 5.1 Simulated E2E tests (full user journey)
 - [x] 5.2 Consensus library integration tests — 48 tests across 8 classes (factory, API, versioning, validation, AI-assisted, errors, multi-round, persistence)
-- [ ] 5.3 Synthesis output validation tests
-- [ ] 5.4 Error scenario coverage
+- [x] 5.3 Synthesis output validation tests — 62 tests across 9 classes (schema completeness, value ranges, cross-field consistency, edge cases, mock output, adapter mapping, narrative, provenance, adapter edge cases)
+- [x] 5.4 Error scenario coverage — 61 tests across 8 classes (auth, form, round, synthesis API, comments, response editing, synthesis library, misc admin-only endpoints)
 - [ ] 5.5 Vision QA loop (Playwright screenshots → vision model → iterate until 8+/10)
 
 ## Phase 6: Polish & Performance
@@ -63,14 +63,14 @@
 ```json
 {
   "current_phase": 5,
-  "current_task": "5.2",
-  "last_run": "2026-02-21T04:55:00Z",
+  "current_task": "5.5",
+  "last_run": "2026-02-21T05:54:00Z",
   "tasks_completed": [
     "1.1", "1.2", "1.3", "1.4", "1.5",
     "2.1", "2.2", "2.3", "2.4", "2.5", "2.6",
     "3.1", "3.2", "3.3", "3.4",
     "4.1", "4.2", "4.3", "4.4",
-    "5.1", "5.2"
+    "5.1", "5.2", "5.3", "5.4"
   ],
   "blockers": []
 }
