@@ -320,31 +320,23 @@ export default function FormPage() {
 
 
 
-        {previousSynthesis && (
-
-          <div className="mb-6 fade-in">
-
-            <SynthesisDisplay
-
-              content={previousSynthesis}
-
-              title="Synthesis from the previous round"
-
-            />
-
-          </div>
-
-        )}
+        {/* Questions section header — primary focus */}
+        <div className="mb-2">
+          <h2 className="text-lg font-semibold text-foreground">
+            {mode === 'reviewing' ? 'Your Submitted Answers' : 'Questions'}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {mode === 'reviewing'
+              ? 'Review your submitted responses below.'
+              : 'Please provide your expert input for each question below.'}
+          </p>
+        </div>
 
 
 
         {mode === 'reviewing' ? (
 
           <div>
-
-            <h2 className="text-lg font-semibold mb-4 border-b border-border pb-2 text-foreground">
-              Your Submitted Answers
-            </h2>
 
             {roundQuestions.map((q, i) => {
 
@@ -460,10 +452,83 @@ export default function FormPage() {
 
         )}
 
+        {/* Previous round synthesis — collapsible, secondary to questions */}
+        {previousSynthesis && (
+          <PreviousSynthesisToggle content={previousSynthesis} />
+        )}
+
       </div>
 
     </div>
 
   )
 
+}
+
+/* ------------------------------------------------------------------ */
+/* Collapsible previous synthesis component                           */
+/* ------------------------------------------------------------------ */
+function PreviousSynthesisToggle({ content }: { content: string }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <div
+      className="mt-6 rounded-lg overflow-hidden transition-all"
+      style={{
+        border: '1px solid var(--border)',
+        backgroundColor: 'var(--muted)',
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-4 text-left transition-colors"
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className="text-sm font-semibold"
+            style={{ color: 'var(--foreground)' }}
+          >
+            📋 Previous Round Synthesis
+          </span>
+          <span
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+              color: 'var(--accent)',
+            }}
+          >
+            Optional
+          </span>
+        </div>
+        <span
+          className="text-sm transition-transform"
+          style={{
+            color: 'var(--muted-foreground)',
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+          }}
+        >
+          ▾
+        </span>
+      </button>
+      {isOpen && (
+        <div
+          className="px-4 pb-4 fade-in"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          <SynthesisDisplay
+            content={content}
+            title="Synthesis from the previous round"
+            subtitle="Review what emerged from the last round before submitting."
+          />
+        </div>
+      )}
+    </div>
+  )
 }

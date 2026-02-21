@@ -31,6 +31,7 @@ import {
 	FormInfoCard,
 	ActionsCard,
 	ResponsesModal,
+	ResponsesAccordion,
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
 } from './components/summary';
@@ -84,7 +85,7 @@ export default function SummaryPage() {
 	const [loading, setLoading] = useState(false);
 
 	// ── Responses modal ──
-	const [responsesOpen, setResponsesOpen] = useState(true);
+	const [responsesOpen, setResponsesOpen] = useState(false);
 	const [structuredRounds, setStructuredRounds] = useState<RoundWithResponses[]>([]);
 
 	// ── Round selection ──
@@ -559,6 +560,15 @@ export default function SummaryPage() {
 								currentUserEmail={email}
 							/>
 						)}
+
+						{/* Inline responses accordion — toggle per round */}
+						<ResponsesAccordion
+							structuredRounds={structuredRounds}
+							rounds={rounds}
+							formQuestions={form.questions || []}
+							token={token}
+							onResponseUpdated={handleResponseUpdated}
+						/>
 
 						{/* Synthesis editor (active round only) */}
 						{(!selectedRound || selectedRound.is_active) && (
