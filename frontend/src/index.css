@@ -2015,3 +2015,197 @@ main,
 .round-detail-card {
   animation: roundSlideIn 0.3s ease-out;
 }
+
+/* ------------------------------------------------------------------ */
+/* Cross-Matrix Visualization                                          */
+/* ------------------------------------------------------------------ */
+
+.cross-matrix {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cross-matrix-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.cross-matrix-subtitle {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--muted-foreground);
+  margin-left: auto;
+}
+
+.cross-matrix-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.cross-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: fit-content;
+}
+
+.cross-matrix-corner {
+  background-color: var(--card);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  min-width: 2rem;
+}
+
+.cross-matrix-header {
+  padding: 0.5rem 0.375rem;
+  background-color: var(--card);
+  white-space: nowrap;
+}
+
+.cross-matrix-header-col {
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  text-align: center;
+  vertical-align: bottom;
+}
+
+.cross-matrix-header-row {
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  text-align: right;
+  padding-right: 0.625rem;
+}
+
+.cross-matrix-cell {
+  text-align: center;
+  padding: 0.5rem 0.375rem;
+  min-width: 3.5rem;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.12s ease,
+    box-shadow 0.15s ease;
+}
+
+.cross-matrix-cell:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px var(--accent);
+  z-index: 2;
+  position: relative;
+}
+
+.cross-matrix-cell-diagonal {
+  background-color: var(--muted) !important;
+  cursor: default;
+  color: var(--muted-foreground);
+}
+
+.cross-matrix-cell-diagonal:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.cross-matrix-cell-value {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Legend */
+.cross-matrix-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+}
+
+.cross-matrix-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.cross-matrix-legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+/* Tooltip */
+.cross-matrix-tooltip {
+  position: absolute;
+  z-index: 50;
+  transform: translate(-50%, -100%);
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 0.75rem;
+  min-width: 200px;
+  max-width: 320px;
+  pointer-events: none;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.cross-matrix-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+  justify-content: center;
+}
+
+.cross-matrix-tooltip-arrow {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.cross-matrix-tooltip-score {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cross-matrix-tooltip-section {
+  margin-bottom: 0.375rem;
+}
+
+.cross-matrix-tooltip-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--foreground);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.cross-matrix-tooltip-item {
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  margin: 0.125rem 0;
+  line-height: 1.4;
+  padding-left: 0.5rem;
+  border-left: 2px solid var(--border);
+}
+
+.cross-matrix-tooltip-empty {
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  text-align: center;
+  font-style: italic;
+  margin: 0;
+}

@@ -15,6 +15,7 @@ import {
 	RoundTimeline,
 	RoundCard,
 	StructuredSynthesis,
+	CrossMatrix,
 	SynthesisModeSelector,
 } from './components';
 import type { Round } from './components';
@@ -743,6 +744,19 @@ export default function SummaryPage() {
 									data={structuredData}
 									convergenceScore={convergenceScore}
 									expertLabels={resolvedExpertLabels}
+								/>
+							</div>
+						)}
+
+						{/* Cross-Matrix Visualization */}
+						{structuredData &&
+							expertLabelPreset !== 'default' &&
+							Object.keys(resolvedExpertLabels).length >= 2 && (
+							<div className="card p-5 bounce-in">
+								<CrossMatrix
+									structuredData={structuredData}
+									resolvedExpertLabels={resolvedExpertLabels}
+									expertLabelPreset={expertLabelPreset}
 								/>
 							</div>
 						)}
