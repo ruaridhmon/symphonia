@@ -16,7 +16,7 @@
 ### 1.2 Logo & Brand
 - [x] **Symphonia logo** — tuning fork Concept D (orchestral metaphor, best favicon viability)
 - [x] Favicon (multi-size .ico + apple-touch-icon.png)
-- [ ] Loading animation
+- [x] Loading animation (branded CSS bars + logo in index.html, auto-replaced on React mount)
 - [ ] Email templates styling
 
 ### 1.3 Visual Consistency
@@ -53,11 +53,10 @@
 ## Phase 3: New Features — AI Enhancement (Next 2 Weeks)
 *Goal: Differentiate from "Google Forms + ChatGPT"*
 
-### 3.1 AI Devil's Advocate Section
-**What:** AI-generated counterarguments, clearly separated from expert views
-**UI:** New card type "🤖 AI-Generated Counterpoints"
-**Backend:** Add `ai_counterarguments` field to SynthesisResult
-**Prompt:** "What perspectives did experts NOT consider?"
+### 3.1 AI Devil's Advocate Section ✅ DONE
+- [x] Backend: `/forms/{id}/rounds/{round_id}/devil_advocate` endpoint
+- [x] Frontend: `DevilsAdvocate` component with Generate/Regenerate, strength badges
+- [x] AI disclaimer banner, collapsible card, error handling
 
 ### 3.2 Expert Voice Mirroring
 **What:** Clarify expert statements without changing meaning
@@ -65,18 +64,10 @@
 **Backend:** Add `clarified_text` field to evidence excerpts
 **Prompt:** "Rephrase this for accessibility while preserving nuance"
 
-### 3.3 Audience Translation Toggle
-**What:** Re-render synthesis for different reader profiles
-**UI:** Dropdown in synthesis header: "Translate for: [Policy Maker ▾]"
-**Profiles:**
-- Policy Maker (actionable, regulatory framing)
-- Technical Expert (precise, caveats preserved)
-- General Public (plain language, analogies)
-- Executive (bottom-line, risk/opportunity)
-- Academic (citations, methodology)
-
-**Backend:** New endpoint `/forms/{id}/rounds/{round_id}/translate`
-**Prompt:** Audience-specific system prompts
+### 3.3 Audience Translation Toggle ✅ DONE
+- [x] Backend: `/forms/{id}/rounds/{round_id}/translate` endpoint with 5 audience profiles
+- [x] Frontend: `AudienceTranslation` dropdown component with live translation
+- [x] Profiles: Policy Maker, Technical, General Public, Executive, Academic
 
 ---
 
@@ -101,12 +92,12 @@
 ## Phase 5: Synthesis Versioning (Next 2 Weeks)
 *Goal: Iterate without losing work*
 
-### 5.1 Version Management ✅ PARTIALLY DONE
+### 5.1 Version Management ✅ MOSTLY DONE
 - [x] Backend: SynthesisVersion model
 - [x] Backend: Generate for any round
-- [ ] UI: Version selector dropdown
+- [x] UI: Version selector (pill buttons with active indicators)
 - [ ] UI: Compare versions side-by-side
-- [ ] UI: "Publish" vs "Draft" states
+- [x] UI: "Publish" vs "Draft" states (badges + Publish button)
 - [ ] UI: Version history timeline
 
 ### 5.2 View/Edit Mode ✅ DONE
@@ -152,7 +143,7 @@
 | Milestone | Target | Status |
 |-----------|--------|--------|
 | Design polish complete | Feb 24 | 🔄 In Progress |
-| AI features MVP | Feb 28 | ⏳ Planned |
+| AI features MVP | Feb 28 | 🔄 In Progress (Devil's Advocate + Audience Translation done, Voice Mirroring pending) |
 | Structured input complete | Mar 3 | ⏳ Planned |
 | SPRIND demo ready | Mar 4 | ⏳ Planned |
 | Government pilot ready | Mar 15 | ⏳ Planned |

@@ -1,5 +1,5 @@
 import { LoadingButton, MarkdownRenderer, StructuredSynthesis } from '../index';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, GitCompareArrows } from 'lucide-react';
 import type { Round, SynthesisVersion } from '../../types/summary';
 
 type Props = {
@@ -13,6 +13,8 @@ type Props = {
   formId: number;
   token: string;
   currentUserEmail: string;
+  showCompare?: boolean;
+  onToggleCompare?: () => void;
 };
 
 function formatTimestamp(iso: string | null): string {
@@ -32,6 +34,8 @@ export default function SynthesisVersionPanel({
   onSelectVersion,
   selectedVersion,
   onActivateVersion,
+  showCompare,
+  onToggleCompare,
 }: Props) {
   if (!displayRound) return null;
 
@@ -138,6 +142,27 @@ export default function SynthesisVersionPanel({
             >
               Publish v{selectedVersion.version}
             </LoadingButton>
+          )}
+
+          {/* Compare button — only when 2+ versions exist */}
+          {synthesisVersions.length >= 2 && onToggleCompare && (
+            <button
+              onClick={onToggleCompare}
+              className="w-full flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+              style={{
+                backgroundColor: showCompare
+                  ? 'color-mix(in srgb, var(--accent) 15%, var(--card))'
+                  : 'var(--card)',
+                color: showCompare ? 'var(--accent)' : 'var(--muted-foreground)',
+                border: showCompare
+                  ? '1.5px solid var(--accent)'
+                  : '1.5px solid var(--border)',
+                cursor: 'pointer',
+              }}
+            >
+              <GitCompareArrows size={14} />
+              {showCompare ? 'Hide Comparison' : 'Compare Versions'}
+            </button>
           )}
         </div>
       )}

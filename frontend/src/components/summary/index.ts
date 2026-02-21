@@ -9,3 +9,4 @@ export { default as ResponsesModal } from './ResponsesModal';
 export { default as ResponsesAccordion } from './ResponsesAccordion';
 export { default as RoundHistoryCard } from './RoundHistoryCard';
 export { default as SummaryLoadingSkeleton } from './SummaryLoadingSkeleton';
+export { default as VersionCompare } from './VersionCompare';

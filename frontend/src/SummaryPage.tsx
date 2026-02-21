@@ -48,6 +48,7 @@ import {
 	ResponsesAccordion,
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
+	VersionCompare,
 } from './components/summary';
 
 import { usePresence } from './hooks/usePresence';
@@ -118,6 +119,7 @@ export default function SummaryPage() {
 	// ── Synthesis versioning ──
 	const [synthesisVersions, setSynthesisVersions] = useState<SynthesisVersion[]>([]);
 	const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
+	const [showVersionCompare, setShowVersionCompare] = useState(false);
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
@@ -628,6 +630,15 @@ export default function SummaryPage() {
 							currentUserEmail={email}
 						/>
 
+						{/* Version comparison (side-by-side) */}
+						{showVersionCompare && synthesisVersions.length >= 2 && (
+							<VersionCompare
+								versions={synthesisVersions}
+								currentVersionId={selectedVersionId}
+								onClose={() => setShowVersionCompare(false)}
+							/>
+						)}
+
 						{/* Emergence highlights */}
 						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
 							<div className="card p-4 sm:p-6">
@@ -694,6 +705,8 @@ export default function SummaryPage() {
 							formId={formId}
 							token={token}
 							currentUserEmail={email}
+							showCompare={showVersionCompare}
+							onToggleCompare={() => setShowVersionCompare(v => !v)}
 						/>
 
 						<RoundHistoryCard
