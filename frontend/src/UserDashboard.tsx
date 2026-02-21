@@ -171,7 +171,7 @@ export default function UserDashboard() {
               </div>
             </div>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-3 stagger-enter">
               {myForms.length === 0 && (
                 <p style={{ color: 'var(--muted-foreground)' }}>
                   No forms joined yet.

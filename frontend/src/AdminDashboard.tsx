@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { getForms, createForm as apiCreateForm, FormListItem } from './api/forms';
@@ -7,7 +7,8 @@ import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
-import { Plus } from 'lucide-react';
+import { useCopyToClipboard } from './hooks/useCopyToClipboard';
+import { Plus, Search, Copy, Check, X } from 'lucide-react';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -25,6 +26,19 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [newFormTitle, setNewFormTitle] = useState('');
   const [newQuestions, setNewQuestions] = useState(['']);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [codeCopied, copyCode] = useCopyToClipboard();
+
+  // Filter forms by search query
+  const filteredForms = useMemo(() => {
+    if (!searchQuery.trim()) return forms;
+    const q = searchQuery.toLowerCase().trim();
+    return forms.filter(
+      f =>
+        f.title.toLowerCase().includes(q) ||
+        f.join_code?.toLowerCase().includes(q)
+    );
+  }, [forms, searchQuery]);
 
   const fetchForms = useCallback(async () => {
     if (!token) {
@@ -220,22 +234,67 @@ export default function AdminDashboard() {
               boxShadow: 'var(--card-shadow, none)',
             }}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2
-                className="text-lg font-semibold"
-                style={{ color: 'var(--foreground)' }}
-              >
-                Existing Forms
-              </h2>
-              <span
-                className="text-xs font-medium px-2 py-1 rounded-full"
-                style={{
-                  backgroundColor: 'var(--muted)',
-                  color: 'var(--muted-foreground)',
-                }}
-              >
-                {forms.length} form{forms.length !== 1 ? 's' : ''}
-              </span>
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex items-center justify-between">
+                <h2
+                  className="text-lg font-semibold"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  Existing Forms
+                </h2>
+                <span
+                  className="text-xs font-medium px-2 py-1 rounded-full"
+                  style={{
+                    backgroundColor: 'var(--muted)',
+                    color: 'var(--muted-foreground)',
+                  }}
+                >
+                  {filteredForms.length === forms.length
+                    ? `${forms.length} form${forms.length !== 1 ? 's' : ''}`
+                    : `${filteredForms.length} of ${forms.length}`}
+                </span>
+              </div>
+
+              {/* Search bar */}
+              {forms.length > 3 && (
+                <div className="relative">
+                  <Search
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  />
+                  <input
+                    type="search"
+                    placeholder="Search forms by title or code…"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-9 py-2 rounded-lg text-sm"
+                    style={{
+                      border: '1px solid var(--input)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                    }}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                      style={{
+                        color: 'var(--muted-foreground)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        display: 'flex',
+                      }}
+                      aria-label="Clear search"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Desktop table */}
@@ -257,7 +316,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {forms.map((f) => (
+                  {filteredForms.map((f) => (
                     <tr
                       key={f.id}
                       className="transition-colors"
@@ -272,15 +331,37 @@ export default function AdminDashboard() {
                         {f.title}
                       </td>
                       <td className="p-3">
-                        <code
-                          className="px-2 py-1 rounded text-xs"
+                        <button
+                          type="button"
+                          onClick={() => {
+                            copyCode(f.join_code);
+                            toastSuccess(`Copied code: ${f.join_code}`);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-all group"
                           style={{
                             backgroundColor: 'var(--muted)',
                             color: 'var(--foreground)',
+                            border: '1px solid transparent',
+                            cursor: 'pointer',
+                            fontFamily: 'monospace',
                           }}
+                          onMouseEnter={e => {
+                            e.currentTarget.style.borderColor = 'var(--accent)';
+                            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 8%, var(--muted))';
+                          }}
+                          onMouseLeave={e => {
+                            e.currentTarget.style.borderColor = 'transparent';
+                            e.currentTarget.style.backgroundColor = 'var(--muted)';
+                          }}
+                          title="Click to copy"
                         >
                           {f.join_code}
-                        </code>
+                          {codeCopied ? (
+                            <Check size={12} style={{ color: 'var(--success)' }} />
+                          ) : (
+                            <Copy size={12} style={{ color: 'var(--muted-foreground)', opacity: 0.6 }} />
+                          )}
+                        </button>
                       </td>
                       <td className="p-3">
                         <span
@@ -332,9 +413,26 @@ export default function AdminDashboard() {
               </table>
             </div>
 
+            {/* Empty search state */}
+            {filteredForms.length === 0 && searchQuery && (
+              <div className="text-center py-8">
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                  No forms match "<strong style={{ color: 'var(--foreground)' }}>{searchQuery}</strong>"
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="mt-2 text-sm font-medium"
+                  style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+
             {/* Mobile card list */}
             <div className="sm:hidden space-y-3">
-              {forms.map((f) => (
+              {filteredForms.map((f) => (
                 <div
                   key={f.id}
                   className="rounded-lg p-4"
@@ -352,7 +450,23 @@ export default function AdminDashboard() {
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-3"
                     style={{ color: 'var(--muted-foreground)' }}
                   >
-                    <span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        copyCode(f.join_code);
+                        toastSuccess(`Copied: ${f.join_code}`);
+                      }}
+                      className="inline-flex items-center gap-1"
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--muted-foreground)',
+                        fontSize: 'inherit',
+                        fontFamily: 'inherit',
+                        padding: 0,
+                      }}
+                    >
                       Code:{' '}
                       <code
                         className="px-1.5 py-0.5 rounded text-xs"
@@ -363,7 +477,8 @@ export default function AdminDashboard() {
                       >
                         {f.join_code}
                       </code>
-                    </span>
+                      <Copy size={11} style={{ opacity: 0.5, marginLeft: 2 }} />
+                    </button>
                     <span>Participants: {f.participant_count}</span>
                     <span>Round: {f.current_round}</span>
                   </div>

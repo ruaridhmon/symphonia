@@ -1,10 +1,11 @@
 import { Outlet } from 'react-router-dom';
 import Header from '../Header';
+import CommandPalette from '../components/CommandPalette';
 
 /**
  * Shared layout shell for all authenticated pages.
  *
- * Provides:  Skip link  →  Header  →  scrollable <main>  →  Footer
+ * Provides:  Skip link  →  Header  →  scrollable <main>  →  Footer  →  CommandPalette (⌘K)
  * Child routes render via <Outlet />.
  */
 export default function PageLayout() {
@@ -38,6 +39,8 @@ export default function PageLayout() {
       >
         © {new Date().getFullYear()} Symphonia · Collaborative Consensus Platform
       </footer>
+
+      <CommandPalette />
     </div>
   );
 }

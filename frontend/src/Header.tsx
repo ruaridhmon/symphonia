@@ -84,6 +84,33 @@ export default function Header() {
 
         {/* Right: desktop layout */}
         <div className="hidden sm:flex items-center gap-2">
+          {/* Cmd+K shortcut hint */}
+          <button
+            type="button"
+            onClick={() => {
+              // Trigger Cmd+K
+              document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors"
+            style={{
+              backgroundColor: 'var(--muted)',
+              color: 'var(--muted-foreground)',
+              border: '1px solid var(--border)',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-family)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--foreground)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.color = 'var(--muted-foreground)';
+            }}
+            aria-label="Open command palette"
+          >
+            <span style={{ opacity: 0.7 }}>⌘K</span>
+          </button>
           <ThemeToggle />
           {user && (
             <button
