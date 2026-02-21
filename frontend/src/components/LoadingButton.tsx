@@ -13,8 +13,8 @@ const variantStyles: Record<string, React.CSSProperties> = {
   accent: { backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' },
   secondary: { backgroundColor: 'var(--secondary)', color: 'var(--secondary-foreground)', border: '1px solid var(--border)' },
   destructive: { backgroundColor: 'var(--destructive)', color: 'var(--destructive-foreground)' },
-  success: { backgroundColor: 'var(--success)', color: '#ffffff' },
-  purple: { backgroundColor: '#7c3aed', color: '#ffffff' },
+  success: { backgroundColor: 'var(--success)', color: 'var(--accent-foreground)' },
+  purple: { backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' },
   ghost: { backgroundColor: 'transparent', color: 'var(--foreground)', border: '1px solid var(--border)' },
 };
 

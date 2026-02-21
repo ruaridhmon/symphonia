@@ -52,9 +52,9 @@ export default function Header() {
         backdropFilter: 'blur(8px)',
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex justify-between items-center">
         {/* Left: branding */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div
             className="flex items-center justify-center w-8 h-8 rounded-lg"
             style={{

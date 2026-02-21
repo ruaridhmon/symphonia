@@ -50,8 +50,8 @@ export default function Register() {
       onSubmit={handleRegister}
       className="card-lg p-8 sm:p-10 w-full space-y-5"
     >
-      <h2 className="text-lg font-semibold text-center" style={{ color: 'var(--foreground)' }}>
-        Create your account
+      <h2 className="text-base font-medium text-center" style={{ color: 'var(--muted-foreground)' }}>
+        Create Account
       </h2>
       <div aria-live="polite" aria-atomic="true">
         {error && (

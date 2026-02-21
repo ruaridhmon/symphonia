@@ -21,3 +21,5 @@ export type { Round } from './RoundTimeline';
 export { ToastProvider, useToast } from './Toast';
 export { default as PasswordInput } from './PasswordInput';
 export { default as OfflineBanner } from './OfflineBanner';
+export { default as DevilsAdvocate } from './DevilsAdvocate';
+export { default as AudienceTranslation } from './AudienceTranslation';

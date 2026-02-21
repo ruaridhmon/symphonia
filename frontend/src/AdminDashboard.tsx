@@ -84,10 +84,10 @@ export default function AdminDashboard() {
         {/* ── Page heading ── */}
         <div className="mb-6 sm:mb-8">
           <h1
-            className="text-2xl font-bold tracking-tight"
+            className="text-2xl font-semibold tracking-tight"
             style={{ color: 'var(--foreground)' }}
           >
-            Admin Dashboard
+            Dashboard
           </h1>
           <p
             className="text-sm mt-1"

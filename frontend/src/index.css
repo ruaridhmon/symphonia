@@ -88,7 +88,7 @@
     color: var(--foreground);
     font-family: var(--font-family);
     font-size: 1rem;
-    line-height: 1.6;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -108,7 +108,7 @@
 
   p {
     color: var(--foreground);
-    line-height: 1.6;
+    line-height: 1.5;
   }
 
   a {
@@ -168,7 +168,7 @@
   input::placeholder,
   textarea::placeholder {
     color: var(--muted-foreground);
-    opacity: 0.7;
+    opacity: 0.85;
   }
 
   input:focus,
@@ -176,7 +176,7 @@
   select:focus {
     outline: none;
     border-color: var(--ring);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
@@ -186,12 +186,7 @@
     border-color: color-mix(in srgb, var(--input) 100%, var(--foreground) 15%);
   }
 
-  /* Dark mode focus ring adjustment */
-  html[data-theme="axiotic-dark"] input:focus,
-  html[data-theme="axiotic-dark"] textarea:focus,
-  html[data-theme="axiotic-dark"] select:focus {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-  }
+  /* Dark mode focus ring — inherits from base rule via color-mix on --ring */
 
   /* --- Mobile typography adjustments --- */
   @media (max-width: 640px) {
@@ -246,7 +241,7 @@
     background-color: var(--card);
     color: var(--card-foreground);
     border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-    border-radius: calc(var(--radius) + 4px);
+    border-radius: calc(var(--radius) * 2);
     box-shadow: 0 8px 30px -6px rgba(0,0,0,0.12), 0 2px 8px -2px rgba(0,0,0,0.06);
   }
 
@@ -289,7 +284,7 @@
 
   .btn-success {
     background-color: var(--success);
-    color: #ffffff;
+    color: var(--accent-foreground);
   }
 
   .btn-secondary {
@@ -434,8 +429,8 @@ main,
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-  50% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 15%, transparent); }
 }
 
 @keyframes progress-shimmer {
@@ -553,15 +548,12 @@ main,
   }
 
   .btn-interactive:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    filter: brightness(1.08);
+    filter: brightness(0.92);
   }
 
   .btn-interactive:active:not(:disabled) {
-    transform: translateY(0) scale(0.97);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    filter: brightness(0.95);
+    filter: brightness(0.85);
+    transform: scale(0.98);
     transition-duration: 0.06s;
   }
 
@@ -604,15 +596,12 @@ main,
   }
 
   .btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    filter: brightness(1.08);
+    filter: brightness(0.92);
   }
 
   .btn:active:not(:disabled) {
-    transform: translateY(0) scale(0.97);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    filter: brightness(0.95);
+    filter: brightness(0.85);
+    transform: scale(0.98);
     transition-duration: 0.06s;
   }
 }
@@ -624,18 +613,13 @@ main,
 .card,
 .card-lg {
   transition:
-    transform 0.2s ease,
     box-shadow 0.2s ease,
     border-color 0.2s ease;
 }
 
-.card:hover,
-.card-lg:hover {
-  box-shadow: var(--card-shadow-lg);
-}
-
+/* Only interactive cards get hover effects */
 .card-interactive:hover {
-  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-lg);
   border-color: var(--accent);
 }
 
@@ -779,14 +763,14 @@ main,
   transform: scale(1.15);
   border-color: var(--accent);
   color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .round-timeline-node.selected {
   border-color: var(--accent);
   background-color: var(--accent);
   color: var(--accent-foreground);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 .round-timeline-node.active {
@@ -846,7 +830,7 @@ main,
 }
 
 .badge-active {
-  background-color: rgba(59, 130, 246, 0.15);
+  background-color: color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--accent);
 }
 
@@ -911,7 +895,7 @@ main,
 
 .synthesis-mode-option.selected {
   border-color: var(--accent);
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: color-mix(in srgb, var(--accent) 8%, transparent);
   box-shadow: 0 0 0 1px var(--accent);
 }
 
@@ -1222,7 +1206,7 @@ main,
   font-size: 0.625rem;
   font-weight: 600;
   border-radius: 9999px;
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--accent);
 }
 
@@ -1232,7 +1216,7 @@ main,
   color: #a855f7;
 }
 .expert-chip.dimension-present {
-  background-color: rgba(59, 130, 246, 0.12);
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
 }
 .expert-chip.dimension-future {
@@ -2013,7 +1997,7 @@ main,
   transform: scale(1.2);
   border-color: var(--accent);
   color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .round-timeline-v2-node.has-synthesis {
@@ -2031,7 +2015,7 @@ main,
 
 .round-timeline-v2-node.selected {
   transform: scale(1.2);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
   border-color: var(--accent);
 }
 
@@ -2104,8 +2088,8 @@ main,
 
 .round-card-v2.selected {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15), var(--card-shadow-lg);
-  background-color: rgba(59, 130, 246, 0.03);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 15%, transparent), var(--card-shadow-lg);
+  background-color: color-mix(in srgb, var(--accent) 3%, transparent);
 }
 
 .round-card-v2.current {
@@ -2152,7 +2136,7 @@ main,
 }
 
 .round-card-v2-badge-active {
-  background-color: rgba(59, 130, 246, 0.12);
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
 }
 
@@ -2305,7 +2289,7 @@ main,
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-radius: 9999px;
-  background-color: rgba(59, 130, 246, 0.12);
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
   color: var(--accent);
 }
 

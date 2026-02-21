@@ -25,6 +25,8 @@ export interface ThemeColors {
   destructive: string;
   'destructive-foreground': string;
   success: string;
+  warning: string;
+  'warning-foreground': string;
   highlight: string;
   'highlight-foreground': string;
   'highlight-border': string;
@@ -70,6 +72,8 @@ export const themes: Record<ThemeId, Theme> = {
       destructive: '#dc2626',
       'destructive-foreground': '#ffffff',
       success: '#16a34a',
+      warning: '#eab308',
+      'warning-foreground': '#854d0e',
       highlight: '#eff6ff',
       'highlight-foreground': '#1e40af',
       'highlight-border': '#bfdbfe',
@@ -77,7 +81,7 @@ export const themes: Record<ThemeId, Theme> = {
       input: '#e2e8f0',
       ring: '#2563eb',
       radius: '0.5rem',
-      'font-family': "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      'font-family': "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', sans-serif",
     },
   },
   'axiotic-dark': {
@@ -102,6 +106,8 @@ export const themes: Record<ThemeId, Theme> = {
       destructive: '#ef4444',
       'destructive-foreground': '#ffffff',
       success: '#22c55e',
+      warning: '#facc15',
+      'warning-foreground': '#422006',
       highlight: '#172554',
       'highlight-foreground': '#93c5fd',
       'highlight-border': '#1e3a5f',
@@ -109,7 +115,7 @@ export const themes: Record<ThemeId, Theme> = {
       input: '#1c2b44',
       ring: '#3b82f6',
       radius: '0.5rem',
-      'font-family': "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      'font-family': "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', sans-serif",
     },
   },
   apple: {
@@ -134,6 +140,8 @@ export const themes: Record<ThemeId, Theme> = {
       destructive: '#ff3b30',
       'destructive-foreground': '#ffffff',
       success: '#34c759',
+      warning: '#ff9500',
+      'warning-foreground': '#663c00',
       highlight: '#e8f0fe',
       'highlight-foreground': '#0055d4',
       'highlight-border': '#a8c8f0',

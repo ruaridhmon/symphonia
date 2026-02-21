@@ -29,6 +29,8 @@ import {
 	ConsensusHeatmap,
 	EmergenceHighlights,
 	MarkdownRenderer,
+	DevilsAdvocate,
+	AudienceTranslation,
 	useToast,
 } from './components';
 
@@ -514,9 +516,37 @@ export default function SummaryPage() {
 						{/* Structured synthesis data */}
 						{structuredSynthesisData && (
 							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<BarChart3 size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
-								</h2>
+								<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
+									<h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+										<BarChart3 size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
+									</h2>
+								</div>
+								{/* Audience Translation toggle */}
+								{displayRound && (
+									<div className="mb-4">
+										<AudienceTranslation
+											formId={formId}
+											roundId={displayRound.id}
+											synthesisText={(() => {
+												const parts: string[] = [];
+												if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
+												for (const a of structuredSynthesisData.agreements || []) {
+													parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
+												}
+												for (const d of structuredSynthesisData.disagreements || []) {
+													parts.push(`Disagreement: ${d.topic}`);
+													for (const p of d.positions || []) {
+														parts.push(`  - ${p.position}: ${p.evidence}`);
+													}
+												}
+												for (const n of structuredSynthesisData.nuances || []) {
+													parts.push(`Nuance: ${n.claim} — ${n.context}`);
+												}
+												return parts.join('\n');
+											})()}
+										/>
+									</div>
+								)}
 								<StructuredSynthesis
 									data={structuredSynthesisData}
 									convergenceScore={displayRound?.convergence_score ?? undefined}
@@ -527,6 +557,11 @@ export default function SummaryPage() {
 									currentUserEmail={email}
 								/>
 							</div>
+						)}
+
+						{/* AI Devil's Advocate — after structured analysis */}
+						{displayRound && structuredSynthesisData && (
+							<DevilsAdvocate formId={formId} roundId={displayRound.id} />
 						)}
 
 						{/* Cross-matrix */}
