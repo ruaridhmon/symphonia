@@ -26,7 +26,7 @@
 **Goal:** Implement DSM/Hecate patterns in the UI
 
 - [x] 3.1 Dimensional expert labels (Past/Present/Future or custom) — Expert Labels sidebar panel with presets (temporal/methodological/stakeholder/custom), dimension-coded chips, backend persistence
-- [ ] 3.2 Cross-matrix visualization (which dimensions agree/conflict)
+- [x] 3.2 Cross-matrix visualization (which dimensions agree/conflict) — CrossMatrix component with NxN heatmap, pairwise agreement/disagreement scoring, hover tooltips, dimension-colored headers
 - [ ] 3.3 Emergence highlighting (insights not in any single response)
 - [ ] 3.4 Minority report display (what was lost in synthesis)
 
@@ -63,12 +63,12 @@
 ```json
 {
   "current_phase": 3,
-  "current_task": "3.2",
-  "last_run": "2026-02-21T01:19:00Z",
+  "current_task": "3.3",
+  "last_run": "2026-02-21T01:23:00Z",
   "tasks_completed": [
     "1.1", "1.2", "1.3", "1.4", "1.5",
     "2.1", "2.2", "2.3", "2.4", "2.5", "2.6",
-    "3.1"
+    "3.1", "3.2"
   ],
   "blockers": []
 }
