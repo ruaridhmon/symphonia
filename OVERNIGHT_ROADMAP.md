@@ -90,6 +90,11 @@
 - **Typed AuthContext** — `user: any` → `user: User | null` with proper `User` interface. One fewer `any` in the codebase. (Pulse 3:46pm)
 - **Selective logout** — `localStorage.clear()` → targeted removal of auth keys only. Theme preference, auto-saved drafts, and other localStorage data survive logout. (Pulse 3:46pm)
 - **Specific auth error messages** — Login: differentiates wrong credentials (401/403), server error (5xx), network failure. Register: differentiates duplicate account (409), validation error (422), server error, network failure. (Pulse 3:46pm)
+- **FormPage API client migration** — Migrated from raw `fetch`/`API_BASE_URL` to centralized API client (`getForm`, `getActiveRound`, `submitResponse`, `hasSubmitted`, `getMyResponse`). Added `api.postForm()` for URL-encoded endpoints. Cleaned `submitResponse` in api/responses.ts. (Pulse 4:51pm)
+- **Shared synthesis types** — Created `types/synthesis.ts` as single source of truth. `SynthesisData`, `EmergentInsight`, `Agreement`, `Disagreement`, `Nuance`, `Probe`, `EvidenceExcerpt` — used by StructuredSynthesis, ExportPanel, ConsensusHeatmap, CrossMatrix, EmergenceHighlights, RoundTimeline, summary.ts. Eliminated ~200 lines of duplicate type definitions. (Pulse 4:51pm)
+- **Type cleanup** — MarkdownRenderer `any` → proper `MdProps`/`MdCodeProps`/`MdLinkProps`. ResponseEditor `catch(e: any)` → `catch(e: unknown)`. RoundTimeline imports `Round` from shared types. `synthesis_json: any` → `SynthesisData | null` across summary.ts and RoundTimeline. (Pulse 4:51pm)
+- **⌘+Enter keyboard shortcut** — Form submission via Ctrl+Enter or ⌘+Enter. Keyboard hint displayed below submit button with styled `<kbd>` elements. (Pulse 4:51pm)
+- **Last emoji replaced** — 📋 → Lucide `ClipboardList` icon in FormPage's previous synthesis toggle. Zero emoji in production code. (Pulse 4:51pm)
 
 ## Build Command
 ```bash
@@ -124,6 +129,19 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 - [x] Selective logout (only clears auth keys, preserves theme/drafts/localStorage) — DONE (Pulse 3:46pm)
 - [x] Specific login/register error messages per HTTP status code — DONE (Pulse 3:46pm)
 
+### P10 — Type Safety & Architecture
+- [x] FormPage → centralized API client migration (last major page using raw fetch) — DONE (Pulse 4:51pm)
+- [x] api.postForm() for URL-encoded form endpoints — DONE (Pulse 4:51pm)
+- [x] submitResponse in api/responses.ts → centralized client — DONE (Pulse 4:51pm)
+- [x] Shared types/synthesis.ts — single source of truth for SynthesisData, EmergentInsight, Agreement, etc. — DONE (Pulse 4:51pm)
+- [x] Eliminated ~200 lines of duplicate type definitions across 6 components — DONE (Pulse 4:51pm)
+- [x] MarkdownRenderer type cleanup (any → MdProps/MdCodeProps/MdLinkProps) — DONE (Pulse 4:51pm)
+- [x] ResponseEditor catch(any) → catch(unknown) — DONE (Pulse 4:51pm)
+- [x] RoundTimeline imports Round from shared types — DONE (Pulse 4:51pm)
+- [x] ⌘+Enter / Ctrl+Enter keyboard shortcut for form submission — DONE (Pulse 4:51pm)
+- [x] Replaced 📋 emoji with Lucide ClipboardList icon in FormPage — DONE (Pulse 4:51pm)
+- [x] Keyboard shortcut hint below submit button — DONE (Pulse 4:51pm)
+
 ### P7 — Accessibility & Expert UX
 - [x] `prefers-reduced-motion` support (WCAG 2.1) — respects OS motion preferences, disables all animations — DONE (Pulse 1:36pm)
 - [x] Enhanced SynthesisModeSelector — expandable tooltips with detailed descriptions and "Best for" guidance for each mode — DONE (Pulse 1:36pm)
@@ -143,11 +161,11 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 ## Pulse State
 ```json
 {
-  "last_run": "2026-02-21T14:41:00Z",
-  "current_task": "P9 security & quality hardening. Security headers, typed auth, selective logout, better errors.",
+  "last_run": "2026-02-21T16:51:00Z",
+  "current_task": "P10 type safety & architecture. FormPage API migration, shared synthesis types, type cleanup.",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 25,
-  "status": "ALL PHASES COMPLETE + P9 SECURITY & QUALITY HARDENING"
+  "pulse_direct_changes": 26,
+  "status": "ALL PHASES COMPLETE + P10 TYPE SAFETY & ARCHITECTURE"
 }
 ```
