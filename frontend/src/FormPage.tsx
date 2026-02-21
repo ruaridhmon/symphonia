@@ -235,7 +235,7 @@ export default function FormPage() {
             !
           </div>
           <h2 className="text-xl font-semibold text-foreground">Unable to load form</h2>
-          <p className="text-sm text-muted-foreground">{loadError}</p>
+          <p className="text-sm text-muted-foreground" role="alert" aria-live="polite">{loadError}</p>
           <div className="flex gap-3 justify-center">
             <LoadingButton variant="accent" size="md" onClick={loadForm}>
               Try Again
@@ -425,18 +425,21 @@ export default function FormPage() {
 
             </LoadingButton>
 
-            {submitError && (
-              <div
-                className="rounded-lg p-3 text-sm text-center"
-                style={{
-                  backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
-                  border: '1px solid var(--destructive)',
-                  color: 'var(--destructive)',
-                }}
-              >
-                {submitError}
-              </div>
-            )}
+            <div aria-live="polite" aria-atomic="true">
+              {submitError && (
+                <div
+                  className="rounded-lg p-3 text-sm text-center"
+                  role="alert"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+                    border: '1px solid var(--destructive)',
+                    color: 'var(--destructive)',
+                  }}
+                >
+                  {submitError}
+                </div>
+              )}
+            </div>
 
           </>
 

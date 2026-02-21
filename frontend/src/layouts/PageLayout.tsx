@@ -4,7 +4,7 @@ import Header from '../Header';
 /**
  * Shared layout shell for all authenticated pages.
  *
- * Provides:  Header  →  scrollable <main>  →  Footer
+ * Provides:  Skip link  →  Header  →  scrollable <main>  →  Footer
  * Child routes render via <Outlet />.
  */
 export default function PageLayout() {
@@ -17,9 +17,13 @@ export default function PageLayout() {
         fontFamily: 'var(--font-family)',
       }}
     >
+      <a href="#main-content" className="skip-to-main">
+        Skip to main content
+      </a>
+
       <Header />
 
-      <main className="flex-1 flex flex-col">
+      <main id="main-content" className="flex-1 flex flex-col" tabIndex={-1}>
         <Outlet />
       </main>
 

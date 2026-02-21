@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { ThemeToggle } from './theme';
@@ -6,6 +6,41 @@ import { ThemeToggle } from './theme';
 export default function Header() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Close mobile menu on Escape, manage focus
+  const handleMenuKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (!menuOpen) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    },
+    [menuOpen],
+  );
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.addEventListener('keydown', handleMenuKeyDown);
+      // Focus first focusable item in menu
+      const timer = setTimeout(() => {
+        const focusable = menuRef.current?.querySelector<HTMLElement>(
+          'button, a, [tabindex]:not([tabindex="-1"])',
+        );
+        focusable?.focus();
+      }, 50);
+      return () => {
+        clearTimeout(timer);
+        document.removeEventListener('keydown', handleMenuKeyDown);
+      };
+    }
+    return () => {
+      document.removeEventListener('keydown', handleMenuKeyDown);
+    };
+  }, [menuOpen, handleMenuKeyDown]);
 
   return (
     <header
@@ -76,6 +111,7 @@ export default function Header() {
 
         {/* Right: mobile hamburger button */}
         <button
+          ref={menuButtonRef}
           className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
           style={{
             color: 'var(--foreground)',
@@ -85,6 +121,8 @@ export default function Header() {
           }}
           onClick={() => setMenuOpen(prev => !prev)}
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-nav-menu"
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -92,7 +130,11 @@ export default function Header() {
 
       {/* Mobile dropdown menu */}
       <div
+        ref={menuRef}
+        id="mobile-nav-menu"
         className="sm:hidden overflow-hidden transition-all duration-200 ease-in-out"
+        role="menu"
+        aria-label="Mobile navigation"
         style={{
           maxHeight: menuOpen ? '200px' : '0',
           opacity: menuOpen ? 1 : 0,

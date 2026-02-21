@@ -2841,6 +2841,61 @@ main,
 }
 
 /* ------------------------------------------------------------------ */
+/* Skip-to-main-content link                                          */
+/* ------------------------------------------------------------------ */
+
+.skip-to-main {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: top 0.15s ease;
+}
+
+.skip-to-main:focus {
+  top: 1rem;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Global focus-visible rings for all interactive elements             */
+/* ------------------------------------------------------------------ */
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[tabindex]:focus-visible:not([tabindex="-1"]) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Dark mode focus ring adjustment */
+html[data-theme="axiotic-dark"] button:focus-visible,
+html[data-theme="axiotic-dark"] a:focus-visible,
+html[data-theme="axiotic-dark"] [role="button"]:focus-visible,
+html[data-theme="axiotic-dark"] [role="tab"]:focus-visible,
+html[data-theme="axiotic-dark"] [tabindex]:focus-visible:not([tabindex="-1"]) {
+  outline-color: #60a5fa;
+}
+
+/* Card interactive focus */
+.card-interactive:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ */
 /* Mobile-first responsive adjustments                                */
 /* ------------------------------------------------------------------ */
 

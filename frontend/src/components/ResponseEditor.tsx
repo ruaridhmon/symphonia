@@ -130,6 +130,19 @@ export default function ResponseEditor({
 
   const forceSave = useCallback(() => saveEdits(true), [saveEdits]);
 
+  // Close conflict modal on Escape
+  useEffect(() => {
+    if (!conflict) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setConflict(null);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [conflict]);
+
   // Auto-resize textareas
   const autoResize = useCallback((el: HTMLTextAreaElement | null) => {
     if (el) {

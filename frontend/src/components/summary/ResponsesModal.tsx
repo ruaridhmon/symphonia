@@ -1,7 +1,11 @@
 import { createPortal } from 'react-dom';
+import { useEffect, useRef, useCallback } from 'react';
 import { LoadingButton, ResponseEditor } from '../index';
 import type { Round, RoundWithResponses, StructuredResponse } from '../../types/summary';
 import { extractQuestionText } from '../../utils/questions';
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 type Props = {
   open: boolean;
@@ -22,6 +26,63 @@ export default function ResponsesModal({
   token,
   onResponseUpdated,
 }: Props) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // Focus trap: keep focus within the modal
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab') {
+        const modal = modalRef.current;
+        if (!modal) return;
+        const focusable = Array.from(
+          modal.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    },
+    [onClose],
+  );
+
+  // On open: save previous focus, focus first element, add keydown listener
+  useEffect(() => {
+    if (!open) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    const timer = setTimeout(() => {
+      const modal = modalRef.current;
+      if (modal) {
+        const first = modal.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+        first?.focus();
+      }
+    }, 50);
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('keydown', handleKeyDown);
+      // Restore focus on close
+      previousFocusRef.current?.focus();
+    };
+  }, [open, handleKeyDown]);
+
   if (!open) return null;
 
   return createPortal(
@@ -31,8 +92,12 @@ export default function ResponsesModal({
       onClick={e => {
         if (e.target === e.currentTarget) onClose();
       }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="All Responses"
     >
       <div
+        ref={modalRef}
         className="card max-w-full sm:max-w-3xl w-full max-h-screen sm:max-h-[90vh] rounded-none sm:rounded-lg overflow-y-auto p-4 sm:p-6 text-left"
         style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
       >

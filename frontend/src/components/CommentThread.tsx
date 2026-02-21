@@ -195,6 +195,19 @@ export default function CommentThread({
     setCommentCount(count);
   }, [sectionComments]);
 
+  // Close on Escape
+  useEffect(() => {
+    if (!expanded) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setExpanded(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [expanded]);
+
   const fetchComments = useCallback(async () => {
     setLoading(true);
     try {

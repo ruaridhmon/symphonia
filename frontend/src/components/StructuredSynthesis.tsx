@@ -68,6 +68,8 @@ function SectionHeader({
   color,
   expanded,
   onToggle,
+  sectionId,
+  headerId,
 }: {
   title: string;
   count: number;
@@ -75,17 +77,25 @@ function SectionHeader({
   color: string;
   expanded: boolean;
   onToggle: () => void;
+  sectionId: string;
+  headerId: string;
 }) {
   return (
-    <button className="structured-section-header" onClick={onToggle}>
+    <button
+      className="structured-section-header"
+      onClick={onToggle}
+      id={headerId}
+      aria-expanded={expanded}
+      aria-controls={sectionId}
+    >
       <div className="structured-section-left">
-        <span className="structured-section-emoji">{icon}</span>
+        <span className="structured-section-emoji" aria-hidden="true">{icon}</span>
         <span className="structured-section-title">{title}</span>
         <span className="structured-section-badge" style={{ backgroundColor: color }}>
           {count}
         </span>
       </div>
-      <span className={`structured-section-chevron ${expanded ? 'expanded' : ''}`}>
+      <span className={`structured-section-chevron ${expanded ? 'expanded' : ''}`} aria-hidden="true">
         ▸
       </span>
     </button>
@@ -214,9 +224,16 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
             color="var(--accent)"
             expanded={expandedSections.narrative}
             onToggle={() => toggle('narrative')}
+            sectionId="synthesis-section-narrative"
+            headerId="synthesis-header-narrative"
           />
           {expandedSections.narrative && (
-            <div className="structured-section-body slide-down">
+            <div
+              className="structured-section-body slide-down"
+              id="synthesis-section-narrative"
+              role="region"
+              aria-labelledby="synthesis-header-narrative"
+            >
               <div className="structured-narrative">{narrative}</div>
             </div>
           )}
@@ -233,9 +250,16 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
             color="var(--success)"
             expanded={expandedSections.agreements}
             onToggle={() => toggle('agreements')}
+            sectionId="synthesis-section-agreements"
+            headerId="synthesis-header-agreements"
           />
           {expandedSections.agreements && (
-            <div className="structured-section-body slide-down">
+            <div
+              className="structured-section-body slide-down"
+              id="synthesis-section-agreements"
+              role="region"
+              aria-labelledby="synthesis-header-agreements"
+            >
               {agreements.map((a, i) => (
                 <div key={i} className="structured-card agreement-card">
                   <div className="structured-card-header">
@@ -281,9 +305,16 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
             color="#eab308"
             expanded={expandedSections.disagreements}
             onToggle={() => toggle('disagreements')}
+            sectionId="synthesis-section-disagreements"
+            headerId="synthesis-header-disagreements"
           />
           {expandedSections.disagreements && (
-            <div className="structured-section-body slide-down">
+            <div
+              className="structured-section-body slide-down"
+              id="synthesis-section-disagreements"
+              role="region"
+              aria-labelledby="synthesis-header-disagreements"
+            >
               {disagreements.map((d, i) => (
                 <div key={i} className="structured-card disagreement-card">
                   <div className="structured-card-header">
@@ -341,9 +372,16 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
             color="#a855f7"
             expanded={expandedSections.nuances}
             onToggle={() => toggle('nuances')}
+            sectionId="synthesis-section-nuances"
+            headerId="synthesis-header-nuances"
           />
           {expandedSections.nuances && (
-            <div className="structured-section-body slide-down">
+            <div
+              className="structured-section-body slide-down"
+              id="synthesis-section-nuances"
+              role="region"
+              aria-labelledby="synthesis-header-nuances"
+            >
               {nuances.map((n, i) => (
                 <div key={i} className="structured-card nuance-card">
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
@@ -377,9 +415,16 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
             color="var(--accent)"
             expanded={expandedSections.probes}
             onToggle={() => toggle('probes')}
+            sectionId="synthesis-section-probes"
+            headerId="synthesis-header-probes"
           />
           {expandedSections.probes && (
-            <div className="structured-section-body slide-down">
+            <div
+              className="structured-section-body slide-down"
+              id="synthesis-section-probes"
+              role="region"
+              aria-labelledby="synthesis-header-probes"
+            >
               {probes.map((p, i) => (
                 <div key={i} className="structured-card probe-card">
                   <p className="structured-card-claim">{p.question}</p>

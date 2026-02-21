@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { CheckCircle2, MessageSquare, BarChart3, HelpCircle } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────
@@ -45,8 +45,62 @@ export default function RoundTimeline({
   onSelectRound,
 }: RoundTimelineProps) {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const stepperRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Roving tabindex: arrow key handler for stepper (Left/Right)
+  const handleStepperKeyDown = useCallback(
+    (e: React.KeyboardEvent, index: number) => {
+      let nextIndex = -1;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        nextIndex = (index + 1) % rounds.length;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        nextIndex = (index - 1 + rounds.length) % rounds.length;
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        nextIndex = 0;
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        nextIndex = rounds.length - 1;
+      }
+      if (nextIndex >= 0) {
+        stepperRefs.current[nextIndex]?.focus();
+        onSelectRound(rounds[nextIndex]);
+      }
+    },
+    [rounds, onSelectRound],
+  );
+
+  // Arrow key handler for card list (Up/Down)
+  const handleCardKeyDown = useCallback(
+    (e: React.KeyboardEvent, index: number) => {
+      let nextIndex = -1;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        nextIndex = (index + 1) % rounds.length;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        nextIndex = (index - 1 + rounds.length) % rounds.length;
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        nextIndex = 0;
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        nextIndex = rounds.length - 1;
+      }
+      if (nextIndex >= 0) {
+        cardRefs.current[nextIndex]?.focus();
+        onSelectRound(rounds[nextIndex]);
+      }
+    },
+    [rounds, onSelectRound],
+  );
 
   if (rounds.length === 0) return null;
+
+  const selectedIndex = rounds.findIndex(r => r.id === selectedRoundId);
 
   return (
     <div className="round-timeline-v2">
@@ -58,7 +112,11 @@ export default function RoundTimeline({
       </div>
 
       {/* ── Horizontal stepper track ── */}
-      <div className="round-timeline-v2-stepper">
+      <div
+        className="round-timeline-v2-stepper"
+        role="tablist"
+        aria-label="Round stepper"
+      >
         {rounds.map((round, index) => {
           const isActive = round.is_active;
           const isSelected = round.id === selectedRoundId;
@@ -78,20 +136,24 @@ export default function RoundTimeline({
 
               {/* Node button */}
               <button
+                ref={el => { stepperRefs.current[index] = el; }}
                 className={[
                   'round-timeline-v2-node',
                   isActive ? 'active' : '',
                   isSelected ? 'selected' : '',
                   hasSynthesis ? 'has-synthesis' : '',
                 ].filter(Boolean).join(' ')}
+                role="tab"
+                aria-selected={isSelected}
+                tabIndex={isSelected || (selectedIndex === -1 && index === 0) ? 0 : -1}
                 onClick={() => onSelectRound(round)}
+                onKeyDown={e => handleStepperKeyDown(e, index)}
                 onMouseEnter={() => setHoveredId(round.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                aria-label={`Round ${round.round_number}`}
-                aria-current={isSelected ? 'step' : undefined}
+                aria-label={`Round ${round.round_number}${isActive ? ' (active)' : ''}${hasSynthesis ? ' (synthesised)' : ''}`}
               >
                 {hasSynthesis ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : (
@@ -106,6 +168,7 @@ export default function RoundTimeline({
                 className={`round-timeline-v2-step-label ${
                   isSelected ? 'selected' : ''
                 } ${isActive ? 'active' : ''}`}
+                aria-hidden="true"
               >
                 R{round.round_number}
               </span>
@@ -115,8 +178,12 @@ export default function RoundTimeline({
       </div>
 
       {/* ── Round cards ── */}
-      <div className="round-timeline-v2-cards">
-        {rounds.map((round) => {
+      <div
+        className="round-timeline-v2-cards"
+        role="listbox"
+        aria-label="Round cards"
+      >
+        {rounds.map((round, index) => {
           const isActive = round.is_active;
           const isSelected = round.id === selectedRoundId;
           const hasSynthesis = !!(round.synthesis && round.synthesis.trim());
@@ -124,12 +191,17 @@ export default function RoundTimeline({
           return (
             <button
               key={round.id}
+              ref={el => { cardRefs.current[index] = el; }}
               className={[
                 'round-card-v2',
                 isSelected ? 'selected' : '',
                 isActive ? 'current' : '',
               ].filter(Boolean).join(' ')}
+              role="option"
+              aria-selected={isSelected}
+              tabIndex={isSelected || (selectedIndex === -1 && index === 0) ? 0 : -1}
               onClick={() => onSelectRound(round)}
+              onKeyDown={e => handleCardKeyDown(e, index)}
             >
               {/* Card header */}
               <div className="round-card-v2-header">

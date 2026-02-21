@@ -48,18 +48,21 @@ export default function Register() {
       <h2 className="text-lg font-semibold text-center" style={{ color: 'var(--foreground)' }}>
         Create your account
       </h2>
-      {error && (
-        <div
-          className="rounded-lg px-4 py-3 text-sm text-center"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
-            color: 'var(--destructive)',
-            border: '1px solid color-mix(in srgb, var(--destructive) 25%, transparent)',
-          }}
-        >
-          {error}
-        </div>
-      )}
+      <div aria-live="polite" aria-atomic="true">
+        {error && (
+          <div
+            className="rounded-lg px-4 py-3 text-sm text-center"
+            role="alert"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+              color: 'var(--destructive)',
+              border: '1px solid color-mix(in srgb, var(--destructive) 25%, transparent)',
+            }}
+          >
+            {error}
+          </div>
+        )}
+      </div>
       <div className="space-y-1.5">
         <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
           Email address
