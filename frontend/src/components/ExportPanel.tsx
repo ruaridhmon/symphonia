@@ -4,11 +4,18 @@ import LoadingButton from './LoadingButton';
 
 // ─── Types (mirrors StructuredSynthesis.tsx) ─────────────
 
+interface EvidenceExcerpt {
+  expert_id: number;
+  expert_label: string;
+  quote: string;
+}
+
 interface Agreement {
   claim: string;
   supporting_experts: number[];
   confidence: number;
   evidence_summary: string;
+  evidence_excerpts?: EvidenceExcerpt[];
 }
 
 interface DisagreementPosition {
@@ -165,6 +172,13 @@ function generateMarkdown(
         lines.push(`  - Supporting experts: ${expertList(a.supporting_experts, labels)}`);
         if (a.evidence_summary) {
           lines.push(`  - Evidence: ${a.evidence_summary}`);
+        }
+        if (a.evidence_excerpts?.length) {
+          lines.push(`  - **Supporting Excerpts:**`);
+          for (const ex of a.evidence_excerpts) {
+            const label = labels[ex.expert_id] || ex.expert_label || `Expert ${ex.expert_id}`;
+            lines.push(`    - _${label}_: "${ex.quote}"`);
+          }
         }
       }
       lines.push('');

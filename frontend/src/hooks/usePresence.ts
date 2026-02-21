@@ -10,6 +10,8 @@ interface UsePresenceOptions {
   formId: number | null;
   page: string;
   userEmail: string;
+  /** Optional callback for non-presence WebSocket messages (e.g. synthesis_complete) */
+  onMessage?: (data: Record<string, unknown>) => void;
 }
 
 interface UsePresenceReturn {
@@ -22,7 +24,7 @@ interface UsePresenceReturn {
  * Connects to /ws, sends presence_join on mount, heartbeats every 15s,
  * and presence_leave on unmount. Returns current viewers for the form.
  */
-export function usePresence({ formId, page, userEmail }: UsePresenceOptions): UsePresenceReturn {
+export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceOptions): UsePresenceReturn {
   const [viewers, setViewers] = useState<Viewer[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
@@ -66,8 +68,10 @@ export function usePresence({ formId, page, userEmail }: UsePresenceOptions): Us
         const data = JSON.parse(event.data);
         if (data.type === 'presence_update' && data.form_id === formId) {
           setViewers(data.viewers || []);
+        } else if (onMessage) {
+          // Forward non-presence messages (synthesis_complete, summary_updated, etc.)
+          onMessage(data);
         }
-        // Allow other message types (e.g. summary_updated) to pass through
       } catch {
         // Ignore non-JSON messages
       }
@@ -88,7 +92,7 @@ export function usePresence({ formId, page, userEmail }: UsePresenceOptions): Us
     ws.onerror = () => {
       ws.close();
     };
-  }, [formId, page, userEmail]);
+  }, [formId, page, userEmail, onMessage]);
 
   useEffect(() => {
     connect();

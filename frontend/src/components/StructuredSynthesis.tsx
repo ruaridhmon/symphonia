@@ -1,14 +1,21 @@
 import { useState } from 'react';
-import { CheckCircle2, Zap, Lightbulb, Target, FileText } from 'lucide-react';
+import { CheckCircle2, Zap, Lightbulb, Target, FileText, Quote, ChevronDown } from 'lucide-react';
 import CommentThread from './CommentThread';
 
 // ─── Types ──────────────────────────────────────────────
+
+interface EvidenceExcerpt {
+  expert_id: number;
+  expert_label: string;
+  quote: string;
+}
 
 interface Agreement {
   claim: string;
   supporting_experts: number[];
   confidence: number;
   evidence_summary: string;
+  evidence_excerpts?: EvidenceExcerpt[];
 }
 
 interface DisagreementPosition {
@@ -120,6 +127,58 @@ function ConfidenceBar({ value, label }: { value: number; label?: string }) {
   );
 }
 
+function EvidenceDrawer({
+  excerpts,
+  expertLabels,
+  isOpen,
+  onToggle,
+}: {
+  excerpts: EvidenceExcerpt[];
+  expertLabels?: Record<number, string>;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  if (!excerpts || excerpts.length === 0) return null;
+
+  return (
+    <div className="evidence-drawer">
+      <button
+        className="evidence-drawer-toggle"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+      >
+        <Quote size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+        <span className="evidence-drawer-label">
+          {excerpts.length} supporting excerpt{excerpts.length !== 1 ? 's' : ''}
+        </span>
+        <ChevronDown
+          size={14}
+          className={`evidence-drawer-chevron ${isOpen ? 'open' : ''}`}
+        />
+      </button>
+      {isOpen && (
+        <div className="evidence-drawer-body slide-down">
+          {excerpts.map((ex, idx) => {
+            const label = expertLabels?.[ex.expert_id] || ex.expert_label || `E${ex.expert_id}`;
+            return (
+              <div key={idx} className="evidence-excerpt">
+                <div className="evidence-excerpt-header">
+                  <span className={`expert-chip ${getDimensionClass(expertLabels?.[ex.expert_id])}`}>
+                    {label}
+                  </span>
+                </div>
+                <blockquote className="evidence-excerpt-quote">
+                  "{ex.quote}"
+                </blockquote>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SeverityBadge({ severity }: { severity: string }) {
   const colors: Record<string, { bg: string; text: string }> = {
     low: { bg: 'rgba(34,197,94,0.15)', text: 'var(--success)' },
@@ -167,6 +226,10 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
     probes: true,
     narrative: false,
   });
+  const [openEvidence, setOpenEvidence] = useState<Record<number, boolean>>({});
+
+  const toggleEvidence = (index: number) =>
+    setOpenEvidence(prev => ({ ...prev, [index]: !prev[index] }));
 
   const toggle = (section: string) =>
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -287,6 +350,14 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                         </span>
                       ))}
                     </div>
+                  )}
+                  {a.evidence_excerpts && a.evidence_excerpts.length > 0 && (
+                    <EvidenceDrawer
+                      excerpts={a.evidence_excerpts}
+                      expertLabels={expertLabels}
+                      isOpen={!!openEvidence[i]}
+                      onToggle={() => toggleEvidence(i)}
+                    />
                   )}
                 </div>
               ))}
