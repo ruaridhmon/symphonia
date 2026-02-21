@@ -28,47 +28,67 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <form
-        onSubmit={handleLogin}
-        className="card-lg p-8 sm:p-10 max-w-md w-full space-y-5"
-      >
-        <h1 className="text-xl font-semibold text-center text-foreground">Login</h1>
-        {error && (
-          <p className="text-destructive text-sm text-center">{error}</p>
-        )}
+    <form
+      onSubmit={handleLogin}
+      className="card-lg p-8 sm:p-10 w-full space-y-5"
+    >
+      <h2 className="text-lg font-semibold text-center" style={{ color: 'var(--foreground)' }}>
+        Sign in to your account
+      </h2>
+      {error && (
+        <div
+          className="rounded-lg px-4 py-3 text-sm text-center"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+            color: 'var(--destructive)',
+            border: '1px solid color-mix(in srgb, var(--destructive) 25%, transparent)',
+          }}
+        >
+          {error}
+        </div>
+      )}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+          Email address
+        </label>
         <input
           type="email"
-          placeholder="Email"
+          placeholder="you@example.com"
           required
           value={email}
           onChange={e => setEmail(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg"
         />
+      </div>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+          Password
+        </label>
         <input
           type="password"
-          placeholder="Password"
+          placeholder="••••••••"
           required
           value={password}
           onChange={e => setPassword(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg"
         />
-        <LoadingButton
-          type="submit"
-          variant="accent"
-          size="lg"
-          loading={isLoggingIn || isLoading}
-          loadingText="Logging in…"
-          className="w-full"
-        >
-          Login
-        </LoadingButton>
-        <div className="text-sm text-center">
-          <Link to="/register" className="text-accent underline">
-            No account? Register
-          </Link>
-        </div>
-      </form>
-    </div>
+      </div>
+      <LoadingButton
+        type="submit"
+        variant="accent"
+        size="lg"
+        loading={isLoggingIn || isLoading}
+        loadingText="Signing in…"
+        className="w-full"
+      >
+        Sign In
+      </LoadingButton>
+      <div className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
+        Don't have an account?{' '}
+        <Link to="/register" className="font-medium" style={{ color: 'var(--accent)' }}>
+          Create one
+        </Link>
+      </div>
+    </form>
   );
 }

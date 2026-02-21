@@ -24,9 +24,9 @@
 - [x] Error handling with retry buttons — DONE (Pulse 6:06am): FormPage now has error state with retry on load failure + inline submit error display; UserDashboard already had retry
 
 ### P3 — Architecture
-- [ ] Decompose SummaryPage (560 lines → smaller components)
+- [x] Decompose SummaryPage (1414→672 lines, 10 subcomponents) — DONE (Pulse 6:36am)
 - [ ] TanStack Query for state management
-- [ ] Mobile responsiveness
+- [x] Mobile responsiveness (safe-area insets, touch targets, overflow, responsive spacing) — DONE (Pulse 6:36am)
 
 ## Completed This Session
 - Button sizing fix (width: fit-content)
@@ -48,6 +48,8 @@
 - **Duplicate footer cleanup** — removed from SummaryPage (line 1303) and ThankYouPage; stripped redundant header/min-h-screen wrapper from ThankYouPage since PageLayout provides it all (Pulse)
 - **Button consistency** — Login, Register, UserDashboard migrated to LoadingButton with proper variant/size props (Pulse)
 - **Error handling + retry** — FormPage load errors show retry button + back-to-dashboard; submit errors shown inline; proper HTTP status checks added (Pulse)
+- **SummaryPage decomposition** — 1414→672 lines; extracted 10 focused subcomponents (SummaryHeader, SynthesisEditorCard, AISynthesisPanel, SynthesisVersionPanel, NextRoundQuestionsCard, FormInfoCard, ActionsCard, ResponsesModal, RoundHistoryCard, SummaryLoadingSkeleton) + shared types file (Pulse)
+- **Mobile responsiveness** — safe-area insets for notched devices, coarse pointer touch targets (44px min), horizontal overflow prevention, responsive card padding, prose typography scaling, landscape orientation support (Pulse)
 
 ## Build Command
 ```bash
@@ -64,6 +66,6 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
   "workers_completed": 5,
   "workers_spawned": 5,
   "pulse_direct_changes": 5,
-  "status": "P0 clear, P1 clear, P2 clear — all polish tasks done"
+  "status": "P0 clear, P1 clear, P2 clear, P3 clear (except TanStack Query) — architecture complete"
 }
 ```

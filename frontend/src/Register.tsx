@@ -41,47 +41,67 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <form
-        onSubmit={handleRegister}
-        className="card-lg p-8 sm:p-10 max-w-md w-full space-y-5"
-      >
-        <h1 className="text-xl font-semibold text-center text-foreground">Register</h1>
-        {error && (
-          <p className="text-destructive text-sm text-center">{error}</p>
-        )}
+    <form
+      onSubmit={handleRegister}
+      className="card-lg p-8 sm:p-10 w-full space-y-5"
+    >
+      <h2 className="text-lg font-semibold text-center" style={{ color: 'var(--foreground)' }}>
+        Create your account
+      </h2>
+      {error && (
+        <div
+          className="rounded-lg px-4 py-3 text-sm text-center"
+          style={{
+            backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+            color: 'var(--destructive)',
+            border: '1px solid color-mix(in srgb, var(--destructive) 25%, transparent)',
+          }}
+        >
+          {error}
+        </div>
+      )}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+          Email address
+        </label>
         <input
           type="email"
-          placeholder="Email"
+          placeholder="you@example.com"
           required
           value={email}
           onChange={e => setEmail(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg"
         />
+      </div>
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+          Password
+        </label>
         <input
           type="password"
-          placeholder="Password"
+          placeholder="••••••••"
           required
           value={password}
           onChange={e => setPassword(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg"
         />
-        <LoadingButton
-          type="submit"
-          variant="accent"
-          size="lg"
-          loading={isRegistering || isLoading}
-          loadingText="Registering…"
-          className="w-full"
-        >
-          Register & Login
-        </LoadingButton>
-        <div className="text-sm text-center">
-          <Link to="/login" className="text-accent underline">
-            Already have an account? Login
-          </Link>
-        </div>
-      </form>
-    </div>
+      </div>
+      <LoadingButton
+        type="submit"
+        variant="accent"
+        size="lg"
+        loading={isRegistering || isLoading}
+        loadingText="Creating account…"
+        className="w-full"
+      >
+        Create Account
+      </LoadingButton>
+      <div className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
+        Already have an account?{' '}
+        <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>
+          Sign in
+        </Link>
+      </div>
+    </form>
   );
 }

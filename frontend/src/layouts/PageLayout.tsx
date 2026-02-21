@@ -24,14 +24,15 @@ export default function PageLayout() {
       </main>
 
       <footer
-        className="border-t text-center py-4 text-sm"
+        className="border-t text-center py-6 text-xs"
         style={{
-          backgroundColor: 'var(--card)',
+          backgroundColor: 'transparent',
           borderColor: 'var(--border)',
           color: 'var(--muted-foreground)',
+          opacity: 0.7,
         }}
       >
-        © {new Date().getFullYear()} Symphonia
+        © {new Date().getFullYear()} Symphonia · Collaborative Consensus Platform
       </footer>
     </div>
   );
