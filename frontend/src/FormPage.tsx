@@ -48,7 +48,9 @@ export default function FormPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const [mode, setMode] = useState('loading') // loading, filling, reviewing
+  const [mode, setMode] = useState('loading') // loading, filling, reviewing, error
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   // Real-time presence
   const { viewers } = usePresence({
@@ -82,123 +84,74 @@ export default function FormPage() {
   }, [])
 
 
-  useEffect(() => {
-
+  const loadForm = useCallback(async () => {
     const token = localStorage.getItem('access_token')
-
     if (!token || !id) return
 
-
+    setLoadError(null)
+    setMode('loading')
 
     const headers = { Authorization: `Bearer ${token}` }
 
-
-
-    async function load() {
-
+    try {
       const formRes = await fetch(`${API_BASE_URL}/forms/${id}`, { headers })
-
+      if (!formRes.ok) throw new Error(`Failed to load form (HTTP ${formRes.status})`)
       const formData = await formRes.json()
-
       setForm(formData)
 
-
-
       const roundRes = await fetch(`${API_BASE_URL}/forms/${id}/active_round`, {
-
         headers
-
       })
 
-
-
       if (!roundRes.ok) {
-
         const fallbackQuestions = Array.isArray(formData.questions)
-
           ? formData.questions
-
           : []
 
-
-
         setRoundQuestions(fallbackQuestions)
-
         setStructuredResponses(buildEmptyResponses(fallbackQuestions))
-
         setMode('filling');
-
         return
-
       }
-
-
 
       const roundData = await roundRes.json()
 
-
-
       const questions =
-
         Array.isArray(roundData.questions) && roundData.questions.length > 0
-
           ? roundData.questions
-
           : formData.questions || []
 
-
-
       setActiveRound(roundData)
-
       setRoundQuestions(questions)
 
-
-
       // Check if user has already submitted
-
       const hasSubmittedRes = await fetch(`${API_BASE_URL}/has_submitted?form_id=${id}`, { headers })
-
       const hasSubmittedData = await hasSubmittedRes.json()
 
-
-
       if (hasSubmittedData.submitted) {
-
         setHasSubmitted(true)
-
         setMode('reviewing')
-
         const myResponseRes = await fetch(`${API_BASE_URL}/form/${id}/my_response`, { headers })
-
         const myResponseData = await myResponseRes.json()
-
         if (myResponseData.answers) {
-
           setStructuredResponses(legacyToStructured(myResponseData.answers))
-
         }
-
       } else {
-
         setHasSubmitted(false)
-
         setMode('filling')
-
         setStructuredResponses(buildEmptyResponses(questions))
-
       }
 
-
-
       setPreviousSynthesis(roundData.previous_round_synthesis || '')
-
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : 'Failed to load form. Please try again.')
+      setMode('error')
     }
-
-
-
-    load()
-
   }, [id, buildEmptyResponses, legacyToStructured])
+
+  useEffect(() => {
+    loadForm()
+  }, [loadForm])
 
 
 
@@ -211,10 +164,11 @@ export default function FormPage() {
 
 
     setIsSubmitting(true)
+    setSubmitError(null)
 
     try {
 
-      await fetch(`${API_BASE_URL}/submit`, {
+      const res = await fetch(`${API_BASE_URL}/submit`, {
 
         method: 'POST',
 
@@ -236,6 +190,8 @@ export default function FormPage() {
 
       })
 
+      if (!res.ok) throw new Error(`Submission failed (HTTP ${res.status})`)
+
       // Clear auto-save data on successful submit
       roundQuestions.forEach((_, i) => {
         try {
@@ -245,6 +201,8 @@ export default function FormPage() {
 
       navigate('/waiting')
 
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Submission failed. Your answers are saved locally — please try again.')
     } finally {
 
       setIsSubmitting(false)
@@ -254,6 +212,41 @@ export default function FormPage() {
   }
 
 
+  if (mode === 'error') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="card-lg p-8 sm:p-10 max-w-md w-full text-center space-y-5">
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--destructive)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fff',
+              fontSize: '24px',
+              fontWeight: 'bold',
+              margin: '0 auto',
+            }}
+          >
+            !
+          </div>
+          <h2 className="text-xl font-semibold text-foreground">Unable to load form</h2>
+          <p className="text-sm text-muted-foreground">{loadError}</p>
+          <div className="flex gap-3 justify-center">
+            <LoadingButton variant="accent" size="md" onClick={loadForm}>
+              Try Again
+            </LoadingButton>
+            <LoadingButton variant="ghost" size="md" onClick={() => navigate('/')}>
+              Back to Dashboard
+            </LoadingButton>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (!form || mode === 'loading') {
     return (
@@ -430,6 +423,19 @@ export default function FormPage() {
               {hasSubmitted ? 'Update Response' : 'Submit'}
 
             </LoadingButton>
+
+            {submitError && (
+              <div
+                className="rounded-lg p-3 text-sm text-center"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+                  border: '1px solid var(--destructive)',
+                  color: 'var(--destructive)',
+                }}
+              >
+                {submitError}
+              </div>
+            )}
 
           </>
 

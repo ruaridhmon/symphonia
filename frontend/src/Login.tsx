@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { Link, Navigate } from 'react-router-dom';
+import { LoadingButton } from './components';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -8,7 +9,6 @@ export default function Login() {
   const [error, setError] = useState('');
   const { login, token, isLoading } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,13 +53,16 @@ export default function Login() {
           onChange={e => setPassword(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg"
         />
-        <button
+        <LoadingButton
           type="submit"
-          disabled={isLoggingIn || isLoading}
-          className="btn btn-accent w-full py-2.5 text-base"
+          variant="accent"
+          size="lg"
+          loading={isLoggingIn || isLoading}
+          loadingText="Logging in…"
+          className="w-full"
         >
-          {isLoggingIn ? 'Logging in…' : 'Login'}
-        </button>
+          Login
+        </LoadingButton>
         <div className="text-sm text-center">
           <Link to="/register" className="text-accent underline">
             No account? Register

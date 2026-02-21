@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { Link, Navigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
+import { LoadingButton } from './components';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -65,13 +66,16 @@ export default function Register() {
           onChange={e => setPassword(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg"
         />
-        <button
+        <LoadingButton
           type="submit"
-          disabled={isRegistering || isLoading}
-          className="btn btn-accent w-full py-2.5 text-base"
+          variant="accent"
+          size="lg"
+          loading={isRegistering || isLoading}
+          loadingText="Registering…"
+          className="w-full"
         >
-          {isRegistering ? 'Registering…' : 'Register & Login'}
-        </button>
+          Register & Login
+        </LoadingButton>
         <div className="text-sm text-center">
           <Link to="/login" className="text-accent underline">
             Already have an account? Login

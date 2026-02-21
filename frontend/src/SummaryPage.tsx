@@ -1300,9 +1300,6 @@ export default function SummaryPage() {
 					document.body
 				)}
 
-			<footer className="bg-card border-t border-border text-center py-4 text-sm text-muted-foreground mt-8">
-				© {new Date().getFullYear()} – Summary workspace
-			</footer>
 		</div>
 	);
 }

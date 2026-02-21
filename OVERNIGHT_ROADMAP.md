@@ -19,9 +19,9 @@
 ### P2 — Polish
 - [x] API client layer abstraction — DONE (Worker 4)
 - [x] Synthesis versioning UI (show versions, compare, activate) — DONE (Worker 5)
-- [ ] Duplicate footer cleanup
-- [ ] Button consistency across all pages
-- [ ] Error handling with retry buttons
+- [x] Duplicate footer cleanup — DONE (Pulse 6:06am): removed duplicate footers from SummaryPage and ThankYouPage (PageLayout provides the footer); stripped redundant header/shell from ThankYouPage
+- [x] Button consistency across all pages — DONE (Pulse 6:06am): migrated Login, Register, UserDashboard from raw `<button>` to `<LoadingButton>` with proper variants (accent, success, destructive, ghost)
+- [x] Error handling with retry buttons — DONE (Pulse 6:06am): FormPage now has error state with retry on load failure + inline submit error display; UserDashboard already had retry
 
 ### P3 — Architecture
 - [ ] Decompose SummaryPage (560 lines → smaller components)
@@ -45,6 +45,9 @@
 - **Synthesis versioning UI** — version selector, publish, generate new (Worker 5)
 - **View/Edit mode toggle** — clean toggle between rendered markdown and TipTap editor (Pulse)
 - **Structured JSON for all synthesis modes** — simple/ttd now return same structured format as committee (Pulse)
+- **Duplicate footer cleanup** — removed from SummaryPage (line 1303) and ThankYouPage; stripped redundant header/min-h-screen wrapper from ThankYouPage since PageLayout provides it all (Pulse)
+- **Button consistency** — Login, Register, UserDashboard migrated to LoadingButton with proper variant/size props (Pulse)
+- **Error handling + retry** — FormPage load errors show retry button + back-to-dashboard; submit errors shown inline; proper HTTP status checks added (Pulse)
 
 ## Build Command
 ```bash
@@ -57,10 +60,10 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 ```json
 {
   "last_run": "2026-02-21T05:36:00Z",
-  "current_task": "ALL P0 + P1 COMPLETE",
+  "current_task": "ALL P0 + P1 + P2 COMPLETE",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 2,
-  "status": "P0 clear, P1 clear, P2 partially clear"
+  "pulse_direct_changes": 5,
+  "status": "P0 clear, P1 clear, P2 clear — all polish tasks done"
 }
 ```

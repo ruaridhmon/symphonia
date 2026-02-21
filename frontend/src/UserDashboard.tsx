@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import { getMyForms, unlockForm, Form } from './api/forms';
 import { ApiError } from './api/client';
 import Container from './layouts/Container';
+import { LoadingButton } from './components';
 
 /**
  * User dashboard — join forms via code, view/enter joined forms.
@@ -82,17 +83,13 @@ export default function UserDashboard() {
             }}
           >
             <span className="text-sm font-medium">{error}</span>
-            <button
-              type="button"
+            <LoadingButton
+              variant="destructive"
+              size="sm"
               onClick={fetchMyForms}
-              className="self-start sm:self-auto px-3 py-1.5 rounded-lg text-sm font-medium"
-              style={{
-                backgroundColor: 'var(--destructive)',
-                color: '#ffffff',
-              }}
             >
               Retry
-            </button>
+            </LoadingButton>
           </div>
         )}
 
@@ -135,15 +132,14 @@ export default function UserDashboard() {
                 {joinError}
               </p>
             )}
-            <button
-              className="w-full py-2 rounded-lg font-medium"
-              style={{
-                backgroundColor: 'var(--accent)',
-                color: 'var(--accent-foreground)',
-              }}
+            <LoadingButton
+              type="submit"
+              variant="accent"
+              size="md"
+              className="w-full"
             >
               Join Form
-            </button>
+            </LoadingButton>
           </form>
         </div>
 
@@ -182,16 +178,13 @@ export default function UserDashboard() {
                   }}
                 >
                   <span style={{ color: 'var(--foreground)' }}>{f.title}</span>
-                  <button
-                    className="self-start sm:self-auto px-4 py-1.5 rounded-lg font-medium text-sm shrink-0"
-                    style={{
-                      backgroundColor: 'var(--success)',
-                      color: '#ffffff',
-                    }}
+                  <LoadingButton
+                    variant="success"
+                    size="sm"
                     onClick={() => navigate(`/form/${f.id}`)}
                   >
                     Enter
-                  </button>
+                  </LoadingButton>
                 </li>
               ))}
             </ul>
