@@ -1,28 +1,29 @@
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lightbulb } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Lightbulb, Pencil } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
+interface WaitingState {
+  formId?: string;
+  formTitle?: string;
+  roundNumber?: number;
+}
+
 export default function WaitingPage() {
-  useDocumentTitle('Waiting for Next Round');
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const location = useLocation();
+  const state = (location.state as WaitingState) || {};
+  const { formId, formTitle, roundNumber } = state;
+
+  useDocumentTitle(formTitle ? `Waiting — ${formTitle}` : 'Waiting for Next Round');
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    // Fetch user info (async, but WebSocket setup is outside)
-    fetch(`${API_BASE_URL}/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => { if (data) setEmail(data.email || ''); })
-      .catch(err => console.error('[WaitingPage] Fetch error:', err));
-
-    // WebSocket setup — outside async so cleanup works correctly
+    // WebSocket setup for live synthesis notification
     const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${new URL(API_BASE_URL).host}/ws`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
@@ -33,13 +34,9 @@ export default function WaitingPage() {
         if (msg.type === 'summary_updated') {
           navigate('/result', { replace: true });
         }
-      } catch (err) {
-        console.error('[WaitingPage] Failed to parse WebSocket message:', err);
+      } catch {
+        // Ignore unparseable messages
       }
-    };
-
-    ws.onerror = (err) => {
-      console.error('[WaitingPage] WebSocket error:', err);
     };
 
     return () => {
@@ -47,11 +44,6 @@ export default function WaitingPage() {
       wsRef.current = null;
     };
   }, [navigate]);
-
-  function logout() {
-    localStorage.clear();
-    navigate('/');
-  }
 
   return (
     <div className="flex-1 px-4 py-6 sm:py-8 max-w-6xl mx-auto flex justify-center items-center">
@@ -68,6 +60,22 @@ export default function WaitingPage() {
           <h2 className="text-2xl font-semibold text-foreground">
             Thank you for your submission
           </h2>
+
+          {/* Form context — show which form & round */}
+          {(formTitle || roundNumber) && (
+            <div
+              className="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-full mx-auto"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                color: 'var(--accent)',
+              }}
+            >
+              {formTitle && <span className="font-medium">{formTitle}</span>}
+              {formTitle && roundNumber && <span style={{ opacity: 0.5 }}>·</span>}
+              {roundNumber && <span>Round {roundNumber}</span>}
+            </div>
+          )}
+
           <p className="text-lg text-muted-foreground max-w-md mx-auto">
             Your response has been recorded. You'll be notified when the
             synthesis is ready
@@ -93,12 +101,23 @@ export default function WaitingPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => navigate('/')}
-          className="text-sm text-accent underline hover:text-accent-hover transition-colors"
-        >
-          ← Back to Dashboard
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          {formId && (
+            <button
+              onClick={() => navigate(`/form/${formId}`)}
+              className="inline-flex items-center gap-1.5 text-sm text-accent underline hover:text-accent-hover transition-colors"
+            >
+              <Pencil size={13} />
+              Edit response
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/')}
+            className="text-sm text-accent underline hover:text-accent-hover transition-colors"
+          >
+            ← Back to Dashboard
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,12 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, Clock, FileText } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { getMyForms, unlockForm, Form } from './api/forms';
+import { api } from './api/client';
 import { ApiError } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
 import Skeleton, { SkeletonCard } from './components/Skeleton';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
+
+/** Per-form status info fetched from the API */
+interface FormStatus {
+  submitted: boolean;
+  roundNumber: number | null;
+}
 
 /**
  * User dashboard — join forms via code, view/enter joined forms.
@@ -19,10 +27,35 @@ export default function UserDashboard() {
   const { token } = useAuth();
   const navigate = useNavigate();
   const [myForms, setMyForms] = useState<Form[]>([]);
+  const [formStatuses, setFormStatuses] = useState<Record<number, FormStatus>>({});
   const [joinCode, setJoinCode] = useState('');
   const [joinError, setJoinError] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  /** Fetch submission status + round info for a list of forms */
+  const fetchStatuses = useCallback(async (forms: Form[]) => {
+    const statuses: Record<number, FormStatus> = {};
+    await Promise.allSettled(
+      forms.map(async (f) => {
+        try {
+          const [submitRes, roundRes] = await Promise.allSettled([
+            api.get<{ submitted: boolean }>(`/has_submitted?form_id=${f.id}`),
+            api.get<{ round_number: number }>(`/forms/${f.id}/active_round`),
+          ]);
+          statuses[f.id] = {
+            submitted:
+              submitRes.status === 'fulfilled' ? submitRes.value.submitted : false,
+            roundNumber:
+              roundRes.status === 'fulfilled' ? roundRes.value.round_number : null,
+          };
+        } catch {
+          statuses[f.id] = { submitted: false, roundNumber: null };
+        }
+      })
+    );
+    setFormStatuses(statuses);
+  }, []);
 
   const fetchMyForms = useCallback(async () => {
     if (!token) {
@@ -33,7 +66,10 @@ export default function UserDashboard() {
       setError(null);
       setLoading(true);
       const data = await getMyForms();
-      setMyForms(Array.isArray(data) ? data : []);
+      const forms = Array.isArray(data) ? data : [];
+      setMyForms(forms);
+      // Fire-and-forget status enrichment
+      fetchStatuses(forms);
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) return; // client.ts handles redirect
@@ -44,7 +80,7 @@ export default function UserDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, fetchStatuses]);
 
   useEffect(() => {
     fetchMyForms();
@@ -177,25 +213,67 @@ export default function UserDashboard() {
                   No forms joined yet.
                 </p>
               )}
-              {myForms.map((f) => (
-                <li
-                  key={f.id}
-                  className="rounded-lg p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
-                  style={{
-                    backgroundColor: 'var(--muted)',
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  <span style={{ color: 'var(--foreground)' }}>{f.title}</span>
-                  <LoadingButton
-                    variant="success"
-                    size="sm"
-                    onClick={() => navigate(`/form/${f.id}`)}
+              {myForms.map((f) => {
+                const status = formStatuses[f.id];
+                return (
+                  <li
+                    key={f.id}
+                    className="rounded-lg p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
+                    style={{
+                      backgroundColor: 'var(--muted)',
+                      border: '1px solid var(--border)',
+                    }}
                   >
-                    Enter
-                  </LoadingButton>
-                </li>
-              ))}
+                    <div className="flex flex-col gap-1.5">
+                      <span style={{ color: 'var(--foreground)', fontWeight: 500 }}>{f.title}</span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {status?.roundNumber != null && (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                              color: 'var(--accent)',
+                            }}
+                          >
+                            <FileText size={11} />
+                            Round {status.roundNumber}
+                          </span>
+                        )}
+                        {status?.submitted ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)',
+                              color: 'var(--success)',
+                            }}
+                          >
+                            <CheckCircle2 size={11} />
+                            Submitted
+                          </span>
+                        ) : status ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: 'color-mix(in srgb, #eab308 12%, transparent)',
+                              color: '#ca8a04',
+                            }}
+                          >
+                            <Clock size={11} />
+                            Awaiting response
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <LoadingButton
+                      variant="success"
+                      size="sm"
+                      onClick={() => navigate(`/form/${f.id}`)}
+                    >
+                      {status?.submitted ? 'Review' : 'Enter'}
+                    </LoadingButton>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

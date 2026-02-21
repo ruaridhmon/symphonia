@@ -202,7 +202,13 @@ export default function FormPage() {
         } catch { /* ignore */ }
       })
 
-      navigate('/waiting')
+      navigate('/waiting', {
+        state: {
+          formId: id,
+          formTitle: form?.title,
+          roundNumber: activeRound?.round_number,
+        },
+      })
 
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Submission failed. Your answers are saved locally — please try again.')

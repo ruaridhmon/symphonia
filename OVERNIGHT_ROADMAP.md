@@ -76,6 +76,10 @@
 - **Admin search/filter** — Search bar appears when >3 forms exist. Filters by title or join code. Clear button, match count indicator. Empty state with clear-search action. (Pulse 1:06pm)
 - **Staggered entrance animations** — CSS stagger animation for form lists. Cards fade in sequentially with 50ms delay between items for a smooth reveal effect. (Pulse 1:06pm)
 - **useCopyToClipboard hook** — Reusable hook with visual feedback timer and fallback for older browsers. (Pulse 1:06pm)
+- **Reduced motion accessibility** — `@media (prefers-reduced-motion: reduce)` kills all animations, transitions, scroll-behavior, and transform effects. Orbit animation on WaitingPage degrades gracefully. WCAG 2.1 compliant. (Pulse 1:36pm)
+- **SynthesisModeSelector tooltips** — Each synthesis mode (Simple/Committee/TTD) now has an expandable info panel with detailed description and "Best for" guidance. Helps non-technical admins choose the right mode. (Pulse 1:36pm)
+- **Form status badges** — UserDashboard now fetches per-form submission status and round number. Each form shows "Round N" badge + "Submitted ✓" (green) or "Awaiting response" (amber). Button text changes to "Review" for submitted forms. (Pulse 1:36pm)
+- **WaitingPage context** — FormPage now passes form title, form ID, and round number to WaitingPage via navigation state. WaitingPage shows form title + round number pill, dynamic page title, and "Edit response" link back to the form. Console.error cleanup. (Pulse 1:36pm)
 
 ## Build Command
 ```bash
@@ -95,6 +99,13 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 - [x] Staggered card entrance animations — smooth CSS stagger for form lists — DONE (Pulse 1:06pm)
 - [x] ⌘K hint button in header — discoverable shortcut for command palette — DONE (Pulse 1:06pm)
 
+### P7 — Accessibility & Expert UX
+- [x] `prefers-reduced-motion` support (WCAG 2.1) — respects OS motion preferences, disables all animations — DONE (Pulse 1:36pm)
+- [x] Enhanced SynthesisModeSelector — expandable tooltips with detailed descriptions and "Best for" guidance for each mode — DONE (Pulse 1:36pm)
+- [x] Form status badges on UserDashboard — shows Round number, "Submitted ✓" or "Awaiting response" per form — DONE (Pulse 1:36pm)
+- [x] Enriched WaitingPage — shows form title + round number context, "Edit response" link back to form — DONE (Pulse 1:36pm)
+- [x] Console.log cleanup (WaitingPage) — removed remaining debug logging — DONE (Pulse 1:36pm)
+
 ### P5 — Final Polish
 - [x] AdminDashboard → API client migration (was last file using raw `fetch`) — DONE (Pulse 12:36pm)
 - [x] AdminDashboard `<a>` → React Router `<Link>` (prevents full-page reloads) — DONE (Pulse 12:36pm)
@@ -107,11 +118,11 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 ## Pulse State
 ```json
 {
-  "last_run": "2026-02-21T13:06:00Z",
-  "current_task": "P6 power features deployed. Command palette, search, copy-to-clipboard, animations.",
+  "last_run": "2026-02-21T13:36:00Z",
+  "current_task": "P7 accessibility & expert UX. Reduced motion, tooltips, form badges, waiting page context.",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 15,
-  "status": "ALL PHASES COMPLETE + P6 POWER FEATURES"
+  "pulse_direct_changes": 19,
+  "status": "ALL PHASES COMPLETE + P7 ACCESSIBILITY & EXPERT UX"
 }
 ```

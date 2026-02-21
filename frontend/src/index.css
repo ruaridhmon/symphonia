@@ -490,6 +490,37 @@ main,
 }
 
 /* ------------------------------------------------------------------ */
+/* Reduced Motion (WCAG 2.1 — prefers-reduced-motion)                */
+/* Respects user/OS preference to minimise animations.               */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .card:hover,
+  .card-lg:hover {
+    transform: none !important;
+  }
+  .card-interactive:hover {
+    transform: none !important;
+  }
+  .btn-interactive:active {
+    transform: none !important;
+  }
+  .waiting-orbit-dot {
+    animation: none !important;
+    position: static !important;
+    display: inline-block;
+    margin: 0 4px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Interactive Button (replaces static .btn)                          */
 /* Inside @layer components so Tailwind utilities (w-full etc.)       */
 /* can override defaults like width: fit-content.                     */
