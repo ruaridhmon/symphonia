@@ -11,7 +11,7 @@ import os
 
 from .models import (
     User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
-    UserFormUnlock, FollowUp, FollowUpResponse,
+    UserFormUnlock, FollowUp, FollowUpResponse, SynthesisComment,
 )
 from .auth import (
     get_db,
@@ -1329,6 +1329,202 @@ async def send_email(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed: {str(e)}")
+
+
+# ---------------------------------------------------------
+# SYNTHESIS COMMENTS
+# ---------------------------------------------------------
+
+class CommentCreatePayload(BaseModel):
+    section_type: str
+    section_index: int | None = None
+    parent_id: int | None = None
+    body: str
+
+
+class CommentUpdatePayload(BaseModel):
+    body: str
+
+
+def _serialize_comment(c: SynthesisComment) -> dict:
+    """Serialize a comment to a dict (without replies)."""
+    return {
+        "id": c.id,
+        "round_id": c.round_id,
+        "section_type": c.section_type,
+        "section_index": c.section_index,
+        "parent_id": c.parent_id,
+        "author_id": c.author_id,
+        "author_email": c.author.email if c.author else None,
+        "body": c.body,
+        "created_at": c.created_at.isoformat() if c.created_at else None,
+        "updated_at": c.updated_at.isoformat() if c.updated_at else None,
+    }
+
+
+def _nest_comments(comments: list[SynthesisComment]) -> list[dict]:
+    """Build nested comment threads from a flat list."""
+    top_level = []
+    replies_map: dict[int, list[dict]] = {}
+
+    # First pass: serialize all
+    serialized = {c.id: _serialize_comment(c) for c in comments}
+
+    # Second pass: group replies
+    for c in comments:
+        s = serialized[c.id]
+        if c.parent_id and c.parent_id in serialized:
+            replies_map.setdefault(c.parent_id, []).append(s)
+        else:
+            top_level.append(s)
+
+    # Third pass: attach replies to parents
+    for s in serialized.values():
+        s["replies"] = replies_map.get(s["id"], [])
+
+    return top_level
+
+
+@router.get("/forms/{form_id}/rounds/{round_id}/comments")
+def get_comments(
+    form_id: int,
+    round_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """List all comments for a round, nested by thread."""
+    # Verify round belongs to form
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    comments = (
+        db.query(SynthesisComment)
+        .filter(SynthesisComment.round_id == round_id)
+        .order_by(SynthesisComment.created_at.asc())
+        .all()
+    )
+
+    return _nest_comments(comments)
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/comments")
+async def create_comment(
+    form_id: int,
+    round_id: int,
+    payload: CommentCreatePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Create a comment on a synthesis section."""
+    # Verify round belongs to form
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    valid_section_types = {"agreement", "disagreement", "nuance", "emergence", "general"}
+    if payload.section_type not in valid_section_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid section_type. Must be one of: {', '.join(sorted(valid_section_types))}",
+        )
+
+    # If replying, validate parent exists and belongs to same round
+    if payload.parent_id:
+        parent = (
+            db.query(SynthesisComment)
+            .filter(
+                SynthesisComment.id == payload.parent_id,
+                SynthesisComment.round_id == round_id,
+            )
+            .first()
+        )
+        if not parent:
+            raise HTTPException(status_code=404, detail="Parent comment not found")
+        # Only 1 level deep — disallow replying to a reply
+        if parent.parent_id is not None:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot reply to a reply (max 1 level of nesting)",
+            )
+
+    comment = SynthesisComment(
+        round_id=round_id,
+        section_type=payload.section_type,
+        section_index=payload.section_index,
+        parent_id=payload.parent_id,
+        author_id=user.id,
+        body=payload.body,
+    )
+    db.add(comment)
+    db.commit()
+    db.refresh(comment)
+
+    result = _serialize_comment(comment)
+    result["replies"] = []
+
+    # Broadcast new comment via WebSocket
+    for conn in ws_manager.active_connections.copy():
+        try:
+            await conn.send_json({
+                "type": "comment_added",
+                "form_id": form_id,
+                "round_id": round_id,
+                "comment": result,
+            })
+        except Exception:
+            ws_manager.disconnect(conn)
+
+    return result
+
+
+@router.put("/comments/{comment_id}")
+def update_comment(
+    comment_id: int,
+    payload: CommentUpdatePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Edit own comment."""
+    comment = db.query(SynthesisComment).filter(SynthesisComment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    if comment.author_id != user.id:
+        raise HTTPException(status_code=403, detail="Can only edit your own comments")
+
+    comment.body = payload.body
+    db.commit()
+    db.refresh(comment)
+
+    result = _serialize_comment(comment)
+    result["replies"] = []
+    return result
+
+
+@router.delete("/comments/{comment_id}")
+def delete_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Delete own comment (or admin can delete any)."""
+    comment = db.query(SynthesisComment).filter(SynthesisComment.id == comment_id).first()
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    if comment.author_id != user.id and not user.is_admin:
+        raise HTTPException(status_code=403, detail="Can only delete your own comments")
+
+    db.delete(comment)
+    db.commit()
+    return {"status": "deleted"}
 
 
 # ---------------------------------------------------------

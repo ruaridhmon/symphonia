@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import CommentThread from './CommentThread';
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -12,6 +13,10 @@ interface EmergentInsight {
 interface EmergenceHighlightsProps {
   insights: EmergentInsight[];
   expertLabels?: Record<number, string>;
+  formId?: number;
+  roundId?: number;
+  token?: string;
+  currentUserEmail?: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────
@@ -51,7 +56,8 @@ function getEmergenceTypeClass(type: string): string {
 
 // ─── Component ───────────────────────────────────────────
 
-export default function EmergenceHighlights({ insights, expertLabels }: EmergenceHighlightsProps) {
+export default function EmergenceHighlights({ insights, expertLabels, formId, roundId, token, currentUserEmail }: EmergenceHighlightsProps) {
+  const commentsEnabled = !!(formId && roundId && token);
   const [expanded, setExpanded] = useState(true);
 
   if (!insights || insights.length === 0) return null;
@@ -77,9 +83,21 @@ export default function EmergenceHighlights({ insights, expertLabels }: Emergenc
             <div key={i} className="emergence-card">
               <div className="emergence-card-top">
                 <p className="emergence-card-insight">{insight.insight}</p>
-                <span className={`emergence-type-badge ${getEmergenceTypeClass(insight.emergence_type)}`}>
-                  {getEmergenceTypeLabel(insight.emergence_type)}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <span className={`emergence-type-badge ${getEmergenceTypeClass(insight.emergence_type)}`}>
+                    {getEmergenceTypeLabel(insight.emergence_type)}
+                  </span>
+                  {commentsEnabled && (
+                    <CommentThread
+                      formId={formId!}
+                      roundId={roundId!}
+                      sectionType="emergence"
+                      sectionIndex={i}
+                      token={token!}
+                      currentUserEmail={currentUserEmail}
+                    />
+                  )}
+                </div>
               </div>
               {insight.contributing_experts.length > 0 && (
                 <div className="structured-card-experts">

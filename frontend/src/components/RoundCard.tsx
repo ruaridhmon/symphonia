@@ -6,9 +6,12 @@ interface RoundCardProps {
   round: Round;
   isCurrentRound: boolean;
   expertLabels?: Record<number, string>;
+  formId?: number;
+  token?: string;
+  currentUserEmail?: string;
 }
 
-export default function RoundCard({ round, isCurrentRound, expertLabels }: RoundCardProps) {
+export default function RoundCard({ round, isCurrentRound, expertLabels, formId, token, currentUserEmail }: RoundCardProps) {
   const hasSynthesis = !!(round.synthesis && round.synthesis.trim());
   const hasStructured = !!(round.synthesis_json && typeof round.synthesis_json === 'object');
 
@@ -103,6 +106,10 @@ export default function RoundCard({ round, isCurrentRound, expertLabels }: Round
               data={round.synthesis_json}
               convergenceScore={round.convergence_score ?? undefined}
               expertLabels={expertLabels}
+              formId={formId}
+              roundId={round.id}
+              token={token}
+              currentUserEmail={currentUserEmail}
             />
           ) : (
             <div className="round-detail-synthesis-body">

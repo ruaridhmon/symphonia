@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import CommentThread from './CommentThread';
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -51,6 +52,10 @@ interface StructuredSynthesisProps {
   data: SynthesisData;
   convergenceScore?: number;
   expertLabels?: Record<number, string>;
+  formId?: number;
+  roundId?: number;
+  token?: string;
+  currentUserEmail?: string;
 }
 
 // ─── Sub-components ──────────────────────────────────────
@@ -142,7 +147,8 @@ function getDimensionClass(label?: string): string {
   return '';
 }
 
-export default function StructuredSynthesis({ data, convergenceScore, expertLabels }: StructuredSynthesisProps) {
+export default function StructuredSynthesis({ data, convergenceScore, expertLabels, formId, roundId, token, currentUserEmail }: StructuredSynthesisProps) {
+  const commentsEnabled = !!(formId && roundId && token);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     agreements: true,
     disagreements: true,
@@ -233,7 +239,19 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                 <div key={i} className="structured-card agreement-card">
                   <div className="structured-card-header">
                     <p className="structured-card-claim">{a.claim}</p>
-                    <ConfidenceBar value={a.confidence} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <ConfidenceBar value={a.confidence} />
+                      {commentsEnabled && (
+                        <CommentThread
+                          formId={formId!}
+                          roundId={roundId!}
+                          sectionType="agreement"
+                          sectionIndex={i}
+                          token={token!}
+                          currentUserEmail={currentUserEmail}
+                        />
+                      )}
+                    </div>
                   </div>
                   <p className="structured-card-evidence">{a.evidence_summary}</p>
                   {a.supporting_experts.length > 0 && (
@@ -269,7 +287,19 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                 <div key={i} className="structured-card disagreement-card">
                   <div className="structured-card-header">
                     <p className="structured-card-claim">{d.topic}</p>
-                    <SeverityBadge severity={d.severity} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <SeverityBadge severity={d.severity} />
+                      {commentsEnabled && (
+                        <CommentThread
+                          formId={formId!}
+                          roundId={roundId!}
+                          sectionType="disagreement"
+                          sectionIndex={i}
+                          token={token!}
+                          currentUserEmail={currentUserEmail}
+                        />
+                      )}
+                    </div>
                   </div>
                   <div className="disagreement-positions">
                     {d.positions.map((pos, j) => (
@@ -315,7 +345,19 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
             <div className="structured-section-body slide-down">
               {nuances.map((n, i) => (
                 <div key={i} className="structured-card nuance-card">
-                  <p className="structured-card-claim">{n.claim}</p>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+                    <p className="structured-card-claim">{n.claim}</p>
+                    {commentsEnabled && (
+                      <CommentThread
+                        formId={formId!}
+                        roundId={roundId!}
+                        sectionType="nuance"
+                        sectionIndex={i}
+                        token={token!}
+                        currentUserEmail={currentUserEmail}
+                      />
+                    )}
+                  </div>
                   <p className="structured-card-evidence">{n.context}</p>
                 </div>
               ))}

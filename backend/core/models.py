@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, String, Boolean, JSON, Float
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 from .db import Base
 
@@ -149,3 +149,26 @@ class FollowUpResponse(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     follow_up = relationship("FollowUp", back_populates="responses")
+
+
+class SynthesisComment(Base):
+    """A threaded comment on a specific section of a synthesis output."""
+    __tablename__ = "synthesis_comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False)
+    section_type = Column(String, nullable=False)  # "agreement", "disagreement", "nuance", "emergence", "general"
+    section_index = Column(Integer, nullable=True)  # index within that section type (e.g., agreement #2)
+    parent_id = Column(Integer, ForeignKey("synthesis_comments.id"), nullable=True)  # for threading
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    body = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    round = relationship("RoundModel", backref="synthesis_comments")
+    author = relationship("User")
+    replies = relationship(
+        "SynthesisComment",
+        backref=backref("parent", remote_side=[id]),
+        cascade="all, delete-orphan",
+    )
