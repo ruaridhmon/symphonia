@@ -160,6 +160,17 @@ function isValidThemeId(id: string): id is ThemeId {
   return VALID_THEME_IDS.has(id);
 }
 
+function getSystemTheme(): ThemeId {
+  try {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'axiotic-dark';
+    }
+  } catch {
+    // matchMedia may be unavailable
+  }
+  return DEFAULT_THEME;
+}
+
 function getStoredTheme(): ThemeId {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -167,7 +178,8 @@ function getStoredTheme(): ThemeId {
   } catch {
     // localStorage may be unavailable (SSR, private browsing, etc.)
   }
-  return DEFAULT_THEME;
+  // No stored preference — respect OS dark/light mode
+  return getSystemTheme();
 }
 
 function applyTheme(themeId: ThemeId) {

@@ -10,6 +10,7 @@ import {
   Sun,
   Moon,
   Palette,
+  Keyboard,
 } from 'lucide-react';
 
 interface CommandItem {
@@ -27,6 +28,7 @@ interface CommandItem {
  */
 export default function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,6 +38,7 @@ export default function CommandPalette() {
 
   const close = useCallback(() => {
     setIsOpen(false);
+    setShowShortcuts(false);
     setQuery('');
     setActiveIndex(0);
   }, []);
@@ -108,6 +111,15 @@ export default function CommandPalette() {
       },
     );
 
+    items.push({
+      id: 'shortcuts',
+      label: 'Keyboard Shortcuts',
+      description: 'View all shortcuts',
+      icon: <Keyboard size={16} />,
+      action: () => { setShowShortcuts(true); },
+      keywords: ['help', 'keys', 'hotkeys', 'bindings', '?'],
+    });
+
     if (user) {
       items.push({
         id: 'logout',
@@ -133,7 +145,7 @@ export default function CommandPalette() {
     );
   }, [commands, query]);
 
-  // Keyboard listener for Cmd+K
+  // Keyboard listener for Cmd+K and ? (shortcuts help)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -141,12 +153,30 @@ export default function CommandPalette() {
         setIsOpen(prev => !prev);
       }
       if (e.key === 'Escape' && isOpen) {
-        close();
+        if (showShortcuts) {
+          setShowShortcuts(false);
+        } else {
+          close();
+        }
+      }
+      // ? key opens shortcuts help (only when not typing in an input)
+      if (
+        e.key === '?' &&
+        !isOpen &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement) &&
+        !(e.target as HTMLElement)?.isContentEditable
+      ) {
+        e.preventDefault();
+        setIsOpen(true);
+        setShowShortcuts(true);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, close]);
+  }, [isOpen, showShortcuts, close]);
 
   // Focus input when opened
   useEffect(() => {
@@ -186,6 +216,16 @@ export default function CommandPalette() {
 
   if (!isOpen) return null;
 
+  const shortcuts = [
+    { keys: ['⌘', 'K'], description: 'Open command palette' },
+    { keys: ['?'], description: 'Keyboard shortcuts help' },
+    { keys: ['⌘', 'Enter'], description: 'Submit form response' },
+    { keys: ['↑', '↓'], description: 'Navigate lists' },
+    { keys: ['Enter'], description: 'Select / confirm' },
+    { keys: ['Esc'], description: 'Close dialog / cancel' },
+    { keys: ['Tab'], description: 'Next field' },
+  ];
+
   return (
     <div
       className="command-palette-overlay"
@@ -193,57 +233,131 @@ export default function CommandPalette() {
         if (e.target === e.currentTarget) close();
       }}
     >
-      <div className="command-palette" role="dialog" aria-label="Command palette">
-        <input
-          ref={inputRef}
-          type="text"
-          className="command-palette-input"
-          placeholder="Type a command…"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={handleInputKeyDown}
-          aria-autocomplete="list"
-          aria-activedescendant={filtered[activeIndex]?.id}
-        />
-
-        <div className="command-palette-list" ref={listRef} role="listbox">
-          {filtered.length === 0 ? (
-            <div className="command-palette-empty">
-              No commands match "{query}"
-            </div>
-          ) : (
-            filtered.map((cmd, i) => (
+      <div className="command-palette" role="dialog" aria-label={showShortcuts ? 'Keyboard shortcuts' : 'Command palette'}>
+        {showShortcuts ? (
+          /* ── Keyboard shortcuts panel ── */
+          <>
+            <div
+              style={{
+                padding: '16px 20px 12px',
+                borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <h2 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', margin: 0 }}>
+                Keyboard Shortcuts
+              </h2>
               <button
-                key={cmd.id}
-                id={cmd.id}
-                role="option"
-                aria-selected={i === activeIndex}
-                className={`command-palette-item ${i === activeIndex ? 'active' : ''}`}
-                onClick={cmd.action}
-                onMouseEnter={() => setActiveIndex(i)}
+                onClick={() => setShowShortcuts(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--muted-foreground)',
+                  fontSize: '0.8rem',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = 'var(--foreground)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--muted-foreground)'}
               >
-                <div className="command-palette-item-icon">{cmd.icon}</div>
-                <div className="command-palette-item-text">
-                  <span className="command-palette-item-label">{cmd.label}</span>
-                  {cmd.description && (
-                    <span className="command-palette-item-desc">{cmd.description}</span>
-                  )}
-                </div>
+                ← Back
               </button>
-            ))
-          )}
-        </div>
+            </div>
+            <div style={{ padding: '8px 12px', maxHeight: '320px', overflowY: 'auto' }}>
+              {shortcuts.map((s, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 8px',
+                    borderBottom: i < shortcuts.length - 1 ? '1px solid var(--border)' : 'none',
+                  }}
+                >
+                  <span style={{ fontSize: '0.85rem', color: 'var(--foreground)' }}>
+                    {s.description}
+                  </span>
+                  <span style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    {s.keys.map((key, j) => (
+                      <span key={j}>
+                        <kbd className="command-palette-kbd">{key}</kbd>
+                        {j < s.keys.length - 1 && (
+                          <span style={{ color: 'var(--muted-foreground)', fontSize: '0.7rem', margin: '0 2px' }}>+</span>
+                        )}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="command-palette-footer">
+              <div>
+                <kbd className="command-palette-kbd">esc</kbd> close
+              </div>
+              <div>
+                <kbd className="command-palette-kbd">?</kbd>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* ── Command search panel ── */
+          <>
+            <input
+              ref={inputRef}
+              type="text"
+              className="command-palette-input"
+              placeholder="Type a command…"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              onKeyDown={handleInputKeyDown}
+              aria-autocomplete="list"
+              aria-activedescendant={filtered[activeIndex]?.id}
+            />
 
-        <div className="command-palette-footer">
-          <div>
-            <kbd className="command-palette-kbd">↑↓</kbd> navigate
-            <kbd className="command-palette-kbd" style={{ marginLeft: 8 }}>↵</kbd> select
-            <kbd className="command-palette-kbd" style={{ marginLeft: 8 }}>esc</kbd> close
-          </div>
-          <div>
-            <kbd className="command-palette-kbd">⌘K</kbd>
-          </div>
-        </div>
+            <div className="command-palette-list" ref={listRef} role="listbox">
+              {filtered.length === 0 ? (
+                <div className="command-palette-empty">
+                  No commands match "{query}"
+                </div>
+              ) : (
+                filtered.map((cmd, i) => (
+                  <button
+                    key={cmd.id}
+                    id={cmd.id}
+                    role="option"
+                    aria-selected={i === activeIndex}
+                    className={`command-palette-item ${i === activeIndex ? 'active' : ''}`}
+                    onClick={cmd.action}
+                    onMouseEnter={() => setActiveIndex(i)}
+                  >
+                    <div className="command-palette-item-icon">{cmd.icon}</div>
+                    <div className="command-palette-item-text">
+                      <span className="command-palette-item-label">{cmd.label}</span>
+                      {cmd.description && (
+                        <span className="command-palette-item-desc">{cmd.description}</span>
+                      )}
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            <div className="command-palette-footer">
+              <div>
+                <kbd className="command-palette-kbd">↑↓</kbd> navigate
+                <kbd className="command-palette-kbd" style={{ marginLeft: 8 }}>↵</kbd> select
+                <kbd className="command-palette-kbd" style={{ marginLeft: 8 }}>esc</kbd> close
+              </div>
+              <div>
+                <kbd className="command-palette-kbd">⌘K</kbd>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
