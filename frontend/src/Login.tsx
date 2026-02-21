@@ -53,26 +53,30 @@ export default function Login() {
         )}
       </div>
       <div className="space-y-1.5">
-        <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+        <label htmlFor="login-email" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
           Email address
         </label>
         <input
+          id="login-email"
           type="email"
           placeholder="you@example.com"
           required
+          autoComplete="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg"
         />
       </div>
       <div className="space-y-1.5">
-        <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+        <label htmlFor="login-password" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
           Password
         </label>
         <input
+          id="login-password"
           type="password"
           placeholder="••••••••"
           required
+          autoComplete="current-password"
           value={password}
           onChange={e => setPassword(e.target.value)}
           className="w-full px-4 py-2.5 rounded-lg"

@@ -76,6 +76,7 @@
 
   html[data-theme="axiotic-dark"] {
     color-scheme: dark;
+    --background-gradient: linear-gradient(135deg, #0c1222 0%, #111827 50%, #0c1222 100%);
   }
 
   body {

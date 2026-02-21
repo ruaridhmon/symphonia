@@ -68,6 +68,9 @@
 - **Dynamic document titles** — `useDocumentTitle` hook applied to all 10 routes. Browser tab now shows "Dashboard — Symphonia", "Sign In — Symphonia", etc. Restores previous title on unmount. (Pulse 11:36am)
 - **WebSocket fix** — Critical: real-time features were completely broken. `pip` in venv had Python 3.14 shebang but server runs Python 3.12. Installed `uvicorn[standard]` (websockets, httptools, uvloop) in correct Python 3.12 site-packages. Verified: WebSocket connections now properly upgrade and work. (Pulse 12:06pm)
 - **Favicon + meta tags** — SVG favicon (indigo-blue gradient S), meta description, theme-color for mobile browser chrome. (Pulse 12:06pm)
+- **AdminDashboard modernization** — Migrated from raw `fetch` to centralised API client with proper `FormListItem` typing. Replaced `<a>` tags with React Router `<Link>` (SPA navigation, no full-page reloads). Replaced emoji with Lucide `Plus` icon. Retry button → `<LoadingButton>`. Last component to be modernised. (Pulse 12:36pm)
+- **AuthLayout dark mode** — Replaced hardcoded light gradient with `var(--background-gradient)` CSS variable. Added dark theme gradient definition. Login/Register pages now render correctly in all three themes. (Pulse 12:36pm)
+- **Form accessibility** — Added `htmlFor`/`id` associations and `autoComplete` attributes to Login and Register forms. Screen readers and password managers now work properly. (Pulse 12:36pm)
 
 ## Build Command
 ```bash
@@ -80,14 +83,23 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 - [x] WebSocket connections broken (uvicorn[standard] not installed for Python 3.12) — FIXED (Pulse 12:06pm): websockets/httptools/uvloop installed in correct Python 3.12 site-packages, pip shebang corrected. All real-time features (presence, live updates) now functional.
 - [x] SVG favicon + meta tags (description, theme-color) — DONE (Pulse 12:06pm)
 
+### P5 — Final Polish
+- [x] AdminDashboard → API client migration (was last file using raw `fetch`) — DONE (Pulse 12:36pm)
+- [x] AdminDashboard `<a>` → React Router `<Link>` (prevents full-page reloads) — DONE (Pulse 12:36pm)
+- [x] AdminDashboard `any` types → `FormListItem` proper typing — DONE (Pulse 12:36pm)
+- [x] AdminDashboard retry button → `<LoadingButton>` consistency — DONE (Pulse 12:36pm)
+- [x] AdminDashboard emoji → Lucide `Plus` icon — DONE (Pulse 12:36pm)
+- [x] AuthLayout dark mode fix (hardcoded light gradient → CSS variable) — DONE (Pulse 12:36pm)
+- [x] Login/Register `htmlFor` + `autoComplete` attributes for accessibility — DONE (Pulse 12:36pm)
+
 ## Pulse State
 ```json
 {
-  "last_run": "2026-02-21T12:06:00Z",
-  "current_task": "WebSocket fix + favicon. All roadmap items complete.",
+  "last_run": "2026-02-21T12:36:00Z",
+  "current_task": "Final polish pass. All roadmap items complete.",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 13,
-  "status": "ALL PHASES COMPLETE — WebSocket real-time features now working"
+  "pulse_direct_changes": 14,
+  "status": "ALL PHASES COMPLETE — polishing final edges"
 }
 ```

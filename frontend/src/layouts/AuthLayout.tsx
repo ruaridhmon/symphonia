@@ -11,7 +11,7 @@ export default function AuthLayout() {
     <div
       className="min-h-screen flex items-center justify-center px-4 sm:px-6"
       style={{
-        background: 'linear-gradient(135deg, #f1f5f9 0%, #eef2ff 50%, #f1f5f9 100%)',
+        background: 'var(--background-gradient, var(--background))',
         color: 'var(--foreground)',
         fontFamily: 'var(--font-family)',
       }}

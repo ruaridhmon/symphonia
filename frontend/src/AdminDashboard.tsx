@@ -1,87 +1,80 @@
-import { useState, useEffect } from 'react';
-import { API_BASE_URL } from './config';
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { getForms, createForm as apiCreateForm, FormListItem } from './api/forms';
+import { ApiError } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
+import { Plus } from 'lucide-react';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
  *
  * Rendered inside PageLayout via Dashboard component.
+ * Uses centralised API client for all requests.
  */
 export default function AdminDashboard() {
   useDocumentTitle('Admin Dashboard');
   const { token } = useAuth();
   const { toastError, toastSuccess } = useToast();
   
-  const [forms, setForms] = useState<any[]>([]);
+  const [forms, setForms] = useState<FormListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newFormTitle, setNewFormTitle] = useState('');
   const [newQuestions, setNewQuestions] = useState(['']);
 
-  const fetchForms = () => {
+  const fetchForms = useCallback(async () => {
     if (!token) {
       setLoading(false);
       return;
     }
     setLoading(true);
     setError(null);
-    fetch(`${API_BASE_URL}/forms`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => {
-        if (!r.ok) {
-          if (r.status === 401) {
-            throw new Error('Session expired. Please log in again.');
-          } else if (r.status === 403) {
-            throw new Error('Admin access required to view forms.');
-          }
-          throw new Error(`Failed to load forms (HTTP ${r.status})`);
+    try {
+      const data = await getForms();
+      setForms(Array.isArray(data) ? data : []);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) return; // client.ts handles redirect
+        if (err.status === 403) {
+          setError('Admin access required to view forms.');
+        } else {
+          setError(`Failed to load forms (HTTP ${err.status})`);
         }
-        return r.json();
-      })
-      .then(d => {
-        setForms(Array.isArray(d) ? d : []);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('[AdminDashboard] Failed to load forms:', err);
-        setError(err.message || 'Failed to load forms');
-        setLoading(false);
-      });
-  };
+      } else {
+        setError('Failed to load forms. Please check your connection.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
     fetchForms();
-  }, [token]);
+  }, [fetchForms]);
 
-  const createForm = async () => {
-    const res = await fetch(`${API_BASE_URL}/create_form`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
+  const handleCreateForm = async () => {
+    try {
+      const created = await apiCreateForm({
         title: newFormTitle,
         questions: newQuestions.filter(q => q.trim() !== ''),
         allow_join: true,
         join_code: String(Math.floor(10000 + Math.random() * 90000)),
-      }),
-    });
-    if (!res.ok) {
-      toastError(`Save failed (HTTP ${res.status})`);
-      return;
+      });
+      setForms(prev => [...prev, created]);
+      setNewFormTitle('');
+      setNewQuestions(['']);
+      toastSuccess('Form created');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toastError(`Save failed (HTTP ${err.status})`);
+      } else {
+        toastError('Failed to create form');
+      }
     }
-
-    const created = await res.json();
-    setForms(prev => [...prev, created]);
-    setNewFormTitle('');
-    setNewQuestions(['']);
-    toastSuccess('Form created');
   };
 
   if (loading) {
@@ -124,17 +117,13 @@ export default function AdminDashboard() {
             }}
           >
             <span className="text-sm font-medium">{error}</span>
-            <button
-              type="button"
+            <LoadingButton
+              variant="destructive"
+              size="sm"
               onClick={fetchForms}
-              className="self-start sm:self-auto px-3 py-1.5 rounded-lg text-sm font-medium"
-              style={{
-                backgroundColor: 'var(--destructive)',
-                color: '#ffffff',
-              }}
             >
               Retry
-            </button>
+            </LoadingButton>
           </div>
         )}
 
@@ -149,10 +138,11 @@ export default function AdminDashboard() {
           }}
         >
           <h2
-            className="text-lg font-semibold mb-4"
+            className="text-lg font-semibold mb-4 flex items-center gap-2"
             style={{ color: 'var(--foreground)' }}
           >
-            ✨ Create a New Form
+            <Plus size={20} style={{ color: 'var(--accent)' }} />
+            Create a New Form
           </h2>
           <div className="space-y-1.5 mb-4">
             <label
@@ -213,7 +203,7 @@ export default function AdminDashboard() {
             <LoadingButton
               variant="accent"
               size="md"
-              onClick={createForm}
+              onClick={handleCreateForm}
             >
               Save Form
             </LoadingButton>
@@ -267,7 +257,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {forms.map((f: any) => (
+                  {forms.map((f) => (
                     <tr
                       key={f.id}
                       className="transition-colors"
@@ -319,22 +309,22 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="p-3 text-right space-x-3">
-                        <a
-                          href={`/admin/form/${f.id}`}
+                        <Link
+                          to={`/admin/form/${f.id}`}
                           className="text-sm font-medium transition-colors"
                           style={{ color: 'var(--muted-foreground)' }}
                           onMouseEnter={e => e.currentTarget.style.color = 'var(--foreground)'}
                           onMouseLeave={e => e.currentTarget.style.color = 'var(--muted-foreground)'}
                         >
                           Edit
-                        </a>
-                        <a
-                          href={`/admin/form/${f.id}/summary`}
+                        </Link>
+                        <Link
+                          to={`/admin/form/${f.id}/summary`}
                           className="text-sm font-medium"
                           style={{ color: 'var(--accent)' }}
                         >
                           Summary →
-                        </a>
+                        </Link>
                       </td>
                     </tr>
                   ))}
@@ -344,7 +334,7 @@ export default function AdminDashboard() {
 
             {/* Mobile card list */}
             <div className="sm:hidden space-y-3">
-              {forms.map((f: any) => (
+              {forms.map((f) => (
                 <div
                   key={f.id}
                   className="rounded-lg p-4"
@@ -378,20 +368,20 @@ export default function AdminDashboard() {
                     <span>Round: {f.current_round}</span>
                   </div>
                   <div className="flex gap-4">
-                    <a
-                      href={`/admin/form/${f.id}`}
+                    <Link
+                      to={`/admin/form/${f.id}`}
                       className="text-sm"
                       style={{ color: 'var(--accent)' }}
                     >
                       Edit
-                    </a>
-                    <a
-                      href={`/admin/form/${f.id}/summary`}
+                    </Link>
+                    <Link
+                      to={`/admin/form/${f.id}/summary`}
                       className="text-sm"
                       style={{ color: 'var(--accent)' }}
                     >
                       Summary
-                    </a>
+                    </Link>
                   </div>
                 </div>
               ))}
