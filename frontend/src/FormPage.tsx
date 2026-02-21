@@ -5,11 +5,12 @@ import { LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } f
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
+import { extractQuestionText } from './utils/questions'
 
 type Form = {
   id: number
   title: string
-  questions: string[]
+  questions: (string | Record<string, unknown>)[]
   allow_join: boolean
   join_code: string
 }
@@ -19,7 +20,7 @@ type ActiveRound = {
   round_number: number
   synthesis: string
   is_active: boolean
-  questions: string[]
+  questions: (string | Record<string, unknown>)[]
 }
 
 export default function FormPage() {
@@ -40,7 +41,7 @@ export default function FormPage() {
 
   const [previousSynthesis, setPreviousSynthesis] = useState('')
 
-  const [roundQuestions, setRoundQuestions] = useState<string[]>([])
+  const [roundQuestions, setRoundQuestions] = useState<(string | Record<string, unknown>)[]>([])
 
   const [structuredResponses, setStructuredResponses] = useState<Record<string, StructuredResponse>>({})
 
@@ -60,9 +61,9 @@ export default function FormPage() {
   })
 
   /** Build initial empty structured responses for a set of questions */
-  const buildEmptyResponses = useCallback((questions: string[]) => {
+  const buildEmptyResponses = useCallback((questions: (string | Record<string, unknown>)[]) => {
     return Object.fromEntries(
-      questions.map((_: string, i: number) => [`q${i + 1}`, emptyStructuredResponse()])
+      questions.map((_: string | Record<string, unknown>, i: number) => [`q${i + 1}`, emptyStructuredResponse()])
     ) as Record<string, StructuredResponse>
   }, [])
 
@@ -338,7 +339,7 @@ export default function FormPage() {
 
                 <div key={key} className="mb-6">
 
-                  <label className="block text-sm font-semibold text-foreground mb-2">{q}</label>
+                  <label className="block text-sm font-semibold text-foreground mb-2">{extractQuestionText(q)}</label>
 
                   <StructuredInput
                     questionIndex={i}
@@ -384,7 +385,7 @@ export default function FormPage() {
 
                 <div key={key} className="mb-6">
 
-                  <label className="block text-sm font-medium mb-2 text-foreground">{q}</label>
+                  <label className="block text-sm font-medium mb-2 text-foreground">{extractQuestionText(q)}</label>
 
                   <StructuredInput
                     questionIndex={i}

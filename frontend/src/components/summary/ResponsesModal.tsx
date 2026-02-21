@@ -1,13 +1,14 @@
 import { createPortal } from 'react-dom';
 import { LoadingButton, ResponseEditor } from '../index';
 import type { Round, RoundWithResponses, StructuredResponse } from '../../types/summary';
+import { extractQuestionText } from '../../utils/questions';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   structuredRounds: RoundWithResponses[];
   rounds: Round[];
-  formQuestions: string[];
+  formQuestions: (string | Record<string, unknown>)[];
   token: string;
   onResponseUpdated: (roundId: number, updated: { id: number; answers: Record<string, string>; version: number }) => void;
 };

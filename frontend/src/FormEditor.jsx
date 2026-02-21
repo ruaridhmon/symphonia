@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { API_BASE_URL } from './config'
+import { extractQuestionText } from './utils/questions'
 
 export default function FormEditor() {
   const { id } = useParams()
@@ -57,7 +58,13 @@ export default function FormEditor() {
 
   function updateQuestion(i, value) {
     const updated = [...questions]
-    updated[i] = value
+    const original = updated[i]
+    // If the original question is an object, update only the label field
+    if (original && typeof original === 'object') {
+      updated[i] = { ...original, label: value }
+    } else {
+      updated[i] = value
+    }
     setQuestions(updated)
   }
 
@@ -98,7 +105,7 @@ export default function FormEditor() {
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
-            className="w-full rounded-lg px-3 py-2.5"
+            className="w-full rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
           />
         </div>
 
@@ -108,9 +115,9 @@ export default function FormEditor() {
             {questions.map((q, i) => (
               <div key={i} className="flex items-center gap-2">
                 <input
-                  value={q}
+                  value={extractQuestionText(q)}
                   onChange={e => updateQuestion(i, e.target.value)}
-                  className="w-full rounded-lg px-3 py-2.5"
+                  className="w-full rounded-lg px-3 py-2.5 border border-border bg-card"
                 />
                 <button
                   className="text-destructive text-sm underline font-medium"
@@ -131,7 +138,7 @@ export default function FormEditor() {
           </button>
         </div>
         
-        <div className="card-lg p-6 sm:p-8 flex justify-end items-center gap-3">
+        <div className="card-lg p-6 sm:p-8 flex items-center gap-3">
           <button
             onClick={saveForm}
             className="btn btn-accent px-6 py-2"
@@ -141,14 +148,14 @@ export default function FormEditor() {
           <button
             type="button"
             onClick={async () => {
-              if (!window.confirm('Are you sure you want to delete this form?')) return
+              if (!window.confirm('Are you sure you want to delete this form? This action cannot be undone.')) return
               await fetch(`${API_BASE_URL}/forms/${id}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
               })
               navigate('/')
             }}
-            className="btn btn-destructive px-5 py-2"
+            className="ml-auto px-5 py-2 rounded-lg text-sm font-medium border border-destructive text-destructive bg-transparent hover:bg-destructive hover:text-white transition-colors"
           >
             Delete Form
           </button>

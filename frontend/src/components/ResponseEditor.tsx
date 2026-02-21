@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '../config';
+import { extractQuestionText } from '../utils/questions';
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ interface ConflictInfo {
 
 interface ResponseEditorProps {
   response: ResponseData;
-  questions: string[];
+  questions: (string | Record<string, unknown>)[];
   token: string;
   onUpdated?: (updated: ResponseData) => void;
 }
@@ -178,7 +179,7 @@ export default function ResponseEditor({
                 className="text-xs font-semibold mb-1"
                 style={{ color: 'var(--foreground)' }}
               >
-                {q}
+                {extractQuestionText(q)}
               </div>
               <div
                 className="text-sm leading-relaxed"
@@ -246,7 +247,7 @@ export default function ResponseEditor({
               className="text-xs font-semibold mb-1 block"
               style={{ color: 'var(--foreground)' }}
             >
-              {q}
+              {extractQuestionText(q)}
             </label>
             <textarea
               ref={el => {
@@ -342,7 +343,7 @@ export default function ResponseEditor({
                 return (
                   <div key={key}>
                     <div style={{ color: 'var(--muted-foreground)' }}>
-                      {q}
+                      {extractQuestionText(q)}
                     </div>
                     <div
                       className="mt-0.5"
