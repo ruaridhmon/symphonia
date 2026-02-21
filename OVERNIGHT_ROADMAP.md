@@ -80,6 +80,11 @@
 - **SynthesisModeSelector tooltips** — Each synthesis mode (Simple/Committee/TTD) now has an expandable info panel with detailed description and "Best for" guidance. Helps non-technical admins choose the right mode. (Pulse 1:36pm)
 - **Form status badges** — UserDashboard now fetches per-form submission status and round number. Each form shows "Round N" badge + "Submitted ✓" (green) or "Awaiting response" (amber). Button text changes to "Review" for submitted forms. (Pulse 1:36pm)
 - **WaitingPage context** — FormPage now passes form title, form ID, and round number to WaitingPage via navigation state. WaitingPage shows form title + round number pill, dynamic page title, and "Edit response" link back to the form. Console.error cleanup. (Pulse 1:36pm)
+- **PWA manifest + Apple meta** — manifest.json with app name, icons, standalone display mode. Apple mobile web app meta tags. App is now installable on iOS, Android, and desktop. (Pulse 2:41pm)
+- **PasswordInput component** — Reusable eye toggle component (Eye/EyeOff Lucide icons, forwardRef). Integrated into Login and Register pages. (Pulse 2:41pm)
+- **Print stylesheet** — `@media print` rules: hide header/footer/nav/buttons, flat cards, clean prose typography, no animations, proper page margins. Ctrl+P now produces clean synthesis printouts. (Pulse 2:41pm)
+- **ResultPage modernisation** — Migrated from raw `fetch` to centralised API client. Added skeleton loading states (two card placeholders). Added error state with retry button. Removed console.error calls. (Pulse 2:41pm)
+- **FormEditor modernisation** — Migrated from raw `fetch` to API client (`api.get`/`api.put`/`api.delete`). Added toast success messages for save and delete. Added error handling with toast feedback. Removed `API_BASE_URL` import. (Pulse 2:41pm)
 
 ## Build Command
 ```bash
@@ -98,6 +103,13 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 - [x] Admin dashboard search/filter — search forms by title or join code with clear button — DONE (Pulse 1:06pm)
 - [x] Staggered card entrance animations — smooth CSS stagger for form lists — DONE (Pulse 1:06pm)
 - [x] ⌘K hint button in header — discoverable shortcut for command palette — DONE (Pulse 1:06pm)
+
+### P8 — Final Hardening & Installability
+- [x] PWA manifest.json + Apple mobile meta tags (installable on iOS/Android/desktop) — DONE (Pulse 2:41pm)
+- [x] PasswordInput component with eye visibility toggle (Login + Register) — DONE (Pulse 2:41pm)
+- [x] Print stylesheet for clean Ctrl+P synthesis output — DONE (Pulse 2:41pm)
+- [x] ResultPage → API client migration + skeleton loading + error/retry UI — DONE (Pulse 2:41pm)
+- [x] FormEditor → API client migration + toast feedback on save/delete — DONE (Pulse 2:41pm)
 
 ### P7 — Accessibility & Expert UX
 - [x] `prefers-reduced-motion` support (WCAG 2.1) — respects OS motion preferences, disables all animations — DONE (Pulse 1:36pm)
@@ -118,11 +130,11 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 ## Pulse State
 ```json
 {
-  "last_run": "2026-02-21T13:36:00Z",
-  "current_task": "P7 accessibility & expert UX. Reduced motion, tooltips, form badges, waiting page context.",
+  "last_run": "2026-02-21T14:41:00Z",
+  "current_task": "P8 final hardening. PWA, password toggle, print styles, API client migrations.",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 19,
-  "status": "ALL PHASES COMPLETE + P7 ACCESSIBILITY & EXPERT UX"
+  "pulse_direct_changes": 24,
+  "status": "ALL PHASES COMPLETE + P8 FINAL HARDENING & INSTALLABILITY"
 }
 ```
