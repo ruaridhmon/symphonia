@@ -28,6 +28,8 @@
 - [ ] TanStack Query for state management (deferred — requires large refactor, all pages working well without it)
 - [x] Toast notification system — replace all 9 alert() calls with themed toasts — DONE (Pulse 11:06am)
 - [x] Mobile responsiveness (safe-area insets, touch targets, overflow, responsive spacing) — DONE (Pulse 6:36am)
+- [x] 404 Not Found page (themed, with navigation) — DONE (Pulse 11:36am)
+- [x] Dynamic document titles across all 10 routes (useDocumentTitle hook) — DONE (Pulse 11:36am)
 - [x] Code splitting (React.lazy + Vite manual chunks) — DONE (Pulse 7:06am): initial bundle 1,298KB → 18KB app shell + lazy-loaded routes. Vendor chunks: react 177KB, tiptap 302KB, markdown 318KB, docx 342KB — each cached independently.
 - [x] Convert remaining .jsx → .tsx (FormEditor) — DONE (Pulse 7:06am): full TypeScript, Lucide icons, LoadingButton integration
 - [x] Remove dead code (AdminFormPage.jsx) — DONE (Pulse 7:06am)
@@ -62,6 +64,8 @@
 - **Skeleton loading states** — UserDashboard: replaced "Loading…" text with SkeletonCard shimmer placeholders; FormPage: replaced orbit spinner with full form skeleton (title + round + questions + button shapes). (Pulse 8:06am)
 - **React.memo performance** — Memoized 4 heavy pure components: MarkdownRenderer, RoundCard, SynthesisDisplay, CrossMatrix. SummaryPage chunk: 75.6KB → 49.1KB (35% smaller). Prevents unnecessary re-renders during synthesis editing. (Pulse 8:06am)
 - **Toast notification system** — New Toast component (success/error/warning/info variants) with themed colors, slide-in/out animations, auto-dismiss. Replaced all 9 `alert()` calls across SummaryPage (7), FormEditor (1), AdminDashboard (1). Added success toasts for save/create. Zero `alert()` calls remain. (Pulse 11:06am)
+- **404 Not Found page** — Themed catch-all route with "Go back" and "Dashboard" navigation. Lazy-loaded, wrapped in ErrorBoundary. (Pulse 11:36am)
+- **Dynamic document titles** — `useDocumentTitle` hook applied to all 10 routes. Browser tab now shows "Dashboard — Symphonia", "Sign In — Symphonia", etc. Restores previous title on unmount. (Pulse 11:36am)
 
 ## Build Command
 ```bash
@@ -73,11 +77,11 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 ## Pulse State
 ```json
 {
-  "last_run": "2026-02-21T11:06:00Z",
-  "current_task": "Toast notifications shipped. 31 tasks total.",
+  "last_run": "2026-02-21T11:36:00Z",
+  "current_task": "404 page + dynamic titles shipped. 33 tasks total.",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 9,
-  "status": "ALL PHASES COMPLETE + toast notifications (9 alert() → themed toasts)"
+  "pulse_direct_changes": 11,
+  "status": "ALL PHASES COMPLETE + 404 page + dynamic document titles"
 }
 ```
