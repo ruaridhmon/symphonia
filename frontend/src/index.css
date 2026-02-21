@@ -3636,3 +3636,51 @@ html[data-theme="axiotic-dark"] .command-palette-overlay {
   color: var(--muted-foreground);
   font-size: 0.875rem;
 }
+
+/* ═══════════════════════════════════════════════
+   Print stylesheet — clean synthesis output
+   ═══════════════════════════════════════════════ */
+@media print {
+  /* Hide chrome: header, footer, nav, command palette, toasts, buttons */
+  header,
+  footer,
+  nav,
+  .command-palette-overlay,
+  [data-toast-container],
+  button:not([type="submit"]) {
+    display: none !important;
+  }
+
+  /* Reset background/colors for print */
+  html, body, #root {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Cards print flat */
+  .card-lg,
+  [class*="rounded-xl"],
+  [class*="rounded-lg"] {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+  }
+
+  /* Synthesis content fills width */
+  .prose {
+    max-width: 100% !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* No animations */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 1.5cm;
+  }
+}

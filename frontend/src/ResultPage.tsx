@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
+import { api } from './api/client';
 import { LoadingButton, SynthesisDisplay } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
+import Skeleton from './components/Skeleton';
 
 export default function ResultPage() {
   useDocumentTitle('Synthesis Results');
   const [html, setHtml] = useState('');
-  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [responses, setResponses] = useState({
     accuracy: '',
@@ -27,25 +30,16 @@ export default function ResultPage() {
 
     const load = async () => {
       try {
-        const me = await fetch(`${API_BASE_URL}/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => r.json());
+        setError(null);
+        setLoading(true);
 
-        setEmail(me.email || '');
-
-        const feedback = await fetch(`${API_BASE_URL}/has_submitted_feedback`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => r.json());
-
+        const feedback = await api.get<{ submitted: boolean }>('/has_submitted_feedback');
         if (feedback.submitted === true) {
           navigate('/thank-you', { replace: true });
           return;
         }
 
-        const summary = await fetch(`${API_BASE_URL}/summary_text`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }).then((r) => r.json());
-
+        const summary = await api.get<{ summary: string }>('/summary_text');
         if (!summary.summary?.trim()) {
           navigate('/waiting', { replace: true });
           return;
@@ -53,9 +47,10 @@ export default function ResultPage() {
 
         setHtml(summary.summary);
         hadSummary.current = true;
-      } catch (err) {
-        console.error('ResultPage load error:', err);
-        navigate('/waiting', { replace: true });
+      } catch {
+        setError('Failed to load synthesis results. Please try again.');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -79,18 +74,13 @@ export default function ResultPage() {
             setHtml(newHtml);
           }
         }
-      } catch (err) {
-        console.error('WebSocket parse error:', err);
+      } catch {
+        // Ignore malformed WebSocket messages
       }
     };
 
     return () => ws.close();
   }, [navigate]);
-
-  function logout() {
-    localStorage.clear();
-    navigate('/');
-  }
 
   function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setResponses((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -105,19 +95,39 @@ export default function ResultPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('access_token');
-      await fetch(`${API_BASE_URL}/submit_feedback`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(responses),
-      });
+      await api.post('/submit_feedback', responses);
       navigate('/thank-you');
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex-1 px-4 sm:px-6 py-6 sm:py-8 max-w-3xl mx-auto space-y-6">
+        <Skeleton variant="card" width="100%" height="200px" />
+        <Skeleton variant="card" width="100%" height="300px" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 px-4 sm:px-6 py-6 sm:py-8 max-w-3xl mx-auto">
+        <div
+          className="card-lg p-8 sm:p-10 text-center space-y-4"
+        >
+          <p style={{ color: 'var(--destructive)' }}>{error}</p>
+          <LoadingButton
+            variant="accent"
+            size="md"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </LoadingButton>
+        </div>
+      </div>
+    );
   }
 
   return (

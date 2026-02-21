@@ -19,3 +19,4 @@ export { default as Skeleton, SkeletonCard, SkeletonForm, SkeletonTable, Skeleto
 export type { PresenceViewer } from './PresenceIndicator';
 export type { Round } from './RoundTimeline';
 export { ToastProvider, useToast } from './Toast';
+export { default as PasswordInput } from './PasswordInput';

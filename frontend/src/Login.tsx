@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { Link, Navigate } from 'react-router-dom';
-import { LoadingButton } from './components';
+import { LoadingButton, PasswordInput } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Login() {
@@ -71,15 +71,13 @@ export default function Login() {
         <label htmlFor="login-password" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
           Password
         </label>
-        <input
+        <PasswordInput
           id="login-password"
-          type="password"
           placeholder="••••••••"
           required
           autoComplete="current-password"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg"
         />
       </div>
       <LoadingButton

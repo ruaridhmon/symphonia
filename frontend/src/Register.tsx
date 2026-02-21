@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { Link, Navigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
-import { LoadingButton } from './components';
+import { LoadingButton, PasswordInput } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Register() {
@@ -84,15 +84,13 @@ export default function Register() {
         <label htmlFor="register-password" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
           Password
         </label>
-        <input
+        <PasswordInput
           id="register-password"
-          type="password"
           placeholder="••••••••"
           required
           autoComplete="new-password"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg"
         />
       </div>
       <LoadingButton

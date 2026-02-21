@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Trash2, Plus, Save, ArrowLeft } from 'lucide-react';
-import { API_BASE_URL } from './config';
+import { api } from './api/client';
 import { extractQuestionText } from './utils/questions';
 import LoadingButton from './components/LoadingButton';
 import { useToast } from './components/Toast';
@@ -17,7 +17,7 @@ export default function FormEditor() {
   useDocumentTitle('Edit Form');
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toastError } = useToast();
+  const { toastError, toastSuccess } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -33,43 +33,34 @@ export default function FormEditor() {
       return;
     }
 
-    fetch(`${API_BASE_URL}/forms/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((form: FormData) => {
+    api.get<FormData>(`/forms/${id}`)
+      .then((form) => {
         setTitle(form.title);
         setQuestions(form.questions || []);
         setJoinCode(form.join_code);
         setLoading(false);
+      })
+      .catch(() => {
+        toastError('Failed to load form');
+        setLoading(false);
       });
-  }, [id, navigate]);
+  }, [id, navigate, toastError]);
 
   async function saveForm() {
-    const token = localStorage.getItem('access_token');
     setSaving(true);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/forms/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          questions,
-          allow_join: true,
-          join_code: joinCode,
-        }),
+      await api.put(`/forms/${id}`, {
+        title,
+        questions,
+        allow_join: true,
+        join_code: joinCode,
       });
 
-      if (!res.ok) {
-        toastError('Failed to save edits');
-        return;
-      }
-
+      toastSuccess('Form saved');
       navigate('/');
+    } catch {
+      toastError('Failed to save edits');
     } finally {
       setSaving(false);
     }
@@ -85,13 +76,11 @@ export default function FormEditor() {
 
     setDeleting(true);
     try {
-      await fetch(`${API_BASE_URL}/forms/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
+      await api.delete(`/forms/${id}`);
+      toastSuccess('Form deleted');
       navigate('/');
+    } catch {
+      toastError('Failed to delete form');
     } finally {
       setDeleting(false);
     }

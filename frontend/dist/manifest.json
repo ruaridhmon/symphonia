@@ -1,0 +1,19 @@
+{
+  "name": "Symphonia — Collaborative Consensus",
+  "short_name": "Symphonia",
+  "description": "Expert consensus platform for structured multi-round deliberation. By Axiotic AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#6366f1",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"]
+}
