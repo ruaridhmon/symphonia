@@ -85,6 +85,11 @@
 - **Print stylesheet** — `@media print` rules: hide header/footer/nav/buttons, flat cards, clean prose typography, no animations, proper page margins. Ctrl+P now produces clean synthesis printouts. (Pulse 2:41pm)
 - **ResultPage modernisation** — Migrated from raw `fetch` to centralised API client. Added skeleton loading states (two card placeholders). Added error state with retry button. Removed console.error calls. (Pulse 2:41pm)
 - **FormEditor modernisation** — Migrated from raw `fetch` to API client (`api.get`/`api.put`/`api.delete`). Added toast success messages for save and delete. Added error handling with toast feedback. Removed `API_BASE_URL` import. (Pulse 2:41pm)
+- **Security headers middleware** — X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy: camera=(), microphone=(), geolocation=(). Static assets: 1yr immutable caching. API: no-store. (Pulse 3:46pm)
+- **Modern lifespan** — Replaced deprecated `@app.on_event("startup"/"shutdown")` with `asynccontextmanager` lifespan. Future-proof against FastAPI deprecation. (Pulse 3:46pm)
+- **Typed AuthContext** — `user: any` → `user: User | null` with proper `User` interface. One fewer `any` in the codebase. (Pulse 3:46pm)
+- **Selective logout** — `localStorage.clear()` → targeted removal of auth keys only. Theme preference, auto-saved drafts, and other localStorage data survive logout. (Pulse 3:46pm)
+- **Specific auth error messages** — Login: differentiates wrong credentials (401/403), server error (5xx), network failure. Register: differentiates duplicate account (409), validation error (422), server error, network failure. (Pulse 3:46pm)
 
 ## Build Command
 ```bash
@@ -111,6 +116,14 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 - [x] ResultPage → API client migration + skeleton loading + error/retry UI — DONE (Pulse 2:41pm)
 - [x] FormEditor → API client migration + toast feedback on save/delete — DONE (Pulse 2:41pm)
 
+### P9 — Security & Quality Hardening
+- [x] Security headers middleware (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) — DONE (Pulse 3:46pm)
+- [x] Static asset caching (1yr immutable) + API no-store — DONE (Pulse 3:46pm)
+- [x] Replaced deprecated `on_event` with modern `lifespan` context manager — DONE (Pulse 3:46pm)
+- [x] Typed AuthContext (`User` interface replaces `any`) — DONE (Pulse 3:46pm)
+- [x] Selective logout (only clears auth keys, preserves theme/drafts/localStorage) — DONE (Pulse 3:46pm)
+- [x] Specific login/register error messages per HTTP status code — DONE (Pulse 3:46pm)
+
 ### P7 — Accessibility & Expert UX
 - [x] `prefers-reduced-motion` support (WCAG 2.1) — respects OS motion preferences, disables all animations — DONE (Pulse 1:36pm)
 - [x] Enhanced SynthesisModeSelector — expandable tooltips with detailed descriptions and "Best for" guidance for each mode — DONE (Pulse 1:36pm)
@@ -131,10 +144,10 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 ```json
 {
   "last_run": "2026-02-21T14:41:00Z",
-  "current_task": "P8 final hardening. PWA, password toggle, print styles, API client migrations.",
+  "current_task": "P9 security & quality hardening. Security headers, typed auth, selective logout, better errors.",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 24,
-  "status": "ALL PHASES COMPLETE + P8 FINAL HARDENING & INSTALLABILITY"
+  "pulse_direct_changes": 25,
+  "status": "ALL PHASES COMPLETE + P9 SECURITY & QUALITY HARDENING"
 }
 ```
