@@ -8,7 +8,7 @@ import { LoadingButton, SkeletonDashboard } from './components';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useCopyToClipboard } from './hooks/useCopyToClipboard';
-import { Plus, Search, Copy, Check, X } from 'lucide-react';
+import { Plus, Search, Copy, Check, X, FileText } from 'lucide-react';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -133,6 +133,45 @@ export default function AdminDashboard() {
             </LoadingButton>
           </Link>
         </div>
+
+        {/* ── Empty state ── */}
+        {forms.length === 0 && !error && (
+          <div
+            className="rounded-lg p-12 text-center"
+            style={{
+              backgroundColor: 'var(--card)',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--card-shadow, none)',
+            }}
+          >
+            <div
+              className="mx-auto mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+              }}
+            >
+              <FileText size={32} style={{ color: 'var(--accent)' }} />
+            </div>
+            <h3
+              className="text-lg font-semibold mb-2"
+              style={{ color: 'var(--foreground)' }}
+            >
+              No consultations yet
+            </h3>
+            <p
+              className="text-sm mb-6 max-w-sm mx-auto"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              Create your first consultation to get started collecting expert insights with the Delphi method.
+            </p>
+            <Link to="/admin/form/new">
+              <LoadingButton variant="accent" size="md">
+                <Plus size={18} className="mr-1.5" />
+                Create First Consultation
+              </LoadingButton>
+            </Link>
+          </div>
+        )}
 
         {/* ── Existing forms table ── */}
         {forms.length > 0 && (

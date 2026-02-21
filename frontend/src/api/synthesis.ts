@@ -63,3 +63,50 @@ export function pushSummary(formId: number, summary: string) {
     summary,
   });
 }
+
+/* ── Devil's Advocate ── */
+
+export interface Counterargument {
+  argument: string;
+  rationale: string;
+  strength: 'strong' | 'moderate' | 'weak';
+}
+
+export interface DevilsAdvocateResult {
+  counterarguments: Counterargument[];
+}
+
+/** Generate AI devil's advocate counterarguments for a round */
+export function generateDevilsAdvocate(formId: number, roundId: number) {
+  return api.post<DevilsAdvocateResult>(
+    `/forms/${formId}/rounds/${roundId}/devil_advocate`
+  );
+}
+
+/* ── Audience Translation ── */
+
+export type AudienceType =
+  | 'policy_maker'
+  | 'technical'
+  | 'general_public'
+  | 'executive'
+  | 'academic';
+
+export interface TranslateResult {
+  audience: AudienceType;
+  audience_label: string;
+  translated_text: string;
+}
+
+/** Translate synthesis for a specific audience */
+export function translateSynthesis(
+  formId: number,
+  roundId: number,
+  audience: AudienceType,
+  synthesisText: string
+) {
+  return api.post<TranslateResult>(
+    `/forms/${formId}/rounds/${roundId}/translate`,
+    { audience, synthesis_text: synthesisText }
+  );
+}

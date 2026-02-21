@@ -1,1 +1,0 @@
-import{b as o}from"./index-076bec68.js";function n(){return o.get("/forms")}function e(r){return o.get(`/forms/${r}`)}function s(){return o.get("/my_forms")}function m(r){return o.post("/forms/unlock",{join_code:r})}export{s as a,e as b,n as g,m as u};

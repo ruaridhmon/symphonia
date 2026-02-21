@@ -1,4 +1,5 @@
 import { LoadingButton, MarkdownRenderer, StructuredSynthesis } from '../index';
+import { CheckCircle } from 'lucide-react';
 import type { Round, SynthesisVersion } from '../../types/summary';
 
 type Props = {
@@ -8,13 +9,21 @@ type Props = {
   onSelectVersion: (id: number) => void;
   selectedVersion: SynthesisVersion | null;
   onActivateVersion: (id: number) => void;
-  isGeneratingVersion: boolean;
-  onGenerateNewVersion: () => void;
   resolvedExpertLabels: Record<number, string>;
   formId: number;
   token: string;
   currentUserEmail: string;
 };
+
+function formatTimestamp(iso: string | null): string {
+  if (!iso) return '';
+  return new Date(iso).toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
 export default function SynthesisVersionPanel({
   displayRound,
@@ -23,8 +32,6 @@ export default function SynthesisVersionPanel({
   onSelectVersion,
   selectedVersion,
   onActivateVersion,
-  isGeneratingVersion,
-  onGenerateNewVersion,
 }: Props) {
   if (!displayRound) return null;
 
@@ -41,85 +48,99 @@ export default function SynthesisVersionPanel({
       </h3>
 
       {synthesisVersions.length === 0 ? (
-        <p className="text-sm text-muted-foreground mb-3">
-          No versions yet. Generate one below.
+        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          No versions yet. Use <strong>Generate Summary</strong> above to create one.
         </p>
       ) : (
-        <div className="space-y-2 mb-3">
-          <label
-            htmlFor="version-select"
-            className="block text-sm font-medium text-muted-foreground mb-1"
-          >
-            Select version
-          </label>
-          <select
-            id="version-select"
-            className="w-full rounded-lg px-3 py-2 text-sm"
-            value={selectedVersionId ?? ''}
-            onChange={e => onSelectVersion(Number(e.target.value))}
-          >
-            {synthesisVersions.map(v => (
-              <option key={v.id} value={v.id}>
-                v{v.version}
-                {v.is_active ? ' ★ active' : ''}
-                {v.strategy ? ` (${v.strategy})` : ''}
-                {v.created_at
-                  ? ` — ${new Date(v.created_at).toLocaleString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}`
-                  : ''}
-              </option>
-            ))}
-          </select>
+        <div className="space-y-3">
+          {/* Version pills */}
+          <div className="flex flex-wrap gap-2">
+            {synthesisVersions.map(v => {
+              const isSelected = v.id === selectedVersionId;
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => onSelectVersion(v.id)}
+                  className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                  style={{
+                    backgroundColor: isSelected
+                      ? 'color-mix(in srgb, var(--accent) 15%, var(--card))'
+                      : 'var(--muted)',
+                    color: isSelected ? 'var(--accent)' : 'var(--muted-foreground)',
+                    border: isSelected
+                      ? '1.5px solid var(--accent)'
+                      : '1.5px solid transparent',
+                    cursor: 'pointer',
+                  }}
+                  title={`v${v.version}${v.is_active ? ' (published)' : ''} — ${formatTimestamp(v.created_at)}`}
+                >
+                  v{v.version}
+                  {v.is_active && (
+                    <CheckCircle size={12} style={{ color: 'var(--success)' }} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
+          {/* Selected version details */}
           {selectedVersion && (
             <div
-              className="text-xs text-muted-foreground space-y-1 mt-2 p-2 rounded-lg"
-              style={{ background: 'var(--muted)' }}
+              className="text-xs space-y-1.5 p-3 rounded-lg"
+              style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
             >
+              <div className="flex items-center justify-between">
+                <span className="font-semibold" style={{ color: 'var(--foreground)' }}>
+                  v{selectedVersion.version}
+                </span>
+                {selectedVersion.is_active ? (
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)',
+                      color: 'var(--success)',
+                    }}
+                  >
+                    <CheckCircle size={10} /> Published
+                  </span>
+                ) : (
+                  <span
+                    className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                    style={{
+                      backgroundColor: 'var(--card)',
+                      color: 'var(--muted-foreground)',
+                    }}
+                  >
+                    Draft
+                  </span>
+                )}
+              </div>
+              {selectedVersion.created_at && (
+                <div>{formatTimestamp(selectedVersion.created_at)}</div>
+              )}
               <div>
                 <strong>Model:</strong> {selectedVersion.model_used || 'N/A'}
               </div>
               <div>
                 <strong>Strategy:</strong> {selectedVersion.strategy || 'N/A'}
               </div>
-              <div>
-                <strong>Status:</strong>{' '}
-                {selectedVersion.is_active ? (
-                  <span className="text-success font-semibold">Active (published)</span>
-                ) : (
-                  <span>Draft</span>
-                )}
-              </div>
             </div>
           )}
 
+          {/* Publish button for non-active versions */}
           {selectedVersion && !selectedVersion.is_active && (
             <LoadingButton
               variant="success"
               size="sm"
               onClick={() => onActivateVersion(selectedVersion.id)}
-              className="w-full mt-1"
+              className="w-full"
             >
               Publish v{selectedVersion.version}
             </LoadingButton>
           )}
         </div>
       )}
-
-      <LoadingButton
-        variant="accent"
-        size="sm"
-        loading={isGeneratingVersion}
-        loadingText="Generating…"
-        onClick={onGenerateNewVersion}
-        className="w-full"
-      >
-        Generate New Version
-      </LoadingButton>
     </div>
   );
 }

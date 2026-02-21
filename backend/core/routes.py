@@ -2061,6 +2061,322 @@ def delete_comment(
 
 
 # ---------------------------------------------------------
+# AI DEVIL'S ADVOCATE
+# ---------------------------------------------------------
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/devil_advocate")
+def devil_advocate(
+    form_id: int,
+    round_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Generate AI counterarguments (devil's advocate) for a round's synthesis.
+
+    Reads all expert responses and the current synthesis, then asks the LLM
+    to identify blind spots, missing perspectives, and steel-man counterarguments.
+    """
+    # Verify round belongs to form
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    # Fetch questions
+    questions = round_obj.questions or []
+    if not questions:
+        form = db.query(FormModel).filter(FormModel.id == form_id).first()
+        if form:
+            questions = form.questions or []
+
+    # Fetch responses
+    responses = (
+        db.query(Response)
+        .filter(Response.round_id == round_id)
+        .order_by(Response.created_at.asc())
+        .all()
+    )
+    if not responses:
+        raise HTTPException(status_code=404, detail="No responses found for this round")
+
+    # Build context from responses
+    responses_text = ""
+    for i, r in enumerate(responses, 1):
+        responses_text += f"\nExpert {i}:\n"
+        answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
+        for q_idx, q in enumerate(questions, 1):
+            q_text = q if isinstance(q, str) else q.get("label", q.get("text", str(q)))
+            answer = answers.get(f'q{q_idx}', 'No answer')
+            responses_text += f"  Q: {q_text}\n  A: {answer}\n"
+
+    # Get synthesis text
+    synthesis_text = ""
+    if round_obj.synthesis_json:
+        sj = round_obj.synthesis_json
+        parts = []
+        for a in sj.get("agreements", []):
+            parts.append(f"Agreement: {a.get('claim', '')} — {a.get('evidence_summary', '')}")
+        for d in sj.get("disagreements", []):
+            parts.append(f"Disagreement: {d.get('topic', '')}")
+            for p in d.get("positions", []):
+                parts.append(f"  - {p.get('position', '')}: {p.get('evidence', '')}")
+        for n in sj.get("nuances", []):
+            parts.append(f"Nuance: {n.get('claim', '')} — {n.get('context', '')}")
+        synthesis_text = "\n".join(parts)
+    elif round_obj.synthesis:
+        synthesis_text = round_obj.synthesis
+
+    if not synthesis_text:
+        raise HTTPException(status_code=400, detail="No synthesis available to critique. Generate a synthesis first.")
+
+    # Check for mock mode
+    synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    if synthesis_mode == "mock" or not api_key:
+        return {
+            "counterarguments": [
+                {
+                    "argument": "Selection bias in expert panel composition",
+                    "rationale": "The expert panel may not represent the full spectrum of views on this topic. Key stakeholder groups or dissenting traditions may be absent.",
+                    "strength": "strong",
+                },
+                {
+                    "argument": "Temporal assumptions may not hold",
+                    "rationale": "The consensus assumes current conditions persist, but rapid technological or political change could invalidate core premises.",
+                    "strength": "moderate",
+                },
+                {
+                    "argument": "Implementation feasibility gap",
+                    "rationale": "Recommendations may be theoretically sound but practically difficult to implement given resource constraints and institutional inertia.",
+                    "strength": "strong",
+                },
+            ]
+        }
+
+    prompt = f"""You are a rigorous devil's advocate analyst. Your job is to identify important counterarguments, blind spots, and perspectives that are NOT represented in the expert discussion below.
+
+--- Expert Responses ---
+{responses_text}
+
+--- Current Synthesis ---
+{synthesis_text}
+
+--- Your Task ---
+Given these expert responses and synthesis, what important counterarguments, blind spots, or perspectives are NOT represented? Generate 3-5 steel-man counterarguments.
+
+For each counterargument:
+1. State the argument clearly and charitably (steel-man it)
+2. Provide rationale for why this perspective matters
+3. Rate its strength as "strong", "moderate", or "weak"
+
+Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
+{{
+  "counterarguments": [
+    {{
+      "argument": "The counterargument stated clearly",
+      "rationale": "Why this perspective matters and evidence that supports it",
+      "strength": "strong|moderate|weak"
+    }}
+  ]
+}}"""
+
+    try:
+        openai_client = get_openai_client()
+        if not openai_client:
+            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+
+        completion = openai_client.chat.completions.create(
+            model="anthropic/claude-sonnet-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a devil's advocate analyst for a Delphi-style expert consensus platform. "
+                        "Your role is to identify blind spots, missing perspectives, and counterarguments "
+                        "that the expert panel has NOT considered. Be rigorous, specific, and constructive. "
+                        "Always return valid JSON matching the requested schema."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        raw_output = completion.choices[0].message.content or ""
+
+        # Parse JSON
+        cleaned = raw_output.strip()
+        if cleaned.startswith("```"):
+            lines = cleaned.split("\n")
+            lines = [l for l in lines if not l.strip().startswith("```")]
+            cleaned = "\n".join(lines)
+
+        parsed = json.loads(cleaned)
+
+        # Validate structure
+        counterarguments = parsed.get("counterarguments", [])
+        validated = []
+        for ca in counterarguments:
+            strength = ca.get("strength", "moderate")
+            if strength not in ("strong", "moderate", "weak"):
+                strength = "moderate"
+            validated.append({
+                "argument": ca.get("argument", ""),
+                "rationale": ca.get("rationale", ""),
+                "strength": strength,
+            })
+
+        return {"counterarguments": validated}
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Failed to parse devil's advocate response")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate counterarguments: {e}")
+
+
+# ---------------------------------------------------------
+# AUDIENCE TRANSLATION
+# ---------------------------------------------------------
+
+AUDIENCE_PROMPTS = {
+    "policy_maker": (
+        "Translate the following expert synthesis into actionable policy recommendations "
+        "with regulatory framing. Use clear policy language, identify regulatory levers, "
+        "suggest specific actions, and frame uncertainties as risk assessments. "
+        "Structure with: Executive Summary, Key Policy Recommendations, Regulatory Considerations, "
+        "Risk Assessment, and Suggested Next Steps."
+    ),
+    "technical": (
+        "Preserve the precise terminology, uncertainties, and caveats in this expert synthesis. "
+        "Maintain technical accuracy, include confidence intervals where applicable, "
+        "note methodological limitations, and preserve the nuance of expert disagreements. "
+        "Use precise language appropriate for domain specialists."
+    ),
+    "general_public": (
+        "Translate this expert synthesis into plain language that a general audience can understand. "
+        "Use analogies, avoid jargon, explain technical terms when they must be used, "
+        "and focus on practical implications for everyday life. "
+        "Keep sentences short and use concrete examples."
+    ),
+    "executive": (
+        "Translate this expert synthesis into a bottom-line executive summary. "
+        "Focus on key risks and opportunities. Use a maximum of 3 main bullet points. "
+        "Be decisive, highlight what matters for decision-making, and indicate confidence levels. "
+        "Format: Bottom Line Up Front, then 3 key bullets, then a single 'Watch Out For' caveat."
+    ),
+    "academic": (
+        "Translate this expert synthesis with academic rigour. Include methodology notes, "
+        "epistemic uncertainty framing, citation-style references to expert positions, "
+        "and note where further research is needed. Use appropriate hedging language "
+        "and distinguish between established consensus and emerging perspectives."
+    ),
+}
+
+
+class TranslatePayload(BaseModel):
+    audience: str
+    synthesis_text: str
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/translate")
+def translate_synthesis(
+    form_id: int,
+    round_id: int,
+    payload: TranslatePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Translate a synthesis for a specific audience lens."""
+    # Validate audience
+    if payload.audience not in AUDIENCE_PROMPTS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid audience. Must be one of: {', '.join(AUDIENCE_PROMPTS.keys())}",
+        )
+
+    # Verify round belongs to form
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    if not payload.synthesis_text.strip():
+        raise HTTPException(status_code=400, detail="No synthesis text provided")
+
+    # Check for mock mode
+    synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    audience_labels = {
+        "policy_maker": "Policy Maker",
+        "technical": "Technical Specialist",
+        "general_public": "General Public",
+        "executive": "Executive",
+        "academic": "Academic",
+    }
+
+    if synthesis_mode == "mock" or not api_key:
+        return {
+            "audience": payload.audience,
+            "audience_label": audience_labels.get(payload.audience, payload.audience),
+            "translated_text": (
+                f"**[{audience_labels.get(payload.audience, payload.audience)} Translation — Mock Mode]**\n\n"
+                f"This is a mock translation of the synthesis for the "
+                f"*{audience_labels.get(payload.audience, payload.audience)}* audience. "
+                f"Enable OPENROUTER_API_KEY for real LLM translation.\n\n"
+                f"Original synthesis has been preserved above."
+            ),
+        }
+
+    system_prompt = AUDIENCE_PROMPTS[payload.audience]
+
+    try:
+        openai_client = get_openai_client()
+        if not openai_client:
+            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+
+        completion = openai_client.chat.completions.create(
+            model="anthropic/claude-sonnet-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Please translate the following expert consensus synthesis "
+                        f"for a {audience_labels.get(payload.audience, payload.audience)} audience:\n\n"
+                        f"{payload.synthesis_text}"
+                    ),
+                },
+            ],
+        )
+
+        translated = completion.choices[0].message.content or ""
+
+        return {
+            "audience": payload.audience,
+            "audience_label": audience_labels.get(payload.audience, payload.audience),
+            "translated_text": translated.strip(),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to translate synthesis: {e}")
+
+
+# ---------------------------------------------------------
 # ATLAS: UX TESTING DATA SEEDER
 # ---------------------------------------------------------
 

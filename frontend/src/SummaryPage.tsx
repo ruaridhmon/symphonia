@@ -114,7 +114,6 @@ export default function SummaryPage() {
 	// ── Synthesis versioning ──
 	const [synthesisVersions, setSynthesisVersions] = useState<SynthesisVersion[]>([]);
 	const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
-	const [isGeneratingVersion, setIsGeneratingVersion] = useState(false);
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
@@ -396,35 +395,6 @@ export default function SummaryPage() {
 		}
 	}
 
-	async function generateNewVersion() {
-		if (!displayRound || !formId) return;
-		setIsGeneratingVersion(true);
-		try {
-			const data = await apiGenerateSynthesis(formId, displayRound.id, {
-				model: selectedModel,
-				strategy: synthesisMode,
-				n_analysts: 3,
-				mode: 'human_only',
-			});
-
-			// Optimistic update: immediately reflect new synthesis in round state
-			if (data.synthesis_json) {
-				const content = data.synthesis || '';
-				const updatedRound = { ...displayRound, synthesis: content, synthesis_json: data.synthesis_json };
-				setRounds(prev => prev.map(r => r.id === displayRound.id ? updatedRound : r));
-				if (activeRound?.id === displayRound.id) setActiveRound(updatedRound);
-				if (selectedRound?.id === displayRound.id) setSelectedRound(updatedRound);
-			}
-
-			await loadSynthesisVersions(displayRound.id);
-			await loadAll();
-		} catch (error) {
-			toastError((error as Error).message || 'Failed to generate version');
-		} finally {
-			setIsGeneratingVersion(false);
-		}
-	}
-
 	async function activateVersion(versionId: number) {
 		try {
 			await apiActivateVersion(versionId);
@@ -659,8 +629,6 @@ export default function SummaryPage() {
 							onSelectVersion={setSelectedVersionId}
 							selectedVersion={selectedVersion}
 							onActivateVersion={activateVersion}
-							isGeneratingVersion={isGeneratingVersion}
-							onGenerateNewVersion={generateNewVersion}
 							resolvedExpertLabels={resolvedExpertLabels}
 							formId={formId}
 							token={token}
