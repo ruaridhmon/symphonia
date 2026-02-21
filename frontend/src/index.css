@@ -331,6 +331,18 @@ table.data-table tbody tr:hover {
 }
 
 /* ------------------------------------------------------------------ */
+/* Admin table row hover (CSS-only)                                   */
+/* ------------------------------------------------------------------ */
+
+.admin-table-row {
+  transition: background-color 0.1s ease;
+}
+
+.admin-table-row:hover {
+  background-color: var(--muted);
+}
+
+/* ------------------------------------------------------------------ */
 /* Header button hover (CSS-only, no onMouseEnter/Leave)              */
 /* ------------------------------------------------------------------ */
 

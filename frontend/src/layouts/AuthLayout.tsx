@@ -19,16 +19,15 @@ export default function AuthLayout() {
       <div className="w-full max-w-md">
         {/* Branding — converging waves */}
         <div className="text-center mb-8">
-          {/* Converging waves logo mark */}
-          <div className="inline-flex items-center justify-center mb-4">
-            <img src="/logo.png" alt="" className="h-14 w-auto" aria-hidden="true" />
+          {/* Symphonia wordmark — starburst + logotype */}
+          <div className="inline-flex items-center justify-center mb-3">
+            <img
+              src="/logo-wordmark.png"
+              alt="Symphonia"
+              className="h-10 w-auto"
+              style={{ maxWidth: '220px' }}
+            />
           </div>
-          <h1
-            className="text-2xl font-semibold"
-            style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
-          >
-            Symphonia
-          </h1>
           <p
             className="text-sm mt-1"
             style={{ color: 'var(--muted-foreground)' }}

@@ -55,7 +55,11 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex justify-between items-center">
         {/* Left: branding — converging waves */}
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="" className="h-7 w-auto flex-shrink-0" aria-hidden="true" />
+          <img
+            src="/logo-mark.png"
+            alt="Symphonia"
+            className="h-7 w-auto flex-shrink-0"
+          />
           <div>
             <h1
               className="text-lg font-semibold leading-tight"
