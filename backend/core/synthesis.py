@@ -80,6 +80,16 @@ class FlowMode(str, Enum):
 
 
 @dataclass
+class EmergentInsight:
+    """An insight that emerged from combining multiple expert perspectives."""
+
+    insight: str
+    contributing_experts: List[int]  # Experts whose inputs combined
+    emergence_type: str  # "cross-pollination" | "synthesis" | "implicit"
+    explanation: str  # Why this is emergent (what gap it fills)
+
+
+@dataclass
 class Agreement:
     """A point of consensus among experts."""
 
@@ -140,6 +150,7 @@ class SynthesisResult:
     areas_of_agreement: Optional[List[str]] = None
     areas_of_disagreement: Optional[List[str]] = None
     uncertainties: Optional[List[str]] = None
+    emergent_insights: List[EmergentInsight] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serialisable dict, handling nested dataclasses."""
@@ -290,6 +301,21 @@ class MockSynthesis:
             ),
         ]
 
+        emergent_insights = [
+            EmergentInsight(
+                insight="The tension between aggressive timeline and quality standards suggests a phased rollout approach that neither expert proposed independently",
+                contributing_experts=[1, 2],
+                emergence_type="cross-pollination",
+                explanation="Expert 1 pushed for speed, Expert 2 for quality — combining both reveals a middle path neither articulated",
+            ),
+            EmergentInsight(
+                insight="Documentation standards and UX priorities are more deeply connected than any single response suggested",
+                contributing_experts=[1, 2, 3] if num_responses > 2 else [1, 2],
+                emergence_type="synthesis",
+                explanation="Multiple experts mentioned both topics separately, but the synthesis reveals they're aspects of the same underlying concern",
+            ),
+        ]
+
         if progress_callback:
             await progress_callback("mock_complete", 2, 2)
 
@@ -316,6 +342,7 @@ class MockSynthesis:
             ],
             meta_synthesis_reasoning="[MOCK MODE] Simulated synthesis data for UX testing.",
             narrative="[MOCK] Placeholder narrative for testing purposes.",
+            emergent_insights=emergent_insights,
         )
 
 
@@ -769,6 +796,68 @@ class ConsensusLibraryAdapter:
             "n_disagreements": float(n_disagree),
         }
 
+        # --- Emergent insights ---
+        # Collect expert ids that appear on opposite sides of disagreements
+        disagreement_experts: Dict[int, set] = {}  # expert_id → set of disagreement indices
+        for d_idx, d in enumerate(disagreements):
+            for pos in d.positions:
+                for eid in pos.get("experts", []):
+                    if isinstance(eid, int):
+                        disagreement_experts.setdefault(eid, set()).add(d_idx)
+
+        emergent_insights: List[EmergentInsight] = []
+        for claim in synthesis.claims:
+            source_ids = _extract_expert_ids(claim.sources)
+            if len(source_ids) < 2:
+                continue
+
+            # Check if contributing experts appear on different sides of any disagreement
+            involved_disagreements: set = set()
+            for eid in source_ids:
+                involved_disagreements.update(disagreement_experts.get(eid, set()))
+
+            is_cross_pollination = False
+            for d_idx in involved_disagreements:
+                if d_idx < len(disagreements):
+                    d = disagreements[d_idx]
+                    sides_with_experts = [
+                        set(pos.get("experts", []))
+                        for pos in d.positions
+                    ]
+                    source_set = set(source_ids)
+                    sides_hit = sum(
+                        1 for side in sides_with_experts
+                        if side & source_set
+                    )
+                    if sides_hit >= 2:
+                        is_cross_pollination = True
+                        break
+
+            if is_cross_pollination:
+                emergent_insights.append(
+                    EmergentInsight(
+                        insight=claim.text,
+                        contributing_experts=source_ids,
+                        emergence_type="cross-pollination",
+                        explanation=(
+                            f"This insight draws from experts on opposing sides of a disagreement, "
+                            f"suggesting a perspective that transcends individual positions"
+                        ),
+                    )
+                )
+            elif claim.agreement_level in ("consensus", "majority") and len(source_ids) >= 2:
+                # Multi-expert agreement that synthesises across sources
+                emergent_insights.append(
+                    EmergentInsight(
+                        insight=claim.text,
+                        contributing_experts=source_ids,
+                        emergence_type="synthesis",
+                        explanation=(
+                            f"Combined from {len(source_ids)} expert perspectives into a unified claim"
+                        ),
+                    )
+                )
+
         return SynthesisResult(
             agreements=agreements,
             disagreements=disagreements,
@@ -805,6 +894,7 @@ class ConsensusLibraryAdapter:
             areas_of_agreement=list(synthesis.areas_of_agreement),
             areas_of_disagreement=list(synthesis.areas_of_disagreement),
             uncertainties=list(synthesis.uncertainties),
+            emergent_insights=emergent_insights,
         )
 
 

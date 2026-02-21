@@ -2209,3 +2209,110 @@ main,
   font-style: italic;
   margin: 0;
 }
+
+/* ------------------------------------------------------------------ */
+/* Emergence Highlights                                               */
+/* ------------------------------------------------------------------ */
+
+.emergence-section {
+  margin-top: 0.25rem;
+}
+
+.emergence-card {
+  position: relative;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  background: var(--card);
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+}
+
+.emergence-card::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: calc(var(--radius) + 1.5px);
+  padding: 1.5px;
+  background: linear-gradient(
+    var(--shimmer-angle, 0deg),
+    rgba(168, 85, 247, 0.4),
+    rgba(20, 184, 166, 0.4),
+    rgba(168, 85, 247, 0.15),
+    rgba(20, 184, 166, 0.15)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: shimmer 4s linear infinite;
+  pointer-events: none;
+}
+
+.emergence-card:hover {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.1), 0 0 40px rgba(20, 184, 166, 0.05);
+}
+
+.emergence-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.emergence-card-insight {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--foreground);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+.emergence-type-badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.emergence-type-cross-pollination {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+}
+
+.emergence-type-synthesis {
+  background: rgba(20, 184, 166, 0.15);
+  color: #14b8a6;
+}
+
+.emergence-type-implicit {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.emergence-explanation {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+
+@keyframes shimmer {
+  0% { --shimmer-angle: 0deg; }
+  100% { --shimmer-angle: 360deg; }
+}
+
+@property --shimmer-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}

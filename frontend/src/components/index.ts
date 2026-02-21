@@ -6,5 +6,6 @@ export { default as RoundTimeline } from './RoundTimeline';
 export { default as RoundCard } from './RoundCard';
 export { default as StructuredSynthesis } from './StructuredSynthesis';
 export { default as CrossMatrix } from './CrossMatrix';
+export { default as EmergenceHighlights } from './EmergenceHighlights';
 export { default as SynthesisModeSelector } from './SynthesisModeSelector';
 export type { Round } from './RoundTimeline';

@@ -16,6 +16,7 @@ import {
 	RoundCard,
 	StructuredSynthesis,
 	CrossMatrix,
+	EmergenceHighlights,
 	SynthesisModeSelector,
 } from './components';
 import type { Round } from './components';
@@ -33,6 +34,7 @@ type StructuredSynthesisData = {
 	areas_of_agreement?: string[];
 	areas_of_disagreement?: string[];
 	uncertainties?: string[];
+	emergent_insights?: any[];
 };
 
 type Form = {
@@ -743,6 +745,16 @@ export default function SummaryPage() {
 								<StructuredSynthesis
 									data={structuredData}
 									convergenceScore={convergenceScore}
+									expertLabels={resolvedExpertLabels}
+								/>
+							</div>
+						)}
+
+						{/* Emergence Highlights */}
+						{structuredData?.emergent_insights && structuredData.emergent_insights.length > 0 && (
+							<div className="card p-5 bounce-in">
+								<EmergenceHighlights
+									insights={structuredData.emergent_insights}
 									expertLabels={resolvedExpertLabels}
 								/>
 							</div>

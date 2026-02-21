@@ -44,6 +44,7 @@ interface SynthesisData {
   areas_of_agreement?: string[];
   areas_of_disagreement?: string[];
   uncertainties?: string[];
+  emergent_insights?: any[];
 }
 
 interface StructuredSynthesisProps {
