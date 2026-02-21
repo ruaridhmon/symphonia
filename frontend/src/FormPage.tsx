@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from './config'
-import { LoadingButton, SynthesisDisplay } from './components'
+import { LoadingButton, SynthesisDisplay, PresenceIndicator } from './components'
+import { usePresence } from './hooks/usePresence'
 
 type Form = {
   id: number
@@ -27,6 +28,10 @@ export default function FormPage() {
 
 
 
+  const formId = id ? Number(id) : null
+
+  const [email] = useState(() => localStorage.getItem('email') || '')
+
   const [form, setForm] = useState<Form | null>(null)
 
   const [activeRound, setActiveRound] = useState<ActiveRound | null>(null)
@@ -42,6 +47,13 @@ export default function FormPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const [mode, setMode] = useState('loading') // loading, filling, reviewing
+
+  // Real-time presence
+  const { viewers } = usePresence({
+    formId,
+    page: 'form',
+    userEmail: email,
+  })
 
 
 
@@ -272,7 +284,10 @@ export default function FormPage() {
 
         </div>
 
-        <h1 className="text-2xl font-bold mb-1 text-foreground">{form.title}</h1>
+        <div className="flex items-center gap-4 mb-1">
+          <h1 className="text-2xl font-bold text-foreground">{form.title}</h1>
+          <PresenceIndicator viewers={viewers} currentUserEmail={email} />
+        </div>
 
 
 

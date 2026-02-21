@@ -8,6 +8,8 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 import { API_BASE_URL } from './config';
+import { PresenceIndicator } from './components';
+import { usePresence } from './hooks/usePresence';
 
 type Round = {
 	id: number;
@@ -63,6 +65,13 @@ export default function SummaryPage() {
 		'openai/gpt-4o',
 		'google/gemini-2.0-flash',
 	];
+
+	// Real-time presence
+	const { viewers } = usePresence({
+		formId: formId || null,
+		page: 'summary',
+		userEmail: email,
+	});
 
 	const editor = useEditor({
 		extensions: [
@@ -466,11 +475,14 @@ export default function SummaryPage() {
 		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
 			<header className="bg-card border-b border-border shadow-card">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-					<div>
-						<h1 className="text-xl font-bold tracking-tight text-foreground">Admin Workspace</h1>
-						<p className="text-sm text-muted-foreground mt-0.5">
-							Logged in as <strong className="text-foreground">{email}</strong>
-						</p>
+					<div className="flex items-center gap-4">
+						<div>
+							<h1 className="text-xl font-bold tracking-tight text-foreground">Admin Workspace</h1>
+							<p className="text-sm text-muted-foreground mt-0.5">
+								Logged in as <strong className="text-foreground">{email}</strong>
+							</p>
+						</div>
+						<PresenceIndicator viewers={viewers} currentUserEmail={email} />
 					</div>
 					<button onClick={logout} className="text-sm text-destructive underline">
 						Log out
