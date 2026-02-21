@@ -132,15 +132,17 @@ export default function Router() {
                 </ErrorBoundary>
               }
             />
-            <Route
-              path="/admin/form/:id/summary"
-              element={
-                <ErrorBoundary fallbackTitle="Summary Page Error">
-                  <SummaryPage />
-                </ErrorBoundary>
-              }
-            />
           </Route>
+          {/* SummaryPage has its own SummaryHeader — render outside PageLayout
+              to avoid double header (PageLayout Header + SummaryHeader). */}
+          <Route
+            path="/admin/form/:id/summary"
+            element={
+              <ErrorBoundary fallbackTitle="Summary Page Error">
+                <SummaryPage />
+              </ErrorBoundary>
+            }
+          />
         </Route>
         {/* ── 404 catch-all ── */}
         <Route
