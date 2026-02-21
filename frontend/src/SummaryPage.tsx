@@ -17,6 +17,7 @@ import {
 	StructuredSynthesis,
 	CrossMatrix,
 	EmergenceHighlights,
+	MinorityReport,
 	SynthesisModeSelector,
 } from './components';
 import type { Round } from './components';
@@ -35,6 +36,7 @@ type StructuredSynthesisData = {
 	areas_of_disagreement?: string[];
 	uncertainties?: string[];
 	emergent_insights?: any[];
+	minority_reports?: any[];
 };
 
 type Form = {
@@ -755,6 +757,16 @@ export default function SummaryPage() {
 							<div className="card p-5 bounce-in">
 								<EmergenceHighlights
 									insights={structuredData.emergent_insights}
+									expertLabels={resolvedExpertLabels}
+								/>
+							</div>
+						)}
+
+						{/* Minority Report — Dissenting voices */}
+						{structuredData?.minority_reports && structuredData.minority_reports.length > 0 && (
+							<div className="card p-5 bounce-in">
+								<MinorityReport
+									reports={structuredData.minority_reports}
 									expertLabels={resolvedExpertLabels}
 								/>
 							</div>

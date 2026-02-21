@@ -2316,3 +2316,150 @@ main,
   initial-value: 0deg;
   inherits: false;
 }
+
+/* ─── Minority Report Section ─────────────────────────── */
+
+.minority-section {
+  margin-top: 0.25rem;
+}
+
+.minority-card {
+  position: relative;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius);
+  background: var(--card);
+  margin-bottom: 0.75rem;
+  border-left: 3px solid #f59e0b;
+  transition: all 0.2s ease;
+}
+
+.minority-card:hover {
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.08), 0 0 32px rgba(245, 158, 11, 0.04);
+}
+
+.minority-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.minority-claim {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--foreground);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+.minority-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.minority-agreement-badge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.minority-badge-minority {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.minority-badge-divided {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.minority-vote-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.minority-held-by {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-right: 0.25rem;
+}
+
+.minority-counterpoint-block {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--muted);
+}
+
+.minority-vs {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+  margin-bottom: 0.375rem;
+}
+
+.minority-counterpoint {
+  font-size: 0.875rem;
+  color: var(--foreground);
+  line-height: 1.5;
+  margin: 0;
+  opacity: 0.85;
+}
+
+.minority-evidence-section {
+  margin-top: 0.75rem;
+}
+
+.minority-evidence-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.minority-evidence-toggle:hover {
+  color: var(--foreground);
+}
+
+.minority-evidence-chevron {
+  font-size: 0.625rem;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.minority-evidence-chevron.expanded {
+  transform: rotate(90deg);
+}
+
+.minority-evidence {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+  margin: 0.5rem 0 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba(245, 158, 11, 0.3);
+  font-style: italic;
+}

@@ -118,6 +118,16 @@ class Nuance:
 
 
 @dataclass
+class MinorityReport:
+    """A perspective held by few experts that was outvoted or lost in synthesis."""
+    claim: str
+    expert_ids: List[int]  # Which experts held this view
+    agreement_level: str  # "minority" or "divided"
+    counterpoint: str  # What the majority said instead
+    original_evidence: str  # The evidence supporting this minority view
+
+
+@dataclass
 class Probe:
     """A follow-up question generated to resolve ambiguity."""
 
@@ -151,6 +161,7 @@ class SynthesisResult:
     areas_of_disagreement: Optional[List[str]] = None
     uncertainties: Optional[List[str]] = None
     emergent_insights: List[EmergentInsight] = field(default_factory=list)
+    minority_reports: List[MinorityReport] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to JSON-serialisable dict, handling nested dataclasses."""
@@ -316,6 +327,30 @@ class MockSynthesis:
             ),
         ]
 
+        minority_reports = [
+            MinorityReport(
+                claim="Aggressive timeline is necessary due to competitive pressure",
+                expert_ids=[1],
+                agreement_level="minority",
+                counterpoint="The majority favours a cautious 6-month approach prioritising quality over speed",
+                original_evidence="Expert 1 cited market analysis showing competitors launching similar products within Q2, making speed-to-market critical",
+            ),
+            MinorityReport(
+                claim="Documentation should be deprioritised in favour of rapid prototyping",
+                expert_ids=[1],
+                agreement_level="minority",
+                counterpoint="Most experts agreed structured documentation is essential and should not be sacrificed",
+                original_evidence="Expert 1 argued that lean startup methodology suggests documentation can follow implementation",
+            ),
+            MinorityReport(
+                claim="User testing should happen only after full feature completion",
+                expert_ids=[2],
+                agreement_level="divided",
+                counterpoint="The majority recommended continuous user testing throughout the development cycle",
+                original_evidence="Expert 2 suggested that partial-feature testing creates misleading feedback that doesn't reflect the complete user experience",
+            ),
+        ]
+
         if progress_callback:
             await progress_callback("mock_complete", 2, 2)
 
@@ -343,6 +378,7 @@ class MockSynthesis:
             meta_synthesis_reasoning="[MOCK MODE] Simulated synthesis data for UX testing.",
             narrative="[MOCK] Placeholder narrative for testing purposes.",
             emergent_insights=emergent_insights,
+            minority_reports=minority_reports,
         )
 
 
@@ -858,6 +894,69 @@ class ConsensusLibraryAdapter:
                     )
                 )
 
+        # --- Minority reports ---
+        minority_reports: List[MinorityReport] = []
+        for claim in synthesis.claims:
+            source_ids = _extract_expert_ids(claim.sources)
+
+            if claim.agreement_level == "minority":
+                # Direct minority claim
+                counterpoint = (
+                    claim.counterarguments[0]
+                    if claim.counterarguments
+                    else "The majority held a different view"
+                )
+                evidence = "; ".join(
+                    s.quote for s in claim.sources if s.quote
+                ) or "From synthesis"
+                minority_reports.append(
+                    MinorityReport(
+                        claim=claim.text,
+                        expert_ids=source_ids,
+                        agreement_level="minority",
+                        counterpoint=counterpoint,
+                        original_evidence=evidence,
+                    )
+                )
+            elif claim.agreement_level == "divided" and len(source_ids) == 1:
+                # Divided claim held by a single expert
+                counterpoint = (
+                    claim.counterarguments[0]
+                    if claim.counterarguments
+                    else "Other experts took a different position"
+                )
+                evidence = "; ".join(
+                    s.quote for s in claim.sources if s.quote
+                ) or "From synthesis"
+                minority_reports.append(
+                    MinorityReport(
+                        claim=claim.text,
+                        expert_ids=source_ids,
+                        agreement_level="divided",
+                        counterpoint=counterpoint,
+                        original_evidence=evidence,
+                    )
+                )
+            elif (
+                claim.counterarguments
+                and len(source_ids) > 0
+                and len(source_ids) <= num_responses // 3
+            ):
+                # Claim with counterarguments where few experts support it
+                counterpoint = claim.counterarguments[0]
+                evidence = "; ".join(
+                    s.quote for s in claim.sources if s.quote
+                ) or "From synthesis"
+                minority_reports.append(
+                    MinorityReport(
+                        claim=claim.text,
+                        expert_ids=source_ids,
+                        agreement_level="minority",
+                        counterpoint=counterpoint,
+                        original_evidence=evidence,
+                    )
+                )
+
         return SynthesisResult(
             agreements=agreements,
             disagreements=disagreements,
@@ -895,6 +994,7 @@ class ConsensusLibraryAdapter:
             areas_of_disagreement=list(synthesis.areas_of_disagreement),
             uncertainties=list(synthesis.uncertainties),
             emergent_insights=emergent_insights,
+            minority_reports=minority_reports,
         )
 
 
