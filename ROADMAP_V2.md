@@ -14,8 +14,8 @@
 - [ ] Prioritize and implement top 20 issues
 
 ### 1.2 Logo & Brand
-- [ ] **Symphonia logo** — orchestral/synthesis metaphor
-- [ ] Favicon
+- [x] **Symphonia logo** — tuning fork Concept D (orchestral metaphor, best favicon viability)
+- [x] Favicon (multi-size .ico + apple-touch-icon.png)
 - [ ] Loading animation
 - [ ] Email templates styling
 
@@ -43,10 +43,10 @@
 - [x] Create Consultation = separate page
 
 ### 2.3 Remaining UX
-- [ ] Remove duplicate "Generate" buttons (consolidate)
-- [ ] Loading states for all async actions
-- [ ] Error recovery (retry buttons everywhere)
-- [ ] Empty states with helpful CTAs
+- [x] Remove duplicate empty states in AdminDashboard (was rendering twice)
+- [x] Loading states for all async actions (ActionsCard: Save, Download now have spinners)
+- [x] Error recovery — SummaryPage load failure now shows retry + back-to-dashboard
+- [x] Empty states with helpful CTAs (AdminDashboard, UserDashboard already had good ones)
 
 ---
 
@@ -111,7 +111,7 @@
 
 ### 5.2 View/Edit Mode ✅ DONE
 - [x] Toggle between rendered markdown and editor
-- [ ] Auto-switch to View mode after generation
+- [x] Auto-switch to View mode after generation (already implemented in generateSummary)
 
 ---
 
