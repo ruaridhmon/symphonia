@@ -184,14 +184,20 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 - **Full** API client layer: auth, forms, rounds, responses, synthesis, comments, atlas
 - **Centralized** auth via API client (token from localStorage, auto-redirect on 401)
 
+### P12 — Final Polish & Housekeeping
+- [x] System theme auto-detection (respects OS prefers-color-scheme on first visit) — DONE (Pulse 7:10pm)
+- [x] Offline detection banner (fixed bottom bar when navigator.onLine goes false, WifiOff icon) — DONE (Pulse 7:10pm)
+- [x] Keyboard shortcuts help panel (? key or search 'shortcuts' in ⌘K palette, lists all shortcuts) — DONE (Pulse 7:10pm)
+- [x] Cleaned up 5 GRIND_WORKER artifact files — DONE (Pulse 7:10pm)
+
 ## Pulse State
 ```json
 {
-  "last_run": "2026-02-21T18:00:00Z",
-  "current_task": "P11 complete API client migration & final cleanup",
+  "last_run": "2026-02-21T19:10:00Z",
+  "current_task": "P12 final polish & housekeeping",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 27,
-  "status": "ALL PHASES COMPLETE — ZERO RAW FETCH, ZERO ANY, ZERO EMOJI"
+  "pulse_direct_changes": 31,
+  "status": "ALL PHASES COMPLETE — P0-P12 SHIPPED"
 }
 ```
