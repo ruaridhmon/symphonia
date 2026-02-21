@@ -1089,13 +1089,94 @@ def form_responses(
 
     return [
         {
+            "id": x.id,
             "answers": x.answers,
             "email": x.user.email if x.user else None,
             "timestamp": x.created_at.isoformat(),
-            "round_id": x.round_id
+            "round_id": x.round_id,
+            "version": x.version,
         }
         for x in items
     ]
+
+
+class ResponseEditPayload(BaseModel):
+    answers: dict
+    version: int  # optimistic locking: must match current version
+
+
+@router.put("/responses/{response_id}")
+def edit_response(
+    response_id: int,
+    payload: ResponseEditPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Edit a participant response (admin only) with optimistic locking.
+
+    Returns 409 Conflict if the response has been modified since the client
+    last fetched it (version mismatch).
+    """
+    response = db.query(Response).filter(Response.id == response_id).first()
+    if not response:
+        raise HTTPException(status_code=404, detail="Response not found")
+
+    # Optimistic lock check
+    if response.version != payload.version:
+        raise HTTPException(
+            status_code=409,
+            detail="Conflict: response was modified by another user",
+            headers={"X-Current-Version": str(response.version)},
+        )
+
+    from datetime import datetime as _dt
+
+    response.answers = payload.answers
+    response.version = response.version + 1
+    response.updated_at = _dt.utcnow()
+    db.commit()
+    db.refresh(response)
+
+    return {
+        "id": response.id,
+        "answers": response.answers,
+        "email": response.user.email if response.user else None,
+        "timestamp": response.created_at.isoformat(),
+        "updated_at": response.updated_at.isoformat() if response.updated_at else None,
+        "round_id": response.round_id,
+        "version": response.version,
+    }
+
+
+@router.put("/responses/{response_id}/force")
+def force_edit_response(
+    response_id: int,
+    payload: ResponseEditPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Force-edit a response, overwriting any concurrent changes (admin only)."""
+    response = db.query(Response).filter(Response.id == response_id).first()
+    if not response:
+        raise HTTPException(status_code=404, detail="Response not found")
+
+    from datetime import datetime as _dt
+
+    response.answers = payload.answers
+    response.version = response.version + 1
+    response.updated_at = _dt.utcnow()
+    db.commit()
+    db.refresh(response)
+
+    return {
+        "id": response.id,
+        "answers": response.answers,
+        "email": response.user.email if response.user else None,
+        "timestamp": response.created_at.isoformat(),
+        "updated_at": response.updated_at.isoformat() if response.updated_at else None,
+        "round_id": response.round_id,
+        "version": response.version,
+    }
 
 
 @router.get("/form/{form_id}/archived_responses")
@@ -1151,9 +1232,11 @@ def rounds_with_responses(
             "is_active": r.is_active,
             "responses": [
                 {
+                    "id": x.id,
                     "answers": x.answers,
                     "email": x.user.email if x.user else None,
-                    "timestamp": x.created_at.isoformat()
+                    "timestamp": x.created_at.isoformat(),
+                    "version": x.version,
                 }
                 for x in rs
             ]

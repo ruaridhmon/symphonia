@@ -10,5 +10,6 @@ export { default as EmergenceHighlights } from './EmergenceHighlights';
 export { default as MinorityReport } from './MinorityReport';
 export { default as SynthesisModeSelector } from './SynthesisModeSelector';
 export { default as PresenceIndicator } from './PresenceIndicator';
+export { default as ResponseEditor } from './ResponseEditor';
 export type { PresenceViewer } from './PresenceIndicator';
 export type { Round } from './RoundTimeline';

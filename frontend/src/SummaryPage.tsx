@@ -8,7 +8,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 import { API_BASE_URL } from './config';
-import { PresenceIndicator } from './components';
+import { PresenceIndicator, ResponseEditor } from './components';
 import { usePresence } from './hooks/usePresence';
 
 type Round = {
@@ -52,6 +52,24 @@ export default function SummaryPage() {
 
 	const [responsesOpen, setResponsesOpen] = useState(true);
 	const [responsesHTML, setResponsesHTML] = useState('');
+
+	// Structured response data for ResponseEditor integration
+	type StructuredResponse = {
+		id: number;
+		answers: Record<string, string>;
+		email: string | null;
+		timestamp: string;
+		version: number;
+		round_id: number;
+	};
+	type RoundWithResponses = {
+		id: number;
+		round_number: number;
+		synthesis: string;
+		is_active: boolean;
+		responses: StructuredResponse[];
+	};
+	const [structuredRounds, setStructuredRounds] = useState<RoundWithResponses[]>([]);
 
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
 	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
@@ -137,6 +155,29 @@ export default function SummaryPage() {
 			console.log('[SummaryPage] rounds_with_responses status:', response.status);
 			const roundsWithResponses = await response.json();
 			console.log('[SummaryPage] rounds_with_responses data:', roundsWithResponses);
+
+			// Store structured data for ResponseEditor
+			if (Array.isArray(roundsWithResponses)) {
+				setStructuredRounds(
+					roundsWithResponses.map((r: any) => ({
+						id: r.id,
+						round_number: r.round_number,
+						synthesis: r.synthesis || '',
+						is_active: !!r.is_active,
+						responses: (r.responses || []).map((resp: any) => ({
+							id: resp.id,
+							answers:
+								typeof resp.answers === 'string'
+									? JSON.parse(resp.answers)
+									: resp.answers || {},
+							email: resp.email || null,
+							timestamp: resp.timestamp,
+							version: resp.version ?? 1,
+							round_id: r.id,
+						})),
+					}))
+				);
+			}
 
 			let html = '';
 			if (!roundsWithResponses || roundsWithResponses.length === 0) {
@@ -252,63 +293,40 @@ export default function SummaryPage() {
 			return;
 		}
 
+		// Reload structured data for modal
 		console.log('[SummaryPage] Fetching rounds_with_responses for modal...');
-		const roundsWithResponses = await fetch(
-			`${API_BASE_URL}/forms/${formId}/rounds_with_responses`,
-			{ headers: authHeaders }
-		).then(r => r.json());
+		try {
+			const res = await fetch(
+				`${API_BASE_URL}/forms/${formId}/rounds_with_responses`,
+				{ headers: authHeaders }
+			);
+			const roundsWithResponses = await res.json();
 
-		let html = '';
-		if (!roundsWithResponses || roundsWithResponses.length === 0) {
-			html = '<p style="color: var(--muted-foreground)">No responses yet for this form.</p>';
-		} else {
-			for (const round of roundsWithResponses) {
-				html += `<div style="margin-bottom: 2rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--muted)">
-                            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--foreground)">Round ${round.round_number}</h2>`;
-
-				if (round.responses.length === 0) {
-					html += '<p style="color: var(--muted-foreground)">No responses for this round.</p>';
-					html += `</div>`;
-					continue;
-				}
-
-				const questions =
-					rounds.find(r => r.id === round.id)?.questions ||
-					form?.questions ||
-					[];
-
-				// Group responses by question for better readability
-				for (let i = 0; i < questions.length; i++) {
-					const question = questions[i];
-					const questionKey = `q${i + 1}`;
-					html += `<div style="margin-bottom: 1.5rem; padding: 0.75rem; border-left: 4px solid var(--accent); background: var(--card); border-radius: 0.375rem; box-shadow: var(--card-shadow)">
-                                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--foreground)">${question}</h3>`;
-
-					let hasAnswers = false;
-					for (const response of round.responses) {
-						const answer = response.answers[questionKey];
-						if (answer) {
-							hasAnswers = true;
-							html += `
-                                <div style="padding: 0.5rem 1rem; margin: 0.5rem 0; border-top: 1px solid var(--border)">
-                                    <p style="font-size: 0.875rem; color: var(--foreground); line-height: 1.6">${answer}</p>
-                                    <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.25rem; font-style: italic">
-                                        – ${response.email || 'Anonymous'}
-                                    </p>
-                                </div>
-                            `;
-						}
-					}
-					if (!hasAnswers) {
-						html += `<p style="font-size: 0.875rem; color: var(--muted-foreground); font-style: italic">No responses for this question.</p>`;
-					}
-					html += `</div>`;
-				}
-				html += `</div>`;
+			if (Array.isArray(roundsWithResponses)) {
+				setStructuredRounds(
+					roundsWithResponses.map((r: any) => ({
+						id: r.id,
+						round_number: r.round_number,
+						synthesis: r.synthesis || '',
+						is_active: !!r.is_active,
+						responses: (r.responses || []).map((resp: any) => ({
+							id: resp.id,
+							answers:
+								typeof resp.answers === 'string'
+									? JSON.parse(resp.answers)
+									: resp.answers || {},
+							email: resp.email || null,
+							timestamp: resp.timestamp,
+							version: resp.version ?? 1,
+							round_id: r.id,
+						})),
+					}))
+				);
 			}
+		} catch (e) {
+			console.error('[SummaryPage] viewAllResponses fetch error:', e);
 		}
 
-		setResponsesHTML(html);
 		setResponsesOpen(true);
 	}
 
@@ -668,10 +686,71 @@ export default function SummaryPage() {
 							style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
 						>
 							<h3 className="text-xl font-semibold mb-4 text-foreground">All Responses</h3>
-							<div
-								className="prose prose-sm max-w-none"
-								dangerouslySetInnerHTML={{ __html: responsesHTML }}
-							/>
+
+							{structuredRounds.length === 0 ? (
+								<p style={{ color: 'var(--muted-foreground)' }}>
+									No responses yet for this form.
+								</p>
+							) : (
+								structuredRounds.map(round => {
+									const roundQuestions =
+										rounds.find(r => r.id === round.id)?.questions ||
+										form?.questions ||
+										[];
+									return (
+										<div
+											key={round.id}
+											className="mb-6 p-4 rounded-lg"
+											style={{
+												backgroundColor: 'var(--muted)',
+												border: '1px solid var(--border)',
+											}}
+										>
+											<h4 className="text-lg font-semibold mb-3 text-foreground">
+												Round {round.round_number}
+											</h4>
+											{round.responses.length === 0 ? (
+												<p style={{ color: 'var(--muted-foreground)' }}>
+													No responses for this round.
+												</p>
+											) : (
+												<div className="space-y-3">
+													{round.responses.map(resp => (
+														<ResponseEditor
+															key={resp.id}
+															response={resp}
+															questions={roundQuestions}
+															token={token}
+															onUpdated={updated => {
+																setStructuredRounds(prev =>
+																	prev.map(r =>
+																		r.id === round.id
+																			? {
+																					...r,
+																					responses: r.responses.map(
+																						rr =>
+																							rr.id === updated.id
+																								? {
+																										...rr,
+																										answers: updated.answers,
+																										version: updated.version,
+																								  }
+																								: rr
+																					),
+																			  }
+																			: r
+																	)
+																);
+															}}
+														/>
+													))}
+												</div>
+											)}
+										</div>
+									);
+								})
+							)}
+
 							<button
 								className="btn btn-accent mt-6"
 								onClick={() => setResponsesOpen(false)}

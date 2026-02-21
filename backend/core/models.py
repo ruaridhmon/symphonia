@@ -80,6 +80,8 @@ class Response(Base):
     round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False)
     answers = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    version = Column(Integer, default=1, nullable=False)
 
     user = relationship("User", back_populates="responses")
     form = relationship("FormModel", back_populates="responses")
