@@ -8,15 +8,35 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 import { API_BASE_URL } from './config';
-import { PresenceIndicator, ResponseEditor } from './components';
+
+// Phase 1 + 2 + 3 components
+import {
+	PresenceIndicator,
+	ResponseEditor,
+	LoadingButton,
+	MarkdownRenderer,
+	RoundTimeline,
+	RoundCard,
+	SynthesisProgress,
+	SynthesisModeSelector,
+	StructuredSynthesis,
+	CrossMatrix,
+	EmergenceHighlights,
+} from './components';
+
+// Phase 4 hook (already wired)
 import { usePresence } from './hooks/usePresence';
 
+// Extended Round type to support all component props
 type Round = {
 	id: number;
 	round_number: number;
 	synthesis: string;
+	synthesis_json?: any;
 	is_active: boolean;
 	questions: string[];
+	convergence_score?: number | null;
+	response_count?: number;
 };
 
 type Form = {
@@ -53,6 +73,20 @@ export default function SummaryPage() {
 	const [responsesOpen, setResponsesOpen] = useState(true);
 	const [responsesHTML, setResponsesHTML] = useState('');
 
+	// Phase 1: Selected round for RoundTimeline/RoundCard navigation
+	const [selectedRound, setSelectedRound] = useState<Round | null>(null);
+
+	// Phase 1: Synthesis progress tracking
+	const [synthesisStage, setSynthesisStage] = useState('preparing');
+	const [synthesisStep, setSynthesisStep] = useState(0);
+	const [synthesisTotalSteps, setSynthesisTotalSteps] = useState(5);
+
+	// Phase 2: Synthesis mode selector
+	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
+
+	// Phase 3: Expert label preset for CrossMatrix
+	const [expertLabelPreset] = useState('default');
+
 	// Structured response data for ResponseEditor integration
 	type StructuredResponse = {
 		id: number;
@@ -84,7 +118,7 @@ export default function SummaryPage() {
 		'google/gemini-2.0-flash',
 	];
 
-	// Real-time presence
+	// Phase 4: Real-time presence (already wired)
 	const { viewers } = usePresence({
 		formId: formId || null,
 		page: 'summary',
@@ -106,6 +140,30 @@ export default function SummaryPage() {
 			}
 		}
 	});
+
+	// Derive structured synthesis data and expert labels from the selected/active round
+	const displayRound = selectedRound || activeRound;
+	const structuredSynthesisData = displayRound?.synthesis_json || null;
+
+	// Build expert labels from synthesis_json if available
+	const resolvedExpertLabels: Record<number, string> = useMemo(() => {
+		if (!structuredSynthesisData) return {};
+		const labels: Record<number, string> = {};
+		// Extract from agreements' supporting_experts
+		const allExperts = new Set<number>();
+		for (const a of structuredSynthesisData.agreements || []) {
+			for (const e of a.supporting_experts || []) allExperts.add(e);
+		}
+		for (const d of structuredSynthesisData.disagreements || []) {
+			for (const p of d.positions || []) {
+				for (const e of p.experts || []) allExperts.add(e);
+			}
+		}
+		for (const id of allExperts) {
+			labels[id] = `Expert ${id}`;
+		}
+		return labels;
+	}, [structuredSynthesisData]);
 
 	useEffect(() => {
 		console.log('[SummaryPage] useEffect[/me] triggered - token:', !!token);
@@ -242,8 +300,11 @@ export default function SummaryPage() {
 					id: x.id,
 					round_number: x.round_number,
 					synthesis: x.synthesis || '',
+					synthesis_json: x.synthesis_json || null,
 					is_active: !!x.is_active,
-					questions: Array.isArray(x.questions) ? x.questions : []
+					questions: Array.isArray(x.questions) ? x.questions : [],
+					convergence_score: x.convergence_score ?? null,
+					response_count: x.response_count ?? 0,
 				})
 			);
 			console.log('[SummaryPage] mapped rounds:', mapped);
@@ -252,6 +313,11 @@ export default function SummaryPage() {
 			const active = mapped.find(x => x.is_active) || null;
 			console.log('[SummaryPage] active round:', active);
 			setActiveRound(active || null);
+
+			// Auto-select the active round for RoundTimeline
+			if (active && !selectedRound) {
+				setSelectedRound(active);
+			}
 
 			if (active && editor) {
 				console.log('[SummaryPage] Setting editor content from active round synthesis');
@@ -439,24 +505,36 @@ export default function SummaryPage() {
 	}
 
 	async function generateSummary() {
-		console.log('[SummaryPage] generateSummary() called, formId:', formId, 'model:', selectedModel);
+		console.log('[SummaryPage] generateSummary() called, formId:', formId, 'model:', selectedModel, 'mode:', synthesisMode);
 		if (!formId || !selectedModel) {
 			console.log('[SummaryPage] generateSummary() skipped - missing formId or model');
 			return;
 		}
 
 		setIsGenerating(true);
+		// Phase 1: Show synthesis progress
+		setSynthesisStage('preparing');
+		setSynthesisStep(0);
+		setSynthesisTotalSteps(5);
+
 		try {
+			// Simulate progress stages
+			setSynthesisStage('analyzing');
+			setSynthesisStep(1);
+
 			console.log('[SummaryPage] Posting to generate_summary...');
 			const res = await fetch(
 				`${API_BASE_URL}/forms/${formId}/generate_summary`,
 				{
 					method: 'POST',
 					headers: { ...authHeaders, 'Content-Type': 'application/json' },
-					body: JSON.stringify({ model: selectedModel })
+					body: JSON.stringify({ model: selectedModel, mode: synthesisMode })
 				}
 			);
 			console.log('[SummaryPage] generate_summary response status:', res.status);
+
+			setSynthesisStage('synthesising');
+			setSynthesisStep(3);
 
 			if (!res.ok) {
 				const errorData = await res.json();
@@ -466,16 +544,40 @@ export default function SummaryPage() {
 
 			const data = await res.json();
 			console.log('[SummaryPage] generate_summary data:', data);
+
+			setSynthesisStage('formatting');
+			setSynthesisStep(4);
+
 			if (data.summary && editor) {
 				console.log('[SummaryPage] Setting editor content from generated summary');
 				editor.commands.setContent(data.summary);
 			}
+
+			setSynthesisStage('complete');
+			setSynthesisStep(5);
+
+			// Auto-hide progress after 2s
+			setTimeout(() => {
+				setSynthesisStage('preparing');
+				setSynthesisStep(0);
+			}, 2000);
 		} catch (error) {
 			console.error('[SummaryPage] generateSummary() error:', error);
 			alert((error as Error).message);
+			setSynthesisStage('preparing');
+			setSynthesisStep(0);
 		} finally {
 			console.log('[SummaryPage] generateSummary() finally - setting isGenerating=false');
 			setIsGenerating(false);
+		}
+	}
+
+	// Phase 1: Handle round selection from RoundTimeline
+	function handleSelectRound(round: Round) {
+		setSelectedRound(round);
+		// If selecting the active round, load its content into the editor
+		if (round.is_active && editor) {
+			editor.commands.setContent(round.synthesis || '');
 		}
 	}
 
@@ -500,6 +602,7 @@ export default function SummaryPage() {
 								Logged in as <strong className="text-foreground">{email}</strong>
 							</p>
 						</div>
+						{/* Phase 4: PresenceIndicator (already wired) */}
 						<PresenceIndicator viewers={viewers} currentUserEmail={email} />
 					</div>
 					<button onClick={logout} className="text-sm text-destructive underline">
@@ -518,17 +621,105 @@ export default function SummaryPage() {
 					</button>
 				</div>
 
+				{/* Phase 1: RoundTimeline — horizontal round navigation */}
+				{rounds.length > 0 && (
+					<div className="mb-6">
+						<RoundTimeline
+							rounds={rounds}
+							activeRoundId={activeRound?.id || null}
+							selectedRoundId={selectedRound?.id || null}
+							onSelectRound={handleSelectRound}
+						/>
+					</div>
+				)}
+
+				{/* Phase 1: SynthesisProgress — shown during AI generation */}
+				<SynthesisProgress
+					stage={synthesisStage}
+					step={synthesisStep}
+					totalSteps={synthesisTotalSteps}
+					visible={isGenerating}
+				/>
+
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 					{/* Main Content */}
 					<div className="lg:col-span-2 space-y-6">
-						<div className="card p-6 min-h-[200px] lg:min-h-[300px]">
-							<h2 className="text-lg font-semibold mb-3 text-foreground">
-								Synthesis for Round {activeRound?.round_number || ''}
-							</h2>
-							<div className="prose max-w-none">
-								<EditorContent editor={editor} />
+						{/* Phase 1: RoundCard — show details for the selected round (non-active) */}
+						{selectedRound && !selectedRound.is_active && (
+							<RoundCard
+								round={selectedRound}
+								isCurrentRound={false}
+								expertLabels={resolvedExpertLabels}
+								formId={formId}
+								token={token}
+								currentUserEmail={email}
+							/>
+						)}
+
+						{/* Synthesis editor (for the active round) */}
+						{(!selectedRound || selectedRound.is_active) && (
+							<div className="card p-6 min-h-[200px] lg:min-h-[300px]">
+								<h2 className="text-lg font-semibold mb-3 text-foreground">
+									Synthesis for Round {activeRound?.round_number || ''}
+								</h2>
+								<div className="prose max-w-none">
+									<EditorContent editor={editor} />
+								</div>
 							</div>
-						</div>
+						)}
+
+						{/* Phase 1: MarkdownRenderer — read-only synthesis view for non-active selected rounds */}
+						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
+							<div className="card p-6">
+								<h2 className="text-lg font-semibold mb-3 text-foreground">
+									Synthesis (Round {selectedRound.round_number})
+								</h2>
+								<MarkdownRenderer content={selectedRound.synthesis} />
+							</div>
+						)}
+
+						{/* Phase 2: StructuredSynthesis — render structured synthesis data when available */}
+						{structuredSynthesisData && (
+							<div className="card p-6">
+								<h2 className="text-lg font-semibold mb-3 text-foreground">Structured Analysis</h2>
+								<StructuredSynthesis
+									data={structuredSynthesisData}
+									convergenceScore={displayRound?.convergence_score ?? undefined}
+									expertLabels={resolvedExpertLabels}
+									formId={formId}
+									roundId={displayRound?.id}
+									token={token}
+									currentUserEmail={email}
+								/>
+							</div>
+						)}
+
+						{/* Phase 3: CrossMatrix — dimensional visualization */}
+						{structuredSynthesisData && (
+							<div className="card p-6">
+								<h2 className="text-lg font-semibold mb-3 text-foreground">Expert Cross-Analysis</h2>
+								<CrossMatrix
+									structuredData={structuredSynthesisData}
+									resolvedExpertLabels={resolvedExpertLabels}
+									expertLabelPreset={expertLabelPreset}
+								/>
+							</div>
+						)}
+
+						{/* Phase 3: EmergenceHighlights — emergent insights */}
+						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
+							<div className="card p-6">
+								<h2 className="text-lg font-semibold mb-3 text-foreground">Emergent Insights</h2>
+								<EmergenceHighlights
+									insights={structuredSynthesisData.emergent_insights}
+									expertLabels={resolvedExpertLabels}
+									formId={formId}
+									roundId={displayRound?.id}
+									token={token}
+									currentUserEmail={email}
+								/>
+							</div>
+						)}
 
 						<div className="card p-6">
 							<h2 className="text-lg font-semibold text-foreground">Next Round Questions</h2>
@@ -542,21 +733,26 @@ export default function SummaryPage() {
 											onChange={e => updateNextQuestion(index, e.target.value)}
 											placeholder={`Question ${index + 1}`}
 										/>
-										<button
-											className="btn btn-destructive px-3 py-2 text-sm opacity-80"
+										{/* Phase 1: LoadingButton replaces plain Remove button */}
+										<LoadingButton
+											variant="destructive"
+											size="sm"
 											onClick={() => removeNextQuestion(index)}
 										>
 											Remove
-										</button>
+										</LoadingButton>
 									</div>
 								))}
 							</div>
-							<button
+							{/* Phase 1: LoadingButton replaces plain Add Question button */}
+							<LoadingButton
+								variant="secondary"
+								size="sm"
 								onClick={addNextQuestion}
-								className="btn btn-secondary mt-4 text-sm"
+								className="mt-4"
 							>
 								Add Question
-							</button>
+							</LoadingButton>
 						</div>
 					</div>
 
@@ -574,36 +770,48 @@ export default function SummaryPage() {
 								</div>
 							</div>
 						</div>
+
 						<div className="card p-4">
 							<h3 className="text-base font-semibold mb-3 text-foreground">Actions</h3>
 							<div className="flex flex-col space-y-2">
-								<button
+								{/* Phase 1: LoadingButton replaces plain action buttons */}
+								<LoadingButton
+									variant="accent"
+									size="md"
 									onClick={viewAllResponses}
-									className="btn btn-accent w-full text-left justify-start"
+									className="w-full text-left justify-start"
 								>
 									{responsesOpen ? 'Hide Responses' : 'View All Responses'}
-								</button>
-								<button
+								</LoadingButton>
+								<LoadingButton
+									variant="secondary"
+									size="md"
 									onClick={downloadResponses}
-									className="btn btn-secondary w-full text-left justify-start"
+									className="w-full text-left justify-start"
 								>
 									Download Responses
-								</button>
-								<button
-									className="btn btn-success w-full text-left justify-start"
+								</LoadingButton>
+								<LoadingButton
+									variant="success"
+									size="md"
 									onClick={saveSynthesis}
+									className="w-full text-left justify-start"
 								>
 									Save Synthesis
-								</button>
+								</LoadingButton>
 								<div className="pt-2">
-									<button
+									{/* Phase 1: LoadingButton with loading state for Start Next Round */}
+									<LoadingButton
+										variant="accent"
+										size="md"
 										onClick={startNextRound}
-										className="btn btn-accent w-full font-semibold"
+										loading={loading}
+										loadingText="Starting…"
+										className="w-full font-semibold"
 										style={{ backgroundColor: 'var(--accent-hover)' }}
-										disabled={loading}
 									>
 										Start Next Round
-									</button>
+									</LoadingButton>
 								</div>
 							</div>
 						</div>
@@ -611,6 +819,12 @@ export default function SummaryPage() {
 						<div className="card p-4">
 							<h3 className="text-base font-semibold mb-3 text-foreground">AI-Powered Synthesis</h3>
 							<div className="space-y-3">
+								{/* Phase 2: SynthesisModeSelector — choose synthesis mode */}
+								<SynthesisModeSelector
+									mode={synthesisMode}
+									onModeChange={setSynthesisMode}
+								/>
+
 								<div>
 									<label htmlFor="model-select" className="block text-sm font-medium text-muted-foreground mb-1.5">
 										Choose a model
@@ -628,20 +842,21 @@ export default function SummaryPage() {
 										))}
 									</select>
 								</div>
-								<button
+								{/* Phase 1: LoadingButton replaces plain Generate Summary button */}
+								<LoadingButton
+									variant="purple"
+									size="md"
+									loading={isGenerating}
+									loadingText="Generating…"
 									onClick={generateSummary}
-									className="btn w-full font-semibold text-sm"
-									style={{
-										backgroundColor: '#7c3aed',
-										color: '#ffffff',
-									}}
-									disabled={isGenerating}
+									className="w-full font-semibold"
 								>
-									{isGenerating ? 'Generating…' : 'Generate Summary'}
-								</button>
+									Generate Summary
+								</LoadingButton>
 							</div>
 						</div>
 
+						{/* Phase 1: RoundTimeline replaces the old Round History list in sidebar */}
 						{rounds.length > 0 && (
 							<div className="card p-4">
 								<h3 className="text-base font-semibold mb-2 text-foreground">Round History</h3>
@@ -649,7 +864,10 @@ export default function SummaryPage() {
 									{rounds.map(r => (
 										<li
 											key={r.id}
-											className="flex justify-between items-center border-b border-border last:border-b-0 py-1.5"
+											className={`flex justify-between items-center border-b border-border last:border-b-0 py-1.5 cursor-pointer hover:bg-muted/50 rounded px-1 ${
+												selectedRound?.id === r.id ? 'bg-accent/10' : ''
+											}`}
+											onClick={() => handleSelectRound(r)}
 										>
 											<span className="text-foreground">
 												Round {r.round_number}{' '}
@@ -751,12 +969,15 @@ export default function SummaryPage() {
 								})
 							)}
 
-							<button
-								className="btn btn-accent mt-6"
+							{/* Phase 1: LoadingButton replaces plain Close button */}
+							<LoadingButton
+								variant="accent"
+								size="md"
 								onClick={() => setResponsesOpen(false)}
+								className="mt-6"
 							>
 								Close
-							</button>
+							</LoadingButton>
 						</div>
 					</div>,
 					document.body
