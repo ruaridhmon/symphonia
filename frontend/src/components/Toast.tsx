@@ -62,9 +62,9 @@ const TOAST_CONFIG: Record<ToastType, {
   warning: {
     icon: AlertTriangle,
     bg: 'color-mix(in srgb, #f59e0b 12%, var(--card))',
-    border: '#f59e0b',
+    border: 'var(--warning)',
     fg: 'var(--card-foreground)',
-    iconColor: '#f59e0b',
+    iconColor: 'var(--warning)',
   },
   info: {
     icon: Info,

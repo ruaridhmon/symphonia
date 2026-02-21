@@ -53,20 +53,13 @@ export default function Header() {
       }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex justify-between items-center">
-        {/* Left: branding */}
-        <div className="flex items-center gap-2">
-          <div
-            className="flex items-center justify-center w-8 h-8 rounded-lg"
-            style={{
-              background: 'linear-gradient(135deg, var(--accent), var(--accent-hover))',
-            }}
-          >
-            <span className="text-sm" role="img" aria-label="Symphonia">🎵</span>
-          </div>
+        {/* Left: branding — converging waves */}
+        <div className="flex items-center gap-2.5">
+          <img src="/logo.png" alt="" className="h-7 w-auto flex-shrink-0" aria-hidden="true" />
           <div>
             <h1
-              className="text-lg font-bold tracking-tight leading-tight"
-              style={{ color: 'var(--foreground)' }}
+              className="text-lg font-semibold leading-tight"
+              style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
             >
               Symphonia
             </h1>
@@ -88,25 +81,9 @@ export default function Header() {
           <button
             type="button"
             onClick={() => {
-              // Trigger Cmd+K
               document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
             }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-colors"
-            style={{
-              backgroundColor: 'var(--muted)',
-              color: 'var(--muted-foreground)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer',
-              fontFamily: 'var(--font-family)',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'var(--accent)';
-              e.currentTarget.style.color = 'var(--foreground)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.color = 'var(--muted-foreground)';
-            }}
+            className="header-cmd-k-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs"
             aria-label="Open command palette"
           >
             <span style={{ opacity: 0.7 }}>⌘K</span>
@@ -115,21 +92,7 @@ export default function Header() {
           {user && (
             <button
               onClick={logout}
-              className="text-sm px-3 py-1.5 rounded-lg transition-colors"
-              style={{
-                color: 'var(--muted-foreground)',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = 'var(--muted)';
-                e.currentTarget.style.color = 'var(--destructive)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--muted-foreground)';
-              }}
+              className="header-logout-btn text-sm px-3 py-1.5 rounded-lg"
             >
               Log out
             </button>
@@ -184,15 +147,7 @@ export default function Header() {
           {user && (
             <button
               onClick={() => { setMenuOpen(false); logout(); }}
-              className="text-sm text-left px-3 py-2 rounded-lg transition-colors"
-              style={{
-                color: 'var(--destructive)',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--muted)'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+              className="header-logout-btn text-sm text-left px-3 py-2 rounded-lg"
             >
               Log out
             </button>

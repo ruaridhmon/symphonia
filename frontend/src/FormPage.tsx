@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ClipboardList } from 'lucide-react'
+import { ClipboardList, AlertCircle, ChevronDown } from 'lucide-react'
 import { getForm, Form } from './api/forms'
 import { getActiveRound, ActiveRound } from './api/rounds'
 import { submitResponse, hasSubmitted as checkSubmitted, getMyResponse } from './api/responses'
@@ -180,35 +180,29 @@ export default function FormPage() {
   }, [mode, structuredResponses, id])
 
   if (mode === 'error') {
+    const friendlyError = loadError?.includes('fetch')
+      ? 'Check your internet connection and try again.'
+      : loadError
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="card-lg p-8 sm:p-10 max-w-md w-full text-center space-y-5">
-          <div
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              backgroundColor: 'var(--destructive)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontSize: '24px',
-              fontWeight: 'bold',
-              margin: '0 auto',
-            }}
-          >
-            !
+          <div style={{ margin: '0 auto', width: '48px', height: '48px' }}>
+            <AlertCircle size={48} style={{ color: 'var(--destructive)' }} />
           </div>
           <h2 className="text-xl font-semibold text-foreground">Unable to load form</h2>
-          <p className="text-sm text-muted-foreground" role="alert" aria-live="polite">{loadError}</p>
-          <div className="flex gap-3 justify-center">
-            <LoadingButton variant="accent" size="md" onClick={loadForm}>
+          <p className="text-sm text-muted-foreground" role="alert" aria-live="polite">{friendlyError}</p>
+          <div className="flex gap-4 justify-center">
+            <LoadingButton variant="accent" size="md" onClick={loadForm} style={{ minWidth: '120px' }}>
               Try Again
             </LoadingButton>
-            <LoadingButton variant="ghost" size="md" onClick={() => navigate('/')}>
-              Back to Dashboard
-            </LoadingButton>
+            <button
+              onClick={() => navigate('/')}
+              className="text-sm font-medium"
+              style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', minWidth: '120px' }}
+            >
+              Go Back
+            </button>
           </div>
         </div>
       </div>
@@ -420,15 +414,14 @@ function PreviousSynthesisToggle({ content }: { content: string }) {
             Optional
           </span>
         </div>
-        <span
-          className="text-sm transition-transform"
+        <ChevronDown
+          size={16}
           style={{
             color: 'var(--muted-foreground)',
             transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease',
           }}
-        >
-          ▾
-        </span>
+        />
       </button>
       {isOpen && (
         <div

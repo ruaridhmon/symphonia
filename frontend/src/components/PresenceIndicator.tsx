@@ -93,7 +93,7 @@ const styles: Record<string, React.CSSProperties> = {
   initial: {
     fontSize: '11px',
     fontWeight: 600,
-    color: '#ffffff',
+    color: 'var(--accent-foreground)',
     lineHeight: 1,
     userSelect: 'none' as const,
   },

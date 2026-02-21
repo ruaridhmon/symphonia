@@ -10,13 +10,13 @@ interface SynthesisProgressProps {
 
 const stageLabels: Record<string, { label: string; icon: ReactNode }> = {
   preparing: { label: 'Preparing responses…', icon: <FileDown size={16} style={{ color: 'var(--accent)' }} /> },
-  mock_init: { label: 'Initialising…', icon: <Wand2 size={16} style={{ color: '#a855f7' }} /> },
+  mock_init: { label: 'Initialising…', icon: <Wand2 size={16} style={{ color: 'var(--accent)' }} /> },
   synthesising: { label: 'Synthesising insights…', icon: <Microscope size={16} style={{ color: 'var(--accent)' }} /> },
   analyzing: { label: 'Analysing responses…', icon: <Search size={16} style={{ color: 'var(--accent)' }} /> },
   mapping_results: { label: 'Mapping results…', icon: <Map size={16} style={{ color: 'var(--accent)' }} /> },
-  formatting: { label: 'Formatting output…', icon: <Sparkles size={16} style={{ color: '#a855f7' }} /> },
-  mock_complete: { label: 'Wrapping up…', icon: <Wand2 size={16} style={{ color: '#a855f7' }} /> },
-  complete: { label: 'Complete!', icon: <CheckCircle2 size={16} style={{ color: '#16a34a' }} /> },
+  formatting: { label: 'Formatting output…', icon: <Sparkles size={16} style={{ color: 'var(--accent)' }} /> },
+  mock_complete: { label: 'Wrapping up…', icon: <Wand2 size={16} style={{ color: 'var(--accent)' }} /> },
+  complete: { label: 'Complete!', icon: <CheckCircle2 size={16} style={{ color: 'var(--success)' }} /> },
   generating: { label: 'Generating synthesis…', icon: <Brain size={16} style={{ color: 'var(--accent)' }} /> },
 };
 

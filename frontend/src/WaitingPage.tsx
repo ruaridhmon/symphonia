@@ -95,7 +95,7 @@ export default function WaitingPage() {
           }}
         >
           <p className="text-xs text-muted-foreground" style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
-            <Lightbulb size={14} style={{ color: '#a855f7', flexShrink: 0, marginTop: '1px' }} />
+            <Lightbulb size={14} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: '1px' }} />
             <span>The facilitator is reviewing all responses and preparing the
             next round. This page will update automatically.</span>
           </p>

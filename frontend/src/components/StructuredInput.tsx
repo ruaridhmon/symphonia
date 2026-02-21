@@ -19,17 +19,18 @@ interface StructuredInputProps {
 /* ------------------------------------------------------------------ */
 /* Confidence label helper                                            */
 /* ------------------------------------------------------------------ */
+/* Use CSS variables so colors adapt to dark/light theme */
 const confidenceLabels: Record<number, { label: string; color: string }> = {
-  1: { label: 'Highly uncertain', color: '#ef4444' },
-  2: { label: 'Very uncertain', color: '#f97316' },
-  3: { label: 'Uncertain', color: '#f59e0b' },
-  4: { label: 'Somewhat uncertain', color: '#eab308' },
-  5: { label: 'Neutral', color: '#a3a3a3' },
-  6: { label: 'Somewhat confident', color: '#84cc16' },
-  7: { label: 'Confident', color: '#22c55e' },
-  8: { label: 'Very confident', color: '#16a34a' },
-  9: { label: 'Highly confident', color: '#15803d' },
-  10: { label: 'Certain', color: '#166534' },
+  1: { label: 'Highly uncertain', color: 'var(--destructive)' },
+  2: { label: 'Very uncertain', color: 'var(--warning)' },
+  3: { label: 'Uncertain', color: 'var(--warning)' },
+  4: { label: 'Somewhat uncertain', color: 'var(--warning)' },
+  5: { label: 'Neutral', color: 'var(--muted-foreground)' },
+  6: { label: 'Somewhat confident', color: 'var(--success)' },
+  7: { label: 'Confident', color: 'var(--success)' },
+  8: { label: 'Very confident', color: 'var(--success)' },
+  9: { label: 'Highly confident', color: 'var(--success)' },
+  10: { label: 'Certain', color: 'var(--success)' },
 };
 
 function getConfidenceInfo(n: number) {
@@ -535,9 +536,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
     fontWeight: 500,
     borderRadius: '9999px',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
     color: 'var(--accent)',
-    border: '1px solid rgba(59, 130, 246, 0.2)',
+    border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
     maxWidth: '100%',
     wordBreak: 'break-all' as const,
   },
@@ -548,7 +549,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
     fontWeight: 500,
     borderRadius: '9999px',
-    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
     color: 'var(--accent)',
   },
   chipRemove: {

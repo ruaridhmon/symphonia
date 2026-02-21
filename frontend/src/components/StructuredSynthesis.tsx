@@ -60,7 +60,7 @@ function ConfidenceBar({ value, label }: { value: number; label?: string }) {
   const pct = Math.round(value * 100);
   const color =
     pct >= 80 ? 'var(--success)' :
-    pct >= 60 ? '#eab308' :
+    pct >= 60 ? 'var(--warning)' :
     'var(--destructive)';
 
   return (
@@ -129,7 +129,7 @@ function EvidenceDrawer({
 function SeverityBadge({ severity }: { severity: string }) {
   const colors: Record<string, { bg: string; text: string }> = {
     low: { bg: 'rgba(34,197,94,0.15)', text: 'var(--success)' },
-    moderate: { bg: 'rgba(234,179,8,0.15)', text: '#eab308' },
+    moderate: { bg: 'color-mix(in srgb, var(--warning) 15%, transparent)', text: 'var(--warning)' },
     high: { bg: 'rgba(239,68,68,0.15)', text: 'var(--destructive)' },
   };
   const c = colors[severity] || colors.moderate;
@@ -319,7 +319,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
           <SectionHeader
             title="Disagreements"
             count={disagreements.length}
-            icon={<Zap size={16} style={{ color: '#eab308' }} />}
+            icon={<Zap size={16} style={{ color: 'var(--warning)' }} />}
             color="#eab308"
             expanded={expandedSections.disagreements}
             onToggle={() => toggle('disagreements')}
@@ -386,7 +386,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
           <SectionHeader
             title="Nuances & Uncertainties"
             count={nuances.length}
-            icon={<Lightbulb size={16} style={{ color: '#a855f7' }} />}
+            icon={<Lightbulb size={16} style={{ color: 'var(--accent)' }} />}
             color="#a855f7"
             expanded={expandedSections.nuances}
             onToggle={() => toggle('nuances')}

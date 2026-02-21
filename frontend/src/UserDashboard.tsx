@@ -209,9 +209,15 @@ export default function UserDashboard() {
           ) : (
             <ul className="space-y-3 stagger-enter">
               {myForms.length === 0 && (
-                <p style={{ color: 'var(--muted-foreground)' }}>
-                  No forms joined yet.
-                </p>
+                <div className="text-center py-8">
+                  <div className="text-3xl mb-3 opacity-40">📭</div>
+                  <p className="text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                    No consultations yet
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                    Enter a join code above to access your first consultation.
+                  </p>
+                </div>
               )}
               {myForms.map((f) => {
                 const status = formStatuses[f.id];
@@ -254,8 +260,8 @@ export default function UserDashboard() {
                           <span
                             className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
                             style={{
-                              backgroundColor: 'color-mix(in srgb, #eab308 12%, transparent)',
-                              color: '#ca8a04',
+                              backgroundColor: 'color-mix(in srgb, var(--warning) 12%, transparent)',
+                              color: 'var(--warning-foreground)',
                             }}
                           >
                             <Clock size={11} />

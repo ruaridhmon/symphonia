@@ -170,7 +170,7 @@ const CrossMatrix = memo(function CrossMatrix({
 
   function getCellTextColor(score: number): string {
     if (Math.abs(score) < 0.05) return 'var(--muted-foreground)';
-    if (Math.abs(score) > 0.5) return '#ffffff';
+    if (Math.abs(score) > 0.5) return 'var(--card)';
     return 'var(--foreground)';
   }
 
@@ -329,7 +329,7 @@ const CrossMatrix = memo(function CrossMatrix({
           </div>
           {tooltip.details.agreements.length > 0 && (
             <div className="cross-matrix-tooltip-section">
-              <span className="cross-matrix-tooltip-label"><CheckCircle2 size={12} style={{ color: '#16a34a', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />Agreements:</span>
+              <span className="cross-matrix-tooltip-label"><CheckCircle2 size={12} style={{ color: 'var(--success)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />Agreements:</span>
               {tooltip.details.agreements.map((a, i) => (
                 <p key={i} className="cross-matrix-tooltip-item">{a}</p>
               ))}
@@ -337,7 +337,7 @@ const CrossMatrix = memo(function CrossMatrix({
           )}
           {tooltip.details.disagreements.length > 0 && (
             <div className="cross-matrix-tooltip-section">
-              <span className="cross-matrix-tooltip-label"><Zap size={12} style={{ color: '#eab308', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />Conflicts:</span>
+              <span className="cross-matrix-tooltip-label"><Zap size={12} style={{ color: 'var(--warning)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />Conflicts:</span>
               {tooltip.details.disagreements.map((d, i) => (
                 <p key={i} className="cross-matrix-tooltip-item">{d}</p>
               ))}

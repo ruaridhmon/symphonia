@@ -59,9 +59,9 @@ export default function EmergenceHighlights({ insights, expertLabels, formId, ro
     <div className="emergence-section fade-in">
       <button className="structured-section-header" onClick={() => setExpanded(!expanded)}>
         <div className="structured-section-left">
-          <span className="structured-section-emoji"><Sparkles size={16} style={{ color: '#a855f7' }} /></span>
+          <span className="structured-section-emoji"><Sparkles size={16} style={{ color: 'var(--accent)' }} /></span>
           <span className="structured-section-title">Emergent Insights</span>
-          <span className="structured-section-badge" style={{ backgroundColor: '#a855f7' }}>
+          <span className="structured-section-badge" style={{ backgroundColor: 'var(--accent)' }}>
             {insights.length}
           </span>
         </div>

@@ -9,9 +9,9 @@ interface DevilsAdvocateProps {
 }
 
 const STRENGTH_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  strong: { bg: 'rgba(239,68,68,0.12)', text: '#ef4444', label: 'Strong' },
-  moderate: { bg: 'rgba(234,179,8,0.12)', text: '#eab308', label: 'Moderate' },
-  weak: { bg: 'rgba(34,197,94,0.12)', text: '#22c55e', label: 'Weak' },
+  strong: { bg: 'color-mix(in srgb, var(--destructive) 12%, transparent)', text: 'var(--destructive)', label: 'Strong' },
+  moderate: { bg: 'color-mix(in srgb, var(--warning) 12%, transparent)', text: 'var(--warning)', label: 'Moderate' },
+  weak: { bg: 'color-mix(in srgb, var(--success) 12%, transparent)', text: 'var(--success)', label: 'Weak' },
 };
 
 function StrengthBadge({ strength }: { strength: string }) {
@@ -57,7 +57,7 @@ export default function DevilsAdvocate({ formId, roundId }: DevilsAdvocateProps)
           className="flex items-center gap-2 text-left"
           style={{ background: 'none', border: 'none', cursor: generated ? 'pointer' : 'default', padding: 0 }}
         >
-          <ShieldAlert size={20} style={{ color: '#f97316' }} />
+          <ShieldAlert size={20} style={{ color: 'var(--warning)' }} />
           <h2 className="text-lg font-semibold text-foreground">
             🤖 AI Counterpoints
           </h2>
@@ -78,7 +78,7 @@ export default function DevilsAdvocate({ formId, roundId }: DevilsAdvocateProps)
           className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
           style={{
             backgroundColor: loading ? 'var(--muted)' : 'rgba(249,115,22,0.12)',
-            color: loading ? 'var(--muted-foreground)' : '#f97316',
+            color: loading ? 'var(--muted-foreground)' : 'var(--warning)',
             border: 'none',
             cursor: loading ? 'not-allowed' : 'pointer',
           }}
@@ -101,7 +101,7 @@ export default function DevilsAdvocate({ formId, roundId }: DevilsAdvocateProps)
         className="flex items-start gap-2 text-xs rounded-lg px-3 py-2 mb-3"
         style={{ backgroundColor: 'rgba(249,115,22,0.06)', color: 'var(--muted-foreground)' }}
       >
-        <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" style={{ color: '#f97316' }} />
+        <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" style={{ color: 'var(--warning)' }} />
         <span>
           These counterarguments are <strong>AI-generated</strong> and do not represent expert views.
           They highlight potential blind spots for consideration.

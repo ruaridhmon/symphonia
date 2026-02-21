@@ -100,16 +100,18 @@ export default function AdminDashboard() {
         {/* ── Error banner ── */}
         {error && (
           <div
-            className="rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            className="rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
             style={{
-              backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
-              border: '1px solid var(--destructive)',
-              color: 'var(--destructive)',
+              backgroundColor: 'var(--muted)',
+              border: '1px solid var(--border)',
             }}
           >
-            <span className="text-sm font-medium">{error}</span>
+            <div className="flex items-center gap-3">
+              <span style={{ color: 'var(--destructive)', fontSize: '1.25rem' }}>⚠</span>
+              <span className="text-sm" style={{ color: 'var(--foreground)' }}>{error}</span>
+            </div>
             <LoadingButton
-              variant="destructive"
+              variant="accent"
               size="sm"
               onClick={fetchForms}
             >
@@ -168,6 +170,25 @@ export default function AdminDashboard() {
               <LoadingButton variant="accent" size="md">
                 <Plus size={18} className="mr-1.5" />
                 Create First Consultation
+              </LoadingButton>
+            </Link>
+          </div>
+        )}
+
+        {/* ── Empty state ── */}
+        {forms.length === 0 && !error && (
+          <div className="text-center py-16">
+            <div className="text-4xl mb-4 opacity-40">📋</div>
+            <h3 className="text-lg font-semibold mb-1" style={{ color: 'var(--foreground)' }}>
+              No Consultations Yet
+            </h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>
+              Create your first consultation to start gathering expert consensus.
+            </p>
+            <Link to="/admin/form/new">
+              <LoadingButton variant="accent" size="md">
+                <Plus size={18} className="mr-1.5" />
+                New Consultation
               </LoadingButton>
             </Link>
           </div>
@@ -257,21 +278,19 @@ export default function AdminDashboard() {
                       borderBottom: '2px solid var(--border)',
                     }}
                   >
-                    <th className="p-3 text-xs font-semibold uppercase tracking-wider text-left">Form Title</th>
-                    <th className="p-3 text-xs font-semibold uppercase tracking-wider text-left">Join Code</th>
-                    <th className="p-3 text-xs font-semibold uppercase tracking-wider text-left">Participants</th>
-                    <th className="p-3 text-xs font-semibold uppercase tracking-wider text-left">Round</th>
-                    <th className="p-3 text-xs font-semibold uppercase tracking-wider text-right">Actions</th>
+                    <th className="p-3 text-xs font-medium text-left">Form Title</th>
+                    <th className="p-3 text-xs font-medium text-left">Join Code</th>
+                    <th className="p-3 text-xs font-medium text-left">Participants</th>
+                    <th className="p-3 text-xs font-medium text-left">Round</th>
+                    <th className="p-3 text-xs font-medium text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredForms.map((f) => (
                     <tr
                       key={f.id}
-                      className="transition-colors"
+                      className="admin-table-row"
                       style={{ borderBottom: '1px solid var(--border)' }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--muted)'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                       <td
                         className="p-3 font-medium"

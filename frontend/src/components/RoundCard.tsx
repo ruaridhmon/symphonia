@@ -65,7 +65,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
                   round.convergence_score >= 0.8
                     ? 'var(--success)'
                     : round.convergence_score >= 0.6
-                    ? '#eab308'
+                    ? 'var(--warning)'
                     : 'var(--destructive)',
               }}
             >
@@ -81,7 +81,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
                   round.convergence_score >= 0.8
                     ? 'var(--success)'
                     : round.convergence_score >= 0.6
-                    ? '#eab308'
+                    ? 'var(--warning)'
                     : 'var(--destructive)',
               }}
             />

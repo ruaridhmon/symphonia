@@ -166,7 +166,7 @@ export default function FormEditor() {
       </h1>
 
       {/* Title */}
-      <div className="card-lg p-6 sm:p-8 mb-6">
+      <div className="card-lg p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4 text-foreground">Consultation Title</h2>
         <input
           value={title}
@@ -177,7 +177,7 @@ export default function FormEditor() {
       </div>
 
       {/* Questions */}
-      <div className="card-lg p-6 sm:p-8 mb-6">
+      <div className="card-lg p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4 text-foreground">Questions</h2>
         <p className="text-sm text-muted-foreground mb-4">
           Add the questions you want experts to respond to in this consultation.
@@ -227,7 +227,7 @@ export default function FormEditor() {
       </div>
 
       {/* Join Code (read-only preview) */}
-      <div className="card-lg p-6 sm:p-8 mb-6">
+      <div className="card-lg p-6 mb-6">
         <h2 className="text-lg font-semibold mb-2 text-foreground">Join Code</h2>
         <p className="text-sm text-muted-foreground mb-4">
           Share this code with experts so they can access the consultation.
@@ -238,7 +238,7 @@ export default function FormEditor() {
       </div>
 
       {/* Actions */}
-      <div className="card-lg p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="card-lg p-6 flex flex-col sm:flex-row sm:items-center gap-4">
         <LoadingButton
           variant="accent"
           loading={saving}

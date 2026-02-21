@@ -17,24 +17,15 @@ export default function AuthLayout() {
       }}
     >
       <div className="w-full max-w-md">
-        {/* Branding */}
+        {/* Branding — converging waves */}
         <div className="text-center mb-8">
-          <div
-            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
-            style={{
-              background: 'linear-gradient(135deg, var(--accent), var(--accent-hover))',
-              boxShadow: '0 4px 14px color-mix(in srgb, var(--accent) 25%, transparent)',
-            }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 18V5l12-2v13" />
-              <circle cx="6" cy="18" r="3" />
-              <circle cx="18" cy="16" r="3" />
-            </svg>
+          {/* Converging waves logo mark */}
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src="/logo.png" alt="" className="h-14 w-auto" aria-hidden="true" />
           </div>
           <h1
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--foreground)' }}
+            className="text-2xl font-semibold"
+            style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
           >
             Symphonia
           </h1>

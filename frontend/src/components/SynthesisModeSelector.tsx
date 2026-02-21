@@ -22,7 +22,7 @@ const modes: {
     description: 'Quick one-shot summary',
     detail:
       'A single AI pass that reads all expert responses and generates a unified summary. Fast and cost-effective, but may miss nuanced disagreements or minority positions.',
-    icon: <Zap size={16} style={{ color: '#eab308' }} />,
+    icon: <Zap size={16} style={{ color: 'var(--warning)' }} />,
     speed: 'Fast',
     bestFor: 'Quick overviews, early rounds, small panels (< 8 experts)',
   },

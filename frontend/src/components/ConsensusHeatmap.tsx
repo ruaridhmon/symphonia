@@ -220,7 +220,7 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
 
   function getCellTextColor(value: number, type: string): string {
     if (type === 'absent') return 'var(--muted-foreground)';
-    if (Math.abs(value) > 0.6) return '#ffffff';
+    if (Math.abs(value) > 0.6) return 'var(--card)';
     return 'var(--foreground)';
   }
 

@@ -17,7 +17,7 @@ function convergenceColor(score: number | null | undefined): string {
   if (score == null) return 'var(--muted-foreground)';
   const pct = Math.round(score * 100);
   if (pct >= 80) return 'var(--success)';
-  if (pct >= 60) return '#eab308';
+  if (pct >= 60) return 'var(--warning)';
   return 'var(--destructive)';
 }
 
