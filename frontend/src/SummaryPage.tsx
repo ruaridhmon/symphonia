@@ -86,6 +86,9 @@ export default function SummaryPage() {
 	// Phase 3: Expert label preset for CrossMatrix
 	const [expertLabelPreset] = useState('default');
 
+	// P0: View/Edit mode toggle for synthesis
+	const [synthesisViewMode, setSynthesisViewMode] = useState<'view' | 'edit'>('view');
+
 	// Phase 5: Synthesis versioning
 	type SynthesisVersionType = {
 		id: number;
@@ -543,6 +546,9 @@ export default function SummaryPage() {
 				editor.commands.setContent(synthesisContent);
 			}
 
+			// Auto-switch to View mode to show the rendered result
+			setSynthesisViewMode('view');
+
 			// Reload rounds to show the new synthesis version
 			await loadAll();
 
@@ -777,19 +783,70 @@ export default function SummaryPage() {
 							/>
 						)}
 
-						{/* Synthesis editor (for the active round) */}
+						{/* Synthesis with View/Edit toggle */}
 						{(!selectedRound || selectedRound.is_active) && (
 							<div className="card p-6 min-h-[200px] lg:min-h-[300px]">
-								<h2 className="text-lg font-semibold mb-3 text-foreground">
-									Synthesis for Round {activeRound?.round_number || ''}
-								</h2>
-								<div className="prose max-w-none">
-									<EditorContent editor={editor} />
+								<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+									<h2 className="text-lg font-semibold text-foreground" style={{ margin: 0 }}>
+										Synthesis for Round {activeRound?.round_number || ''}
+									</h2>
+									<div style={{
+										display: 'inline-flex',
+										borderRadius: '0.5rem',
+										overflow: 'hidden',
+										border: '1px solid var(--border)',
+										fontSize: '0.8125rem',
+									}}>
+										<button
+											onClick={() => setSynthesisViewMode('view')}
+											style={{
+												padding: '0.375rem 0.75rem',
+												cursor: 'pointer',
+												border: 'none',
+												fontWeight: synthesisViewMode === 'view' ? 600 : 400,
+												backgroundColor: synthesisViewMode === 'view' ? 'var(--accent)' : 'var(--card)',
+												color: synthesisViewMode === 'view' ? 'white' : 'var(--muted-foreground)',
+												transition: 'all 0.15s ease',
+											}}
+										>
+											View
+										</button>
+										<button
+											onClick={() => setSynthesisViewMode('edit')}
+											style={{
+												padding: '0.375rem 0.75rem',
+												cursor: 'pointer',
+												border: 'none',
+												borderLeft: '1px solid var(--border)',
+												fontWeight: synthesisViewMode === 'edit' ? 600 : 400,
+												backgroundColor: synthesisViewMode === 'edit' ? 'var(--accent)' : 'var(--card)',
+												color: synthesisViewMode === 'edit' ? 'white' : 'var(--muted-foreground)',
+												transition: 'all 0.15s ease',
+											}}
+										>
+											Edit
+										</button>
+									</div>
 								</div>
+								{synthesisViewMode === 'edit' ? (
+									<div className="prose max-w-none">
+										<EditorContent editor={editor} />
+									</div>
+								) : (
+									<div>
+										{activeRound?.synthesis ? (
+											<MarkdownRenderer content={activeRound.synthesis} />
+										) : (
+											<p style={{ color: 'var(--muted-foreground)', fontStyle: 'italic' }}>
+												No synthesis yet. Generate one using the AI panel, or switch to Edit mode to write manually.
+											</p>
+										)}
+									</div>
+								)}
 							</div>
 						)}
 
-						{/* Phase 1: MarkdownRenderer — read-only synthesis view for non-active selected rounds */}
+						{/* Read-only synthesis view for non-active selected rounds */}
 						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
 							<div className="card p-6">
 								<h2 className="text-lg font-semibold mb-3 text-foreground">

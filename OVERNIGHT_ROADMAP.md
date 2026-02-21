@@ -6,19 +6,19 @@
 - [x] `[object Object]` in questions — FIXED
 - [x] Generate synthesis for past rounds — FIXED  
 - [x] Consensus library import error — FIXED
-- [ ] View/Edit mode toggle for synthesis (markdown rendering)
-- [ ] All 3 synthesis modes produce structured JSON cards
+- [x] View/Edit mode toggle for synthesis (markdown rendering) — DONE (Pulse 5:36am)
+- [x] All 3 synthesis modes produce structured JSON cards — DONE (Pulse 5:36am)
 
 ### P1 — Core UX (from brainstorms)
-- [ ] Structured input templates (position/evidence/confidence/counterarguments)
-- [ ] Auto-save drafts to localStorage
-- [ ] Remove ALL console.log statements
-- [ ] Fix WebSocket memory leak in WaitingPage
-- [ ] Emoji → Lucide icons migration
+- [x] Structured input templates (position/evidence/confidence/counterarguments) — DONE (Worker 2)
+- [x] Auto-save drafts to localStorage — DONE (Worker 2)
+- [x] Remove ALL console.log statements (65 removed) — DONE (Worker 1)
+- [x] Fix WebSocket memory leak in WaitingPage — DONE (Worker 1)
+- [x] Emoji → Lucide icons migration (12 files) — DONE (Worker 3)
 
 ### P2 — Polish
-- [ ] API client layer abstraction
-- [ ] Synthesis versioning UI (show versions, compare, activate)
+- [x] API client layer abstraction — DONE (Worker 4)
+- [x] Synthesis versioning UI (show versions, compare, activate) — DONE (Worker 5)
 - [ ] Duplicate footer cleanup
 - [ ] Button consistency across all pages
 - [ ] Error handling with retry buttons
@@ -35,6 +35,16 @@
 - Question text extraction from objects
 - Past round synthesis endpoint wired up
 - Consensus library Python version fix
+- **Next Round button error handling + loading state** (Worker 1)
+- **65 console.log statements removed** (Worker 1)
+- **WebSocket memory leak fixed** (Worker 1)
+- **Structured Input component** — position/evidence/confidence/counterarguments/citations (Worker 2)
+- **Auto-save drafts to localStorage** with debounced 500ms save (Worker 2)
+- **Emoji → Lucide icons migration** — 12 files, semantic colors (Worker 3)
+- **API client layer** — centralised fetch, typed modules, error handling (Worker 4)
+- **Synthesis versioning UI** — version selector, publish, generate new (Worker 5)
+- **View/Edit mode toggle** — clean toggle between rendered markdown and TipTap editor (Pulse)
+- **Structured JSON for all synthesis modes** — simple/ttd now return same structured format as committee (Pulse)
 
 ## Build Command
 ```bash
@@ -46,9 +56,11 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 ## Pulse State
 ```json
 {
-  "last_run": null,
-  "current_task": "P0 - View/Edit mode toggle",
-  "workers_completed": 0,
-  "workers_spawned": 5
+  "last_run": "2026-02-21T05:36:00Z",
+  "current_task": "ALL P0 + P1 COMPLETE",
+  "workers_completed": 5,
+  "workers_spawned": 5,
+  "pulse_direct_changes": 2,
+  "status": "P0 clear, P1 clear, P2 partially clear"
 }
 ```

@@ -747,8 +747,8 @@ async def generate_synthesis_for_round(
         synthesis_text = "".join(text_parts) if text_parts else "Synthesis complete."
 
     else:
-        # Simple single-prompt synthesis
-        prompt_content = "Please synthesize the following responses to the questions that were asked.\n\n"
+        # Simple / TTD single-prompt synthesis — now produces structured JSON too
+        prompt_content = "Synthesize the following expert responses.\n\n"
         prompt_content += "Questions:\n"
         for i, q in enumerate(questions, 1):
             prompt_content += f"{i}. {q}\n"
@@ -763,7 +763,48 @@ async def generate_synthesis_for_round(
                 prompt_content += f"    A: {answer}\n"
 
         prompt_content += "\n--- End of Responses ---\n"
-        prompt_content += "\nNow, please provide a concise synthesis of all the answers."
+        prompt_content += """
+Return your synthesis as a JSON object with the following structure (and ONLY the JSON, no markdown fences, no extra text):
+{
+  "narrative": "A 2-3 paragraph narrative summary of the overall synthesis",
+  "agreements": [
+    {
+      "claim": "What the experts agree on",
+      "supporting_experts": [1, 2],
+      "confidence": 0.85,
+      "evidence_summary": "Key evidence supporting this agreement"
+    }
+  ],
+  "disagreements": [
+    {
+      "topic": "Topic of disagreement",
+      "positions": [
+        {"position": "Position A", "experts": [1], "evidence": "Evidence for A"},
+        {"position": "Position B", "experts": [2], "evidence": "Evidence for B"}
+      ],
+      "severity": "low|moderate|high"
+    }
+  ],
+  "nuances": [
+    {
+      "claim": "A nuanced point or uncertainty",
+      "context": "Why this matters",
+      "relevant_experts": [1]
+    }
+  ],
+  "confidence_map": {"overall": 0.75},
+  "follow_up_probes": [
+    {
+      "question": "A follow-up question to deepen understanding",
+      "target_experts": [1, 2],
+      "rationale": "Why this question would help"
+    }
+  ],
+  "meta_synthesis_reasoning": "Brief explanation of how the synthesis was constructed"
+}
+
+Expert numbers correspond to the Response numbers above. Include ALL relevant agreements, disagreements, and nuances. Be thorough.
+"""
 
         try:
             openai_client = get_openai_client()
@@ -774,12 +815,75 @@ async def generate_synthesis_for_round(
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are an expert at synthesizing and summarizing responses.",
+                        "content": (
+                            "You are an expert Delphi method facilitator. You synthesize expert responses "
+                            "into structured analyses identifying agreements, disagreements, nuances, and "
+                            "follow-up questions. Always return valid JSON matching the requested schema."
+                        ),
                     },
                     {"role": "user", "content": prompt_content},
                 ],
             )
-            synthesis_text = completion.choices[0].message.content
+            raw_output = completion.choices[0].message.content or ""
+
+            # Try to parse as structured JSON
+            try:
+                # Strip markdown code fences if present
+                cleaned = raw_output.strip()
+                if cleaned.startswith("```"):
+                    # Remove ```json and trailing ```
+                    lines = cleaned.split("\n")
+                    lines = [l for l in lines if not l.strip().startswith("```")]
+                    cleaned = "\n".join(lines)
+                parsed = json.loads(cleaned)
+
+                # Validate required keys exist, fill defaults
+                synthesis_json_data = {
+                    "narrative": parsed.get("narrative", ""),
+                    "agreements": parsed.get("agreements", []),
+                    "disagreements": parsed.get("disagreements", []),
+                    "nuances": parsed.get("nuances", []),
+                    "confidence_map": parsed.get("confidence_map", {"overall": 0.5}),
+                    "follow_up_probes": parsed.get("follow_up_probes", []),
+                    "meta_synthesis_reasoning": parsed.get("meta_synthesis_reasoning", ""),
+                }
+
+                # Build readable text from the structured data
+                text_parts = []
+                if synthesis_json_data.get("narrative"):
+                    text_parts.append(f"<p>{synthesis_json_data['narrative']}</p>")
+                if synthesis_json_data["agreements"]:
+                    text_parts.append("<h3>Agreements</h3>")
+                    for a in synthesis_json_data["agreements"]:
+                        conf = a.get("confidence", 0)
+                        text_parts.append(
+                            f"<p><strong>{a.get('claim', '')}</strong> "
+                            f"(confidence: {conf:.0%}) — {a.get('evidence_summary', '')}</p>"
+                        )
+                if synthesis_json_data["disagreements"]:
+                    text_parts.append("<h3>Disagreements</h3>")
+                    for d in synthesis_json_data["disagreements"]:
+                        text_parts.append(
+                            f"<p><strong>{d.get('topic', '')}</strong> ({d.get('severity', 'moderate')})</p><ul>"
+                        )
+                        for pos in d.get("positions", []):
+                            text_parts.append(
+                                f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
+                            )
+                        text_parts.append("</ul>")
+                if synthesis_json_data["nuances"]:
+                    text_parts.append("<h3>Nuances</h3>")
+                    for n in synthesis_json_data["nuances"]:
+                        text_parts.append(
+                            f"<p><strong>{n.get('claim', '')}</strong> — {n.get('context', '')}</p>"
+                        )
+                synthesis_text = "".join(text_parts) if text_parts else raw_output
+
+            except (json.JSONDecodeError, KeyError, TypeError):
+                # LLM didn't return valid JSON — fall back to raw text
+                synthesis_text = raw_output
+                synthesis_json_data = None
+
         except HTTPException:
             raise
         except Exception as e:
