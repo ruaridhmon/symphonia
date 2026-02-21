@@ -9,18 +9,34 @@ import Container from './layouts/Container';
  * Rendered inside PageLayout via Dashboard component.
  */
 export default function AdminDashboard() {
+  console.log('[AdminDashboard] Component render');
   const { token } = useAuth();
+  console.log('[AdminDashboard] Token from useAuth:', token ? `${token.slice(0, 20)}...` : 'EMPTY/NULL');
+  
   const [forms, setForms] = useState([]);
   const [newFormTitle, setNewFormTitle] = useState('');
   const [newQuestions, setNewQuestions] = useState(['']);
 
   useEffect(() => {
+    console.log('[AdminDashboard] useEffect triggered, token:', !!token);
     if (token) {
+      console.log('[AdminDashboard] Fetching /forms...');
       fetch(`${API_BASE_URL}/forms`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-        .then(r => r.json())
-        .then(d => setForms(Array.isArray(d) ? d : []));
+        .then(r => {
+          console.log('[AdminDashboard] /forms response status:', r.status);
+          return r.json();
+        })
+        .then(d => {
+          console.log('[AdminDashboard] /forms data:', d);
+          setForms(Array.isArray(d) ? d : []);
+        })
+        .catch(err => {
+          console.error('[AdminDashboard] /forms fetch error:', err);
+        });
+    } else {
+      console.log('[AdminDashboard] Skipping fetch - no token');
     }
   }, [token]);
 
