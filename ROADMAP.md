@@ -1,26 +1,26 @@
 # Symphonia Roadmap
 
 > Autonomous development pulse runs every 3 hours
-> Last updated: 2026-02-20
+> Last updated: 2026-02-21
 
-## Phase 1: UX Foundation (IN PROGRESS)
+## Phase 1: UX Foundation ✅ COMPLETE
 **Goal:** Make it feel collaborative, not like a prison
 
-- [ ] 1.1 Progress indicator during synthesis (spinner + stages)
-- [ ] 1.2 Button feedback states (hover, active, loading, disabled)
-- [ ] 1.3 Markdown rendering for synthesis output
-- [ ] 1.4 Round navigation timeline/stepper
-- [ ] 1.5 Larger, more readable round cards
+- [x] 1.1 Progress indicator during synthesis (spinner + stages) — SynthesisProgress component + WebSocket integration in SummaryPage
+- [x] 1.2 Button feedback states (hover, active, loading, disabled) — LoadingButton component with micro-interactions, used throughout SummaryPage
+- [x] 1.3 Markdown rendering for synthesis output — MarkdownRenderer with GFM + raw HTML support, used in RoundCard & SynthesisDisplay
+- [x] 1.4 Round navigation timeline/stepper — RoundTimeline v2 with horizontal stepper + card list + convergence scores
+- [x] 1.5 Larger, more readable round cards — RoundCard detail view with convergence bar, questions, structured/markdown synthesis
 
-## Phase 2: Structured Synthesis Display
+## Phase 2: Structured Synthesis Display ✅ COMPLETE
 **Goal:** Surface the rich data from consensus library
 
-- [ ] 2.1 Synthesis mode selector (Simple / Committee / TTD)
-- [ ] 2.2 Agreements section with count badge + confidence
-- [ ] 2.3 Disagreements section with severity indicators
-- [ ] 2.4 Nuances section (collapsible)
-- [ ] 2.5 Follow-up Probes section (things to work on)
-- [ ] 2.6 Expert attribution (who said what)
+- [x] 2.1 Synthesis mode selector (Simple / Committee / TTD) — SynthesisModeSelector component wired into SummaryPage sidebar
+- [x] 2.2 Agreements section with count badge + confidence — StructuredSynthesis: expandable agreements with confidence bars
+- [x] 2.3 Disagreements section with severity indicators — StructuredSynthesis: severity badges (low/moderate/high) + position breakdowns
+- [x] 2.4 Nuances section (collapsible) — StructuredSynthesis: collapsible nuances section with context
+- [x] 2.5 Follow-up Probes section (things to work on) — StructuredSynthesis: probe cards with rationale + target experts
+- [x] 2.6 Expert attribution (who said what) — Expert chips (E1, E2...) on agreements, disagreements, and probes
 
 ## Phase 3: Dimensional Search Integration
 **Goal:** Implement DSM/Hecate patterns in the UI
@@ -62,10 +62,13 @@
 
 ```json
 {
-  "current_phase": 1,
-  "current_task": "1.1",
-  "last_run": null,
-  "tasks_completed": [],
+  "current_phase": 3,
+  "current_task": "3.1",
+  "last_run": "2026-02-21T00:19:00Z",
+  "tasks_completed": [
+    "1.1", "1.2", "1.3", "1.4", "1.5",
+    "2.1", "2.2", "2.3", "2.4", "2.5", "2.6"
+  ],
   "blockers": []
 }
 ```
