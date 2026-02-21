@@ -30,6 +30,68 @@ from core.ws import ws_manager
 load_dotenv()
 
 
+# ---------------------------------------------------------
+# COMMENT → SYNTHESIS HELPERS
+# ---------------------------------------------------------
+
+def _fetch_comments_for_round(db: Session, round_id: int) -> list[SynthesisComment]:
+    """Fetch all comments for a round, ordered chronologically."""
+    return (
+        db.query(SynthesisComment)
+        .filter(SynthesisComment.round_id == round_id)
+        .order_by(SynthesisComment.created_at.asc())
+        .all()
+    )
+
+
+def _format_comments_as_context(comments: list[SynthesisComment]) -> str:
+    """Format synthesis comments into a text block suitable for LLM context.
+
+    Returns an empty string if there are no comments.
+    Groups comments by section type and includes author emails
+    to allow the LLM to cross-reference with expert responses.
+    """
+    if not comments:
+        return ""
+
+    section_labels = {
+        "agreement": "Agreement",
+        "disagreement": "Disagreement",
+        "nuance": "Nuance",
+        "emergence": "Emergent Insight",
+        "general": "General",
+    }
+
+    # Group by section_type
+    grouped: dict[str, list[SynthesisComment]] = {}
+    for c in comments:
+        grouped.setdefault(c.section_type, []).append(c)
+
+    lines = [
+        "",
+        "--- Expert Discussion Comments ---",
+        "The following comments were posted by experts during discussion of the "
+        "synthesis. These represent additional qualitative input — reactions, "
+        "corrections, elaborations, and new points raised in deliberation. "
+        "Incorporate these perspectives into the synthesis where relevant, "
+        "noting them as points raised during expert discussion.",
+        "",
+    ]
+
+    for section_type, section_comments in grouped.items():
+        label = section_labels.get(section_type, section_type.title())
+        lines.append(f"[Comments on {label} section]")
+        for c in section_comments:
+            author = c.author.email if c.author else f"User {c.author_id}"
+            idx_note = f" (item #{c.section_index + 1})" if c.section_index is not None else ""
+            prefix = "  ↳ Reply" if c.parent_id else " "
+            lines.append(f"{prefix} {author}{idx_note}: {c.body}")
+        lines.append("")
+
+    lines.append("--- End of Expert Discussion Comments ---")
+    return "\n".join(lines)
+
+
 router = APIRouter()
 
 # Lazy client initialization to avoid startup crash when no API key
@@ -351,7 +413,19 @@ def generate_summary(
             prompt_content += f"    A: {answer}\n"
 
     prompt_content += "\n--- End of Responses ---\n"
+
+    # Include expert discussion comments if any exist
+    comments = _fetch_comments_for_round(db, active_round.id)
+    comments_context = _format_comments_as_context(comments)
+    if comments_context:
+        prompt_content += comments_context + "\n"
+
     prompt_content += "\nNow, please provide a concise synthesis of all the answers."
+    if comments_context:
+        prompt_content += (
+            " Where experts raised additional points in discussion comments, "
+            "integrate those perspectives naturally (e.g. 'In discussion, experts also noted...')."
+        )
 
     # Check for mock mode or missing API key
     synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
@@ -490,6 +564,10 @@ async def synthesise_committee(
             except Exception:
                 ws_manager.disconnect(conn)
 
+    # Fetch expert discussion comments for additional context
+    comments = _fetch_comments_for_round(db, active_round.id)
+    comments_context = _format_comments_as_context(comments)
+
     # Run committee synthesis
     api_key = os.getenv("OPENROUTER_API_KEY", "")
     synthesiser = get_synthesiser(
@@ -503,6 +581,7 @@ async def synthesise_committee(
         model=payload.model,
         mode=flow_mode,
         progress_callback=progress_callback,
+        comments_context=comments_context,
     )
 
     # Store results on the round
@@ -684,6 +763,10 @@ async def generate_synthesis_for_round(
     synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
     api_key = os.getenv("OPENROUTER_API_KEY", "")
 
+    # Fetch expert discussion comments for this round
+    round_comments = _fetch_comments_for_round(db, round_id)
+    round_comments_context = _format_comments_as_context(round_comments)
+
     if synthesis_mode_env == "mock" or not api_key:
         # Mock synthesis for demo/testing
         synthesis_text = (
@@ -717,6 +800,7 @@ async def generate_synthesis_for_round(
             responses=response_dicts,
             model=payload.model,
             mode=flow_mode,
+            comments_context=round_comments_context,
         )
 
         synthesis_json_data = result.to_dict()
@@ -763,6 +847,11 @@ async def generate_synthesis_for_round(
                 prompt_content += f"    A: {answer}\n"
 
         prompt_content += "\n--- End of Responses ---\n"
+
+        # Include expert discussion comments if any exist
+        if round_comments_context:
+            prompt_content += round_comments_context + "\n"
+
         prompt_content += """
 Return your synthesis as a JSON object with the following structure (and ONLY the JSON, no markdown fences, no extra text):
 {
@@ -772,7 +861,11 @@ Return your synthesis as a JSON object with the following structure (and ONLY th
       "claim": "What the experts agree on",
       "supporting_experts": [1, 2],
       "confidence": 0.85,
-      "evidence_summary": "Key evidence supporting this agreement"
+      "evidence_summary": "Key evidence supporting this agreement",
+      "evidence_excerpts": [
+        {"expert_id": 1, "expert_label": "Response 1", "quote": "Direct quote or close paraphrase from this expert's response that supports the claim"},
+        {"expert_id": 2, "expert_label": "Response 2", "quote": "Direct quote or close paraphrase from this expert's response"}
+      ]
     }
   ],
   "disagreements": [
@@ -804,6 +897,9 @@ Return your synthesis as a JSON object with the following structure (and ONLY th
 }
 
 Expert numbers correspond to the Response numbers above. Include ALL relevant agreements, disagreements, and nuances. Be thorough.
+IMPORTANT: For each agreement, include "evidence_excerpts" with direct quotes from each supporting expert's actual response. This allows users to trace each agreement back to the original expert input.
+
+If expert discussion comments are included above, integrate those perspectives into the synthesis naturally. Comments represent additional qualitative input raised during deliberation — they may reinforce, challenge, or add nuance to the structured responses.
 """
 
         try:
@@ -889,7 +985,12 @@ Expert numbers correspond to the Response numbers above. Include ALL relevant ag
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to generate synthesis: {e}")
 
-    # Create the version record
+    # Create the version record — auto-activate so the round updates immediately
+    # Deactivate all existing versions for this round first
+    db.query(SynthesisVersion).filter(
+        SynthesisVersion.round_id == round_id,
+    ).update({"is_active": False})
+
     new_version = SynthesisVersion(
         round_id=round_id,
         version=next_version,
@@ -897,11 +998,31 @@ Expert numbers correspond to the Response numbers above. Include ALL relevant ag
         synthesis_json=synthesis_json_data,
         model_used=payload.model,
         strategy=strategy,
-        is_active=False,
+        is_active=True,
     )
     db.add(new_version)
+
+    # Copy synthesis onto the round model so it's immediately visible
+    round_obj.synthesis = synthesis_text
+    round_obj.synthesis_json = synthesis_json_data
+
     db.commit()
     db.refresh(new_version)
+
+    # Broadcast synthesis update via WebSocket so other clients auto-refresh
+    if synthesis_text:
+        await ws_manager.broadcast_summary(synthesis_text)
+    for conn in ws_manager.active_connections.copy():
+        try:
+            await conn.send_json({
+                "type": "synthesis_complete",
+                "form_id": form_id,
+                "round_id": round_id,
+                "version_id": new_version.id,
+                "synthesis_json": synthesis_json_data,
+            })
+        except Exception:
+            ws_manager.disconnect(conn)
 
     return {
         "id": new_version.id,

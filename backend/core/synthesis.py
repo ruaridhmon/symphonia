@@ -90,6 +90,15 @@ class EmergentInsight:
 
 
 @dataclass
+class EvidenceExcerpt:
+    """A direct quote from an expert supporting a claim."""
+
+    expert_id: int
+    expert_label: str  # e.g. "E1", or resolved name/role
+    quote: str
+
+
+@dataclass
 class Agreement:
     """A point of consensus among experts."""
 
@@ -97,6 +106,7 @@ class Agreement:
     supporting_experts: List[int]
     confidence: float
     evidence_summary: str
+    evidence_excerpts: List[EvidenceExcerpt] = field(default_factory=list)
 
 
 @dataclass
@@ -193,6 +203,7 @@ class Synthesiser(Protocol):
         model: Optional[str] = None,
         mode: FlowMode = FlowMode.HUMAN_ONLY,
         progress_callback: ProgressCallback = None,
+        comments_context: str = "",
     ) -> SynthesisResult: ...
 
 
@@ -256,6 +267,7 @@ class MockSynthesis:
         model: Optional[str] = None,
         mode: FlowMode = FlowMode.HUMAN_ONLY,
         progress_callback: ProgressCallback = None,
+        comments_context: str = "",
     ) -> SynthesisResult:
         num_responses = len(responses)
 
@@ -268,12 +280,20 @@ class MockSynthesis:
                 supporting_experts=list(range(1, min(num_responses + 1, 4))),
                 confidence=0.85,
                 evidence_summary="Multiple responses emphasised clear documentation",
+                evidence_excerpts=[
+                    EvidenceExcerpt(expert_id=1, expert_label="E1", quote="Clear documentation is essential for team alignment and reduces misunderstandings significantly."),
+                    EvidenceExcerpt(expert_id=2, expert_label="E2", quote="Structured communication protocols should be established from day one of any project."),
+                ] + ([EvidenceExcerpt(expert_id=3, expert_label="E3", quote="Without proper documentation standards, knowledge silos form rapidly.")] if num_responses > 2 else []),
             ),
             Agreement(
                 claim="There is consensus on prioritising user experience",
                 supporting_experts=list(range(1, min(num_responses + 1, 3))),
                 confidence=0.92,
                 evidence_summary="Responses consistently mentioned UX as key",
+                evidence_excerpts=[
+                    EvidenceExcerpt(expert_id=1, expert_label="E1", quote="User experience should be the north star metric for all product decisions."),
+                    EvidenceExcerpt(expert_id=2, expert_label="E2", quote="Investing in UX research early pays dividends throughout the product lifecycle."),
+                ],
             ),
         ]
 
@@ -614,9 +634,14 @@ class ConsensusLibraryAdapter:
         model: Optional[str] = None,
         mode: FlowMode = FlowMode.HUMAN_ONLY,
         progress_callback: ProgressCallback = None,
+        comments_context: str = "",
     ) -> SynthesisResult:
         """
         Run synthesis using the consensus library.
+
+        Args:
+            comments_context: Optional pre-formatted string of expert discussion
+                comments to include as additional context in the synthesis prompt.
 
         Raises:
             SynthesisResponseError: If responses are empty or cannot be mapped.
@@ -642,6 +667,15 @@ class ConsensusLibraryAdapter:
 
         prose_responses = self._build_prose_responses(responses)
         question_text = self._build_question_text(questions)
+
+        # Append expert discussion comments to the question text so they
+        # are visible to the library's synthesis prompt as additional context
+        if comments_context:
+            question_text += (
+                "\n\n" + comments_context
+                + "\n\nIncorporate these discussion comments into the synthesis "
+                "where relevant, noting them as points raised during expert deliberation."
+            )
 
         context = AdapterSynthesisContext(
             study_id="runtime",
@@ -722,6 +756,21 @@ class ConsensusLibraryAdapter:
                 evidence = "; ".join(
                     s.quote for s in claim.sources if s.quote
                 )
+                # Build per-expert evidence excerpts
+                excerpts: List[EvidenceExcerpt] = []
+                for s in claim.sources:
+                    if s.quote:
+                        sid = getattr(s, "source_id", "")
+                        eid = 0
+                        if isinstance(sid, str) and sid.startswith("E") and sid[1:].isdigit():
+                            eid = int(sid[1:])
+                        excerpts.append(
+                            EvidenceExcerpt(
+                                expert_id=eid,
+                                expert_label=sid or f"E{eid}",
+                                quote=s.quote,
+                            )
+                        )
                 agreements.append(
                     Agreement(
                         claim=claim.text,
@@ -730,6 +779,7 @@ class ConsensusLibraryAdapter:
                         confidence=confidence,
                         evidence_summary=evidence
                         or "Synthesised from expert responses",
+                        evidence_excerpts=excerpts,
                     )
                 )
             else:

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -15,6 +15,7 @@ import {
 	SynthesisProgress,
 	StructuredSynthesis,
 	CrossMatrix,
+	ConsensusHeatmap,
 	EmergenceHighlights,
 	MarkdownRenderer,
 	useToast,
@@ -107,11 +108,24 @@ export default function SummaryPage() {
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
 	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
 
+	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
+	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
+		if (data.type === 'synthesis_complete' && data.form_id === formId) {
+			// Another client (or our own broadcast) completed synthesis — reload
+			loadAll().then(() => {
+				if (data.round_id && typeof data.round_id === 'number') {
+					loadSynthesisVersions(data.round_id);
+				}
+			});
+		}
+	}, [formId]);
+
 	// ── Presence ──
 	const { viewers } = usePresence({
 		formId: formId || null,
 		page: 'summary',
 		userEmail: email,
+		onMessage: handleWsMessage,
 	});
 
 	// ── Editor ──
@@ -390,8 +404,18 @@ export default function SummaryPage() {
 			const content = data.synthesis || data.summary || '';
 			if (content && editor) editor.commands.setContent(content);
 
+			// Optimistic update: immediately reflect synthesis in UI state
+			if (data.synthesis_json && targetRound) {
+				const updatedRound = { ...targetRound, synthesis: content, synthesis_json: data.synthesis_json };
+				setRounds(prev => prev.map(r => r.id === targetRound.id ? updatedRound : r));
+				if (activeRound?.id === targetRound.id) setActiveRound(updatedRound);
+				if (selectedRound?.id === targetRound.id) setSelectedRound(updatedRound);
+			}
+
 			setSynthesisViewMode('view');
+			// Reload round data and versions to stay in sync with backend
 			await loadAll();
+			if (targetRound) await loadSynthesisVersions(targetRound.id);
 
 			setSynthesisStage('complete');
 			setSynthesisStep(5);
@@ -421,7 +445,20 @@ export default function SummaryPage() {
 				const err = await res.json();
 				throw new Error(err.detail || 'Failed to generate synthesis version');
 			}
+
+			const data = await res.json();
+
+			// Optimistic update: immediately reflect new synthesis in round state
+			if (data.synthesis_json) {
+				const content = data.synthesis || '';
+				const updatedRound = { ...displayRound, synthesis: content, synthesis_json: data.synthesis_json };
+				setRounds(prev => prev.map(r => r.id === displayRound.id ? updatedRound : r));
+				if (activeRound?.id === displayRound.id) setActiveRound(updatedRound);
+				if (selectedRound?.id === displayRound.id) setSelectedRound(updatedRound);
+			}
+
 			await loadSynthesisVersions(displayRound.id);
+			await loadAll();
 		} catch (error) {
 			toastError((error as Error).message || 'Failed to generate version');
 		} finally {
@@ -571,6 +608,20 @@ export default function SummaryPage() {
 									structuredData={structuredSynthesisData}
 									resolvedExpertLabels={resolvedExpertLabels}
 									expertLabelPreset="default"
+								/>
+							</div>
+						)}
+
+						{/* Consensus heatmap */}
+						{structuredSynthesisData && (
+							<div className="card p-4 sm:p-6">
+								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
+									<span>🗺️</span> Consensus Heatmap
+								</h2>
+								<ConsensusHeatmap
+									structuredData={structuredSynthesisData}
+									resolvedExpertLabels={resolvedExpertLabels}
+									questions={displayRound?.questions}
 								/>
 							</div>
 						)}

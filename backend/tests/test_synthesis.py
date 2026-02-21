@@ -748,3 +748,177 @@ class TestSynthesiserProtocol:
     def test_adapter_satisfies_protocol(self) -> None:
         adapter = ConsensusLibraryAdapter(strategy="simple")
         assert isinstance(adapter, Synthesiser)
+
+
+# =============================================================================
+# 14. Comments context integration
+# =============================================================================
+
+
+class TestCommentsContextIntegration:
+    """Tests that comments_context flows through synthesis correctly."""
+
+    @pytest.mark.asyncio
+    async def test_mock_accepts_comments_context(self) -> None:
+        """MockSynthesis should accept comments_context without error."""
+        mock = MockSynthesis()
+        result = await mock.run(
+            questions=SAMPLE_QUESTIONS,
+            responses=SAMPLE_RESPONSES,
+            comments_context="[Comments] Expert A: I disagree with point 2",
+        )
+        assert isinstance(result, SynthesisResult)
+
+    @pytest.mark.asyncio
+    async def test_mock_works_with_empty_comments(self) -> None:
+        """MockSynthesis should work fine with empty comments_context."""
+        mock = MockSynthesis()
+        result = await mock.run(
+            questions=SAMPLE_QUESTIONS,
+            responses=SAMPLE_RESPONSES,
+            comments_context="",
+        )
+        assert isinstance(result, SynthesisResult)
+
+    @pytest.mark.asyncio
+    async def test_adapter_appends_comments_to_question_text(self) -> None:
+        """ConsensusLibraryAdapter should append comments to the question text in the context."""
+        adapter = ConsensusLibraryAdapter.__new__(ConsensusLibraryAdapter)
+        adapter.strategy_name = "simple"
+        adapter._effective_strategy = "simple"
+        adapter.timeout_seconds = 60.0
+        adapter._strategy_instance = None
+        adapter._llm_client = None
+
+        # Track what context is passed to the library strategy
+        captured_context = {}
+
+        async def fake_strategy_run(context, responses):
+            captured_context["question_text"] = context.question_text
+            return _make_pipeline_result(narrative="Test with comments")
+
+        # Manually init and replace strategy
+        mock_strategy = MagicMock()
+        mock_strategy.run = AsyncMock(side_effect=fake_strategy_run)
+        adapter._strategy_instance = mock_strategy
+
+        comments = "--- Expert Discussion Comments ---\nExpert A: This needs more data"
+
+        result = await adapter.run(
+            questions=SAMPLE_QUESTIONS,
+            responses=SAMPLE_RESPONSES,
+            comments_context=comments,
+        )
+
+        assert isinstance(result, SynthesisResult)
+        assert "Expert Discussion Comments" in captured_context["question_text"]
+        assert "This needs more data" in captured_context["question_text"]
+
+    @pytest.mark.asyncio
+    async def test_adapter_no_comments_no_append(self) -> None:
+        """ConsensusLibraryAdapter should NOT modify question text when comments are empty."""
+        adapter = ConsensusLibraryAdapter.__new__(ConsensusLibraryAdapter)
+        adapter.strategy_name = "simple"
+        adapter._effective_strategy = "simple"
+        adapter.timeout_seconds = 60.0
+        adapter._strategy_instance = None
+        adapter._llm_client = None
+
+        captured_context = {}
+
+        async def fake_strategy_run(context, responses):
+            captured_context["question_text"] = context.question_text
+            return _make_pipeline_result(narrative="Test no comments")
+
+        mock_strategy = MagicMock()
+        mock_strategy.run = AsyncMock(side_effect=fake_strategy_run)
+        adapter._strategy_instance = mock_strategy
+
+        result = await adapter.run(
+            questions=SAMPLE_QUESTIONS,
+            responses=SAMPLE_RESPONSES,
+            comments_context="",
+        )
+
+        assert isinstance(result, SynthesisResult)
+        # Should NOT contain comment markers
+        assert "Discussion Comments" not in captured_context["question_text"]
+
+
+class TestFormatCommentsAsContext:
+    """Tests for the _format_comments_as_context helper in routes."""
+
+    def test_empty_comments_returns_empty_string(self) -> None:
+        from core.routes import _format_comments_as_context
+        assert _format_comments_as_context([]) == ""
+
+    def test_formats_comments_with_sections(self) -> None:
+        from core.routes import _format_comments_as_context
+
+        # Create mock comment objects
+        comment = MagicMock()
+        comment.section_type = "agreement"
+        comment.section_index = 0
+        comment.parent_id = None
+        comment.author_id = 1
+        comment.body = "I strongly support this finding"
+        comment.author = MagicMock()
+        comment.author.email = "expert@test.com"
+
+        result = _format_comments_as_context([comment])
+        assert "Expert Discussion Comments" in result
+        assert "Agreement" in result
+        assert "expert@test.com" in result
+        assert "I strongly support this finding" in result
+        assert "(item #1)" in result
+
+    def test_formats_replies_with_indent(self) -> None:
+        from core.routes import _format_comments_as_context
+
+        parent = MagicMock()
+        parent.section_type = "disagreement"
+        parent.section_index = 1
+        parent.parent_id = None
+        parent.author_id = 1
+        parent.body = "This seems off"
+        parent.author = MagicMock()
+        parent.author.email = "expert1@test.com"
+
+        reply = MagicMock()
+        reply.section_type = "disagreement"
+        reply.section_index = 1
+        reply.parent_id = 99  # has a parent
+        reply.author_id = 2
+        reply.body = "I agree it needs revision"
+        reply.author = MagicMock()
+        reply.author.email = "expert2@test.com"
+
+        result = _format_comments_as_context([parent, reply])
+        assert "Reply" in result
+        assert "expert2@test.com" in result
+
+    def test_groups_by_section_type(self) -> None:
+        from core.routes import _format_comments_as_context
+
+        c1 = MagicMock()
+        c1.section_type = "agreement"
+        c1.section_index = 0
+        c1.parent_id = None
+        c1.author_id = 1
+        c1.body = "Agree comment"
+        c1.author = MagicMock()
+        c1.author.email = "a@test.com"
+
+        c2 = MagicMock()
+        c2.section_type = "nuance"
+        c2.section_index = 0
+        c2.parent_id = None
+        c2.author_id = 2
+        c2.body = "Nuance comment"
+        c2.author = MagicMock()
+        c2.author.email = "b@test.com"
+
+        result = _format_comments_as_context([c1, c2])
+        assert "Agreement" in result
+        assert "Nuance" in result
+        assert result.index("Agreement") < result.index("Nuance") or result.index("Nuance") < result.index("Agreement")
