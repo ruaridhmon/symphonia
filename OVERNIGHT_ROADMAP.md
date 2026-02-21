@@ -66,6 +66,8 @@
 - **Toast notification system** — New Toast component (success/error/warning/info variants) with themed colors, slide-in/out animations, auto-dismiss. Replaced all 9 `alert()` calls across SummaryPage (7), FormEditor (1), AdminDashboard (1). Added success toasts for save/create. Zero `alert()` calls remain. (Pulse 11:06am)
 - **404 Not Found page** — Themed catch-all route with "Go back" and "Dashboard" navigation. Lazy-loaded, wrapped in ErrorBoundary. (Pulse 11:36am)
 - **Dynamic document titles** — `useDocumentTitle` hook applied to all 10 routes. Browser tab now shows "Dashboard — Symphonia", "Sign In — Symphonia", etc. Restores previous title on unmount. (Pulse 11:36am)
+- **WebSocket fix** — Critical: real-time features were completely broken. `pip` in venv had Python 3.14 shebang but server runs Python 3.12. Installed `uvicorn[standard]` (websockets, httptools, uvloop) in correct Python 3.12 site-packages. Verified: WebSocket connections now properly upgrade and work. (Pulse 12:06pm)
+- **Favicon + meta tags** — SVG favicon (indigo-blue gradient S), meta description, theme-color for mobile browser chrome. (Pulse 12:06pm)
 
 ## Build Command
 ```bash
@@ -74,14 +76,18 @@ pkill -f "uvicorn.*8766"
 cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate && nohup .venv/bin/python3.12 -m uvicorn main:app --host 0.0.0.0 --port 8766 > /tmp/symphonia.log 2>&1 &
 ```
 
+### P4 — Infrastructure Fixes
+- [x] WebSocket connections broken (uvicorn[standard] not installed for Python 3.12) — FIXED (Pulse 12:06pm): websockets/httptools/uvloop installed in correct Python 3.12 site-packages, pip shebang corrected. All real-time features (presence, live updates) now functional.
+- [x] SVG favicon + meta tags (description, theme-color) — DONE (Pulse 12:06pm)
+
 ## Pulse State
 ```json
 {
-  "last_run": "2026-02-21T11:36:00Z",
-  "current_task": "404 page + dynamic titles shipped. 33 tasks total.",
+  "last_run": "2026-02-21T12:06:00Z",
+  "current_task": "WebSocket fix + favicon. All roadmap items complete.",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 11,
-  "status": "ALL PHASES COMPLETE + 404 page + dynamic document titles"
+  "pulse_direct_changes": 13,
+  "status": "ALL PHASES COMPLETE — WebSocket real-time features now working"
 }
 ```
