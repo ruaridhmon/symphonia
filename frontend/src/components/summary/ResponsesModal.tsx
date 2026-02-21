@@ -26,7 +26,7 @@ export default function ResponsesModal({
   return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+      style={{ backgroundColor: 'rgba(0,0,0,0.65)' }}
       onClick={e => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -35,7 +35,23 @@ export default function ResponsesModal({
         className="card max-w-3xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 text-left"
         style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
       >
-        <h3 className="text-xl font-semibold mb-4 text-foreground">All Responses</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold text-foreground">All Responses</h3>
+          <button
+            onClick={onClose}
+            className="text-lg w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+            style={{
+              color: 'var(--muted-foreground)',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = 'var(--muted)'}
+            onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            ✕
+          </button>
+        </div>
 
         {structuredRounds.length === 0 ? (
           <p style={{ color: 'var(--muted-foreground)' }}>

@@ -16,10 +16,13 @@ export default function SynthesisEditorCard({
   editor,
 }: Props) {
   return (
-    <div className="card p-4 sm:p-6 min-h-[200px] lg:min-h-[300px]">
+    <div
+      className="card p-4 sm:p-6 min-h-[200px] lg:min-h-[300px]"
+      style={{ borderTop: '3px solid var(--accent)' }}
+    >
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
-        <h2 className="text-lg font-semibold text-foreground" style={{ margin: 0 }}>
-          Synthesis for Round {activeRound?.round_number || ''}
+        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2" style={{ margin: 0 }}>
+          <span>📝</span> Synthesis for Round {activeRound?.round_number || ''}
         </h2>
         <div
           style={{
@@ -71,9 +74,21 @@ export default function SynthesisEditorCard({
           {activeRound?.synthesis ? (
             <MarkdownRenderer content={activeRound.synthesis} />
           ) : (
-            <p style={{ color: 'var(--muted-foreground)', fontStyle: 'italic' }}>
-              No synthesis yet. Generate one using the AI panel, or switch to Edit mode to write manually.
-            </p>
+            <div
+              className="rounded-lg p-6 text-center"
+              style={{
+                backgroundColor: 'var(--muted)',
+                border: '1px dashed var(--border)',
+              }}
+            >
+              <div className="text-3xl mb-3">🤖</div>
+              <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                No synthesis yet
+              </p>
+              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                Generate one using the AI panel on the right, or switch to Edit mode to write manually.
+              </p>
+            </div>
           )}
         </div>
       )}

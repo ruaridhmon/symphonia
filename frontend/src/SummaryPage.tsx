@@ -607,7 +607,16 @@ export default function SummaryPage() {
 					</div>
 
 					{/* ── Sidebar (1/3) ── */}
-					<div className="lg:col-span-1 space-y-4 sm:space-y-6">
+					<div
+						className="lg:col-span-1 space-y-4 sm:space-y-4"
+						style={{
+							position: 'sticky',
+							top: '4.5rem',
+							alignSelf: 'start',
+							maxHeight: 'calc(100vh - 5.5rem)',
+							overflowY: 'auto',
+						}}
+					>
 						<FormInfoCard form={form} activeRound={activeRound} />
 
 						<ActionsCard

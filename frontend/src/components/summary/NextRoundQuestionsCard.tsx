@@ -18,9 +18,18 @@ export default function NextRoundQuestionsCard({
       <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
         <span>❓</span> Next Round Questions
       </h2>
-      <div className="space-y-3 mt-3">
+      <div className="space-y-2 mt-3">
         {questions.map((q, index) => (
-          <div key={index} className="flex gap-2 items-center">
+          <div key={index} className="flex gap-2 items-center group">
+            <span
+              className="text-xs font-medium shrink-0 w-6 h-6 flex items-center justify-center rounded-full"
+              style={{
+                backgroundColor: 'var(--muted)',
+                color: 'var(--muted-foreground)',
+              }}
+            >
+              {index + 1}
+            </span>
             <input
               type="text"
               className="flex-1 rounded-lg px-3 py-2 text-sm min-w-0"
@@ -29,11 +38,13 @@ export default function NextRoundQuestionsCard({
               placeholder={`Question ${index + 1}`}
             />
             <LoadingButton
-              variant="destructive"
+              variant="secondary"
               size="sm"
               onClick={() => onRemoveQuestion(index)}
+              style={{ opacity: 0.4, transition: 'opacity 0.15s ease' }}
+              className="group-hover:!opacity-100"
             >
-              Remove
+              ✕
             </LoadingButton>
           </div>
         ))}
@@ -42,9 +53,9 @@ export default function NextRoundQuestionsCard({
         variant="secondary"
         size="sm"
         onClick={onAddQuestion}
-        className="mt-4"
+        className="mt-3"
       >
-        Add Question
+        + Add Question
       </LoadingButton>
     </div>
   );
