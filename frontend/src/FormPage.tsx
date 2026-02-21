@@ -286,8 +286,8 @@ export default function FormPage() {
 
         </div>
 
-        <div className="flex items-center gap-4 mb-1">
-          <h1 className="text-2xl font-bold text-foreground">{form.title}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{form.title}</h1>
           <PresenceIndicator viewers={viewers} currentUserEmail={email} />
         </div>
 

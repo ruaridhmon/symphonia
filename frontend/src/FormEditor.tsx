@@ -188,7 +188,7 @@ export default function FormEditor() {
       </div>
 
       {/* Actions */}
-      <div className="card-lg p-6 sm:p-8 flex items-center gap-3">
+      <div className="card-lg p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-3">
         <LoadingButton
           variant="accent"
           loading={saving}
@@ -203,7 +203,7 @@ export default function FormEditor() {
           variant="destructive"
           loading={deleting}
           onClick={deleteForm}
-          className="ml-auto px-5 py-2.5"
+          className="sm:ml-auto px-5 py-2.5"
         >
           <Trash2 size={16} className="mr-2" />
           Delete Form

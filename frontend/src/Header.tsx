@@ -1,8 +1,11 @@
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { ThemeToggle } from './theme';
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header
@@ -15,7 +18,7 @@ export default function Header() {
       }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
-        {/* Left: branding + user info */}
+        {/* Left: branding */}
         <div className="flex items-center gap-3">
           <div
             className="flex items-center justify-center w-8 h-8 rounded-lg"
@@ -32,9 +35,10 @@ export default function Header() {
             >
               Symphonia
             </h1>
+            {/* Show email inline on desktop only */}
             {user && (
               <p
-                className="text-xs leading-tight"
+                className="text-xs leading-tight hidden sm:block"
                 style={{ color: 'var(--muted-foreground)' }}
               >
                 {user.email}
@@ -43,8 +47,8 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Right: theme toggle + logout */}
-        <div className="flex items-center gap-2">
+        {/* Right: desktop layout */}
+        <div className="hidden sm:flex items-center gap-2">
           <ThemeToggle />
           {user && (
             <button
@@ -64,6 +68,62 @@ export default function Header() {
                 e.currentTarget.style.backgroundColor = 'transparent';
                 e.currentTarget.style.color = 'var(--muted-foreground)';
               }}
+            >
+              Log out
+            </button>
+          )}
+        </div>
+
+        {/* Right: mobile hamburger button */}
+        <button
+          className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
+          style={{
+            color: 'var(--foreground)',
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+          }}
+          onClick={() => setMenuOpen(prev => !prev)}
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+        >
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </div>
+
+      {/* Mobile dropdown menu */}
+      <div
+        className="sm:hidden overflow-hidden transition-all duration-200 ease-in-out"
+        style={{
+          maxHeight: menuOpen ? '200px' : '0',
+          opacity: menuOpen ? 1 : 0,
+          borderTop: menuOpen ? '1px solid var(--border)' : 'none',
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-3">
+          {user && (
+            <p
+              className="text-xs"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              {user.email}
+            </p>
+          )}
+          <div className="flex items-center justify-between">
+            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Theme</span>
+            <ThemeToggle />
+          </div>
+          {user && (
+            <button
+              onClick={() => { setMenuOpen(false); logout(); }}
+              className="text-sm text-left px-3 py-2 rounded-lg transition-colors"
+              style={{
+                color: 'var(--destructive)',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--muted)'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               Log out
             </button>

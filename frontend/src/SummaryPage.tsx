@@ -477,7 +477,7 @@ export default function SummaryPage() {
 					>
 						← Back to Dashboard
 					</button>
-					<h2 className="text-sm font-medium hidden sm:block" style={{ color: 'var(--muted-foreground)' }}>
+					<h2 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
 						{form.title}
 					</h2>
 				</div>
@@ -608,14 +608,7 @@ export default function SummaryPage() {
 
 					{/* ── Sidebar (1/3) ── */}
 					<div
-						className="lg:col-span-1 space-y-4 sm:space-y-4"
-						style={{
-							position: 'sticky',
-							top: '4.5rem',
-							alignSelf: 'start',
-							maxHeight: 'calc(100vh - 5.5rem)',
-							overflowY: 'auto',
-						}}
+						className="lg:col-span-1 space-y-4 sm:space-y-4 lg:sticky lg:top-[4.5rem] lg:self-start lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto"
 					>
 						<FormInfoCard form={form} activeRound={activeRound} />
 
