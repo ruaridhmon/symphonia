@@ -7,6 +7,7 @@ import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
 import { extractQuestionText } from './utils/questions'
+import { useDocumentTitle } from './hooks/useDocumentTitle'
 
 type Form = {
   id: number
@@ -25,7 +26,7 @@ type ActiveRound = {
 }
 
 export default function FormPage() {
-
+  useDocumentTitle('Submit Response')
   const { id } = useParams()
 
   const navigate = useNavigate()

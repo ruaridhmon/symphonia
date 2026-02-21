@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lightbulb } from 'lucide-react';
 import { API_BASE_URL } from './config';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function WaitingPage() {
+  useDocumentTitle('Waiting for Next Round');
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const wsRef = useRef<WebSocket | null>(null);

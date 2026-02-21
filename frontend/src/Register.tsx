@@ -3,8 +3,10 @@ import { useAuth } from './AuthContext';
 import { Link, Navigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
 import { LoadingButton } from './components';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Register() {
+  useDocumentTitle('Register');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

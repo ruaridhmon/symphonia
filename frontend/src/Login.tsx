@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { Link, Navigate } from 'react-router-dom';
 import { LoadingButton } from './components';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Login() {
+  useDocumentTitle('Sign In');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

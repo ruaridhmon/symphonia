@@ -16,6 +16,7 @@ const FormPage     = lazy(() => import('./FormPage'));
 const Login        = lazy(() => import('./Login'));
 const Register     = lazy(() => import('./Register'));
 const Atlas        = lazy(() => import('./Atlas'));
+const NotFoundPage = lazy(() => import('./NotFoundPage'));
 
 /**
  * Application routes organised by layout shell.
@@ -141,6 +142,15 @@ export default function Router() {
             />
           </Route>
         </Route>
+        {/* ── 404 catch-all ── */}
+        <Route
+          path="*"
+          element={
+            <ErrorBoundary fallbackTitle="Page Error">
+              <NotFoundPage />
+            </ErrorBoundary>
+          }
+        />
       </Routes>
     </Suspense>
   );

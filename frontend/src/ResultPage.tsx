@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
 import { LoadingButton, SynthesisDisplay } from './components';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function ResultPage() {
+  useDocumentTitle('Synthesis Results');
   const [html, setHtml] = useState('');
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);

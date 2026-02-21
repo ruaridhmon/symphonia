@@ -7,6 +7,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 import { API_BASE_URL } from './config';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 import {
 	RoundTimeline,
@@ -65,6 +66,7 @@ function extractQuestionText(q: unknown): string {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SummaryPage() {
+	useDocumentTitle('Synthesis Summary');
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const formId = Number(id);

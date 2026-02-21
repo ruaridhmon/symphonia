@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
 import { useToast } from './components/Toast';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -11,6 +12,7 @@ import { useToast } from './components/Toast';
  * Rendered inside PageLayout via Dashboard component.
  */
 export default function AdminDashboard() {
+  useDocumentTitle('Admin Dashboard');
   const { token } = useAuth();
   const { toastError, toastSuccess } = useToast();
   

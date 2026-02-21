@@ -5,6 +5,7 @@ import { API_BASE_URL } from './config';
 import { extractQuestionText } from './utils/questions';
 import LoadingButton from './components/LoadingButton';
 import { useToast } from './components/Toast';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 interface FormData {
   title: string;
@@ -13,6 +14,7 @@ interface FormData {
 }
 
 export default function FormEditor() {
+  useDocumentTitle('Edit Form');
   const { id } = useParams();
   const navigate = useNavigate();
   const { toastError } = useToast();

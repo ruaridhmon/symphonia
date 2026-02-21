@@ -6,6 +6,7 @@ import { ApiError } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
 import Skeleton, { SkeletonCard } from './components/Skeleton';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 /**
  * User dashboard — join forms via code, view/enter joined forms.
@@ -14,6 +15,7 @@ import Skeleton, { SkeletonCard } from './components/Skeleton';
  * Uses <section> instead of <main> to avoid nesting <main> inside PageLayout's <main>.
  */
 export default function UserDashboard() {
+  useDocumentTitle('My Forms');
   const { token } = useAuth();
   const navigate = useNavigate();
   const [myForms, setMyForms] = useState<Form[]>([]);
