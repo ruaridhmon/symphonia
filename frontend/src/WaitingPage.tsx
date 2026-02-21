@@ -1,60 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lightbulb } from 'lucide-react';
 import { API_BASE_URL } from './config';
 
 export default function WaitingPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    const fetchMeAndCheckSummary = async () => {
+    // Fetch user info (async, but WebSocket setup is outside)
+    fetch(`${API_BASE_URL}/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => { if (data) setEmail(data.email || ''); })
+      .catch(err => console.error('[WaitingPage] Fetch error:', err));
+
+    // WebSocket setup — outside async so cleanup works correctly
+    const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${new URL(API_BASE_URL).host}/ws`;
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onmessage = (e) => {
       try {
-        const res = await fetch(`${API_BASE_URL}/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setEmail(data.email || '');
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'summary_updated') {
+          navigate('/result', { replace: true });
         }
       } catch (err) {
-        console.error('[WaitingPage] ❌ Fetch error:', err);
+        console.error('[WaitingPage] Failed to parse WebSocket message:', err);
       }
-
-      const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${new URL(API_BASE_URL).host}/ws`;
-      const ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        console.log('[WaitingPage] ✅ WebSocket connected');
-      };
-
-      ws.onmessage = (e) => {
-        try {
-          const msg = JSON.parse(e.data);
-          if (msg.type === 'summary_updated') {
-            navigate('/result', { replace: true });
-          }
-        } catch (err) {
-          console.error('[WaitingPage] ❌ Failed to parse message:', err);
-        }
-      };
-
-      ws.onerror = (err) => {
-        console.error('[WaitingPage] ❌ WebSocket error:', err);
-      };
-
-      ws.onclose = () => {
-        console.log('[WaitingPage] 🔌 WebSocket closed');
-      };
-
-      return () => {
-        ws.close();
-      };
     };
 
-    fetchMeAndCheckSummary();
+    ws.onerror = (err) => {
+      console.error('[WaitingPage] WebSocket error:', err);
+    };
+
+    return () => {
+      ws.close();
+      wsRef.current = null;
+    };
   }, [navigate]);
 
   function logout() {
@@ -95,9 +84,10 @@ export default function WaitingPage() {
             border: '1px solid var(--border)',
           }}
         >
-          <p className="text-xs text-muted-foreground">
-            💡 The facilitator is reviewing all responses and preparing the
-            next round. This page will update automatically.
+          <p className="text-xs text-muted-foreground" style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+            <Lightbulb size={14} style={{ color: '#a855f7', flexShrink: 0, marginTop: '1px' }} />
+            <span>The facilitator is reviewing all responses and preparing the
+            next round. This page will update automatically.</span>
           </p>
         </div>
 

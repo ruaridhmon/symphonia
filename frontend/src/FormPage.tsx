@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from './config'
-import { LoadingButton, SynthesisDisplay, PresenceIndicator } from './components'
+import { LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
 import { usePresence } from './hooks/usePresence'
+import type { StructuredResponse } from './types/structured-input'
+import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
 
 type Form = {
   id: number
@@ -40,7 +42,7 @@ export default function FormPage() {
 
   const [roundQuestions, setRoundQuestions] = useState<string[]>([])
 
-  const [responses, setResponses] = useState<Record<string, string>>({})
+  const [structuredResponses, setStructuredResponses] = useState<Record<string, StructuredResponse>>({})
 
   const [hasSubmitted, setHasSubmitted] = useState(false)
 
@@ -55,6 +57,29 @@ export default function FormPage() {
     userEmail: email,
   })
 
+  /** Build initial empty structured responses for a set of questions */
+  const buildEmptyResponses = useCallback((questions: string[]) => {
+    return Object.fromEntries(
+      questions.map((_: string, i: number) => [`q${i + 1}`, emptyStructuredResponse()])
+    ) as Record<string, StructuredResponse>
+  }, [])
+
+  /** Convert legacy flat string answers to structured responses */
+  const legacyToStructured = useCallback((answers: Record<string, string | StructuredResponse>): Record<string, StructuredResponse> => {
+    const result: Record<string, StructuredResponse> = {}
+    for (const [key, val] of Object.entries(answers)) {
+      if (typeof val === 'string') {
+        // Legacy: plain text → put it in the position field
+        result[key] = { ...emptyStructuredResponse(), position: val }
+      } else if (val && typeof val === 'object' && 'position' in val) {
+        // Already structured
+        result[key] = val as StructuredResponse
+      } else {
+        result[key] = emptyStructuredResponse()
+      }
+    }
+    return result
+  }, [])
 
 
   useEffect(() => {
@@ -99,15 +124,7 @@ export default function FormPage() {
 
         setRoundQuestions(fallbackQuestions)
 
-        setResponses(
-
-          Object.fromEntries(
-
-            fallbackQuestions.map((_: any, i: number) => [`q${i + 1}`, ''])
-
-          )
-
-        )
+        setStructuredResponses(buildEmptyResponses(fallbackQuestions))
 
         setMode('filling');
 
@@ -157,7 +174,7 @@ export default function FormPage() {
 
         if (myResponseData.answers) {
 
-          setResponses(myResponseData.answers)
+          setStructuredResponses(legacyToStructured(myResponseData.answers))
 
         }
 
@@ -167,11 +184,7 @@ export default function FormPage() {
 
         setMode('filling')
 
-        setResponses(
-
-          Object.fromEntries(questions.map((_: any, i: number) => [`q${i + 1}`, '']))
-
-        )
+        setStructuredResponses(buildEmptyResponses(questions))
 
       }
 
@@ -185,17 +198,7 @@ export default function FormPage() {
 
     load()
 
-  }, [id])
-
-
-
-  function autoResize(e: React.ChangeEvent<HTMLTextAreaElement>) {
-
-    e.target.style.height = 'auto'
-
-    e.target.style.height = `${e.target.scrollHeight}px`
-
-  }
+  }, [id, buildEmptyResponses, legacyToStructured])
 
 
 
@@ -227,13 +230,18 @@ export default function FormPage() {
 
           form_id: id,
 
-          answers: JSON.stringify(responses)
+          answers: JSON.stringify(structuredResponses)
 
         })
 
       })
 
-
+      // Clear auto-save data on successful submit
+      roundQuestions.forEach((_, i) => {
+        try {
+          localStorage.removeItem(autoSaveKey(id, i))
+        } catch { /* ignore */ }
+      })
 
       navigate('/waiting')
 
@@ -339,11 +347,13 @@ export default function FormPage() {
 
                   <label className="block text-sm font-semibold text-foreground mb-2">{q}</label>
 
-                  <div className="w-full rounded-lg px-4 py-3 bg-muted min-h-[4rem] whitespace-pre-wrap text-foreground border border-border">
-
-                    {responses[key] || <span className="text-muted-foreground">No answer provided</span>}
-
-                  </div>
+                  <StructuredInput
+                    questionIndex={i}
+                    formId={id!}
+                    value={structuredResponses[key] ?? emptyStructuredResponse()}
+                    onChange={() => {}}
+                    readOnly
+                  />
 
                 </div>
 
@@ -383,28 +393,16 @@ export default function FormPage() {
 
                   <label className="block text-sm font-medium mb-2 text-foreground">{q}</label>
 
-                  <textarea
-
-                    rows={2}
-
-                    className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
-
-                    onInput={autoResize}
-
-                    value={responses[key] || ''}
-
-                    onChange={e =>
-
-                      setResponses(prev => ({
-
+                  <StructuredInput
+                    questionIndex={i}
+                    formId={id!}
+                    value={structuredResponses[key] ?? emptyStructuredResponse()}
+                    onChange={(val) =>
+                      setStructuredResponses(prev => ({
                         ...prev,
-
-                        [key]: e.target.value
-
+                        [key]: val,
                       }))
-
                     }
-
                   />
 
                 </div>

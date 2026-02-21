@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CheckCircle2, Zap, Lightbulb, Target, FileText } from 'lucide-react';
 import CommentThread from './CommentThread';
 
 // ─── Types ──────────────────────────────────────────────
@@ -63,14 +64,14 @@ interface StructuredSynthesisProps {
 function SectionHeader({
   title,
   count,
-  emoji,
+  icon,
   color,
   expanded,
   onToggle,
 }: {
   title: string;
   count: number;
-  emoji: string;
+  icon: React.ReactNode;
   color: string;
   expanded: boolean;
   onToggle: () => void;
@@ -78,7 +79,7 @@ function SectionHeader({
   return (
     <button className="structured-section-header" onClick={onToggle}>
       <div className="structured-section-left">
-        <span className="structured-section-emoji">{emoji}</span>
+        <span className="structured-section-emoji">{icon}</span>
         <span className="structured-section-title">{title}</span>
         <span className="structured-section-badge" style={{ backgroundColor: color }}>
           {count}
@@ -209,7 +210,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
           <SectionHeader
             title="Narrative Summary"
             count={0}
-            emoji="📝"
+            icon={<FileText size={16} style={{ color: 'var(--accent)' }} />}
             color="var(--accent)"
             expanded={expandedSections.narrative}
             onToggle={() => toggle('narrative')}
@@ -228,7 +229,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
           <SectionHeader
             title="Agreements"
             count={agreements.length}
-            emoji="✅"
+            icon={<CheckCircle2 size={16} style={{ color: 'var(--success)' }} />}
             color="var(--success)"
             expanded={expandedSections.agreements}
             onToggle={() => toggle('agreements')}
@@ -276,7 +277,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
           <SectionHeader
             title="Disagreements"
             count={disagreements.length}
-            emoji="⚡"
+            icon={<Zap size={16} style={{ color: '#eab308' }} />}
             color="#eab308"
             expanded={expandedSections.disagreements}
             onToggle={() => toggle('disagreements')}
@@ -336,7 +337,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
           <SectionHeader
             title="Nuances & Uncertainties"
             count={nuances.length}
-            emoji="🔮"
+            icon={<Lightbulb size={16} style={{ color: '#a855f7' }} />}
             color="#a855f7"
             expanded={expandedSections.nuances}
             onToggle={() => toggle('nuances')}
@@ -372,7 +373,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
           <SectionHeader
             title="Follow-up Probes"
             count={probes.length}
-            emoji="🎯"
+            icon={<Target size={16} style={{ color: 'var(--accent)' }} />}
             color="var(--accent)"
             expanded={expandedSections.probes}
             onToggle={() => toggle('probes')}

@@ -14,6 +14,7 @@ import os
 from .models import (
     User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
     UserFormUnlock, FollowUp, FollowUpResponse, SynthesisComment,
+    SynthesisVersion,
 )
 from .auth import (
     get_db,
@@ -569,6 +570,311 @@ async def synthesise_committee(
         "synthesis": result_dict,
         "convergence_score": active_round.convergence_score,
         "text_synthesis": active_round.synthesis,
+    }
+
+
+# ---------------------------------------------------------
+# SYNTHESIS VERSIONING
+# ---------------------------------------------------------
+
+@router.get("/forms/{form_id}/rounds/{round_id}/synthesis_versions")
+def list_synthesis_versions(
+    form_id: int,
+    round_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """List all synthesis versions for a given round."""
+    # Verify round belongs to form
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    versions = (
+        db.query(SynthesisVersion)
+        .filter(SynthesisVersion.round_id == round_id)
+        .order_by(SynthesisVersion.version.asc())
+        .all()
+    )
+
+    return [
+        {
+            "id": v.id,
+            "round_id": v.round_id,
+            "version": v.version,
+            "synthesis": v.synthesis,
+            "synthesis_json": v.synthesis_json,
+            "model_used": v.model_used,
+            "strategy": v.strategy,
+            "created_at": v.created_at.isoformat() if v.created_at else None,
+            "is_active": v.is_active,
+        }
+        for v in versions
+    ]
+
+
+class GenerateSynthesisVersionPayload(BaseModel):
+    model: str = "anthropic/claude-sonnet-4"
+    strategy: str = "simple"  # "simple" | "committee" | "ttd"
+    n_analysts: int = 3
+    mode: str = "human_only"
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/generate_synthesis")
+async def generate_synthesis_for_round(
+    form_id: int,
+    round_id: int,
+    payload: GenerateSynthesisVersionPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Generate a NEW synthesis version for ANY round (not just active).
+
+    Creates a new SynthesisVersion record with an incremented version number.
+    If strategy is 'committee', runs the committee synthesiser.
+    Otherwise, falls back to simple single-prompt synthesis.
+    """
+    # Verify round belongs to form
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    # Fetch questions for this round
+    questions = round_obj.questions or []
+    if not questions:
+        form = db.query(FormModel).filter(FormModel.id == form_id).first()
+        if form:
+            questions = form.questions or []
+    if not questions:
+        raise HTTPException(status_code=400, detail="No questions found for this round")
+
+    # Fetch responses for this round
+    responses = (
+        db.query(Response)
+        .filter(Response.round_id == round_id)
+        .order_by(Response.created_at.asc())
+        .all()
+    )
+    if not responses:
+        raise HTTPException(status_code=404, detail="No responses to synthesise for this round")
+
+    # Determine next version number
+    max_version = (
+        db.query(SynthesisVersion.version)
+        .filter(SynthesisVersion.round_id == round_id)
+        .order_by(SynthesisVersion.version.desc())
+        .first()
+    )
+    next_version = (max_version[0] + 1) if max_version else 1
+
+    synthesis_text = None
+    synthesis_json_data = None
+
+    strategy = payload.strategy.lower()
+
+    # Check for mock mode or missing API key
+    synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    if synthesis_mode_env == "mock" or not api_key:
+        # Mock synthesis for demo/testing
+        synthesis_text = (
+            f"## Synthesis v{next_version} (Mock Mode)\n\n"
+            f"**Round {round_obj.round_number}** — {len(responses)} responses analysed.\n\n"
+            f"*Strategy: {strategy} | Model: {payload.model}*\n\n"
+            "This is a mock synthesis. Enable OPENROUTER_API_KEY for real LLM synthesis."
+        )
+    elif strategy == "committee":
+        # Run committee synthesis
+        response_dicts = [
+            {
+                "answers": r.answers,
+                "email": r.user.email if r.user else f"Expert {i}",
+            }
+            for i, r in enumerate(responses)
+        ]
+
+        try:
+            flow_mode = FlowMode(payload.mode)
+        except ValueError:
+            flow_mode = FlowMode.HUMAN_ONLY
+
+        synthesiser = get_synthesiser(
+            api_key=api_key,
+            n_analysts=payload.n_analysts,
+        )
+
+        result = await synthesiser.run(
+            questions=questions,
+            responses=response_dicts,
+            model=payload.model,
+            mode=flow_mode,
+        )
+
+        synthesis_json_data = result.to_dict()
+
+        # Build text representation for backwards compat
+        text_parts = []
+        if result.agreements:
+            text_parts.append("<h3>Agreements</h3>")
+            for a in result.agreements:
+                text_parts.append(
+                    f"<p><strong>{a.claim}</strong> "
+                    f"(confidence: {a.confidence:.0%}) — {a.evidence_summary}</p>"
+                )
+        if result.disagreements:
+            text_parts.append("<h3>Disagreements</h3>")
+            for d in result.disagreements:
+                text_parts.append(f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>")
+                for pos in d.positions:
+                    text_parts.append(
+                        f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
+                    )
+                text_parts.append("</ul>")
+        if result.nuances:
+            text_parts.append("<h3>Nuances</h3>")
+            for n in result.nuances:
+                text_parts.append(f"<p><strong>{n.claim}</strong> — {n.context}</p>")
+
+        synthesis_text = "".join(text_parts) if text_parts else "Synthesis complete."
+
+    else:
+        # Simple single-prompt synthesis
+        prompt_content = "Please synthesize the following responses to the questions that were asked.\n\n"
+        prompt_content += "Questions:\n"
+        for i, q in enumerate(questions, 1):
+            prompt_content += f"{i}. {q}\n"
+
+        prompt_content += "\n--- Responses ---\n"
+        for i, r in enumerate(responses, 1):
+            prompt_content += f"\nResponse {i}:\n"
+            answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
+            for q_idx, q_text in enumerate(questions, 1):
+                answer = answers.get(f'q{q_idx}', 'No answer')
+                prompt_content += f"  - Q: {q_text}\n"
+                prompt_content += f"    A: {answer}\n"
+
+        prompt_content += "\n--- End of Responses ---\n"
+        prompt_content += "\nNow, please provide a concise synthesis of all the answers."
+
+        try:
+            openai_client = get_openai_client()
+            if not openai_client:
+                raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+            completion = openai_client.chat.completions.create(
+                model=payload.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert at synthesizing and summarizing responses.",
+                    },
+                    {"role": "user", "content": prompt_content},
+                ],
+            )
+            synthesis_text = completion.choices[0].message.content
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to generate synthesis: {e}")
+
+    # Create the version record
+    new_version = SynthesisVersion(
+        round_id=round_id,
+        version=next_version,
+        synthesis=synthesis_text,
+        synthesis_json=synthesis_json_data,
+        model_used=payload.model,
+        strategy=strategy,
+        is_active=False,
+    )
+    db.add(new_version)
+    db.commit()
+    db.refresh(new_version)
+
+    return {
+        "id": new_version.id,
+        "round_id": new_version.round_id,
+        "version": new_version.version,
+        "synthesis": new_version.synthesis,
+        "synthesis_json": new_version.synthesis_json,
+        "model_used": new_version.model_used,
+        "strategy": new_version.strategy,
+        "created_at": new_version.created_at.isoformat() if new_version.created_at else None,
+        "is_active": new_version.is_active,
+    }
+
+
+@router.put("/synthesis_versions/{version_id}/activate")
+def activate_synthesis_version(
+    version_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Set a synthesis version as the active/published one.
+
+    Deactivates all other versions for the same round, then activates
+    the specified version. Also copies the synthesis text and JSON
+    back onto the Round model for backwards compatibility.
+    """
+    version = db.query(SynthesisVersion).filter(SynthesisVersion.id == version_id).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Synthesis version not found")
+
+    # Deactivate all other versions for this round
+    db.query(SynthesisVersion).filter(
+        SynthesisVersion.round_id == version.round_id,
+        SynthesisVersion.id != version_id,
+    ).update({"is_active": False})
+
+    # Activate the selected version
+    version.is_active = True
+
+    # Copy synthesis to the round model for backwards compatibility
+    round_obj = db.query(RoundModel).filter(RoundModel.id == version.round_id).first()
+    if round_obj:
+        round_obj.synthesis = version.synthesis
+        round_obj.synthesis_json = version.synthesis_json
+
+    db.commit()
+
+    return {
+        "id": version.id,
+        "round_id": version.round_id,
+        "version": version.version,
+        "is_active": version.is_active,
+        "message": f"Version {version.version} is now active",
+    }
+
+
+@router.get("/synthesis_versions/{version_id}")
+def get_synthesis_version(
+    version_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Get a specific synthesis version by ID."""
+    version = db.query(SynthesisVersion).filter(SynthesisVersion.id == version_id).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Synthesis version not found")
+
+    return {
+        "id": version.id,
+        "round_id": version.round_id,
+        "version": version.version,
+        "synthesis": version.synthesis,
+        "synthesis_json": version.synthesis_json,
+        "model_used": version.model_used,
+        "strategy": version.strategy,
+        "created_at": version.created_at.isoformat() if version.created_at else None,
+        "is_active": version.is_active,
     }
 
 

@@ -1,4 +1,5 @@
 export { default as ExportPanel } from './ExportPanel';
+export { default as StructuredInput } from './StructuredInput';
 export { default as LoadingButton } from './LoadingButton';
 export { default as MarkdownRenderer } from './MarkdownRenderer';
 export { default as SynthesisDisplay } from './SynthesisDisplay';

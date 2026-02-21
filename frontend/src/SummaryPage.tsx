@@ -51,16 +51,12 @@ type Form = {
 };
 
 export default function SummaryPage() {
-	console.log('[SummaryPage] Component render started');
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const formId = Number(id);
-	console.log('[SummaryPage] formId:', formId, 'raw id param:', id);
 
 	const token = useMemo(() => {
-		const t = localStorage.getItem('access_token') || '';
-		console.log('[SummaryPage] Token from localStorage:', t ? `${t.slice(0, 20)}...` : 'EMPTY');
-		return t;
+		return localStorage.getItem('access_token') || '';
 	}, []);
 	const authHeaders = useMemo(
 		() => ({ Authorization: `Bearer ${token}` }),
@@ -89,6 +85,22 @@ export default function SummaryPage() {
 
 	// Phase 3: Expert label preset for CrossMatrix
 	const [expertLabelPreset] = useState('default');
+
+	// Phase 5: Synthesis versioning
+	type SynthesisVersionType = {
+		id: number;
+		round_id: number;
+		version: number;
+		synthesis: string | null;
+		synthesis_json: any;
+		model_used: string | null;
+		strategy: string | null;
+		created_at: string | null;
+		is_active: boolean;
+	};
+	const [synthesisVersions, setSynthesisVersions] = useState<SynthesisVersionType[]>([]);
+	const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
+	const [isGeneratingVersion, setIsGeneratingVersion] = useState(false);
 
 	// Structured response data for ResponseEditor integration
 	type StructuredResponse = {
@@ -169,53 +181,27 @@ export default function SummaryPage() {
 	}, [structuredSynthesisData]);
 
 	useEffect(() => {
-		console.log('[SummaryPage] useEffect[/me] triggered - token:', !!token);
-		if (!token) {
-			console.log('[SummaryPage] useEffect[/me] skipped - no token');
-			return;
-		}
-		console.log('[SummaryPage] Fetching /me...');
+		if (!token) return;
 		fetch(`${API_BASE_URL}/me`, { headers: authHeaders })
-			.then(r => {
-				console.log('[SummaryPage] /me response status:', r.status);
-				return r.json();
-			})
-			.then(d => {
-				console.log('[SummaryPage] /me data:', d);
-				setEmail(d.email || '');
-			})
+			.then(r => r.json())
+			.then(d => setEmail(d.email || ''))
 			.catch(err => console.error('[SummaryPage] /me fetch error:', err));
 	}, [token, authHeaders]);
 
 	useEffect(() => {
-		console.log('[SummaryPage] useEffect[loadAll] triggered - token:', !!token, 'formId:', formId, 'editor:', !!editor);
-		if (!token || !formId) {
-			console.log('[SummaryPage] useEffect[loadAll] skipped - missing token or formId');
-			return;
-		}
-		console.log('[SummaryPage] Calling loadAll()...');
+		if (!token || !formId) return;
 		loadAll()
-			.then(() => {
-				console.log('[SummaryPage] loadAll() completed, now calling loadResponses()...');
-				return loadResponses();
-			})
-			.then(() => {
-				console.log('[SummaryPage] loadResponses() completed');
-			})
-			.catch(err => console.error('[SummaryPage] loadAll/loadResponses chain error:', err));
+			.then(() => loadResponses())
+			.catch(err => console.error('[SummaryPage] loadAll/loadResponses error:', err));
 	}, [token, formId, authHeaders, editor]);
 
 	async function loadResponses() {
-		console.log('[SummaryPage] loadResponses() started');
 		try {
-			console.log('[SummaryPage] Fetching rounds_with_responses...');
 			const response = await fetch(
 				`${API_BASE_URL}/forms/${formId}/rounds_with_responses`,
 				{ headers: authHeaders }
 			);
-			console.log('[SummaryPage] rounds_with_responses status:', response.status);
 			const roundsWithResponses = await response.json();
-			console.log('[SummaryPage] rounds_with_responses data:', roundsWithResponses);
 
 			// Store structured data for ResponseEditor
 			if (Array.isArray(roundsWithResponses)) {
@@ -272,31 +258,23 @@ export default function SummaryPage() {
 			}
 			setResponsesHTML(html);
 		} catch (e) {
-			console.error('[SummaryPage] loadResponses() error:', e);
+			console.error('[SummaryPage] loadResponses error:', e);
 		}
-		console.log('[SummaryPage] loadResponses() finished');
 	}
 
 	async function loadAll() {
-		console.log('[SummaryPage] loadAll() started');
 		setLoading(true);
 		try {
-			console.log('[SummaryPage] Fetching form data...');
 			const formRes = await fetch(`${API_BASE_URL}/forms/${formId}`, {
 				headers: authHeaders
 			});
-			console.log('[SummaryPage] form response status:', formRes.status);
 			const f = await formRes.json();
-			console.log('[SummaryPage] form data:', f);
 			setForm(f);
 
-			console.log('[SummaryPage] Fetching rounds...');
 			const roundsRes = await fetch(`${API_BASE_URL}/forms/${formId}/rounds`, {
 				headers: authHeaders
 			});
-			console.log('[SummaryPage] rounds response status:', roundsRes.status);
 			const list = await roundsRes.json();
-			console.log('[SummaryPage] rounds data:', list);
 
 			const mapped: Round[] = (Array.isArray(list) ? list : []).map(
 				(x: any) => ({
@@ -310,60 +288,69 @@ export default function SummaryPage() {
 					response_count: x.response_count ?? 0,
 				})
 			);
-			console.log('[SummaryPage] mapped rounds:', mapped);
 			setRounds(mapped);
 
 			const active = mapped.find(x => x.is_active) || null;
-			console.log('[SummaryPage] active round:', active);
 			setActiveRound(active || null);
 
 			// Auto-select the active round for RoundTimeline
 			if (active && !selectedRound) {
 				setSelectedRound(active);
+				// Phase 5: Load synthesis versions for the active round
+				loadSynthesisVersions(active.id);
 			}
 
 			if (active && editor) {
-				console.log('[SummaryPage] Setting editor content from active round synthesis');
 				editor.commands.setContent(active.synthesis || '');
 				setHasSavedSynthesis(
 					!!(active.synthesis && active.synthesis.trim().length > 0)
 				);
 
+				// Extract question text - questions can be strings OR objects with text/label
+				const extractQuestionText = (q: unknown): string => {
+					if (typeof q === 'string') return q;
+					if (q && typeof q === 'object') {
+						const obj = q as Record<string, unknown>;
+						return String(obj.text || obj.label || obj.question || '');
+					}
+					return '';
+				};
+
 				if (active.questions && active.questions.length) {
-					console.log('[SummaryPage] Setting nextRoundQuestions from active.questions');
-					setNextRoundQuestions(active.questions);
+					setNextRoundQuestions(active.questions.map(extractQuestionText));
 				} else if (Array.isArray(f.questions)) {
-					console.log('[SummaryPage] Setting nextRoundQuestions from form.questions');
-					setNextRoundQuestions(f.questions);
+					setNextRoundQuestions(f.questions.map(extractQuestionText));
 				}
 			} else if (f && Array.isArray(f.questions)) {
-				console.log('[SummaryPage] No active round, setting nextRoundQuestions from form.questions');
-				setNextRoundQuestions(f.questions);
+				// Extract question text - questions can be strings OR objects with text/label
+				const extractQuestionText = (q: unknown): string => {
+					if (typeof q === 'string') return q;
+					if (q && typeof q === 'object') {
+						const obj = q as Record<string, unknown>;
+						return String(obj.text || obj.label || obj.question || '');
+					}
+					return '';
+				};
+				setNextRoundQuestions(f.questions.map(extractQuestionText));
 			}
-			console.log('[SummaryPage] loadAll() try block completed successfully');
 		} catch (err) {
-			console.error('[SummaryPage] loadAll() error:', err);
+			console.error('[SummaryPage] loadAll error:', err);
 		} finally {
-			console.log('[SummaryPage] loadAll() finally - setting loading=false');
 			setLoading(false);
 		}
 	}
 
 	function logout() {
-		console.log('[SummaryPage] logout() called');
 		localStorage.clear();
 		navigate('/');
 	}
 
 	async function viewAllResponses() {
-		console.log('[SummaryPage] viewAllResponses() called, responsesOpen:', responsesOpen);
 		if (responsesOpen) {
 			setResponsesOpen(false);
 			return;
 		}
 
-		// Reload structured data for modal
-		console.log('[SummaryPage] Fetching rounds_with_responses for modal...');
 		try {
 			const res = await fetch(
 				`${API_BASE_URL}/forms/${formId}/rounds_with_responses`,
@@ -393,20 +380,15 @@ export default function SummaryPage() {
 				);
 			}
 		} catch (e) {
-			console.error('[SummaryPage] viewAllResponses fetch error:', e);
+			console.error('[SummaryPage] Failed to load responses:', e);
 		}
 
 		setResponsesOpen(true);
 	}
 
 	async function saveSynthesis() {
-		console.log('[SummaryPage] saveSynthesis() called');
-		if (!activeRound || !formId) {
-			console.log('[SummaryPage] saveSynthesis() skipped - no activeRound or formId');
-			return;
-		}
+		if (!activeRound || !formId) return;
 		const summary = editor?.getHTML() || '';
-		console.log('[SummaryPage] Saving synthesis, length:', summary.length);
 
 		try {
 			const res = await fetch(`${API_BASE_URL}/forms/${formId}/push_summary`, {
@@ -414,10 +396,14 @@ export default function SummaryPage() {
 				headers: { ...authHeaders, 'Content-Type': 'application/json' },
 				body: JSON.stringify({ summary })
 			});
-			console.log('[SummaryPage] push_summary response status:', res.status);
+			if (!res.ok) {
+				const errData = await res.json().catch(() => ({}));
+				throw new Error(errData.detail || `Failed to save synthesis (HTTP ${res.status})`);
+			}
 			setHasSavedSynthesis(true);
 		} catch (err) {
-			console.error('[SummaryPage] saveSynthesis() error:', err);
+			console.error('[SummaryPage] saveSynthesis error:', err);
+			alert((err as Error).message || 'Failed to save synthesis');
 		}
 	}
 
@@ -438,36 +424,38 @@ export default function SummaryPage() {
 	}
 
 	async function startNextRound() {
-		console.log('[SummaryPage] startNextRound() called');
-		if (!formId) {
-			console.log('[SummaryPage] startNextRound() skipped - no formId');
-			return;
-		}
+		if (!formId) return;
 
 		const cleaned = nextRoundQuestions
 			.map(q => q.trim())
 			.filter(q => q.length > 0);
-		console.log('[SummaryPage] cleaned questions:', cleaned);
 		if (!cleaned.length) {
 			alert('Add at least one question for the next round.');
 			return;
 		}
 
+		setLoading(true);
 		try {
-			console.log('[SummaryPage] Posting to next_round...');
 			const res = await fetch(`${API_BASE_URL}/forms/${formId}/next_round`, {
 				method: 'POST',
 				headers: { ...authHeaders, 'Content-Type': 'application/json' },
 				body: JSON.stringify({ questions: cleaned })
 			});
-			console.log('[SummaryPage] next_round response status:', res.status);
 
-			console.log('[SummaryPage] Reloading all data...');
+			if (!res.ok) {
+				const errData = await res.json().catch(() => ({}));
+				throw new Error(errData.detail || `Failed to advance round (HTTP ${res.status})`);
+			}
+
 			await loadAll();
+			await loadResponses();
 			setHasSavedSynthesis(false);
-			console.log('[SummaryPage] startNextRound() completed');
+			setSelectedRound(null);
 		} catch (err) {
-			console.error('[SummaryPage] startNextRound() error:', err);
+			console.error('[SummaryPage] startNextRound error:', err);
+			alert((err as Error).message || 'Failed to start next round');
+		} finally {
+			setLoading(false);
 		}
 	}
 
@@ -508,69 +496,69 @@ export default function SummaryPage() {
 	}
 
 	async function generateSummary() {
-		console.log('[SummaryPage] generateSummary() called, formId:', formId, 'model:', selectedModel, 'mode:', synthesisMode);
-		if (!formId || !selectedModel) {
-			console.log('[SummaryPage] generateSummary() skipped - missing formId or model');
-			return;
-		}
+		// Use displayRound (selectedRound or activeRound) to support generating for any round
+		const targetRound = selectedRound || activeRound;
+		if (!formId || !selectedModel || !targetRound) return;
 
 		setIsGenerating(true);
-		// Phase 1: Show synthesis progress
 		setSynthesisStage('preparing');
 		setSynthesisStep(0);
 		setSynthesisTotalSteps(5);
 
 		try {
-			// Simulate progress stages
 			setSynthesisStage('analyzing');
 			setSynthesisStep(1);
 
-			console.log('[SummaryPage] Posting to generate_summary...');
+			// Use the round-specific endpoint that supports generating synthesis for ANY round
 			const res = await fetch(
-				`${API_BASE_URL}/forms/${formId}/generate_summary`,
+				`${API_BASE_URL}/forms/${formId}/rounds/${targetRound.id}/generate_synthesis`,
 				{
 					method: 'POST',
 					headers: { ...authHeaders, 'Content-Type': 'application/json' },
-					body: JSON.stringify({ model: selectedModel, mode: synthesisMode })
+					body: JSON.stringify({
+						model: selectedModel,
+						strategy: synthesisMode,  // "simple" | "committee" | "ttd"
+						n_analysts: 3,
+						mode: 'human_only'
+					})
 				}
 			);
-			console.log('[SummaryPage] generate_summary response status:', res.status);
 
 			setSynthesisStage('synthesising');
 			setSynthesisStep(3);
 
 			if (!res.ok) {
-				const errorData = await res.json();
-				console.error('[SummaryPage] generate_summary error response:', errorData);
+				const errorData = await res.json().catch(() => ({}));
 				throw new Error(errorData.detail || 'Failed to generate summary');
 			}
 
 			const data = await res.json();
-			console.log('[SummaryPage] generate_summary data:', data);
 
 			setSynthesisStage('formatting');
 			setSynthesisStep(4);
 
-			if (data.summary && editor) {
-				console.log('[SummaryPage] Setting editor content from generated summary');
-				editor.commands.setContent(data.summary);
+			// The new endpoint returns 'synthesis', old returned 'summary'
+			const synthesisContent = data.synthesis || data.summary || '';
+			if (synthesisContent && editor) {
+				editor.commands.setContent(synthesisContent);
 			}
+
+			// Reload rounds to show the new synthesis version
+			await loadAll();
 
 			setSynthesisStage('complete');
 			setSynthesisStep(5);
 
-			// Auto-hide progress after 2s
 			setTimeout(() => {
 				setSynthesisStage('preparing');
 				setSynthesisStep(0);
 			}, 2000);
 		} catch (error) {
-			console.error('[SummaryPage] generateSummary() error:', error);
+			console.error('[SummaryPage] generateSummary error:', error);
 			alert((error as Error).message);
 			setSynthesisStage('preparing');
 			setSynthesisStep(0);
 		} finally {
-			console.log('[SummaryPage] generateSummary() finally - setting isGenerating=false');
 			setIsGenerating(false);
 		}
 	}
@@ -582,10 +570,105 @@ export default function SummaryPage() {
 		if (round.is_active && editor) {
 			editor.commands.setContent(round.synthesis || '');
 		}
+		// Phase 5: Load synthesis versions for the selected round
+		loadSynthesisVersions(round.id);
 	}
 
+	// Phase 5: Load synthesis versions for a round
+	async function loadSynthesisVersions(roundId: number) {
+		try {
+			const res = await fetch(
+				`${API_BASE_URL}/forms/${formId}/rounds/${roundId}/synthesis_versions`,
+				{ headers: authHeaders }
+			);
+			if (res.ok) {
+				const versions: SynthesisVersionType[] = await res.json();
+				setSynthesisVersions(versions);
+				// Auto-select the active version, or the latest one
+				const active = versions.find(v => v.is_active);
+				setSelectedVersionId(active?.id || (versions.length > 0 ? versions[versions.length - 1].id : null));
+			} else {
+				setSynthesisVersions([]);
+				setSelectedVersionId(null);
+			}
+		} catch (e) {
+			console.error('[SummaryPage] loadSynthesisVersions error:', e);
+			setSynthesisVersions([]);
+			setSelectedVersionId(null);
+		}
+	}
+
+	// Phase 5: Generate a new synthesis version for the currently displayed round
+	async function generateNewVersion() {
+		const targetRound = displayRound;
+		if (!targetRound || !formId) return;
+
+		setIsGeneratingVersion(true);
+		try {
+			const res = await fetch(
+				`${API_BASE_URL}/forms/${formId}/rounds/${targetRound.id}/generate_synthesis`,
+				{
+					method: 'POST',
+					headers: { ...authHeaders, 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						model: selectedModel,
+						strategy: synthesisMode,
+						n_analysts: 3,
+						mode: 'human_only',
+					}),
+				}
+			);
+
+			if (!res.ok) {
+				const err = await res.json();
+				throw new Error(err.detail || 'Failed to generate synthesis version');
+			}
+
+			// Reload versions
+			await loadSynthesisVersions(targetRound.id);
+		} catch (error) {
+			console.error('[SummaryPage] generateNewVersion error:', error);
+			alert((error as Error).message);
+		} finally {
+			setIsGeneratingVersion(false);
+		}
+	}
+
+	// Phase 5: Activate a specific synthesis version
+	async function activateVersion(versionId: number) {
+		try {
+			const res = await fetch(
+				`${API_BASE_URL}/synthesis_versions/${versionId}/activate`,
+				{
+					method: 'PUT',
+					headers: { ...authHeaders, 'Content-Type': 'application/json' },
+				}
+			);
+
+			if (!res.ok) {
+				const err = await res.json();
+				throw new Error(err.detail || 'Failed to activate version');
+			}
+
+			// Reload versions and rounds
+			const targetRound = displayRound;
+			if (targetRound) {
+				await loadSynthesisVersions(targetRound.id);
+			}
+			await loadAll();
+		} catch (error) {
+			console.error('[SummaryPage] activateVersion error:', error);
+			alert((error as Error).message);
+		}
+	}
+
+	// Phase 5: Get the currently selected version object
+	const selectedVersion = useMemo(
+		() => synthesisVersions.find(v => v.id === selectedVersionId) || null,
+		[synthesisVersions, selectedVersionId]
+	);
+
 	if (!form) {
-		console.log('[SummaryPage] Rendering loading state (form is null)');
 		return (
 			<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
 				<header className="bg-card border-b border-border shadow-card">
@@ -629,7 +712,6 @@ export default function SummaryPage() {
 		);
 	}
 
-	console.log('[SummaryPage] Rendering main content, form:', form.title, 'activeRound:', activeRound?.round_number);
 	return (
 		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
 			<header className="bg-card border-b border-border shadow-card">
@@ -741,6 +823,46 @@ export default function SummaryPage() {
 									structuredData={structuredSynthesisData}
 									resolvedExpertLabels={resolvedExpertLabels}
 									expertLabelPreset={expertLabelPreset}
+								/>
+							</div>
+						)}
+
+						{/* Phase 5: Show selected version synthesis (when viewing a specific version) */}
+						{selectedVersion && selectedVersion.synthesis && (
+							<div className="card p-6">
+								<div className="flex items-center justify-between mb-3">
+									<h2 className="text-lg font-semibold text-foreground">
+										Synthesis v{selectedVersion.version}
+										{selectedVersion.is_active && (
+											<span className="ml-2 text-xs font-normal px-2 py-0.5 rounded-full bg-success/10 text-success">
+												active
+											</span>
+										)}
+									</h2>
+									<span className="text-xs text-muted-foreground">
+										{selectedVersion.model_used || ''} · {selectedVersion.strategy || ''}
+										{selectedVersion.created_at &&
+											` · ${new Date(selectedVersion.created_at).toLocaleString()}`}
+									</span>
+								</div>
+								<MarkdownRenderer content={selectedVersion.synthesis} />
+							</div>
+						)}
+
+						{/* Phase 5: Show structured data from selected version if available */}
+						{selectedVersion?.synthesis_json && (
+							<div className="card p-6">
+								<h2 className="text-lg font-semibold mb-3 text-foreground">
+									Structured Analysis (v{selectedVersion.version})
+								</h2>
+								<StructuredSynthesis
+									data={selectedVersion.synthesis_json}
+									convergenceScore={displayRound?.convergence_score ?? undefined}
+									expertLabels={resolvedExpertLabels}
+									formId={formId}
+									roundId={displayRound?.id}
+									token={token}
+									currentUserEmail={email}
 								/>
 							</div>
 						)}
@@ -900,6 +1022,99 @@ export default function SummaryPage() {
 								</LoadingButton>
 							</div>
 						</div>
+
+						{/* Phase 5: Synthesis Versioning */}
+						{displayRound && (
+							<div className="card p-4">
+								<h3 className="text-base font-semibold mb-3 text-foreground">
+									Synthesis Versions
+									<span className="text-xs font-normal text-muted-foreground ml-2">
+										Round {displayRound.round_number}
+									</span>
+								</h3>
+
+								{synthesisVersions.length === 0 ? (
+									<p className="text-sm text-muted-foreground mb-3">
+										No versions yet. Generate one below.
+									</p>
+								) : (
+									<div className="space-y-2 mb-3">
+										<label htmlFor="version-select" className="block text-sm font-medium text-muted-foreground mb-1">
+											Select version
+										</label>
+										<select
+											id="version-select"
+											className="w-full rounded-lg px-3 py-2 text-sm"
+											value={selectedVersionId ?? ''}
+											onChange={e => {
+												const vid = Number(e.target.value);
+												setSelectedVersionId(vid);
+											}}
+										>
+											{synthesisVersions.map(v => (
+												<option key={v.id} value={v.id}>
+													v{v.version}
+													{v.is_active ? ' ★ active' : ''}
+													{v.strategy ? ` (${v.strategy})` : ''}
+													{v.created_at
+														? ` — ${new Date(v.created_at).toLocaleString(undefined, {
+																month: 'short',
+																day: 'numeric',
+																hour: '2-digit',
+																minute: '2-digit',
+														  })}`
+														: ''}
+												</option>
+											))}
+										</select>
+
+										{/* Version details */}
+										{selectedVersion && (
+											<div className="text-xs text-muted-foreground space-y-1 mt-2 p-2 rounded-lg" style={{ background: 'var(--muted)' }}>
+												<div>
+													<strong>Model:</strong> {selectedVersion.model_used || 'N/A'}
+												</div>
+												<div>
+													<strong>Strategy:</strong> {selectedVersion.strategy || 'N/A'}
+												</div>
+												<div>
+													<strong>Status:</strong>{' '}
+													{selectedVersion.is_active ? (
+														<span className="text-success font-semibold">Active (published)</span>
+													) : (
+														<span>Draft</span>
+													)}
+												</div>
+											</div>
+										)}
+
+										{/* Activate button — only if not already active */}
+										{selectedVersion && !selectedVersion.is_active && (
+											<LoadingButton
+												variant="success"
+												size="sm"
+												onClick={() => activateVersion(selectedVersion.id)}
+												className="w-full mt-1"
+											>
+												Publish v{selectedVersion.version}
+											</LoadingButton>
+										)}
+									</div>
+								)}
+
+								{/* Generate new version */}
+								<LoadingButton
+									variant="accent"
+									size="sm"
+									loading={isGeneratingVersion}
+									loadingText="Generating…"
+									onClick={generateNewVersion}
+									className="w-full"
+								>
+									Generate New Version
+								</LoadingButton>
+							</div>
+						)}
 
 						{/* Phase 1: RoundTimeline replaces the old Round History list in sidebar */}
 						{rounds.length > 0 && (

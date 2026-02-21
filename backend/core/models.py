@@ -151,6 +151,27 @@ class FollowUpResponse(Base):
     follow_up = relationship("FollowUp", back_populates="responses")
 
 
+class SynthesisVersion(Base):
+    """A versioned snapshot of synthesis output for a round.
+
+    Allows regeneration with version tracking, comparison, and rollback.
+    The ``is_active`` flag marks which version is currently published to experts.
+    """
+    __tablename__ = "synthesis_versions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False)
+    version = Column(Integer, nullable=False)  # 1, 2, 3…
+    synthesis = Column(Text, nullable=True)
+    synthesis_json = Column(JSON, nullable=True)
+    model_used = Column(String, nullable=True)
+    strategy = Column(String, nullable=True)  # "simple", "committee", "ttd"
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_active = Column(Boolean, default=False)  # Which version is currently published
+
+    round = relationship("RoundModel", backref="synthesis_versions")
+
+
 class SynthesisComment(Base):
     """A threaded comment on a specific section of a synthesis output."""
     __tablename__ = "synthesis_comments"

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { VolumeX } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -66,7 +67,7 @@ export default function MinorityReport({ reports, expertLabels, totalExperts }: 
     <div className="minority-section fade-in">
       <button className="structured-section-header" onClick={() => setExpanded(!expanded)}>
         <div className="structured-section-left">
-          <span className="structured-section-emoji">🔇</span>
+          <span className="structured-section-emoji"><VolumeX size={16} style={{ color: '#f59e0b' }} /></span>
           <span className="structured-section-title">Minority Report</span>
           <span className="structured-section-badge" style={{ backgroundColor: '#f59e0b' }}>
             {reports.length}

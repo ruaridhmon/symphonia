@@ -1,3 +1,4 @@
+import { MessageSquare, BarChart3, HelpCircle, FileText } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 import StructuredSynthesis from './StructuredSynthesis';
 import type { Round } from './RoundTimeline';
@@ -33,15 +34,18 @@ export default function RoundCard({ round, isCurrentRound, expertLabels, formId,
           </h3>
           <div className="round-detail-card-meta">
             <span className="round-detail-card-meta-item">
-              💬 {round.response_count ?? 0} responses
+              <MessageSquare size={14} style={{ color: 'var(--muted-foreground)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
+              {round.response_count ?? 0} responses
             </span>
             {round.convergence_score != null && (
               <span className="round-detail-card-meta-item">
-                📊 {Math.round(round.convergence_score * 100)}% convergence
+                <BarChart3 size={14} style={{ color: 'var(--accent)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
+                {Math.round(round.convergence_score * 100)}% convergence
               </span>
             )}
             <span className="round-detail-card-meta-item">
-              ❓ {round.questions?.length ?? 0} questions
+              <HelpCircle size={14} style={{ color: 'var(--muted-foreground)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
+              {round.questions?.length ?? 0} questions
             </span>
           </div>
         </div>
@@ -121,7 +125,7 @@ export default function RoundCard({ round, isCurrentRound, expertLabels, formId,
 
       {!hasSynthesis && (
         <div className="round-detail-empty">
-          <div className="round-detail-empty-icon">📝</div>
+          <div className="round-detail-empty-icon"><FileText size={24} style={{ color: 'var(--muted-foreground)' }} /></div>
           <p className="round-detail-empty-text">
             {isCurrentRound
               ? 'No synthesis generated yet for this round. Use the editor above to write or generate one.'

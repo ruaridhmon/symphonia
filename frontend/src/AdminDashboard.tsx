@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
-import { SkeletonDashboard } from './components';
+import { LoadingButton, SkeletonDashboard } from './components';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -10,40 +10,48 @@ import { SkeletonDashboard } from './components';
  * Rendered inside PageLayout via Dashboard component.
  */
 export default function AdminDashboard() {
-  console.log('[AdminDashboard] Component render');
   const { token } = useAuth();
-  console.log('[AdminDashboard] Token from useAuth:', token ? `${token.slice(0, 20)}...` : 'EMPTY/NULL');
   
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newFormTitle, setNewFormTitle] = useState('');
   const [newQuestions, setNewQuestions] = useState(['']);
 
-  useEffect(() => {
-    console.log('[AdminDashboard] useEffect triggered, token:', !!token);
-    if (token) {
-      console.log('[AdminDashboard] Fetching /forms...');
-      setLoading(true);
-      fetch(`${API_BASE_URL}/forms`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(r => {
-          console.log('[AdminDashboard] /forms response status:', r.status);
-          return r.json();
-        })
-        .then(d => {
-          console.log('[AdminDashboard] /forms data:', d);
-          setForms(Array.isArray(d) ? d : []);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error('[AdminDashboard] /forms fetch error:', err);
-          setLoading(false);
-        });
-    } else {
-      console.log('[AdminDashboard] Skipping fetch - no token');
+  const fetchForms = () => {
+    if (!token) {
       setLoading(false);
+      return;
     }
+    setLoading(true);
+    setError(null);
+    fetch(`${API_BASE_URL}/forms`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => {
+        if (!r.ok) {
+          if (r.status === 401) {
+            throw new Error('Session expired. Please log in again.');
+          } else if (r.status === 403) {
+            throw new Error('Admin access required to view forms.');
+          }
+          throw new Error(`Failed to load forms (HTTP ${r.status})`);
+        }
+        return r.json();
+      })
+      .then(d => {
+        setForms(Array.isArray(d) ? d : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('[AdminDashboard] Failed to load forms:', err);
+        setError(err.message || 'Failed to load forms');
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchForms();
   }, [token]);
 
   const createForm = async () => {
@@ -84,6 +92,31 @@ export default function AdminDashboard() {
   return (
     <section className="flex-1 py-6 sm:py-8">
       <Container size="lg">
+        {/* ── Error banner ── */}
+        {error && (
+          <div
+            className="rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+              border: '1px solid var(--destructive)',
+              color: 'var(--destructive)',
+            }}
+          >
+            <span className="text-sm font-medium">{error}</span>
+            <button
+              type="button"
+              onClick={fetchForms}
+              className="self-start sm:self-auto px-3 py-1.5 rounded-lg text-sm font-medium"
+              style={{
+                backgroundColor: 'var(--destructive)',
+                color: '#ffffff',
+              }}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* ── Create form card ── */}
         <div
           className="rounded-lg p-4 sm:p-6 mb-6 sm:mb-8"
@@ -130,26 +163,22 @@ export default function AdminDashboard() {
               }}
             />
           ))}
-          <div className="flex flex-col sm:flex-row sm:justify-between gap-3 mt-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 mt-3">
             <button
               type="button"
               onClick={() => setNewQuestions([...newQuestions, ''])}
-              className="text-sm"
+              className="text-sm w-fit"
               style={{ color: 'var(--accent)' }}
             >
               + Add question
             </button>
-            <button
-              type="button"
+            <LoadingButton
+              variant="accent"
+              size="md"
               onClick={createForm}
-              className="px-4 py-2 rounded-lg font-medium"
-              style={{
-                backgroundColor: 'var(--accent)',
-                color: 'var(--accent-foreground)',
-              }}
             >
               Save Form
-            </button>
+            </LoadingButton>
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CheckCircle2, MessageSquare, BarChart3, HelpCircle } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -145,7 +146,8 @@ export default function RoundTimeline({
                     )}
                     {hasSynthesis && !isActive && (
                       <span className="round-card-v2-badge round-card-v2-badge-complete">
-                        ✓ Synthesised
+                        <CheckCircle2 size={12} style={{ color: 'var(--success)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '3px' }} />
+                        Synthesised
                       </span>
                     )}
                     {!hasSynthesis && !isActive && (
@@ -160,7 +162,7 @@ export default function RoundTimeline({
               {/* Stats row */}
               <div className="round-card-v2-stats">
                 <div className="round-card-v2-stat">
-                  <span className="round-card-v2-stat-icon">💬</span>
+                  <span className="round-card-v2-stat-icon"><MessageSquare size={14} style={{ color: 'var(--muted-foreground)' }} /></span>
                   <span className="round-card-v2-stat-value">
                     {round.response_count ?? 0}
                   </span>
@@ -168,7 +170,7 @@ export default function RoundTimeline({
                 </div>
 
                 <div className="round-card-v2-stat">
-                  <span className="round-card-v2-stat-icon">📊</span>
+                  <span className="round-card-v2-stat-icon"><BarChart3 size={14} style={{ color: 'var(--accent)' }} /></span>
                   <span
                     className="round-card-v2-stat-value"
                     style={{ color: convergenceColor(round.convergence_score) }}
@@ -179,7 +181,7 @@ export default function RoundTimeline({
                 </div>
 
                 <div className="round-card-v2-stat">
-                  <span className="round-card-v2-stat-icon">❓</span>
+                  <span className="round-card-v2-stat-icon"><HelpCircle size={14} style={{ color: 'var(--muted-foreground)' }} /></span>
                   <span className="round-card-v2-stat-value">
                     {round.questions?.length ?? 0}
                   </span>

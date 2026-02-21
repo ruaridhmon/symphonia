@@ -77,12 +77,12 @@ function expertList(ids: number[], labels: Record<number, string>): string {
   return ids.map(id => expertName(id, labels)).join(', ');
 }
 
-function severityEmoji(severity: string): string {
+function severityMarker(severity: string): string {
   switch (severity?.toLowerCase()) {
-    case 'high': return '🔴';
-    case 'medium': return '🟡';
-    case 'low': return '🟢';
-    default: return '⚪';
+    case 'high': return '[HIGH]';
+    case 'medium': return '[MED]';
+    case 'low': return '[LOW]';
+    default: return '[—]';
   }
 }
 
@@ -175,7 +175,7 @@ function generateMarkdown(
       lines.push('### Disagreements');
       lines.push('');
       for (const d of data.disagreements) {
-        lines.push(`- **${d.topic}** ${severityEmoji(d.severity)} Severity: ${d.severity}`);
+        lines.push(`- **${d.topic}** ${severityMarker(d.severity)} Severity: ${d.severity}`);
         for (const pos of d.positions) {
           lines.push(`  - *${pos.position}*`);
           lines.push(`    - Experts: ${expertList(pos.experts, labels)}`);

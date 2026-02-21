@@ -1,4 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
+import { CheckCircle2, Zap, Link2 } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -232,7 +233,7 @@ export default function CrossMatrix({
   return (
     <div className="cross-matrix fade-in" ref={matrixRef}>
       <div className="cross-matrix-title">
-        <span>🔗</span>
+        <Link2 size={16} style={{ color: 'var(--accent)' }} />
         <span>Expert Agreement Matrix</span>
         <span className="cross-matrix-subtitle">
           Hover cells to see specific agreements & conflicts
@@ -354,7 +355,7 @@ export default function CrossMatrix({
           </div>
           {tooltip.details.agreements.length > 0 && (
             <div className="cross-matrix-tooltip-section">
-              <span className="cross-matrix-tooltip-label">✅ Agreements:</span>
+              <span className="cross-matrix-tooltip-label"><CheckCircle2 size={12} style={{ color: '#16a34a', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />Agreements:</span>
               {tooltip.details.agreements.map((a, i) => (
                 <p key={i} className="cross-matrix-tooltip-item">{a}</p>
               ))}
@@ -362,7 +363,7 @@ export default function CrossMatrix({
           )}
           {tooltip.details.disagreements.length > 0 && (
             <div className="cross-matrix-tooltip-section">
-              <span className="cross-matrix-tooltip-label">⚡ Conflicts:</span>
+              <span className="cross-matrix-tooltip-label"><Zap size={12} style={{ color: '#eab308', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />Conflicts:</span>
               {tooltip.details.disagreements.map((d, i) => (
                 <p key={i} className="cross-matrix-tooltip-item">{d}</p>
               ))}

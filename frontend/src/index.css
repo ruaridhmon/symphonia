@@ -244,6 +244,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    width: fit-content;
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
     font-weight: 500;
@@ -446,93 +447,97 @@ main,
 
 /* ------------------------------------------------------------------ */
 /* Interactive Button (replaces static .btn)                          */
+/* Inside @layer components so Tailwind utilities (w-full etc.)       */
+/* can override defaults like width: fit-content.                     */
 /* ------------------------------------------------------------------ */
+@layer components {
+  .btn-interactive {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: fit-content;
+    font-weight: 500;
+    line-height: 1.5;
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-family);
+    position: relative;
+    overflow: hidden;
+    min-height: 2.75rem; /* 44px minimum tap target */
 
-.btn-interactive {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-weight: 500;
-  line-height: 1.5;
-  border-radius: var(--radius);
-  cursor: pointer;
-  border: none;
-  font-family: var(--font-family);
-  position: relative;
-  overflow: hidden;
-  min-height: 2.75rem; /* 44px minimum tap target */
+    /* Micro-interaction transitions */
+    transition:
+      transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.15s ease,
+      background-color 0.15s ease,
+      opacity 0.15s ease;
+  }
 
-  /* Micro-interaction transitions */
-  transition:
-    transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.15s ease,
-    background-color 0.15s ease,
-    opacity 0.15s ease;
-}
+  .btn-interactive:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    filter: brightness(1.08);
+  }
 
-.btn-interactive:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  filter: brightness(1.08);
-}
+  .btn-interactive:active:not(:disabled) {
+    transform: translateY(0) scale(0.97);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    filter: brightness(0.95);
+    transition-duration: 0.06s;
+  }
 
-.btn-interactive:active:not(:disabled) {
-  transform: translateY(0) scale(0.97);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  filter: brightness(0.95);
-  transition-duration: 0.06s;
-}
+  .btn-interactive:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
 
-.btn-interactive:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
+  .btn-interactive:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
 
-.btn-interactive:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
+  /* Spinner inside buttons */
+  .spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    flex-shrink: 0;
+  }
 
-/* Spinner inside buttons */
-.spinner {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
-  flex-shrink: 0;
-}
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
 
-.btn-icon {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-}
+  /* Upgrade existing .btn with subtle transitions */
+  .btn {
+    transition:
+      transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.15s ease,
+      background-color 0.15s ease,
+      opacity 0.15s ease;
+  }
 
-/* Also upgrade existing .btn with subtle transitions */
-.btn {
-  transition:
-    transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.15s ease,
-    background-color 0.15s ease,
-    opacity 0.15s ease;
-}
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    filter: brightness(1.08);
+  }
 
-.btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  filter: brightness(1.08);
-}
-
-.btn:active:not(:disabled) {
-  transform: translateY(0) scale(0.97);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  filter: brightness(0.95);
-  transition-duration: 0.06s;
+  .btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.97);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    filter: brightness(0.95);
+    transition-duration: 0.06s;
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -1376,6 +1381,86 @@ main,
 
 .markdown-body .md-em {
   font-style: italic;
+}
+
+/*
+ * Fallback styles for raw HTML elements rendered via dangerouslySetInnerHTML.
+ * The md-* classes only apply when ReactMarkdown renders with custom components;
+ * raw HTML (e.g. from committee synthesis) needs these base element selectors.
+ */
+.markdown-body > h1, .markdown-body h1:not(.md-h1) {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 1.5rem 0 0.75rem 0;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid var(--border);
+}
+.markdown-body > h2, .markdown-body h2:not(.md-h2) {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 1.25rem 0 0.625rem 0;
+}
+.markdown-body > h3, .markdown-body h3:not(.md-h3) {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 1rem 0 0.5rem 0;
+}
+.markdown-body > h4, .markdown-body h4:not(.md-h4) {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0.875rem 0 0.375rem 0;
+}
+.markdown-body > p, .markdown-body p:not(.md-p) {
+  margin: 0 0 0.75rem 0;
+}
+.markdown-body > ul, .markdown-body ul:not(.md-ul) {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0 0 0.75rem 0;
+}
+.markdown-body > ol, .markdown-body ol:not(.md-ol) {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 0 0 0.75rem 0;
+}
+.markdown-body li:not(.md-li) {
+  margin: 0.25rem 0;
+  line-height: 1.6;
+}
+.markdown-body strong:not(.md-strong) {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.markdown-body em:not(.md-em) {
+  font-style: italic;
+}
+.markdown-body a:not(.md-link) {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.markdown-body table:not(.md-table) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  margin: 0.75rem 0;
+}
+.markdown-body th:not(.md-th) {
+  background-color: var(--muted);
+  color: var(--foreground);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.markdown-body td:not(.md-td) {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
 }
 
 /* ------------------------------------------------------------------ */

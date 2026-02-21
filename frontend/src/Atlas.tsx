@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Map } from 'lucide-react';
 import { API_BASE_URL } from './config';
 
 interface TestForm {
@@ -102,7 +103,7 @@ export default function Atlas() {
   return (
     <div className="min-h-screen p-8" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-2">🗺️ UX Atlas</h1>
+        <h1 className="text-3xl font-bold mb-2" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Map size={28} style={{ color: 'var(--accent)' }} /> UX Atlas</h1>
         <p className="mb-8 opacity-60">Click any button to jump to that state</p>
 
         {states.map((section, sectionIdx) => (

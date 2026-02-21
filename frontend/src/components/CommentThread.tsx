@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 
 // ─── Types ───────────────────────────────────────────────
@@ -295,7 +296,7 @@ export default function CommentThread({
         style={styles.toggleBtn}
         title={expanded ? 'Collapse comments' : 'View comments'}
       >
-        <span style={styles.commentIcon}>💬</span>
+        <span style={styles.commentIcon}><MessageSquare size={14} style={{ color: 'var(--accent)' }} /></span>
         {commentCount > 0 && (
           <span style={styles.badge}>{commentCount}</span>
         )}
