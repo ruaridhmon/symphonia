@@ -1,71 +1,8 @@
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import LoadingButton from './LoadingButton';
-
-// ─── Types (mirrors StructuredSynthesis.tsx) ─────────────
-
-interface EvidenceExcerpt {
-  expert_id: number;
-  expert_label: string;
-  quote: string;
-}
-
-interface Agreement {
-  claim: string;
-  supporting_experts: number[];
-  confidence: number;
-  evidence_summary: string;
-  evidence_excerpts?: EvidenceExcerpt[];
-}
-
-interface DisagreementPosition {
-  position: string;
-  experts: number[];
-  evidence: string;
-}
-
-interface Disagreement {
-  topic: string;
-  positions: DisagreementPosition[];
-  severity: string;
-}
-
-interface Nuance {
-  claim: string;
-  context: string;
-  relevant_experts: number[];
-}
-
-interface Probe {
-  question: string;
-  target_experts: number[];
-  rationale: string;
-}
-
-interface SynthesisData {
-  agreements: Agreement[];
-  disagreements: Disagreement[];
-  nuances: Nuance[];
-  confidence_map: Record<string, number>;
-  follow_up_probes: Probe[];
-  meta_synthesis_reasoning: string;
-  narrative?: string;
-  areas_of_agreement?: string[];
-  areas_of_disagreement?: string[];
-  uncertainties?: string[];
-  emergent_insights?: any[];
-}
-
-interface Round {
-  id: number;
-  round_number: number;
-  synthesis: string;
-  synthesis_json?: any;
-  is_active: boolean;
-  questions: (string | Record<string, unknown>)[];
-  convergence_score?: number | null;
-  response_count?: number;
-}
+import type { SynthesisData } from '../types/synthesis';
+import type { Round } from '../types/summary';
 
 interface ExportPanelProps {
   formTitle: string;

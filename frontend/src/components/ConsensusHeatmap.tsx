@@ -1,40 +1,6 @@
 import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { Grid3x3, Users, HelpCircle } from 'lucide-react';
-
-// ─── Types ──────────────────────────────────────────────
-
-interface Agreement {
-  claim: string;
-  supporting_experts: number[];
-  confidence: number;
-  evidence_summary: string;
-}
-
-interface DisagreementPosition {
-  position: string;
-  experts: number[];
-  evidence: string;
-}
-
-interface Disagreement {
-  topic: string;
-  positions: DisagreementPosition[];
-  severity: string;
-}
-
-interface Nuance {
-  claim: string;
-  context: string;
-  relevant_experts: number[];
-}
-
-interface SynthesisData {
-  agreements: Agreement[];
-  disagreements: Disagreement[];
-  nuances: Nuance[];
-  confidence_map?: Record<string, number>;
-  [key: string]: any;
-}
+import type { SynthesisData } from '../types/synthesis';
 
 interface HeatmapCell {
   expertId: number;

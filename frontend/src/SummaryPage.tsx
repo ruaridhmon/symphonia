@@ -190,6 +190,7 @@ export default function SummaryPage() {
 			const roundsRes = await fetch(`${API_BASE_URL}/forms/${formId}/rounds`, { headers: authHeaders });
 			const list = await roundsRes.json();
 
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const mapped: Round[] = (Array.isArray(list) ? list : []).map((x: any) => ({
 				id: x.id,
 				round_number: x.round_number,
@@ -232,11 +233,13 @@ export default function SummaryPage() {
 			const data = await response.json();
 			if (Array.isArray(data)) {
 				setStructuredRounds(
-					data.map((r: any) => ({
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				data.map((r: any) => ({
 						id: r.id,
 						round_number: r.round_number,
 						synthesis: r.synthesis || '',
 						is_active: !!r.is_active,
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						responses: (r.responses || []).map((resp: any) => ({
 							id: resp.id,
 							answers: typeof resp.answers === 'string' ? JSON.parse(resp.answers) : resp.answers || {},
@@ -348,11 +351,13 @@ export default function SummaryPage() {
 			return;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const paragraphs = raw.flatMap((r: any, i: number) => {
 			const header = new Paragraph({
 				children: [new TextRun({ text: `Response ${i + 1}`, bold: true })],
 				spacing: { after: 200 },
 			});
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const qa = Object.entries(r.answers).flatMap(([k, v]: any) => [
 				new Paragraph({ children: [new TextRun({ text: k, bold: true })], spacing: { after: 80 } }),
 				new Paragraph({ text: String(v ?? ''), spacing: { after: 160 } }),
@@ -647,13 +652,13 @@ export default function SummaryPage() {
 						/>
 
 						{/* Emergence highlights */}
-						{structuredSynthesisData?.emergent_insights?.length > 0 && (
+						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
 							<div className="card p-4 sm:p-6">
 								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
 									<span>✨</span> Emergent Insights
 								</h2>
 								<EmergenceHighlights
-									insights={structuredSynthesisData.emergent_insights}
+									insights={structuredSynthesisData.emergent_insights ?? []}
 									expertLabels={resolvedExpertLabels}
 									formId={formId}
 									roundId={displayRound?.id}

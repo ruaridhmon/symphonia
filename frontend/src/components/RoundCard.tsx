@@ -109,7 +109,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
           <h4 className="round-detail-synthesis-title">Synthesis</h4>
           {hasStructured ? (
             <StructuredSynthesis
-              data={round.synthesis_json}
+              data={round.synthesis_json!}
               convergenceScore={round.convergence_score ?? undefined}
               expertLabels={expertLabels}
               formId={formId}

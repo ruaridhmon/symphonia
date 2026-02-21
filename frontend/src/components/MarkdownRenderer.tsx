@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -7,6 +7,12 @@ interface MarkdownRendererProps {
   content: string;
   className?: string;
 }
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/** Props for custom markdown component overrides (react-markdown component signatures) */
+type MdProps = { children?: ReactNode } & Record<string, any>;
+type MdCodeProps = { className?: string; children?: ReactNode } & Record<string, any>;
+type MdLinkProps = { href?: string; children?: ReactNode } & Record<string, any>;
 
 /**
  * Preprocess content to recover markdown from HTML-wrapped sources.
@@ -107,16 +113,16 @@ function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
 
 /** Shared component overrides for ReactMarkdown */
 const markdownComponents = {
-  h1: ({ children }: any) => <h1 className="md-h1">{children}</h1>,
-  h2: ({ children }: any) => <h2 className="md-h2">{children}</h2>,
-  h3: ({ children }: any) => <h3 className="md-h3">{children}</h3>,
-  h4: ({ children }: any) => <h4 className="md-h4">{children}</h4>,
-  p: ({ children }: any) => <p className="md-p">{children}</p>,
-  ul: ({ children }: any) => <ul className="md-ul">{children}</ul>,
-  ol: ({ children }: any) => <ol className="md-ol">{children}</ol>,
-  li: ({ children }: any) => <li className="md-li">{children}</li>,
-  blockquote: ({ children }: any) => <blockquote className="md-blockquote">{children}</blockquote>,
-  code: ({ className: codeClass, children, ...props }: any) => {
+  h1: ({ children }: MdProps) => <h1 className="md-h1">{children}</h1>,
+  h2: ({ children }: MdProps) => <h2 className="md-h2">{children}</h2>,
+  h3: ({ children }: MdProps) => <h3 className="md-h3">{children}</h3>,
+  h4: ({ children }: MdProps) => <h4 className="md-h4">{children}</h4>,
+  p: ({ children }: MdProps) => <p className="md-p">{children}</p>,
+  ul: ({ children }: MdProps) => <ul className="md-ul">{children}</ul>,
+  ol: ({ children }: MdProps) => <ol className="md-ol">{children}</ol>,
+  li: ({ children }: MdProps) => <li className="md-li">{children}</li>,
+  blockquote: ({ children }: MdProps) => <blockquote className="md-blockquote">{children}</blockquote>,
+  code: ({ className: codeClass, children, ...props }: MdCodeProps) => {
     const isInline = !codeClass;
     return isInline ? (
       <code className="md-code-inline" {...props}>{children}</code>
@@ -126,21 +132,21 @@ const markdownComponents = {
       </pre>
     );
   },
-  table: ({ children }: any) => (
+  table: ({ children }: MdProps) => (
     <div className="md-table-wrapper">
       <table className="md-table">{children}</table>
     </div>
   ),
-  th: ({ children }: any) => <th className="md-th">{children}</th>,
-  td: ({ children }: any) => <td className="md-td">{children}</td>,
+  th: ({ children }: MdProps) => <th className="md-th">{children}</th>,
+  td: ({ children }: MdProps) => <td className="md-td">{children}</td>,
   hr: () => <hr className="md-hr" />,
-  a: ({ href, children }: any) => (
+  a: ({ href, children }: MdLinkProps) => (
     <a href={href} className="md-link" target="_blank" rel="noopener noreferrer">
       {children}
     </a>
   ),
-  strong: ({ children }: any) => <strong className="md-strong">{children}</strong>,
-  em: ({ children }: any) => <em className="md-em">{children}</em>,
+  strong: ({ children }: MdProps) => <strong className="md-strong">{children}</strong>,
+  em: ({ children }: MdProps) => <em className="md-em">{children}</em>,
 };
 
 export default memo(MarkdownRenderer);

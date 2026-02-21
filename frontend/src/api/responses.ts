@@ -29,34 +29,13 @@ export interface MyResponse {
  * Submit (or re-submit) a response for the active round.
  *
  * Note: the backend expects form-encoded data for this endpoint,
- * so we use URLSearchParams instead of JSON.
+ * so we use postForm (URLSearchParams) instead of JSON.
  */
-export async function submitResponse(formId: number, answers: Record<string, string>) {
-  const token = localStorage.getItem('access_token');
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-
-  const body = new URLSearchParams();
-  body.append('form_id', String(formId));
-  body.append('answers', JSON.stringify(answers));
-
-  const response = await fetch(`${API_BASE_URL}/submit`, {
-    method: 'POST',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body,
+export function submitResponse(formId: number, answers: Record<string, unknown>) {
+  return api.postForm<{ ok: boolean }>('/submit', {
+    form_id: String(formId),
+    answers: JSON.stringify(answers),
   });
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem('access_token');
-      window.location.href = '/login';
-    }
-    const { ApiError } = await import('./client');
-    throw new ApiError(response.status, await response.text());
-  }
-
-  return response.json() as Promise<{ ok: boolean }>;
 }
 
 /** Check whether the current user has submitted for the active round */

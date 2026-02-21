@@ -1,32 +1,6 @@
 import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { CheckCircle2, Zap, Link2 } from 'lucide-react';
-
-// ─── Types ──────────────────────────────────────────────
-
-interface Agreement {
-  claim: string;
-  supporting_experts: number[];
-  confidence: number;
-  evidence_summary: string;
-}
-
-interface DisagreementPosition {
-  position: string;
-  experts: number[];
-  evidence: string;
-}
-
-interface Disagreement {
-  topic: string;
-  positions: DisagreementPosition[];
-  severity: string;
-}
-
-interface SynthesisData {
-  agreements: Agreement[];
-  disagreements: Disagreement[];
-  [key: string]: any;
-}
+import type { SynthesisData } from '../types/synthesis';
 
 interface CellDetail {
   agreements: string[];

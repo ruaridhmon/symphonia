@@ -1,15 +1,7 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import CommentThread from './CommentThread';
-
-// ─── Types ──────────────────────────────────────────────
-
-interface EmergentInsight {
-  insight: string;
-  contributing_experts: number[];
-  emergence_type: string; // "cross-pollination" | "synthesis" | "implicit"
-  explanation: string;
-}
+import type { EmergentInsight } from '../types/synthesis';
 
 interface EmergenceHighlightsProps {
   insights: EmergentInsight[];

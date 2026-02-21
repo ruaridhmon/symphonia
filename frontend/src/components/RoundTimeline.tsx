@@ -1,18 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { CheckCircle2, MessageSquare, BarChart3, HelpCircle } from 'lucide-react';
+import type { Round } from '../types/summary';
 
-// ─── Types ──────────────────────────────────────────────
-
-export type Round = {
-  id: number;
-  round_number: number;
-  synthesis: string;
-  synthesis_json?: any;
-  is_active: boolean;
-  questions: (string | Record<string, unknown>)[];
-  convergence_score?: number | null;
-  response_count?: number;
-};
+export type { Round };
 
 interface RoundTimelineProps {
   rounds: Round[];

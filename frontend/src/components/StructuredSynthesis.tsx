@@ -1,60 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle2, Zap, Lightbulb, Target, FileText, Quote, ChevronDown } from 'lucide-react';
 import CommentThread from './CommentThread';
-
-// ─── Types ──────────────────────────────────────────────
-
-interface EvidenceExcerpt {
-  expert_id: number;
-  expert_label: string;
-  quote: string;
-}
-
-interface Agreement {
-  claim: string;
-  supporting_experts: number[];
-  confidence: number;
-  evidence_summary: string;
-  evidence_excerpts?: EvidenceExcerpt[];
-}
-
-interface DisagreementPosition {
-  position: string;
-  experts: number[];
-  evidence: string;
-}
-
-interface Disagreement {
-  topic: string;
-  positions: DisagreementPosition[];
-  severity: string;
-}
-
-interface Nuance {
-  claim: string;
-  context: string;
-  relevant_experts: number[];
-}
-
-interface Probe {
-  question: string;
-  target_experts: number[];
-  rationale: string;
-}
-
-interface SynthesisData {
-  agreements: Agreement[];
-  disagreements: Disagreement[];
-  nuances: Nuance[];
-  confidence_map: Record<string, number>;
-  follow_up_probes: Probe[];
-  meta_synthesis_reasoning: string;
-  narrative?: string;
-  areas_of_agreement?: string[];
-  areas_of_disagreement?: string[];
-  uncertainties?: string[];
-  emergent_insights?: any[];
-}
+import type { SynthesisData, EvidenceExcerpt } from '../types/synthesis';
 
 interface StructuredSynthesisProps {
   data: SynthesisData;

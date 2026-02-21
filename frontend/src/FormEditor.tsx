@@ -14,16 +14,18 @@ interface FormData {
 }
 
 export default function FormEditor() {
-  useDocumentTitle('Edit Form');
   const { id } = useParams();
+  const isCreateMode = id === 'new';
+  
+  useDocumentTitle(isCreateMode ? 'Create Consultation' : 'Edit Consultation');
   const navigate = useNavigate();
   const { toastError, toastSuccess } = useToast();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isCreateMode);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [title, setTitle] = useState('');
-  const [questions, setQuestions] = useState<FormData['questions']>([]);
+  const [questions, setQuestions] = useState<FormData['questions']>(['']);
   const [joinCode, setJoinCode] = useState('');
 
   useEffect(() => {
@@ -33,6 +35,13 @@ export default function FormEditor() {
       return;
     }
 
+    // In create mode, don't fetch - just set empty state
+    if (isCreateMode) {
+      setJoinCode(String(Math.floor(10000 + Math.random() * 90000)));
+      return;
+    }
+
+    // Edit mode - fetch existing form
     api.get<FormData>(`/forms/${id}`)
       .then((form) => {
         setTitle(form.title);
@@ -44,23 +53,49 @@ export default function FormEditor() {
         toastError('Failed to load form');
         setLoading(false);
       });
-  }, [id, navigate, toastError]);
+  }, [id, isCreateMode, navigate, toastError]);
 
   async function saveForm() {
+    if (!title.trim()) {
+      toastError('Please enter a title');
+      return;
+    }
+
+    const validQuestions = questions.filter(q => {
+      const text = extractQuestionText(q);
+      return text && text.trim() !== '';
+    });
+
+    if (validQuestions.length === 0) {
+      toastError('Please add at least one question');
+      return;
+    }
+
     setSaving(true);
 
     try {
-      await api.put(`/forms/${id}`, {
-        title,
-        questions,
-        allow_join: true,
-        join_code: joinCode,
-      });
-
-      toastSuccess('Form saved');
+      if (isCreateMode) {
+        // Create new form
+        await api.post('/create_form', {
+          title,
+          questions: validQuestions.map(q => extractQuestionText(q)),
+          allow_join: true,
+          join_code: joinCode,
+        });
+        toastSuccess('Consultation created');
+      } else {
+        // Update existing form
+        await api.put(`/forms/${id}`, {
+          title,
+          questions: validQuestions,
+          allow_join: true,
+          join_code: joinCode,
+        });
+        toastSuccess('Consultation saved');
+      }
       navigate('/');
     } catch {
-      toastError('Failed to save edits');
+      toastError(isCreateMode ? 'Failed to create consultation' : 'Failed to save edits');
     } finally {
       setSaving(false);
     }
@@ -69,7 +104,7 @@ export default function FormEditor() {
   async function deleteForm() {
     if (
       !window.confirm(
-        'Are you sure you want to delete this form? This action cannot be undone.',
+        'Are you sure you want to delete this consultation? This action cannot be undone.',
       )
     )
       return;
@@ -77,10 +112,10 @@ export default function FormEditor() {
     setDeleting(true);
     try {
       await api.delete(`/forms/${id}`);
-      toastSuccess('Form deleted');
+      toastSuccess('Consultation deleted');
       navigate('/');
     } catch {
-      toastError('Failed to delete form');
+      toastError('Failed to delete consultation');
     } finally {
       setDeleting(false);
     }
@@ -125,12 +160,18 @@ export default function FormEditor() {
         Back to Dashboard
       </button>
 
+      {/* Page title */}
+      <h1 className="text-2xl font-bold mb-6 text-foreground">
+        {isCreateMode ? 'Create New Consultation' : 'Edit Consultation'}
+      </h1>
+
       {/* Title */}
       <div className="card-lg p-6 sm:p-8 mb-6">
-        <h2 className="text-lg font-semibold mb-4 text-foreground">Form Title</h2>
+        <h2 className="text-lg font-semibold mb-4 text-foreground">Consultation Title</h2>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="e.g. AI in Education: Risks & Opportunities"
           className="w-full rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
         />
       </div>
@@ -138,6 +179,9 @@ export default function FormEditor() {
       {/* Questions */}
       <div className="card-lg p-6 sm:p-8 mb-6">
         <h2 className="text-lg font-semibold mb-4 text-foreground">Questions</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Add the questions you want experts to respond to in this consultation.
+        </p>
         <div className="space-y-3">
           {questions.map((q, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -157,15 +201,17 @@ export default function FormEditor() {
                 className="w-full rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
                 placeholder={`Question ${i + 1}`}
               />
-              <button
-                className="shrink-0 p-2 rounded-lg transition-colors"
-                style={{ color: 'var(--destructive)' }}
-                type="button"
-                onClick={() => removeQuestion(i)}
-                title="Remove question"
-              >
-                <Trash2 size={16} />
-              </button>
+              {questions.length > 1 && (
+                <button
+                  className="shrink-0 p-2 rounded-lg transition-colors"
+                  style={{ color: 'var(--destructive)' }}
+                  type="button"
+                  onClick={() => removeQuestion(i)}
+                  title="Remove question"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -180,6 +226,17 @@ export default function FormEditor() {
         </button>
       </div>
 
+      {/* Join Code (read-only preview) */}
+      <div className="card-lg p-6 sm:p-8 mb-6">
+        <h2 className="text-lg font-semibold mb-2 text-foreground">Join Code</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Share this code with experts so they can access the consultation.
+        </p>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-muted">
+          <span className="font-mono text-lg font-semibold text-foreground">{joinCode}</span>
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="card-lg p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-3">
         <LoadingButton
@@ -189,18 +246,20 @@ export default function FormEditor() {
           className="px-6 py-2.5"
         >
           <Save size={16} className="mr-2" />
-          Save Edits
+          {isCreateMode ? 'Create Consultation' : 'Save Edits'}
         </LoadingButton>
 
-        <LoadingButton
-          variant="destructive"
-          loading={deleting}
-          onClick={deleteForm}
-          className="sm:ml-auto px-5 py-2.5"
-        >
-          <Trash2 size={16} className="mr-2" />
-          Delete Form
-        </LoadingButton>
+        {!isCreateMode && (
+          <LoadingButton
+            variant="destructive"
+            loading={deleting}
+            onClick={deleteForm}
+            className="sm:ml-auto px-5 py-2.5"
+          >
+            <Trash2 size={16} className="mr-2" />
+            Delete Consultation
+          </LoadingButton>
+        )}
       </div>
     </div>
   );

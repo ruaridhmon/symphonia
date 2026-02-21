@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+// Backend routes are at root (no /api prefix)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
 async function apiClient<T>(
   endpoint: string,
@@ -17,9 +18,12 @@ async function apiClient<T>(
 
   if (!response.ok) {
     if (response.status === 401) {
-      // Token expired - redirect to login
+      // Token expired - clear auth and redirect to login with message
       localStorage.removeItem('access_token');
-      window.location.href = '/login';
+      localStorage.removeItem('email');
+      window.location.href = '/login?expired=1';
+      // Throw to stop further processing
+      throw new ApiError(401, 'Session expired. Please log in again.');
     }
     throw new ApiError(response.status, await response.text());
   }
@@ -42,6 +46,14 @@ export const api = {
     apiClient<T>(endpoint, {
       method: 'POST',
       body: data !== undefined ? JSON.stringify(data) : undefined,
+    }),
+
+  /** POST with URL-encoded form body (for endpoints that expect form data) */
+  postForm: <T>(endpoint: string, params: Record<string, string>) =>
+    apiClient<T>(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(params).toString(),
     }),
 
   put: <T>(endpoint: string, data: unknown) =>

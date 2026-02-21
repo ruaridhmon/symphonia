@@ -1,10 +1,12 @@
+import type { SynthesisData } from './synthesis';
+
 /** Shared types for the Summary workspace */
 
 export type Round = {
   id: number;
   round_number: number;
   synthesis: string;
-  synthesis_json?: any;
+  synthesis_json?: SynthesisData | null;
   is_active: boolean;
   questions: (string | Record<string, unknown>)[];
   convergence_score?: number | null;
@@ -41,7 +43,7 @@ export type SynthesisVersion = {
   round_id: number;
   version: number;
   synthesis: string | null;
-  synthesis_json: any;
+  synthesis_json: SynthesisData | null;
   model_used: string | null;
   strategy: string | null;
   created_at: string | null;

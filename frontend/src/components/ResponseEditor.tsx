@@ -119,8 +119,8 @@ export default function ResponseEditor({
         setEditedAnswers({});
         setConflict(null);
         onUpdated?.(updated);
-      } catch (e: any) {
-        setError(e.message || 'Network error');
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'Network error');
       } finally {
         setSaving(false);
       }
