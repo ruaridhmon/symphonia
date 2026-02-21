@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { MessageSquare, BarChart3, HelpCircle, FileText } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 import StructuredSynthesis from './StructuredSynthesis';
@@ -13,7 +14,7 @@ interface RoundCardProps {
   currentUserEmail?: string;
 }
 
-export default function RoundCard({ round, isCurrentRound, expertLabels, formId, token, currentUserEmail }: RoundCardProps) {
+const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels, formId, token, currentUserEmail }: RoundCardProps) {
   const hasSynthesis = !!(round.synthesis && round.synthesis.trim());
   const hasStructured = !!(round.synthesis_json && typeof round.synthesis_json === 'object');
 
@@ -136,4 +137,6 @@ export default function RoundCard({ round, isCurrentRound, expertLabels, formId,
       )}
     </div>
   );
-}
+});
+
+export default RoundCard;

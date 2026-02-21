@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API_BASE_URL } from './config'
 import { LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
+import Skeleton, { SkeletonCard } from './components/Skeleton'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
@@ -251,12 +252,25 @@ export default function FormPage() {
 
   if (!form || mode === 'loading') {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="waiting-orbit">
-          <div className="waiting-orbit-dot" />
-          <div className="waiting-orbit-dot" />
-          <div className="waiting-orbit-dot" />
-          <div className="waiting-orbit-dot" />
+      <div className="min-h-screen bg-background px-4 py-6 sm:py-8">
+        <div className="max-w-3xl mx-auto card-lg p-6 sm:p-8 space-y-6">
+          {/* Back button skeleton */}
+          <Skeleton variant="text" width="140px" height="0.875rem" />
+          {/* Title skeleton */}
+          <Skeleton variant="text" width="70%" height="1.75rem" />
+          {/* Round label */}
+          <Skeleton variant="text" width="80px" height="1rem" />
+          {/* Question skeletons */}
+          <div className="space-y-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="space-y-2">
+                <Skeleton variant="text" width={`${50 + i * 10}%`} height="0.875rem" />
+                <Skeleton variant="card" height="6rem" />
+              </div>
+            ))}
+          </div>
+          {/* Submit button skeleton */}
+          <Skeleton variant="button" width="100%" height="2.75rem" />
         </div>
       </div>
     )

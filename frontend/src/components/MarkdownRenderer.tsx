@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -59,7 +60,7 @@ function preprocessContent(raw: string): { text: string; forceMarkdown: boolean 
  * Handles content that may have been wrapped in <p> tags by WYSIWYG editors
  * (e.g., TipTap) by detecting markdown syntax and recovering structure.
  */
-export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   if (!content) return null;
 
   const { text, forceMarkdown } = preprocessContent(content);
@@ -141,3 +142,5 @@ const markdownComponents = {
   strong: ({ children }: any) => <strong className="md-strong">{children}</strong>,
   em: ({ children }: any) => <em className="md-em">{children}</em>,
 };
+
+export default memo(MarkdownRenderer);

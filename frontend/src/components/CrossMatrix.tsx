@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { CheckCircle2, Zap, Link2 } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────
@@ -62,7 +62,7 @@ function pairKey(a: number, b: number): string {
 
 // ─── Component ───────────────────────────────────────────
 
-export default function CrossMatrix({
+const CrossMatrix = memo(function CrossMatrix({
   structuredData,
   resolvedExpertLabels,
   expertLabelPreset,
@@ -376,4 +376,6 @@ export default function CrossMatrix({
       )}
     </div>
   );
-}
+});
+
+export default CrossMatrix;

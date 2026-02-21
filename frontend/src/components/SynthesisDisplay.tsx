@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import MarkdownRenderer from './MarkdownRenderer';
 
 interface SynthesisDisplayProps {
@@ -10,7 +11,7 @@ interface SynthesisDisplayProps {
  * Themed synthesis display card using MarkdownRenderer.
  * Supports both raw HTML and markdown content.
  */
-export default function SynthesisDisplay({
+const SynthesisDisplay = memo(function SynthesisDisplay({
   content,
   title = 'Synthesis',
   subtitle,
@@ -28,4 +29,6 @@ export default function SynthesisDisplay({
       <MarkdownRenderer content={content} />
     </div>
   );
-}
+});
+
+export default SynthesisDisplay;

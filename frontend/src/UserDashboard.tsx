@@ -5,6 +5,7 @@ import { getMyForms, unlockForm, Form } from './api/forms';
 import { ApiError } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
+import Skeleton, { SkeletonCard } from './components/Skeleton';
 
 /**
  * User dashboard — join forms via code, view/enter joined forms.
@@ -160,7 +161,13 @@ export default function UserDashboard() {
           </h2>
 
           {loading ? (
-            <p style={{ color: 'var(--muted-foreground)' }}>Loading…</p>
+            <div className="space-y-3">
+              <SkeletonCard />
+              <SkeletonCard />
+              <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '0.5rem' }}>
+                <Skeleton variant="text" width="40%" height="0.75rem" />
+              </div>
+            </div>
           ) : (
             <ul className="space-y-3">
               {myForms.length === 0 && (
