@@ -446,6 +446,24 @@ main,
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* Toast notifications */
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateX(100%) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes toast-slide-out {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to   { opacity: 0; transform: translateX(100%) scale(0.95); }
+}
+
+.toast-enter {
+  animation: toast-slide-in 0.25s ease-out forwards;
+}
+
+.toast-exit {
+  animation: toast-slide-out 0.25s ease-in forwards;
+}
+
 @keyframes gentle-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }

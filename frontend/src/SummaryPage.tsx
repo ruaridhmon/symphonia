@@ -16,6 +16,7 @@ import {
 	CrossMatrix,
 	EmergenceHighlights,
 	MarkdownRenderer,
+	useToast,
 } from './components';
 
 import {
@@ -67,6 +68,7 @@ export default function SummaryPage() {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const formId = Number(id);
+	const { toastError, toastWarning, toastSuccess } = useToast();
 
 	const token = useMemo(() => localStorage.getItem('access_token') || '', []);
 	const authHeaders = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
@@ -283,8 +285,9 @@ export default function SummaryPage() {
 				throw new Error(err.detail || `Failed to save synthesis (HTTP ${res.status})`);
 			}
 			setHasSavedSynthesis(true);
+			toastSuccess('Synthesis saved');
 		} catch (err) {
-			alert((err as Error).message || 'Failed to save synthesis');
+			toastError((err as Error).message || 'Failed to save synthesis');
 		}
 	}
 
@@ -292,7 +295,7 @@ export default function SummaryPage() {
 		if (!formId) return;
 		const cleaned = nextRoundQuestions.map(q => q.trim()).filter(q => q.length > 0);
 		if (!cleaned.length) {
-			alert('Add at least one question for the next round.');
+			toastWarning('Add at least one question for the next round.');
 			return;
 		}
 		setLoading(true);
@@ -311,7 +314,7 @@ export default function SummaryPage() {
 			setHasSavedSynthesis(false);
 			setSelectedRound(null);
 		} catch (err) {
-			alert((err as Error).message || 'Failed to start next round');
+			toastError((err as Error).message || 'Failed to start next round');
 		} finally {
 			setLoading(false);
 		}
@@ -324,7 +327,7 @@ export default function SummaryPage() {
 		).then(r => r.json());
 
 		if (!Array.isArray(raw) || raw.length === 0) {
-			alert('No responses to download');
+			toastWarning('No responses to download');
 			return;
 		}
 
@@ -392,7 +395,7 @@ export default function SummaryPage() {
 			setSynthesisStep(5);
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
 		} catch (error) {
-			alert((error as Error).message);
+			toastError((error as Error).message || 'Failed to generate synthesis');
 			setSynthesisStage('preparing');
 			setSynthesisStep(0);
 		} finally {
@@ -418,7 +421,7 @@ export default function SummaryPage() {
 			}
 			await loadSynthesisVersions(displayRound.id);
 		} catch (error) {
-			alert((error as Error).message);
+			toastError((error as Error).message || 'Failed to generate version');
 		} finally {
 			setIsGeneratingVersion(false);
 		}
@@ -437,7 +440,7 @@ export default function SummaryPage() {
 			if (displayRound) await loadSynthesisVersions(displayRound.id);
 			await loadAll();
 		} catch (error) {
-			alert((error as Error).message);
+			toastError((error as Error).message || 'Failed to activate version');
 		}
 	}
 

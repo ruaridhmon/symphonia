@@ -4,6 +4,7 @@ import { Trash2, Plus, Save, ArrowLeft } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { extractQuestionText } from './utils/questions';
 import LoadingButton from './components/LoadingButton';
+import { useToast } from './components/Toast';
 
 interface FormData {
   title: string;
@@ -14,6 +15,7 @@ interface FormData {
 export default function FormEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toastError } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -61,7 +63,7 @@ export default function FormEditor() {
       });
 
       if (!res.ok) {
-        alert('Failed to save edits');
+        toastError('Failed to save edits');
         return;
       }
 

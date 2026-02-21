@@ -3,6 +3,7 @@ import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
+import { useToast } from './components/Toast';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -11,6 +12,7 @@ import { LoadingButton, SkeletonDashboard } from './components';
  */
 export default function AdminDashboard() {
   const { token } = useAuth();
+  const { toastError, toastSuccess } = useToast();
   
   const [forms, setForms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ export default function AdminDashboard() {
       }),
     });
     if (!res.ok) {
-      alert(`Save failed: ${res.status}`);
+      toastError(`Save failed (HTTP ${res.status})`);
       return;
     }
 
@@ -77,6 +79,7 @@ export default function AdminDashboard() {
     setForms(prev => [...prev, created]);
     setNewFormTitle('');
     setNewQuestions(['']);
+    toastSuccess('Form created');
   };
 
   if (loading) {

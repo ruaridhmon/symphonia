@@ -1,4 +1,4 @@
-import{j as e,M as P,r as W,a as F}from"./vendor-markdown-a1d6e1cc.js";import{r as p}from"./vendor-react-fd223168.js";import{A}from"./index-6a7780d9.js";import{h as K,s as Q,C as Y,Z as J,k as G,t as U,i as X,j as L,u as ee}from"./vendor-icons-b8054e6d.js";import{e as se}from"./questions-120dea94.js";function te(t){let s=t.trim();if(/<(?:div|section|table|thead|tbody|tr)\b/i.test(s))return{text:s,forceMarkdown:!1};const o=/(?:^|\s)#{1,6}\s|^\s*[-*+]\s|\*\*|__|\|.*\|/m;let a=s.replace(/<br\s*\/?>/gi,`
+import{j as e,M as P,r as W,a as F}from"./vendor-markdown-a1d6e1cc.js";import{r as p}from"./vendor-react-fd223168.js";import{A}from"./index-fb1d297e.js";import{i as K,u as Q,C as Y,Z as J,l as G,v as U,j as X,k as L,w as ee}from"./vendor-icons-8d46dc27.js";import{e as se}from"./questions-120dea94.js";function te(t){let s=t.trim();if(/<(?:div|section|table|thead|tbody|tr)\b/i.test(s))return{text:s,forceMarkdown:!1};const o=/(?:^|\s)#{1,6}\s|^\s*[-*+]\s|\*\*|__|\|.*\|/m;let a=s.replace(/<br\s*\/?>/gi,`
 `).replace(/<\/p>\s*<p>/gi,`
 
 `).replace(/^<p>/i,"").replace(/<\/p>$/i,"");return o.test(a)?(a=a.replace(/\s+(#{1,6}\s)/g,`
