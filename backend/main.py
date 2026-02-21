@@ -4,8 +4,9 @@ Symphonia Backend - Expert Consensus Platform
 Protected by Cloudflare Access.
 """
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -18,15 +19,49 @@ from core.ws import ws_manager
 # Frontend dist directory (built with `npm run build`)
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 
+
+# =============================================================================
+# LIFECYCLE (modern lifespan replaces deprecated on_event)
+# =============================================================================
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # ── Startup ──
+    print("✅ Symphonia backend started")
+    if FRONTEND_DIR.exists():
+        print(f"   Frontend: {FRONTEND_DIR}")
+    else:
+        print("   Frontend: NOT FOUND")
+    yield
+    # ── Shutdown ──
+    print("👋 Symphonia shutting down cleanly")
+
+
 app = FastAPI(
     title="Symphonia",
     description="Expert Consensus Platform by Axiotic AI",
     version="2.0.0",
+    lifespan=lifespan,
 )
 
 # =============================================================================
 # MIDDLEWARE STACK
 # =============================================================================
+
+# Security headers — applied to every response
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response: Response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    # Cache static assets aggressively, don't cache API responses
+    if request.url.path.startswith("/assets/"):
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    elif request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+    return response
 
 # CORS
 app.add_middleware(
@@ -135,19 +170,4 @@ else:
     print("⚠️  Frontend not built. Run `npm run build` in frontend/")
 
 
-# =============================================================================
-# LIFECYCLE
-# =============================================================================
-
-@app.on_event("startup")
-async def startup_event():
-    print("✅ Symphonia backend started")
-    if FRONTEND_DIR.exists():
-        print(f"   Frontend: {FRONTEND_DIR}")
-    else:
-        print("   Frontend: NOT FOUND")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    print("👋 Symphonia shutting down cleanly")
+# Lifecycle handled by lifespan context manager above.

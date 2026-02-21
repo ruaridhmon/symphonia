@@ -19,7 +19,7 @@ export default function Login() {
     try {
       await login(email, password);
     } catch (err) {
-      setError('Login failed. Please check your credentials.');
+      setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {
       setIsLoggingIn(false);
     }

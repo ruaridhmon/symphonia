@@ -19,20 +19,34 @@ export default function Register() {
     setIsRegistering(true);
 
     try {
-      const reg = await fetch(`${API_BASE_URL}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ email, password })
-      });
+      let reg: Response;
+      try {
+        reg = await fetch(`${API_BASE_URL}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ email, password }),
+        });
+      } catch {
+        throw new Error('Unable to reach the server. Please check your connection.');
+      }
 
       if (!reg.ok) {
-        throw new Error('Registration failed');
+        if (reg.status === 409) {
+          throw new Error('An account with this email already exists.');
+        }
+        if (reg.status === 422) {
+          throw new Error('Invalid email or password format.');
+        }
+        if (reg.status >= 500) {
+          throw new Error('Server error — please try again later.');
+        }
+        throw new Error('Registration failed. Please try again.');
       }
 
       await login(email, password);
 
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
     } finally {
       setIsRegistering(false);
     }

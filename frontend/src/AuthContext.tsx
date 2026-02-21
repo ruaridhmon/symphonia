@@ -1,45 +1,67 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { API_BASE_URL } from './config';
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export interface User {
+  email: string;
+}
+
 interface AuthContextType {
   token: string | null;
-  user: any; // You might want to define a user type
+  user: User | null;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
 
+/** Keys that belong to the auth system — only these are cleared on logout. */
+const AUTH_STORAGE_KEYS = ['access_token', 'is_admin', 'email'] as const;
+
+// ---------------------------------------------------------------------------
+// Context
+// ---------------------------------------------------------------------------
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('access_token'));
-  const [user, setUser] = useState<any>(null); // Set a proper user type
+  const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => localStorage.getItem('is_admin') === 'true');
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (token) {
-      // You might want to fetch user details here if the token is present
-      // For now, we'll just use the localStorage data
       setIsAdmin(localStorage.getItem('is_admin') === 'true');
-      setUser({ email: localStorage.getItem('email') });
+      const storedEmail = localStorage.getItem('email');
+      if (storedEmail) setUser({ email: storedEmail });
     }
     setIsLoading(false);
   }, [token]);
 
   const login = async (email: string, password: string) => {
-    const res = await fetch(`${API_BASE_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        username: email,
-        password: password
-      })
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ username: email, password }),
+      });
+    } catch {
+      throw new Error('Unable to reach the server. Please check your connection.');
+    }
 
     if (!res.ok) {
-      throw new Error('Login failed');
+      if (res.status === 401 || res.status === 403) {
+        throw new Error('Invalid email or password.');
+      }
+      if (res.status >= 500) {
+        throw new Error('Server error — please try again later.');
+      }
+      throw new Error('Login failed. Please try again.');
     }
 
     const data = await res.json();
@@ -53,7 +75,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.clear();
+    // Only clear auth-related keys — preserve theme, drafts, etc.
+    for (const key of AUTH_STORAGE_KEYS) {
+      localStorage.removeItem(key);
+    }
     setToken(null);
     setUser(null);
     setIsAdmin(false);
