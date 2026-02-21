@@ -36,7 +36,7 @@
 - [x] 4.1 Real-time presence (who's viewing) — usePresence hook + PresenceIndicator component with WebSocket presence tracking, auto-reconnect, heartbeats
 - [x] 4.2 Response editing with conflict resolution — ResponseEditor component with TipTap, version tracking, conflict detection
 - [x] 4.3 Comment threads on synthesis sections — SynthesisComment model with threading, CRUD endpoints with WebSocket broadcast, CommentThread component integrated into StructuredSynthesis + EmergenceHighlights
-- [ ] 4.4 Export to PDF/Markdown
+- [x] 4.4 Export to PDF/Markdown — ExportPanel component with comprehensive Markdown export + browser-native PDF via styled print dialog
 
 ## Phase 5: Testing & Validation
 **Goal:** Prove it works (Sam's directive + Father's Vision QA)
@@ -62,14 +62,14 @@
 
 ```json
 {
-  "current_phase": 4,
-  "current_task": "4.4",
-  "last_run": "2026-02-21T03:25:00Z",
+  "current_phase": 5,
+  "current_task": "5.1",
+  "last_run": "2026-02-21T03:52:00Z",
   "tasks_completed": [
     "1.1", "1.2", "1.3", "1.4", "1.5",
     "2.1", "2.2", "2.3", "2.4", "2.5", "2.6",
     "3.1", "3.2", "3.3", "3.4",
-    "4.1", "4.2", "4.3"
+    "4.1", "4.2", "4.3", "4.4"
   ],
   "blockers": []
 }
