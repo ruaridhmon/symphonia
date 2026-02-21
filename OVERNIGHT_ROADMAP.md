@@ -27,6 +27,9 @@
 - [x] Decompose SummaryPage (1414→672 lines, 10 subcomponents) — DONE (Pulse 6:36am)
 - [ ] TanStack Query for state management
 - [x] Mobile responsiveness (safe-area insets, touch targets, overflow, responsive spacing) — DONE (Pulse 6:36am)
+- [x] Code splitting (React.lazy + Vite manual chunks) — DONE (Pulse 7:06am): initial bundle 1,298KB → 18KB app shell + lazy-loaded routes. Vendor chunks: react 177KB, tiptap 302KB, markdown 318KB, docx 342KB — each cached independently.
+- [x] Convert remaining .jsx → .tsx (FormEditor) — DONE (Pulse 7:06am): full TypeScript, Lucide icons, LoadingButton integration
+- [x] Remove dead code (AdminFormPage.jsx) — DONE (Pulse 7:06am)
 
 ## Completed This Session
 - Button sizing fix (width: fit-content)
@@ -50,6 +53,9 @@
 - **Error handling + retry** — FormPage load errors show retry button + back-to-dashboard; submit errors shown inline; proper HTTP status checks added (Pulse)
 - **SummaryPage decomposition** — 1414→672 lines; extracted 10 focused subcomponents (SummaryHeader, SynthesisEditorCard, AISynthesisPanel, SynthesisVersionPanel, NextRoundQuestionsCard, FormInfoCard, ActionsCard, ResponsesModal, RoundHistoryCard, SummaryLoadingSkeleton) + shared types file (Pulse)
 - **Mobile responsiveness** — safe-area insets for notched devices, coarse pointer touch targets (44px min), horizontal overflow prevention, responsive card padding, prose typography scaling, landscape orientation support (Pulse)
+- **Code splitting** — React.lazy for all 10 route components + Vite manualChunks for 5 vendor groups. Initial JS: 1,298KB → 18KB (72x smaller). Each page loads on demand. Vendor libs cached independently for faster subsequent loads. (Pulse 7:06am)
+- **FormEditor modernization** — Converted from .jsx to .tsx. Added TypeScript types, Lucide icons (Trash2/Plus/Save/ArrowLeft), LoadingButton with loading states, question numbering, proper layout within PageLayout. (Pulse 7:06am)
+- **Dead code removal** — Removed orphaned AdminFormPage.jsx (104 lines, not referenced by router). (Pulse 7:06am)
 
 ## Build Command
 ```bash
@@ -62,10 +68,10 @@ cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate 
 ```json
 {
   "last_run": "2026-02-21T05:36:00Z",
-  "current_task": "ALL P0 + P1 + P2 COMPLETE",
+  "current_task": "ALL P0 + P1 + P2 + P3 COMPLETE (except TanStack Query)",
   "workers_completed": 5,
   "workers_spawned": 5,
-  "pulse_direct_changes": 5,
-  "status": "P0 clear, P1 clear, P2 clear, P3 clear (except TanStack Query) — architecture complete"
+  "pulse_direct_changes": 6,
+  "status": "P0 clear, P1 clear, P2 clear, P3 clear (except TanStack Query) — code-split + modernized"
 }
 ```
