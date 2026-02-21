@@ -1,8 +1,7 @@
 """
 Symphonia Backend - Expert Consensus Platform
 
-Protected by email OTP authentication.
-Only authorized emails can access the platform.
+Protected by Cloudflare Access.
 """
 import os
 from pathlib import Path
@@ -11,8 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from core import routes as core_routes
-from core.otp_routes import router as otp_router
-from core.otp_auth import OTPAuthMiddleware, validate_session, SESSION_COOKIE_NAME
 from core.db import engine, SessionLocal
 from core.models import Base, User, UserFormUnlock
 from core.auth import get_password_hash
@@ -28,10 +25,10 @@ app = FastAPI(
 )
 
 # =============================================================================
-# MIDDLEWARE STACK (order matters!)
+# MIDDLEWARE STACK
 # =============================================================================
 
-# 1. CORS (must be first)
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,17 +37,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. OTP Authentication (DISABLED - using Cloudflare Access instead)
-# app.add_middleware(OTPAuthMiddleware)
-
 # =============================================================================
 # ROUTES
 # =============================================================================
 
-# OTP auth routes (login, request, verify, logout, status)
-app.include_router(otp_router)
-
-# Main application routes (protected by OTP middleware)
+# Main application routes
 app.include_router(core_routes.router)
 
 # =============================================================================
@@ -70,7 +61,6 @@ with SessionLocal() as db:
             is_admin=True
         ))
     else:
-        # Only update is_admin, don't overwrite password
         admin.is_admin = True
 
     # Also ensure samuel@axiotic.ai exists as admin
@@ -90,8 +80,8 @@ with SessionLocal() as db:
     print("=" * 60)
     print("🎵 SYMPHONIA - Expert Consensus Platform")
     print("=" * 60)
-    print("🔐 OTP Authentication ENABLED")
-    print("   Authorized emails:")
+    print("🔐 Protected by Cloudflare Access")
+    print("   Admin users:")
     print("   • antreas@axiotic.ai")
     print("   • samuel@axiotic.ai")
     print("=" * 60)
@@ -116,9 +106,7 @@ async def websocket_endpoint(websocket: WebSocket):
 # STATIC FILES & SPA ROUTING
 # =============================================================================
 
-# Mount static assets (JS, CSS, etc.) from the frontend build
 if FRONTEND_DIR.exists():
-    # Serve static assets under /assets
     assets_dir = FRONTEND_DIR / "assets"
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
@@ -126,23 +114,18 @@ if FRONTEND_DIR.exists():
     @app.get("/")
     async def serve_spa_root(request: Request):
         """Serve the SPA index.html for the root path."""
-        # Auth handled by Cloudflare Access
         return FileResponse(str(FRONTEND_DIR / "index.html"))
     
     @app.get("/{full_path:path}")
     async def serve_spa_catchall(request: Request, full_path: str):
         """Catch-all route for SPA - serves index.html for client-side routing."""
-        # Skip API routes
-        if full_path.startswith(("otp/", "api/", "ws", "docs", "openapi")):
+        if full_path.startswith(("api/", "ws", "docs", "openapi")):
             return {"detail": "Not Found"}
         
-        # Check if it's a static file request
         static_file = FRONTEND_DIR / full_path
         if static_file.exists() and static_file.is_file():
             return FileResponse(str(static_file))
         
-        # Auth handled by Cloudflare Access
-        # For all other paths, serve index.html (SPA routing)
         index_html = FRONTEND_DIR / "index.html"
         if index_html.exists():
             return FileResponse(str(index_html))
@@ -162,8 +145,7 @@ async def startup_event():
     if FRONTEND_DIR.exists():
         print(f"   Frontend: {FRONTEND_DIR}")
     else:
-        print("   Frontend: NOT FOUND (run `npm run build` in frontend/)")
-    print("   Login: /otp/login")
+        print("   Frontend: NOT FOUND")
 
 
 @app.on_event("shutdown")

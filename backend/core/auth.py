@@ -43,6 +43,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    print(f"[get_current_user] Token received: {token[:50] if token else 'NONE'}...")
     credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com")
 
@@ -54,18 +55,24 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
             raise HTTPException(status_code=401, detail="Dummy admin not found")
         return admin
 
-
-
     try:
+        print(f"[get_current_user] Decoding with SECRET_KEY: {SECRET_KEY[:10]}...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print(f"[get_current_user] Payload decoded: {payload}")
         user_id = payload.get("sub")
         if user_id is None:
+            print("[get_current_user] ERROR: No 'sub' in payload")
             raise credentials_exception
-    except JWTError:
+    except JWTError as e:
+        print(f"[get_current_user] JWTError: {e}")
         raise credentials_exception
+    
+    print(f"[get_current_user] Looking up user_id={user_id}")
     user = db.query(User).filter(User.id == int(user_id)).first()
     if not user:
+        print(f"[get_current_user] ERROR: No user found for id={user_id}")
         raise credentials_exception
+    print(f"[get_current_user] SUCCESS: Found user {user.email}")
     return user
 
 async def get_admin_user(user: User = Depends(get_current_user)):

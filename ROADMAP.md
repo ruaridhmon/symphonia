@@ -33,7 +33,7 @@
 ## Phase 4: Collaboration Features
 **Goal:** Make multi-user interaction smooth
 
-- [ ] 4.1 Real-time presence (who's viewing)
+- [x] 4.1 Real-time presence (who's viewing) — usePresence hook + PresenceIndicator component with WebSocket presence tracking, auto-reconnect, heartbeats
 - [ ] 4.2 Response editing with conflict resolution
 - [ ] 4.3 Comment threads on synthesis sections
 - [ ] 4.4 Export to PDF/Markdown
@@ -68,7 +68,8 @@
   "tasks_completed": [
     "1.1", "1.2", "1.3", "1.4", "1.5",
     "2.1", "2.2", "2.3", "2.4", "2.5", "2.6",
-    "3.1", "3.2", "3.3", "3.4"
+    "3.1", "3.2", "3.3", "3.4",
+    "4.1"
   ],
   "blockers": []
 }
