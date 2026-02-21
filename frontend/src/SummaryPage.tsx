@@ -11,6 +11,7 @@ import { API_BASE_URL } from './config';
 
 // Phase 1 + 2 + 3 components
 import {
+	ExportPanel,
 	PresenceIndicator,
 	ResponseEditor,
 	LoadingButton,
@@ -22,6 +23,8 @@ import {
 	StructuredSynthesis,
 	CrossMatrix,
 	EmergenceHighlights,
+	Skeleton,
+	SkeletonCard,
 } from './components';
 
 // Phase 4 hook (already wired)
@@ -584,8 +587,44 @@ export default function SummaryPage() {
 	if (!form) {
 		console.log('[SummaryPage] Rendering loading state (form is null)');
 		return (
-			<div className="min-h-screen bg-background flex items-center justify-center">
-				<p className="text-muted-foreground text-lg">Loading…</p>
+			<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
+				<header className="bg-card border-b border-border shadow-card">
+					<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+						<div className="flex items-center gap-4">
+							<div>
+								<Skeleton variant="text" width="12rem" height="1.5rem" />
+								<Skeleton variant="text" width="10rem" height="1rem" style={{ marginTop: '0.25rem' }} />
+							</div>
+						</div>
+						<Skeleton variant="button" width="5rem" height="2rem" />
+					</div>
+				</header>
+
+				<main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+					<Skeleton variant="text" width="10rem" style={{ marginBottom: '1.5rem' }} />
+
+					{/* Round timeline skeleton */}
+					<div className="mb-6 flex gap-4">
+						<Skeleton variant="avatar" width="3rem" height="3rem" />
+						<Skeleton variant="avatar" width="3rem" height="3rem" />
+						<Skeleton variant="avatar" width="3rem" height="3rem" />
+					</div>
+
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+						{/* Main content skeleton */}
+						<div className="lg:col-span-2 space-y-6">
+							<SkeletonCard />
+							<SkeletonCard />
+						</div>
+
+						{/* Sidebar skeleton */}
+						<div className="lg:col-span-1 space-y-6">
+							<SkeletonCard />
+							<SkeletonCard />
+							<SkeletonCard />
+						</div>
+					</div>
+				</main>
 			</div>
 		);
 	}
@@ -799,6 +838,12 @@ export default function SummaryPage() {
 								>
 									Save Synthesis
 								</LoadingButton>
+								<ExportPanel
+									formTitle={form?.title || 'Untitled Form'}
+									rounds={rounds}
+									structuredSynthesisData={structuredSynthesisData}
+									expertLabels={resolvedExpertLabels}
+								/>
 								<div className="pt-2">
 									{/* Phase 1: LoadingButton with loading state for Start Next Round */}
 									<LoadingButton

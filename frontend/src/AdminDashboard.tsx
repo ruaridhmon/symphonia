@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
+import { SkeletonDashboard } from './components';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -14,6 +15,7 @@ export default function AdminDashboard() {
   console.log('[AdminDashboard] Token from useAuth:', token ? `${token.slice(0, 20)}...` : 'EMPTY/NULL');
   
   const [forms, setForms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [newFormTitle, setNewFormTitle] = useState('');
   const [newQuestions, setNewQuestions] = useState(['']);
 
@@ -21,6 +23,7 @@ export default function AdminDashboard() {
     console.log('[AdminDashboard] useEffect triggered, token:', !!token);
     if (token) {
       console.log('[AdminDashboard] Fetching /forms...');
+      setLoading(true);
       fetch(`${API_BASE_URL}/forms`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -31,12 +34,15 @@ export default function AdminDashboard() {
         .then(d => {
           console.log('[AdminDashboard] /forms data:', d);
           setForms(Array.isArray(d) ? d : []);
+          setLoading(false);
         })
         .catch(err => {
           console.error('[AdminDashboard] /forms fetch error:', err);
+          setLoading(false);
         });
     } else {
       console.log('[AdminDashboard] Skipping fetch - no token');
+      setLoading(false);
     }
   }, [token]);
 
@@ -64,6 +70,16 @@ export default function AdminDashboard() {
     setNewFormTitle('');
     setNewQuestions(['']);
   };
+
+  if (loading) {
+    return (
+      <section className="flex-1 py-6 sm:py-8">
+        <Container size="lg">
+          <SkeletonDashboard />
+        </Container>
+      </section>
+    );
+  }
 
   return (
     <section className="flex-1 py-6 sm:py-8">

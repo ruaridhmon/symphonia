@@ -34,7 +34,7 @@
 **Goal:** Make multi-user interaction smooth
 
 - [x] 4.1 Real-time presence (who's viewing) — usePresence hook + PresenceIndicator component with WebSocket presence tracking, auto-reconnect, heartbeats
-- [ ] 4.2 Response editing with conflict resolution
+- [x] 4.2 Response editing with conflict resolution — ResponseEditor component with TipTap, version tracking, conflict detection
 - [x] 4.3 Comment threads on synthesis sections — SynthesisComment model with threading, CRUD endpoints with WebSocket broadcast, CommentThread component integrated into StructuredSynthesis + EmergenceHighlights
 - [ ] 4.4 Export to PDF/Markdown
 

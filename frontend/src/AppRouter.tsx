@@ -11,6 +11,7 @@ import FormPage from './FormPage';
 import Login from './Login';
 import Register from './Register';
 import Atlas from './Atlas';
+import ErrorBoundary from './components/ErrorBoundary';
 
 /**
  * Application routes organised by layout shell.
@@ -39,27 +40,97 @@ export default function Router() {
     <Routes>
       {/* ── Public auth pages (centred layout) ── */}
       <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/login"
+          element={
+            <ErrorBoundary fallbackTitle="Login Error">
+              <Login />
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <ErrorBoundary fallbackTitle="Registration Error">
+              <Register />
+            </ErrorBoundary>
+          }
+        />
       </Route>
 
       {/* ── Authenticated pages (shared page shell) ── */}
       <Route element={<PrivateRoute />}>
         <Route element={<PageLayout />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/atlas" element={<Atlas />} />
-          <Route path="/waiting" element={<WaitingPage />} />
-          <Route path="/result" element={<ResultPage />} />
-          <Route path="/thank-you" element={<ThankYouPage />} />
-          <Route path="/form/:id" element={<FormPage />} />
+          <Route
+            path="/"
+            element={
+              <ErrorBoundary fallbackTitle="Dashboard Error">
+                <Dashboard />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/atlas"
+            element={
+              <ErrorBoundary fallbackTitle="Atlas Error">
+                <Atlas />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/waiting"
+            element={
+              <ErrorBoundary fallbackTitle="Waiting Page Error">
+                <WaitingPage />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/result"
+            element={
+              <ErrorBoundary fallbackTitle="Result Page Error">
+                <ResultPage />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/thank-you"
+            element={
+              <ErrorBoundary fallbackTitle="Thank You Page Error">
+                <ThankYouPage />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/form/:id"
+            element={
+              <ErrorBoundary fallbackTitle="Form Submission Error">
+                <FormPage />
+              </ErrorBoundary>
+            }
+          />
         </Route>
       </Route>
 
       {/* ── Admin pages (shared page shell, admin-only) ── */}
       <Route element={<PrivateRoute isAdminRoute />}>
         <Route element={<PageLayout />}>
-          <Route path="/admin/form/:id" element={<FormEditor />} />
-          <Route path="/admin/form/:id/summary" element={<SummaryPage />} />
+          <Route
+            path="/admin/form/:id"
+            element={
+              <ErrorBoundary fallbackTitle="Form Editor Error">
+                <FormEditor />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/admin/form/:id/summary"
+            element={
+              <ErrorBoundary fallbackTitle="Summary Page Error">
+                <SummaryPage />
+              </ErrorBoundary>
+            }
+          />
         </Route>
       </Route>
     </Routes>

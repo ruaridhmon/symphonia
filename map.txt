@@ -1,0 +1,111 @@
+.
+|-- backend
+|   |-- core
+|   |   |-- __init__.py
+|   |   |-- auth.py
+|   |   |-- db.py
+|   |   |-- models.py
+|   |   |-- routes.py
+|   |   |-- synthesis.py
+|   |   |-- synthesis_worker_a.py
+|   |   |-- synthesis_worker_b.py
+|   |   `-- ws.py
+|   |-- tests
+|   |   |-- __init__.py
+|   |   |-- test_synthesis.py
+|   |   |-- test_synthesis_worker_a.py
+|   |   `-- test_synthesis_worker_b.py
+|   |-- Dockerfile
+|   |-- INTEGRATION_NOTES.md
+|   |-- WORKER_A_NOTES.md
+|   |-- WORKER_B_NOTES.md
+|   |-- main.py
+|   |-- ngrok.log
+|   |-- ngrok_config.py
+|   |-- requirements.txt
+|   |-- seed_government_consultations.py
+|   |-- start_ngrok.py
+|   |-- summary_cache.txt
+|   |-- symphonia.db
+|   `-- uvicorn.log
+|-- docs
+|   `-- PROJECT_SPEC.md
+|-- frontend
+|   |-- dist
+|   |   |-- assets
+|   |   |   |-- index-0deb9e67.js
+|   |   |   `-- index-973baf88.css
+|   |   `-- index.html
+|   |-- src
+|   |   |-- components
+|   |   |   |-- CommentThread.tsx
+|   |   |   |-- CrossMatrix.tsx
+|   |   |   |-- EmergenceHighlights.tsx
+|   |   |   |-- LoadingButton.tsx
+|   |   |   |-- MarkdownRenderer.tsx
+|   |   |   |-- MinorityReport.tsx
+|   |   |   |-- PresenceIndicator.tsx
+|   |   |   |-- ResponseEditor.tsx
+|   |   |   |-- RoundCard.tsx
+|   |   |   |-- RoundTimeline.tsx
+|   |   |   |-- StructuredSynthesis.tsx
+|   |   |   |-- SynthesisDisplay.tsx
+|   |   |   |-- SynthesisModeSelector.tsx
+|   |   |   |-- SynthesisProgress.tsx
+|   |   |   `-- index.ts
+|   |   |-- hooks
+|   |   |   `-- usePresence.ts
+|   |   |-- layouts
+|   |   |   |-- AuthLayout.tsx
+|   |   |   |-- Container.tsx
+|   |   |   |-- PageLayout.tsx
+|   |   |   `-- index.ts
+|   |   |-- theme
+|   |   |   |-- ThemeProvider.tsx
+|   |   |   |-- ThemeToggle.tsx
+|   |   |   `-- index.ts
+|   |   |-- AdminDashboard.tsx
+|   |   |-- AdminFormPage.jsx
+|   |   |-- App.tsx
+|   |   |-- AppRouter.tsx
+|   |   |-- Atlas.tsx
+|   |   |-- AuthContext.tsx
+|   |   |-- Dashboard.tsx
+|   |   |-- FormEditor.jsx
+|   |   |-- FormPage.tsx
+|   |   |-- Header.tsx
+|   |   |-- Login.tsx
+|   |   |-- PrivateRoute.tsx
+|   |   |-- Register.tsx
+|   |   |-- ResultPage.tsx
+|   |   |-- SummaryPage.tsx
+|   |   |-- ThankYouPage.tsx
+|   |   |-- UserDashboard.tsx
+|   |   |-- WaitingPage.tsx
+|   |   |-- config.ts
+|   |   |-- index.css
+|   |   `-- main.tsx
+|   |-- Dockerfile
+|   |-- LAYOUT_CHANGES.md
+|   |-- MOTION_CHANGES.md
+|   |-- VISUAL_CHANGES.md
+|   |-- index.html
+|   |-- nginx.conf
+|   |-- package-lock.json
+|   |-- package.json
+|   |-- postcss.config.js
+|   |-- tailwind.config.js
+|   |-- tsconfig.json
+|   |-- tsconfig.node.json
+|   `-- vite.config.ts
+|-- LICENSE
+|-- PLAN.md
+|-- README.md
+|-- ROADMAP.md
+|-- docker-compose.yml
+|-- map.txt
+|-- package-lock.json
+|-- package.json
+`-- vite.config.ts
+
+13 directories, 96 files
