@@ -886,8 +886,49 @@ def get_form(
         "title": f.title,
         "questions": f.questions,
         "allow_join": f.allow_join,
-        "join_code": f.join_code
+        "join_code": f.join_code,
+        "expert_labels": f.expert_labels,
     }
+
+
+# ---------------------------------------------------------
+# EXPERT LABELS
+# ---------------------------------------------------------
+
+class ExpertLabelsPayload(BaseModel):
+    preset: str  # "default" | "temporal" | "custom" | "methodological" | "stakeholder"
+    custom_labels: dict | None = None
+
+
+@router.get("/forms/{form_id}/expert_labels")
+def get_expert_labels(
+    form_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    f = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not f:
+        raise HTTPException(status_code=404, detail="Form not found")
+    return f.expert_labels or {"preset": "default", "custom_labels": {}}
+
+
+@router.put("/forms/{form_id}/expert_labels")
+def put_expert_labels(
+    form_id: int,
+    payload: ExpertLabelsPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    f = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not f:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    f.expert_labels = {
+        "preset": payload.preset,
+        "custom_labels": payload.custom_labels or {},
+    }
+    db.commit()
+    return f.expert_labels
 
 
 # ---------------------------------------------------------

@@ -89,10 +89,12 @@ export default function SummaryPage() {
 	const [viewingRound, setViewingRound] = useState<Round | null>(null);
 
 	// Expert labels
-	type ExpertLabelPreset = 'default' | 'temporal' | 'custom';
+	type ExpertLabelPreset = 'default' | 'temporal' | 'methodological' | 'stakeholder' | 'custom';
 	const [expertLabelPreset, setExpertLabelPreset] = useState<ExpertLabelPreset>('default');
 	const [customExpertLabels, setCustomExpertLabels] = useState<Record<number, string>>({});
 	const [expertLabelsOpen, setExpertLabelsOpen] = useState(false);
+	const expertLabelsSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const [expertLabelsLoaded, setExpertLabelsLoaded] = useState(false);
 
 	const temporalPresets: Record<number, string> = {
 		1: 'Urðr (Past)',
@@ -100,13 +102,37 @@ export default function SummaryPage() {
 		3: 'Skuld (Future)',
 	};
 
+	const methodologicalPresets: Record<number, string> = {
+		1: 'Quantitative',
+		2: 'Qualitative',
+		3: 'Mixed Methods',
+	};
+
+	const stakeholderPresets: Record<number, string> = {
+		1: 'Industry',
+		2: 'Academia',
+		3: 'Policy',
+	};
+
+	const dimensionClassMap: Record<string, Record<number, string>> = {
+		temporal: { 1: 'dimension-past', 2: 'dimension-present', 3: 'dimension-future' },
+		methodological: { 1: 'dimension-quantitative', 2: 'dimension-qualitative', 3: 'dimension-mixed' },
+		stakeholder: { 1: 'dimension-industry', 2: 'dimension-academia', 3: 'dimension-policy' },
+	};
+
 	const expertCount = activeRound?.response_count || 3;
 
 	const resolvedExpertLabels: Record<number, string> = useMemo(() => {
-		if (expertLabelPreset === 'temporal') {
+		const presetMap: Record<string, Record<number, string>> = {
+			temporal: temporalPresets,
+			methodological: methodologicalPresets,
+			stakeholder: stakeholderPresets,
+		};
+		const selected = presetMap[expertLabelPreset];
+		if (selected) {
 			const labels: Record<number, string> = {};
 			for (let i = 1; i <= expertCount; i++) {
-				labels[i] = temporalPresets[i] || `Expert ${i}`;
+				labels[i] = selected[i] || `Expert ${i}`;
 			}
 			return labels;
 		}
@@ -115,6 +141,34 @@ export default function SummaryPage() {
 		}
 		return {};
 	}, [expertLabelPreset, customExpertLabels, expertCount]);
+
+	// ─── Expert labels persistence ────────────────────────
+
+	const saveExpertLabels = useCallback(
+		(preset: ExpertLabelPreset, labels: Record<number, string>) => {
+			if (!formId || !token) return;
+			fetch(`${API_BASE_URL}/forms/${formId}/expert_labels`, {
+				method: 'PUT',
+				headers: { ...authHeaders, 'Content-Type': 'application/json' },
+				body: JSON.stringify({ preset, custom_labels: labels }),
+			}).catch((err) => console.error('Failed to save expert labels:', err));
+		},
+		[formId, token, authHeaders]
+	);
+
+	const debouncedSaveExpertLabels = useCallback(
+		(preset: ExpertLabelPreset, labels: Record<number, string>) => {
+			if (expertLabelsSaveTimer.current) clearTimeout(expertLabelsSaveTimer.current);
+			expertLabelsSaveTimer.current = setTimeout(() => saveExpertLabels(preset, labels), 600);
+		},
+		[saveExpertLabels]
+	);
+
+	// Save when preset or custom labels change (only after initial load)
+	useEffect(() => {
+		if (!expertLabelsLoaded) return;
+		debouncedSaveExpertLabels(expertLabelPreset, customExpertLabels);
+	}, [expertLabelPreset, customExpertLabels, expertLabelsLoaded, debouncedSaveExpertLabels]);
 
 	const wsRef = useRef<WebSocket | null>(null);
 
@@ -204,6 +258,31 @@ export default function SummaryPage() {
 			});
 			const f = await formRes.json();
 			setForm(f);
+
+			// Load expert labels from backend
+			try {
+				const labelsRes = await fetch(`${API_BASE_URL}/forms/${formId}/expert_labels`, {
+					headers: authHeaders,
+				});
+				if (labelsRes.ok) {
+					const labelsData = await labelsRes.json();
+					if (labelsData.preset) {
+						setExpertLabelPreset(labelsData.preset as ExpertLabelPreset);
+					}
+					if (labelsData.custom_labels && typeof labelsData.custom_labels === 'object') {
+						// Convert string keys back to number keys
+						const numericLabels: Record<number, string> = {};
+						for (const [k, v] of Object.entries(labelsData.custom_labels)) {
+							numericLabels[Number(k)] = v as string;
+						}
+						setCustomExpertLabels(numericLabels);
+					}
+					setExpertLabelsLoaded(true);
+				}
+			} catch (e) {
+				console.error('Failed to load expert labels:', e);
+				setExpertLabelsLoaded(true);
+			}
 
 			const roundsRes = await fetch(
 				`${API_BASE_URL}/forms/${formId}/rounds`,
@@ -843,31 +922,41 @@ export default function SummaryPage() {
 							{expertLabelsOpen && (
 								<div className="mt-3 space-y-3 slide-down">
 									<div className="flex gap-1 flex-wrap">
-										{(['default', 'temporal', 'custom'] as const).map(preset => (
-											<button
-												key={preset}
-												className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
-													expertLabelPreset === preset
-														? 'bg-accent text-white border-accent'
-														: 'border-border text-muted-foreground hover:border-accent'
-												}`}
-												onClick={() => setExpertLabelPreset(preset)}
-											>
-												{preset === 'default' ? 'Default' : preset === 'temporal' ? 'Temporal' : 'Custom'}
-											</button>
-										))}
+										{(['default', 'temporal', 'methodological', 'stakeholder', 'custom'] as const).map(preset => {
+											const label: Record<string, string> = {
+												default: 'Default',
+												temporal: 'Temporal',
+												methodological: 'Methodological',
+												stakeholder: 'Stakeholder',
+												custom: 'Custom',
+											};
+											return (
+												<button
+													key={preset}
+													className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+														expertLabelPreset === preset
+															? 'bg-accent text-white border-accent'
+															: 'border-border text-muted-foreground hover:border-accent'
+													}`}
+													onClick={() => setExpertLabelPreset(preset)}
+												>
+													{label[preset]}
+												</button>
+											);
+										})}
 									</div>
-									{expertLabelPreset === 'temporal' && (
+									{(['temporal', 'methodological', 'stakeholder'] as const).includes(expertLabelPreset as any) && (
 										<div className="space-y-1.5">
-											{Array.from({ length: expertCount }, (_, i) => i + 1).map(id => (
-												<div key={id} className="flex items-center gap-2 text-xs">
-													<span className={`expert-chip ${
-														id === 1 ? 'dimension-past' : id === 2 ? 'dimension-present' : 'dimension-future'
-													}`}>
-														{temporalPresets[id] || `Expert ${id}`}
-													</span>
-												</div>
-											))}
+											{Array.from({ length: expertCount }, (_, i) => i + 1).map(id => {
+												const dimClasses = dimensionClassMap[expertLabelPreset] || {};
+												return (
+													<div key={id} className="flex items-center gap-2 text-xs">
+														<span className={`expert-chip ${dimClasses[id] || ''}`}>
+															{resolvedExpertLabels[id] || `Expert ${id}`}
+														</span>
+													</div>
+												);
+											})}
 										</div>
 									)}
 									{expertLabelPreset === 'custom' && (

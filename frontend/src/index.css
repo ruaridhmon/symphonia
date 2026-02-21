@@ -1003,6 +1003,34 @@ main,
   color: var(--success);
 }
 
+/* Methodological dimension chips */
+.expert-chip.dimension-quantitative {
+  background-color: rgba(14, 165, 233, 0.12);
+  color: #0ea5e9;
+}
+.expert-chip.dimension-qualitative {
+  background-color: rgba(244, 63, 94, 0.12);
+  color: #f43f5e;
+}
+.expert-chip.dimension-mixed {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+/* Stakeholder dimension chips */
+.expert-chip.dimension-industry {
+  background-color: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+}
+.expert-chip.dimension-academia {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+}
+.expert-chip.dimension-policy {
+  background-color: rgba(236, 72, 153, 0.12);
+  color: #ec4899;
+}
+
 /* Confidence bar */
 .confidence-bar {
   display: flex;

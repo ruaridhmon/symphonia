@@ -40,6 +40,8 @@ class FormModel(Base):
     allow_join = Column(Boolean, default=True)
     join_code = Column(String, unique=True, nullable=False)
 
+    expert_labels = Column(JSON, nullable=True)  # {"preset": "temporal"|"custom"|"default"|"methodological"|"stakeholder", "custom_labels": {1: "Label", ...}}
+
     rounds = relationship("RoundModel", back_populates="form", cascade="all, delete-orphan")
     responses = relationship("Response", back_populates="form", cascade="all, delete-orphan")
     archived_responses = relationship("ArchivedResponse", back_populates="form", cascade="all, delete-orphan")

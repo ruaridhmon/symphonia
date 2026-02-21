@@ -126,9 +126,18 @@ function SeverityBadge({ severity }: { severity: string }) {
 function getDimensionClass(label?: string): string {
   if (!label) return '';
   const lower = label.toLowerCase();
+  // Temporal dimensions
   if (lower.includes('past') || lower.includes('urðr') || lower.includes('urd')) return 'dimension-past';
   if (lower.includes('present') || lower.includes('verðandi') || lower.includes('verdandi')) return 'dimension-present';
   if (lower.includes('future') || lower.includes('skuld')) return 'dimension-future';
+  // Methodological dimensions
+  if (lower.includes('quantitative')) return 'dimension-quantitative';
+  if (lower.includes('qualitative')) return 'dimension-qualitative';
+  if (lower.includes('mixed')) return 'dimension-mixed';
+  // Stakeholder dimensions
+  if (lower.includes('industry')) return 'dimension-industry';
+  if (lower.includes('academia')) return 'dimension-academia';
+  if (lower.includes('policy')) return 'dimension-policy';
   return '';
 }
 
