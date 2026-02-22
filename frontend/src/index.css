@@ -3796,8 +3796,8 @@ html[data-theme="axiotic-dark"] .command-palette-overlay {
 }
 
 /* ── Logo dark mode adaptation ── */
-/* White-background PNG: invert + hue-rotate brings the navy logo back to light-blue
-   while turning the white background to near-black (invisible on dark bg) */
+/* Logos now have transparent backgrounds. In dark mode, the dark navy artwork
+   needs to become white/light so it's visible against dark backgrounds. */
 html[data-theme="axiotic-dark"] img[alt="Symphonia"] {
-  filter: invert(1) hue-rotate(200deg);
+  filter: brightness(0) invert(1);
 }
