@@ -49,6 +49,7 @@ import {
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
 	VersionCompare,
+	VersionTimeline,
 } from './components/summary';
 
 import { usePresence } from './hooks/usePresence';
@@ -709,6 +710,15 @@ export default function SummaryPage() {
 							showCompare={showVersionCompare}
 							onToggleCompare={() => setShowVersionCompare(v => !v)}
 						/>
+
+						{/* Version History Timeline */}
+						{synthesisVersions.length > 0 && (
+							<VersionTimeline
+								versions={synthesisVersions}
+								selectedVersionId={selectedVersionId}
+								onSelectVersion={setSelectedVersionId}
+							/>
+						)}
 
 						<RoundHistoryCard
 							rounds={rounds}

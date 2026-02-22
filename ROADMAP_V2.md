@@ -58,11 +58,12 @@
 - [x] Frontend: `DevilsAdvocate` component with Generate/Regenerate, strength badges
 - [x] AI disclaimer banner, collapsible card, error handling
 
-### 3.2 Expert Voice Mirroring
-**What:** Clarify expert statements without changing meaning
-**UI:** Toggle to show "Original" vs "Clarified" for each quote
-**Backend:** Add `clarified_text` field to evidence excerpts
-**Prompt:** "Rephrase this for accessibility while preserving nuance"
+### 3.2 Expert Voice Mirroring ✅ DONE
+- [x] Backend: `/forms/{id}/rounds/{round_id}/voice_mirror` endpoint
+- [x] Frontend: `VoiceMirroring` component with Generate/toggle per response
+- [x] Original vs Clarified toggle with inline comparison
+- [x] AI disclaimer banner, error handling, toggle-all support
+- [x] Integrated into ResponsesAccordion per expanded round
 
 ### 3.3 Audience Translation Toggle ✅ DONE
 - [x] Backend: `/forms/{id}/rounds/{round_id}/translate` endpoint with 5 audience profiles
@@ -74,13 +75,13 @@
 ## Phase 4: Structured Input (Next 2 Weeks)
 *Goal: Better data in = better synthesis out*
 
-### 4.1 Expert Input Templates ✅ PARTIALLY DONE
+### 4.1 Expert Input Templates ✅ DONE
 - [x] Position field
 - [x] Evidence field  
 - [x] Confidence slider (1-10)
-- [ ] Counterarguments field (what argues against your position?)
-- [ ] Citations helper
-- [ ] Expert nomination field
+- [x] Counterarguments field (what argues against your position?)
+- [x] Citations helper (Advanced section with chip-based input)
+- [x] Expert nomination field (Advanced section with chip-based input)
 
 ### 4.2 Auto-Save ✅ DONE
 - [x] Debounced localStorage save
@@ -96,9 +97,9 @@
 - [x] Backend: SynthesisVersion model
 - [x] Backend: Generate for any round
 - [x] UI: Version selector (pill buttons with active indicators)
-- [ ] UI: Compare versions side-by-side
+- [x] UI: Compare versions side-by-side (VersionCompare component)
 - [x] UI: "Publish" vs "Draft" states (badges + Publish button)
-- [ ] UI: Version history timeline
+- [x] UI: Version history timeline (VersionTimeline component)
 
 ### 5.2 View/Edit Mode ✅ DONE
 - [x] Toggle between rendered markdown and editor
@@ -143,8 +144,8 @@
 | Milestone | Target | Status |
 |-----------|--------|--------|
 | Design polish complete | Feb 24 | 🔄 In Progress |
-| AI features MVP | Feb 28 | 🔄 In Progress (Devil's Advocate + Audience Translation done, Voice Mirroring pending) |
-| Structured input complete | Mar 3 | ⏳ Planned |
+| AI features MVP | Feb 28 | ✅ Complete (Devil's Advocate + Audience Translation + Voice Mirroring) |
+| Structured input complete | Mar 3 | 🔄 In Progress (templates done, server drafts + resume pending) |
 | SPRIND demo ready | Mar 4 | ⏳ Planned |
 | Government pilot ready | Mar 15 | ⏳ Planned |
 
