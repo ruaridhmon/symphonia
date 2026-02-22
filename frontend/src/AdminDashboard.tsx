@@ -1,72 +1,94 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
-import { getForms, FormListItem } from './api/forms';
-import { ApiError } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
-import { useToast } from './components/Toast';
-import { useDocumentTitle } from './hooks/useDocumentTitle';
-import { useCopyToClipboard } from './hooks/useCopyToClipboard';
-import { Plus, Search, Copy, Check, X, FileText } from 'lucide-react';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
  *
  * Rendered inside PageLayout via Dashboard component.
- * Uses centralised API client for all requests.
  */
 export default function AdminDashboard() {
-  useDocumentTitle('Admin Dashboard');
   const { token } = useAuth();
-  const { toastError, toastSuccess } = useToast();
   
-  const [forms, setForms] = useState<FormListItem[]>([]);
+  const [forms, setForms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [codeCopied, copyCode] = useCopyToClipboard();
+  const [newFormTitle, setNewFormTitle] = useState('');
+  const [newQuestions, setNewQuestions] = useState(['']);
+  const [search, setSearch] = useState('');
 
-  // Filter forms by search query
-  const filteredForms = useMemo(() => {
-    if (!searchQuery.trim()) return forms;
-    const q = searchQuery.toLowerCase().trim();
-    return forms.filter(
-      f =>
-        f.title.toLowerCase().includes(q) ||
-        f.join_code?.toLowerCase().includes(q)
-    );
-  }, [forms, searchQuery]);
-
-  const fetchForms = useCallback(async () => {
+  const fetchForms = () => {
     if (!token) {
       setLoading(false);
       return;
     }
     setLoading(true);
     setError(null);
-    try {
-      const data = await getForms();
-      setForms(Array.isArray(data) ? data : []);
-    } catch (err) {
-      if (err instanceof ApiError) {
-        if (err.status === 401) return; // client.ts handles redirect
-        if (err.status === 403) {
-          setError('Admin access required to view forms.');
-        } else {
-          setError(`Failed to load forms (HTTP ${err.status})`);
+    fetch(`${API_BASE_URL}/forms`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => {
+        if (!r.ok) {
+          if (r.status === 401) {
+            throw new Error('Session expired. Please log in again.');
+          } else if (r.status === 403) {
+            throw new Error('Admin access required to view forms.');
+          }
+          throw new Error(`Failed to load forms (HTTP ${r.status})`);
         }
-      } else {
-        setError('Failed to load forms. Please check your connection.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
+        return r.json();
+      })
+      .then(d => {
+        setForms(Array.isArray(d) ? d : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('[AdminDashboard] Failed to load forms:', err);
+        setError(err.message || 'Failed to load forms');
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
     fetchForms();
-  }, [fetchForms]);
+  }, [token]);
+
+  const createForm = async () => {
+    const res = await fetch(`${API_BASE_URL}/create_form`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title: newFormTitle,
+        questions: newQuestions.filter(q => q.trim() !== ''),
+        allow_join: true,
+        join_code: String(Math.floor(10000 + Math.random() * 90000)),
+      }),
+    });
+    if (!res.ok) {
+      alert(`Save failed: ${res.status}`);
+      return;
+    }
+
+    const created = await res.json();
+    setForms(prev => [...prev, created]);
+    setNewFormTitle('');
+    setNewQuestions(['']);
+  };
+
+  /* ── Filtered forms for search ── */
+  const filteredForms = forms.filter(f => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      (f.title && f.title.toLowerCase().includes(q)) ||
+      (f.join_code && String(f.join_code).toLowerCase().includes(q))
+    );
+  });
 
   if (loading) {
     return (
@@ -84,10 +106,10 @@ export default function AdminDashboard() {
         {/* ── Page heading ── */}
         <div className="mb-6 sm:mb-8">
           <h1
-            className="text-2xl font-semibold tracking-tight"
+            className="text-2xl font-bold tracking-tight"
             style={{ color: 'var(--foreground)' }}
           >
-            Dashboard
+            Admin Dashboard
           </h1>
           <p
             className="text-sm mt-1"
@@ -100,358 +122,562 @@ export default function AdminDashboard() {
         {/* ── Error banner ── */}
         {error && (
           <div
-            className="rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            className="rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
             style={{
-              backgroundColor: 'var(--muted)',
-              border: '1px solid var(--border)',
+              backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+              border: '1px solid var(--destructive)',
+              color: 'var(--destructive)',
             }}
           >
-            <div className="flex items-center gap-3">
-              <span style={{ color: 'var(--destructive)', fontSize: '1.25rem' }}>⚠</span>
-              <span className="text-sm" style={{ color: 'var(--foreground)' }}>{error}</span>
-            </div>
-            <LoadingButton
-              variant="accent"
-              size="sm"
+            <span className="text-sm font-medium">{error}</span>
+            <button
+              type="button"
               onClick={fetchForms}
-            >
-              Retry
-            </LoadingButton>
-          </div>
-        )}
-
-        {/* ── Header with Create button ── */}
-        <div className="flex items-center justify-between mb-6">
-          <h2
-            className="text-lg font-semibold"
-            style={{ color: 'var(--foreground)' }}
-          >
-            Your Consultations
-          </h2>
-          <Link to="/admin/form/new">
-            <LoadingButton variant="accent" size="md">
-              <Plus size={18} className="mr-1.5" />
-              New Consultation
-            </LoadingButton>
-          </Link>
-        </div>
-
-        {/* ── Empty state ── */}
-        {forms.length === 0 && !error && (
-          <div
-            className="rounded-lg p-12 text-center"
-            style={{
-              backgroundColor: 'var(--card)',
-              border: '1px solid var(--border)',
-              boxShadow: 'var(--card-shadow, none)',
-            }}
-          >
-            <div
-              className="mx-auto mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full"
+              className="self-start sm:self-auto px-3 py-1.5 rounded-lg text-sm font-medium"
               style={{
-                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                backgroundColor: 'var(--destructive)',
+                color: '#ffffff',
               }}
             >
-              <FileText size={32} style={{ color: 'var(--accent)' }} />
-            </div>
-            <h3
-              className="text-lg font-semibold mb-2"
-              style={{ color: 'var(--foreground)' }}
-            >
-              No consultations yet
-            </h3>
-            <p
-              className="text-sm mb-6 max-w-sm mx-auto"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              Create your first consultation to get started collecting expert insights with the Delphi method.
-            </p>
-            <Link to="/admin/form/new">
-              <LoadingButton variant="accent" size="md">
-                <Plus size={18} className="mr-1.5" />
-                Create First Consultation
-              </LoadingButton>
-            </Link>
+              Retry
+            </button>
           </div>
         )}
 
-        {/* duplicate empty state removed */}
+        {/* ── Create form card ── */}
+        <div
+          className="rounded-lg p-4 sm:p-6 mb-6 sm:mb-8"
+          style={{
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderLeft: '3px solid var(--accent)',
+            boxShadow: 'var(--card-shadow, none)',
+          }}
+        >
+          <h2
+            className="text-lg font-semibold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            ✨ Create a New Form
+          </h2>
+          <div className="space-y-1.5 mb-4">
+            <label
+              className="block text-sm font-medium"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Form title
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. AI in Education: Risks & Opportunities"
+              value={newFormTitle}
+              onChange={e => setNewFormTitle(e.target.value)}
+              className="w-full rounded-lg px-3 py-2.5 text-base"
+              style={{
+                border: '1px solid var(--input)',
+                backgroundColor: 'var(--background)',
+                color: 'var(--foreground)',
+                fontWeight: 500,
+              }}
+            />
+          </div>
+          {newQuestions.map((q, i) => (
+            <input
+              key={i}
+              type="text"
+              placeholder={`Question ${i + 1}`}
+              value={q}
+              onChange={e => {
+                const updated = [...newQuestions];
+                updated[i] = e.target.value;
+                setNewQuestions(updated);
+              }}
+              className="w-full rounded-lg px-3 py-2 mb-2"
+              style={{
+                border: '1px solid var(--input)',
+                backgroundColor: 'var(--background)',
+                color: 'var(--foreground)',
+              }}
+            />
+          ))}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 mt-3">
+            <button
+              type="button"
+              onClick={() => setNewQuestions([...newQuestions, ''])}
+              className="text-sm w-fit px-3 py-1.5 rounded-lg font-medium transition-colors"
+              style={{
+                color: 'var(--accent)',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 8%, transparent)'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              + Add question
+            </button>
+            <LoadingButton
+              variant="accent"
+              size="md"
+              onClick={createForm}
+            >
+              Save Form
+            </LoadingButton>
+          </div>
+        </div>
 
-        {/* ── Existing forms table ── */}
+        {/* ── Existing forms ── */}
         {forms.length > 0 && (
           <div
-            className="rounded-lg p-4 sm:p-6"
+            className="rounded-lg overflow-hidden"
             style={{
               backgroundColor: 'var(--card)',
               border: '1px solid var(--border)',
               boxShadow: 'var(--card-shadow, none)',
             }}
           >
-            <div className="flex flex-col gap-4 mb-4">
-              <div className="flex items-center justify-between">
-                <h2
-                  className="text-lg font-semibold"
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  Existing Forms
-                </h2>
-                <span
-                  className="text-xs font-medium px-2 py-1 rounded-full"
-                  style={{
-                    backgroundColor: 'var(--muted)',
-                    color: 'var(--muted-foreground)',
-                  }}
-                >
-                  {filteredForms.length === forms.length
-                    ? `${forms.length} form${forms.length !== 1 ? 's' : ''}`
-                    : `${filteredForms.length} of ${forms.length}`}
-                </span>
-              </div>
-
-              {/* Search bar */}
-              {forms.length > 3 && (
-                <div className="relative">
-                  <Search
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  />
-                  <input
-                    type="search"
-                    placeholder="Search forms by title or code…"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-9 py-2 rounded-lg text-sm"
+            {/* Section header + search */}
+            <div
+              className="p-4 sm:p-6 pb-0 sm:pb-0"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                {/* Left: title + count badge */}
+                <div className="flex items-center gap-3">
+                  <h2
+                    className="text-lg font-semibold"
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    Existing Forms
+                  </h2>
+                  <span
+                    className="inline-flex items-center justify-center text-xs font-bold px-2.5 py-0.5 rounded-full"
                     style={{
-                      border: '1px solid var(--input)',
-                      backgroundColor: 'var(--background)',
-                      color: 'var(--foreground)',
-                    }}
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                      style={{
-                        color: 'var(--muted-foreground)',
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0,
-                        display: 'flex',
-                      }}
-                      aria-label="Clear search"
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Desktop table */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead>
-                  <tr
-                    style={{
-                      backgroundColor: 'var(--muted)',
-                      color: 'var(--muted-foreground)',
-                      borderBottom: '2px solid var(--border)',
+                      backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                      color: 'var(--accent)',
+                      minWidth: '1.75rem',
                     }}
                   >
-                    <th className="p-3 text-xs font-medium text-left">Form Title</th>
-                    <th className="p-3 text-xs font-medium text-left">Join Code</th>
-                    <th className="p-3 text-xs font-medium text-left">Participants</th>
-                    <th className="p-3 text-xs font-medium text-left">Round</th>
-                    <th className="p-3 text-xs font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredForms.map((f) => (
-                    <tr
-                      key={f.id}
-                      className="admin-table-row"
-                      style={{ borderBottom: '1px solid var(--border)' }}
-                    >
-                      <td
-                        className="p-3 font-medium"
-                        style={{ color: 'var(--foreground)' }}
-                      >
-                        {f.title}
-                      </td>
-                      <td className="p-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            copyCode(f.join_code);
-                            toastSuccess(`Copied code: ${f.join_code}`);
-                          }}
-                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-all group"
-                          style={{
-                            backgroundColor: 'var(--muted)',
-                            color: 'var(--foreground)',
-                            border: '1px solid transparent',
-                            cursor: 'pointer',
-                            fontFamily: 'monospace',
-                          }}
-                          onMouseEnter={e => {
-                            e.currentTarget.style.borderColor = 'var(--accent)';
-                            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 8%, var(--muted))';
-                          }}
-                          onMouseLeave={e => {
-                            e.currentTarget.style.borderColor = 'transparent';
-                            e.currentTarget.style.backgroundColor = 'var(--muted)';
-                          }}
-                          title="Click to copy"
-                        >
-                          {f.join_code}
-                          {codeCopied ? (
-                            <Check size={12} style={{ color: 'var(--success)' }} />
-                          ) : (
-                            <Copy size={12} style={{ color: 'var(--muted-foreground)', opacity: 0.6 }} />
-                          )}
-                        </button>
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 rounded-full text-xs font-semibold"
-                          style={{
-                            backgroundColor: f.participant_count > 0
-                              ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
-                              : 'var(--muted)',
-                            color: f.participant_count > 0
-                              ? 'var(--accent)'
-                              : 'var(--muted-foreground)',
-                          }}
-                        >
-                          {f.participant_count}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-2 rounded-full text-xs font-medium"
-                          style={{
-                            backgroundColor: 'var(--muted)',
-                            color: 'var(--foreground)',
-                          }}
-                        >
-                          R{f.current_round}
-                        </span>
-                      </td>
-                      <td className="p-3 text-right space-x-3">
-                        <Link
-                          to={`/admin/form/${f.id}`}
-                          className="text-sm font-medium transition-colors"
-                          style={{ color: 'var(--muted-foreground)' }}
-                          onMouseEnter={e => e.currentTarget.style.color = 'var(--foreground)'}
-                          onMouseLeave={e => e.currentTarget.style.color = 'var(--muted-foreground)'}
-                        >
-                          Edit
-                        </Link>
-                        <Link
-                          to={`/admin/form/${f.id}/summary`}
-                          className="text-sm font-medium"
-                          style={{ color: 'var(--accent)' }}
-                        >
-                          Summary →
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    {forms.length}
+                  </span>
+                </div>
+
+                {/* Right: search input */}
+                <div
+                  className="relative w-full sm:w-72"
+                >
+                  {/* Search icon */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                    style={{
+                      width: '1rem',
+                      height: '1rem',
+                      color: 'var(--muted-foreground)',
+                    }}
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search forms by title or code…"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="w-full text-sm pl-9 pr-3"
+                    style={{
+                      height: '2.5rem',
+                      borderRadius: 'var(--radius)',
+                      border: '1px solid var(--input)',
+                      backgroundColor: 'var(--card)',
+                      color: 'var(--foreground)',
+                      outline: 'none',
+                    }}
+                    onFocus={e => {
+                      e.currentTarget.style.borderColor = 'var(--accent)';
+                      e.currentTarget.style.boxShadow = '0 0 0 2px rgba(37, 99, 235, 0.25)';
+                    }}
+                    onBlur={e => {
+                      e.currentTarget.style.borderColor = 'var(--input)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Empty search state */}
-            {filteredForms.length === 0 && searchQuery && (
-              <div className="text-center py-8">
-                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                  No forms match "<strong style={{ color: 'var(--foreground)' }}>{searchQuery}</strong>"
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="mt-2 text-sm font-medium"
-                  style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}
+            {/* ── Empty search state ── */}
+            {filteredForms.length === 0 && search && (
+              <div className="px-4 sm:px-6 py-12 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="mx-auto mb-3"
+                  style={{
+                    width: '2.5rem',
+                    height: '2.5rem',
+                    color: 'var(--muted-foreground)',
+                    opacity: 0.5,
+                  }}
                 >
-                  Clear search
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                  />
+                </svg>
+                <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
+                  No forms match "<span style={{ color: 'var(--foreground)' }}>{search}</span>"
+                </p>
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  Try a different title or join code
+                </p>
               </div>
             )}
 
-            {/* Mobile card list */}
-            <div className="sm:hidden space-y-3">
-              {filteredForms.map((f) => (
-                <div
-                  key={f.id}
-                  className="rounded-lg p-4"
-                  style={{
-                    backgroundColor: 'var(--muted)',
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  <div
-                    className="font-medium mb-2"
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    {f.title}
-                  </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-3"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        copyCode(f.join_code);
-                        toastSuccess(`Copied: ${f.join_code}`);
-                      }}
-                      className="inline-flex items-center gap-1"
+            {/* ── Desktop table ── */}
+            {filteredForms.length > 0 && (
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-sm text-left" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+                  <thead>
+                    <tr
                       style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: 'var(--muted-foreground)',
-                        fontSize: 'inherit',
-                        fontFamily: 'inherit',
-                        padding: 0,
+                        backgroundColor: 'var(--muted)',
                       }}
                     >
-                      Code:{' '}
-                      <code
-                        className="px-1.5 py-0.5 rounded text-xs"
+                      <th
+                        className="px-6 py-3 text-left"
                         style={{
-                          backgroundColor: 'var(--card)',
+                          color: 'var(--muted-foreground)',
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          borderBottom: '1px solid var(--border)',
+                        }}
+                      >
+                        Form Title
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left"
+                        style={{
+                          color: 'var(--muted-foreground)',
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          borderBottom: '1px solid var(--border)',
+                        }}
+                      >
+                        Join Code
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left"
+                        style={{
+                          color: 'var(--muted-foreground)',
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          borderBottom: '1px solid var(--border)',
+                        }}
+                      >
+                        Participants
+                      </th>
+                      <th
+                        className="px-6 py-3 text-left"
+                        style={{
+                          color: 'var(--muted-foreground)',
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          borderBottom: '1px solid var(--border)',
+                        }}
+                      >
+                        Round
+                      </th>
+                      <th
+                        className="px-6 py-3 text-right"
+                        style={{
+                          color: 'var(--muted-foreground)',
+                          fontSize: '0.6875rem',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          borderBottom: '1px solid var(--border)',
+                        }}
+                      >
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredForms.map((f: any, idx: number) => (
+                      <tr
+                        key={f.id}
+                        className="transition-colors duration-150"
+                        style={{
+                          borderBottom:
+                            idx < filteredForms.length - 1
+                              ? '1px solid var(--border)'
+                              : 'none',
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.backgroundColor = 'var(--muted)';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <td
+                          className="px-6 py-3.5 font-medium"
+                          style={{
+                            color: 'var(--foreground)',
+                            maxWidth: '20rem',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {f.title}
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <code
+                            className="inline-block px-2.5 py-1 rounded-md text-xs font-mono font-semibold"
+                            style={{
+                              backgroundColor: 'var(--muted)',
+                              color: 'var(--foreground)',
+                              border: '1px solid var(--border)',
+                              letterSpacing: '0.04em',
+                            }}
+                          >
+                            {f.join_code}
+                          </code>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span
+                            className="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 rounded-full text-xs font-bold"
+                            style={{
+                              backgroundColor:
+                                f.participant_count > 0
+                                  ? 'rgba(37, 99, 235, 0.1)'
+                                  : 'var(--muted)',
+                              color:
+                                f.participant_count > 0
+                                  ? 'var(--accent)'
+                                  : 'var(--muted-foreground)',
+                            }}
+                          >
+                            {f.participant_count}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span
+                            className="inline-flex items-center justify-center min-w-[2rem] h-6 px-2 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: 'var(--muted)',
+                              color: 'var(--foreground)',
+                            }}
+                          >
+                            R{f.current_round}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5 text-right">
+                          <div className="inline-flex items-center gap-1">
+                            <a
+                              href={`/admin/form/${f.id}`}
+                              className="inline-flex items-center px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors duration-150"
+                              style={{
+                                color: 'var(--muted-foreground)',
+                              }}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.color = 'var(--foreground)';
+                                e.currentTarget.style.backgroundColor = 'var(--muted)';
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.color = 'var(--muted-foreground)';
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                              }}
+                            >
+                              Edit
+                            </a>
+                            <a
+                              href={`/admin/form/${f.id}/summary`}
+                              className="inline-flex items-center px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors duration-150"
+                              style={{
+                                color: 'var(--accent)',
+                              }}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.08)';
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                              }}
+                            >
+                              Summary
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 16 16"
+                                fill="currentColor"
+                                style={{ width: '0.875rem', height: '0.875rem', marginLeft: '0.25rem' }}
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ── Mobile card list ── */}
+            {filteredForms.length > 0 && (
+              <div className="sm:hidden px-4 pb-4 space-y-3">
+                {filteredForms.map((f: any) => (
+                  <div
+                    key={f.id}
+                    className="rounded-lg overflow-hidden transition-colors duration-150"
+                    style={{
+                      backgroundColor: 'var(--background)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    {/* Card header */}
+                    <div
+                      className="px-4 py-3"
+                      style={{
+                        borderBottom: '1px solid var(--border)',
+                      }}
+                    >
+                      <div
+                        className="font-semibold text-sm leading-snug"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        {f.title}
+                      </div>
+                    </div>
+
+                    {/* Card body: metadata row */}
+                    <div className="px-4 py-3 flex items-center gap-3 flex-wrap">
+                      {/* Join code pill */}
+                      <code
+                        className="inline-block px-2 py-0.5 rounded text-xs font-mono font-semibold"
+                        style={{
+                          backgroundColor: 'var(--muted)',
                           color: 'var(--foreground)',
+                          border: '1px solid var(--border)',
+                          letterSpacing: '0.04em',
                         }}
                       >
                         {f.join_code}
                       </code>
-                      <Copy size={11} style={{ opacity: 0.5, marginLeft: 2 }} />
-                    </button>
-                    <span>Participants: {f.participant_count}</span>
-                    <span>Round: {f.current_round}</span>
-                  </div>
-                  <div className="flex gap-4">
-                    <Link
-                      to={`/admin/form/${f.id}`}
-                      className="text-sm"
-                      style={{ color: 'var(--accent)' }}
+
+                      {/* Participants pill */}
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+                        style={{
+                          backgroundColor:
+                            f.participant_count > 0
+                              ? 'rgba(37, 99, 235, 0.1)'
+                              : 'var(--muted)',
+                          color:
+                            f.participant_count > 0
+                              ? 'var(--accent)'
+                              : 'var(--muted-foreground)',
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                          style={{ width: '0.75rem', height: '0.75rem' }}
+                        >
+                          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
+                        </svg>
+                        {f.participant_count}
+                      </span>
+
+                      {/* Round pill */}
+                      <span
+                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                        style={{
+                          backgroundColor: 'var(--muted)',
+                          color: 'var(--foreground)',
+                        }}
+                      >
+                        R{f.current_round}
+                      </span>
+                    </div>
+
+                    {/* Card actions */}
+                    <div
+                      className="px-4 py-2.5 flex items-center gap-2"
+                      style={{
+                        borderTop: '1px solid var(--border)',
+                        backgroundColor: 'var(--muted)',
+                      }}
                     >
-                      Edit
-                    </Link>
-                    <Link
-                      to={`/admin/form/${f.id}/summary`}
-                      className="text-sm"
-                      style={{ color: 'var(--accent)' }}
-                    >
-                      Summary
-                    </Link>
+                      <a
+                        href={`/admin/form/${f.id}`}
+                        className="flex-1 text-center py-1.5 rounded-md text-sm font-medium transition-colors duration-150"
+                        style={{
+                          color: 'var(--muted-foreground)',
+                        }}
+                      >
+                        Edit
+                      </a>
+                      <div
+                        style={{
+                          width: '1px',
+                          height: '1.25rem',
+                          backgroundColor: 'var(--border)',
+                        }}
+                      />
+                      <a
+                        href={`/admin/form/${f.id}/summary`}
+                        className="flex-1 text-center py-1.5 rounded-md text-sm font-medium transition-colors duration-150"
+                        style={{
+                          color: 'var(--accent)',
+                        }}
+                      >
+                        Summary →
+                      </a>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {/* ── Footer with result count ── */}
+            {search && filteredForms.length > 0 && (
+              <div
+                className="px-4 sm:px-6 py-3 text-xs"
+                style={{
+                  borderTop: '1px solid var(--border)',
+                  color: 'var(--muted-foreground)',
+                }}
+              >
+                Showing {filteredForms.length} of {forms.length} form{forms.length !== 1 ? 's' : ''}
+              </div>
+            )}
           </div>
         )}
       </Container>
