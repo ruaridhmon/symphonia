@@ -6,7 +6,7 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
-import { BarChart3, Link2, MapPin, Sparkles } from 'lucide-react';
+import { BarChart3, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { getMe } from './api/auth';
@@ -497,10 +497,25 @@ export default function SummaryPage() {
 					visible={isGenerating}
 				/>
 
-				{/* Main grid — stacks on mobile */}
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-					{/* ── Main Content (2/3) ── */}
-					<div className="lg:col-span-2 space-y-4 sm:space-y-6">
+				{/* Floating sidebar toggle */}
+				<button
+					onClick={() => setSidebarOpen(v => !v)}
+					className="fixed z-50 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium shadow-lg transition-all"
+					style={{
+						right: sidebarOpen ? 'calc(20rem + 12px)' : '12px',
+						top: '4.75rem',
+						background: 'var(--card)',
+						border: '1px solid var(--border)',
+						color: 'var(--foreground)',
+					}}
+					title={sidebarOpen ? 'Hide panel' : 'Show panel'}
+				>
+					{sidebarOpen ? <X size={15} /> : <PanelRight size={15} />}
+					<span className="hidden sm:inline">{sidebarOpen ? 'Hide' : 'Controls'}</span>
+				</button>
+
+				{/* Main content — full width */}
+				<div className="space-y-4 sm:space-y-6" style={{ marginRight: sidebarOpen ? '21rem' : '0', transition: 'margin-right 0.2s ease' }}>
 						{/* Non-active round card */}
 						{selectedRound && !selectedRound.is_active && (
 							<RoundCard
@@ -667,9 +682,25 @@ export default function SummaryPage() {
 						/>
 					</div>
 
-					{/* ── Sidebar (1/3) ── */}
+					{/* ── Floating Sidebar ── */}
 					<div
-						className="lg:col-span-1 space-y-4 sm:space-y-4 lg:sticky lg:top-[4.5rem] lg:self-start lg:max-h-[calc(100vh-5.5rem)] lg:overflow-y-auto"
+						style={{
+							position: 'fixed',
+							right: 0,
+							top: '4.5rem',
+							width: '20rem',
+							height: 'calc(100vh - 4.5rem)',
+							overflowY: 'auto',
+							zIndex: 40,
+							borderLeft: '1px solid var(--border)',
+							background: 'var(--background)',
+							transform: sidebarOpen ? 'translateX(0)' : 'translateX(100%)',
+							transition: 'transform 0.2s ease',
+							padding: '1rem',
+							display: 'flex',
+							flexDirection: 'column',
+							gap: '1rem',
+						}}
 					>
 						<FormInfoCard form={form} activeRound={activeRound} />
 
@@ -726,7 +757,6 @@ export default function SummaryPage() {
 							onSelectRound={handleSelectRound}
 						/>
 					</div>
-				</div>
 			</main>
 
 			{/* Responses modal */}
