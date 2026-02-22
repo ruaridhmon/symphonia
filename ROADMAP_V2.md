@@ -128,8 +128,8 @@
 ## Phase 7: Government Readiness (Month 2)
 *Goal: Meet UK GDS/security requirements*
 
-- [ ] WCAG 2.2 AA accessibility audit
-- [ ] Keyboard navigation complete
+- [x] WCAG 2.2 AA accessibility audit (RouteAnnouncer, ARIA landmarks, table scope, form labels, sr-only utility, focus-visible rings)
+- [x] Keyboard navigation complete (global focus-visible rings, skip link, command palette ⌘K, proper button/link elements throughout)
 - [ ] Screen reader testing
 - [x] httpOnly cookies (XSS protection) — session_token cookie, JS-inaccessible, SameSite=Lax
 - [x] CSRF protection — double-submit cookie pattern, X-CSRF-Token header validation on state-changing requests
