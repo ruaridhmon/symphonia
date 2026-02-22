@@ -42,11 +42,11 @@
 - [x] Dashboard = list only
 - [x] Create Consultation = separate page
 
-### 2.3 Remaining UX
+### 2.3 Remaining UX ✅ DONE
 - [x] Remove duplicate empty states in AdminDashboard (was rendering twice)
 - [x] Loading states for all async actions (ActionsCard: Save, Download now have spinners)
 - [x] Error recovery — SummaryPage load failure now shows retry + back-to-dashboard
-- [x] Empty states with helpful CTAs (AdminDashboard, UserDashboard already had good ones)
+- [x] Empty states with helpful CTAs (AdminDashboard zero-forms empty state + UserDashboard)
 
 ---
 
@@ -114,7 +114,7 @@
 - [x] API client abstraction
 - [x] SummaryPage decomposition (1414→672 lines)
 - [x] Code splitting (1.3MB → 18KB initial)
-- [x] TypeScript zero errors
+- [x] TypeScript zero errors (re-verified Feb 22 — fixed VersionCompare, ExportPanel, RoundCard)
 - [x] React.memo for heavy components
 
 ### 6.2 Future
@@ -130,7 +130,8 @@
 
 - [x] WCAG 2.2 AA accessibility audit (RouteAnnouncer, ARIA landmarks, table scope, form labels, sr-only utility, focus-visible rings)
 - [x] Keyboard navigation complete (global focus-visible rings, skip link, command palette ⌘K, proper button/link elements throughout)
-- [ ] Screen reader testing
+- [x] Screen reader foundations (useDocumentTitle on all pages, label/htmlFor associations, sr-only labels, aria-label on inputs)
+- [ ] Screen reader testing (manual VoiceOver pass)
 - [x] httpOnly cookies (XSS protection) — session_token cookie, JS-inaccessible, SameSite=Lax
 - [x] CSRF protection — double-submit cookie pattern, X-CSRF-Token header validation on state-changing requests
 - [x] Audit logging for admin actions (AuditLog model + /audit-log endpoint + wired into key routes)
