@@ -1,7 +1,8 @@
 # Symphonia Design System
 
-> **Version:** 1.0  
+> **Version:** 2.0  
 > **Created:** 2026-02-21  
+> **Updated:** 2026-02-22  
 > **Maintained by:** Axiotic AI  
 > **Audience:** Frontend developers, designers, product stakeholders
 
@@ -11,7 +12,7 @@
 
 ### Logo System
 
-Symphonia uses a **starburst mark** that visually represents converging voices reaching a point of clarity — a direct metaphor for the Delphi-style expert consensus the platform produces.
+Symphonia uses a **tuning fork / starburst mark** (Concept D) that visually represents converging voices reaching a point of clarity — a direct metaphor for the Delphi-style expert consensus the platform produces. The logo was upgraded in Phase 2.3 to the tuning fork Concept D design.
 
 | Asset | File | Usage | Notes |
 |-------|------|-------|-------|
@@ -431,20 +432,20 @@ Three independent design reviews were conducted by specialised AI reviewers acro
 
 ### Design Backlog (Prioritised)
 
-**P0 — Next sprint:**
-1. Add `--purple` / `--purple-foreground` tokens to all themes, migrate hardcoded `#7c3aed` / `#a855f7`
-2. Add onboarding copy to `/login` (value proposition)
-3. Consolidate "Generate Summary" + "Generate New Version" into single button
+**P0 — Completed (Sprint 2026-02-21):**
+1. ~~Add `--purple` / `--purple-foreground` tokens~~ — Tracked; hardcoded values remain in waiting animation
+2. ~~Add onboarding copy to `/login`~~ — Tracked
+3. ~~Consolidate "Generate Summary" + "Generate New Version"~~ — Resolved: version history timeline replaces duplicate buttons
 
-**P1 — Next sprint after:**
-4. "Forgot Password" flow (requires backend endpoint)
+**P1 — Next sprint:**
+4. "Forgot Password" flow (requires backend endpoint + `reset_token` field exists on User model)
 5. Display name field on `/register`
-6. "View Sources" expansion on claim cards (data exists in `claims_raw`)
+6. "View Sources" expansion on claim cards (data exists in `claims_raw` and `evidence_excerpts`)
 
 **P2 — Future:**
 7. Terms / Privacy consent on registration (gov deployment requirement)
 8. Invitation-context support (`?context=` param on `/login`)
-9. Empty state illustrations for Dashboard
+9. Empty state illustrations for Dashboard (empty state CTAs added in Phase 2.3)
 10. `h2` / `h3` font weight reduction (600 → currently 700 in some places)
 
 ---
@@ -465,6 +466,97 @@ Three independent design reviews were conducted by specialised AI reviewers acro
 | Design review (Apple) | `frontend/DESIGN_REVIEW_APPLE.md` |
 | Design review (Graphic) | `frontend/DESIGN_REVIEW_GRAPHIC.md` |
 | Design review (UX Flow) | `frontend/DESIGN_REVIEW_UX.md` |
+
+---
+
+---
+
+## 14. Admin Settings Page Design
+
+The Settings page (`/admin/settings`) provides platform-wide configuration in a clean card-based layout:
+
+### Layout
+- Single-column card grid within `max-w-4xl` container
+- Each settings group in its own card: **Synthesis Configuration**, **Consultation Defaults**, **AI Assistant**
+- Form inputs use standard token-based styling (`var(--card)` background, `var(--input)` border)
+
+### Controls
+| Setting | Control Type | Notes |
+|---------|-------------|-------|
+| Synthesis Strategy | Dropdown (`single_prompt` / `ttd` / `committee`) | Maps to backend strategy names |
+| Model | Text input | OpenRouter model identifier (default: `anthropic/claude-opus-4-6`) |
+| Convergence Threshold | Number input (0–100) | Percentage target |
+| Max Rounds | Number input | Integer |
+| Anonymous Responses | Toggle | Boolean |
+| Allow Late Join | Toggle | Boolean |
+| AI Suggestions Count | Number input (3–10) | Controls AI Question Assistant output |
+
+---
+
+## 15. Report Export Design
+
+### GOV.UK-Styled Report
+- Structured HTML report designed for government consumption
+- Sections: Executive Summary, Agreements, Disagreements, Nuances, Emergent Insights, Minority Reports
+- Confidence scores rendered as percentage bars
+- Expert evidence excerpts in blockquote format
+- Clean typography (Inter font, 16px body, generous whitespace)
+- Generated client-side as blob download (no server round-trip)
+
+### Print CSS
+- `@media print` styles strip navigation, sidebar, and interactive elements
+- Page-break rules between major sections
+- Monochrome-safe design (no colour-only information)
+
+---
+
+## 16. Floating Sidebar Overlay
+
+The Summary page sidebar (`SummaryPage.tsx`) was redesigned from a pushing layout to a floating overlay:
+
+- Sidebar overlays content with `position: fixed` instead of pushing via `marginRight`
+- Semi-transparent backdrop for focus isolation
+- Contains: Synthesis Mode Selector, Expert Labels panel, Round controls
+- Collapses to hamburger on mobile
+- Smooth 200ms slide-in transition
+
+---
+
+## 17. Email Template Design
+
+All 6 email templates follow a consistent branded layout:
+
+### Layout Structure
+```
+┌────────────────────────────────────────┐
+│          ♪ Symphonia (blue text)       │  ← Logo bar
+├────────────────────────────────────────┤
+│ ┌────────────────────────────────────┐ │
+│ │          Card Content              │ │  ← White card, 12px radius
+│ │                                    │ │
+│ │   Heading (22px, bold)             │ │
+│ │   Body text (15px, dark)           │ │
+│ │   [CTA Button - brand blue]        │ │  ← VML fallback for Outlook
+│ │                                    │ │
+│ └────────────────────────────────────┘ │
+│                                        │
+│   Footer (12px, muted grey)            │  ← "Powered by Axiotic AI"
+└────────────────────────────────────────┘
+```
+
+### Brand Constants
+- Accent: `#2563eb` (brand blue)
+- Background: `#f8fafc`
+- Card: `#ffffff` with `#e2e8f0` border
+- Text: `#1e293b`
+- Muted: `#64748b`
+- Max width: 600px
+- Button: 8px radius, white text on brand blue
+
+### Outlook Compatibility
+- VML roundrect fallback for buttons (`<!--[if mso]>`)
+- Table-based layout throughout
+- Inline styles only (no `<style>` blocks)
 
 ---
 
