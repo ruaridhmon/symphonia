@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
@@ -11,12 +12,11 @@ import { LoadingButton, SkeletonDashboard } from './components';
  */
 export default function AdminDashboard() {
   const { token } = useAuth();
-  
+  const navigate = useNavigate();
+
   const [forms, setForms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newFormTitle, setNewFormTitle] = useState('');
-  const [newQuestions, setNewQuestions] = useState(['']);
   const [search, setSearch] = useState('');
 
   const fetchForms = () => {
@@ -55,30 +55,6 @@ export default function AdminDashboard() {
     fetchForms();
   }, [token]);
 
-  const createForm = async () => {
-    const res = await fetch(`${API_BASE_URL}/create_form`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        title: newFormTitle,
-        questions: newQuestions.filter(q => q.trim() !== ''),
-        allow_join: true,
-        join_code: String(Math.floor(10000 + Math.random() * 90000)),
-      }),
-    });
-    if (!res.ok) {
-      alert(`Save failed: ${res.status}`);
-      return;
-    }
-
-    const created = await res.json();
-    setForms(prev => [...prev, created]);
-    setNewFormTitle('');
-    setNewQuestions(['']);
-  };
 
   /* ── Filtered forms for search ── */
   const filteredForms = forms.filter(f => {
@@ -103,21 +79,7 @@ export default function AdminDashboard() {
   return (
     <section className="flex-1 py-6 sm:py-8">
       <Container size="lg">
-        {/* ── Page heading ── */}
-        <div className="mb-6 sm:mb-8">
-          <h1
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--foreground)' }}
-          >
-            Admin Dashboard
-          </h1>
-          <p
-            className="text-sm mt-1"
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            Create and manage your Delphi consultation forms
-          </p>
-        </div>
+
 
         {/* ── Error banner ── */}
         {error && (
@@ -144,86 +106,26 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── Create form card ── */}
-        <div
-          className="rounded-lg p-4 sm:p-6 mb-6 sm:mb-8"
-          style={{
-            backgroundColor: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderLeft: '3px solid var(--accent)',
-            boxShadow: 'var(--card-shadow, none)',
-          }}
-        >
-          <h2
-            className="text-lg font-semibold mb-4"
-            style={{ color: 'var(--foreground)' }}
-          >
-            ✨ Create a New Form
-          </h2>
-          <div className="space-y-1.5 mb-4">
-            <label
-              className="block text-sm font-medium"
+        {/* ── Create form CTA ── */}
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <div>
+            <h1
+              className="text-2xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
-              Form title
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. AI in Education: Risks & Opportunities"
-              value={newFormTitle}
-              onChange={e => setNewFormTitle(e.target.value)}
-              className="w-full rounded-lg px-3 py-2.5 text-base"
-              style={{
-                border: '1px solid var(--input)',
-                backgroundColor: 'var(--background)',
-                color: 'var(--foreground)',
-                fontWeight: 500,
-              }}
-            />
+              Admin Dashboard
+            </h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+              Create and manage your Delphi consultation forms
+            </p>
           </div>
-          {newQuestions.map((q, i) => (
-            <input
-              key={i}
-              type="text"
-              placeholder={`Question ${i + 1}`}
-              value={q}
-              onChange={e => {
-                const updated = [...newQuestions];
-                updated[i] = e.target.value;
-                setNewQuestions(updated);
-              }}
-              className="w-full rounded-lg px-3 py-2 mb-2"
-              style={{
-                border: '1px solid var(--input)',
-                backgroundColor: 'var(--background)',
-                color: 'var(--foreground)',
-              }}
-            />
-          ))}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 mt-3">
-            <button
-              type="button"
-              onClick={() => setNewQuestions([...newQuestions, ''])}
-              className="text-sm w-fit px-3 py-1.5 rounded-lg font-medium transition-colors"
-              style={{
-                color: 'var(--accent)',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 8%, transparent)'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              + Add question
-            </button>
-            <LoadingButton
-              variant="accent"
-              size="md"
-              onClick={createForm}
-            >
-              Save Form
-            </LoadingButton>
-          </div>
+          <LoadingButton
+            variant="accent"
+            size="md"
+            onClick={() => navigate('/admin/forms/new')}
+          >
+            + New Form
+          </LoadingButton>
         </div>
 
         {/* ── Existing forms ── */}

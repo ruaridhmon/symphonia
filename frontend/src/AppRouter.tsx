@@ -16,7 +16,8 @@ const FormPage     = lazy(() => import('./FormPage'));
 const Login        = lazy(() => import('./Login'));
 const Register     = lazy(() => import('./Register'));
 const Atlas        = lazy(() => import('./Atlas'));
-const NotFoundPage = lazy(() => import('./NotFoundPage'));
+const NotFoundPage  = lazy(() => import('./NotFoundPage'));
+const AdminFormNew  = lazy(() => import('./AdminFormNew'));
 
 /**
  * Application routes organised by layout shell.
@@ -124,6 +125,14 @@ export default function Router() {
         {/* ── Admin pages (shared page shell, admin-only) ── */}
         <Route element={<PrivateRoute isAdminRoute />}>
           <Route element={<PageLayout />}>
+            <Route
+              path="/admin/forms/new"
+              element={
+                <ErrorBoundary fallbackTitle="New Form Error">
+                  <AdminFormNew />
+                </ErrorBoundary>
+              }
+            />
             <Route
               path="/admin/form/:id"
               element={
