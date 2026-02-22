@@ -85,8 +85,8 @@
 
 ### 4.2 Auto-Save ✅ DONE
 - [x] Debounced localStorage save
-- [ ] Server-side draft persistence
-- [ ] Resume incomplete responses
+- [x] Server-side draft persistence (Draft model + PUT/GET/DELETE endpoints + 2s debounced auto-save)
+- [x] Resume incomplete responses (server draft restored on page load + dismissable banner)
 
 ---
 
@@ -145,7 +145,7 @@
 |-----------|--------|--------|
 | Design polish complete | Feb 24 | 🔄 In Progress |
 | AI features MVP | Feb 28 | ✅ Complete (Devil's Advocate + Audience Translation + Voice Mirroring) |
-| Structured input complete | Mar 3 | 🔄 In Progress (templates done, server drafts + resume pending) |
+| Structured input complete | Mar 3 | ✅ Complete (templates + server drafts + resume) |
 | SPRIND demo ready | Mar 4 | ⏳ Planned |
 | Government pilot ready | Mar 15 | ⏳ Planned |
 
