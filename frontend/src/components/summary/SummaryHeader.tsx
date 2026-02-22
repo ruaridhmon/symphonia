@@ -28,14 +28,11 @@ export default function SummaryHeader({ email, viewers, onLogout }: Props) {
             className="flex items-center gap-2 sm:gap-3 min-w-0 cursor-pointer"
             onClick={() => navigate('/')}
           >
-            <div
-              className="flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, var(--accent), var(--accent-hover))',
-              }}
-            >
-              <span className="text-sm" role="img" aria-label="Symphonia">🎵</span>
-            </div>
+            <img
+              src="/logo-mark.png"
+              alt="Symphonia"
+              className="h-7 w-auto flex-shrink-0"
+            />
             <div className="min-w-0">
               <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-tight">
                 Admin Workspace

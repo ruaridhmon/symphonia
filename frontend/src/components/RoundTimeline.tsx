@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { CheckCircle2, MessageSquare, BarChart3, HelpCircle } from 'lucide-react';
+import { CheckCircle2, Users, TrendingUp, ClipboardList } from 'lucide-react';
 import type { Round } from '../types/summary';
 
 export type { Round };
@@ -224,7 +224,7 @@ export default function RoundTimeline({
               {/* Stats row */}
               <div className="round-card-v2-stats">
                 <div className="round-card-v2-stat">
-                  <span className="round-card-v2-stat-icon"><MessageSquare size={14} style={{ color: 'var(--muted-foreground)' }} /></span>
+                  <span className="round-card-v2-stat-icon"><Users size={14} style={{ color: 'var(--muted-foreground)' }} /></span>
                   <span className="round-card-v2-stat-value">
                     {round.response_count ?? 0}
                   </span>
@@ -232,7 +232,7 @@ export default function RoundTimeline({
                 </div>
 
                 <div className="round-card-v2-stat">
-                  <span className="round-card-v2-stat-icon"><BarChart3 size={14} style={{ color: 'var(--accent)' }} /></span>
+                  <span className="round-card-v2-stat-icon"><TrendingUp size={14} style={{ color: 'var(--accent)' }} /></span>
                   <span
                     className="round-card-v2-stat-value"
                     style={{ color: convergenceColor(round.convergence_score) }}
@@ -243,7 +243,7 @@ export default function RoundTimeline({
                 </div>
 
                 <div className="round-card-v2-stat">
-                  <span className="round-card-v2-stat-icon"><HelpCircle size={14} style={{ color: 'var(--muted-foreground)' }} /></span>
+                  <span className="round-card-v2-stat-icon"><ClipboardList size={14} style={{ color: 'var(--muted-foreground)' }} /></span>
                   <span className="round-card-v2-stat-value">
                     {round.questions?.length ?? 0}
                   </span>
