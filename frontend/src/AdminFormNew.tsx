@@ -177,19 +177,62 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
           <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 4 }}>
             How Symphonia augments this process
           </h3>
-          <p style={{ fontSize: '0.83rem', color: 'var(--muted-foreground)', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+          <p style={{ fontSize: '0.83rem', color: 'var(--muted-foreground)', lineHeight: 1.6, margin: '0 0 14px 0' }}>
             Symphonia keeps the Delphi principles intact — anonymity, independent response, iterative
             refinement — and replaces the bottleneck: manual facilitation.
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+          {/* Core augmentations */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
             {[
-              { label: 'AI synthesis', desc: 'Instead of a facilitator spending days reading and summarising, AI analyses all responses in seconds — identifying convergence, surfacing minority views, and preserving nuance.' },
-              { label: 'AI-suggested follow-up questions', desc: 'After each synthesis, Symphonia can suggest targeted questions for the next round based on what the analysis reveals. The admin reviews, edits, or replaces them — full automation is available as an option, but the facilitator stays in control.' },
-              { label: 'Convergence scoring', desc: 'Each round is scored for how much expert opinion is converging. You can see at a glance whether more rounds are needed.' },
-              { label: 'Speed', desc: 'A traditional Delphi takes weeks per round. Symphonia compresses this to hours — without sacrificing rigour.' },
+              { label: 'AI synthesis', desc: 'Instead of a facilitator spending days reading and summarising, AI analyses all responses in minutes — identifying convergence, surfacing minority views, and preserving nuance that would otherwise be lost.' },
+              { label: 'Convergence scoring', desc: 'Each round is automatically scored for how much expert opinion is converging. You can see at a glance whether another round is warranted.' },
+              { label: 'Suggested follow-up questions', desc: 'After synthesis, Symphonia can suggest targeted questions for the next round. The admin reviews, edits, or replaces them — full automation is available but the facilitator stays in control.' },
+              { label: 'Speed', desc: 'A traditional Delphi takes weeks per round due to manual synthesis. Symphonia compresses this to hours — without sacrificing rigour.' },
             ].map((item, i) => (
               <div key={i} style={{ fontSize: '0.83rem', lineHeight: 1.6, display: 'flex', gap: 10 }}>
-                <span style={{ color: 'var(--accent)', fontWeight: 600, flexShrink: 0 }}>+</span>
+                <span style={{ color: 'var(--accent)', fontWeight: 700, flexShrink: 0 }}>+</span>
+                <span style={{ color: 'var(--muted-foreground)' }}>
+                  <strong style={{ color: 'var(--foreground)' }}>{item.label}:</strong> {item.desc}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Analysis tools */}
+          <p style={{ fontSize: '0.83rem', fontWeight: 600, color: 'var(--foreground)', margin: '0 0 8px 0' }}>
+            Analysis tools
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+            {[
+              { label: 'Structured Analysis', desc: 'The synthesis is broken into structured sections — key findings, areas of agreement, areas of tension, and open questions — making it easy to navigate complex expert opinion.' },
+              { label: 'Consensus Heatmap', desc: 'A visual matrix showing where experts align and where they diverge, question by question. Spots of red reveal the sharpest disagreements worth probing further.' },
+              { label: 'Expert Cross-Analysis', desc: 'A cross-reference view showing how each expert's position relates to others — surfacing which experts are outliers, which are anchors, and where surprising alignments exist.' },
+              { label: 'Emergent Insights', desc: 'AI identifies patterns, themes, and connections that don't appear in any single response — ideas that only become visible when the full expert panel is considered together.' },
+              { label: 'Expert Voice Mirroring', desc: 'Each expert's response is available in its original form or as an AI-clarified version that improves readability while preserving meaning exactly. Toggle between them at any time.' },
+              { label: 'Version History', desc: 'Every synthesis is versioned. You can compare how the expert consensus has evolved across rounds — and revert to any earlier synthesis if needed.' },
+            ].map((item, i) => (
+              <div key={i} style={{ fontSize: '0.83rem', lineHeight: 1.6, display: 'flex', gap: 10 }}>
+                <span style={{ color: 'var(--accent)', fontWeight: 700, flexShrink: 0 }}>◆</span>
+                <span style={{ color: 'var(--muted-foreground)' }}>
+                  <strong style={{ color: 'var(--foreground)' }}>{item.label}:</strong> {item.desc}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Synthesis strategies */}
+          <p style={{ fontSize: '0.83rem', fontWeight: 600, color: 'var(--foreground)', margin: '0 0 8px 0' }}>
+            Synthesis strategies
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              { label: 'Simple', desc: 'A single AI pass over all responses. Fast, clear, good for most consultations.' },
+              { label: 'Committee', desc: 'Multiple AI reviewers synthesise independently, then an integrator resolves disagreements between the syntheses. More thorough — catches things a single pass misses.' },
+              { label: 'Test-Time Diffusion (TTD)', desc: 'An advanced iterative synthesis — the AI generates and refines multiple candidate syntheses, selecting the most accurate convergence of expert views. Best for high-stakes consultations where precision matters most.' },
+            ].map((item, i) => (
+              <div key={i} style={{ fontSize: '0.83rem', lineHeight: 1.6, display: 'flex', gap: 10 }}>
+                <span style={{ color: 'var(--muted-foreground)', fontWeight: 700, flexShrink: 0 }}>→</span>
                 <span style={{ color: 'var(--muted-foreground)' }}>
                   <strong style={{ color: 'var(--foreground)' }}>{item.label}:</strong> {item.desc}
                 </span>
