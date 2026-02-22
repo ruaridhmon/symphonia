@@ -224,13 +224,13 @@ export default function UserDashboard() {
                 return (
                   <li
                     key={f.id}
-                    className="rounded-lg p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
+                    className="form-item rounded-lg p-4 relative overflow-hidden"
                     style={{
                       backgroundColor: 'var(--muted)',
                       border: '1px solid var(--border)',
                     }}
                   >
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1.5 pr-16">
                       <span style={{ color: 'var(--foreground)', fontWeight: 500 }}>{f.title}</span>
                       <div className="flex flex-wrap items-center gap-2">
                         {status?.roundNumber != null && (
@@ -270,13 +270,16 @@ export default function UserDashboard() {
                         ) : null}
                       </div>
                     </div>
-                    <LoadingButton
-                      variant="success"
-                      size="sm"
-                      onClick={() => navigate(`/form/${f.id}`)}
-                    >
-                      {status?.submitted ? 'Review' : 'Enter'}
-                    </LoadingButton>
+                    {/* Float-in action — slides in from right on hover */}
+                    <div className="form-item-action">
+                      <LoadingButton
+                        variant="success"
+                        size="sm"
+                        onClick={() => navigate(`/form/${f.id}`)}
+                      >
+                        {status?.submitted ? 'Review' : 'Enter'}
+                      </LoadingButton>
+                    </div>
                   </li>
                 );
               })}

@@ -3725,3 +3725,29 @@ html[data-theme="axiotic-dark"] .command-palette-overlay {
     margin: 1.5cm;
   }
 }
+
+/* ── Form item float-in action ── */
+.form-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.form-item-action {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-right: 1rem;
+  padding-left: 3rem;
+  background: linear-gradient(to right, transparent, var(--muted) 35%);
+  transform: translateX(110%);
+  opacity: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+
+.form-item:hover .form-item-action {
+  transform: translateX(0);
+  opacity: 1;
+}
