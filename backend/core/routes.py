@@ -3023,3 +3023,211 @@ def seed_atlas_data(
         "message": "Atlas data seeded",
         "forms": created_forms
     }
+
+
+# ---------------------------------------------------------
+# AI QUESTION ASSISTANT
+# ---------------------------------------------------------
+
+DELPHI_SYSTEM_PROMPT = """You are an expert facilitator of Delphi consultations. Symphonia is a structured multi-round expert consultation platform. Your job is to help design high-quality Delphi consultation forms.
+
+DELPHI METHODOLOGY:
+- Structured, iterative, multi-round process for converging expert opinion
+- Round 1: Open questions invite broad expert perspectives
+- Round 2+: Synthesis of prior responses + targeted follow-up questions
+- Goal: Surface areas of consensus AND genuine disagreement among experts
+- Key principle: Questions should generate DIVERSE responses, not confirm existing views
+
+WHAT MAKES A GOOD DELPHI QUESTION:
+1. Open-ended — cannot be answered yes/no
+2. Forward-looking — "What will...", "How should...", "What are the key..."
+3. Neutral framing — no loaded language, no implied correct answer
+4. Specific scope — one topic per question, not "What do you think about X and Y and Z?"
+5. Expert-relevant — requires domain knowledge to answer meaningfully
+6. Generative — likely to produce diverse, substantive responses across experts
+7. Right length — short enough to be clear, not so brief it's vague
+
+WHAT MAKES A BAD DELPHI QUESTION:
+- Binary: "Should we do X?" → experts just say yes/no
+- Leading: "Given the obvious risks of X, how should we..." → implies the answer
+- Too broad: "What do you think about AI?" → too vague, experts can't focus
+- Too narrow: "What is the exact percentage of..." → not opinion-worthy
+- Double-barrelled: "What are the risks and opportunities of X?" → split it
+
+When suggesting questions for a consultation titled "{title}", generate questions that would surface meaningful expert disagreement and produce a rich synthesis.
+
+Respond with JSON only. No prose outside JSON."""
+
+
+def _build_ai_suggest_user_prompt(title: str, description: str, questions: list[str], mode: str) -> str:
+    """Build the user prompt for the AI suggest endpoint based on mode."""
+    context = f'Consultation title: "{title}"'
+    if description:
+        context += f'\nDescription: "{description}"'
+    if questions and any(q.strip() for q in questions):
+        non_empty = [q for q in questions if q.strip()]
+        context += "\nExisting questions:\n" + "\n".join(f"  {i+1}. {q}" for i, q in enumerate(non_empty))
+
+    if mode == "suggest":
+        return (
+            f"{context}\n\n"
+            "Generate 3-5 new question suggestions for this consultation topic. "
+            "Each question should be distinct, open-ended, and designed to surface meaningful expert disagreement.\n\n"
+            'Respond with JSON only: { "suggestions": ["Q1?", "Q2?", ...] }'
+        )
+    elif mode == "critique":
+        return (
+            f"{context}\n\n"
+            "Review the existing questions and identify weaknesses. For each issue found, "
+            "explain what's wrong and rate severity.\n\n"
+            "Respond with JSON only: "
+            '{ "critique": [{ "question": "the question text", "issue": "what is wrong", "severity": "low|medium|high" }] }'
+        )
+    elif mode == "improve":
+        return (
+            f"{context}\n\n"
+            "Rewrite the existing questions to be better Delphi consultation questions. "
+            "For each, provide the original, the improved version, and the reason for the change.\n\n"
+            "Respond with JSON only: "
+            '{ "improved": [{ "original": "original question", "improved": "improved question", "reason": "why this is better" }] }'
+        )
+    else:
+        return f"{context}\n\nGenerate 3-5 question suggestions.\n\nRespond with JSON only."
+
+
+@router.post("/ai/suggest")
+def ai_suggest(
+    payload: dict,
+    user: User = Depends(get_current_user),
+):
+    """AI-powered question assistant for Delphi consultation form design.
+
+    Modes:
+    - suggest: Generate 3-5 new question suggestions
+    - critique: Review existing questions for weaknesses
+    - improve: Rewrite existing questions to be better
+    """
+    title = payload.get("title", "").strip()
+    description = payload.get("description", "").strip()
+    questions = payload.get("questions", [])
+    mode = payload.get("mode", "suggest")
+
+    if mode not in ("suggest", "critique", "improve"):
+        raise HTTPException(status_code=400, detail="Invalid mode. Must be 'suggest', 'critique', or 'improve'.")
+
+    if not title:
+        raise HTTPException(status_code=400, detail="Title is required.")
+
+    if mode in ("critique", "improve"):
+        non_empty = [q for q in questions if isinstance(q, str) and q.strip()]
+        if not non_empty:
+            raise HTTPException(status_code=400, detail=f"At least one question is required for '{mode}' mode.")
+
+    # Check for mock mode or missing API key
+    synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    if synthesis_mode == "mock" or not api_key:
+        # Return mock data for demo/testing
+        if mode == "suggest":
+            return {
+                "suggestions": [
+                    f"What are the most significant challenges facing {title.lower() if title else 'this domain'} in the next 5 years?",
+                    f"How should organisations adapt their strategies to address emerging trends in this area?",
+                    f"What key factors will determine success or failure in addressing these challenges?",
+                    f"Where do you see the greatest potential for innovation or disruption?",
+                ]
+            }
+        elif mode == "critique":
+            return {
+                "critique": [
+                    {
+                        "question": questions[0] if questions else "N/A",
+                        "issue": "This is a mock critique. Enable OPENROUTER_API_KEY for real AI analysis.",
+                        "severity": "medium",
+                    }
+                ]
+            }
+        else:
+            return {
+                "improved": [
+                    {
+                        "original": questions[0] if questions else "N/A",
+                        "improved": f"[Mock improvement] {questions[0] if questions else 'N/A'}",
+                        "reason": "This is a mock improvement. Enable OPENROUTER_API_KEY for real AI suggestions.",
+                    }
+                ]
+            }
+
+    # Build prompts
+    system_prompt = DELPHI_SYSTEM_PROMPT.replace("{title}", title)
+    user_prompt = _build_ai_suggest_user_prompt(title, description, questions, mode)
+    model = os.getenv("SYNTHESIS_MODEL", "google/gemini-2.5-flash-preview")
+
+    try:
+        openai_client = get_openai_client()
+        if not openai_client:
+            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+
+        completion = openai_client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
+
+        raw_output = completion.choices[0].message.content or ""
+
+        # Parse JSON response
+        cleaned = raw_output.strip()
+        if cleaned.startswith("```"):
+            lines = cleaned.split("\n")
+            lines = [l for l in lines if not l.strip().startswith("```")]
+            cleaned = "\n".join(lines)
+
+        parsed = json.loads(cleaned)
+
+        # Validate and return based on mode
+        if mode == "suggest":
+            suggestions = parsed.get("suggestions", [])
+            if not isinstance(suggestions, list):
+                raise ValueError("Invalid suggestions format")
+            return {"suggestions": suggestions}
+
+        elif mode == "critique":
+            critique = parsed.get("critique", [])
+            if not isinstance(critique, list):
+                raise ValueError("Invalid critique format")
+            # Validate each critique entry
+            validated = []
+            for item in critique:
+                severity = item.get("severity", "medium")
+                if severity not in ("low", "medium", "high"):
+                    severity = "medium"
+                validated.append({
+                    "question": item.get("question", ""),
+                    "issue": item.get("issue", ""),
+                    "severity": severity,
+                })
+            return {"critique": validated}
+
+        elif mode == "improve":
+            improved = parsed.get("improved", [])
+            if not isinstance(improved, list):
+                raise ValueError("Invalid improved format")
+            validated = []
+            for item in improved:
+                validated.append({
+                    "original": item.get("original", ""),
+                    "improved": item.get("improved", ""),
+                    "reason": item.get("reason", ""),
+                })
+            return {"improved": validated}
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Failed to parse AI response as JSON")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI suggestion failed: {e}")

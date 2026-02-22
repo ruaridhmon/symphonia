@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronUp, ChevronDown, Trash2, RefreshCw } from 'lucide-react';
+import { ChevronUp, ChevronDown, Trash2, RefreshCw, Sparkles, BookOpen, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
@@ -55,6 +55,634 @@ function ToggleSwitch({
   );
 }
 
+/* ── Delphi Guide Modal ───────────────────────────────────────── */
+
+function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null;
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem',
+      }}
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+        }}
+      />
+
+      {/* Modal panel */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'relative',
+          width: '100%',
+          maxWidth: 640,
+          maxHeight: '85vh',
+          overflowY: 'auto',
+          backgroundColor: 'var(--card)',
+          border: '1px solid var(--border)',
+          borderRadius: 12,
+          padding: '2rem',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        }}
+      >
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: 16,
+            right: 16,
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--muted-foreground)',
+            padding: 4,
+            borderRadius: 6,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          title="Close guide"
+        >
+          <X size={20} />
+        </button>
+
+        {/* Header */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <BookOpen size={22} style={{ color: 'var(--accent)' }} />
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--foreground)', margin: 0 }}>
+              Delphi Consultation Guide
+            </h2>
+          </div>
+          <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', margin: 0, lineHeight: 1.6 }}>
+            Everything you need to design a great consultation.
+          </p>
+        </div>
+
+        {/* What is Delphi? */}
+        <section style={{ marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 8 }}>
+            What is the Delphi method?
+          </h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', lineHeight: 1.7, margin: 0 }}>
+            The Delphi method gathers expert opinions through multiple rounds of structured questions.
+            Instead of a noisy group discussion, each expert responds independently — then an AI synthesizes
+            everyone's input and generates follow-up questions. Over several rounds, areas of agreement
+            and genuine disagreement become clear.
+          </p>
+        </section>
+
+        {/* How Symphonia implements it */}
+        <section style={{ marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 8 }}>
+            How Symphonia works
+          </h3>
+          <div style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', lineHeight: 1.7 }}>
+            <p style={{ margin: '0 0 8px 0' }}>
+              <strong style={{ color: 'var(--foreground)' }}>Round 1:</strong> You create opening questions.
+              Experts respond anonymously and independently.
+            </p>
+            <p style={{ margin: '0 0 8px 0' }}>
+              <strong style={{ color: 'var(--foreground)' }}>Synthesis:</strong> AI analyses all responses,
+              identifying agreements, disagreements, and nuances.
+            </p>
+            <p style={{ margin: '0 0 8px 0' }}>
+              <strong style={{ color: 'var(--foreground)' }}>Round 2+:</strong> Based on the synthesis,
+              new questions target areas of disagreement. Experts see the synthesis and respond again.
+            </p>
+            <p style={{ margin: 0 }}>
+              <strong style={{ color: 'var(--foreground)' }}>Convergence:</strong> Repeat until a clear
+              picture emerges — or until productive disagreements are well-mapped.
+            </p>
+          </div>
+        </section>
+
+        {/* Good questions */}
+        <section style={{ marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 8 }}>
+            ✅ Good questions look like this
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {[
+              'What are the most significant barriers to adopting AI in clinical settings over the next 5 years?',
+              'How should regulatory frameworks adapt to keep pace with generative AI capabilities?',
+              'What key factors will determine whether autonomous vehicles achieve broad public trust by 2030?',
+            ].map((q, i) => (
+              <div
+                key={i}
+                style={{
+                  fontSize: '0.83rem',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
+                  color: 'var(--foreground)',
+                  lineHeight: 1.5,
+                }}
+              >
+                {q}
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: '0.78rem', color: 'var(--muted-foreground)', marginTop: 8 }}>
+            Open-ended, forward-looking, neutral, specific, expert-relevant.
+          </p>
+        </section>
+
+        {/* Bad questions */}
+        <section style={{ marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 8 }}>
+            ❌ Avoid questions like these
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {[
+              { q: 'Should we regulate AI?', why: 'Binary — experts just say yes/no' },
+              { q: 'Given the obvious dangers of deepfakes, how should we ban them?', why: 'Leading — implies the answer' },
+              { q: 'What do you think about technology?', why: 'Too broad — no focus' },
+            ].map((item, i) => (
+              <div
+                key={i}
+                style={{
+                  fontSize: '0.83rem',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  backgroundColor: 'color-mix(in srgb, var(--destructive) 6%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--destructive) 15%, transparent)',
+                  color: 'var(--foreground)',
+                  lineHeight: 1.5,
+                }}
+              >
+                <span style={{ fontStyle: 'italic' }}>"{item.q}"</span>
+                <span style={{ color: 'var(--muted-foreground)', marginLeft: 6 }}>— {item.why}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Tips */}
+        <section>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 8 }}>
+            💡 Tips for a great consultation
+          </h3>
+          <ul style={{ fontSize: '0.83rem', color: 'var(--muted-foreground)', lineHeight: 1.8, paddingLeft: 20, margin: 0 }}>
+            <li>Start with 3–5 well-crafted questions — quality beats quantity.</li>
+            <li>Each question should cover one topic only. Split double-barrelled questions.</li>
+            <li>Use "What…", "How…", "In what ways…" — not "Do you agree…"</li>
+            <li>Think: "Would 10 different experts give 10 meaningfully different answers?"</li>
+            <li>Write a clear title — it helps experts calibrate their responses.</li>
+            <li>Use the AI assistant below to get suggestions, critique, or improvements.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+/* ── AI Assistant Panel ───────────────────────────────────────── */
+
+type AiMode = 'suggest' | 'critique' | 'improve';
+
+interface CritiqueItem {
+  question: string;
+  issue: string;
+  severity: 'low' | 'medium' | 'high';
+}
+
+interface ImproveItem {
+  original: string;
+  improved: string;
+  reason: string;
+}
+
+function AiAssistantPanel({
+  open,
+  onClose,
+  title,
+  questions,
+  onAddQuestion,
+  onReplaceQuestion,
+  token,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  questions: string[];
+  onAddQuestion: (q: string) => void;
+  onReplaceQuestion: (original: string, improved: string) => void;
+  token: string | null;
+}) {
+  const [mode, setMode] = useState<AiMode>('suggest');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [addedQuestions, setAddedQuestions] = useState<Set<string>>(new Set());
+  const [replacedQuestions, setReplacedQuestions] = useState<Set<string>>(new Set());
+
+  const handleGenerate = async () => {
+    if (!title.trim()) {
+      setError('Please enter a form title first.');
+      return;
+    }
+
+    if ((mode === 'critique' || mode === 'improve') && !questions.some(q => q.trim())) {
+      setError(`Add at least one question before using "${mode}" mode.`);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    setAddedQuestions(new Set());
+    setReplacedQuestions(new Set());
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/ai/suggest`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title,
+          description: '',
+          questions: questions.filter(q => q.trim()),
+          mode,
+        }),
+      });
+
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        throw new Error(detail.detail || `Request failed (HTTP ${res.status})`);
+      }
+
+      const data = await res.json();
+      setResult(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to get AI suggestions.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddSuggestion = (q: string) => {
+    onAddQuestion(q);
+    setAddedQuestions(prev => new Set(prev).add(q));
+  };
+
+  const handleUseImproved = (item: ImproveItem) => {
+    onReplaceQuestion(item.original, item.improved);
+    setReplacedQuestions(prev => new Set(prev).add(item.original));
+  };
+
+  if (!open) return null;
+
+  const severityStyles: Record<string, { bg: string; border: string; text: string }> = {
+    high: {
+      bg: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+      border: 'color-mix(in srgb, var(--destructive) 25%, transparent)',
+      text: 'var(--destructive)',
+    },
+    medium: {
+      bg: 'color-mix(in srgb, orange 10%, transparent)',
+      border: 'color-mix(in srgb, orange 25%, transparent)',
+      text: 'orange',
+    },
+    low: {
+      bg: 'color-mix(in srgb, var(--muted-foreground) 8%, transparent)',
+      border: 'color-mix(in srgb, var(--muted-foreground) 15%, transparent)',
+      text: 'var(--muted-foreground)',
+    },
+  };
+
+  return (
+    <div
+      style={{
+        marginTop: '1rem',
+        borderRadius: 12,
+        border: '1px solid var(--border)',
+        backgroundColor: 'var(--card)',
+        overflow: 'hidden',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      {/* Panel header */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 16px',
+          borderBottom: '1px solid var(--border)',
+          backgroundColor: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Sparkles size={16} style={{ color: 'var(--accent)' }} />
+          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--foreground)' }}>
+            AI Assistant
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            color: 'var(--muted-foreground)',
+            padding: 4,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+          title="Close AI assistant"
+        >
+          <X size={16} />
+        </button>
+      </div>
+
+      {/* Panel body */}
+      <div style={{ padding: '16px' }}>
+        {/* Mode selector */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+          {([
+            { key: 'suggest' as AiMode, label: 'Suggest questions' },
+            { key: 'critique' as AiMode, label: 'Critique' },
+            { key: 'improve' as AiMode, label: 'Improve' },
+          ]).map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => { setMode(key); setResult(null); setError(null); }}
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: mode === key ? 600 : 400,
+                padding: '6px 14px',
+                borderRadius: 20,
+                border: `1px solid ${mode === key ? 'var(--accent)' : 'var(--border)'}`,
+                backgroundColor: mode === key ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
+                color: mode === key ? 'var(--accent)' : 'var(--muted-foreground)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Generate button */}
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '10px 16px',
+            borderRadius: 8,
+            border: 'none',
+            backgroundColor: loading ? 'var(--input)' : 'var(--accent)',
+            color: loading ? 'var(--muted-foreground)' : '#fff',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+            cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            transition: 'background-color 0.15s ease',
+            marginBottom: 12,
+          }}
+        >
+          {loading ? (
+            <>
+              <span
+                style={{
+                  width: 16,
+                  height: 16,
+                  border: '2px solid var(--muted-foreground)',
+                  borderTopColor: 'transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                  display: 'inline-block',
+                }}
+              />
+              Thinking…
+            </>
+          ) : (
+            <>
+              <Sparkles size={14} />
+              Generate
+            </>
+          )}
+        </button>
+
+        {/* Error */}
+        {error && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 8,
+              padding: '10px 12px',
+              borderRadius: 8,
+              backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--destructive) 20%, transparent)',
+              marginBottom: 12,
+            }}
+          >
+            <AlertCircle size={16} style={{ color: 'var(--destructive)', flexShrink: 0, marginTop: 1 }} />
+            <span style={{ fontSize: '0.82rem', color: 'var(--destructive)', lineHeight: 1.5 }}>
+              {error}
+            </span>
+          </div>
+        )}
+
+        {/* Results — Suggest mode */}
+        {result?.suggestions && mode === 'suggest' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <p style={{ fontSize: '0.78rem', color: 'var(--muted-foreground)', margin: '0 0 4px 0' }}>
+              Click a suggestion to add it to your form:
+            </p>
+            {result.suggestions.map((q: string, i: number) => {
+              const added = addedQuestions.has(q);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => !added && handleAddSuggestion(q)}
+                  disabled={added}
+                  style={{
+                    textAlign: 'left',
+                    fontSize: '0.83rem',
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    border: `1px solid ${added ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--border)'}`,
+                    backgroundColor: added
+                      ? 'color-mix(in srgb, var(--accent) 8%, transparent)'
+                      : 'var(--background)',
+                    color: 'var(--foreground)',
+                    cursor: added ? 'default' : 'pointer',
+                    lineHeight: 1.5,
+                    transition: 'all 0.15s ease',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 10,
+                  }}
+                >
+                  {added ? (
+                    <CheckCircle2 size={16} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: '0.75rem',
+                        color: 'var(--accent)',
+                        fontWeight: 600,
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}
+                    >
+                      +
+                    </span>
+                  )}
+                  <span>{q}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Results — Critique mode */}
+        {result?.critique && mode === 'critique' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {result.critique.map((item: CritiqueItem, i: number) => {
+              const severity = severityStyles[item.severity] || severityStyles.medium;
+              return (
+                <div
+                  key={i}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    border: `1px solid ${severity.border}`,
+                    backgroundColor: severity.bg,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <AlertCircle size={14} style={{ color: severity.text, flexShrink: 0 }} />
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                        color: severity.text,
+                      }}
+                    >
+                      {item.severity}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.83rem', color: 'var(--foreground)', margin: '0 0 4px 0', fontStyle: 'italic' }}>
+                    "{item.question}"
+                  </p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', margin: 0 }}>
+                    {item.issue}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Results — Improve mode */}
+        {result?.improved && mode === 'improve' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {result.improved.map((item: ImproveItem, i: number) => {
+              const replaced = replacedQuestions.has(item.original);
+              return (
+                <div
+                  key={i}
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: 8,
+                    border: `1px solid ${replaced ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--border)'}`,
+                    backgroundColor: replaced
+                      ? 'color-mix(in srgb, var(--accent) 5%, transparent)'
+                      : 'var(--background)',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: '0.78rem',
+                      color: 'var(--muted-foreground)',
+                      margin: '0 0 4px 0',
+                      textDecoration: replaced ? 'line-through' : 'none',
+                    }}
+                  >
+                    <strong>Original:</strong> {item.original}
+                  </p>
+                  <p style={{ fontSize: '0.83rem', color: 'var(--foreground)', margin: '0 0 6px 0' }}>
+                    <strong>Improved:</strong> {item.improved}
+                  </p>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--muted-foreground)', margin: '0 0 8px 0', fontStyle: 'italic' }}>
+                    {item.reason}
+                  </p>
+                  {!replaced ? (
+                    <button
+                      type="button"
+                      onClick={() => handleUseImproved(item)}
+                      style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        padding: '4px 12px',
+                        borderRadius: 6,
+                        border: '1px solid var(--accent)',
+                        backgroundColor: 'transparent',
+                        color: 'var(--accent)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      Use improved version
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: '0.78rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <CheckCircle2 size={14} /> Applied
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Inline keyframes for spinner */}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 /* ── Main component ───────────────────────────────────────────── */
 
 export default function AdminFormNew() {
@@ -80,10 +708,35 @@ export default function AdminFormNew() {
   const [anonymous, setAnonymous] = useState(false);
   const [deadline, setDeadline] = useState('');
 
+  /* Worker D state — Guide modal + AI panel */
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
+
   const swapQuestions = (a: number, b: number) => {
     const updated = [...questions];
     [updated[a], updated[b]] = [updated[b], updated[a]];
     setQuestions(updated);
+  };
+
+  const handleAddQuestion = (q: string) => {
+    // Add to the first empty slot, or append
+    const emptyIdx = questions.findIndex(existing => existing.trim() === '');
+    if (emptyIdx !== -1) {
+      const updated = [...questions];
+      updated[emptyIdx] = q;
+      setQuestions(updated);
+    } else {
+      setQuestions([...questions, q]);
+    }
+  };
+
+  const handleReplaceQuestion = (original: string, improved: string) => {
+    const idx = questions.findIndex(q => q.trim() === original.trim());
+    if (idx !== -1) {
+      const updated = [...questions];
+      updated[idx] = improved;
+      setQuestions(updated);
+    }
   };
 
   const createForm = async () => {
@@ -122,6 +775,9 @@ export default function AdminFormNew() {
   return (
     <section className="flex-1 py-6 sm:py-8">
       <Container size="lg">
+        {/* Delphi Guide Modal */}
+        <DelphiGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
+
         {/* Back button */}
         <button
           type="button"
@@ -140,16 +796,50 @@ export default function AdminFormNew() {
           ← Back to Dashboard
         </button>
 
-        <div className="mb-6">
-          <h1
-            className="text-2xl font-bold tracking-tight"
-            style={{ color: 'var(--foreground)' }}
+        <div className="mb-6" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+          <div>
+            <h1
+              className="text-2xl font-bold tracking-tight"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Create a New Form
+            </h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+              Set up a new Delphi consultation with title and opening questions.
+            </p>
+          </div>
+
+          {/* Guide button — Worker D */}
+          <button
+            type="button"
+            onClick={() => setGuideOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              borderRadius: 8,
+              border: '1px solid var(--border)',
+              backgroundColor: 'var(--background)',
+              color: 'var(--muted-foreground)',
+              fontSize: '0.82rem',
+              fontWeight: 500,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.borderColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--accent)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.color = 'var(--muted-foreground)';
+            }}
           >
-            Create a New Form
-          </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-            Set up a new Delphi consultation with title and opening questions.
-          </p>
+            <BookOpen size={16} />
+            Guide
+          </button>
         </div>
 
         {error && (
@@ -478,6 +1168,50 @@ export default function AdminFormNew() {
               );
             })}
           </div>
+
+          {/* ── AI Assist button + Panel (Worker D) ────────────────── */}
+          {!aiPanelOpen && (
+            <button
+              type="button"
+              onClick={() => setAiPanelOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 16px',
+                borderRadius: 8,
+                border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)',
+                backgroundColor: 'color-mix(in srgb, var(--accent) 6%, transparent)',
+                color: 'var(--accent)',
+                fontSize: '0.83rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                marginBottom: 4,
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 12%, transparent)';
+                e.currentTarget.style.borderColor = 'var(--accent)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, transparent)';
+                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--accent) 40%, transparent)';
+              }}
+            >
+              <Sparkles size={15} />
+              ✨ AI Assist
+            </button>
+          )}
+
+          <AiAssistantPanel
+            open={aiPanelOpen}
+            onClose={() => setAiPanelOpen(false)}
+            title={title}
+            questions={questions}
+            onAddQuestion={handleAddQuestion}
+            onReplaceQuestion={handleReplaceQuestion}
+            token={token}
+          />
 
           {/* ── Advanced Settings (Worker C) ───────────────────────── */}
           <div
