@@ -184,7 +184,7 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[
               { label: 'AI synthesis', desc: 'Instead of a facilitator spending days reading and summarising, AI analyses all responses in seconds — identifying convergence, surfacing minority views, and preserving nuance.' },
-              { label: 'Automatic follow-up questions', desc: 'Symphonia generates targeted Round 2 questions based on what the synthesis reveals — no manual question design between rounds.' },
+              { label: 'AI-suggested follow-up questions', desc: 'After each synthesis, Symphonia can suggest targeted questions for the next round based on what the analysis reveals. The admin reviews, edits, or replaces them — full automation is available as an option, but the facilitator stays in control.' },
               { label: 'Convergence scoring', desc: 'Each round is scored for how much expert opinion is converging. You can see at a glance whether more rounds are needed.' },
               { label: 'Speed', desc: 'A traditional Delphi takes weeks per round. Symphonia compresses this to hours — without sacrificing rigour.' },
             ].map((item, i) => (
