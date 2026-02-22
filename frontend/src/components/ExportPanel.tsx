@@ -257,51 +257,30 @@ function markdownToSimpleHtml(md: string): string {
   return html;
 }
 
-function exportAsPdf(formTitle: string, markdownContent: string) {
-  const htmlBody = markdownToSimpleHtml(markdownContent);
-  const fullHtml = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<title>${formTitle} — Symphonia Export</title>
-<style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    color: #1a1a2e;
-    line-height: 1.6;
-  }
-  h1 { font-size: 1.8em; border-bottom: 2px solid #6366f1; padding-bottom: 8px; margin-bottom: 16px; }
-  h2 { font-size: 1.4em; color: #4338ca; margin-top: 28px; }
-  h3 { font-size: 1.15em; color: #6366f1; margin-top: 20px; }
-  hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
-  ul { padding-left: 1.2em; }
-  li { margin-bottom: 6px; }
-  strong { color: #0f172a; }
-  em { color: #475569; }
-  @media print {
-    body { padding: 0; }
-    h1 { page-break-after: avoid; }
-    h2, h3 { page-break-after: avoid; }
-  }
-</style>
-</head>
-<body>
-${htmlBody}
-</body>
-</html>`;
-
-  // Open in a new window and trigger print
+function exportAsPdf(
+  formTitle: string,
+  rounds: Round[],
+  data: SynthesisData | null,
+  labels: Record<number, string>,
+) {
+  // Use the full GOV.UK-styled HTML (all structured data, agreements, disagreements,
+  // confidence scores, expert panel) — far richer than plain markdown conversion.
+  // Adds an @media print tweak to auto-trigger browser print dialog.
+  const html = generateGovUkReport(formTitle, rounds, data, labels);
+  // Inject a print-trigger script just before </body>
+  const printHtml = html.replace(
+    '</body>',
+    `<script>window.addEventListener('load', function() { setTimeout(function() { window.print(); }, 600); });</script></body>`,
+  );
   const printWindow = window.open('', '_blank');
   if (printWindow) {
-    printWindow.document.write(fullHtml);
+    printWindow.document.write(printHtml);
     printWindow.document.close();
-    // Small delay to let styles load
-    setTimeout(() => {
-      printWindow.print();
-    }, 400);
+  } else {
+    // Popup blocked — fall back to blob download of the HTML
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const filename = `${formTitle.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}-report.html`;
+    saveAs(blob, filename);
   }
 }
 
@@ -950,11 +929,10 @@ function exportAsGovUkReport(
   labels: Record<number, string>,
 ) {
   const html = generateGovUkReport(formTitle, rounds, data, labels);
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-  }
+  // Use blob download — window.open popups are blocked in most browsers
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const filename = `${formTitle.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase()}-govuk-report.html`;
+  saveAs(blob, filename);
 }
 
 // ─── Component ───────────────────────────────────────────
@@ -984,8 +962,7 @@ export default function ExportPanel({
   const handleExportPdf = () => {
     setExportingPdf(true);
     try {
-      const md = generateMarkdown(formTitle, rounds, structuredSynthesisData, expertLabels);
-      exportAsPdf(formTitle, md);
+      exportAsPdf(formTitle, rounds, structuredSynthesisData, expertLabels);
     } finally {
       setTimeout(() => setExportingPdf(false), 800);
     }
