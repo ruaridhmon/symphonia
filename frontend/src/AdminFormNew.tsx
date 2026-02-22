@@ -135,41 +135,66 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
           </p>
         </div>
 
-        {/* What is Delphi? */}
+        {/* What is standard Delphi? */}
         <section style={{ marginBottom: '1.5rem' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 8 }}>
             What is the Delphi method?
           </h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', lineHeight: 1.7, margin: 0 }}>
-            The Delphi method gathers expert opinions through multiple rounds of structured questions.
-            Instead of a noisy group discussion, each expert responds independently — then an AI synthesizes
-            everyone's input and generates follow-up questions. Over several rounds, areas of agreement
-            and genuine disagreement become clear.
+          <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', lineHeight: 1.7, margin: '0 0 10px 0' }}>
+            Developed at the RAND Corporation in the 1950s, the Delphi method is a structured process
+            for reaching consensus among a panel of experts — without the distortions of face-to-face debate.
+            Dominant voices, social pressure, and groupthink are eliminated because each expert responds
+            independently and anonymously.
           </p>
-        </section>
-
-        {/* How Symphonia implements it */}
-        <section style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 8 }}>
-            How Symphonia works
-          </h3>
           <div style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', lineHeight: 1.7 }}>
             <p style={{ margin: '0 0 8px 0' }}>
-              <strong style={{ color: 'var(--foreground)' }}>Round 1:</strong> You create opening questions.
-              Experts respond anonymously and independently.
+              <strong style={{ color: 'var(--foreground)' }}>Round 1:</strong> A facilitator sends structured
+              questionnaires to the expert panel. Experts respond independently, in writing.
             </p>
             <p style={{ margin: '0 0 8px 0' }}>
-              <strong style={{ color: 'var(--foreground)' }}>Synthesis:</strong> AI analyses all responses,
-              identifying agreements, disagreements, and nuances.
+              <strong style={{ color: 'var(--foreground)' }}>Synthesis:</strong> The facilitator manually
+              reads all responses, extracts themes, identifies areas of agreement and disagreement,
+              and writes a summary.
             </p>
             <p style={{ margin: '0 0 8px 0' }}>
-              <strong style={{ color: 'var(--foreground)' }}>Round 2+:</strong> Based on the synthesis,
-              new questions target areas of disagreement. Experts see the synthesis and respond again.
+              <strong style={{ color: 'var(--foreground)' }}>Round 2+:</strong> Experts see the anonymised
+              summary and respond again — refining their positions, challenging others, or converging
+              toward shared views.
             </p>
             <p style={{ margin: 0 }}>
-              <strong style={{ color: 'var(--foreground)' }}>Convergence:</strong> Repeat until a clear
-              picture emerges — or until productive disagreements are well-mapped.
+              <strong style={{ color: 'var(--foreground)' }}>Outcome:</strong> After 2–4 rounds a clear picture
+              emerges — areas of genuine consensus, and areas of principled disagreement worth
+              understanding.
             </p>
+          </div>
+        </section>
+
+        {/* Divider */}
+        <div style={{ borderTop: '1px solid var(--border)', margin: '1.25rem 0' }} />
+
+        {/* How Symphonia augments Delphi */}
+        <section style={{ marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--foreground)', marginBottom: 4 }}>
+            How Symphonia augments this process
+          </h3>
+          <p style={{ fontSize: '0.83rem', color: 'var(--muted-foreground)', lineHeight: 1.6, margin: '0 0 12px 0' }}>
+            Symphonia keeps the Delphi principles intact — anonymity, independent response, iterative
+            refinement — and replaces the bottleneck: manual facilitation.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[
+              { label: 'AI synthesis', desc: 'Instead of a facilitator spending days reading and summarising, AI analyses all responses in seconds — identifying convergence, surfacing minority views, and preserving nuance.' },
+              { label: 'Automatic follow-up questions', desc: 'Symphonia generates targeted Round 2 questions based on what the synthesis reveals — no manual question design between rounds.' },
+              { label: 'Convergence scoring', desc: 'Each round is scored for how much expert opinion is converging. You can see at a glance whether more rounds are needed.' },
+              { label: 'Speed', desc: 'A traditional Delphi takes weeks per round. Symphonia compresses this to hours — without sacrificing rigour.' },
+            ].map((item, i) => (
+              <div key={i} style={{ fontSize: '0.83rem', lineHeight: 1.6, display: 'flex', gap: 10 }}>
+                <span style={{ color: 'var(--accent)', fontWeight: 600, flexShrink: 0 }}>+</span>
+                <span style={{ color: 'var(--muted-foreground)' }}>
+                  <strong style={{ color: 'var(--foreground)' }}>{item.label}:</strong> {item.desc}
+                </span>
+              </div>
+            ))}
           </div>
         </section>
 
