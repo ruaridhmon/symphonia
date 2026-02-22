@@ -17,7 +17,7 @@
 - [x] **Symphonia logo** — tuning fork Concept D (orchestral metaphor, best favicon viability)
 - [x] Favicon (multi-size .ico + apple-touch-icon.png)
 - [x] Loading animation (branded CSS bars + logo in index.html, auto-replaced on React mount)
-- [ ] Email templates styling
+- [x] Email templates styling (5 branded templates: invitation, new round, synthesis ready, reminder, welcome + preview endpoint)
 
 ### 1.3 Visual Consistency ✅ DONE
 - [x] Color system audit (ensure dark/light parity) — skeleton/gradient vars added to all themes, hardcoded #fff → CSS vars

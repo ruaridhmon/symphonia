@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Query
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -14,8 +14,9 @@ import os
 from .models import (
     User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
     UserFormUnlock, FollowUp, FollowUpResponse, SynthesisComment,
-    SynthesisVersion, Draft,
+    SynthesisVersion, Draft, AuditLog,
 )
+from .audit import audit_log
 from .auth import (
     get_db,
     get_password_hash,
@@ -480,6 +481,7 @@ class GenerateSummaryPayload(BaseModel):
 def generate_summary(
     form_id: int,
     payload: GenerateSummaryPayload,
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
 ):
@@ -589,6 +591,9 @@ The dimensional analysis reveals a **temporal paradox**: governance frameworks d
             ],
         )
         summary = completion.choices[0].message.content
+        audit_log(db, user=user, action="generate_summary", resource_type="form",
+                  resource_id=form_id, detail={"model": payload.model, "round": active_round.round_number}, request=request)
+        db.commit()
         return {"summary": summary}
     except Exception as e:
         # Log the error for debugging
@@ -1383,6 +1388,7 @@ class FormUpdate(BaseModel):
 @router.post("/create_form")
 def create_form(
     payload: FormCreate,
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
 ):
@@ -1403,6 +1409,9 @@ def create_form(
         questions=payload.questions
     )
     db.add(first_round)
+
+    audit_log(db, user=user, action="create_form", resource_type="form",
+              resource_id=f.id, detail={"title": f.title}, request=request)
     db.commit()
 
     return {
@@ -1420,6 +1429,7 @@ def create_form(
 def update_form(
     form_id: int,
     payload: FormUpdate,
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
 ):
@@ -1427,8 +1437,11 @@ def update_form(
     if not f:
         raise HTTPException(status_code=404, detail="Form not found")
 
+    old_title = f.title
     f.title = payload.title
     f.questions = payload.questions
+    audit_log(db, user=user, action="update_form", resource_type="form",
+              resource_id=form_id, detail={"old_title": old_title, "new_title": payload.title}, request=request)
     db.commit()
     return {"status": "updated"}
 
@@ -1436,6 +1449,7 @@ def update_form(
 @router.delete("/forms/{form_id}")
 def delete_form(
     form_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
 ):
@@ -1444,6 +1458,8 @@ def delete_form(
     if not f:
         raise HTTPException(status_code=404, detail="Form not found")
 
+    audit_log(db, user=user, action="delete_form", resource_type="form",
+              resource_id=form_id, detail={"title": f.title}, request=request)
     db.delete(f)
     db.commit()
     return {"status": "deleted"}
@@ -2011,6 +2027,8 @@ class InvitationEmailPayload(BaseModel):
 @router.post("/email/invitation")
 async def send_invitation_email(
     payload: InvitationEmailPayload,
+    request: Request,
+    db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user),
 ):
     """Send a branded invitation email to an expert."""
@@ -2023,6 +2041,9 @@ async def send_invitation_email(
     )
     try:
         await _send_templated_email(payload.to, subject, html)
+        audit_log(db, user=user, action="send_invitation", resource_type="email",
+                  detail={"to": payload.to, "consultation": payload.consultation_title}, request=request)
+        db.commit()
         return {"status": "sent", "template": "invitation"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Email failed: {str(e)}")
@@ -2167,6 +2188,58 @@ async def preview_email_template(
 
     _subject, html = TEMPLATES[template_name](**sample_data[template_name])
     return {"template": template_name, "subject": _subject, "html": html}
+
+
+# ---------------------------------------------------------
+# AUDIT LOG
+# ---------------------------------------------------------
+
+@router.get("/audit-log")
+def get_audit_log(
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    action: str | None = Query(None),
+    user_id: int | None = Query(None),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Retrieve the audit trail. Admin-only. Supports filtering by action type and user."""
+    q = db.query(AuditLog).order_by(AuditLog.timestamp.desc())
+    if action:
+        q = q.filter(AuditLog.action == action)
+    if user_id:
+        q = q.filter(AuditLog.user_id == user_id)
+    total = q.count()
+    entries = q.offset(offset).limit(limit).all()
+    return {
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+        "entries": [
+            {
+                "id": e.id,
+                "timestamp": e.timestamp.isoformat() + "Z",
+                "user_id": e.user_id,
+                "user_email": e.user_email,
+                "action": e.action,
+                "resource_type": e.resource_type,
+                "resource_id": e.resource_id,
+                "detail": e.detail,
+                "ip_address": e.ip_address,
+            }
+            for e in entries
+        ],
+    }
+
+
+@router.get("/audit-log/actions")
+def get_audit_log_actions(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Return distinct action types in the audit log (for filter dropdowns)."""
+    rows = db.query(AuditLog.action).distinct().order_by(AuditLog.action).all()
+    return {"actions": [r[0] for r in rows]}
 
 
 # ---------------------------------------------------------

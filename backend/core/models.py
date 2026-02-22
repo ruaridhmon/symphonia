@@ -213,3 +213,25 @@ class SynthesisComment(Base):
         backref=backref("parent", remote_side=[id]),
         cascade="all, delete-orphan",
     )
+
+
+class AuditLog(Base):
+    """Immutable audit trail for admin actions (Gov readiness requirement).
+
+    Every state-changing admin action writes one row: who did what, to which
+    resource, and when.  The ``detail`` JSON column captures action-specific
+    context (e.g. old vs new values for edits).
+    """
+    __tablename__ = "audit_log"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    user_email = Column(String, nullable=False)  # denormalised for fast reads
+    action = Column(String, nullable=False, index=True)  # e.g. "create_form", "generate_synthesis", "send_email"
+    resource_type = Column(String, nullable=True)  # "form", "round", "user", "email"
+    resource_id = Column(Integer, nullable=True)  # PK of affected resource
+    detail = Column(JSON, nullable=True)  # action-specific context
+    ip_address = Column(String, nullable=True)
+
+    user = relationship("User")
