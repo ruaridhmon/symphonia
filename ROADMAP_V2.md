@@ -135,7 +135,7 @@
 - [x] CSRF protection — double-submit cookie pattern, X-CSRF-Token header validation on state-changing requests
 - [x] Audit logging for admin actions (AuditLog model + /audit-log endpoint + wired into key routes)
 - [ ] GOV.UK Design System alignment review
-- [ ] Export to GOV.UK report format
+- [x] Export to GOV.UK report format (GOV.UK-styled HTML report with findings cards, metadata, annexes, print CSS)
 
 ---
 

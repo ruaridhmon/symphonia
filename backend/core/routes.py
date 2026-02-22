@@ -3059,7 +3059,7 @@ When suggesting questions for a consultation titled "{title}", generate question
 Respond with JSON only. No prose outside JSON."""
 
 
-def _build_ai_suggest_user_prompt(title: str, description: str, questions: list[str], mode: str) -> str:
+def _build_ai_suggest_user_prompt(title: str, description: str, questions: list[str], mode: str, **kwargs) -> str:
     """Build the user prompt for the AI suggest endpoint based on mode."""
     context = f'Consultation title: "{title}"'
     if description:
@@ -3069,9 +3069,10 @@ def _build_ai_suggest_user_prompt(title: str, description: str, questions: list[
         context += "\nExisting questions:\n" + "\n".join(f"  {i+1}. {q}" for i, q in enumerate(non_empty))
 
     if mode == "suggest":
+        count = kwargs.get("suggestion_count", 5)
         return (
             f"{context}\n\n"
-            "Generate 3-5 new question suggestions for this consultation topic. "
+            f"Generate {count} new question suggestions for this consultation topic. "
             "Each question should be distinct, open-ended, and designed to surface meaningful expert disagreement.\n\n"
             'Respond with JSON only: { "suggestions": ["Q1?", "Q2?", ...] }'
         )
@@ -3101,6 +3102,12 @@ def _build_ai_suggest_user_prompt(title: str, description: str, questions: list[
 
 DEFAULT_SETTINGS = {
     "synthesis_model": "anthropic/claude-opus-4-6",
+    "max_rounds": "3",
+    "convergence_threshold": "70",
+    "default_anonymous": "false",
+    "ai_suggestions_count": "5",
+    "synthesis_strategy": "single_prompt",
+    "allow_late_join": "true",
 }
 
 @router.get("/admin/settings")
@@ -3141,6 +3148,7 @@ def update_settings(
 def ai_suggest(
     payload: dict,
     user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """AI-powered question assistant for Delphi consultation form design.
 
@@ -3203,7 +3211,15 @@ def ai_suggest(
 
     # Build prompts
     system_prompt = DELPHI_SYSTEM_PROMPT.replace("{title}", title)
-    user_prompt = _build_ai_suggest_user_prompt(title, description, questions, mode)
+    # Read suggestion count from DB setting
+    suggestion_count = int(DEFAULT_SETTINGS["ai_suggestions_count"])
+    count_setting = db.query(Setting).filter(Setting.key == "ai_suggestions_count").first()
+    if count_setting:
+        try:
+            suggestion_count = max(3, min(10, int(count_setting.value)))
+        except (ValueError, TypeError):
+            pass
+    user_prompt = _build_ai_suggest_user_prompt(title, description, questions, mode, suggestion_count=suggestion_count)
     # Model: from payload > DB setting > env var > hardcoded default
     model = payload.get("model") or None
     if not model:
