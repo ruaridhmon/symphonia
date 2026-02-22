@@ -16,6 +16,8 @@ async function apiClient<T>(
 ): Promise<T> {
   // Read CSRF token from cookie (set by backend on login)
   const csrfToken = getCookie('csrf_token');
+  // Fallback: Bearer token from localStorage (backward compat with non-cookie sessions)
+  const bearerToken = localStorage.getItem('access_token');
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -23,13 +25,15 @@ async function apiClient<T>(
     headers: {
       'Content-Type': 'application/json',
       ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+      ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}),
       ...options.headers,
     },
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      // Session cookie expired — clear local state and redirect
+      // Session expired — clear ALL local auth state and redirect
+      localStorage.removeItem('access_token');
       localStorage.removeItem('email');
       localStorage.removeItem('is_admin');
       window.location.href = '/login?expired=1';
