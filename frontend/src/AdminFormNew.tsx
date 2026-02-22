@@ -945,12 +945,14 @@ export default function AdminFormNew() {
           {/* ── Title ─────────────────────────────────────────────── */}
           <div className="space-y-1.5 mb-6">
             <label
+              htmlFor="form-title-input"
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
               Form title
             </label>
             <input
+              id="form-title-input"
               type="text"
               placeholder="e.g. AI in Education: Risks & Opportunities"
               value={title}

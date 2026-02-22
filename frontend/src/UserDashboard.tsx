@@ -148,21 +148,25 @@ export default function UserDashboard() {
             Join a New Form
           </h2>
           <form onSubmit={handleUnlock} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Enter join code"
-              value={joinCode}
-              onChange={e => {
-                setJoinCode(e.target.value);
-                setJoinError('');
-              }}
-              className="w-full px-4 py-2 rounded-lg"
-              style={{
-                border: '1px solid var(--input)',
-                backgroundColor: 'var(--background)',
-                color: 'var(--foreground)',
-              }}
-            />
+            <div>
+              <label htmlFor="join-code-input" className="sr-only">Join code</label>
+              <input
+                id="join-code-input"
+                type="text"
+                placeholder="Enter join code"
+                value={joinCode}
+                onChange={e => {
+                  setJoinCode(e.target.value);
+                  setJoinError('');
+                }}
+                className="w-full px-4 py-2 rounded-lg"
+                style={{
+                  border: '1px solid var(--input)',
+                  backgroundColor: 'var(--background)',
+                  color: 'var(--foreground)',
+                }}
+              />
+            </div>
             {joinError && (
               <p
                 className="text-sm text-center"

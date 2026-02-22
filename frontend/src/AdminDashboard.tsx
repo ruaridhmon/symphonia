@@ -4,6 +4,7 @@ import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -11,6 +12,7 @@ import { LoadingButton, SkeletonDashboard } from './components';
  * Rendered inside PageLayout via Dashboard component.
  */
 export default function AdminDashboard() {
+  useDocumentTitle('Admin Dashboard');
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -136,6 +138,40 @@ export default function AdminDashboard() {
             </LoadingButton>
           </div>
         </div>
+
+        {/* ── Empty state when no forms ── */}
+        {!loading && forms.length === 0 && !error && (
+          <div
+            className="rounded-xl p-8 sm:p-12 text-center"
+            style={{
+              backgroundColor: 'var(--card)',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--card-shadow, none)',
+            }}
+          >
+            <div className="text-4xl mb-4 opacity-40">🎼</div>
+            <h2
+              className="text-lg font-semibold mb-2"
+              style={{ color: 'var(--foreground)' }}
+            >
+              No consultations yet
+            </h2>
+            <p
+              className="text-sm mb-6 max-w-md mx-auto"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              Create your first Delphi consultation to start gathering expert consensus.
+              Each form guides participants through structured rounds of feedback.
+            </p>
+            <LoadingButton
+              variant="accent"
+              size="lg"
+              onClick={() => navigate('/admin/forms/new')}
+            >
+              Create Your First Consultation
+            </LoadingButton>
+          </div>
+        )}
 
         {/* ── Existing forms ── */}
         {forms.length > 0 && (

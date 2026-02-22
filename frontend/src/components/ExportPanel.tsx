@@ -843,7 +843,7 @@ function generateGovUkReport(
   <h3 class="govuk-heading-m">Round ${r.round_number}</h3>
   ${r.questions.length > 0 ? `
   <h4 class="govuk-heading-s">Questions posed</h4>
-  <ol class="govuk-body">${r.questions.map(q => `<li style="margin-bottom:8px">${escHtml(q)}</li>`).join('')}</ol>` : ''}
+  <ol class="govuk-body">${r.questions.map(q => `<li style="margin-bottom:8px">${escHtml(typeof q === 'string' ? q : String((q as Record<string, unknown>).text || (q as Record<string, unknown>).label || (q as Record<string, unknown>).question || ''))}</li>`).join('')}</ol>` : ''}
   ${r.synthesis ? `
   <h4 class="govuk-heading-s">Round synthesis</h4>
   <div class="govuk-inset-text"><p class="govuk-body">${escHtml(r.synthesis)}</p></div>` : ''}
