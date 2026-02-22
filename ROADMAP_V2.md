@@ -133,7 +133,7 @@
 - [ ] Screen reader testing
 - [ ] httpOnly cookies (XSS protection)
 - [ ] CSRF protection
-- [ ] Audit logging for admin actions
+- [x] Audit logging for admin actions (AuditLog model + /audit-log endpoint + wired into key routes)
 - [ ] GOV.UK Design System alignment review
 - [ ] Export to GOV.UK report format
 
@@ -143,7 +143,7 @@
 
 | Milestone | Target | Status |
 |-----------|--------|--------|
-| Design polish complete | Feb 24 | 🔄 In Progress |
+| Design polish complete | Feb 24 | 🔄 In Progress (1.2 ✅, 1.3 ✅, 1.1 needs design agent feedback) |
 | AI features MVP | Feb 28 | ✅ Complete (Devil's Advocate + Audience Translation + Voice Mirroring) |
 | Structured input complete | Mar 3 | ✅ Complete (templates + server drafts + resume) |
 | SPRIND demo ready | Mar 4 | ⏳ Planned |
