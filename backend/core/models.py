@@ -172,6 +172,26 @@ class SynthesisVersion(Base):
     round = relationship("RoundModel", backref="synthesis_versions")
 
 
+class Draft(Base):
+    """Server-side auto-save of in-progress expert responses.
+
+    One draft per user per form (always for the active round).
+    Replaced on every save, deleted on successful submit.
+    """
+    __tablename__ = "drafts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    form_id = Column(Integer, ForeignKey("forms.id"), nullable=False)
+    round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False)
+    answers = Column(JSON, nullable=False)  # Same shape as Response.answers
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User")
+    form = relationship("FormModel")
+    round = relationship("RoundModel")
+
+
 class SynthesisComment(Base):
     """A threaded comment on a specific section of a synthesis output."""
     __tablename__ = "synthesis_comments"

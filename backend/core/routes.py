@@ -14,7 +14,7 @@ import os
 from .models import (
     User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
     UserFormUnlock, FollowUp, FollowUpResponse, SynthesisComment,
-    SynthesisVersion,
+    SynthesisVersion, Draft,
 )
 from .auth import (
     get_db,
@@ -209,6 +209,13 @@ def submit_response(
     )
     db.add(archive)
 
+    # Clean up any saved draft for this form/round
+    db.query(Draft).filter(
+        Draft.user_id == user.id,
+        Draft.form_id == form_id,
+        Draft.round_id == active_round.id,
+    ).delete()
+
     db.commit()
     return {"ok": True}
 
@@ -257,6 +264,117 @@ def get_my_response(
         raise HTTPException(status_code=404, detail="No response found")
 
     return {"answers": response.answers}
+
+
+# ---------------------------------------------------------
+# SERVER-SIDE DRAFTS (auto-save)
+# ---------------------------------------------------------
+
+class DraftPayload(BaseModel):
+    answers: dict
+
+
+@router.put("/forms/{form_id}/draft")
+def save_draft(
+    form_id: int,
+    payload: DraftPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Upsert a draft for the active round. Called by the frontend auto-save."""
+    active_round = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .first()
+    )
+    if not active_round:
+        raise HTTPException(status_code=400, detail="No active round")
+
+    draft = (
+        db.query(Draft)
+        .filter(
+            Draft.user_id == user.id,
+            Draft.form_id == form_id,
+            Draft.round_id == active_round.id,
+        )
+        .first()
+    )
+
+    if draft:
+        draft.answers = payload.answers
+        from datetime import datetime as dt
+        draft.updated_at = dt.utcnow()
+    else:
+        draft = Draft(
+            user_id=user.id,
+            form_id=form_id,
+            round_id=active_round.id,
+            answers=payload.answers,
+        )
+        db.add(draft)
+
+    db.commit()
+    return {"ok": True}
+
+
+@router.get("/forms/{form_id}/draft")
+def get_draft(
+    form_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Load a saved draft for the active round (if any)."""
+    active_round = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .first()
+    )
+    if not active_round:
+        return {"draft": None}
+
+    draft = (
+        db.query(Draft)
+        .filter(
+            Draft.user_id == user.id,
+            Draft.form_id == form_id,
+            Draft.round_id == active_round.id,
+        )
+        .first()
+    )
+
+    if not draft:
+        return {"draft": None}
+
+    return {
+        "draft": {
+            "answers": draft.answers,
+            "updated_at": draft.updated_at.isoformat() if draft.updated_at else None,
+        }
+    }
+
+
+@router.delete("/forms/{form_id}/draft")
+def delete_draft(
+    form_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Delete a draft after successful submission."""
+    active_round = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .first()
+    )
+    if not active_round:
+        return {"ok": True}
+
+    db.query(Draft).filter(
+        Draft.user_id == user.id,
+        Draft.form_id == form_id,
+        Draft.round_id == active_round.id,
+    ).delete()
+    db.commit()
+    return {"ok": True}
 
 
 # ---------------------------------------------------------

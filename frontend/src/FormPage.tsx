@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ClipboardList, AlertCircle, ChevronDown } from 'lucide-react'
 import { getForm, Form } from './api/forms'
 import { getActiveRound, ActiveRound } from './api/rounds'
-import { submitResponse, hasSubmitted as checkSubmitted, getMyResponse } from './api/responses'
+import { submitResponse, hasSubmitted as checkSubmitted, getMyResponse, saveDraft, getDraft, deleteDraft } from './api/responses'
 import { ApiError } from './api/client'
 import { LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
 import Skeleton, { SkeletonCard } from './components/Skeleton'
@@ -32,6 +32,10 @@ export default function FormPage() {
   const [mode, setMode] = useState('loading') // loading, filling, reviewing, error
   const [loadError, setLoadError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [draftRestored, setDraftRestored] = useState(false)
+  const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latestResponsesRef = useRef<Record<string, StructuredResponse>>({})
 
   // Real-time presence
   const { viewers } = usePresence({
@@ -60,6 +64,31 @@ export default function FormPage() {
       }
     }
     return result
+  }, [])
+
+  /** Debounced server-side draft save (2s after last keystroke) */
+  const scheduleDraftSave = useCallback((answers: Record<string, StructuredResponse>) => {
+    if (!formId) return
+    latestResponsesRef.current = answers
+    if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
+    draftTimerRef.current = setTimeout(async () => {
+      try {
+        setDraftStatus('saving')
+        await saveDraft(formId, latestResponsesRef.current)
+        setDraftStatus('saved')
+        // Reset status after 3s
+        setTimeout(() => setDraftStatus((s) => s === 'saved' ? 'idle' : s), 3000)
+      } catch {
+        setDraftStatus('error')
+      }
+    }, 2000)
+  }, [formId])
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (draftTimerRef.current) clearTimeout(draftTimerRef.current)
+    }
   }, [])
 
   const loadForm = useCallback(async () => {
@@ -105,13 +134,35 @@ export default function FormPage() {
         } else {
           setHasSubmitted(false)
           setMode('filling')
-          setStructuredResponses(buildEmptyResponses(questions))
+          // Try to restore server-side draft first
+          try {
+            const { draft } = await getDraft(Number(id))
+            if (draft?.answers) {
+              setStructuredResponses(legacyToStructured(draft.answers as Record<string, string | StructuredResponse>))
+              setDraftRestored(true)
+            } else {
+              setStructuredResponses(buildEmptyResponses(questions))
+            }
+          } catch {
+            setStructuredResponses(buildEmptyResponses(questions))
+          }
         }
       } catch {
         // If can't check submit status, assume not submitted
         setHasSubmitted(false)
         setMode('filling')
-        setStructuredResponses(buildEmptyResponses(questions))
+        // Try to restore server-side draft
+        try {
+          const { draft } = await getDraft(Number(id))
+          if (draft?.answers) {
+            setStructuredResponses(legacyToStructured(draft.answers as Record<string, string | StructuredResponse>))
+            setDraftRestored(true)
+          } else {
+            setStructuredResponses(buildEmptyResponses(questions))
+          }
+        } catch {
+          setStructuredResponses(buildEmptyResponses(questions))
+        }
       }
 
       setPreviousSynthesis(roundData?.previous_round_synthesis || '')
@@ -138,12 +189,13 @@ export default function FormPage() {
     try {
       await submitResponse(Number(id), structuredResponses)
 
-      // Clear auto-save data on successful submit
+      // Clear auto-save data on successful submit (local + server)
       roundQuestions.forEach((_, i) => {
         try {
           localStorage.removeItem(autoSaveKey(id, i))
         } catch { /* ignore */ }
       })
+      try { await deleteDraft(Number(id)) } catch { /* ignore */ }
 
       navigate('/waiting', {
         state: {
@@ -254,6 +306,27 @@ export default function FormPage() {
           </p>
         )}
 
+        {/* Draft restored banner */}
+        {draftRestored && (
+          <div
+            className="rounded-lg p-3 mb-4 flex items-center justify-between text-sm fade-in"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+              color: 'var(--accent)',
+            }}
+          >
+            <span>📝 Your previous draft has been restored.</span>
+            <button
+              onClick={() => setDraftRestored(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: '1rem' }}
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Questions section header */}
         <div className="mb-2">
           <h2 className="text-lg font-semibold text-foreground">
@@ -303,12 +376,13 @@ export default function FormPage() {
                     questionIndex={i}
                     formId={id!}
                     value={structuredResponses[key] ?? emptyStructuredResponse()}
-                    onChange={(val) =>
-                      setStructuredResponses(prev => ({
-                        ...prev,
-                        [key]: val,
-                      }))
-                    }
+                    onChange={(val) => {
+                      setStructuredResponses(prev => {
+                        const next = { ...prev, [key]: val }
+                        scheduleDraftSave(next)
+                        return next
+                      })
+                    }}
                   />
                 </div>
               )
@@ -324,24 +398,32 @@ export default function FormPage() {
               {hasSubmitted ? 'Update Response' : 'Submit'}
             </LoadingButton>
 
-            {/* Keyboard shortcut hint */}
-            <p className="text-xs text-center mt-2" style={{ color: 'var(--muted-foreground)' }}>
-              Press <kbd style={{
-                padding: '1px 5px',
-                borderRadius: '3px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--muted)',
-                fontSize: '0.7rem',
-                fontFamily: 'inherit',
-              }}>⌘</kbd>+<kbd style={{
-                padding: '1px 5px',
-                borderRadius: '3px',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--muted)',
-                fontSize: '0.7rem',
-                fontFamily: 'inherit',
-              }}>Enter</kbd> to submit
-            </p>
+            {/* Status bar: draft save + keyboard shortcut */}
+            <div className="flex items-center justify-between mt-2 px-1">
+              <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                {draftStatus === 'saving' && '⏳ Saving draft…'}
+                {draftStatus === 'saved' && '✓ Draft saved'}
+                {draftStatus === 'error' && '⚠ Draft save failed'}
+                {draftStatus === 'idle' && '\u00A0'}
+              </span>
+              <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                <kbd style={{
+                  padding: '1px 5px',
+                  borderRadius: '3px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--muted)',
+                  fontSize: '0.7rem',
+                  fontFamily: 'inherit',
+                }}>⌘</kbd>+<kbd style={{
+                  padding: '1px 5px',
+                  borderRadius: '3px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--muted)',
+                  fontSize: '0.7rem',
+                  fontFamily: 'inherit',
+                }}>Enter</kbd> to submit
+              </span>
+            </div>
 
             <div aria-live="polite" aria-atomic="true">
               {submitError && (

@@ -79,3 +79,25 @@ export function forceUpdateResponse(
     version,
   });
 }
+
+/* ── Server-side Drafts ── */
+
+export interface DraftData {
+  answers: Record<string, unknown>;
+  updated_at: string | null;
+}
+
+/** Save (upsert) a draft for the active round */
+export function saveDraft(formId: number, answers: Record<string, unknown>) {
+  return api.put<{ ok: boolean }>(`/forms/${formId}/draft`, { answers });
+}
+
+/** Load a saved draft for the active round */
+export function getDraft(formId: number) {
+  return api.get<{ draft: DraftData | null }>(`/forms/${formId}/draft`);
+}
+
+/** Delete a draft (e.g. after successful submission) */
+export function deleteDraft(formId: number) {
+  return api.delete<{ ok: boolean }>(`/forms/${formId}/draft`);
+}
