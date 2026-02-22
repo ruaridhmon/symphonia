@@ -3162,7 +3162,7 @@ def ai_suggest(
     # Build prompts
     system_prompt = DELPHI_SYSTEM_PROMPT.replace("{title}", title)
     user_prompt = _build_ai_suggest_user_prompt(title, description, questions, mode)
-    model = os.getenv("SYNTHESIS_MODEL", "google/gemini-2.5-flash-preview")
+    model = os.getenv("SYNTHESIS_MODEL", "google/gemini-flash-1.5")
 
     try:
         openai_client = get_openai_client()
