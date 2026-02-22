@@ -253,6 +253,11 @@ export default function StructuredInput({
               value={value.confidence}
               onChange={e => update({ confidence: Number(e.target.value) })}
               style={styles.slider}
+              aria-label={`Confidence level: ${value.confidence} out of 10 — ${conf.label}`}
+              aria-valuemin={1}
+              aria-valuemax={10}
+              aria-valuenow={value.confidence}
+              aria-valuetext={`${value.confidence} — ${conf.label}`}
             />
             <div style={styles.sliderLabels}>
               <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>1</span>
@@ -309,14 +314,14 @@ export default function StructuredInput({
         <div style={styles.advancedPanel} className="slide-down">
           {/* Citations */}
           <div style={styles.advancedSection}>
-            <label style={styles.fieldLabel}>
+            <div style={styles.fieldLabel}>
               <BookOpen size={12} /> Citations
-            </label>
+            </div>
             <div style={styles.chipList}>
               {(value.citations ?? []).map((c, i) => (
                 <span key={i} style={styles.chip}>
                   {c}
-                  <button type="button" onClick={() => removeCitation(i)} style={styles.chipRemove}>
+                  <button type="button" onClick={() => removeCitation(i)} style={styles.chipRemove} aria-label={`Remove citation: ${c}`}>
                     <X size={10} />
                   </button>
                 </span>
@@ -326,13 +331,14 @@ export default function StructuredInput({
               <input
                 type="text"
                 placeholder="Add a citation (URL, DOI, or reference)…"
+                aria-label="Add a citation"
                 className="rounded-lg px-3 py-2 bg-muted"
                 style={{ flex: 1, fontSize: '0.8125rem' }}
                 value={newCitation}
                 onChange={e => setNewCitation(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCitation(); } }}
               />
-              <button type="button" onClick={addCitation} style={styles.addButton}>
+              <button type="button" onClick={addCitation} style={styles.addButton} aria-label="Add citation">
                 <Plus size={14} />
               </button>
             </div>
@@ -340,9 +346,9 @@ export default function StructuredInput({
 
           {/* Expert Nominations */}
           <div style={styles.advancedSection}>
-            <label style={styles.fieldLabel}>
+            <div style={styles.fieldLabel}>
               <Users size={12} /> Nominate Experts
-            </label>
+            </div>
             <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', margin: '0 0 0.5rem 0' }}>
               Who else should contribute to this question?
             </p>
@@ -350,7 +356,7 @@ export default function StructuredInput({
               {(value.expertNominations ?? []).map((n, i) => (
                 <span key={i} style={styles.chip}>
                   {n}
-                  <button type="button" onClick={() => removeNomination(i)} style={styles.chipRemove}>
+                  <button type="button" onClick={() => removeNomination(i)} style={styles.chipRemove} aria-label={`Remove nomination: ${n}`}>
                     <X size={10} />
                   </button>
                 </span>
@@ -360,13 +366,14 @@ export default function StructuredInput({
               <input
                 type="text"
                 placeholder="Name or email of expert…"
+                aria-label="Nominate an expert"
                 className="rounded-lg px-3 py-2 bg-muted"
                 style={{ flex: 1, fontSize: '0.8125rem' }}
                 value={newNomination}
                 onChange={e => setNewNomination(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNomination(); } }}
               />
-              <button type="button" onClick={addNomination} style={styles.addButton}>
+              <button type="button" onClick={addNomination} style={styles.addButton} aria-label="Add expert nomination">
                 <Plus size={14} />
               </button>
             </div>
@@ -380,6 +387,8 @@ export default function StructuredInput({
 /* ------------------------------------------------------------------ */
 /* Section sub-component                                              */
 /* ------------------------------------------------------------------ */
+let sectionIdCounter = 0;
+
 function Section({
   icon,
   label,
@@ -391,13 +400,14 @@ function Section({
   required?: boolean;
   children: React.ReactNode;
 }) {
+  const [labelId] = useState(() => `si-label-${++sectionIdCounter}`);
   return (
-    <div style={styles.section}>
-      <label style={styles.fieldLabel}>
+    <div style={styles.section} role="group" aria-labelledby={labelId}>
+      <div id={labelId} style={styles.fieldLabel}>
         {icon}
         <span>{label}</span>
-        {required && <span style={{ color: 'var(--destructive)', marginLeft: '0.25rem' }}>*</span>}
-      </label>
+        {required && <span style={{ color: 'var(--destructive)', marginLeft: '0.25rem' }} aria-label="required">*</span>}
+      </div>
       {children}
     </div>
   );

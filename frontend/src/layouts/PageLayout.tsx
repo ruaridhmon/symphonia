@@ -24,12 +24,13 @@ export default function PageLayout() {
 
       <Header />
 
-      <main id="main-content" className="flex-1 flex flex-col" tabIndex={-1}>
+      <main id="main-content" className="flex-1 flex flex-col" tabIndex={-1} aria-label="Main content">
         <Outlet />
       </main>
 
       <footer
         className="border-t text-center py-6 text-xs"
+        role="contentinfo"
         style={{
           backgroundColor: 'transparent',
           borderColor: 'var(--border)',

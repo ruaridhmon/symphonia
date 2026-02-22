@@ -175,6 +175,7 @@ export default function AdminDashboard() {
                 {/* Right: search input */}
                 <div
                   className="relative w-full sm:w-72"
+                  role="search"
                 >
                   {/* Search icon */}
                   <svg
@@ -200,21 +201,13 @@ export default function AdminDashboard() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     className="w-full text-sm pl-9 pr-3"
+                    aria-label="Search forms by title or join code"
                     style={{
                       height: '2.5rem',
                       borderRadius: 'var(--radius)',
                       border: '1px solid var(--input)',
                       backgroundColor: 'var(--card)',
                       color: 'var(--foreground)',
-                      outline: 'none',
-                    }}
-                    onFocus={e => {
-                      e.currentTarget.style.borderColor = 'var(--accent)';
-                      e.currentTarget.style.boxShadow = '0 0 0 2px rgba(37, 99, 235, 0.25)';
-                    }}
-                    onBlur={e => {
-                      e.currentTarget.style.borderColor = 'var(--input)';
-                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 </div>
@@ -259,7 +252,7 @@ export default function AdminDashboard() {
             {/* ── Desktop table ── */}
             {filteredForms.length > 0 && (
               <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-sm text-left" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+                <table className="w-full text-sm text-left" style={{ borderCollapse: 'separate', borderSpacing: 0 }} aria-label="Consultation forms">
                   <thead>
                     <tr
                       style={{
@@ -267,6 +260,7 @@ export default function AdminDashboard() {
                       }}
                     >
                       <th
+                        scope="col"
                         className="px-6 py-3 text-left"
                         style={{
                           color: 'var(--muted-foreground)',
@@ -280,6 +274,7 @@ export default function AdminDashboard() {
                         Form Title
                       </th>
                       <th
+                        scope="col"
                         className="px-6 py-3 text-left"
                         style={{
                           color: 'var(--muted-foreground)',
@@ -293,6 +288,7 @@ export default function AdminDashboard() {
                         Join Code
                       </th>
                       <th
+                        scope="col"
                         className="px-6 py-3 text-left"
                         style={{
                           color: 'var(--muted-foreground)',
@@ -306,6 +302,7 @@ export default function AdminDashboard() {
                         Participants
                       </th>
                       <th
+                        scope="col"
                         className="px-6 py-3 text-left"
                         style={{
                           color: 'var(--muted-foreground)',
@@ -319,6 +316,7 @@ export default function AdminDashboard() {
                         Round
                       </th>
                       <th
+                        scope="col"
                         className="px-6 py-3 text-right"
                         style={{
                           color: 'var(--muted-foreground)',
@@ -581,6 +579,8 @@ export default function AdminDashboard() {
             {search && filteredForms.length > 0 && (
               <div
                 className="px-4 sm:px-6 py-3 text-xs"
+                role="status"
+                aria-live="polite"
                 style={{
                   borderTop: '1px solid var(--border)',
                   color: 'var(--muted-foreground)',

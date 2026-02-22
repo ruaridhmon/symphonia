@@ -45,6 +45,7 @@ export default function Header() {
   return (
     <header
       className="border-b sticky top-0 z-40"
+      role="banner"
       style={{
         backgroundColor: 'var(--card)',
         borderColor: 'var(--border)',
@@ -80,7 +81,7 @@ export default function Header() {
         </div>
 
         {/* Right: desktop layout */}
-        <div className="hidden sm:flex items-center gap-2">
+        <nav className="hidden sm:flex items-center gap-2" aria-label="User actions">
           {/* Cmd+K shortcut hint */}
           <button
             type="button"
@@ -101,7 +102,7 @@ export default function Header() {
               Log out
             </button>
           )}
-        </div>
+        </nav>
 
         {/* Right: mobile hamburger button */}
         <button

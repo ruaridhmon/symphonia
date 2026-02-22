@@ -6,6 +6,7 @@ import { AuthProvider } from './AuthContext'
 import { ThemeProvider } from './theme'
 import { ToastProvider } from './components/Toast'
 import OfflineBanner from './components/OfflineBanner'
+import RouteAnnouncer from './components/RouteAnnouncer'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -14,6 +15,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ToastProvider>
         <BrowserRouter>
           <AuthProvider>
+            <RouteAnnouncer />
             <Router />
             <OfflineBanner />
           </AuthProvider>
