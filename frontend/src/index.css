@@ -11,11 +11,45 @@
 @tailwind utilities;
 
 /* ------------------------------------------------------------------ */
+/* Design Tokens — Symphonia Design System                            */
+/* ------------------------------------------------------------------ */
+/*
+ * SPACING: 8px grid (--space-unit = 0.5rem = 8px)
+ *   --space-0: 0        --space-1: 0.25rem (4px)  --space-2: 0.5rem (8px)
+ *   --space-3: 0.75rem  --space-4: 1rem (16px)    --space-5: 1.25rem
+ *   --space-6: 1.5rem   --space-8: 2rem (32px)    --space-10: 2.5rem
+ *   --space-12: 3rem    --space-16: 4rem
+ *
+ * TYPOGRAPHY SCALE (modular, 1.25 ratio):
+ *   --text-xs: 0.625rem (10px)  --text-sm: 0.75rem (12px)
+ *   --text-base: 0.875rem (14px, body)  --text-md: 1rem (16px)
+ *   --text-lg: 1.125rem (18px)   --text-xl: 1.25rem (20px)
+ *   --text-2xl: 1.5rem (24px)    --text-3xl: 1.875rem (30px)
+ *
+ * ICONS: All Lucide. Semantic colors via .icon-* classes.
+ *   Default: 16px. Cards: 18–20px. Headers: 20–24px.
+ */
+
+/* ------------------------------------------------------------------ */
 /* CSS Custom Properties — Converging Waves Design Language            */
 /* Overridden at runtime by ThemeProvider.                             */
 /* Light theme is the default.                                        */
 /* ------------------------------------------------------------------ */
 :root {
+  /* --- Spacing (8px grid) --- */
+  --space-unit: 0.5rem;
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
   /* --- Core: crisp white like the logo background --- */
   --background: #ffffff;
   --background-gradient: #ffffff;
@@ -312,6 +346,15 @@
     border-radius: var(--radius);
     color: var(--highlight-foreground);
   }
+
+  /* ── Semantic icon colors ── */
+  .icon-default { color: var(--muted-foreground); }
+  .icon-accent { color: var(--accent); }
+  .icon-success { color: var(--success); }
+  .icon-warning { color: var(--warning); }
+  .icon-destructive { color: var(--destructive); }
+  .icon-muted { color: var(--muted-foreground); opacity: 0.6; }
+  .icon-foreground { color: var(--foreground); }
 }
 
 /* ------------------------------------------------------------------ */

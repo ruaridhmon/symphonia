@@ -40,7 +40,7 @@ export default function OfflineBanner() {
         gap: '8px',
         padding: '10px 16px',
         backgroundColor: 'var(--destructive)',
-        color: '#fff',
+        color: 'var(--destructive-foreground)',
         fontSize: '0.875rem',
         fontWeight: 500,
         fontFamily: 'var(--font-family)',

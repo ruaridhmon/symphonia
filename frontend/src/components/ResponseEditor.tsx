@@ -378,7 +378,7 @@ export default function ResponseEditor({
                 className="px-4 py-2 rounded-lg text-sm font-medium"
                 style={{
                   backgroundColor: 'var(--destructive)',
-                  color: '#fff',
+                  color: 'var(--destructive-foreground)',
                   opacity: saving ? 0.6 : 1,
                 }}
               >

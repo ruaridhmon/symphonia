@@ -10,6 +10,7 @@ export type ThemeType = 'dark' | 'light';
 
 export interface ThemeColors {
   background: string;
+  'background-gradient': string;
   foreground: string;
   card: string;
   'card-foreground': string;
@@ -35,6 +36,9 @@ export interface ThemeColors {
   ring: string;
   radius: string;
   'font-family': string;
+  /* Skeleton loading */
+  'skeleton-base': string;
+  'skeleton-highlight': string;
 }
 
 export interface Theme {
@@ -57,6 +61,7 @@ export const themes: Record<ThemeId, Theme> = {
     type: 'light',
     colors: {
       background: '#ffffff',
+      'background-gradient': '#ffffff',
       foreground: '#0f172a',
       card: '#f8faff',
       'card-foreground': '#0f172a',
@@ -82,6 +87,8 @@ export const themes: Record<ThemeId, Theme> = {
       ring: '#2563eb',
       radius: '0.5rem',
       'font-family': "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      'skeleton-base': '#e2e8f0',
+      'skeleton-highlight': '#f1f5f9',
     },
   },
   'axiotic-dark': {
@@ -91,6 +98,7 @@ export const themes: Record<ThemeId, Theme> = {
     type: 'dark',
     colors: {
       background: '#0a0f1e',
+      'background-gradient': 'linear-gradient(135deg, #0a0f1e 0%, #0f172a 50%, #0a0f1e 100%)',
       foreground: '#f0f4ff',
       card: '#0f172a',
       'card-foreground': '#f0f4ff',
@@ -116,6 +124,8 @@ export const themes: Record<ThemeId, Theme> = {
       ring: '#3b82f6',
       radius: '0.5rem',
       'font-family': "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      'skeleton-base': '#1e293b',
+      'skeleton-highlight': '#334155',
     },
   },
   apple: {
@@ -125,6 +135,7 @@ export const themes: Record<ThemeId, Theme> = {
     type: 'light',
     colors: {
       background: '#f5f5f7',
+      'background-gradient': '#f5f5f7',
       foreground: '#1d1d1f',
       card: '#ffffff',
       'card-foreground': '#1d1d1f',
@@ -150,6 +161,8 @@ export const themes: Record<ThemeId, Theme> = {
       ring: '#007aff',
       radius: '0.625rem',
       'font-family': "'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', sans-serif",
+      'skeleton-base': '#d2d2d7',
+      'skeleton-highlight': '#e5e5ea',
     },
   },
 };

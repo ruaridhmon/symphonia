@@ -98,7 +98,7 @@ export default function AdminDashboard() {
               className="self-start sm:self-auto px-3 py-1.5 rounded-lg text-sm font-medium"
               style={{
                 backgroundColor: 'var(--destructive)',
-                color: '#ffffff',
+                color: 'var(--destructive-foreground)',
               }}
             >
               Retry

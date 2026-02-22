@@ -60,6 +60,12 @@ export default {
         'fast': '120ms',
         'slow': '350ms',
       },
+      spacing: {
+        'grid': 'var(--space-unit)',       // 8px
+        'grid-2': 'var(--space-4)',        // 16px
+        'grid-3': 'var(--space-6)',        // 24px
+        'grid-4': 'var(--space-8)',        // 32px
+      },
     },
   },
   plugins: [],
