@@ -63,6 +63,42 @@ async def add_security_headers(request: Request, call_next):
         response.headers["Cache-Control"] = "no-store"
     return response
 
+
+# CSRF protection — validates X-CSRF-Token header on state-changing requests
+# Uses double-submit cookie pattern: csrf_token cookie (JS-readable) must
+# match the X-CSRF-Token header sent by the frontend.
+CSRF_EXEMPT_PATHS = {"/login", "/register", "/logout", "/ws"}
+
+@app.middleware("http")
+async def csrf_protection(request: Request, call_next):
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return await call_next(request)
+
+    path = request.url.path.rstrip("/")
+    if path in CSRF_EXEMPT_PATHS:
+        return await call_next(request)
+
+    # Only enforce CSRF when auth comes from cookies (not Bearer tokens).
+    # If the request has an Authorization header, it's an API client using
+    # Bearer tokens and CSRF doesn't apply (the token IS the proof).
+    auth_header = request.headers.get("authorization", "")
+    has_auth_cookie = "session_token" in request.cookies
+    if auth_header.lower().startswith("bearer ") or not has_auth_cookie:
+        return await call_next(request)
+
+    # Cookie-based auth → require CSRF token
+    csrf_cookie = request.cookies.get("csrf_token", "")
+    csrf_header = request.headers.get("x-csrf-token", "")
+
+    if not csrf_cookie or not csrf_header or csrf_cookie != csrf_header:
+        return Response(
+            content='{"detail":"CSRF token missing or invalid"}',
+            status_code=403,
+            media_type="application/json",
+        )
+
+    return await call_next(request)
+
 # CORS
 app.add_middleware(
     CORSMiddleware,

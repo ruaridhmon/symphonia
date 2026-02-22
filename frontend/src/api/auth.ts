@@ -11,6 +11,7 @@ export interface LoginResponse {
   access_token: string;
   is_admin: boolean;
   email: string;
+  csrf_token?: string;
 }
 
 /* ── API calls ── */
@@ -25,7 +26,12 @@ export function register(email: string, password: string) {
   return api.postForm<{ message: string }>('/register', { email, password });
 }
 
-/** Log in (returns token + user info) */
+/** Log in (returns token + user info, sets httpOnly auth cookie) */
 export function login(email: string, password: string) {
   return api.postForm<LoginResponse>('/login', { username: email, password });
+}
+
+/** Log out (clears httpOnly auth + CSRF cookies) */
+export function logout() {
+  return api.post<{ message: string }>('/logout');
 }

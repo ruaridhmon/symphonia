@@ -131,8 +131,8 @@
 - [ ] WCAG 2.2 AA accessibility audit
 - [ ] Keyboard navigation complete
 - [ ] Screen reader testing
-- [ ] httpOnly cookies (XSS protection)
-- [ ] CSRF protection
+- [x] httpOnly cookies (XSS protection) — session_token cookie, JS-inaccessible, SameSite=Lax
+- [x] CSRF protection — double-submit cookie pattern, X-CSRF-Token header validation on state-changing requests
 - [x] Audit logging for admin actions (AuditLog model + /audit-log endpoint + wired into key routes)
 - [ ] GOV.UK Design System alignment review
 - [ ] Export to GOV.UK report format

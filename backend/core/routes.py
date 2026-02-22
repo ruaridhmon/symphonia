@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, Query
+from fastapi import APIRouter, Depends, Form, HTTPException, Request, Query, Response as FastAPIResponse
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -22,8 +22,14 @@ from .auth import (
     get_password_hash,
     verify_password,
     create_access_token,
+    generate_csrf_token,
     get_current_user,
     get_current_admin_user,
+    AUTH_COOKIE_NAME,
+    CSRF_COOKIE_NAME,
+    COOKIE_MAX_AGE,
+    COOKIE_SECURE,
+    COOKIE_SAMESITE,
 )
 from .synthesis import CommitteeSynthesiser, FlowMode, get_synthesiser
 from core.ws import ws_manager
@@ -138,8 +144,9 @@ def register(
 
 @router.post("/login")
 def login(
+    response: FastAPIResponse,
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
@@ -148,13 +155,45 @@ def login(
     token = create_access_token(
         data={"sub": str(user.id), "is_admin": user.is_admin}
     )
+    csrf_token = generate_csrf_token()
 
+    # Set JWT as httpOnly cookie (not accessible to JS → XSS-proof)
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=token,
+        max_age=COOKIE_MAX_AGE,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        path="/",
+    )
+    # Set CSRF token as readable cookie (JS reads it, sends as header)
+    response.set_cookie(
+        key=CSRF_COOKIE_NAME,
+        value=csrf_token,
+        max_age=COOKIE_MAX_AGE,
+        httponly=False,  # Must be readable by JS
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        path="/",
+    )
+
+    # Still return token in body for backward compatibility during migration
     return {
         "access_token": token,
         "token_type": "bearer",
         "is_admin": user.is_admin,
-        "email": user.email
+        "email": user.email,
+        "csrf_token": csrf_token,
     }
+
+
+@router.post("/logout")
+def logout(response: FastAPIResponse):
+    """Clear auth cookies."""
+    response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
+    response.delete_cookie(key=CSRF_COOKIE_NAME, path="/")
+    return {"message": "Logged out"}
 
 
 @router.get("/me")

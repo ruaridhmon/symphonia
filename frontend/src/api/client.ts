@@ -1,28 +1,38 @@
 // Backend routes are at root (no /api prefix)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 
+/**
+ * Read a cookie value by name.
+ * Used to read the csrf_token cookie for double-submit CSRF protection.
+ */
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem('access_token');
+  // Read CSRF token from cookie (set by backend on login)
+  const csrfToken = getCookie('csrf_token');
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
+    credentials: 'include', // Send httpOnly cookies automatically
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
       ...options.headers,
     },
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      // Token expired - clear auth and redirect to login with message
-      localStorage.removeItem('access_token');
+      // Session cookie expired — clear local state and redirect
       localStorage.removeItem('email');
+      localStorage.removeItem('is_admin');
       window.location.href = '/login?expired=1';
-      // Throw to stop further processing
       throw new ApiError(401, 'Session expired. Please log in again.');
     }
     throw new ApiError(response.status, await response.text(), response.headers);
@@ -54,7 +64,7 @@ export const api = {
   postForm: <T>(endpoint: string, params: Record<string, string>) =>
     apiClient<T>(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' } as Record<string, string>,
       body: new URLSearchParams(params).toString(),
     }),
 

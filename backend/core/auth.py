@@ -1,5 +1,6 @@
 import os
-from fastapi import Depends, HTTPException, status
+import secrets
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from .db import SessionLocal
@@ -14,8 +15,15 @@ SECRET_KEY = "your‑jwt‑secret"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 
+# Cookie configuration
+AUTH_COOKIE_NAME = "session_token"
+CSRF_COOKIE_NAME = "csrf_token"
+COOKIE_MAX_AGE = ACCESS_TOKEN_EXPIRE_MINUTES * 60  # seconds
+COOKIE_SECURE = os.environ.get("COOKIE_SECURE", "true").lower() == "true"
+COOKIE_SAMESITE = "lax"
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 
 def get_db():
     db = SessionLocal()
@@ -42,37 +50,57 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    print(f"[get_current_user] Token received: {token[:50] if token else 'NONE'}...")
+
+def generate_csrf_token() -> str:
+    """Generate a cryptographically secure CSRF token."""
+    return secrets.token_urlsafe(32)
+
+
+def _resolve_token(request: Request, bearer_token: str | None) -> str | None:
+    """Extract JWT from httpOnly cookie first, then fall back to Bearer header.
+
+    This enables a smooth migration: old clients using Bearer still work,
+    new clients using httpOnly cookies get XSS protection.
+    """
+    # 1. Try httpOnly cookie (preferred — immune to XSS)
+    cookie_token = request.cookies.get(AUTH_COOKIE_NAME)
+    if cookie_token:
+        return cookie_token
+    # 2. Fall back to Authorization: Bearer header (backward compat)
+    if bearer_token:
+        return bearer_token
+    return None
+
+
+async def get_current_user(
+    request: Request,
+    token: str | None = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
+    resolved_token = _resolve_token(request, token)
+    if not resolved_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
     credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com")
 
-    # if token == "dummy-token":
-    #     return SimpleNamespace(email="admin@example.com", is_admin=True)
-    if token == "dummy-token":
+    if resolved_token == "dummy-token":
         admin = db.query(User).filter(User.email == admin_email).first()
         if not admin:
             raise HTTPException(status_code=401, detail="Dummy admin not found")
         return admin
 
     try:
-        print(f"[get_current_user] Decoding with SECRET_KEY: {SECRET_KEY[:10]}...")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print(f"[get_current_user] Payload decoded: {payload}")
+        payload = jwt.decode(resolved_token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
         if user_id is None:
-            print("[get_current_user] ERROR: No 'sub' in payload")
             raise credentials_exception
-    except JWTError as e:
-        print(f"[get_current_user] JWTError: {e}")
+    except JWTError:
         raise credentials_exception
-    
-    print(f"[get_current_user] Looking up user_id={user_id}")
+
     user = db.query(User).filter(User.id == int(user_id)).first()
     if not user:
-        print(f"[get_current_user] ERROR: No user found for id={user_id}")
         raise credentials_exception
-    print(f"[get_current_user] SUCCESS: Found user {user.email}")
     return user
 
 async def get_admin_user(user: User = Depends(get_current_user)):

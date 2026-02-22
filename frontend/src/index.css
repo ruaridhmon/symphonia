@@ -3794,3 +3794,9 @@ html[data-theme="axiotic-dark"] .command-palette-overlay {
   transform: translateX(0);
   opacity: 1;
 }
+
+/* ── Logo dark mode adaptation ── */
+/* White-background PNGs need inversion in dark mode to avoid a bright white box */
+html[data-theme="axiotic-dark"] img[alt="Symphonia"] {
+  filter: brightness(0) invert(1);
+}
