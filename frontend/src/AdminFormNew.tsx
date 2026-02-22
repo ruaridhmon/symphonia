@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronUp, ChevronDown, Trash2, RefreshCw, Sparkles, BookOpen, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { API_BASE_URL } from './config';
+import { api } from './api/client';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
@@ -207,9 +208,9 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
             {[
               { label: 'Structured Analysis', desc: 'The synthesis is broken into structured sections — key findings, areas of agreement, areas of tension, and open questions — making it easy to navigate complex expert opinion.' },
               { label: 'Consensus Heatmap', desc: 'A visual matrix showing where experts align and where they diverge, question by question. Spots of red reveal the sharpest disagreements worth probing further.' },
-              { label: 'Expert Cross-Analysis', desc: 'A cross-reference view showing how each expert's position relates to others — surfacing which experts are outliers, which are anchors, and where surprising alignments exist.' },
-              { label: 'Emergent Insights', desc: 'AI identifies patterns, themes, and connections that don't appear in any single response — ideas that only become visible when the full expert panel is considered together.' },
-              { label: 'Expert Voice Mirroring', desc: 'Each expert's response is available in its original form or as an AI-clarified version that improves readability while preserving meaning exactly. Toggle between them at any time.' },
+              { label: "Expert Cross-Analysis", desc: "A cross-reference view showing how each expert's position relates to others — surfacing which experts are outliers, which are anchors, and where surprising alignments exist." },
+              { label: "Emergent Insights", desc: "AI identifies patterns, themes, and connections that don't appear in any single response — ideas that only become visible when the full expert panel is considered together." },
+              { label: "Expert Voice Mirroring", desc: "Each expert's response is available in its original form or as an AI-clarified version that improves readability while preserving meaning exactly. Toggle between them at any time." },
               { label: 'Version History', desc: 'Every synthesis is versioned. You can compare how the expert consensus has evolved across rounds — and revert to any earlier synthesis if needed.' },
             ].map((item, i) => (
               <div key={i} style={{ fontSize: '0.83rem', lineHeight: 1.6, display: 'flex', gap: 10 }}>
@@ -764,6 +765,7 @@ export default function AdminFormNew() {
   const [joinCode, setJoinCode] = useState(() => generateJoinCode());
   const [questions, setQuestions] = useState(['']);
   const [saving, setSaving] = useState(false);
+  const [synthesisModel, setSynthesisModel] = useState('anthropic/claude-opus-4-6');
   const [error, setError] = useState<string | null>(null);
 
   /* Question interaction state (Worker B) */
@@ -775,6 +777,13 @@ export default function AdminFormNew() {
   const [allowJoin, setAllowJoin] = useState(true);
   const [anonymous, setAnonymous] = useState(false);
   const [deadline, setDeadline] = useState('');
+
+  // Load synthesis model from settings
+  useEffect(() => {
+    api.get<Record<string, string>>('/admin/settings')
+      .then(data => { if (data.synthesis_model) setSynthesisModel(data.synthesis_model); })
+      .catch(() => {}); // silently fall back to default
+  }, []);
 
   /* Worker D state — Guide modal + AI panel */
   const [guideOpen, setGuideOpen] = useState(false);

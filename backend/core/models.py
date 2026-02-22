@@ -235,3 +235,12 @@ class AuditLog(Base):
     ip_address = Column(String, nullable=True)
 
     user = relationship("User")
+
+
+class Setting(Base):
+    """Global app settings stored as key-value pairs."""
+    __tablename__ = "settings"
+
+    key = Column(String, primary_key=True)
+    value = Column(Text, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

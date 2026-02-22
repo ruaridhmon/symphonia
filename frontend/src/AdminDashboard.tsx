@@ -119,13 +119,22 @@ export default function AdminDashboard() {
               Create and manage your Delphi consultation forms
             </p>
           </div>
-          <LoadingButton
-            variant="accent"
-            size="md"
-            onClick={() => navigate('/admin/forms/new')}
-          >
-            + New Form
-          </LoadingButton>
+          <div className="flex items-center gap-2">
+            <LoadingButton
+              variant="ghost"
+              size="md"
+              onClick={() => navigate('/admin/settings')}
+            >
+              ⚙ Settings
+            </LoadingButton>
+            <LoadingButton
+              variant="accent"
+              size="md"
+              onClick={() => navigate('/admin/forms/new')}
+            >
+              + New Form
+            </LoadingButton>
+          </div>
         </div>
 
         {/* ── Existing forms ── */}

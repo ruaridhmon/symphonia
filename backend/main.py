@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from core import routes as core_routes
 from core.db import engine, SessionLocal
-from core.models import Base, User, UserFormUnlock
+from core.models import Base, User, UserFormUnlock, Setting
 from core.auth import get_password_hash
 from core.ws import ws_manager
 

@@ -14,7 +14,7 @@ import os
 from .models import (
     User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
     UserFormUnlock, FollowUp, FollowUpResponse, SynthesisComment,
-    SynthesisVersion, Draft, AuditLog,
+    SynthesisVersion, Draft, AuditLog, Setting,
 )
 from .audit import audit_log
 from .auth import (
@@ -3095,6 +3095,48 @@ def _build_ai_suggest_user_prompt(title: str, description: str, questions: list[
         return f"{context}\n\nGenerate 3-5 question suggestions.\n\nRespond with JSON only."
 
 
+
+
+# ── App Settings ─────────────────────────────────────────────────────────────
+
+DEFAULT_SETTINGS = {
+    "synthesis_model": "anthropic/claude-opus-4-6",
+}
+
+@router.get("/admin/settings")
+def get_settings(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Return all app settings (admin only)."""
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    rows = db.query(Setting).all()
+    result = dict(DEFAULT_SETTINGS)  # start with defaults
+    for row in rows:
+        result[row.key] = row.value
+    return result
+
+
+@router.patch("/admin/settings")
+def update_settings(
+    payload: dict,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    request: Request = None,
+):
+    """Update one or more settings (admin only)."""
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    allowed_keys = set(DEFAULT_SETTINGS.keys())
+    for key, value in payload.items():
+        if key not in allowed_keys:
+            raise HTTPException(status_code=400, detail=f"Unknown setting: {key}")
+        row = db.query(Setting).filter(Setting.key == key).first()
+        if row:
+            row.value = str(value)
+        else:
+            db.add(Setting(key=key, value=str(value)))
+    db.commit()
+    return {"status": "ok"}
+
 @router.post("/ai/suggest")
 def ai_suggest(
     payload: dict,
@@ -3162,7 +3204,11 @@ def ai_suggest(
     # Build prompts
     system_prompt = DELPHI_SYSTEM_PROMPT.replace("{title}", title)
     user_prompt = _build_ai_suggest_user_prompt(title, description, questions, mode)
-    model = os.getenv("SYNTHESIS_MODEL", "google/gemini-flash-1.5")
+    # Model: from payload > DB setting > env var > hardcoded default
+    model = payload.get("model") or None
+    if not model:
+        db_setting = db.query(Setting).filter(Setting.key == "synthesis_model").first()
+        model = db_setting.value if db_setting else os.getenv("SYNTHESIS_MODEL", "anthropic/claude-opus-4-6")
 
     try:
         openai_client = get_openai_client()

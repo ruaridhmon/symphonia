@@ -72,6 +72,8 @@ export const api = {
       body: new URLSearchParams(params).toString(),
     }),
 
+  patch: <T>(endpoint: string, data: unknown) =>
+    apiClient<T>(endpoint, { method: 'PATCH', body: JSON.stringify(data) }),
   put: <T>(endpoint: string, data: unknown) =>
     apiClient<T>(endpoint, {
       method: 'PUT',
