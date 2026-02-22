@@ -1982,6 +1982,193 @@ async def send_email(
         raise HTTPException(status_code=500, detail=f"Failed: {str(e)}")
 
 
+# ── Helper: send a styled template email ────────────────────────
+async def _send_templated_email(to: str, subject: str, html: str):
+    """Internal helper to send an email via SMTP."""
+    msg = EmailMessage()
+    msg["From"] = os.getenv("SMTP_FROM", "info@colabintel.org")
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg.set_content(html, subtype="html")
+    await aiosmtplib.send(
+        msg,
+        hostname=os.getenv("SMTP_HOST"),
+        port=int(os.getenv("SMTP_PORT", "587")),
+        start_tls=True,
+        username=os.getenv("SMTP_USER"),
+        password=os.getenv("SMTP_PASS"),
+    )
+
+
+class InvitationEmailPayload(BaseModel):
+    to: EmailStr
+    consultation_title: str
+    admin_name: str
+    invitation_url: str
+    message: str = ""
+
+
+@router.post("/email/invitation")
+async def send_invitation_email(
+    payload: InvitationEmailPayload,
+    user: User = Depends(get_current_admin_user),
+):
+    """Send a branded invitation email to an expert."""
+    from .email_templates import invitation
+    subject, html = invitation(
+        consultation_title=payload.consultation_title,
+        admin_name=payload.admin_name,
+        invitation_url=payload.invitation_url,
+        message=payload.message,
+    )
+    try:
+        await _send_templated_email(payload.to, subject, html)
+        return {"status": "sent", "template": "invitation"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Email failed: {str(e)}")
+
+
+class NewRoundEmailPayload(BaseModel):
+    to: list[EmailStr]
+    consultation_title: str
+    round_number: int
+    questions: list[str] | None = None
+    round_url: str
+
+
+@router.post("/email/new-round")
+async def send_new_round_email(
+    payload: NewRoundEmailPayload,
+    user: User = Depends(get_current_admin_user),
+):
+    """Notify experts that a new round is open."""
+    from .email_templates import new_round
+    subject, html = new_round(
+        consultation_title=payload.consultation_title,
+        round_number=payload.round_number,
+        questions=payload.questions,
+        round_url=payload.round_url,
+    )
+    errors = []
+    for recipient in payload.to:
+        try:
+            await _send_templated_email(recipient, subject, html)
+        except Exception as e:
+            errors.append({"to": recipient, "error": str(e)})
+    if errors and len(errors) == len(payload.to):
+        raise HTTPException(status_code=500, detail={"errors": errors})
+    return {"status": "sent", "template": "new_round", "sent": len(payload.to) - len(errors), "errors": errors}
+
+
+class SynthesisReadyEmailPayload(BaseModel):
+    to: list[EmailStr]
+    consultation_title: str
+    round_number: int
+    summary_url: str
+    consensus_score: float | None = None
+
+
+@router.post("/email/synthesis-ready")
+async def send_synthesis_ready_email(
+    payload: SynthesisReadyEmailPayload,
+    user: User = Depends(get_current_admin_user),
+):
+    """Notify participants that synthesis is ready."""
+    from .email_templates import synthesis_ready
+    subject, html = synthesis_ready(
+        consultation_title=payload.consultation_title,
+        round_number=payload.round_number,
+        summary_url=payload.summary_url,
+        consensus_score=payload.consensus_score,
+    )
+    errors = []
+    for recipient in payload.to:
+        try:
+            await _send_templated_email(recipient, subject, html)
+        except Exception as e:
+            errors.append({"to": recipient, "error": str(e)})
+    if errors and len(errors) == len(payload.to):
+        raise HTTPException(status_code=500, detail={"errors": errors})
+    return {"status": "sent", "template": "synthesis_ready", "sent": len(payload.to) - len(errors), "errors": errors}
+
+
+class ReminderEmailPayload(BaseModel):
+    to: list[EmailStr]
+    consultation_title: str
+    round_number: int
+    deadline: str | None = None
+    round_url: str
+
+
+@router.post("/email/reminder")
+async def send_reminder_email(
+    payload: ReminderEmailPayload,
+    user: User = Depends(get_current_admin_user),
+):
+    """Send a gentle reminder to experts who haven't responded."""
+    from .email_templates import round_reminder
+    subject, html = round_reminder(
+        consultation_title=payload.consultation_title,
+        round_number=payload.round_number,
+        deadline=payload.deadline,
+        round_url=payload.round_url,
+    )
+    errors = []
+    for recipient in payload.to:
+        try:
+            await _send_templated_email(recipient, subject, html)
+        except Exception as e:
+            errors.append({"to": recipient, "error": str(e)})
+    if errors and len(errors) == len(payload.to):
+        raise HTTPException(status_code=500, detail={"errors": errors})
+    return {"status": "sent", "template": "round_reminder", "sent": len(payload.to) - len(errors), "errors": errors}
+
+
+@router.get("/email/preview/{template_name}")
+async def preview_email_template(
+    template_name: str,
+    user: User = Depends(get_current_admin_user),
+):
+    """Preview a template with sample data (returns HTML string)."""
+    from .email_templates import TEMPLATES
+    if template_name not in TEMPLATES:
+        raise HTTPException(status_code=404, detail=f"Unknown template: {template_name}. Available: {list(TEMPLATES.keys())}")
+
+    sample_data = {
+        "invitation": dict(
+            consultation_title="AI Safety in Healthcare",
+            admin_name="Dr. Ruaridh Cattach-McLeod",
+            invitation_url="https://symphonia.example.com/form/abc123",
+            message="We'd love your expertise on the ethical implications of AI triage systems.",
+        ),
+        "new_round": dict(
+            consultation_title="AI Safety in Healthcare",
+            round_number=2,
+            questions=["How should we handle AI disagreement with clinicians?", "What oversight mechanisms are essential?"],
+            round_url="https://symphonia.example.com/form/abc123",
+        ),
+        "synthesis_ready": dict(
+            consultation_title="AI Safety in Healthcare",
+            round_number=2,
+            summary_url="https://symphonia.example.com/summary/abc123",
+            consensus_score=0.73,
+        ),
+        "round_reminder": dict(
+            consultation_title="AI Safety in Healthcare",
+            round_number=2,
+            deadline="28 February 2026, 17:00 GMT",
+            round_url="https://symphonia.example.com/form/abc123",
+        ),
+        "welcome": dict(
+            user_email="expert@university.ac.uk",
+            login_url="https://symphonia.example.com/login",
+        ),
+    }
+
+    _subject, html = TEMPLATES[template_name](**sample_data[template_name])
+    return {"template": template_name, "subject": _subject, "html": html}
+
+
 # ---------------------------------------------------------
 # SYNTHESIS COMMENTS
 # ---------------------------------------------------------
