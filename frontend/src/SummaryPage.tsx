@@ -516,7 +516,7 @@ export default function SummaryPage() {
 				</button>
 
 				{/* Main content — full width */}
-				<div className="space-y-4 sm:space-y-6" style={{ marginRight: sidebarOpen ? '21rem' : '0', transition: 'margin-right 0.2s ease' }}>
+				<div className="space-y-4 sm:space-y-6">
 						{/* Non-active round card */}
 						{selectedRound && !selectedRound.is_active && (
 							<RoundCard
