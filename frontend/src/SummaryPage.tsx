@@ -67,7 +67,7 @@ const MODELS = [
 	'anthropic/claude-opus-4-6',
 	'anthropic/claude-sonnet-4',
 	'openai/gpt-4o',
-	'google/gemini-2.0-flash',
+	'google/gemini-flash-3',
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
