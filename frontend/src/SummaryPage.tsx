@@ -125,6 +125,7 @@ export default function SummaryPage() {
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
 	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
+	const [sidebarOpen, setSidebarOpen] = useState(true);
 
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
 	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
