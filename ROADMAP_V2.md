@@ -19,11 +19,11 @@
 - [x] Loading animation (branded CSS bars + logo in index.html, auto-replaced on React mount)
 - [ ] Email templates styling
 
-### 1.3 Visual Consistency
-- [ ] Color system audit (ensure dark/light parity)
-- [ ] Typography scale standardization
-- [ ] Spacing/grid system (8px base)
-- [ ] Icon style unification (all Lucide, semantic colors)
+### 1.3 Visual Consistency ✅ DONE
+- [x] Color system audit (ensure dark/light parity) — skeleton/gradient vars added to all themes, hardcoded #fff → CSS vars
+- [x] Typography scale standardization — documented modular scale in index.css header
+- [x] Spacing/grid system (8px base) — --space-* design tokens + Tailwind grid-* utilities
+- [x] Icon style unification (all Lucide, semantic colors) — .icon-* utility classes added
 
 ---
 
