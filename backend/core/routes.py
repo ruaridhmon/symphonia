@@ -992,8 +992,65 @@ async def generate_synthesis_for_round(
 
         synthesis_text = "".join(text_parts) if text_parts else "Synthesis complete."
 
+    elif strategy == "ttd":
+        # Run TTD (Test-Time Diffusion) synthesis via the consensus library
+        response_dicts = [
+            {
+                "answers": r.answers,
+                "email": r.user.email if r.user else f"Expert {i}",
+            }
+            for i, r in enumerate(responses)
+        ]
+
+        try:
+            flow_mode = FlowMode(payload.mode)
+        except ValueError:
+            flow_mode = FlowMode.HUMAN_ONLY
+
+        synthesiser = get_synthesiser(
+            api_key=api_key,
+            strategy="ttd",
+            model=payload.model,
+            n_analysts=payload.n_analysts,
+        )
+
+        result = await synthesiser.run(
+            questions=questions,
+            responses=response_dicts,
+            model=payload.model,
+            mode=flow_mode,
+            comments_context=round_comments_context,
+        )
+
+        synthesis_json_data = result.to_dict()
+
+        # Build text representation for backwards compat
+        text_parts = []
+        if result.agreements:
+            text_parts.append("<h3>Agreements</h3>")
+            for a in result.agreements:
+                text_parts.append(
+                    f"<p><strong>{a.claim}</strong> "
+                    f"(confidence: {a.confidence:.0%}) — {a.evidence_summary}</p>"
+                )
+        if result.disagreements:
+            text_parts.append("<h3>Disagreements</h3>")
+            for d in result.disagreements:
+                text_parts.append(f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>")
+                for pos in d.positions:
+                    text_parts.append(
+                        f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
+                    )
+                text_parts.append("</ul>")
+        if result.nuances:
+            text_parts.append("<h3>Nuances</h3>")
+            for n in result.nuances:
+                text_parts.append(f"<p><strong>{n.claim}</strong> — {n.context}</p>")
+
+        synthesis_text = "".join(text_parts) if text_parts else "Synthesis complete."
+
     else:
-        # Simple / TTD single-prompt synthesis — now produces structured JSON too
+        # Simple single-prompt synthesis — produces structured JSON
         prompt_content = "Synthesize the following expert responses.\n\n"
         prompt_content += "Questions:\n"
         for i, q in enumerate(questions, 1):
