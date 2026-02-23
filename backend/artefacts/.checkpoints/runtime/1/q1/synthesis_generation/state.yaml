@@ -1,25 +1,25 @@
 artefact_type: synthesis
 current_artefact:
   areas_of_agreement:
-  - The current system is financially unsustainable in its present trajectory.
+  - There is a significant "postcode lottery" where access to support depends on local authority capacity.
+  - The current volume of EHCP requests is unsustainable for local government budgets.
   - Early intervention is more cost-effective than crisis management, yet remains underfunded.
+  - There is a critical shortage of educational psychologists and specialist teaching staff.
   - The rise in mental health needs and neurodiversity awareness has significantly increased demand for SEN services.
   - The current system is reactive rather than preventative, focusing resources on crisis management.
   - Mainstream schools currently lack the physical and human infrastructure to support the increasing complexity of needs.
   - Early intervention is theoretically more cost-effective but currently underfunded in favor of crisis management.
-  - There is a critical shortage of educational psychologists and specialist teaching staff.
-  - The current volume of EHCP requests is unsustainable for local government budgets.
-  - There is a significant "postcode lottery" where access to support depends on local authority capacity.
+  - The current system is financially unsustainable in its present trajectory.
   areas_of_disagreement:
-  - The extent to which the 2014 reforms are responsible for the current crisis versus subsequent underfunding.
-  - The extent to which "parental choice" should dictate high-cost independent specialist placements.
-  - Whether the increase in SEN cases reflects a genuine rise in biological conditions or a societal/educational shift.
-  - The efficacy of the SEND tribunal system in ensuring equitable outcomes.
-  - Whether the rise in EHCP requests is driven by increased need or by the failure of mainstream 'ordinarily available' provision.
   - The role of private/independent special school placements in draining budgets from the state sector.
-  - Whether the rise in SEN is due to better clinical identification or a failure of the general education system to be flexible.
   - Whether the solution lies in increasing total funding or fundamentally reforming the 2014 Children and Families Act.
+  - Whether the increase in SEN cases reflects a genuine rise in biological conditions or a societal/educational shift.
+  - The extent to which "parental choice" should dictate high-cost independent specialist placements.
+  - The extent to which the 2014 reforms are responsible for the current crisis versus subsequent underfunding.
+  - The efficacy of the SEND tribunal system in ensuring equitable outcomes.
   - The extent to which the legal framework (Children and Families Act 2014) is the solution or part of the problem.
+  - Whether the rise in SEN is due to better clinical identification or a failure of the general education system to be flexible.
+  - Whether the rise in EHCP requests is driven by increased need or by the failure of mainstream 'ordinarily available' provision.
   claims:
   - agreement_level: consensus
     claim_id: T0_C1
@@ -383,285 +383,8 @@ current_artefact:
       verification_status: unverified
     text: '(minority): "The SEND tribunal system is viewed by some as an inequitable mechanism that favors families with the
       resources to litigate, rather than ensuring universal statutory compliance."'
-  - agreement_level: majority
+  - agreement_level: consensus
     claim_id: T1_C1
-    counterarguments:
-    - Some argue that the issue is not the amount of funding but the inefficient and adversarial way it is allocated through
-      legal tribunals.
-    - Experts E1 and E9 argue this is not an aggregate lack of funds but a deliberate and inequitable distribution of resources
-      rooted in systemic injustice.
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: funding has not kept pace with inflation or the increasing complexity of needs
-      source_id: E1
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: real-terms deficits in High Needs Blocks are now systemic
-      source_id: E5
-      verification_status: unverified
-    text: '(majority): Experts identified a primary driver as the gap between statutory funding levels and the reported cost
-      of provision.'
-  - agreement_level: divided
-    claim_id: T1_C2
-    counterarguments:
-    - EHCPs are viewed by others as the only remaining safeguard for children's rights in a failing system.
-    - Expert E4 contends that legal challenges are a necessary response to "willful inertia" and a pervasive lack of accountability
-      within local authorities.
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: the system forces parents into an adversarial battle to secure basic support
-      source_id: E3
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: legal fees and tribunal costs are diverting millions from frontline service delivery
-      source_id: E8
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: Secondly, bureaucratic inertia and a focus on process over people.
-      source_id: E8
-      verification_status: unverified
-    text: '(divided): Experts described the adversarial nature of the statutory process as a "bureaucratic quagmire" (E8)
-      that exhausts local authority resources and prioritizes process over individual needs.'
-  - agreement_level: consensus
-    claim_id: T1_C3
-    counterarguments:
-    - A minority of experts suggest that "diagnostic overshadowing" may lead to over-medicalization of social or educational
-      issues.
-    - Experts E8 and E12 suggest that the current "deficit model" of identification functions as a mechanism of control rather
-      than genuine support.
-    - Expert E1 characterizes the "identification" narrative as disingenuous, arguing it masks a deliberate starvation of
-      public services.
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: unprecedented rise in neurodevelopmental diagnoses over the last decade
-      source_id: E2
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: societal shift toward better recognition of hidden disabilities
-      source_id: E10
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: The primary driver of the SEN crisis is a mismatch between our understanding of neurodiversity and existing educational
-        infrastructure.
-      source_id: E10
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: This is, in many ways, a triumph of improved diagnostic practices and a reduction in stigma
-      source_id: E10_c003
-      verification_status: unverified
-    text: '(divided): While many experts cite a mismatch between increased neurodiversity identification and infrastructure,
-      some view this narrative as a distraction from structural resource distribution.'
-  - agreement_level: majority
-    claim_id: T1_C4
-    counterarguments:
-    - Some argue that with proper leadership and culture, mainstream schools can be inclusive without massive capital investment.
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: mainstream teachers feel ill-equipped to manage complex behavioral and medical needs
-      source_id: E4
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: lack of specialist spaces within mainstream settings leads to placement breakdowns
-      source_id: E12
-      verification_status: unverified
-    text: '(majority): Experts noted gaps in mainstream infrastructure, staff training, and inclusive capacity required to
-      support high-needs pupils.'
-  - agreement_level: minority
-    claim_id: T1_C5
-    counterarguments:
-    - The immediate crisis is focused on the 5-16 age bracket; post-16 issues are a secondary symptom.
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: failure to plan for transition to adulthood leads to more expensive interventions later
-      source_id: E7
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: This creates a de facto inequality where children from more privileged backgrounds are more likely to receive
-        timely and effective support.
-      source_id: E7
-      verification_status: unverified
-    text: '(minority): The duration of funding gaps and the allocation of resources are identified as drivers of inequality,
-      where support access may be influenced by socio-economic background.'
-  - agreement_level: majority
-    claim_id: T1_C6
-    counterarguments:
-    - Pandemic effects are temporary and should not be used to justify permanent structural changes to SEN law.
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: lockdown-related social and communication delays are now manifesting as SEN demand
-      source_id: E6
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: spike in school refusal and anxiety-based non-attendance
-      source_id: E11
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: The primary driver of the SEN crisis is a "loss of momentum" and a detachment from altruistic ideals.
-      source_id: E6
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: The crisis is driven by a state of profound emotional and systemic exhaustion.
-      source_id: E11
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: Systemic weariness prevents the implementation of proactive solutions and fosters resignation.
-      source_id: E11_c005
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: the primary drivers are deeply embedded within a "loss of momentum" – a gradual detachment from the altruistic
-        ideals that once propelled progressive policy.
-      source_id: E6_c001
-      verification_status: unverified
-    text: '(majority): Drivers include a "loss of momentum" in policy (E6), alongside systemic exhaustion and weariness that
-      prevents the implementation of proactive solutions (E11).'
-  - agreement_level: divided
-    claim_id: T1_new_C7
-    counterarguments:
-    - Expert E10 views the strain not as a deliberate dismantling but as an unintended consequence of the "triumph" of increased
-      identification and awareness.
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: E1_c002
-      source_id: E1
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: E9_c001
-      source_id: E9
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: The SEN system has suffered from a deliberate systemic starvation of essential resources.
-      source_id: E1
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: These are not altruistic enterprises; they are businesses that profit from a system designed to generate demand
-        while simultaneously undermining public provision.
-      source_id: E1_c004
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: witnessing firsthand the gutting of special education in an urban district due to what were then euphemistically
-        termed "budgetary efficiencies"
-      source_id: E9_e001
-      verification_status: unverified
-    text: '(divided): Perspectives on systemic failure range from "ideological dismantling" and "budgetary efficiencies" (E9)
-      to a "deliberate systemic starvation" (E1) involving private providers and lobbying interests.'
-  - agreement_level: divided
-    claim_id: T1_new_C8
-    counterarguments: []
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: E8_c001
-      source_id: E8
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: E12_e003
-      source_id: E12
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: the qualitative data from my study on SEN coordinators – the exhaustion, the moral distress, the sheer Sisyphean
-        effort
-      source_id: E12
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: cultivate a culture of profound empathy and respect for the lived experiences of children with SEN and their
-        families.
-      source_id: new_E12_c009_empathy
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: a subtle, perhaps unconscious, societal tendency to devalue or misunderstand the needs of individuals with SEN
-      source_id: new_E7_c009_a
-      verification_status: unverified
-    text: '(minority): Experts point to a "societal ambivalence" (E8) toward difference and a deficit in "genuine empathy"
-      (E12) as underlying cultural drivers of systemic failure.'
-  - agreement_level: divided
-    claim_id: T1_new_C9
-    counterarguments: []
-    sources:
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: E10 regarding diagnostic triumph
-      source_id: E10_c003
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: E1 regarding distribution of resources
-      source_id: E1_c006
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: E9 regarding systemic breakdown
-      source_id: E9_c001
-      verification_status: unverified
-    - confidence: null
-      match_score: -1.0
-      matched_text: null
-      quote: The traditional model of schooling... often struggles to accommodate the flexibility and individualized approaches
-      source_id: E10_c008
-      verification_status: unverified
-    text: '(divided): There is an explicit conflict regarding the rise in SEN cases: whether it represents a success in clinical
-      practice and reduced stigma (E10) or a failure of a rigid education system to accommodate difference (E1, E9).'
-  - agreement_level: consensus
-    claim_id: T2_C1
     counterarguments:
     - Some argue the issue is not just total funding but the inefficient distribution of existing high-needs blocks.
     - Expert E1 argues that "resource scarcity" is a disingenuous framing used by vested interests to mask a deliberate and
@@ -696,7 +419,7 @@ current_artefact:
     text: '(majority): The current funding model is described by Expert E1 as "systemic starvation" and "deliberate neglect,"
       failing to meet the statutory requirements of the increasing number of EHCPs.'
   - agreement_level: majority
-    claim_id: T2_C2
+    claim_id: T1_C2
     counterarguments:
     - Accountability measures are necessary to ensure high standards for all pupils, including those with SEN.
     sources:
@@ -714,7 +437,7 @@ current_artefact:
       verification_status: unverified
     text: High-stakes school accountability and performance metrics disincentivize mainstream schools from being inclusive.
   - agreement_level: consensus
-    claim_id: T2_C4
+    claim_id: T1_C4
     counterarguments:
     - Statutory protections are essential to prevent local authorities from ignoring their duties.
     sources:
@@ -759,7 +482,7 @@ current_artefact:
     text: '(consensus): A "bureaucratic labyrinth" and "willful inertia" within the system force parents to navigate complex
       legal and diagnostic pathways to secure support.'
   - agreement_level: divided
-    claim_id: T2_C5
+    claim_id: T1_C5
     counterarguments:
     - Over-medicalization and "diagnostic creep" may be labeling behavioral issues as clinical disorders (E7).
     - Expert E10 suggests the strain is a byproduct of progress in identification rather than intentional systemic failure.
@@ -787,7 +510,7 @@ current_artefact:
       systems struggle to adapt to evolving understanding, while E1 views it as a result of "deliberate policy neglect" and
       "calculated indifference."'
   - agreement_level: majority
-    claim_id: T2_C6
+    claim_id: T1_C6
     counterarguments:
     - Training alone cannot compensate for the physical lack of staff and space in overcrowded schools.
     sources:
@@ -806,7 +529,7 @@ current_artefact:
     text: '(majority): Workforce shortages and a lack of specialist training impact the delivery of early intervention in
       mainstream settings.'
   - agreement_level: divided
-    claim_id: T2_new_C7
+    claim_id: T1_new_C7
     counterarguments: []
     sources:
     - confidence: null
@@ -867,7 +590,7 @@ current_artefact:
     text: '(divided): Experts E2 and E6 describe a "fragmentation of knowledge" and "systemic amnesia," where polished policy
       rhetoric remains decoupled from the lived experiences of families [E2, E6, E11, E12].'
   - agreement_level: divided
-    claim_id: T2_new_C8
+    claim_id: T1_new_C8
     counterarguments: []
     sources:
     - confidence: null
@@ -905,7 +628,7 @@ current_artefact:
     text: '(divided): The crisis is driven by a shift toward "metrics, standardisation, and efficiency" [E5], which Expert
       E6 argues leads to the "de-professionalisation" of SEN expertise and an oversight of the emotional toll on families.'
   - agreement_level: divided
-    claim_id: T2_new_C9
+    claim_id: T1_new_C9
     counterarguments:
     - Expert E4 argues the crisis stems from a failure of governance and lack of legal clarity rather than the inherent nature
       of the Act itself.
@@ -944,7 +667,7 @@ current_artefact:
     text: '(divided): There is a fundamental conflict between the legal framework of the Children and Families Act 2014 as
       a "clear mandate" for rights [E4] versus a "bureaucratic labyrinth" that exploits parental vulnerability [E1, E12].'
   - agreement_level: divided
-    claim_id: T2_new_C10
+    claim_id: T1_new_C10
     counterarguments: []
     sources:
     - confidence: null
@@ -974,8 +697,285 @@ current_artefact:
       verification_status: unverified
     text: '(minority): The "private provider" industry and independent special school placements create "perverse incentives"
       that drain essential resources from the state sector [E1, E8].'
+  - agreement_level: majority
+    claim_id: T2_C1
+    counterarguments:
+    - Some argue that the issue is not the amount of funding but the inefficient and adversarial way it is allocated through
+      legal tribunals.
+    - Experts E1 and E9 argue this is not an aggregate lack of funds but a deliberate and inequitable distribution of resources
+      rooted in systemic injustice.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: funding has not kept pace with inflation or the increasing complexity of needs
+      source_id: E1
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: real-terms deficits in High Needs Blocks are now systemic
+      source_id: E5
+      verification_status: unverified
+    text: '(majority): Experts identified a primary driver as the gap between statutory funding levels and the reported cost
+      of provision.'
+  - agreement_level: divided
+    claim_id: T2_C2
+    counterarguments:
+    - EHCPs are viewed by others as the only remaining safeguard for children's rights in a failing system.
+    - Expert E4 contends that legal challenges are a necessary response to "willful inertia" and a pervasive lack of accountability
+      within local authorities.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: the system forces parents into an adversarial battle to secure basic support
+      source_id: E3
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: legal fees and tribunal costs are diverting millions from frontline service delivery
+      source_id: E8
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: Secondly, bureaucratic inertia and a focus on process over people.
+      source_id: E8
+      verification_status: unverified
+    text: '(divided): Experts described the adversarial nature of the statutory process as a "bureaucratic quagmire" (E8)
+      that exhausts local authority resources and prioritizes process over individual needs.'
+  - agreement_level: consensus
+    claim_id: T2_C3
+    counterarguments:
+    - A minority of experts suggest that "diagnostic overshadowing" may lead to over-medicalization of social or educational
+      issues.
+    - Experts E8 and E12 suggest that the current "deficit model" of identification functions as a mechanism of control rather
+      than genuine support.
+    - Expert E1 characterizes the "identification" narrative as disingenuous, arguing it masks a deliberate starvation of
+      public services.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: unprecedented rise in neurodevelopmental diagnoses over the last decade
+      source_id: E2
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: societal shift toward better recognition of hidden disabilities
+      source_id: E10
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: The primary driver of the SEN crisis is a mismatch between our understanding of neurodiversity and existing educational
+        infrastructure.
+      source_id: E10
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: This is, in many ways, a triumph of improved diagnostic practices and a reduction in stigma
+      source_id: E10_c003
+      verification_status: unverified
+    text: '(divided): While many experts cite a mismatch between increased neurodiversity identification and infrastructure,
+      some view this narrative as a distraction from structural resource distribution.'
+  - agreement_level: majority
+    claim_id: T2_C4
+    counterarguments:
+    - Some argue that with proper leadership and culture, mainstream schools can be inclusive without massive capital investment.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: mainstream teachers feel ill-equipped to manage complex behavioral and medical needs
+      source_id: E4
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: lack of specialist spaces within mainstream settings leads to placement breakdowns
+      source_id: E12
+      verification_status: unverified
+    text: '(majority): Experts noted gaps in mainstream infrastructure, staff training, and inclusive capacity required to
+      support high-needs pupils.'
+  - agreement_level: minority
+    claim_id: T2_C5
+    counterarguments:
+    - The immediate crisis is focused on the 5-16 age bracket; post-16 issues are a secondary symptom.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: failure to plan for transition to adulthood leads to more expensive interventions later
+      source_id: E7
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: This creates a de facto inequality where children from more privileged backgrounds are more likely to receive
+        timely and effective support.
+      source_id: E7
+      verification_status: unverified
+    text: '(minority): The duration of funding gaps and the allocation of resources are identified as drivers of inequality,
+      where support access may be influenced by socio-economic background.'
+  - agreement_level: majority
+    claim_id: T2_C6
+    counterarguments:
+    - Pandemic effects are temporary and should not be used to justify permanent structural changes to SEN law.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: lockdown-related social and communication delays are now manifesting as SEN demand
+      source_id: E6
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: spike in school refusal and anxiety-based non-attendance
+      source_id: E11
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: The primary driver of the SEN crisis is a "loss of momentum" and a detachment from altruistic ideals.
+      source_id: E6
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: The crisis is driven by a state of profound emotional and systemic exhaustion.
+      source_id: E11
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: Systemic weariness prevents the implementation of proactive solutions and fosters resignation.
+      source_id: E11_c005
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: the primary drivers are deeply embedded within a "loss of momentum" – a gradual detachment from the altruistic
+        ideals that once propelled progressive policy.
+      source_id: E6_c001
+      verification_status: unverified
+    text: '(majority): Drivers include a "loss of momentum" in policy (E6), alongside systemic exhaustion and weariness that
+      prevents the implementation of proactive solutions (E11).'
+  - agreement_level: divided
+    claim_id: T2_new_C7
+    counterarguments:
+    - Expert E10 views the strain not as a deliberate dismantling but as an unintended consequence of the "triumph" of increased
+      identification and awareness.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: E1_c002
+      source_id: E1
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: E9_c001
+      source_id: E9
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: The SEN system has suffered from a deliberate systemic starvation of essential resources.
+      source_id: E1
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: These are not altruistic enterprises; they are businesses that profit from a system designed to generate demand
+        while simultaneously undermining public provision.
+      source_id: E1_c004
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: witnessing firsthand the gutting of special education in an urban district due to what were then euphemistically
+        termed "budgetary efficiencies"
+      source_id: E9_e001
+      verification_status: unverified
+    text: '(divided): Perspectives on systemic failure range from "ideological dismantling" and "budgetary efficiencies" (E9)
+      to a "deliberate systemic starvation" (E1) involving private providers and lobbying interests.'
+  - agreement_level: divided
+    claim_id: T2_new_C8
+    counterarguments: []
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: E8_c001
+      source_id: E8
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: E12_e003
+      source_id: E12
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: the qualitative data from my study on SEN coordinators – the exhaustion, the moral distress, the sheer Sisyphean
+        effort
+      source_id: E12
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: cultivate a culture of profound empathy and respect for the lived experiences of children with SEN and their
+        families.
+      source_id: new_E12_c009_empathy
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: a subtle, perhaps unconscious, societal tendency to devalue or misunderstand the needs of individuals with SEN
+      source_id: new_E7_c009_a
+      verification_status: unverified
+    text: '(minority): Experts point to a "societal ambivalence" (E8) toward difference and a deficit in "genuine empathy"
+      (E12) as underlying cultural drivers of systemic failure.'
+  - agreement_level: divided
+    claim_id: T2_new_C9
+    counterarguments: []
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: E10 regarding diagnostic triumph
+      source_id: E10_c003
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: E1 regarding distribution of resources
+      source_id: E1_c006
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: E9 regarding systemic breakdown
+      source_id: E9_c001
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: The traditional model of schooling... often struggles to accommodate the flexibility and individualized approaches
+      source_id: E10_c008
+      verification_status: unverified
+    text: '(divided): There is an explicit conflict regarding the rise in SEN cases: whether it represents a success in clinical
+      practice and reduced stigma (E10) or a failure of a rigid education system to accommodate difference (E1, E9).'
   code_version: adapter-v2
-  generated_at: '2026-02-23T01:12:46.408205+00:00'
+  generated_at: '2026-02-23T01:29:10.236230+00:00'
   model: google/gemini-3-flash-preview
   narrative: ''
   narrative_statements: []
@@ -986,13 +986,13 @@ current_artefact:
   study_id: ''
   type: synthesis
   uncertainties:
+  - The long-term impact of COVID-19 lockdowns on the developmental trajectories of early-years cohorts.
+  - The degree to which diagnostic overshadowing is affecting the accuracy of SEN identification.
+  - The degree to which private diagnostic assessments are contributing to inequity in the system.
+  - The long-term impact of digital technology and social media on neurodevelopmental trends remains unquantified.
+  - The long-term efficacy of "inclusion" in mainstream settings for children with the most complex needs.
   - It is unclear if "inclusion" in mainstream settings is always the best clinical or educational outcome for all children
     with complex needs.
-  - The degree to which diagnostic overshadowing is affecting the accuracy of SEN identification.
-  - The long-term impact of COVID-19 lockdowns on the developmental trajectories of early-years cohorts.
-  - The long-term impact of digital technology and social media on neurodevelopmental trends remains unquantified.
-  - The degree to which private diagnostic assessments are contributing to inequity in the system.
-  - The long-term efficacy of "inclusion" in mainstream settings for children with the most complex needs.
 is_complete: true
 prompt_version: v1
 stage: synthesis_generation
@@ -5310,4 +5310,4 @@ trajectories:
     timestamp: '2026-02-23T01:12:09.766993'
   total_steps: 2
   trajectory_id: traj_03
-updated_at: '2026-02-23T01:12:46.408357'
+updated_at: '2026-02-23T01:29:10.236349'

@@ -167,11 +167,11 @@ function getDimensionClass(label?: string): string {
 export default function StructuredSynthesis({ data, convergenceScore, expertLabels, formId, roundId, token, currentUserEmail }: StructuredSynthesisProps) {
   const commentsEnabled = !!(formId && roundId && token);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    narrative: true,
     agreements: true,
     disagreements: true,
     nuances: false,
     probes: true,
-    narrative: false,
   });
   const [openEvidence, setOpenEvidence] = useState<Record<number, boolean>>({});
 
