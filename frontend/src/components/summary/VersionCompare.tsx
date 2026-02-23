@@ -54,8 +54,9 @@ export default function VersionCompare({ versions, currentVersionId, onClose }: 
           className="p-1.5 rounded-lg transition-colors"
           style={{ background: 'none', border: 'none', color: 'var(--muted-foreground)', cursor: 'pointer' }}
           title="Close comparison"
+          aria-label="Close version comparison"
         >
-          <X size={18} />
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
 

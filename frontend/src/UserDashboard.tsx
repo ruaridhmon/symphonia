@@ -162,6 +162,7 @@ export default function UserDashboard() {
                 backgroundColor: 'var(--background)',
                 color: 'var(--foreground)',
               }}
+              aria-label="Join code"
             />
             {joinError && (
               <p

@@ -87,15 +87,17 @@ function CommentItem({
                 onClick={() => { setIsEditing(true); setEditBody(comment.body); }}
                 style={styles.actionBtn}
                 title="Edit"
+                aria-label="Edit comment"
               >
-                <Pencil size={12} />
+                <Pencil size={12} aria-hidden="true" />
               </button>
               <button
                 onClick={() => onDelete(comment.id)}
                 style={styles.actionBtn}
                 title="Delete"
+                aria-label="Delete comment"
               >
-                <Trash2 size={12} />
+                <Trash2 size={12} aria-hidden="true" />
               </button>
             </>
           )}
@@ -104,8 +106,9 @@ function CommentItem({
               onClick={() => onReply(comment.id)}
               style={styles.actionBtn}
               title="Reply"
+              aria-label="Reply to comment"
             >
-              <Reply size={12} />
+              <Reply size={12} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -118,6 +121,7 @@ function CommentItem({
             onChange={(e) => setEditBody(e.target.value)}
             style={styles.textarea}
             rows={2}
+            aria-label="Edit comment text"
           />
           <div style={styles.editActions}>
             <button onClick={() => setIsEditing(false)} style={styles.cancelBtn}>
@@ -268,10 +272,12 @@ export default function CommentThread({
         onClick={() => setExpanded(!expanded)}
         style={styles.toggleBtn}
         title={expanded ? 'Collapse comments' : 'View comments'}
+        aria-label={expanded ? 'Collapse comments' : `View comments${commentCount > 0 ? ` (${commentCount})` : ''}`}
+        aria-expanded={expanded}
       >
-        <span style={styles.commentIcon}><MessageSquare size={14} style={{ color: 'var(--accent)' }} /></span>
+        <span style={styles.commentIcon}><MessageSquare size={14} style={{ color: 'var(--accent)' }} aria-hidden="true" /></span>
         {commentCount > 0 && (
-          <span style={styles.badge}>{commentCount}</span>
+          <span style={styles.badge} aria-hidden="true">{commentCount}</span>
         )}
       </button>
 
@@ -306,6 +312,7 @@ export default function CommentThread({
               <button
                 onClick={() => setReplyTo(null)}
                 style={styles.cancelReplyBtn}
+                aria-label="Cancel reply"
               >
                 ✕
               </button>
@@ -320,6 +327,7 @@ export default function CommentThread({
               placeholder={replyTo ? 'Write a reply…' : 'Add a comment…'}
               style={styles.textarea}
               rows={2}
+              aria-label={replyTo ? 'Write a reply' : 'Add a comment'}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   handleSubmit();
@@ -333,6 +341,7 @@ export default function CommentThread({
                 ...styles.submitBtn,
                 opacity: submitting || !newBody.trim() ? 0.5 : 1,
               }}
+              aria-label={replyTo ? 'Submit reply' : 'Submit comment'}
             >
               {submitting ? '…' : '↑'}
             </button>

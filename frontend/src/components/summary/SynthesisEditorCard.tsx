@@ -25,6 +25,8 @@ export default function SynthesisEditorCard({
           <span>📝</span> Synthesis for Round {activeRound?.round_number || ''}
         </h2>
         <div
+          role="tablist"
+          aria-label="Synthesis view mode"
           style={{
             display: 'inline-flex',
             borderRadius: '0.5rem',
@@ -35,6 +37,8 @@ export default function SynthesisEditorCard({
           }}
         >
           <button
+            role="tab"
+            aria-selected={synthesisViewMode === 'view'}
             onClick={() => onSetViewMode('view')}
             style={{
               padding: '0.375rem 0.75rem',
@@ -49,6 +53,8 @@ export default function SynthesisEditorCard({
             View
           </button>
           <button
+            role="tab"
+            aria-selected={synthesisViewMode === 'edit'}
             onClick={() => onSetViewMode('edit')}
             style={{
               padding: '0.375rem 0.75rem',

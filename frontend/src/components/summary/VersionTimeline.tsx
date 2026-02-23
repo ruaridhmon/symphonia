@@ -109,6 +109,8 @@ export default function VersionTimeline({
                 type="button"
                 onClick={() => onSelectVersion(v.id)}
                 className="relative w-full text-left group transition-all"
+                aria-pressed={isSelected}
+                aria-label={`Version ${v.version}${v.is_active ? ' (published)' : ''} — ${formatTimestamp(v.created_at)}`}
                 style={{
                   padding: '0.625rem 0.75rem 0.625rem 1.25rem',
                   background: 'none',

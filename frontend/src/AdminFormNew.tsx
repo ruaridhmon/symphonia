@@ -119,8 +119,9 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
             justifyContent: 'center',
           }}
           title="Close guide"
+          aria-label="Close guide"
         >
-          <X size={20} />
+          <X size={20} aria-hidden="true" />
         </button>
 
         {/* Header */}
@@ -480,8 +481,9 @@ function AiAssistantPanel({
             alignItems: 'center',
           }}
           title="Close AI assistant"
+          aria-label="Close AI assistant"
         >
-          <X size={16} />
+          <X size={16} aria-hidden="true" />
         </button>
       </div>
 
@@ -1133,8 +1135,9 @@ export default function AdminFormNew() {
                           lineHeight: 1,
                         }}
                         title="Move up"
+                        aria-label={`Move question ${i + 1} up`}
                       >
-                        <ChevronUp size={14} />
+                        <ChevronUp size={14} aria-hidden="true" />
                       </button>
                     ) : (
                       <span style={{ height: 14 }} />
@@ -1155,8 +1158,9 @@ export default function AdminFormNew() {
                           lineHeight: 1,
                         }}
                         title="Move down"
+                        aria-label={`Move question ${i + 1} down`}
                       >
-                        <ChevronDown size={14} />
+                        <ChevronDown size={14} aria-hidden="true" />
                       </button>
                     ) : (
                       <span style={{ height: 14 }} />
@@ -1237,8 +1241,9 @@ export default function AdminFormNew() {
                         flexShrink: 0,
                       }}
                       title="Remove question"
+                      aria-label={`Remove question ${i + 1}`}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -1303,6 +1308,8 @@ export default function AdminFormNew() {
               type="button"
               onClick={() => setSettingsOpen(prev => !prev)}
               className="w-full flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors duration-150"
+              aria-expanded={settingsOpen}
+              aria-label="Advanced Settings"
               style={{
                 background: 'none',
                 border: 'none',

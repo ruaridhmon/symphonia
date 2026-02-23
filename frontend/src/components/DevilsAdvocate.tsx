@@ -56,6 +56,8 @@ export default function DevilsAdvocate({ formId, roundId }: DevilsAdvocateProps)
           onClick={() => generated && setExpanded(e => !e)}
           className="flex items-center gap-2 text-left"
           style={{ background: 'none', border: 'none', cursor: generated ? 'pointer' : 'default', padding: 0 }}
+          aria-expanded={generated ? expanded : undefined}
+          aria-label="Toggle AI counterpoints section"
         >
           <ShieldAlert size={20} style={{ color: 'var(--warning)' }} />
           <h2 className="text-lg font-semibold text-foreground">

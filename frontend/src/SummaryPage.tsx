@@ -459,9 +459,12 @@ export default function SummaryPage() {
 
 	return (
 		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
+			<a href="#main-content" className="skip-to-main">
+				Skip to main content
+			</a>
 			<SummaryHeader email={email} viewers={viewers} onLogout={logout} />
 
-			<main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+			<main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6" tabIndex={-1}>
 				{/* Navigation breadcrumb */}
 				<div className="mb-4 flex items-center justify-between">
 					<button
@@ -684,7 +687,9 @@ export default function SummaryPage() {
 					</div>
 
 					{/* ── Floating Sidebar ── */}
-					<div
+					<aside
+						role="complementary"
+						aria-label="Synthesis controls"
 						style={{
 							position: 'fixed',
 							right: 0,
@@ -758,7 +763,7 @@ export default function SummaryPage() {
 							selectedRoundId={selectedRound?.id || null}
 							onSelectRound={handleSelectRound}
 						/>
-					</div>
+					</aside>
 			</main>
 
 			{/* Responses modal */}

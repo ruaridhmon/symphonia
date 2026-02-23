@@ -217,6 +217,7 @@ export default function AdminDashboard() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     className="w-full text-sm pl-9 pr-3"
+                    aria-label="Search forms"
                     style={{
                       height: '2.5rem',
                       borderRadius: 'var(--radius)',

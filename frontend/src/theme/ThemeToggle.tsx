@@ -58,6 +58,7 @@ export function ThemeToggle() {
         onClick={() => setOpen((prev) => !prev)}
         aria-label="Change theme"
         aria-expanded={open}
+        aria-haspopup="menu"
         className="
           flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium
           transition-colors duration-200
@@ -82,6 +83,8 @@ export function ThemeToggle() {
             shadow-lg
             animate-in fade-in slide-in-from-top-1
           "
+          role="menu"
+          aria-label="Theme options"
           style={{
             backgroundColor: 'var(--card)',
             border: '1px solid var(--border)',
@@ -94,6 +97,8 @@ export function ThemeToggle() {
               <button
                 key={option.id}
                 type="button"
+                role="menuitem"
+                aria-current={isActive ? 'true' : undefined}
                 onClick={() => {
                   setTheme(option.id);
                   setOpen(false);

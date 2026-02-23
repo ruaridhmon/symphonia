@@ -78,10 +78,12 @@ export default function SynthesisVersionPanel({
                     cursor: 'pointer',
                   }}
                   title={`v${v.version}${v.is_active ? ' (published)' : ''} — ${formatTimestamp(v.created_at)}`}
+                  aria-pressed={isSelected}
+                  aria-label={`Version ${v.version}${v.is_active ? ' (published)' : ''}`}
                 >
                   v{v.version}
                   {v.is_active && (
-                    <CheckCircle size={12} style={{ color: 'var(--success)' }} />
+                    <CheckCircle size={12} style={{ color: 'var(--success)' }} aria-hidden="true" />
                   )}
                 </button>
               );

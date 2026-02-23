@@ -57,21 +57,27 @@ export default function EmergenceHighlights({ insights, expertLabels, formId, ro
 
   return (
     <div className="emergence-section fade-in">
-      <button className="structured-section-header" onClick={() => setExpanded(!expanded)}>
+      <button
+        className="structured-section-header"
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        aria-controls="emergence-highlights-body"
+        aria-label={`Emergent Insights — ${insights.length} item${insights.length !== 1 ? 's' : ''}`}
+      >
         <div className="structured-section-left">
-          <span className="structured-section-emoji"><Sparkles size={16} style={{ color: 'var(--accent)' }} /></span>
+          <span className="structured-section-emoji" aria-hidden="true"><Sparkles size={16} style={{ color: 'var(--accent)' }} /></span>
           <span className="structured-section-title">Emergent Insights</span>
           <span className="structured-section-badge" style={{ backgroundColor: 'var(--accent)' }}>
             {insights.length}
           </span>
         </div>
-        <span className={`structured-section-chevron ${expanded ? 'expanded' : ''}`}>
+        <span className={`structured-section-chevron ${expanded ? 'expanded' : ''}`} aria-hidden="true">
           ▸
         </span>
       </button>
 
       {expanded && (
-        <div className="structured-section-body slide-down">
+        <div className="structured-section-body slide-down" id="emergence-highlights-body" role="region" aria-label="Emergent Insights">
           {insights.map((insight, i) => (
             <div key={i} className="emergence-card">
               <div className="emergence-card-top">

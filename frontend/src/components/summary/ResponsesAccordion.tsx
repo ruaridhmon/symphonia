@@ -119,6 +119,8 @@ export default function ResponsesAccordion({
                   cursor: 'pointer',
                   fontFamily: 'var(--font-family)',
                 }}
+                aria-expanded={isExpanded}
+                aria-controls={`responses-round-${round.id}`}
               >
                 <div className="flex items-center gap-3">
                   <span
@@ -164,7 +166,10 @@ export default function ResponsesAccordion({
               {/* Expanded content — responses */}
               {isExpanded && (
                 <div
+                  id={`responses-round-${round.id}`}
                   className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-3 slide-down"
+                  role="region"
+                  aria-label={`Responses for Round ${round.round_number}`}
                   style={{
                     borderTop: '1px solid var(--border)',
                   }}

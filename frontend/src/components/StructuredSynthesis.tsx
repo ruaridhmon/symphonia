@@ -66,10 +66,17 @@ function ConfidenceBar({ value, label }: { value: number; label?: string }) {
   return (
     <div className="confidence-bar">
       {label && <span className="confidence-label">{label}</span>}
-      <div className="confidence-track">
+      <div
+        className="confidence-track"
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={label ? `${label}: ${pct}%` : `Confidence: ${pct}%`}
+      >
         <div className="confidence-fill" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
-      <span className="confidence-value">{pct}%</span>
+      <span className="confidence-value" aria-hidden="true">{pct}%</span>
     </div>
   );
 }

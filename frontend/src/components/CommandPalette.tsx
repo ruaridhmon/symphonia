@@ -316,6 +316,7 @@ export default function CommandPalette() {
               onKeyDown={handleInputKeyDown}
               aria-autocomplete="list"
               aria-activedescendant={filtered[activeIndex]?.id}
+              aria-label="Search commands"
             />
 
             <div className="command-palette-list" ref={listRef} role="listbox">

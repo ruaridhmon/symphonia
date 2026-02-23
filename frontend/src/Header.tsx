@@ -97,6 +97,7 @@ export default function Header() {
             <button
               onClick={logout}
               className="header-logout-btn text-sm px-3 py-1.5 rounded-lg"
+              aria-label="Log out"
             >
               Log out
             </button>

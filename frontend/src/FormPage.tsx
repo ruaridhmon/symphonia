@@ -477,6 +477,8 @@ function PreviousSynthesisToggle({ content }: { content: string }) {
           cursor: 'pointer',
           fontFamily: 'inherit',
         }}
+        aria-expanded={isOpen}
+        aria-label="Previous Round Synthesis"
       >
         <div className="flex items-center gap-2">
           <ClipboardList size={16} style={{ color: 'var(--accent)' }} />

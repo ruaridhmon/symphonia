@@ -253,6 +253,7 @@ export default function StructuredInput({
               value={value.confidence}
               onChange={e => update({ confidence: Number(e.target.value) })}
               style={styles.slider}
+              aria-label={`Confidence level: ${value.confidence} out of 10`}
             />
             <div style={styles.sliderLabels}>
               <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>1</span>
@@ -297,8 +298,10 @@ export default function StructuredInput({
         type="button"
         onClick={() => setAdvancedOpen(!advancedOpen)}
         style={styles.advancedToggle}
+        aria-expanded={advancedOpen}
+        aria-label="Advanced options: Citations, Expert Nominations"
       >
-        {advancedOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        {advancedOpen ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
         <span>Advanced</span>
         <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)', fontWeight: 400 }}>
           Citations, Expert Nominations
@@ -331,6 +334,7 @@ export default function StructuredInput({
                 value={newCitation}
                 onChange={e => setNewCitation(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCitation(); } }}
+                aria-label="Add a citation"
               />
               <button type="button" onClick={addCitation} style={styles.addButton}>
                 <Plus size={14} />
@@ -365,6 +369,7 @@ export default function StructuredInput({
                 value={newNomination}
                 onChange={e => setNewNomination(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNomination(); } }}
+                aria-label="Nominate an expert"
               />
               <button type="button" onClick={addNomination} style={styles.addButton}>
                 <Plus size={14} />

@@ -3382,8 +3382,13 @@ main,
 
 button:focus-visible,
 a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
 [role="button"]:focus-visible,
 [role="tab"]:focus-visible,
+[role="radio"]:focus-visible,
+[role="option"]:focus-visible,
 [tabindex]:focus-visible:not([tabindex="-1"]) {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
@@ -3392,8 +3397,13 @@ a:focus-visible,
 /* Dark mode focus ring adjustment */
 html[data-theme="axiotic-dark"] button:focus-visible,
 html[data-theme="axiotic-dark"] a:focus-visible,
+html[data-theme="axiotic-dark"] input:focus-visible,
+html[data-theme="axiotic-dark"] textarea:focus-visible,
+html[data-theme="axiotic-dark"] select:focus-visible,
 html[data-theme="axiotic-dark"] [role="button"]:focus-visible,
 html[data-theme="axiotic-dark"] [role="tab"]:focus-visible,
+html[data-theme="axiotic-dark"] [role="radio"]:focus-visible,
+html[data-theme="axiotic-dark"] [role="option"]:focus-visible,
 html[data-theme="axiotic-dark"] [tabindex]:focus-visible:not([tabindex="-1"]) {
   outline-color: #60a5fa;
 }

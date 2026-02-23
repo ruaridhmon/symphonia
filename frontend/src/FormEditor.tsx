@@ -208,8 +208,9 @@ export default function FormEditor() {
                   type="button"
                   onClick={() => removeQuestion(i)}
                   title="Remove question"
+                  aria-label={`Remove question ${i + 1}`}
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={16} aria-hidden="true" />
                 </button>
               )}
             </div>
