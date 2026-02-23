@@ -4213,12 +4213,12 @@ def admin_analytics(
     # Responses per day
     response_timeline = (
         db.query(
-            cast(Response.created_at, Date).label("date"),
+            func.date(Response.created_at).label("date"),
             func.count(Response.id).label("count"),
         )
         .filter(Response.created_at >= thirty_days_ago)
-        .group_by(cast(Response.created_at, Date))
-        .order_by(cast(Response.created_at, Date))
+        .group_by(func.date(Response.created_at))
+        .order_by(func.date(Response.created_at))
         .all()
     )
 
