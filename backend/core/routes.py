@@ -2622,7 +2622,6 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
 async def devil_advocate(
     form_id: int,
     round_id: int,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -2633,7 +2632,7 @@ async def devil_advocate(
     """
     job_id = str(uuid.uuid4())
     _synthesis_jobs[job_id] = {"status": "pending"}
-    background_tasks.add_task(_run_devil_advocate_job, job_id, form_id, round_id)
+    asyncio.create_task(asyncio.to_thread(_run_devil_advocate_job, job_id, form_id, round_id))
     return {"job_id": job_id, "status": "pending"}
 
 
