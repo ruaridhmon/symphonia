@@ -1,0 +1,131 @@
+# Symphonia CI — backend tests + frontend build
+# Runs on pushes and PRs to main and axiotic/redesign
+
+name: CI
+
+on:
+  push:
+    branches: [main, axiotic/redesign]
+  pull_request:
+    branches: [main, axiotic/redesign]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# ───────────────────────────────────────────────────────────────────────────
+# Backend
+# ───────────────────────────────────────────────────────────────────────────
+jobs:
+  backend-lint:
+    name: "Backend · Lint (ruff)"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff check
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+  backend-test:
+    name: "Backend · Tests (pytest)"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio ruff
+        env:
+          # TODO: If axiotic-ai/consensus is private, set this secret in
+          # repo settings → Secrets → Actions → GH_TOKEN with read:packages
+          # scope, then uncomment the line below.
+          # PIP_EXTRA_INDEX_URL: https://${{ secrets.GH_TOKEN }}@github.com/
+          GIT_TERMINAL_PROMPT: "0"
+
+      - name: Run tests
+        run: |
+          python -m pytest tests/ \
+            -v \
+            --tb=short \
+            -x \
+            --timeout=60
+        env:
+          # Forces mock synthesis — no real API keys needed
+          SYNTHESIS_MODE: mock
+          # Prevent any accidental real calls
+          OPENAI_API_KEY: "sk-test-not-a-real-key"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Frontend
+  # ─────────────────────────────────────────────────────────────────────────
+  frontend-build:
+    name: "Frontend · Build & Type-check"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npx tsc --noEmit
+
+      - name: Vite production build
+        run: npm run build
+
+  frontend-e2e-smoke:
+    name: "Frontend · E2E Smoke (Playwright)"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke tests
+        run: npx playwright test e2e/smoke.spec.ts --reporter=list
