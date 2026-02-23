@@ -43,6 +43,8 @@ export default function LoadingButton({
       className={`btn-interactive ${sizeClasses[size]} ${className}`}
       style={{ ...variantStyles[variant], ...style }}
       disabled={isDisabled}
+      aria-busy={loading}
+      aria-disabled={isDisabled}
       {...props}
     >
       {loading ? (

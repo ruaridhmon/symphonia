@@ -30,13 +30,24 @@ export default function SynthesisProgress({ stage, step, totalSteps, visible }: 
   const isComplete = stage === 'complete' || stage === 'mock_complete';
 
   return (
-    <div className={`synthesis-progress ${isComplete ? 'complete' : ''}`}>
+    <div
+      className={`synthesis-progress ${isComplete ? 'complete' : ''}`}
+      aria-live="polite"
+      aria-atomic="true"
+    >
       <div className="synthesis-progress-header">
-        <span className="synthesis-progress-emoji">{info.icon}</span>
+        <span className="synthesis-progress-emoji" aria-hidden="true">{info.icon}</span>
         <span className="synthesis-progress-label">{info.label}</span>
         <span className="synthesis-progress-pct">{pct}%</span>
       </div>
-      <div className="synthesis-progress-track">
+      <div
+        className="synthesis-progress-track"
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Synthesis progress: ${info.label}`}
+      >
         <div
           className="synthesis-progress-fill"
           style={{ width: `${pct}%` }}

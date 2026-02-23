@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
+
+const AdminAnalytics = lazy(() => import('./components/AdminAnalytics'));
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -136,6 +138,21 @@ export default function AdminDashboard() {
             </LoadingButton>
           </div>
         </div>
+
+        {/* ── Analytics section ── */}
+        <Suspense
+          fallback={
+            <div className="mb-8 animate-pulse">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="rounded-lg h-24" style={{ backgroundColor: 'var(--muted)' }} />
+                ))}
+              </div>
+            </div>
+          }
+        >
+          <AdminAnalytics />
+        </Suspense>
 
         {/* ── Existing forms ── */}
         {forms.length > 0 && (

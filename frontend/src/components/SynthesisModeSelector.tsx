@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Zap, Users, Microscope, Info } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -51,14 +51,40 @@ const modes: {
 export default function SynthesisModeSelector({ mode, onModeChange }: SynthesisModeSelectorProps) {
   const [expandedTooltip, setExpandedTooltip] = useState<string | null>(null);
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const currentIndex = modes.findIndex(m => m.id === mode);
+      let nextIndex = currentIndex;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextIndex = (currentIndex + 1) % modes.length;
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        nextIndex = (currentIndex - 1 + modes.length) % modes.length;
+      }
+      if (nextIndex !== currentIndex) {
+        onModeChange(modes[nextIndex].id);
+        // Focus the newly-selected radio button
+        const container = (e.target as HTMLElement).closest('[role="radiogroup"]');
+        const buttons = container?.querySelectorAll<HTMLElement>('[role="radio"]');
+        buttons?.[nextIndex]?.focus();
+      }
+    },
+    [mode, onModeChange],
+  );
+
   return (
-    <div className="synthesis-mode-selector">
+    <div className="synthesis-mode-selector" role="radiogroup" aria-label="Synthesis mode">
       {modes.map(m => (
         <div key={m.id} style={{ position: 'relative' }}>
           <button
             className={`synthesis-mode-option ${mode === m.id ? 'selected' : ''}`}
             onClick={() => onModeChange(m.id)}
+            role="radio"
+            aria-checked={mode === m.id}
             aria-label={`${m.name} synthesis mode: ${m.description}`}
+            tabIndex={mode === m.id ? 0 : -1}
+            onKeyDown={handleKeyDown}
           >
             <span className="synthesis-mode-emoji">{m.icon}</span>
             <div className="synthesis-mode-text">

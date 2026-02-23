@@ -139,7 +139,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # USER AUTH
 # ---------------------------------------------------------
 
-@router.post("/register")
+@router.post(
+    "/register",
+    tags=["Authentication"],
+    summary="Register a new user",
+    description="Create a new user account with email and password. Returns an error if the email is already registered.",
+    response_description="Success confirmation message",
+)
 @limiter.limit(AUTH_LIMIT)
 def register(
     request: Request,
@@ -157,7 +163,17 @@ def register(
     return {"message": "Registered successfully"}
 
 
-@router.post("/login")
+@router.post(
+    "/login",
+    tags=["Authentication"],
+    summary="Log in and obtain session",
+    description=(
+        "Authenticate with email and password (OAuth2 form). Sets httpOnly JWT cookie "
+        "and a JS-readable CSRF cookie. Also returns tokens in the response body for "
+        "backward compatibility. Rate-limited."
+    ),
+    response_description="Access token, token type, admin flag, email, and CSRF token",
+)
 @limiter.limit(AUTH_LIMIT)
 def login(
     request: Request,
@@ -205,7 +221,13 @@ def login(
     }
 
 
-@router.post("/logout")
+@router.post(
+    "/logout",
+    tags=["Authentication"],
+    summary="Log out and clear session",
+    description="Clears the httpOnly auth cookie and the CSRF cookie, ending the user session.",
+    response_description="Logout confirmation message",
+)
 @limiter.limit(AUTH_LIMIT)
 def logout(
     request: Request,
@@ -217,7 +239,13 @@ def logout(
     return {"message": "Logged out"}
 
 
-@router.get("/me")
+@router.get(
+    "/me",
+    tags=["Authentication"],
+    summary="Get current user info",
+    description="Returns the authenticated user's email and admin status. Requires a valid session.",
+    response_description="Current user email and is_admin flag",
+)
 @limiter.limit(READ_LIMIT)
 def me(
     request: Request,
@@ -230,7 +258,17 @@ def me(
 # SUBMIT RESPONSE (Delphi style)
 # ---------------------------------------------------------
 
-@router.post("/submit")
+@router.post(
+    "/submit",
+    tags=["Responses"],
+    summary="Submit expert response",
+    description=(
+        "Submit answers for the active round of a form. If the user has already "
+        "submitted for this round, the previous response is replaced. Also creates "
+        "an archived copy and cleans up any saved draft. Requires authentication."
+    ),
+    response_description="Success confirmation",
+)
 @limiter.limit(CRUD_LIMIT)
 def submit_response(
     request: Request,
@@ -287,7 +325,13 @@ def submit_response(
     return {"ok": True}
 
 
-@router.get("/has_submitted")
+@router.get(
+    "/has_submitted",
+    tags=["Responses"],
+    summary="Check if user has submitted",
+    description="Check whether the authenticated user has already submitted a response for the active round of a given form.",
+    response_description="Boolean submitted flag",
+)
 @limiter.limit(READ_LIMIT)
 def has_submitted(
     request: Request,
@@ -310,7 +354,13 @@ def has_submitted(
     return {"submitted": bool(r)}
 
 
-@router.get("/form/{form_id}/my_response")
+@router.get(
+    "/form/{form_id}/my_response",
+    tags=["Responses"],
+    summary="Get own response for active round",
+    description="Retrieve the authenticated user's submitted response for the active round of a form. Returns 404 if no response exists.",
+    response_description="The user's answers object",
+)
 @limiter.limit(READ_LIMIT)
 def get_my_response(
     request: Request,
@@ -345,7 +395,13 @@ class DraftPayload(BaseModel):
     answers: dict
 
 
-@router.put("/forms/{form_id}/draft")
+@router.put(
+    "/forms/{form_id}/draft",
+    tags=["Responses"],
+    summary="Save or update draft",
+    description="Upsert a draft for the active round. Called by the frontend auto-save. Creates a new draft or updates the existing one.",
+    response_description="Success confirmation",
+)
 @limiter.limit(CRUD_LIMIT)
 def save_draft(
     request: Request,
@@ -390,7 +446,13 @@ def save_draft(
     return {"ok": True}
 
 
-@router.get("/forms/{form_id}/draft")
+@router.get(
+    "/forms/{form_id}/draft",
+    tags=["Responses"],
+    summary="Load saved draft",
+    description="Load a saved draft for the active round (if any). Returns null draft if none exists.",
+    response_description="Draft answers and timestamp, or null",
+)
 @limiter.limit(READ_LIMIT)
 def get_draft(
     request: Request,
@@ -428,7 +490,13 @@ def get_draft(
     }
 
 
-@router.delete("/forms/{form_id}/draft")
+@router.delete(
+    "/forms/{form_id}/draft",
+    tags=["Responses"],
+    summary="Delete draft",
+    description="Delete a draft after successful submission. Silently succeeds if no draft exists.",
+    response_description="Success confirmation",
+)
 @limiter.limit(CRUD_LIMIT)
 def delete_draft(
     request: Request,
@@ -465,7 +533,13 @@ class FeedbackPayload(BaseModel):
     usability: str
 
 
-@router.post("/submit_feedback")
+@router.post(
+    "/submit_feedback",
+    tags=["Responses"],
+    summary="Submit user feedback",
+    description="Submit feedback on synthesis quality — accuracy, influence, usability, and further thoughts. Marks the user as having submitted feedback.",
+    response_description="Feedback saved confirmation",
+)
 @limiter.limit(CRUD_LIMIT)
 def submit_feedback(
     request: Request,
@@ -3283,6 +3357,177 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to clarify responses: {e}")
+
+
+# ---------------------------------------------------------
+# ADMIN ANALYTICS
+# ---------------------------------------------------------
+
+@router.get("/admin/analytics")
+@limiter.limit(READ_LIMIT)
+def admin_analytics(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Return aggregated analytics for the admin dashboard.
+
+    Returns:
+    - total_forms, total_responses, average_convergence, most_active_form
+    - response_rate_per_form: [{form_id, title, participant_count, response_count, rate}]
+    - convergence_by_form: [{form_id, title, rounds: [{round_number, convergence_score}]}]
+    - synthesis_mode_distribution: [{mode, count}]
+    - activity_timeline: [{date, forms_created, responses_submitted}]
+    """
+    from sqlalchemy import func, cast, Date
+    from datetime import timedelta
+
+    # ── Basic counts ──
+    total_forms = db.query(func.count(FormModel.id)).scalar() or 0
+    total_responses = db.query(func.count(Response.id)).scalar() or 0
+
+    # ── Average convergence (across all rounds that have one) ──
+    avg_convergence = (
+        db.query(func.avg(RoundModel.convergence_score))
+        .filter(RoundModel.convergence_score.isnot(None))
+        .scalar()
+    )
+    avg_convergence = round(float(avg_convergence), 3) if avg_convergence else 0
+
+    # ── Most active form (by response count) ──
+    most_active_row = (
+        db.query(
+            FormModel.id,
+            FormModel.title,
+            func.count(Response.id).label("cnt"),
+        )
+        .join(Response, Response.form_id == FormModel.id)
+        .group_by(FormModel.id, FormModel.title)
+        .order_by(func.count(Response.id).desc())
+        .first()
+    )
+    most_active_form = (
+        {"id": most_active_row[0], "title": most_active_row[1], "response_count": most_active_row[2]}
+        if most_active_row
+        else None
+    )
+
+    # ── Response rate per form ──
+    forms = db.query(FormModel).order_by(FormModel.id).all()
+    response_rate_per_form = []
+    for f in forms:
+        participant_count = (
+            db.query(Response.user_id)
+            .filter(Response.form_id == f.id)
+            .distinct()
+            .count()
+        )
+        # Total unlocked users as the "invited" pool
+        invited_count = (
+            db.query(UserFormUnlock.user_id)
+            .filter(UserFormUnlock.form_id == f.id)
+            .count()
+        )
+        # Use max(invited, participants) to avoid >100%
+        denominator = max(invited_count, participant_count, 1)
+        response_count = db.query(Response).filter(Response.form_id == f.id).count()
+        rate = round(participant_count / denominator * 100, 1) if denominator else 0
+        response_rate_per_form.append({
+            "form_id": f.id,
+            "title": f.title,
+            "invited": denominator,
+            "responded": participant_count,
+            "response_count": response_count,
+            "rate": rate,
+        })
+
+    # ── Convergence trend per form ──
+    convergence_by_form = []
+    for f in forms:
+        rounds = (
+            db.query(RoundModel)
+            .filter(RoundModel.form_id == f.id)
+            .order_by(RoundModel.round_number.asc())
+            .all()
+        )
+        round_data = []
+        for r in rounds:
+            resp_count = db.query(Response).filter(Response.round_id == r.id).count()
+            round_data.append({
+                "round_number": r.round_number,
+                "convergence_score": r.convergence_score,
+                "response_count": resp_count,
+            })
+        convergence_by_form.append({
+            "form_id": f.id,
+            "title": f.title,
+            "rounds": round_data,
+        })
+
+    # ── Synthesis mode distribution ──
+    # Count synthesis versions by strategy
+    strategy_counts = (
+        db.query(SynthesisVersion.strategy, func.count(SynthesisVersion.id))
+        .group_by(SynthesisVersion.strategy)
+        .all()
+    )
+    synthesis_mode_distribution = [
+        {"mode": row[0] or "simple", "count": row[1]}
+        for row in strategy_counts
+    ]
+    # If no synthesis versions, check flow_mode on rounds as fallback
+    if not synthesis_mode_distribution:
+        mode_counts = (
+            db.query(RoundModel.flow_mode, func.count(RoundModel.id))
+            .filter(RoundModel.synthesis.isnot(None))
+            .group_by(RoundModel.flow_mode)
+            .all()
+        )
+        synthesis_mode_distribution = [
+            {"mode": row[0] or "simple", "count": row[1]}
+            for row in mode_counts
+        ]
+
+    # ── Activity timeline (last 30 days) ──
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+
+    # Responses per day
+    response_timeline = (
+        db.query(
+            cast(Response.created_at, Date).label("date"),
+            func.count(Response.id).label("count"),
+        )
+        .filter(Response.created_at >= thirty_days_ago)
+        .group_by(cast(Response.created_at, Date))
+        .order_by(cast(Response.created_at, Date))
+        .all()
+    )
+
+    # Build a complete 30-day series
+    today = datetime.utcnow().date()
+    date_map_responses: dict[str, int] = {}
+    for row in response_timeline:
+        date_map_responses[str(row[0])] = row[1]
+
+    activity_timeline = []
+    for i in range(30):
+        d = today - timedelta(days=29 - i)
+        ds = str(d)
+        activity_timeline.append({
+            "date": ds,
+            "responses": date_map_responses.get(ds, 0),
+        })
+
+    return {
+        "total_forms": total_forms,
+        "total_responses": total_responses,
+        "average_convergence": avg_convergence,
+        "most_active_form": most_active_form,
+        "response_rate_per_form": response_rate_per_form,
+        "convergence_by_form": convergence_by_form,
+        "synthesis_mode_distribution": synthesis_mode_distribution,
+        "activity_timeline": activity_timeline,
+    }
 
 
 # ---------------------------------------------------------

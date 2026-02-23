@@ -40,11 +40,55 @@ async def lifespan(app: FastAPI):
     print("👋 Symphonia shutting down cleanly")
 
 
+openapi_tags = [
+    {
+        "name": "Authentication",
+        "description": "User registration, login, logout, and session management. Uses httpOnly cookie-based JWT with CSRF double-submit protection.",
+    },
+    {
+        "name": "Forms",
+        "description": "CRUD operations for Delphi consultation forms — creation, updates, deletion, join-code unlocking, and expert label configuration.",
+    },
+    {
+        "name": "Rounds",
+        "description": "Delphi round management — view active rounds, advance to next rounds, and list all rounds for a form.",
+    },
+    {
+        "name": "Responses",
+        "description": "Expert response submission, retrieval, editing, drafts, follow-up questions, and feedback. Includes optimistic locking for concurrent edits.",
+    },
+    {
+        "name": "Synthesis",
+        "description": "AI-powered synthesis of expert responses — single-prompt, committee, and TTD strategies. Includes versioning, comments, activation, and export (Markdown/JSON/PDF).",
+    },
+    {
+        "name": "AI Tools",
+        "description": "AI-powered analysis tools — devil's advocate counterarguments, audience translation, expert voice mirroring, and question design assistant.",
+    },
+    {
+        "name": "Email",
+        "description": "Templated email notifications — expert invitations, new round alerts, synthesis-ready notices, reminders, and template previews. Requires SMTP configuration.",
+    },
+    {
+        "name": "Admin",
+        "description": "Administrative operations — application settings, audit trail, and test data seeding. Requires admin privileges.",
+    },
+    {
+        "name": "Health",
+        "description": "Liveness and readiness probes for container orchestration and load balancers.",
+    },
+    {
+        "name": "WebSocket",
+        "description": "Real-time event streaming — synthesis progress updates, comment notifications, and live UI refreshes.",
+    },
+]
+
 app = FastAPI(
-    title="Symphonia",
-    description="Expert Consensus Platform by Axiotic AI",
-    version="2.0.0",
+    title="Symphonia API",
+    description="Expert consensus platform API — Delphi-style deliberation with AI synthesis",
+    version="1.0.0",
     lifespan=lifespan,
+    openapi_tags=openapi_tags,
 )
 
 # =============================================================================
@@ -136,15 +180,19 @@ app.add_middleware(
 # HEALTH CHECK (unauthenticated — for Docker healthcheck & load balancer probes)
 # =============================================================================
 
-@app.get("/health")
+@app.get(
+    "/health",
+    tags=["Health"],
+    summary="Health check",
+    description=(
+        "Liveness / readiness probe. Returns 200 with DB connectivity status. "
+        "Always returns 200 so the container is considered healthy even when the "
+        "DB is temporarily unreachable. Consumers can inspect the `db` field for "
+        "a deeper readiness check."
+    ),
+    response_description="Health status with DB connectivity indicator",
+)
 def health_check():
-    """Liveness / readiness probe.
-
-    Returns 200 with DB connectivity status.  Always returns 200 so
-    the container is considered healthy even when the DB is temporarily
-    unreachable (the backend can still serve static pages).  Consumers
-    can inspect the ``db`` field if they need a deeper readiness check.
-    """
     db_status = "disconnected"
     try:
         from sqlalchemy import text
@@ -212,6 +260,12 @@ with SessionLocal() as db:
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    """Real-time event stream (WebSocket).
+
+    Streams synthesis progress updates, comment notifications, and
+    live UI refresh events to connected clients. No authentication
+    required for the WebSocket connection itself.
+    """
     await ws_manager.connect(websocket)
     try:
         while True:
