@@ -2,9 +2,11 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Smoke tests — verify the login page renders correctly.
- * These run WITHOUT a backend; they only require the Vite dev server.
+ * These run unauthenticated (override the global storageState).
  */
 test.describe('Login page smoke tests', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
   });
