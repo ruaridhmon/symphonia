@@ -713,6 +713,7 @@ export default function SummaryPage() {
 							onStartNextRound={startNextRound}
 							loading={loading}
 							formTitle={form.title}
+							formId={formId}
 							rounds={rounds}
 							structuredSynthesisData={structuredSynthesisData}
 							expertLabels={resolvedExpertLabels}

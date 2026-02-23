@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import LoadingButton from './LoadingButton';
+import { exportSynthesisFromBackend } from '../api/synthesis';
 import type { SynthesisData } from '../types/synthesis';
 import type { Round } from '../types/summary';
 
 interface ExportPanelProps {
   formTitle: string;
+  formId: number;
   rounds: Round[];
   structuredSynthesisData: SynthesisData | null;
   expertLabels: Record<number, string>;
@@ -939,6 +941,7 @@ function exportAsGovUkReport(
 
 export default function ExportPanel({
   formTitle,
+  formId,
   rounds,
   structuredSynthesisData,
   expertLabels,
@@ -946,6 +949,9 @@ export default function ExportPanel({
   const [exportingMd, setExportingMd] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportingGovUk, setExportingGovUk] = useState(false);
+  const [exportingBackendMd, setExportingBackendMd] = useState(false);
+  const [exportingBackendJson, setExportingBackendJson] = useState(false);
+  const [exportingBackendPdf, setExportingBackendPdf] = useState(false);
 
   const handleExportMarkdown = () => {
     setExportingMd(true);
@@ -977,8 +983,65 @@ export default function ExportPanel({
     }
   };
 
+  const handleBackendExport = async (format: 'markdown' | 'json' | 'pdf', setLoading: (v: boolean) => void) => {
+    setLoading(true);
+    try {
+      const { blob, filename } = await exportSynthesisFromBackend(formId, format);
+      saveAs(blob, filename);
+    } catch (err) {
+      console.error('Backend export failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
+      {/* Backend-generated exports (server-side, includes all round data) */}
+      <p
+        className="text-xs font-semibold uppercase tracking-wider mt-2 mb-1"
+        style={{ color: 'var(--muted-foreground)' }}
+      >
+        Export Synthesis
+      </p>
+      <LoadingButton
+        variant="secondary"
+        size="md"
+        onClick={() => handleBackendExport('markdown', setExportingBackendMd)}
+        loading={exportingBackendMd}
+        loadingText="Downloading…"
+        className="w-full text-left justify-start"
+      >
+        Download as Markdown
+      </LoadingButton>
+      <LoadingButton
+        variant="secondary"
+        size="md"
+        onClick={() => handleBackendExport('json', setExportingBackendJson)}
+        loading={exportingBackendJson}
+        loadingText="Downloading…"
+        className="w-full text-left justify-start"
+      >
+        Download as JSON
+      </LoadingButton>
+      <LoadingButton
+        variant="secondary"
+        size="md"
+        onClick={() => handleBackendExport('pdf', setExportingBackendPdf)}
+        loading={exportingBackendPdf}
+        loadingText="Downloading…"
+        className="w-full text-left justify-start"
+      >
+        Download as PDF
+      </LoadingButton>
+
+      {/* Client-side exports */}
+      <p
+        className="text-xs font-semibold uppercase tracking-wider mt-3 mb-1"
+        style={{ color: 'var(--muted-foreground)' }}
+      >
+        Client Reports
+      </p>
       <LoadingButton
         variant="secondary"
         size="md"

@@ -64,6 +64,51 @@ export function pushSummary(formId: number, summary: string) {
   });
 }
 
+/* ── Synthesis Export (backend) ── */
+
+/**
+ * Download synthesis export from the backend.
+ * Returns a Blob suitable for file-saver.
+ */
+export async function exportSynthesisFromBackend(
+  formId: number,
+  format: 'markdown' | 'json' | 'pdf'
+): Promise<{ blob: Blob; filename: string }> {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+  const bearerToken = localStorage.getItem('access_token');
+
+  function getCookie(name: string): string | null {
+    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+  const csrfToken = getCookie('csrf_token');
+
+  const response = await fetch(
+    `${API_BASE_URL}/forms/${formId}/export_synthesis?format=${format}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+        ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}),
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Export failed: ${response.statusText}`);
+  }
+
+  const blob = await response.blob();
+
+  // Extract filename from Content-Disposition header, or use a default
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const filenameMatch = disposition.match(/filename="?([^";\n]+)"?/);
+  const filename = filenameMatch?.[1] || `synthesis-export.${format === 'json' ? 'json' : format === 'pdf' ? 'pdf' : 'md'}`;
+
+  return { blob, filename };
+}
+
 /* ── Devil's Advocate ── */
 
 export interface Counterargument {

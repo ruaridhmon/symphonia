@@ -11,6 +11,7 @@ type Props = {
   onStartNextRound: () => void;
   loading: boolean;
   formTitle: string;
+  formId: number;
   rounds: Round[];
   structuredSynthesisData: SynthesisData | null;
   expertLabels: Record<number, string>;
@@ -24,6 +25,7 @@ export default function ActionsCard({
   onStartNextRound,
   loading,
   formTitle,
+  formId,
   rounds,
   structuredSynthesisData,
   expertLabels,
@@ -80,6 +82,7 @@ export default function ActionsCard({
         </LoadingButton>
         <ExportPanel
           formTitle={formTitle}
+          formId={formId}
           rounds={rounds}
           structuredSynthesisData={structuredSynthesisData}
           expertLabels={expertLabels}

@@ -10,6 +10,19 @@ from openai import OpenAI
 import aiosmtplib
 import json
 import os
+import re
+from datetime import datetime, timezone
+from fastapi.responses import JSONResponse
+
+from .rate_limiter import (
+    limiter,
+    AUTH_LIMIT,
+    SYNTHESIS_LIMIT,
+    AI_LIMIT,
+    EMAIL_LIMIT,
+    CRUD_LIMIT,
+    READ_LIMIT,
+)
 
 from .models import (
     User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
@@ -1265,6 +1278,247 @@ def get_synthesis_version(
         "created_at": version.created_at.isoformat() if version.created_at else None,
         "is_active": version.is_active,
     }
+
+
+# ---------------------------------------------------------
+# SYNTHESIS EXPORT
+# ---------------------------------------------------------
+
+
+def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) -> str:
+    """Build a comprehensive markdown document from all rounds' synthesis data."""
+    lines: list[str] = []
+    now = datetime.now(timezone.utc).strftime("%d %B %Y, %H:%M UTC")
+
+    lines.append(f"# {form.title}")
+    lines.append("")
+    lines.append(f"**Exported:** {now}  ")
+    lines.append(f"**Rounds:** {len(rounds_list)}")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    for rnd in rounds_list:
+        lines.append(f"## Round {rnd.round_number}")
+        lines.append("")
+
+        if rnd.convergence_score is not None:
+            lines.append(f"**Convergence Score:** {rnd.convergence_score * 100:.0f}%")
+            lines.append("")
+
+        questions = rnd.questions or []
+        if questions:
+            lines.append("### Questions")
+            lines.append("")
+            for i, q in enumerate(questions, 1):
+                q_text = q if isinstance(q, str) else q.get("label", q.get("text", str(q))) if isinstance(q, dict) else str(q)
+                lines.append(f"{i}. {q_text}")
+            lines.append("")
+
+        sj = rnd.synthesis_json
+        if sj and isinstance(sj, dict):
+            # Narrative
+            if sj.get("narrative"):
+                lines.append("### Narrative")
+                lines.append("")
+                lines.append(sj["narrative"])
+                lines.append("")
+
+            # Agreements
+            agreements = sj.get("agreements", [])
+            if agreements:
+                lines.append("### Agreements")
+                lines.append("")
+                for a in agreements:
+                    conf = a.get("confidence", 0)
+                    lines.append(f"- **{a.get('claim', '')}** ({conf * 100:.0f}% confidence)")
+                    experts = a.get("supporting_experts", [])
+                    if experts:
+                        lines.append(f"  - Supporting experts: {', '.join(f'Expert {e}' for e in experts)}")
+                    if a.get("evidence_summary"):
+                        lines.append(f"  - Evidence: {a['evidence_summary']}")
+                    excerpts = a.get("evidence_excerpts", [])
+                    if excerpts:
+                        lines.append("  - **Supporting Excerpts:**")
+                        for ex in excerpts:
+                            label = ex.get("expert_label", f"Expert {ex.get('expert_id', '?')}")
+                            lines.append(f'    - _{label}_: "{ex.get("quote", "")}"')
+                lines.append("")
+
+            # Disagreements
+            disagreements = sj.get("disagreements", [])
+            if disagreements:
+                lines.append("### Disagreements")
+                lines.append("")
+                for d in disagreements:
+                    sev = d.get("severity", "moderate")
+                    lines.append(f"- **{d.get('topic', '')}** (Severity: {sev})")
+                    for pos in d.get("positions", []):
+                        experts = pos.get("experts", [])
+                        lines.append(f"  - *{pos.get('position', '')}*")
+                        if experts:
+                            lines.append(f"    - Experts: {', '.join(f'Expert {e}' for e in experts)}")
+                        if pos.get("evidence"):
+                            lines.append(f"    - Evidence: {pos['evidence']}")
+                lines.append("")
+
+            # Nuances
+            nuances = sj.get("nuances", [])
+            if nuances:
+                lines.append("### Nuances")
+                lines.append("")
+                for n in nuances:
+                    lines.append(f"- **{n.get('claim', '')}**")
+                    lines.append(f"  - Context: {n.get('context', '')}")
+                    relevant = n.get("relevant_experts", [])
+                    if relevant:
+                        lines.append(f"  - Relevant experts: {', '.join(f'Expert {e}' for e in relevant)}")
+                lines.append("")
+
+            # Follow-up Probes
+            probes = sj.get("follow_up_probes", [])
+            if probes:
+                lines.append("### Follow-up Probes")
+                lines.append("")
+                for p in probes:
+                    lines.append(f"- **{p.get('question', '')}**")
+                    target = p.get("target_experts", [])
+                    if target:
+                        lines.append(f"  - Target experts: {', '.join(f'Expert {e}' for e in target)}")
+                    if p.get("rationale"):
+                        lines.append(f"  - Rationale: {p['rationale']}")
+                lines.append("")
+
+            # Confidence Map
+            conf_map = sj.get("confidence_map", {})
+            if conf_map:
+                lines.append("### Confidence Map")
+                lines.append("")
+                for topic, score in conf_map.items():
+                    lines.append(f"- {topic}: {score * 100:.0f}%")
+                lines.append("")
+
+            # Meta-synthesis reasoning
+            if sj.get("meta_synthesis_reasoning"):
+                lines.append("### Meta-Synthesis Reasoning")
+                lines.append("")
+                lines.append(sj["meta_synthesis_reasoning"])
+                lines.append("")
+
+        elif rnd.synthesis:
+            lines.append("### Synthesis")
+            lines.append("")
+            lines.append(rnd.synthesis)
+            lines.append("")
+
+        lines.append("---")
+        lines.append("")
+
+    lines.append("*Generated by Symphonia*")
+    return "\n".join(lines)
+
+
+@router.get("/forms/{form_id}/export_synthesis")
+def export_synthesis(
+    form_id: int,
+    format: str = Query("markdown", regex="^(markdown|json|pdf)$"),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Export all rounds' synthesis data for a form.
+
+    Accepts query param ``format``: markdown, json, or pdf.
+    """
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    rounds_list = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id)
+        .order_by(RoundModel.round_number.asc())
+        .all()
+    )
+
+    safe_title = "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in form.title).strip().replace(" ", "-").lower()
+    if not safe_title:
+        safe_title = f"form-{form_id}"
+
+    if format == "json":
+        payload = {
+            "form_id": form.id,
+            "title": form.title,
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "rounds": [
+                {
+                    "round_number": rnd.round_number,
+                    "convergence_score": rnd.convergence_score,
+                    "synthesis_json": rnd.synthesis_json,
+                    "synthesis_text": rnd.synthesis,
+                    "questions": rnd.questions,
+                }
+                for rnd in rounds_list
+            ],
+        }
+        return FastAPIResponse(
+            content=json.dumps(payload, indent=2, default=str),
+            media_type="application/json",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.json"',
+            },
+        )
+
+    # Build markdown
+    md_content = _build_synthesis_markdown(form, rounds_list)
+
+    if format == "pdf":
+        # Try weasyprint for PDF generation
+        try:
+            import markdown as md_lib
+            from weasyprint import HTML as WeasyHTML
+
+            html_body = md_lib.markdown(md_content, extensions=["tables", "fenced_code"])
+            full_html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"/>
+<style>
+body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; font-size: 14px; line-height: 1.6; color: #333; }}
+h1 {{ font-size: 28px; border-bottom: 2px solid #1d70b8; padding-bottom: 8px; }}
+h2 {{ font-size: 22px; margin-top: 30px; color: #1d70b8; }}
+h3 {{ font-size: 18px; margin-top: 20px; }}
+hr {{ border: none; border-top: 1px solid #ccc; margin: 20px 0; }}
+ul, ol {{ margin-left: 20px; }}
+li {{ margin-bottom: 4px; }}
+strong {{ color: #0b0c0c; }}
+em {{ color: #505a5f; }}
+</style>
+</head><body>{html_body}</body></html>"""
+
+            pdf_bytes = WeasyHTML(string=full_html).write_pdf()
+            return FastAPIResponse(
+                content=pdf_bytes,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
+                },
+            )
+        except ImportError:
+            # weasyprint or markdown not available — fall back to .md download
+            return FastAPIResponse(
+                content=md_content.encode("utf-8"),
+                media_type="text/markdown; charset=utf-8",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.md"',
+                },
+            )
+
+    # Default: markdown
+    return FastAPIResponse(
+        content=md_content.encode("utf-8"),
+        media_type="text/markdown; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.md"',
+        },
+    )
 
 
 # ---------------------------------------------------------
