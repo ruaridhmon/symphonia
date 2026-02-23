@@ -47,11 +47,22 @@ async def lifespan(app: FastAPI):
         backup_path = backup_dir / f"symphonia_{timestamp}.db"
         shutil.copy2(db_path, backup_path)
         logger.info("DB backup created: %s", backup_path.name)
-        # Keep only last 7 backups
+        # Keep only last 14 backups
         backups = sorted(backup_dir.glob("symphonia_*.db"))
-        for old in backups[:-7]:
+        for old in backups[:-14]:
             old.unlink()
             logger.info("Removed old backup: %s", old.name)
+
+    # Log current form count for monitoring
+    db = SessionLocal()
+    try:
+        from core.models import FormModel as _FormModel
+        form_count = db.query(_FormModel).count()
+        logger.info("Current form count: %d", form_count)
+        if form_count == 0:
+            logger.warning("WARNING: Database has zero forms!")
+    finally:
+        db.close()
 
     print("✅ Symphonia backend started")
     if FRONTEND_DIR.exists():
@@ -227,14 +238,22 @@ app.add_middleware(
 )
 def health_check():
     db_status = "disconnected"
+    form_count = None
     try:
         from sqlalchemy import text
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         db_status = "connected"
+        # Include form count for external monitoring
+        db = SessionLocal()
+        try:
+            from core.models import FormModel as _FM
+            form_count = db.query(_FM).count()
+        finally:
+            db.close()
     except Exception:
         pass
-    return {"status": "ok", "db": db_status}
+    return {"status": "ok", "db": db_status, "form_count": form_count}
 
 
 # =============================================================================
