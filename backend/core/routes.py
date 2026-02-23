@@ -140,7 +140,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # ---------------------------------------------------------
 
 @router.post("/register")
+@limiter.limit(AUTH_LIMIT)
 def register(
+    request: Request,
     email: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db),
@@ -156,7 +158,9 @@ def register(
 
 
 @router.post("/login")
+@limiter.limit(AUTH_LIMIT)
 def login(
+    request: Request,
     response: FastAPIResponse,
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
@@ -202,7 +206,11 @@ def login(
 
 
 @router.post("/logout")
-def logout(response: FastAPIResponse):
+@limiter.limit(AUTH_LIMIT)
+def logout(
+    request: Request,
+    response: FastAPIResponse,
+):
     """Clear auth cookies."""
     response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
     response.delete_cookie(key=CSRF_COOKIE_NAME, path="/")
@@ -210,7 +218,11 @@ def logout(response: FastAPIResponse):
 
 
 @router.get("/me")
-def me(user: User = Depends(get_current_user)):
+@limiter.limit(READ_LIMIT)
+def me(
+    request: Request,
+    user: User = Depends(get_current_user),
+):
     return {"email": user.email, "is_admin": user.is_admin}
 
 
@@ -219,7 +231,9 @@ def me(user: User = Depends(get_current_user)):
 # ---------------------------------------------------------
 
 @router.post("/submit")
+@limiter.limit(CRUD_LIMIT)
 def submit_response(
+    request: Request,
     form_id: int = Form(...),
     answers: str = Form(...),
     db: Session = Depends(get_db),
@@ -274,7 +288,9 @@ def submit_response(
 
 
 @router.get("/has_submitted")
+@limiter.limit(READ_LIMIT)
 def has_submitted(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
@@ -295,7 +311,9 @@ def has_submitted(
 
 
 @router.get("/form/{form_id}/my_response")
+@limiter.limit(READ_LIMIT)
 def get_my_response(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
@@ -328,7 +346,9 @@ class DraftPayload(BaseModel):
 
 
 @router.put("/forms/{form_id}/draft")
+@limiter.limit(CRUD_LIMIT)
 def save_draft(
+    request: Request,
     form_id: int,
     payload: DraftPayload,
     db: Session = Depends(get_db),
@@ -371,7 +391,9 @@ def save_draft(
 
 
 @router.get("/forms/{form_id}/draft")
+@limiter.limit(READ_LIMIT)
 def get_draft(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -407,7 +429,9 @@ def get_draft(
 
 
 @router.delete("/forms/{form_id}/draft")
+@limiter.limit(CRUD_LIMIT)
 def delete_draft(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -442,7 +466,9 @@ class FeedbackPayload(BaseModel):
 
 
 @router.post("/submit_feedback")
+@limiter.limit(CRUD_LIMIT)
 def submit_feedback(
+    request: Request,
     feedback: FeedbackPayload,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
@@ -468,7 +494,9 @@ def submit_feedback(
 
 
 @router.get("/all_feedback")
+@limiter.limit(READ_LIMIT)
 def all_feedback(
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
 ):
@@ -497,7 +525,9 @@ class SummaryPayload(BaseModel):
 
 
 @router.post("/forms/{form_id}/push_summary")
+@limiter.limit(CRUD_LIMIT)
 async def push_summary(
+    request: Request,
     form_id: int,
     payload: SummaryPayload,
     db: Session = Depends(get_db),
@@ -530,6 +560,7 @@ class GenerateSummaryPayload(BaseModel):
 
 
 @router.post("/forms/{form_id}/generate_summary")
+@limiter.limit(SYNTHESIS_LIMIT)
 def generate_summary(
     form_id: int,
     payload: GenerateSummaryPayload,
@@ -665,7 +696,9 @@ class CommitteeSynthesisPayload(BaseModel):
 
 
 @router.post("/forms/{form_id}/synthesise_committee")
+@limiter.limit(SYNTHESIS_LIMIT)
 async def synthesise_committee(
+    request: Request,
     form_id: int,
     payload: CommitteeSynthesisPayload,
     db: Session = Depends(get_db),
@@ -832,7 +865,9 @@ async def synthesise_committee(
 # ---------------------------------------------------------
 
 @router.get("/forms/{form_id}/rounds/{round_id}/synthesis_versions")
+@limiter.limit(READ_LIMIT)
 def list_synthesis_versions(
+    request: Request,
     form_id: int,
     round_id: int,
     db: Session = Depends(get_db),
@@ -879,7 +914,9 @@ class GenerateSynthesisVersionPayload(BaseModel):
 
 
 @router.post("/forms/{form_id}/rounds/{round_id}/generate_synthesis")
+@limiter.limit(SYNTHESIS_LIMIT)
 async def generate_synthesis_for_round(
+    request: Request,
     form_id: int,
     round_id: int,
     payload: GenerateSynthesisVersionPayload,
@@ -1215,7 +1252,9 @@ If expert discussion comments are included above, integrate those perspectives i
 
 
 @router.put("/synthesis_versions/{version_id}/activate")
+@limiter.limit(CRUD_LIMIT)
 def activate_synthesis_version(
+    request: Request,
     version_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user),
@@ -1257,7 +1296,9 @@ def activate_synthesis_version(
 
 
 @router.get("/synthesis_versions/{version_id}")
+@limiter.limit(READ_LIMIT)
 def get_synthesis_version(
+    request: Request,
     version_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -1530,7 +1571,9 @@ class FollowUpCreatePayload(BaseModel):
 
 
 @router.get("/forms/{form_id}/follow_ups")
+@limiter.limit(READ_LIMIT)
 def get_follow_ups(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -1592,7 +1635,9 @@ def get_follow_ups(
 
 
 @router.post("/forms/{form_id}/follow_ups")
+@limiter.limit(CRUD_LIMIT)
 def create_follow_up(
+    request: Request,
     form_id: int,
     payload: FollowUpCreatePayload,
     db: Session = Depends(get_db),
@@ -1633,7 +1678,9 @@ class FollowUpRespondPayload(BaseModel):
 
 
 @router.post("/follow_ups/{follow_up_id}/respond")
+@limiter.limit(CRUD_LIMIT)
 def respond_to_follow_up(
+    request: Request,
     follow_up_id: int,
     payload: FollowUpRespondPayload,
     db: Session = Depends(get_db),
@@ -1681,6 +1728,7 @@ class FormUpdate(BaseModel):
 
 
 @router.post("/create_form")
+@limiter.limit(CRUD_LIMIT)
 def create_form(
     payload: FormCreate,
     request: Request,
@@ -1721,6 +1769,7 @@ def create_form(
 
 
 @router.put("/forms/{form_id}")
+@limiter.limit(CRUD_LIMIT)
 def update_form(
     form_id: int,
     payload: FormUpdate,
@@ -1742,6 +1791,7 @@ def update_form(
 
 
 @router.delete("/forms/{form_id}")
+@limiter.limit(CRUD_LIMIT)
 def delete_form(
     form_id: int,
     request: Request,
@@ -1761,7 +1811,9 @@ def delete_form(
 
 
 @router.get("/forms")
+@limiter.limit(READ_LIMIT)
 def get_forms(
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
 ):
@@ -1794,7 +1846,9 @@ class UnlockFormPayload(BaseModel):
 
 
 @router.post("/forms/unlock")
+@limiter.limit(CRUD_LIMIT)
 def unlock_form(
+    request: Request,
     payload: UnlockFormPayload,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
@@ -1825,7 +1879,9 @@ def unlock_form(
 
 
 @router.get("/my_forms")
+@limiter.limit(READ_LIMIT)
 def get_my_forms(
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
@@ -1834,7 +1890,9 @@ def get_my_forms(
 
 
 @router.get("/forms/{form_id}")
+@limiter.limit(READ_LIMIT)
 def get_form(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
@@ -1863,7 +1921,9 @@ class ExpertLabelsPayload(BaseModel):
 
 
 @router.get("/forms/{form_id}/expert_labels")
+@limiter.limit(READ_LIMIT)
 def get_expert_labels(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -1875,7 +1935,9 @@ def get_expert_labels(
 
 
 @router.put("/forms/{form_id}/expert_labels")
+@limiter.limit(CRUD_LIMIT)
 def put_expert_labels(
+    request: Request,
     form_id: int,
     payload: ExpertLabelsPayload,
     db: Session = Depends(get_db),
@@ -1902,7 +1964,9 @@ class RoundConfig(BaseModel):
 
 
 @router.get("/forms/{form_id}/active_round")
+@limiter.limit(READ_LIMIT)
 def get_active_round(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
@@ -1936,7 +2000,9 @@ def get_active_round(
 
 
 @router.post("/forms/{form_id}/next_round")
+@limiter.limit(CRUD_LIMIT)
 def open_next_round(
+    request: Request,
     form_id: int,
     payload: RoundConfig | None = None,
     db: Session = Depends(get_db),
@@ -1992,7 +2058,9 @@ def open_next_round(
 
 
 @router.get("/forms/{form_id}/rounds")
+@limiter.limit(READ_LIMIT)
 def get_rounds(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
@@ -2030,7 +2098,9 @@ def get_rounds(
 # ---------------------------------------------------------
 
 @router.get("/form/{form_id}/responses")
+@limiter.limit(READ_LIMIT)
 def form_responses(
+    request: Request,
     form_id: int,
     all_rounds: bool = False,
     db: Session = Depends(get_db),
@@ -2068,7 +2138,9 @@ class ResponseEditPayload(BaseModel):
 
 
 @router.put("/responses/{response_id}")
+@limiter.limit(CRUD_LIMIT)
 def edit_response(
+    request: Request,
     response_id: int,
     payload: ResponseEditPayload,
     db: Session = Depends(get_db),
@@ -2111,7 +2183,9 @@ def edit_response(
 
 
 @router.put("/responses/{response_id}/force")
+@limiter.limit(CRUD_LIMIT)
 def force_edit_response(
+    request: Request,
     response_id: int,
     payload: ResponseEditPayload,
     db: Session = Depends(get_db),
@@ -2142,7 +2216,9 @@ def force_edit_response(
 
 
 @router.get("/form/{form_id}/archived_responses")
+@limiter.limit(READ_LIMIT)
 def form_archived(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
@@ -2166,7 +2242,9 @@ def form_archived(
 
 
 @router.get("/forms/{form_id}/rounds_with_responses")
+@limiter.limit(READ_LIMIT)
 def rounds_with_responses(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
@@ -2212,7 +2290,9 @@ def rounds_with_responses(
 # ---------------------------------------------------------
 
 @router.post("/form/{form_id}/synthesise")
+@limiter.limit(SYNTHESIS_LIMIT)
 def synthesise_simple(
+    request: Request,
     form_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
@@ -2261,7 +2341,9 @@ class EmailRequest(BaseModel):
 
 
 @router.post("/send_email")
+@limiter.limit(EMAIL_LIMIT)
 async def send_email(
+    request: Request,
     to: str = Form(...),
     subject: str = Form(...),
     html: str = Form(...),
@@ -2320,6 +2402,7 @@ class InvitationEmailPayload(BaseModel):
 
 
 @router.post("/email/invitation")
+@limiter.limit(EMAIL_LIMIT)
 async def send_invitation_email(
     payload: InvitationEmailPayload,
     request: Request,
@@ -2353,7 +2436,9 @@ class NewRoundEmailPayload(BaseModel):
 
 
 @router.post("/email/new-round")
+@limiter.limit(EMAIL_LIMIT)
 async def send_new_round_email(
+    request: Request,
     payload: NewRoundEmailPayload,
     user: User = Depends(get_current_admin_user),
 ):
@@ -2385,7 +2470,9 @@ class SynthesisReadyEmailPayload(BaseModel):
 
 
 @router.post("/email/synthesis-ready")
+@limiter.limit(EMAIL_LIMIT)
 async def send_synthesis_ready_email(
+    request: Request,
     payload: SynthesisReadyEmailPayload,
     user: User = Depends(get_current_admin_user),
 ):
@@ -2417,7 +2504,9 @@ class ReminderEmailPayload(BaseModel):
 
 
 @router.post("/email/reminder")
+@limiter.limit(EMAIL_LIMIT)
 async def send_reminder_email(
+    request: Request,
     payload: ReminderEmailPayload,
     user: User = Depends(get_current_admin_user),
 ):
@@ -2441,7 +2530,9 @@ async def send_reminder_email(
 
 
 @router.get("/email/preview/{template_name}")
+@limiter.limit(READ_LIMIT)
 async def preview_email_template(
+    request: Request,
     template_name: str,
     user: User = Depends(get_current_admin_user),
 ):
@@ -2490,7 +2581,9 @@ async def preview_email_template(
 # ---------------------------------------------------------
 
 @router.get("/audit-log")
+@limiter.limit(READ_LIMIT)
 def get_audit_log(
+    request: Request,
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     action: str | None = Query(None),
@@ -2528,7 +2621,9 @@ def get_audit_log(
 
 
 @router.get("/audit-log/actions")
+@limiter.limit(READ_LIMIT)
 def get_audit_log_actions(
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user),
 ):
@@ -2592,7 +2687,9 @@ def _nest_comments(comments: list[SynthesisComment]) -> list[dict]:
 
 
 @router.get("/forms/{form_id}/rounds/{round_id}/comments")
+@limiter.limit(READ_LIMIT)
 def get_comments(
+    request: Request,
     form_id: int,
     round_id: int,
     db: Session = Depends(get_db),
@@ -2619,7 +2716,9 @@ def get_comments(
 
 
 @router.post("/forms/{form_id}/rounds/{round_id}/comments")
+@limiter.limit(CRUD_LIMIT)
 async def create_comment(
+    request: Request,
     form_id: int,
     round_id: int,
     payload: CommentCreatePayload,
@@ -2693,7 +2792,9 @@ async def create_comment(
 
 
 @router.put("/comments/{comment_id}")
+@limiter.limit(CRUD_LIMIT)
 def update_comment(
+    request: Request,
     comment_id: int,
     payload: CommentUpdatePayload,
     db: Session = Depends(get_db),
@@ -2716,7 +2817,9 @@ def update_comment(
 
 
 @router.delete("/comments/{comment_id}")
+@limiter.limit(CRUD_LIMIT)
 def delete_comment(
+    request: Request,
     comment_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
@@ -2739,7 +2842,9 @@ def delete_comment(
 
 
 @router.post("/forms/{form_id}/rounds/{round_id}/devil_advocate")
+@limiter.limit(SYNTHESIS_LIMIT)
 def devil_advocate(
+    request: Request,
     form_id: int,
     round_id: int,
     db: Session = Depends(get_db),
@@ -2958,7 +3063,9 @@ class TranslatePayload(BaseModel):
 
 
 @router.post("/forms/{form_id}/rounds/{round_id}/translate")
+@limiter.limit(SYNTHESIS_LIMIT)
 def translate_synthesis(
+    request: Request,
     form_id: int,
     round_id: int,
     payload: TranslatePayload,
@@ -3060,7 +3167,9 @@ class VoiceMirrorPayload(BaseModel):
 
 
 @router.post("/forms/{form_id}/rounds/{round_id}/voice_mirror")
+@limiter.limit(SYNTHESIS_LIMIT)
 def voice_mirror(
+    request: Request,
     form_id: int,
     round_id: int,
     payload: VoiceMirrorPayload,
@@ -3181,7 +3290,9 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
 # ---------------------------------------------------------
 
 @router.post("/atlas/seed")
+@limiter.limit(CRUD_LIMIT)
 def seed_atlas_data(
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user)
 ):
@@ -3367,7 +3478,12 @@ DEFAULT_SETTINGS = {
 }
 
 @router.get("/admin/settings")
-def get_settings(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+@limiter.limit(READ_LIMIT)
+def get_settings(
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     """Return all app settings (admin only)."""
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -3379,6 +3495,7 @@ def get_settings(user: User = Depends(get_current_user), db: Session = Depends(g
 
 
 @router.patch("/admin/settings")
+@limiter.limit(CRUD_LIMIT)
 def update_settings(
     payload: dict,
     user: User = Depends(get_current_user),
@@ -3401,7 +3518,9 @@ def update_settings(
     return {"status": "ok"}
 
 @router.post("/ai/suggest")
+@limiter.limit(AI_LIMIT)
 def ai_suggest(
+    request: Request,
     payload: dict,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),

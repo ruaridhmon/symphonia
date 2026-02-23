@@ -17,6 +17,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 # Force mock synthesis mode BEFORE any app imports
 os.environ["SYNTHESIS_MODE"] = "mock"
+# Disable rate limiting in tests to avoid 429s
+os.environ["RATE_LIMIT_ENABLED"] = "false"
 
 from core.auth import get_db, get_password_hash
 from core.db import Base
