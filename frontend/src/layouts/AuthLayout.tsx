@@ -24,8 +24,8 @@ export default function AuthLayout() {
             <img
               src="/logo-wordmark.png"
               alt="Symphonia"
-              className="h-20 w-auto"
-              style={{ maxWidth: '360px' }}
+              className="h-32 w-auto"
+              style={{ maxWidth: '480px' }}
             />
           </div>
           <p
