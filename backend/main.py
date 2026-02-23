@@ -9,11 +9,14 @@ from pathlib import Path
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from core import routes as core_routes
 from core.db import engine, SessionLocal
 from core.models import Base, User, UserFormUnlock, Setting
 from core.auth import get_password_hash
+from core.rate_limiter import limiter
 from core.ws import ws_manager
 
 # Frontend dist directory (built with `npm run build`)
@@ -43,6 +46,27 @@ app = FastAPI(
     version="2.0.0",
     lifespan=lifespan,
 )
+
+# =============================================================================
+# RATE LIMITING
+# =============================================================================
+
+# Attach the limiter to app state (required by slowapi)
+app.state.limiter = limiter
+
+
+# Custom 429 handler with clear JSON error
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={
+            "detail": "Rate limit exceeded. Please slow down and try again later.",
+            "retry_after": exc.detail,
+        },
+        headers={"Retry-After": str(getattr(exc, "retry_after", 60))},
+    )
+
 
 # =============================================================================
 # MIDDLEWARE STACK
@@ -107,6 +131,30 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# =============================================================================
+# HEALTH CHECK (unauthenticated — for Docker healthcheck & load balancer probes)
+# =============================================================================
+
+@app.get("/health")
+def health_check():
+    """Liveness / readiness probe.
+
+    Returns 200 with DB connectivity status.  Always returns 200 so
+    the container is considered healthy even when the DB is temporarily
+    unreachable (the backend can still serve static pages).  Consumers
+    can inspect the ``db`` field if they need a deeper readiness check.
+    """
+    db_status = "disconnected"
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        db_status = "connected"
+    except Exception:
+        pass
+    return {"status": "ok", "db": db_status}
+
 
 # =============================================================================
 # ROUTES

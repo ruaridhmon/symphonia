@@ -11,7 +11,7 @@ from jose import JWTError, jwt
 from types import SimpleNamespace
 
 
-SECRET_KEY = "your‑jwt‑secret"
+SECRET_KEY = os.environ.get("JWT_SECRET", "your-jwt-secret-CHANGE-ME")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 hours
 
