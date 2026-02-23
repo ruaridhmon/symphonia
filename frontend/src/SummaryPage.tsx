@@ -125,7 +125,8 @@ export default function SummaryPage() {
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
 	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
-	const [sidebarOpen, setSidebarOpen] = useState(true);
+	// Default sidebar closed on mobile, open on desktop
+	const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
 	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
@@ -504,9 +505,9 @@ export default function SummaryPage() {
 				{/* Floating sidebar toggle */}
 				<button
 					onClick={() => setSidebarOpen(v => !v)}
-					className="fixed z-50 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium shadow-lg transition-all"
+					className="summary-sidebar-toggle fixed z-50 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium shadow-lg transition-all min-h-[44px]"
+					data-open={sidebarOpen ? 'true' : 'false'}
 					style={{
-						right: sidebarOpen ? 'calc(20rem + 12px)' : '12px',
 						top: '4.75rem',
 						background: 'var(--card)',
 						border: '1px solid var(--border)',
@@ -686,15 +687,24 @@ export default function SummaryPage() {
 						/>
 					</div>
 
+					{/* ── Mobile sidebar backdrop ── */}
+					{sidebarOpen && (
+						<div
+							className="fixed inset-0 z-30 bg-black/30 md:hidden"
+							onClick={() => setSidebarOpen(false)}
+							aria-hidden="true"
+						/>
+					)}
+
 					{/* ── Floating Sidebar ── */}
 					<aside
 						role="complementary"
 						aria-label="Synthesis controls"
+						className="summary-sidebar"
 						style={{
 							position: 'fixed',
 							right: 0,
 							top: '4.5rem',
-							width: '20rem',
 							height: 'calc(100vh - 4.5rem)',
 							overflowY: 'auto',
 							zIndex: 40,

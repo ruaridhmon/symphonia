@@ -394,7 +394,7 @@ const styles: Record<string, React.CSSProperties> = {
     top: '100%',
     right: '0',
     zIndex: 50,
-    width: '360px',
+    width: 'min(360px, calc(100vw - 2rem))',
     maxHeight: '420px',
     overflowY: 'auto' as const,
     backgroundColor: 'var(--card)',

@@ -231,55 +231,67 @@ export default function UserDashboard() {
                       border: '1px solid var(--border)',
                     }}
                   >
-                    <div className="flex flex-col gap-1.5 pr-16">
-                      <span style={{ color: 'var(--foreground)', fontWeight: 500 }}>{f.title}</span>
-                      <div className="flex flex-wrap items-center gap-2">
-                        {status?.roundNumber != null && (
-                          <span
-                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-                            style={{
-                              backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
-                              color: 'var(--accent)',
-                            }}
-                          >
-                            <FileText size={11} />
-                            Round {status.roundNumber}
-                          </span>
-                        )}
-                        {status?.submitted ? (
-                          <span
-                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-                            style={{
-                              backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)',
-                              color: 'var(--success)',
-                            }}
-                          >
-                            <CheckCircle2 size={11} />
-                            Submitted
-                          </span>
-                        ) : status ? (
-                          <span
-                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-                            style={{
-                              backgroundColor: 'color-mix(in srgb, var(--warning) 12%, transparent)',
-                              color: 'var(--warning-foreground)',
-                            }}
-                          >
-                            <Clock size={11} />
-                            Awaiting response
-                          </span>
-                        ) : null}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                      <div className="flex flex-col gap-1.5 flex-1 min-w-0 sm:pr-4">
+                        <span className="break-words" style={{ color: 'var(--foreground)', fontWeight: 500 }}>{f.title}</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {status?.roundNumber != null && (
+                            <span
+                              className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                              style={{
+                                backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                                color: 'var(--accent)',
+                              }}
+                            >
+                              <FileText size={11} />
+                              Round {status.roundNumber}
+                            </span>
+                          )}
+                          {status?.submitted ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                              style={{
+                                backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)',
+                                color: 'var(--success)',
+                              }}
+                            >
+                              <CheckCircle2 size={11} />
+                              Submitted
+                            </span>
+                          ) : status ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                              style={{
+                                backgroundColor: 'color-mix(in srgb, var(--warning) 12%, transparent)',
+                                color: 'var(--warning-foreground)',
+                              }}
+                            >
+                              <Clock size={11} />
+                              Awaiting response
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
-                    {/* Float-in action — slides in from right on hover */}
-                    <div className="form-item-action">
-                      <LoadingButton
-                        variant="success"
-                        size="sm"
-                        onClick={() => navigate(`/form/${f.id}`)}
-                      >
-                        {status?.submitted ? 'Review' : 'Enter'}
-                      </LoadingButton>
+                      {/* Action button — always visible on mobile, hover-reveal on desktop */}
+                      <div className="sm:hidden flex-shrink-0">
+                        <LoadingButton
+                          variant="success"
+                          size="sm"
+                          onClick={() => navigate(`/form/${f.id}`)}
+                          className="w-full sm:w-auto"
+                        >
+                          {status?.submitted ? 'Review' : 'Enter'}
+                        </LoadingButton>
+                      </div>
+                      <div className="form-item-action hidden sm:flex">
+                        <LoadingButton
+                          variant="success"
+                          size="sm"
+                          onClick={() => navigate(`/form/${f.id}`)}
+                        >
+                          {status?.submitted ? 'Review' : 'Enter'}
+                        </LoadingButton>
+                      </div>
                     </div>
                   </li>
                 );

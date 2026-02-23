@@ -174,7 +174,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         style={{
           position: 'fixed',
           bottom: '1.5rem',
-          right: '1.5rem',
+          right: '1rem',
+          maxWidth: 'calc(100vw - 2rem)',
           zIndex: 9999,
           display: 'flex',
           flexDirection: 'column-reverse',

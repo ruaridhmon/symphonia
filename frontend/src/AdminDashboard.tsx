@@ -109,10 +109,10 @@ export default function AdminDashboard() {
         )}
 
         {/* ── Create form CTA ── */}
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div>
             <h1
-              className="text-2xl font-bold tracking-tight"
+              className="text-xl sm:text-2xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
               Admin Dashboard
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
               Create and manage your Delphi consultation forms
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <LoadingButton
               variant="ghost"
               size="md"
