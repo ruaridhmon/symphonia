@@ -201,7 +201,10 @@ export default function ResponsesAccordion({
                     </p>
                   ) : (
                     <>
-                      <div className="space-y-3 pt-2">
+                      <div
+                        className="space-y-3 pt-2 overflow-y-auto"
+                        style={{ maxHeight: '600px', paddingRight: '4px' }}
+                      >
                         {round.responses.map(resp => (
                           <ResponseEditor
                             key={resp.id}

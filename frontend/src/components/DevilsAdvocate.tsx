@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ShieldAlert, Loader2, AlertTriangle, ChevronDown } from 'lucide-react';
-import { generateDevilsAdvocate } from '../api/synthesis';
+import { generateDevilsAdvocate, pollSynthesisJob } from '../api/synthesis';
 import type { Counterargument } from '../api/synthesis';
 
 interface DevilsAdvocateProps {
@@ -37,10 +37,22 @@ export default function DevilsAdvocate({ formId, roundId }: DevilsAdvocateProps)
     setLoading(true);
     setError(null);
     try {
-      const result = await generateDevilsAdvocate(formId, roundId);
-      setCounterarguments(result.counterarguments);
-      setGenerated(true);
-      setExpanded(true);
+      // POST returns immediately with {job_id, status: "pending"}
+      const { job_id } = await generateDevilsAdvocate(formId, roundId) as { job_id: string; status: string };
+      // Poll until complete or failed
+      while (true) {
+        await new Promise(r => setTimeout(r, 3000));
+        const job = await pollSynthesisJob(job_id);
+        if (job.status === 'complete') {
+          setCounterarguments((job.result as { counterarguments: Counterargument[] }).counterarguments ?? []);
+          setGenerated(true);
+          setExpanded(true);
+          break;
+        } else if (job.status === 'failed') {
+          throw new Error(job.error || 'Generation failed');
+        }
+        // still running — loop
+      }
     } catch (err) {
       setError((err as Error).message || 'Failed to generate counterarguments');
     } finally {

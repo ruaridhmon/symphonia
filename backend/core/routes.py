@@ -2476,100 +2476,85 @@ def delete_comment(
 # ---------------------------------------------------------
 
 
-@router.post("/forms/{form_id}/rounds/{round_id}/devil_advocate")
-def devil_advocate(
-    form_id: int,
-    round_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-):
-    """Generate AI counterarguments (devil's advocate) for a round's synthesis.
+def _run_devil_advocate_job(job_id: str, form_id: int, round_id: int) -> None:
+    """Background runner for devil's advocate — identical logic to old sync endpoint."""
+    try:
+        _synthesis_jobs[job_id]["status"] = "running"
+        db: Session = SessionLocal()
+        try:
+            round_obj = (
+                db.query(RoundModel)
+                .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+                .first()
+            )
+            if not round_obj:
+                _synthesis_jobs[job_id] = {"status": "failed", "error": "Round not found"}
+                return
 
-    Reads all expert responses and the current synthesis, then asks the LLM
-    to identify blind spots, missing perspectives, and steel-man counterarguments.
-    """
-    # Verify round belongs to form
-    round_obj = (
-        db.query(RoundModel)
-        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
-        .first()
-    )
-    if not round_obj:
-        raise HTTPException(status_code=404, detail="Round not found")
+            questions = round_obj.questions or []
+            if not questions:
+                form = db.query(FormModel).filter(FormModel.id == form_id).first()
+                if form:
+                    questions = form.questions or []
 
-    # Fetch questions
-    questions = round_obj.questions or []
-    if not questions:
-        form = db.query(FormModel).filter(FormModel.id == form_id).first()
-        if form:
-            questions = form.questions or []
+            responses = (
+                db.query(Response)
+                .filter(Response.round_id == round_id)
+                .order_by(Response.created_at.asc())
+                .all()
+            )
+            if not responses:
+                _synthesis_jobs[job_id] = {"status": "failed", "error": "No responses found for this round"}
+                return
 
-    # Fetch responses
-    responses = (
-        db.query(Response)
-        .filter(Response.round_id == round_id)
-        .order_by(Response.created_at.asc())
-        .all()
-    )
-    if not responses:
-        raise HTTPException(status_code=404, detail="No responses found for this round")
+            responses_text = ""
+            for i, r in enumerate(responses, 1):
+                responses_text += f"\nExpert {i}:\n"
+                answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
+                for q_idx, q in enumerate(questions, 1):
+                    q_text = q if isinstance(q, str) else q.get("label", q.get("text", str(q)))
+                    answer = answers.get(f'q{q_idx}', 'No answer')
+                    responses_text += f"  Q: {q_text}\n  A: {answer}\n"
 
-    # Build context from responses
-    responses_text = ""
-    for i, r in enumerate(responses, 1):
-        responses_text += f"\nExpert {i}:\n"
-        answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
-        for q_idx, q in enumerate(questions, 1):
-            q_text = q if isinstance(q, str) else q.get("label", q.get("text", str(q)))
-            answer = answers.get(f'q{q_idx}', 'No answer')
-            responses_text += f"  Q: {q_text}\n  A: {answer}\n"
+            synthesis_text = ""
+            if round_obj.synthesis_json:
+                sj = round_obj.synthesis_json
+                parts = []
+                for a in sj.get("agreements", []):
+                    parts.append(f"Agreement: {a.get('claim', '')} — {a.get('evidence_summary', '')}")
+                for d in sj.get("disagreements", []):
+                    parts.append(f"Disagreement: {d.get('topic', '')}")
+                    for p in d.get("positions", []):
+                        parts.append(f"  - {p.get('position', '')}: {p.get('evidence', '')}")
+                for n in sj.get("nuances", []):
+                    parts.append(f"Nuance: {n.get('claim', '')} — {n.get('context', '')}")
+                synthesis_text = "\n".join(parts)
+            elif round_obj.synthesis:
+                synthesis_text = round_obj.synthesis
+        finally:
+            db.close()
 
-    # Get synthesis text
-    synthesis_text = ""
-    if round_obj.synthesis_json:
-        sj = round_obj.synthesis_json
-        parts = []
-        for a in sj.get("agreements", []):
-            parts.append(f"Agreement: {a.get('claim', '')} — {a.get('evidence_summary', '')}")
-        for d in sj.get("disagreements", []):
-            parts.append(f"Disagreement: {d.get('topic', '')}")
-            for p in d.get("positions", []):
-                parts.append(f"  - {p.get('position', '')}: {p.get('evidence', '')}")
-        for n in sj.get("nuances", []):
-            parts.append(f"Nuance: {n.get('claim', '')} — {n.get('context', '')}")
-        synthesis_text = "\n".join(parts)
-    elif round_obj.synthesis:
-        synthesis_text = round_obj.synthesis
+        if not synthesis_text:
+            _synthesis_jobs[job_id] = {"status": "failed", "error": "No synthesis available. Generate a synthesis first."}
+            return
 
-    if not synthesis_text:
-        raise HTTPException(status_code=400, detail="No synthesis available to critique. Generate a synthesis first.")
+        synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
+        api_key = os.getenv("OPENROUTER_API_KEY", "")
 
-    # Check for mock mode
-    synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
-    api_key = os.getenv("OPENROUTER_API_KEY", "")
+        if synthesis_mode == "mock" or not api_key:
+            _synthesis_jobs[job_id] = {
+                "status": "complete",
+                "result": {
+                    "counterarguments": [
+                        {"argument": "Selection bias in expert panel composition", "rationale": "The expert panel may not represent the full spectrum of views.", "strength": "strong"},
+                        {"argument": "Temporal assumptions may not hold", "rationale": "Rapid change could invalidate core premises.", "strength": "moderate"},
+                        {"argument": "Implementation feasibility gap", "rationale": "Theoretically sound but practically difficult given resource constraints.", "strength": "strong"},
+                    ]
+                }
+            }
+            return
 
-    if synthesis_mode == "mock" or not api_key:
-        return {
-            "counterarguments": [
-                {
-                    "argument": "Selection bias in expert panel composition",
-                    "rationale": "The expert panel may not represent the full spectrum of views on this topic. Key stakeholder groups or dissenting traditions may be absent.",
-                    "strength": "strong",
-                },
-                {
-                    "argument": "Temporal assumptions may not hold",
-                    "rationale": "The consensus assumes current conditions persist, but rapid technological or political change could invalidate core premises.",
-                    "strength": "moderate",
-                },
-                {
-                    "argument": "Implementation feasibility gap",
-                    "rationale": "Recommendations may be theoretically sound but practically difficult to implement given resource constraints and institutional inertia.",
-                    "strength": "strong",
-                },
-            ]
-        }
-
-    prompt = f"""You are a rigorous devil's advocate analyst. Your job is to identify important counterarguments, blind spots, and perspectives that are NOT represented in the expert discussion below.
+        prompt = f"""You are a rigorous devil's advocate analyst. Your job is to identify important counterarguments, blind spots, and perspectives that are NOT represented in the expert discussion below.
 
 --- Expert Responses ---
 {responses_text}
@@ -2596,30 +2581,20 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
   ]
 }}"""
 
-    try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+            _synthesis_jobs[job_id] = {"status": "failed", "error": "OpenRouter API key not configured"}
+            return
 
         completion = openai_client.chat.completions.create(
             model="anthropic/claude-sonnet-4",
             messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a devil's advocate analyst for a Delphi-style expert consensus platform. "
-                        "Your role is to identify blind spots, missing perspectives, and counterarguments "
-                        "that the expert panel has NOT considered. Be rigorous, specific, and constructive. "
-                        "Always return valid JSON matching the requested schema."
-                    ),
-                },
+                {"role": "system", "content": "You are a devil's advocate analyst for a Delphi-style expert consensus platform. Return valid JSON matching the requested schema."},
                 {"role": "user", "content": prompt},
             ],
         )
 
         raw_output = completion.choices[0].message.content or ""
-
-        # Parse JSON
         cleaned = raw_output.strip()
         if cleaned.startswith("```"):
             lines = cleaned.split("\n")
@@ -2627,28 +2602,39 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
             cleaned = "\n".join(lines)
 
         parsed = json.loads(cleaned)
-
-        # Validate structure
         counterarguments = parsed.get("counterarguments", [])
         validated = []
         for ca in counterarguments:
             strength = ca.get("strength", "moderate")
             if strength not in ("strong", "moderate", "weak"):
                 strength = "moderate"
-            validated.append({
-                "argument": ca.get("argument", ""),
-                "rationale": ca.get("rationale", ""),
-                "strength": strength,
-            })
+            validated.append({"argument": ca.get("argument", ""), "rationale": ca.get("rationale", ""), "strength": strength})
 
-        return {"counterarguments": validated}
+        _synthesis_jobs[job_id] = {"status": "complete", "result": {"counterarguments": validated}}
 
     except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Failed to parse devil's advocate response")
-    except HTTPException:
-        raise
+        _synthesis_jobs[job_id] = {"status": "failed", "error": "Failed to parse devil's advocate response"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate counterarguments: {e}")
+        _synthesis_jobs[job_id] = {"status": "failed", "error": str(e)}
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/devil_advocate")
+async def devil_advocate(
+    form_id: int,
+    round_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Generate AI counterarguments (devil's advocate) — async background job.
+
+    Returns immediately with {job_id, status: "pending"}.
+    Poll GET /jobs/{job_id} until status is "complete" or "failed".
+    """
+    job_id = str(uuid.uuid4())
+    _synthesis_jobs[job_id] = {"status": "pending"}
+    background_tasks.add_task(_run_devil_advocate_job, job_id, form_id, round_id)
+    return {"job_id": job_id, "status": "pending"}
 
 
 # ---------------------------------------------------------
