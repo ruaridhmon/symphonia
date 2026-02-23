@@ -566,7 +566,9 @@ class TestMapToAppFormat:
                 ),
             ),
         )
-        result = adapter._map_to_app_format(pr, num_responses=1)
+        # Need ≥2 responses for divided claims to become disagreements
+        # (with 1 response, divided claims are reclassified as agreements)
+        result = adapter._map_to_app_format(pr, num_responses=2)
         assert len(result.disagreements[0].topic) < len(long_text)
         assert result.disagreements[0].topic.endswith("…")
 

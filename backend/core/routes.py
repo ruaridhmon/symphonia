@@ -46,7 +46,15 @@ from .auth import (
     COOKIE_SAMESITE,
 )
 from .db import SessionLocal
-from .synthesis import CommitteeSynthesiser, FlowMode, get_synthesiser
+from .synthesis import (
+    CommitteeSynthesiser,
+    FlowMode,
+    SynthesisConfigError,
+    SynthesisError,
+    SynthesisLibraryError,
+    SynthesisTimeoutError,
+    get_synthesiser,
+)
 from core.ws import ws_manager
 
 load_dotenv()
@@ -220,6 +228,78 @@ def get_openai_client():
 client = None  # Will be set lazily
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+# ---------------------------------------------------------
+# SYNTHESIS HELPERS
+# ---------------------------------------------------------
+
+async def _broadcast_synthesis_error(form_id: int, round_id: int | None, error_message: str):
+    """Broadcast a synthesis error event via WebSocket so clients can show feedback."""
+    for conn in ws_manager.active_connections.copy():
+        try:
+            await conn.send_json({
+                "type": "synthesis_error",
+                "form_id": form_id,
+                "round_id": round_id,
+                "error": error_message,
+            })
+        except Exception:
+            ws_manager.disconnect(conn)
+
+
+def _resolve_synthesis_model(db: Session, payload_model: str | None = None) -> str:
+    """Resolve synthesis model: payload → DB settings → env var → default."""
+    if payload_model and payload_model.strip():
+        return payload_model.strip()
+    db_setting = db.query(Setting).filter(Setting.key == "synthesis_model").first()
+    if db_setting and db_setting.value:
+        return db_setting.value
+    return os.getenv("SYNTHESIS_MODEL", "anthropic/claude-opus-4-6")
+
+
+# ---------------------------------------------------------
+# SYNTHESIS STATUS
+# ---------------------------------------------------------
+
+@router.get(
+    "/synthesis/status",
+    tags=["Synthesis"],
+    summary="Synthesis health check",
+    description="Report the current synthesis configuration: active mode, API key presence, available strategies, and default model.",
+    response_description="Synthesis configuration status",
+)
+@limiter.limit(READ_LIMIT)
+def synthesis_status(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Return current synthesis engine status for diagnostics."""
+    mode_env = os.getenv("SYNTHESIS_MODE", "mock").strip().lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    has_key = bool(api_key and api_key.strip())
+
+    if mode_env != "mock" and not has_key:
+        effective_mode = "mock"
+        mode_note = (
+            f"Configured mode is '{mode_env}' but OPENROUTER_API_KEY is missing; "
+            "falling back to mock mode."
+        )
+    else:
+        effective_mode = mode_env
+        mode_note = None
+
+    model = _resolve_synthesis_model(db)
+
+    return {
+        "configured_mode": mode_env,
+        "effective_mode": effective_mode,
+        "api_key_configured": has_key,
+        "available_strategies": ["mock", "simple", "committee", "ttd"],
+        "default_model": model,
+        "note": mode_note,
+    }
 
 
 # ---------------------------------------------------------
@@ -970,21 +1050,41 @@ async def synthesise_committee(
     comments = _fetch_comments_for_round(db, active_round.id)
     comments_context = _format_comments_as_context(comments)
 
-    # Run committee synthesis
+    # Run committee synthesis with error handling
     api_key = os.getenv("OPENROUTER_API_KEY", "")
-    synthesiser = get_synthesiser(
-        api_key=api_key,
-        n_analysts=payload.n_analysts,
-    )
+    resolved_model = _resolve_synthesis_model(db, payload.model)
 
-    result = await synthesiser.run(
-        questions=questions,
-        responses=response_dicts,
-        model=payload.model,
-        mode=flow_mode,
-        progress_callback=progress_callback,
-        comments_context=comments_context,
-    )
+    try:
+        synthesiser = get_synthesiser(
+            api_key=api_key,
+            n_analysts=payload.n_analysts,
+            model=resolved_model,
+        )
+
+        result = await synthesiser.run(
+            questions=questions,
+            responses=response_dicts,
+            model=resolved_model,
+            mode=flow_mode,
+            progress_callback=progress_callback,
+            comments_context=comments_context,
+        )
+    except SynthesisConfigError as exc:
+        logger.warning("Synthesis config error on form %d: %s", form_id, exc)
+        await _broadcast_synthesis_error(form_id, active_round.id, str(exc))
+        raise HTTPException(status_code=400, detail=f"Synthesis configuration error: {exc}")
+    except SynthesisTimeoutError as exc:
+        logger.warning("Synthesis timeout on form %d: %s", form_id, exc)
+        await _broadcast_synthesis_error(form_id, active_round.id, str(exc))
+        raise HTTPException(status_code=504, detail=f"Synthesis timed out: {exc}")
+    except SynthesisError as exc:
+        logger.error("Synthesis error on form %d: %s", form_id, exc, exc_info=True)
+        await _broadcast_synthesis_error(form_id, active_round.id, str(exc))
+        raise HTTPException(status_code=500, detail=f"Synthesis failed: {exc}")
+    except Exception as exc:
+        logger.error("Unexpected synthesis error on form %d: %s", form_id, exc, exc_info=True)
+        await _broadcast_synthesis_error(form_id, active_round.id, "An unexpected error occurred during synthesis")
+        raise HTTPException(status_code=500, detail=f"Synthesis failed unexpectedly: {exc}")
 
     # Store results on the round
     result_dict = result.to_dict()
@@ -1223,20 +1323,39 @@ async def generate_synthesis_for_round(
         except ValueError:
             flow_mode = FlowMode.HUMAN_ONLY
 
-        synthesiser = get_synthesiser(
-            api_key=api_key,
-            n_analysts=payload.n_analysts,
-            strategy=strategy,
-            model=payload.model,
-        )
+        resolved_model = _resolve_synthesis_model(db, payload.model)
 
-        result = await synthesiser.run(
-            questions=questions,
-            responses=response_dicts,
-            model=payload.model,
-            mode=flow_mode,
-            comments_context=round_comments_context,
-        )
+        try:
+            synthesiser = get_synthesiser(
+                api_key=api_key,
+                n_analysts=payload.n_analysts,
+                strategy=strategy,
+                model=resolved_model,
+            )
+
+            result = await synthesiser.run(
+                questions=questions,
+                responses=response_dicts,
+                model=resolved_model,
+                mode=flow_mode,
+                comments_context=round_comments_context,
+            )
+        except SynthesisConfigError as exc:
+            logger.warning("Synthesis config error (round %d): %s", round_id, exc)
+            await _broadcast_synthesis_error(form_id, round_id, str(exc))
+            raise HTTPException(status_code=400, detail=f"Synthesis configuration error: {exc}")
+        except SynthesisTimeoutError as exc:
+            logger.warning("Synthesis timeout (round %d): %s", round_id, exc)
+            await _broadcast_synthesis_error(form_id, round_id, str(exc))
+            raise HTTPException(status_code=504, detail=f"Synthesis timed out: {exc}")
+        except SynthesisError as exc:
+            logger.error("Synthesis error (round %d): %s", round_id, exc, exc_info=True)
+            await _broadcast_synthesis_error(form_id, round_id, str(exc))
+            raise HTTPException(status_code=500, detail=f"Synthesis failed: {exc}")
+        except Exception as exc:
+            logger.error("Unexpected synthesis error (round %d): %s", round_id, exc, exc_info=True)
+            await _broadcast_synthesis_error(form_id, round_id, "An unexpected error occurred")
+            raise HTTPException(status_code=500, detail=f"Synthesis failed unexpectedly: {exc}")
 
         synthesis_json_data = result.to_dict()
 

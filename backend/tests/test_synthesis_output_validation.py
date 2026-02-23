@@ -289,6 +289,7 @@ class TestSchemaCompleteness:
             "supporting_experts": [1, 2],
             "confidence": 0.85,
             "evidence_summary": "Evidence",
+            "evidence_excerpts": [],
         }
 
     def test_disagreement_serialises_correctly(self) -> None:
@@ -1026,7 +1027,9 @@ class TestAdapterEdgeCases:
         pr = _make_pipeline_result(
             claims=(FakeClaim("c1", long_text, (), "divided"),),
         )
-        result = adapter._map_to_app_format(pr, num_responses=1)
+        # Need ≥2 responses for divided claims to become disagreements
+        # (with 1 response, divided claims are reclassified as agreements)
+        result = adapter._map_to_app_format(pr, num_responses=2)
         assert len(result.disagreements[0].topic) < 150
         assert result.disagreements[0].topic.endswith("…")
 
