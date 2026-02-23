@@ -930,6 +930,10 @@ async def _run_synthesis_job(job_id: str, task_data: dict) -> None:
             )
             synthesis_json_data = result.to_dict()
             text_parts = []
+            # Narrative FIRST
+            _narrative = synthesis_json_data.get("narrative", "")
+            if _narrative:
+                text_parts.append(f"<h3>Narrative Summary</h3><p>{_narrative}</p>")
             if result.agreements:
                 text_parts.append("<h3>Agreements</h3>")
                 for a in result.agreements:
