@@ -19,23 +19,24 @@ interface InlineSpan {
  */
 function buildNarrativeSpans(
   raw: string,
-  agreements: Array<{ claim: string }>,
-  disagreements: Array<{ topic: string }>,
+  agreements: Array<{ claim: string }> | null | undefined,
+  disagreements: Array<{ topic: string }> | null | undefined,
 ): InlineSpan[] {
+  if (!raw) return [{ text: raw ?? '', type: 'plain', index: -1 }];
   // Strip TTD provenance markers
   const text = raw.replace(CLAIM_REF_RE, '');
 
   // Build a sorted list of phrases to link (longest first to prefer longer matches)
   type Phrase = { needle: string; type: 'agreement' | 'disagreement'; index: number };
   const phrases: Phrase[] = [];
-  agreements.forEach((a, i) => {
+  (agreements ?? []).forEach((a, i) => {
     const n = a.claim.trim();
     if (n.length > 10) phrases.push({ needle: n, type: 'agreement', index: i });
     // Also try first clause (up to first comma or semicolon)
     const clause = n.split(/[,;]/)[0].trim();
     if (clause.length > 15 && clause !== n) phrases.push({ needle: clause, type: 'agreement', index: i });
   });
-  disagreements.forEach((d, i) => {
+  (disagreements ?? []).forEach((d, i) => {
     const n = d.topic.trim();
     if (n.length > 10) phrases.push({ needle: n, type: 'disagreement', index: i });
     const clause = n.split(/[,;]/)[0].trim();
@@ -250,12 +251,6 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
   const toggle = (section: string) =>
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
 
-  // Pre-compute narrative spans (memoised — re-runs only when narrative/claims change)
-  const narrativeSpans = useMemo(
-    () => narrative ? buildNarrativeSpans(narrative, agreements, disagreements) : [],
-    [narrative, agreements, disagreements],
-  );
-
   /** Expand the parent section then smooth-scroll to a specific card. */
   const scrollToCard = (section: 'agreements' | 'disagreements' | 'nuances', index: number) => {
     // Ensure the section is expanded
@@ -278,6 +273,12 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
     confidence_map: confidence,
     narrative,
   } = data;
+
+  // Pre-compute narrative spans — MUST come after destructuring to avoid TDZ
+  const narrativeSpans = useMemo(
+    () => narrative ? buildNarrativeSpans(narrative, agreements, disagreements) : [],
+    [narrative, agreements, disagreements],
+  );
 
   return (
     <div className="structured-synthesis fade-in">
