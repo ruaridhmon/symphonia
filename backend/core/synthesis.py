@@ -446,15 +446,7 @@ class ConsensusLibraryAdapter:
                 f"Must be one of {self.SUPPORTED_STRATEGIES}."
             )
 
-        # If committee requested, log and degrade to TTD
-        if strategy == "committee":
-            logger.warning(
-                "CommitteeStrategy is not yet implemented in the consensus library. "
-                "Falling back to TTD (DiffusionStrategy)."
-            )
-            self._effective_strategy = "ttd"
-        else:
-            self._effective_strategy = strategy
+        self._effective_strategy = strategy
 
         self.strategy_name = strategy  # preserve original for provenance
         self.model = model
@@ -501,6 +493,9 @@ class ConsensusLibraryAdapter:
 
         prompts_dir = self._resolve_prompts_dir()
 
+        artefacts_dir = Path(__file__).resolve().parent.parent / "artefacts"
+        artefacts_dir.mkdir(parents=True, exist_ok=True)
+
         if self._effective_strategy == "simple":
             self._strategy_instance = SinglePromptStrategy(
                 llm_client=self._llm_client,
@@ -511,17 +506,34 @@ class ConsensusLibraryAdapter:
                 n_initial_drafts=self.n_drafts,
                 n_denoise_steps=self.n_denoise_steps,
             )
-            artefacts_dir = (
-                Path(__file__).resolve().parent.parent / "artefacts"
-            )
-            artefacts_dir.mkdir(parents=True, exist_ok=True)
-
             self._strategy_instance = DiffusionStrategy(
                 llm_client=self._llm_client,
                 prompts_dir=prompts_dir,
                 ttd_config=ttd_config,
                 artefacts_dir=artefacts_dir,
             )
+        elif self._effective_strategy == "committee":
+            try:
+                from consensus.summarise.strategies import CommitteeStrategy
+                self._strategy_instance = CommitteeStrategy(
+                    llm_client=self._llm_client,
+                    prompts_dir=prompts_dir,
+                    artefacts_dir=artefacts_dir,
+                    num_agents=self.n_drafts,
+                )
+                logger.info("CommitteeStrategy initialised (num_agents=%d)", self.n_drafts)
+            except (ImportError, TypeError) as exc:
+                logger.warning("CommitteeStrategy init failed (%s) — falling back to TTD", exc)
+                ttd_config = TTDConfig(
+                    n_initial_drafts=self.n_drafts,
+                    n_denoise_steps=self.n_denoise_steps,
+                )
+                self._strategy_instance = DiffusionStrategy(
+                    llm_client=self._llm_client,
+                    prompts_dir=prompts_dir,
+                    ttd_config=ttd_config,
+                    artefacts_dir=artefacts_dir,
+                )
 
         logger.info(
             "Initialised %s strategy (model=%s, drafts=%d)",

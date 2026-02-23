@@ -1,7 +1,76 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CheckCircle2, Zap, Lightbulb, Target, FileText, Quote, ChevronDown } from 'lucide-react';
 import CommentThread from './CommentThread';
 import type { SynthesisData, EvidenceExcerpt } from '../types/synthesis';
+
+/** Strip TTD provenance markers like [T0_C1] [T1_C2] from narrative text. */
+const CLAIM_REF_RE = /\[[A-Z]\d+_[A-Z]\d+\]/g;
+
+interface InlineSpan {
+  text: string;
+  type: 'plain' | 'agreement' | 'disagreement';
+  index: number; // which agreement/disagreement to scroll to
+}
+
+/**
+ * Parse narrative text into spans, identifying phrases that match
+ * agreement claims or disagreement topics for inline link rendering.
+ * TTD provenance markers ([T0_C1] etc.) are stripped silently.
+ */
+function buildNarrativeSpans(
+  raw: string,
+  agreements: Array<{ claim: string }>,
+  disagreements: Array<{ topic: string }>,
+): InlineSpan[] {
+  // Strip TTD provenance markers
+  const text = raw.replace(CLAIM_REF_RE, '');
+
+  // Build a sorted list of phrases to link (longest first to prefer longer matches)
+  type Phrase = { needle: string; type: 'agreement' | 'disagreement'; index: number };
+  const phrases: Phrase[] = [];
+  agreements.forEach((a, i) => {
+    const n = a.claim.trim();
+    if (n.length > 10) phrases.push({ needle: n, type: 'agreement', index: i });
+    // Also try first clause (up to first comma or semicolon)
+    const clause = n.split(/[,;]/)[0].trim();
+    if (clause.length > 15 && clause !== n) phrases.push({ needle: clause, type: 'agreement', index: i });
+  });
+  disagreements.forEach((d, i) => {
+    const n = d.topic.trim();
+    if (n.length > 10) phrases.push({ needle: n, type: 'disagreement', index: i });
+    const clause = n.split(/[,;]/)[0].trim();
+    if (clause.length > 15 && clause !== n) phrases.push({ needle: clause, type: 'disagreement', index: i });
+  });
+  phrases.sort((a, b) => b.needle.length - a.needle.length);
+
+  const spans: InlineSpan[] = [];
+  let pos = 0;
+  const lower = text.toLowerCase();
+
+  while (pos < text.length) {
+    let matched = false;
+    for (const ph of phrases) {
+      const idx = lower.indexOf(ph.needle.toLowerCase(), pos);
+      if (idx === pos) {
+        spans.push({ text: text.slice(pos, pos + ph.needle.length), type: ph.type, index: ph.index });
+        pos += ph.needle.length;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      // Append plain char (or extend last plain span)
+      if (spans.length > 0 && spans[spans.length - 1].type === 'plain') {
+        spans[spans.length - 1] = { ...spans[spans.length - 1], text: spans[spans.length - 1].text + text[pos] };
+      } else {
+        spans.push({ text: text[pos], type: 'plain', index: -1 });
+      }
+      pos++;
+    }
+  }
+
+  return spans;
+}
 
 interface StructuredSynthesisProps {
   data: SynthesisData;
@@ -181,6 +250,12 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
   const toggle = (section: string) =>
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
 
+  // Pre-compute narrative spans (memoised — re-runs only when narrative/claims change)
+  const narrativeSpans = useMemo(
+    () => narrative ? buildNarrativeSpans(narrative, agreements, disagreements) : [],
+    [narrative, agreements, disagreements],
+  );
+
   /** Expand the parent section then smooth-scroll to a specific card. */
   const scrollToCard = (section: 'agreements' | 'disagreements' | 'nuances', index: number) => {
     // Ensure the section is expanded
@@ -213,35 +288,22 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
             <FileText size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
             <span>Narrative Summary</span>
           </div>
-          <div className="structured-narrative">{narrative}</div>
-          {/* Clickable claim chips — scroll to detail below */}
-          {(agreements.length > 0 || disagreements.length > 0) && (
-            <div className="narrative-claim-links">
-              <span className="narrative-claim-links-label">Jump to:</span>
-              {agreements.map((a, i) => (
+          <div className="structured-narrative">
+            {narrativeSpans.map((span, i) => {
+              if (span.type === 'plain') return <span key={i}>{span.text}</span>;
+              const isAgreement = span.type === 'agreement';
+              return (
                 <button
-                  key={`a-${i}`}
-                  className="narrative-claim-chip agreement-chip"
-                  onClick={() => scrollToCard('agreements', i)}
-                  title={a.claim}
+                  key={i}
+                  className={`narrative-inline-link ${isAgreement ? 'narrative-inline-agreement' : 'narrative-inline-disagreement'}`}
+                  onClick={() => scrollToCard(isAgreement ? 'agreements' : 'disagreements', span.index)}
+                  title={`Jump to ${isAgreement ? 'agreement' : 'disagreement'} ↓`}
                 >
-                  <CheckCircle2 size={11} />
-                  <span>{a.claim.length > 48 ? a.claim.slice(0, 48) + '…' : a.claim}</span>
+                  {span.text}
                 </button>
-              ))}
-              {disagreements.map((d, i) => (
-                <button
-                  key={`d-${i}`}
-                  className="narrative-claim-chip disagreement-chip"
-                  onClick={() => scrollToCard('disagreements', i)}
-                  title={d.topic}
-                >
-                  <Zap size={11} />
-                  <span>{d.topic.length > 48 ? d.topic.slice(0, 48) + '…' : d.topic}</span>
-                </button>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
       )}
 

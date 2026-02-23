@@ -1074,6 +1074,43 @@ main,
   color: var(--highlight-foreground);
 }
 
+/* Inline narrative links — replace claim text with clickable underlined spans */
+.narrative-inline-link {
+  display: inline;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-style: dotted;
+  transition: text-decoration-style 0.15s, opacity 0.15s;
+}
+
+.narrative-inline-link:hover {
+  text-decoration-style: solid;
+  opacity: 0.8;
+}
+
+.narrative-inline-agreement {
+  color: var(--success);
+  text-decoration-color: var(--success);
+}
+
+.narrative-inline-disagreement {
+  color: #a16207;
+  text-decoration-color: #a16207;
+}
+
+[data-theme="axiotic-dark"] .narrative-inline-disagreement {
+  color: #facc15;
+  text-decoration-color: #facc15;
+}
+
 /* Narrative claim links — scroll-to chips below narrative text */
 .narrative-claim-links {
   display: flex;
