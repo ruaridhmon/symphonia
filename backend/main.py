@@ -10,6 +10,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
+from starlette.routing import Match, Mount
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from core import routes as core_routes
@@ -283,27 +284,76 @@ if FRONTEND_DIR.exists():
     assets_dir = FRONTEND_DIR / "assets"
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
-    
+
     @app.get("/")
     async def serve_spa_root(request: Request):
         """Serve the SPA index.html for the root path."""
         return FileResponse(str(FRONTEND_DIR / "index.html"))
-    
+
     @app.get("/{full_path:path}")
     async def serve_spa_catchall(request: Request, full_path: str):
-        """Catch-all route for SPA - serves index.html for client-side routing."""
-        if full_path.startswith(("api/", "ws", "docs", "openapi")):
-            return {"detail": "Not Found"}
-        
-        static_file = FRONTEND_DIR / full_path
-        if static_file.exists() and static_file.is_file():
+        """Catch-all route for SPA — serves index.html for client-side routing.
+
+        Instead of a fragile hard-coded prefix list, this dynamically checks
+        every registered route on the app.  This guarantees that **all** API
+        endpoints take absolute precedence over the SPA, even when new routes
+        are added in the future.
+
+        • Path matches a registered GET route → 404 JSON (safety-net; the real
+          handler should have already matched before the catch-all).
+        • Path matches a route registered for other methods only → 405.
+        • No match at all → serve the SPA index.html for client-side routing.
+        """
+        request_path = request.url.path
+        scope = {"type": "http", "path": request_path, "method": "GET"}
+
+        has_full_match = False
+        has_partial_match = False
+        allowed_methods: set[str] = set()
+
+        for route in app.routes:
+            # Skip the catch-all itself, the SPA root, and static-file Mounts
+            if getattr(route, "name", "") in ("serve_spa_catchall", "serve_spa_root"):
+                continue
+            if isinstance(route, Mount):
+                continue
+
+            match, _child = route.matches(scope)
+
+            if match == Match.FULL:
+                has_full_match = True
+                break  # A registered GET route already covers this path
+            elif match == Match.PARTIAL:
+                has_partial_match = True
+                allowed_methods.update(getattr(route, "methods", set()) or set())
+
+        if has_full_match:
+            # Safety-net: a registered GET route should have handled this
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+        if has_partial_match:
+            # Path exists but only for other HTTP methods
+            return JSONResponse(
+                {"detail": "Method Not Allowed"},
+                status_code=405,
+                headers={"Allow": ", ".join(sorted(allowed_methods))},
+            )
+
+        # ── No API route matches — serve the SPA ───────────────────────
+        # Try serving a static file from the frontend dist first
+        static_file = (FRONTEND_DIR / full_path).resolve()
+        if (
+            static_file.is_relative_to(FRONTEND_DIR.resolve())
+            and static_file.is_file()
+        ):
             return FileResponse(str(static_file))
-        
+
+        # Fall back to index.html for client-side routing
         index_html = FRONTEND_DIR / "index.html"
         if index_html.exists():
             return FileResponse(str(index_html))
-        
-        return {"detail": "Not Found"}
+
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
 else:
     print("⚠️  Frontend not built. Run `npm run build` in frontend/")
 
