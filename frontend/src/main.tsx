@@ -6,6 +6,7 @@ import { AuthProvider } from './AuthContext'
 import { ThemeProvider } from './theme'
 import { ToastProvider } from './components/Toast'
 import OfflineBanner from './components/OfflineBanner'
+import './i18n'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

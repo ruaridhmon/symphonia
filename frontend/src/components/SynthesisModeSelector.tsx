@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Zap, Users, Microscope, Info } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -7,49 +8,27 @@ interface SynthesisModeSelectorProps {
   onModeChange: (mode: 'simple' | 'committee' | 'ttd') => void;
 }
 
-const modes: {
-  id: 'simple' | 'committee' | 'ttd';
-  name: string;
-  description: string;
-  detail: string;
-  icon: ReactNode;
-  speed: string;
-  bestFor: string;
-}[] = [
-  {
-    id: 'simple',
-    name: 'Simple',
-    description: 'Quick one-shot summary',
-    detail:
-      'A single AI pass that reads all expert responses and generates a unified summary. Fast and cost-effective, but may miss nuanced disagreements or minority positions.',
-    icon: <Zap size={16} style={{ color: 'var(--warning)' }} />,
-    speed: 'Fast',
-    bestFor: 'Quick overviews, early rounds, small panels (< 8 experts)',
-  },
-  {
-    id: 'committee',
-    name: 'Committee',
-    description: 'Multi-analyst structured synthesis',
-    detail:
-      'Multiple independent AI analysts each read all responses and identify agreements, disagreements, nuances, and probes. A meta-synthesiser then combines their analyses into a structured output with provenance tracking.',
-    icon: <Users size={16} style={{ color: 'var(--accent)' }} />,
-    speed: 'Moderate',
-    bestFor: 'Final rounds, policy-critical topics, panels with strong disagreement',
-  },
-  {
-    id: 'ttd',
-    name: 'TTD',
-    description: 'Iterative diffusion refinement',
-    detail:
-      'Think-Through-Diffusion: an iterative process where the synthesis is refined across multiple passes, with each pass deepening the analysis. Produces the most thorough output but takes longer.',
-    icon: <Microscope size={16} style={{ color: 'var(--accent)' }} />,
-    speed: 'Thorough',
-    bestFor: 'Complex multi-dimensional topics, high-stakes decisions, large panels',
-  },
-];
+const modeIcons: Record<string, ReactNode> = {
+  simple: <Zap size={16} style={{ color: 'var(--warning)' }} />,
+  committee: <Users size={16} style={{ color: 'var(--accent)' }} />,
+  ttd: <Microscope size={16} style={{ color: 'var(--accent)' }} />,
+};
+
+const modeIds: ('simple' | 'committee' | 'ttd')[] = ['simple', 'committee', 'ttd'];
 
 export default function SynthesisModeSelector({ mode, onModeChange }: SynthesisModeSelectorProps) {
+  const { t } = useTranslation();
   const [expandedTooltip, setExpandedTooltip] = useState<string | null>(null);
+
+  const modes = modeIds.map(id => ({
+    id,
+    name: t(`synthesis.modes.${id}`),
+    description: t(`synthesis.modes.${id}Desc`),
+    detail: t(`synthesis.modes.${id}Detail`),
+    icon: modeIcons[id],
+    speed: t(`synthesis.modes.speed${id === 'simple' ? 'Fast' : id === 'committee' ? 'Moderate' : 'Thorough'}`),
+    bestFor: t(`synthesis.modes.${id}BestFor`),
+  }));
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -70,11 +49,11 @@ export default function SynthesisModeSelector({ mode, onModeChange }: SynthesisM
         buttons?.[nextIndex]?.focus();
       }
     },
-    [mode, onModeChange],
+    [mode, onModeChange, modes],
   );
 
   return (
-    <div className="synthesis-mode-selector" role="radiogroup" aria-label="Synthesis mode">
+    <div className="synthesis-mode-selector" role="radiogroup" aria-label={t('synthesis.modes.modeLabel')}>
       {modes.map(m => (
         <div key={m.id} style={{ position: 'relative' }}>
           <button
@@ -99,7 +78,7 @@ export default function SynthesisModeSelector({ mode, onModeChange }: SynthesisM
                   e.stopPropagation();
                   setExpandedTooltip(expandedTooltip === m.id ? null : m.id);
                 }}
-                aria-label={`More info about ${m.name} mode`}
+                aria-label={t('synthesis.modes.moreInfo', { mode: m.name })}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -136,7 +115,7 @@ export default function SynthesisModeSelector({ mode, onModeChange }: SynthesisM
             >
               <p style={{ marginBottom: '0.5rem' }}>{m.detail}</p>
               <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--foreground)' }}>
-                Best for: <span style={{ fontWeight: 400, color: 'var(--muted-foreground)' }}>{m.bestFor}</span>
+                {t('synthesis.modes.bestFor')} <span style={{ fontWeight: 400, color: 'var(--muted-foreground)' }}>{m.bestFor}</span>
               </p>
             </div>
           )}

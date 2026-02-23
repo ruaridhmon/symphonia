@@ -24,3 +24,4 @@ export { default as OfflineBanner } from './OfflineBanner';
 export { default as DevilsAdvocate } from './DevilsAdvocate';
 export { default as AudienceTranslation } from './AudienceTranslation';
 export { default as VoiceMirroring } from './VoiceMirroring';
+export { default as LanguageSwitcher } from './LanguageSwitcher';
