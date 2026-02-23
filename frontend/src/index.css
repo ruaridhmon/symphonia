@@ -1052,6 +1052,28 @@ main,
   gap: 1rem;
 }
 
+/* Narrative summary — always-visible block above the stats bar */
+.structured-narrative-top {
+  background-color: var(--highlight);
+  border: 1px solid var(--highlight-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.structured-narrative-top-label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--highlight-foreground);
+}
+
 /* Overview stats bar */
 .structured-overview {
   background-color: var(--muted);

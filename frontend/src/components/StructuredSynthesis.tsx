@@ -192,6 +192,17 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
 
   return (
     <div className="structured-synthesis fade-in">
+      {/* ── Narrative Summary — always visible, always first ── */}
+      {narrative && (
+        <div className="structured-narrative-top">
+          <div className="structured-narrative-top-label">
+            <FileText size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+            <span>Narrative Summary</span>
+          </div>
+          <div className="structured-narrative">{narrative}</div>
+        </div>
+      )}
+
       {/* ── Overview Bar ── */}
       <div className="structured-overview">
         <div className="structured-overview-stats">
@@ -223,32 +234,6 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
           </div>
         )}
       </div>
-
-      {/* ── Narrative ── */}
-      {narrative && (
-        <div className="structured-section">
-          <SectionHeader
-            title="Narrative Summary"
-            count={0}
-            icon={<FileText size={16} style={{ color: 'var(--accent)' }} />}
-            color="var(--accent)"
-            expanded={expandedSections.narrative}
-            onToggle={() => toggle('narrative')}
-            sectionId="synthesis-section-narrative"
-            headerId="synthesis-header-narrative"
-          />
-          {expandedSections.narrative && (
-            <div
-              className="structured-section-body slide-down"
-              id="synthesis-section-narrative"
-              role="region"
-              aria-labelledby="synthesis-header-narrative"
-            >
-              <div className="structured-narrative">{narrative}</div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── Agreements ── */}
       {agreements.length > 0 && (
