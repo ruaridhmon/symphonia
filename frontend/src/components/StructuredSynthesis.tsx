@@ -181,6 +181,20 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
   const toggle = (section: string) =>
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
 
+  /** Expand the parent section then smooth-scroll to a specific card. */
+  const scrollToCard = (section: 'agreements' | 'disagreements' | 'nuances', index: number) => {
+    // Ensure the section is expanded
+    setExpandedSections(prev => ({ ...prev, [section]: true }));
+    // Wait a frame for the DOM to update, then scroll
+    setTimeout(() => {
+      const el = document.getElementById(`syn-${section.slice(0, -1)}-${index}`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Brief highlight flash
+      el?.classList.add('syn-card-highlight');
+      setTimeout(() => el?.classList.remove('syn-card-highlight'), 1500);
+    }, 80);
+  };
+
   const {
     agreements,
     disagreements,
@@ -200,6 +214,34 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
             <span>Narrative Summary</span>
           </div>
           <div className="structured-narrative">{narrative}</div>
+          {/* Clickable claim chips — scroll to detail below */}
+          {(agreements.length > 0 || disagreements.length > 0) && (
+            <div className="narrative-claim-links">
+              <span className="narrative-claim-links-label">Jump to:</span>
+              {agreements.map((a, i) => (
+                <button
+                  key={`a-${i}`}
+                  className="narrative-claim-chip agreement-chip"
+                  onClick={() => scrollToCard('agreements', i)}
+                  title={a.claim}
+                >
+                  <CheckCircle2 size={11} />
+                  <span>{a.claim.length > 48 ? a.claim.slice(0, 48) + '…' : a.claim}</span>
+                </button>
+              ))}
+              {disagreements.map((d, i) => (
+                <button
+                  key={`d-${i}`}
+                  className="narrative-claim-chip disagreement-chip"
+                  onClick={() => scrollToCard('disagreements', i)}
+                  title={d.topic}
+                >
+                  <Zap size={11} />
+                  <span>{d.topic.length > 48 ? d.topic.slice(0, 48) + '…' : d.topic}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -256,7 +298,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
               aria-labelledby="synthesis-header-agreements"
             >
               {agreements.map((a, i) => (
-                <div key={i} className="structured-card agreement-card">
+                <div key={i} id={`syn-agreement-${i}`} className="structured-card agreement-card">
                   <div className="structured-card-header">
                     <p className="structured-card-claim">{a.claim}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -319,7 +361,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
               aria-labelledby="synthesis-header-disagreements"
             >
               {disagreements.map((d, i) => (
-                <div key={i} className="structured-card disagreement-card">
+                <div key={i} id={`syn-disagreement-${i}`} className="structured-card disagreement-card">
                   <div className="structured-card-header">
                     <p className="structured-card-claim">{d.topic}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
