@@ -26,6 +26,15 @@ export interface GenerateSynthesisResult {
   synthesis: string;
   summary?: string;
   synthesis_json?: SynthesisData;
+  // Async job pattern: POST returns immediately with job_id; poll GET /jobs/{job_id}
+  job_id?: string;
+  status?: 'pending' | 'complete' | 'failed';
+}
+
+export interface JobStatusResult {
+  status: 'pending' | 'complete' | 'failed';
+  result: GenerateSynthesisResult | null;
+  error: string | null;
 }
 
 /* ── API calls ── */
@@ -45,7 +54,10 @@ export function activateVersion(versionId: number) {
   );
 }
 
-/** Generate a new synthesis for a round */
+/** Generate a new synthesis for a round.
+ *  Returns immediately with {job_id, status: 'pending'}.
+ *  Poll pollSynthesisJob(job_id) until status === 'complete'.
+ */
 export function generateSynthesis(
   formId: number,
   roundId: number,
@@ -55,6 +67,11 @@ export function generateSynthesis(
     `/forms/${formId}/rounds/${roundId}/generate_synthesis`,
     payload
   );
+}
+
+/** Poll the status of a background synthesis job. */
+export function pollSynthesisJob(jobId: string) {
+  return api.get<JobStatusResult>(`/jobs/${jobId}`);
 }
 
 /** Save/push the editor synthesis content */

@@ -17,6 +17,7 @@ import {
 	getSynthesisVersions as apiGetSynthesisVersions,
 	activateVersion as apiActivateVersion,
 	generateSynthesis as apiGenerateSynthesis,
+	pollSynthesisJob as apiPollSynthesisJob,
 	pushSummary as apiPushSummary,
 } from './api/synthesis';
 
@@ -365,16 +366,38 @@ export default function SummaryPage() {
 			setSynthesisStage('analyzing');
 			setSynthesisStep(1);
 
-			const data = await apiGenerateSynthesis(formId, targetRound.id, {
+			const initial = await apiGenerateSynthesis(formId, targetRound.id, {
 				model: selectedModel,
 				strategy: synthesisMode,
 				n_analysts: 3,
 				mode: 'human_only',
 			});
 
+			// ── Async job pattern: poll until the background synthesis is done ──
+			let data = initial;
+			if (initial.job_id && initial.status === 'pending') {
+				setSynthesisStage('synthesising');
+				setSynthesisStep(2);
+				const jobId = initial.job_id;
+				// Poll every 3 s; timeout after 10 min
+				const deadline = Date.now() + 10 * 60 * 1000;
+				while (Date.now() < deadline) {
+					await new Promise(res => setTimeout(res, 3000));
+					const jobStatus = await apiPollSynthesisJob(jobId);
+					if (jobStatus.status === 'complete' && jobStatus.result) {
+						data = jobStatus.result;
+						break;
+					}
+					if (jobStatus.status === 'failed') {
+						throw new Error(jobStatus.error || 'Synthesis job failed');
+					}
+					// Still pending — update step animation
+					setSynthesisStep(prev => prev < 4 ? prev + 1 : 2);
+				}
+			}
+
 			setSynthesisStage('synthesising');
 			setSynthesisStep(3);
-
 			setSynthesisStage('formatting');
 			setSynthesisStep(4);
 
