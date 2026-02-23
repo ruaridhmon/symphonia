@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
+import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
 
@@ -30,15 +31,28 @@ export default function AdminDashboard() {
     setError(null);
     fetch(`${API_BASE_URL}/forms`, {
       headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include',
     })
       .then(r => {
+        // Detect CF Access redirect
+        if (isCfAccessRedirect(r)) {
+          clearAuthAndRedirect();
+          throw new Error('Session expired (CF Access). Redirecting…');
+        }
         if (!r.ok) {
           if (r.status === 401) {
+            clearAuthAndRedirect();
             throw new Error('Session expired. Please log in again.');
           } else if (r.status === 403) {
             throw new Error('Admin access required to view forms.');
           }
           throw new Error(`Failed to load forms (HTTP ${r.status})`);
+        }
+        // Verify response is JSON (not a CF HTML page)
+        const contentType = r.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          clearAuthAndRedirect();
+          throw new Error('Unexpected response — possible session expiry.');
         }
         return r.json();
       })
@@ -47,8 +61,12 @@ export default function AdminDashboard() {
         setLoading(false);
       })
       .catch(err => {
-        console.error('[AdminDashboard] Failed to load forms:', err);
-        setError(err.message || 'Failed to load forms');
+        // Network errors (TypeError from failed fetch) — don't crash
+        if (err instanceof TypeError) {
+          setError('Network error. Please check your connection.');
+        } else {
+          setError(err.message || 'Failed to load forms');
+        }
         setLoading(false);
       });
   };

@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { ApiError } from './api/client';
+import { ApiError, isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
 import { login as apiLogin, logout as apiLogout, getMe } from './api/auth';
 
 // ---------------------------------------------------------------------------
@@ -59,21 +59,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Sync localStorage for components that read it directly
           localStorage.setItem('email', me.email);
           localStorage.setItem('is_admin', me.is_admin ? 'true' : 'false');
-        } catch {
+        } catch (err) {
           // Cookie expired or invalid — clear and redirect if we had a session
           const hadSession = hasCookie('csrf_token');
           setToken(null);
           setUser(null);
           setIsAdmin(false);
           if (hadSession) {
-            window.location.href = '/login?expired=1';
+            // apiClient already handles CF Access redirects + 401, but as a safety net:
+            clearAuthAndRedirect();
           }
         }
       } else if (token && token !== '__cookie__') {
-        // Legacy localStorage token path
-        setIsAdmin(localStorage.getItem('is_admin') === 'true');
-        const storedEmail = localStorage.getItem('email');
-        if (storedEmail) setUser({ email: storedEmail });
+        // Legacy localStorage token path — validate with a manual redirect-detecting fetch
+        try {
+          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+          const res = await fetch(`${API_BASE_URL}/me`, {
+            credentials: 'include',
+            redirect: 'manual',
+            headers: {
+              ...(localStorage.getItem('access_token')
+                ? { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+                : {}),
+            },
+          });
+          // Opaque redirect or CF Access redirect = session expired
+          if (isCfAccessRedirect(res) || res.status === 401) {
+            clearAuthAndRedirect();
+            return;
+          }
+          // If ok, update state from response
+          if (res.ok) {
+            try {
+              const me = await res.json();
+              setUser({ email: me.email });
+              setIsAdmin(me.is_admin ?? false);
+              localStorage.setItem('email', me.email);
+              localStorage.setItem('is_admin', me.is_admin ? 'true' : 'false');
+            } catch {
+              // Non-JSON response (possible CF page) — treat as expiry
+              clearAuthAndRedirect();
+              return;
+            }
+          }
+        } catch {
+          // Network error during restore — keep existing localStorage state
+          // (user might just be offline momentarily)
+          setIsAdmin(localStorage.getItem('is_admin') === 'true');
+          const storedEmail = localStorage.getItem('email');
+          if (storedEmail) setUser({ email: storedEmail });
+        }
       }
       setIsLoading(false);
     };
@@ -82,6 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Proactive session validation — detect expiry while idle
+  // Uses redirect: 'manual' to catch CF Access 302s before they're followed
   useEffect(() => {
     if (!token) return;
 
@@ -89,11 +125,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const intervalId = setInterval(async () => {
       try {
-        await getMe();
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+        const bearerToken = localStorage.getItem('access_token');
+        const res = await fetch(`${API_BASE_URL}/me`, {
+          credentials: 'include',
+          redirect: 'manual', // Don't follow 302s — detect them
+          headers: {
+            ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}),
+          },
+        });
+
+        // Detect CF Access redirect (opaque redirect or 302/303)
+        if (isCfAccessRedirect(res)) {
+          clearAuthAndRedirect();
+          return;
+        }
+
+        // Explicit 401 or 403
+        if (res.status === 401 || res.status === 403) {
+          clearAuthAndRedirect();
+          return;
+        }
+
+        // 3xx status with redirect: 'manual' — likely CF Access or auth redirect
+        if (res.status >= 300 && res.status < 400) {
+          const location = res.headers.get('location') || '';
+          if (
+            location.includes('cloudflareaccess.com') ||
+            location.includes('cdn-cgi/access') ||
+            location.includes('/login')
+          ) {
+            clearAuthAndRedirect();
+            return;
+          }
+        }
+
+        // If response is ok, verify it's actually JSON (not a CF HTML page)
+        if (res.ok) {
+          try {
+            await res.json();
+          } catch {
+            // HTML response masquerading as 200 = CF interception
+            clearAuthAndRedirect();
+          }
+        }
       } catch {
-        // client.ts 401 handler will redirect to /login?expired=1
-        // Call logout() as safety net to clear local state
-        logout();
+        // Network error during poll — could be CF blocking, or just offline
+        // Don't immediately logout for transient network issues
+        // But if multiple failures occur, the next poll or user action will catch it
       }
     }, CHECK_INTERVAL_MS);
 

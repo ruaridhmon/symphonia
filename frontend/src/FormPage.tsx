@@ -168,7 +168,11 @@ export default function FormPage() {
       setPreviousSynthesis(roundData?.previous_round_synthesis || '')
     } catch (err) {
       if (err instanceof ApiError) {
+        // Status 0 or 401 = handled by apiClient (CF redirect / session expiry)
+        if (err.status === 0 || err.status === 401) return;
         setLoadError(`Failed to load form (HTTP ${err.status})`)
+      } else if (err instanceof TypeError) {
+        setLoadError('Network error. Please check your connection and try again.')
       } else {
         setLoadError(err instanceof Error ? err.message : 'Failed to load form. Please try again.')
       }

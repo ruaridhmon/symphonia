@@ -189,13 +189,24 @@ export default function SummaryPage() {
 	useEffect(() => {
 		if (!token) return;
 		getMe()
-			.then(d => setEmail(d.email || ''))
-			.catch(() => {});
+			.then(d => setEmail(d?.email || ''))
+			.catch(() => {
+				// getMe failure is handled by apiClient (401/CF redirect)
+				// For other errors, just use stored email
+				const stored = localStorage.getItem('email');
+				if (stored) setEmail(stored);
+			});
 	}, [token]);
 
 	useEffect(() => {
 		if (!token || !formId) return;
-		loadAll().then(() => loadResponses()).catch(() => {});
+		let cancelled = false;
+		loadAll()
+			.then(() => { if (!cancelled) return loadResponses(); })
+			.catch(() => {
+				// Error state is set in loadAll — nothing more to do
+			});
+		return () => { cancelled = true; };
 	}, [token, formId, editor]);
 
 	async function loadAll() {
@@ -203,9 +214,16 @@ export default function SummaryPage() {
 		setLoadError(null);
 		try {
 			const f = await apiFetchForm(formId);
+			if (!f) throw new Error('Form not found');
 			setForm(f as Form);
 
-			const list = await getRounds(formId);
+			let list;
+			try {
+				list = await getRounds(formId);
+			} catch {
+				// Rounds might fail independently — show form but flag error
+				list = [];
+			}
 			const mapped: Round[] = (Array.isArray(list) ? list : []).map(x => ({
 				id: x.id,
 				round_number: x.round_number,
@@ -223,16 +241,16 @@ export default function SummaryPage() {
 
 			if (active && !selectedRound) {
 				setSelectedRound(active);
-				loadSynthesisVersions(active.id);
+				loadSynthesisVersions(active.id).catch(() => {});
 			}
 
 			if (active && editor) {
 				editor.commands.setContent(active.synthesis || '');
 				setHasSavedSynthesis(!!(active.synthesis && active.synthesis.trim().length > 0));
-				const qs = active.questions?.length ? active.questions : (Array.isArray(f.questions) ? f.questions : []);
-				setNextRoundQuestions(qs.map(extractQuestionText));
-			} else if (f && Array.isArray(f.questions)) {
-				setNextRoundQuestions(f.questions.map(extractQuestionText));
+				const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
+				setNextRoundQuestions((qs || []).map(extractQuestionText));
+			} else if (f && Array.isArray((f as Form).questions)) {
+				setNextRoundQuestions((f as Form).questions.map(extractQuestionText));
 			}
 		} catch (err) {
 			setLoadError((err as Error).message || 'Failed to load consultation data');

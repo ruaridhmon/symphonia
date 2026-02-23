@@ -69,11 +69,13 @@ export default function UserDashboard() {
       const forms = Array.isArray(data) ? data : [];
       setMyForms(forms);
       // Fire-and-forget status enrichment
-      fetchStatuses(forms);
+      fetchStatuses(forms).catch(() => {});
     } catch (err) {
       if (err instanceof ApiError) {
-        if (err.status === 401) return; // client.ts handles redirect
+        if (err.status === 401 || err.status === 0) return; // client.ts handles redirect / CF Access
         setError(`Failed to load forms (HTTP ${err.status})`);
+      } else if (err instanceof TypeError) {
+        setError('Network error. Please check your connection.');
       } else {
         setError('Failed to load forms. Please check your connection.');
       }
