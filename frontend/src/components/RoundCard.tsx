@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Users, TrendingUp, ClipboardList, FileText } from 'lucide-react';
+import { Users, TrendingUp, ClipboardList, FileText, MessageSquare } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 import StructuredSynthesis from './StructuredSynthesis';
 import type { Round } from './RoundTimeline';
