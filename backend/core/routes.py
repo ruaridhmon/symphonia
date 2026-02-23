@@ -1421,7 +1421,7 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
 @router.get("/forms/{form_id}/export_synthesis")
 def export_synthesis(
     form_id: int,
-    format: str = Query("markdown", regex="^(markdown|json|pdf)$"),
+    format: str = Query("markdown", pattern="^(markdown|json|pdf)$"),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
