@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, Form, HTTPException, Request, Query, Response as FastAPIResponse
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Request, Query, Response as FastAPIResponse
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -9,6 +9,7 @@ from email.message import EmailMessage
 from openai import OpenAI
 import aiosmtplib
 import json
+import logging
 import os
 import re
 from datetime import datetime, timezone
@@ -44,10 +45,96 @@ from .auth import (
     COOKIE_SECURE,
     COOKIE_SAMESITE,
 )
+from .db import SessionLocal
 from .synthesis import CommitteeSynthesiser, FlowMode, get_synthesiser
 from core.ws import ws_manager
 
 load_dotenv()
+
+logger = logging.getLogger("symphonia.routes")
+
+
+# ---------------------------------------------------------
+# SYNTHESIS EMAIL NOTIFICATION HELPER
+# ---------------------------------------------------------
+
+async def _notify_synthesis_ready(
+    form_id: int,
+    round_id: int,
+    round_number: int,
+    admin_email: str | None,
+    convergence_score: float | None = None,
+):
+    """Send email notifications when synthesis completes.
+
+    Runs as a background task so it never blocks the HTTP response.
+    Sends to the admin who triggered synthesis, plus all experts who
+    responded to the round (if they have email addresses).
+
+    Controlled by the NOTIFY_ON_SYNTHESIS env var (default: "true").
+    Gracefully handles missing SMTP config — logs a warning and exits.
+    """
+    if os.getenv("NOTIFY_ON_SYNTHESIS", "true").lower() not in ("true", "1", "yes"):
+        return
+
+    # Quick check that SMTP is configured
+    if not os.getenv("SMTP_HOST"):
+        logger.warning("NOTIFY_ON_SYNTHESIS is enabled but SMTP_HOST is not set — skipping email notifications.")
+        return
+
+    from .email_templates import synthesis_ready
+
+    try:
+        db = SessionLocal()
+        try:
+            form = db.query(FormModel).filter(FormModel.id == form_id).first()
+            if not form:
+                logger.warning("Synthesis notification: form %s not found", form_id)
+                return
+
+            form_title = form.title or f"Form #{form_id}"
+
+            # Build summary URL
+            frontend_url = os.getenv("FRONTEND_URL", os.getenv("APP_URL", "")).rstrip("/")
+            summary_url = f"{frontend_url}/forms/{form_id}/summary" if frontend_url else ""
+
+            subject, html = synthesis_ready(
+                consultation_title=form_title,
+                round_number=round_number,
+                summary_url=summary_url,
+                consensus_score=convergence_score,
+            )
+
+            # Collect recipients: admin + responding experts
+            recipients: set[str] = set()
+            if admin_email:
+                recipients.add(admin_email)
+
+            # Add emails of experts who responded to this round
+            round_responses = (
+                db.query(Response)
+                .filter(Response.round_id == round_id)
+                .all()
+            )
+            for resp in round_responses:
+                if resp.user and resp.user.email:
+                    recipients.add(resp.user.email)
+
+            # Send to each recipient individually
+            for recipient in recipients:
+                try:
+                    await _send_templated_email(recipient, subject, html)
+                except Exception as exc:
+                    logger.warning("Failed to send synthesis notification to %s: %s", recipient, exc)
+
+            logger.info(
+                "Synthesis notification sent for form=%s round=%s to %d recipients",
+                form_id, round_id, len(recipients),
+            )
+        finally:
+            db.close()
+    except Exception as exc:
+        logger.error("Synthesis email notification failed: %s", exc, exc_info=True)
 
 
 # ---------------------------------------------------------
@@ -807,6 +894,7 @@ async def synthesise_committee(
     request: Request,
     form_id: int,
     payload: CommitteeSynthesisPayload,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user),
 ):
@@ -959,6 +1047,16 @@ async def synthesise_committee(
         except Exception:
             ws_manager.disconnect(conn)
 
+    # Schedule email notifications in the background
+    background_tasks.add_task(
+        _notify_synthesis_ready,
+        form_id=form_id,
+        round_id=active_round.id,
+        round_number=active_round.round_number,
+        admin_email=user.email,
+        convergence_score=active_round.convergence_score,
+    )
+
     return {
         "synthesis": result_dict,
         "convergence_score": active_round.convergence_score,
@@ -1042,6 +1140,7 @@ async def generate_synthesis_for_round(
     form_id: int,
     round_id: int,
     payload: GenerateSynthesisVersionPayload,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_admin_user),
 ):
@@ -1359,6 +1458,20 @@ If expert discussion comments are included above, integrate those perspectives i
             })
         except Exception:
             ws_manager.disconnect(conn)
+
+    # Schedule email notifications in the background
+    convergence = None
+    if synthesis_json_data and isinstance(synthesis_json_data.get("confidence_map"), dict):
+        vals = list(synthesis_json_data["confidence_map"].values())
+        convergence = sum(vals) / len(vals) if vals else None
+    background_tasks.add_task(
+        _notify_synthesis_ready,
+        form_id=form_id,
+        round_id=round_id,
+        round_number=round_obj.round_number,
+        admin_email=user.email,
+        convergence_score=convergence,
+    )
 
     return {
         "id": new_version.id,
@@ -2126,6 +2239,97 @@ def get_form(
 
 
 # ---------------------------------------------------------
+# FORM TEMPLATES
+# ---------------------------------------------------------
+
+from .form_templates import list_templates, get_template
+
+
+@router.get(
+    "/templates",
+    tags=["Forms"],
+    summary="List form templates",
+    description="Return all available pre-built form templates with metadata. No authentication required.",
+    response_description="Array of template objects",
+)
+@limiter.limit(READ_LIMIT)
+def get_templates(request: Request):
+    """Return all available form templates."""
+    return list_templates()
+
+
+class TemplateCreatePayload(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    join_code: str | None = None
+    allow_join: bool = True
+
+
+@router.post(
+    "/forms/from_template/{template_id}",
+    tags=["Forms"],
+    summary="Create form from template",
+    description=(
+        "Create a new form pre-filled with a template's questions and settings. "
+        "Optionally override title and description. Admin-only."
+    ),
+    response_description="Created form with ID and all fields",
+)
+@limiter.limit(CRUD_LIMIT)
+def create_form_from_template(
+    request: Request,
+    template_id: str,
+    payload: TemplateCreatePayload | None = None,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Create a new form pre-filled from a template."""
+    template = get_template(template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail=f"Template '{template_id}' not found")
+
+    import uuid
+
+    title = (payload.title if payload and payload.title else template.name).strip()
+    join_code = (payload.join_code if payload and payload.join_code else str(uuid.uuid4())[:8])
+
+    f = FormModel(
+        title=title,
+        questions=template.default_questions,
+        allow_join=payload.allow_join if payload else True,
+        join_code=join_code,
+        expert_labels=template.expert_label_preset,
+    )
+    db.add(f)
+    db.commit()
+    db.refresh(f)
+
+    first_round = RoundModel(
+        form_id=f.id,
+        round_number=1,
+        is_active=True,
+        questions=template.default_questions,
+    )
+    db.add(first_round)
+
+    audit_log(db, user=user, action="create_form_from_template", resource_type="form",
+              resource_id=f.id, detail={"title": f.title, "template_id": template_id}, request=request)
+    db.commit()
+
+    return {
+        "id": f.id,
+        "title": f.title,
+        "questions": f.questions,
+        "allow_join": f.allow_join,
+        "join_code": f.join_code,
+        "expert_labels": f.expert_labels,
+        "participant_count": 0,
+        "current_round": 1,
+        "template_id": template_id,
+    }
+
+
+# ---------------------------------------------------------
 # EXPERT LABELS
 # ---------------------------------------------------------
 
@@ -2853,6 +3057,73 @@ async def send_reminder_email(
     if errors and len(errors) == len(payload.to):
         raise HTTPException(status_code=500, detail={"errors": errors})
     return {"status": "sent", "template": "round_reminder", "sent": len(payload.to) - len(errors), "errors": errors}
+
+
+# ── Manual synthesis notification trigger ────────────────────────
+@router.post(
+    "/forms/{form_id}/notify",
+    tags=["Email"],
+    summary="Notify participants about latest synthesis",
+    description=(
+        "Manually trigger synthesis-ready email notifications for the latest "
+        "synthesised round of a form. Sends to the admin and all experts who "
+        "responded. Admin-only."
+    ),
+    response_description="Notification status and recipient count",
+)
+@limiter.limit(EMAIL_LIMIT)
+async def notify_synthesis_ready(
+    request: Request,
+    form_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Manually trigger synthesis notification emails for the latest round."""
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    # Find the latest round that has a synthesis
+    latest_round = (
+        db.query(RoundModel)
+        .filter(
+            RoundModel.form_id == form_id,
+            RoundModel.synthesis.isnot(None),
+        )
+        .order_by(RoundModel.round_number.desc())
+        .first()
+    )
+    if not latest_round:
+        raise HTTPException(status_code=404, detail="No synthesised round found for this form")
+
+    background_tasks.add_task(
+        _notify_synthesis_ready,
+        form_id=form_id,
+        round_id=latest_round.id,
+        round_number=latest_round.round_number,
+        admin_email=user.email,
+        convergence_score=latest_round.convergence_score,
+    )
+
+    audit_log(
+        db,
+        user=user,
+        action="manual_synthesis_notify",
+        resource_type="form",
+        resource_id=form_id,
+        detail={"round_id": latest_round.id, "round_number": latest_round.round_number},
+        request=request,
+    )
+    db.commit()
+
+    return {
+        "status": "queued",
+        "form_id": form_id,
+        "round_id": latest_round.id,
+        "round_number": latest_round.round_number,
+        "message": "Synthesis notification emails have been queued for delivery.",
+    }
 
 
 @router.get(

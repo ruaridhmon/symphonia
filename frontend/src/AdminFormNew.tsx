@@ -7,6 +7,7 @@ import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
+import TemplatePicker, { type FormTemplate } from './TemplatePicker';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
@@ -761,6 +762,10 @@ export default function AdminFormNew() {
   const { token } = useAuth();
   const navigate = useNavigate();
 
+  /* Template picker state */
+  const [showTemplatePicker, setShowTemplatePicker] = useState(true);
+  const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
+
   /* Core state */
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -786,6 +791,28 @@ export default function AdminFormNew() {
       .then(data => { if (data.synthesis_model) setSynthesisModel(data.synthesis_model); })
       .catch(() => {}); // silently fall back to default
   }, []);
+
+  /* Template selection handlers */
+  const handleSelectTemplate = (template: FormTemplate) => {
+    setSelectedTemplate(template);
+    setTitle(template.name);
+    setDescription(template.description);
+    setQuestions(template.default_questions);
+    setShowTemplatePicker(false);
+  };
+
+  const handleStartBlank = () => {
+    setSelectedTemplate(null);
+    setTitle('');
+    setDescription('');
+    setQuestions(['']);
+    setShowTemplatePicker(false);
+  };
+
+  const handleBackToTemplates = () => {
+    setShowTemplatePicker(true);
+    setSelectedTemplate(null);
+  };
 
   /* Worker D state — Guide modal + AI panel */
   const [guideOpen, setGuideOpen] = useState(false);
@@ -860,7 +887,7 @@ export default function AdminFormNew() {
         {/* Back button */}
         <button
           type="button"
-          onClick={() => navigate('/admin')}
+          onClick={() => showTemplatePicker ? navigate('/admin') : handleBackToTemplates()}
           className="inline-flex items-center gap-1.5 text-sm mb-6 transition-colors"
           style={{
             color: 'var(--muted-foreground)',
@@ -872,19 +899,44 @@ export default function AdminFormNew() {
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
         >
-          ← Back to Dashboard
+          ← {showTemplatePicker ? 'Back to Dashboard' : 'Back to Templates'}
         </button>
 
+        {/* ── Template Picker View ────────────────────────────── */}
+        {showTemplatePicker ? (
+          <div>
+            <div className="mb-6">
+              <h1
+                className="text-2xl font-bold tracking-tight"
+                style={{ color: 'var(--foreground)' }}
+              >
+                Create a New Form
+              </h1>
+              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                Pick a template to get started quickly, or create a blank form from scratch.
+              </p>
+            </div>
+            <TemplatePicker
+              onSelectTemplate={handleSelectTemplate}
+              onStartBlank={handleStartBlank}
+            />
+          </div>
+        ) : (
+        <>
+
+        {/* ── Form Editor View ────────────────────────────────── */}
         <div className="mb-6" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
           <div>
             <h1
               className="text-2xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
-              Create a New Form
+              {selectedTemplate ? `New Form — ${selectedTemplate.icon} ${selectedTemplate.name}` : 'Create a New Form'}
             </h1>
             <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-              Set up a new Delphi consultation with title and opening questions.
+              {selectedTemplate
+                ? 'Customise the template below, then create your consultation.'
+                : 'Set up a new Delphi consultation with title and opening questions.'}
             </p>
           </div>
 
@@ -1490,6 +1542,8 @@ export default function AdminFormNew() {
             </div>
           </div>
         </div>
+        </>
+        )}
       </Container>
     </section>
   );
