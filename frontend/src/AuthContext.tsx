@@ -60,10 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('email', me.email);
           localStorage.setItem('is_admin', me.is_admin ? 'true' : 'false');
         } catch {
-          // Cookie expired or invalid — clear
+          // Cookie expired or invalid — clear and redirect if we had a session
+          const hadSession = hasCookie('csrf_token');
           setToken(null);
           setUser(null);
           setIsAdmin(false);
+          if (hadSession) {
+            window.location.href = '/login?expired=1';
+          }
         }
       } else if (token && token !== '__cookie__') {
         // Legacy localStorage token path
@@ -76,6 +80,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Proactive session validation — detect expiry while idle
+  useEffect(() => {
+    if (!token) return;
+
+    const CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
+    const intervalId = setInterval(async () => {
+      try {
+        await getMe();
+      } catch {
+        // client.ts 401 handler will redirect to /login?expired=1
+        // Call logout() as safety net to clear local state
+        logout();
+      }
+    }, CHECK_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = async (email: string, password: string) => {
     let data;
