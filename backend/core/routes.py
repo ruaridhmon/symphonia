@@ -876,7 +876,7 @@ async def generate_synthesis_for_round(
     """Generate a NEW synthesis version for ANY round (not just active).
 
     Creates a new SynthesisVersion record with an incremented version number.
-    If strategy is 'committee', runs the committee synthesiser.
+    If strategy is 'committee' or 'ttd', runs the consensus library adapter.
     Otherwise, falls back to simple single-prompt synthesis.
     """
     # Verify round belongs to form
@@ -937,8 +937,8 @@ async def generate_synthesis_for_round(
             f"*Strategy: {strategy} | Model: {payload.model}*\n\n"
             "This is a mock synthesis. Enable OPENROUTER_API_KEY for real LLM synthesis."
         )
-    elif strategy == "committee":
-        # Run committee synthesis
+    elif strategy in ("committee", "ttd"):
+        # Run consensus-library synthesis (committee or TTD/diffusion)
         response_dicts = [
             {
                 "answers": r.answers,
@@ -955,6 +955,8 @@ async def generate_synthesis_for_round(
         synthesiser = get_synthesiser(
             api_key=api_key,
             n_analysts=payload.n_analysts,
+            strategy=strategy,
+            model=payload.model,
         )
 
         result = await synthesiser.run(
@@ -993,7 +995,7 @@ async def generate_synthesis_for_round(
         synthesis_text = "".join(text_parts) if text_parts else "Synthesis complete."
 
     else:
-        # Simple / TTD single-prompt synthesis — now produces structured JSON too
+        # Simple single-prompt synthesis — produces structured JSON
         prompt_content = "Synthesize the following expert responses.\n\n"
         prompt_content += "Questions:\n"
         for i, q in enumerate(questions, 1):
