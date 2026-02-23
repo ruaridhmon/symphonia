@@ -567,7 +567,13 @@ def submit_feedback(
     return {"message": "Feedback saved"}
 
 
-@router.get("/all_feedback")
+@router.get(
+    "/all_feedback",
+    tags=["Responses"],
+    summary="List all feedback (admin)",
+    description="Retrieve all user feedback entries ordered by most recent. Admin only.",
+    response_description="Array of feedback entries with user emails and timestamps",
+)
 @limiter.limit(READ_LIMIT)
 def all_feedback(
     request: Request,
@@ -598,7 +604,13 @@ class SummaryPayload(BaseModel):
     summary: str
 
 
-@router.post("/forms/{form_id}/push_summary")
+@router.post(
+    "/forms/{form_id}/push_summary",
+    tags=["Synthesis"],
+    summary="Push manual synthesis text",
+    description="Manually set the synthesis text for the active round. Broadcasts update via WebSocket. Admin only.",
+    response_description="Confirmation that synthesis was pushed",
+)
 @limiter.limit(CRUD_LIMIT)
 async def push_summary(
     request: Request,
@@ -633,7 +645,17 @@ class GenerateSummaryPayload(BaseModel):
     model: str
 
 
-@router.post("/forms/{form_id}/generate_summary")
+@router.post(
+    "/forms/{form_id}/generate_summary",
+    tags=["Synthesis"],
+    summary="Generate AI summary (legacy)",
+    description=(
+        "Generate a single-prompt AI synthesis of all responses for the active round. "
+        "Uses the specified LLM model via OpenRouter. Falls back to mock synthesis when "
+        "OPENROUTER_API_KEY is not set. Admin only."
+    ),
+    response_description="Generated synthesis text",
+)
 @limiter.limit(SYNTHESIS_LIMIT)
 def generate_summary(
     form_id: int,
@@ -769,7 +791,17 @@ class CommitteeSynthesisPayload(BaseModel):
     n_analysts: int = 3
 
 
-@router.post("/forms/{form_id}/synthesise_committee")
+@router.post(
+    "/forms/{form_id}/synthesise_committee",
+    tags=["Synthesis"],
+    summary="Run committee synthesis",
+    description=(
+        "Run N independent LLM analysts + a meta-synthesiser on the active round's responses. "
+        "Produces structured synthesis with agreements, disagreements, nuances, confidence scores, "
+        "and optional follow-up probes. Broadcasts progress via WebSocket. Admin only."
+    ),
+    response_description="Structured synthesis JSON, convergence score, and text synthesis",
+)
 @limiter.limit(SYNTHESIS_LIMIT)
 async def synthesise_committee(
     request: Request,
@@ -938,7 +970,13 @@ async def synthesise_committee(
 # SYNTHESIS VERSIONING
 # ---------------------------------------------------------
 
-@router.get("/forms/{form_id}/rounds/{round_id}/synthesis_versions")
+@router.get(
+    "/forms/{form_id}/rounds/{round_id}/synthesis_versions",
+    tags=["Synthesis"],
+    summary="List synthesis versions",
+    description="List all synthesis versions for a given round, ordered by version number ascending. Requires authentication.",
+    response_description="Array of synthesis version objects with metadata",
+)
 @limiter.limit(READ_LIMIT)
 def list_synthesis_versions(
     request: Request,
@@ -987,7 +1025,17 @@ class GenerateSynthesisVersionPayload(BaseModel):
     mode: str = "human_only"
 
 
-@router.post("/forms/{form_id}/rounds/{round_id}/generate_synthesis")
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/generate_synthesis",
+    tags=["Synthesis"],
+    summary="Generate synthesis for any round",
+    description=(
+        "Generate a new synthesis version for ANY round (not just active). Supports "
+        "'simple', 'committee', and 'ttd' strategies. Auto-activates the new version "
+        "and broadcasts via WebSocket. Admin only."
+    ),
+    response_description="New synthesis version with id, text, JSON, model, and strategy",
+)
 @limiter.limit(SYNTHESIS_LIMIT)
 async def generate_synthesis_for_round(
     request: Request,
@@ -1325,7 +1373,16 @@ If expert discussion comments are included above, integrate those perspectives i
     }
 
 
-@router.put("/synthesis_versions/{version_id}/activate")
+@router.put(
+    "/synthesis_versions/{version_id}/activate",
+    tags=["Synthesis"],
+    summary="Activate a synthesis version",
+    description=(
+        "Set a synthesis version as the active/published one. Deactivates all other "
+        "versions for the same round and copies synthesis onto the Round model. Admin only."
+    ),
+    response_description="Activated version info with confirmation message",
+)
 @limiter.limit(CRUD_LIMIT)
 def activate_synthesis_version(
     request: Request,
@@ -1369,7 +1426,13 @@ def activate_synthesis_version(
     }
 
 
-@router.get("/synthesis_versions/{version_id}")
+@router.get(
+    "/synthesis_versions/{version_id}",
+    tags=["Synthesis"],
+    summary="Get a synthesis version",
+    description="Retrieve a specific synthesis version by ID including text, structured JSON, model, and strategy.",
+    response_description="Full synthesis version object",
+)
 @limiter.limit(READ_LIMIT)
 def get_synthesis_version(
     request: Request,
@@ -1533,7 +1596,16 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
     return "\n".join(lines)
 
 
-@router.get("/forms/{form_id}/export_synthesis")
+@router.get(
+    "/forms/{form_id}/export_synthesis",
+    tags=["Synthesis"],
+    summary="Export synthesis document",
+    description=(
+        "Export all rounds' synthesis data as a downloadable document. "
+        "Supports `format=markdown` (default), `format=json`, or `format=pdf`."
+    ),
+    response_description="Downloadable file (markdown, JSON, or PDF)",
+)
 def export_synthesis(
     form_id: int,
     format: str = Query("markdown", pattern="^(markdown|json|pdf)$"),
@@ -1644,7 +1716,13 @@ class FollowUpCreatePayload(BaseModel):
     question: str
 
 
-@router.get("/forms/{form_id}/follow_ups")
+@router.get(
+    "/forms/{form_id}/follow_ups",
+    tags=["Responses"],
+    summary="List follow-up questions",
+    description="Get all follow-up questions and their responses for the active round. Includes author info and response threads.",
+    response_description="Array of follow-up questions with nested responses",
+)
 @limiter.limit(READ_LIMIT)
 def get_follow_ups(
     request: Request,
@@ -1708,7 +1786,13 @@ def get_follow_ups(
     return result
 
 
-@router.post("/forms/{form_id}/follow_ups")
+@router.post(
+    "/forms/{form_id}/follow_ups",
+    tags=["Responses"],
+    summary="Create a follow-up question",
+    description="Post a new follow-up question on the active round. Tagged as human-authored.",
+    response_description="Created follow-up with ID and timestamp",
+)
 @limiter.limit(CRUD_LIMIT)
 def create_follow_up(
     request: Request,
@@ -1751,7 +1835,14 @@ class FollowUpRespondPayload(BaseModel):
     response: str
 
 
-@router.post("/follow_ups/{follow_up_id}/respond")
+@router.post(
+    "/follow_ups/{follow_up_id}/respond",
+    tags=["Responses"],
+    summary="Respond to a follow-up",
+    description=(
+        "Submit a response to an existing follow-up question. Responses are timestamped and attributed to the authenticated user."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def respond_to_follow_up(
     request: Request,
@@ -1801,7 +1892,14 @@ class FormUpdate(BaseModel):
     questions: list[str]
 
 
-@router.post("/create_form")
+@router.post(
+    "/create_form",
+    tags=["Forms"],
+    summary="Create a consultation form",
+    description=(
+        "Create a new Delphi consultation form with title, questions, join settings, and a join code. Automatically creates the first round. Admin-only."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def create_form(
     payload: FormCreate,
@@ -1842,7 +1940,14 @@ def create_form(
     }
 
 
-@router.put("/forms/{form_id}")
+@router.put(
+    "/forms/{form_id}",
+    tags=["Forms"],
+    summary="Update a form",
+    description=(
+        "Update the title and questions of an existing form. Admin-only. Records an audit log entry."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def update_form(
     form_id: int,
@@ -1864,7 +1969,14 @@ def update_form(
     return {"status": "updated"}
 
 
-@router.delete("/forms/{form_id}")
+@router.delete(
+    "/forms/{form_id}",
+    tags=["Forms"],
+    summary="Delete a form",
+    description=(
+        "Permanently delete a form and all associated data via cascade. Admin-only. Records an audit log entry."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def delete_form(
     form_id: int,
@@ -1884,7 +1996,14 @@ def delete_form(
     return {"status": "deleted"}
 
 
-@router.get("/forms")
+@router.get(
+    "/forms",
+    tags=["Forms"],
+    summary="List all forms",
+    description=(
+        "List all consultation forms with participant counts and current round info. Admin-only. Returns forms ordered by ID."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_forms(
     request: Request,
@@ -1919,7 +2038,14 @@ class UnlockFormPayload(BaseModel):
     join_code: str
 
 
-@router.post("/forms/unlock")
+@router.post(
+    "/forms/unlock",
+    tags=["Forms"],
+    summary="Unlock a form with join code",
+    description=(
+        "Unlock access to a form using its join code. The form must have allow_join=true. Idempotent — returns success if already unlocked. Requires authentication."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def unlock_form(
     request: Request,
@@ -1952,7 +2078,14 @@ def unlock_form(
     return {"message": "Form unlocked successfully."}
 
 
-@router.get("/my_forms")
+@router.get(
+    "/my_forms",
+    tags=["Forms"],
+    summary="List my unlocked forms",
+    description=(
+        "Returns all forms the authenticated user has unlocked via join code."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_my_forms(
     request: Request,
@@ -1963,7 +2096,14 @@ def get_my_forms(
     return unlocked_forms
 
 
-@router.get("/forms/{form_id}")
+@router.get(
+    "/forms/{form_id}",
+    tags=["Forms"],
+    summary="Get form details",
+    description=(
+        "Retrieve details of a specific form including title, questions, join settings, and expert label configuration. Requires authentication."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_form(
     request: Request,
@@ -1994,7 +2134,14 @@ class ExpertLabelsPayload(BaseModel):
     custom_labels: dict | None = None
 
 
-@router.get("/forms/{form_id}/expert_labels")
+@router.get(
+    "/forms/{form_id}/expert_labels",
+    tags=["Forms"],
+    summary="Get expert label config",
+    description=(
+        "Get the expert labelling preset and custom labels for a form. Requires authentication."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_expert_labels(
     request: Request,
@@ -2008,7 +2155,14 @@ def get_expert_labels(
     return f.expert_labels or {"preset": "default", "custom_labels": {}}
 
 
-@router.put("/forms/{form_id}/expert_labels")
+@router.put(
+    "/forms/{form_id}/expert_labels",
+    tags=["Forms"],
+    summary="Update expert label config",
+    description=(
+        "Set the expert labelling preset (default, temporal, custom, methodological, stakeholder) and optional custom labels. Admin-only."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def put_expert_labels(
     request: Request,
@@ -2037,7 +2191,14 @@ class RoundConfig(BaseModel):
     questions: list[str] | None = None
 
 
-@router.get("/forms/{form_id}/active_round")
+@router.get(
+    "/forms/{form_id}/active_round",
+    tags=["Rounds"],
+    summary="Get the active round",
+    description=(
+        "Get the currently active round for a form, including questions and the previous round's synthesis for reference. Returns 404 if no active round. Requires authentication."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_active_round(
     request: Request,
@@ -2073,7 +2234,14 @@ def get_active_round(
 
 
 
-@router.post("/forms/{form_id}/next_round")
+@router.post(
+    "/forms/{form_id}/next_round",
+    tags=["Rounds"],
+    summary="Advance to next round",
+    description=(
+        "Close the current active round and open a new one. Optionally provide new questions; otherwise inherits from previous round. Admin-only."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def open_next_round(
     request: Request,
@@ -2131,7 +2299,14 @@ def open_next_round(
 
 
 
-@router.get("/forms/{form_id}/rounds")
+@router.get(
+    "/forms/{form_id}/rounds",
+    tags=["Rounds"],
+    summary="List all rounds",
+    description=(
+        "List all rounds for a form with synthesis data, convergence scores, questions, and response counts. Requires authentication."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_rounds(
     request: Request,
@@ -2171,7 +2346,14 @@ def get_rounds(
 # RESPONSES
 # ---------------------------------------------------------
 
-@router.get("/form/{form_id}/responses")
+@router.get(
+    "/form/{form_id}/responses",
+    tags=["Responses"],
+    summary="Get responses for a form",
+    description=(
+        "Retrieve expert responses. By default returns only the active round; pass all_rounds=true for all. Admin-only."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def form_responses(
     request: Request,
@@ -2211,7 +2393,14 @@ class ResponseEditPayload(BaseModel):
     version: int  # optimistic locking: must match current version
 
 
-@router.put("/responses/{response_id}")
+@router.put(
+    "/responses/{response_id}",
+    tags=["Responses"],
+    summary="Edit a response (optimistic lock)",
+    description=(
+        "Edit a response with optimistic locking. Returns 409 Conflict if the version doesn't match (concurrent edit). Admin-only."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def edit_response(
     request: Request,
@@ -2256,7 +2445,14 @@ def edit_response(
     }
 
 
-@router.put("/responses/{response_id}/force")
+@router.put(
+    "/responses/{response_id}/force",
+    tags=["Responses"],
+    summary="Force-edit a response",
+    description=(
+        "Force-edit a response, bypassing optimistic locking and overwriting any concurrent changes. Admin-only."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def force_edit_response(
     request: Request,
@@ -2289,7 +2485,14 @@ def force_edit_response(
     }
 
 
-@router.get("/form/{form_id}/archived_responses")
+@router.get(
+    "/form/{form_id}/archived_responses",
+    tags=["Responses"],
+    summary="Get archived responses",
+    description=(
+        "Retrieve the permanent archive of all responses for a form across all rounds. Admin-only."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def form_archived(
     request: Request,
@@ -2315,7 +2518,14 @@ def form_archived(
     ]
 
 
-@router.get("/forms/{form_id}/rounds_with_responses")
+@router.get(
+    "/forms/{form_id}/rounds_with_responses",
+    tags=["Responses"],
+    summary="Get rounds with embedded responses",
+    description=(
+        "List all rounds with their responses inline. Used for the admin view showing responses grouped by round. Admin-only."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def rounds_with_responses(
     request: Request,
@@ -2363,7 +2573,14 @@ def rounds_with_responses(
 # GENERIC SYNTHESIS
 # ---------------------------------------------------------
 
-@router.post("/form/{form_id}/synthesise")
+@router.post(
+    "/form/{form_id}/synthesise",
+    tags=["Synthesis"],
+    summary="Simple HTML concatenation",
+    description=(
+        "Format all active-round responses into simple HTML blocks. No AI involved. Admin-only. For AI synthesis, use generate_summary or synthesise_committee."
+    ),
+)
 @limiter.limit(SYNTHESIS_LIMIT)
 def synthesise_simple(
     request: Request,
@@ -2414,7 +2631,14 @@ class EmailRequest(BaseModel):
     html: str
 
 
-@router.post("/send_email")
+@router.post(
+    "/send_email",
+    tags=["Email"],
+    summary="Send a custom email",
+    description=(
+        "Send a custom HTML email. Requires SMTP configuration. Admin-only. For branded templates, use the specific /email/* endpoints."
+    ),
+)
 @limiter.limit(EMAIL_LIMIT)
 async def send_email(
     request: Request,
@@ -2475,7 +2699,14 @@ class InvitationEmailPayload(BaseModel):
     message: str = ""
 
 
-@router.post("/email/invitation")
+@router.post(
+    "/email/invitation",
+    tags=["Email"],
+    summary="Send expert invitation",
+    description=(
+        "Send a branded invitation email to an expert for a consultation. Records an audit log entry. Admin-only."
+    ),
+)
 @limiter.limit(EMAIL_LIMIT)
 async def send_invitation_email(
     payload: InvitationEmailPayload,
@@ -2509,7 +2740,14 @@ class NewRoundEmailPayload(BaseModel):
     round_url: str
 
 
-@router.post("/email/new-round")
+@router.post(
+    "/email/new-round",
+    tags=["Email"],
+    summary="Send new round notification",
+    description=(
+        "Notify experts that a new round is open. Sends individually; reports partial failures. Admin-only."
+    ),
+)
 @limiter.limit(EMAIL_LIMIT)
 async def send_new_round_email(
     request: Request,
@@ -2543,7 +2781,14 @@ class SynthesisReadyEmailPayload(BaseModel):
     consensus_score: float | None = None
 
 
-@router.post("/email/synthesis-ready")
+@router.post(
+    "/email/synthesis-ready",
+    tags=["Email"],
+    summary="Send synthesis-ready notification",
+    description=(
+        "Notify participants that synthesis is ready for review. Optionally includes the consensus score. Admin-only."
+    ),
+)
 @limiter.limit(EMAIL_LIMIT)
 async def send_synthesis_ready_email(
     request: Request,
@@ -2577,7 +2822,14 @@ class ReminderEmailPayload(BaseModel):
     round_url: str
 
 
-@router.post("/email/reminder")
+@router.post(
+    "/email/reminder",
+    tags=["Email"],
+    summary="Send response reminder",
+    description=(
+        "Send a gentle reminder to experts who haven't responded. Admin-only."
+    ),
+)
 @limiter.limit(EMAIL_LIMIT)
 async def send_reminder_email(
     request: Request,
@@ -2603,7 +2855,14 @@ async def send_reminder_email(
     return {"status": "sent", "template": "round_reminder", "sent": len(payload.to) - len(errors), "errors": errors}
 
 
-@router.get("/email/preview/{template_name}")
+@router.get(
+    "/email/preview/{template_name}",
+    tags=["Email"],
+    summary="Preview email template",
+    description=(
+        "Preview a branded email template with sample data. Available: invitation, new_round, synthesis_ready, round_reminder, welcome. Admin-only."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 async def preview_email_template(
     request: Request,
@@ -2654,7 +2913,14 @@ async def preview_email_template(
 # AUDIT LOG
 # ---------------------------------------------------------
 
-@router.get("/audit-log")
+@router.get(
+    "/audit-log",
+    tags=["Admin"],
+    summary="Get audit trail",
+    description=(
+        "Retrieve the audit trail with pagination. Supports filtering by action type and user ID. Admin-only."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_audit_log(
     request: Request,
@@ -2694,7 +2960,14 @@ def get_audit_log(
     }
 
 
-@router.get("/audit-log/actions")
+@router.get(
+    "/audit-log/actions",
+    tags=["Admin"],
+    summary="List audit action types",
+    description=(
+        "Return distinct action types in the audit log for filter dropdowns. Admin-only."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_audit_log_actions(
     request: Request,
@@ -2760,7 +3033,14 @@ def _nest_comments(comments: list[SynthesisComment]) -> list[dict]:
     return top_level
 
 
-@router.get("/forms/{form_id}/rounds/{round_id}/comments")
+@router.get(
+    "/forms/{form_id}/rounds/{round_id}/comments",
+    tags=["Synthesis"],
+    summary="List synthesis comments",
+    description=(
+        "List all comments for a round's synthesis, nested by thread. Requires authentication."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_comments(
     request: Request,
@@ -2789,7 +3069,14 @@ def get_comments(
     return _nest_comments(comments)
 
 
-@router.post("/forms/{form_id}/rounds/{round_id}/comments")
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/comments",
+    tags=["Synthesis"],
+    summary="Post a synthesis comment",
+    description=(
+        "Post a comment on a synthesis section (agreement, disagreement, nuance, emergence, or general). Supports one-level threading via parent_id. Broadcasts via WebSocket. Requires authentication."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 async def create_comment(
     request: Request,
@@ -2865,7 +3152,14 @@ async def create_comment(
     return result
 
 
-@router.put("/comments/{comment_id}")
+@router.put(
+    "/comments/{comment_id}",
+    tags=["Synthesis"],
+    summary="Edit a comment",
+    description=(
+        "Edit the body of your own comment. Users can only edit their own comments."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def update_comment(
     request: Request,
@@ -2890,7 +3184,14 @@ def update_comment(
     return result
 
 
-@router.delete("/comments/{comment_id}")
+@router.delete(
+    "/comments/{comment_id}",
+    tags=["Synthesis"],
+    summary="Delete a comment",
+    description=(
+        "Delete a comment. Users can delete their own; admins can delete any."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def delete_comment(
     request: Request,
@@ -2915,7 +3216,14 @@ def delete_comment(
 # ---------------------------------------------------------
 
 
-@router.post("/forms/{form_id}/rounds/{round_id}/devil_advocate")
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/devil_advocate",
+    tags=["AI Tools"],
+    summary="Generate devil's advocate counterarguments",
+    description=(
+        "Generate AI counterarguments for a round's synthesis — blind spots, missing perspectives, and steel-man counterarguments. Returns 3-5 rated counterarguments. Requires existing synthesis. Requires authentication."
+    ),
+)
 @limiter.limit(SYNTHESIS_LIMIT)
 def devil_advocate(
     request: Request,
@@ -3136,7 +3444,14 @@ class TranslatePayload(BaseModel):
     synthesis_text: str
 
 
-@router.post("/forms/{form_id}/rounds/{round_id}/translate")
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/translate",
+    tags=["AI Tools"],
+    summary="Translate synthesis for audience",
+    description=(
+        "Translate a synthesis for a specific audience: policy_maker, technical, general_public, executive, or academic. Requires authentication."
+    ),
+)
 @limiter.limit(SYNTHESIS_LIMIT)
 def translate_synthesis(
     request: Request,
@@ -3240,7 +3555,14 @@ class VoiceMirrorPayload(BaseModel):
     responses: list[dict]  # [{"expert": "Expert 1", "question": "...", "answer": "..."}]
 
 
-@router.post("/forms/{form_id}/rounds/{round_id}/voice_mirror")
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/voice_mirror",
+    tags=["AI Tools"],
+    summary="Clarify expert responses",
+    description=(
+        "Clarify expert statements for accessibility without changing meaning. Simplifies jargon and complex sentences while preserving intent. Requires authentication."
+    ),
+)
 @limiter.limit(SYNTHESIS_LIMIT)
 def voice_mirror(
     request: Request,
@@ -3363,7 +3685,14 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
 # ADMIN ANALYTICS
 # ---------------------------------------------------------
 
-@router.get("/admin/analytics")
+@router.get(
+    "/admin/analytics",
+    tags=["Admin"],
+    summary="Get analytics dashboard",
+    description=(
+        "Aggregated analytics: total forms/responses, convergence scores, response rates, synthesis mode distribution, and 30-day activity timeline. Admin-only."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def admin_analytics(
     request: Request,
@@ -3534,7 +3863,14 @@ def admin_analytics(
 # ATLAS: UX TESTING DATA SEEDER
 # ---------------------------------------------------------
 
-@router.post("/atlas/seed")
+@router.post(
+    "/atlas/seed",
+    tags=["Admin"],
+    summary="Seed UX test data",
+    description=(
+        "Seed the database with sample consultation forms for UX testing. Idempotent — skips existing forms. Admin-only."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def seed_atlas_data(
     request: Request,
@@ -3722,7 +4058,14 @@ DEFAULT_SETTINGS = {
     "allow_late_join": "true",
 }
 
-@router.get("/admin/settings")
+@router.get(
+    "/admin/settings",
+    tags=["Admin"],
+    summary="Get application settings",
+    description=(
+        "Return all app settings with defaults. Includes synthesis_model, max_rounds, convergence_threshold, and more. Admin-only."
+    ),
+)
 @limiter.limit(READ_LIMIT)
 def get_settings(
     request: Request,
@@ -3739,7 +4082,14 @@ def get_settings(
     return result
 
 
-@router.patch("/admin/settings")
+@router.patch(
+    "/admin/settings",
+    tags=["Admin"],
+    summary="Update application settings",
+    description=(
+        "Update one or more settings. Only known keys accepted. Admin-only."
+    ),
+)
 @limiter.limit(CRUD_LIMIT)
 def update_settings(
     payload: dict,
@@ -3762,7 +4112,14 @@ def update_settings(
     db.commit()
     return {"status": "ok"}
 
-@router.post("/ai/suggest")
+@router.post(
+    "/ai/suggest",
+    tags=["AI Tools"],
+    summary="AI question design assistant",
+    description=(
+        "AI-powered Delphi question assistant. Modes: 'suggest' (new ideas), 'critique' (review weaknesses), 'improve' (rewrite). Requires authentication."
+    ),
+)
 @limiter.limit(AI_LIMIT)
 def ai_suggest(
     request: Request,
