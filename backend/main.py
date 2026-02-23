@@ -4,7 +4,11 @@ Symphonia Backend - Expert Consensus Platform
 Protected by Cloudflare Access.
 """
 import os
+import logging
+import shutil
+import traceback
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +24,8 @@ from core.auth import get_password_hash
 from core.rate_limiter import limiter
 from core.ws import ws_manager
 
+logger = logging.getLogger("symphonia")
+
 # Frontend dist directory (built with `npm run build`)
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 
@@ -31,6 +37,22 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # ── Startup ──
+
+    # Auto-backup the DB before anything else
+    db_path = Path(__file__).parent / "symphonia.db"
+    if db_path.exists():
+        backup_dir = Path(__file__).parent / "backups"
+        backup_dir.mkdir(exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_path = backup_dir / f"symphonia_{timestamp}.db"
+        shutil.copy2(db_path, backup_path)
+        logger.info("DB backup created: %s", backup_path.name)
+        # Keep only last 7 backups
+        backups = sorted(backup_dir.glob("symphonia_*.db"))
+        for old in backups[:-7]:
+            old.unlink()
+            logger.info("Removed old backup: %s", old.name)
+
     print("✅ Symphonia backend started")
     if FRONTEND_DIR.exists():
         print(f"   Frontend: {FRONTEND_DIR}")
@@ -110,6 +132,16 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
             "retry_after": exc.detail,
         },
         headers={"Retry-After": str(getattr(exc, "retry_after", 60))},
+    )
+
+
+# Global exception handler — catches unhandled exceptions and returns clean JSON
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error("Unhandled exception: %s\n%s", exc, traceback.format_exc())
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error. Please try again."},
     )
 
 

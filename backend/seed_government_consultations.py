@@ -5,6 +5,13 @@ Creates expert responses on AI policy, education, and digital transformation.
 """
 import sys
 import os
+
+# ── Safety guard: prevent accidental execution ──
+if os.environ.get("ALLOW_DB_RESET") != "yes-i-know-what-im-doing":
+    print("ERROR: This script destroys all production data.")
+    print("Set ALLOW_DB_RESET=yes-i-know-what-im-doing to proceed.")
+    sys.exit(1)
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import json

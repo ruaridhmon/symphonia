@@ -925,7 +925,7 @@ The dimensional analysis reveals a **temporal paradox**: governance frameworks d
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
         completion = openai_client.chat.completions.create(
             model=payload.model,
             messages=[
@@ -1459,7 +1459,7 @@ If expert discussion comments are included above, integrate those perspectives i
         try:
             openai_client = get_openai_client()
             if not openai_client:
-                raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+                raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
             completion = openai_client.chat.completions.create(
                 model=payload.model,
                 messages=[
@@ -3738,7 +3738,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
 
         completion = openai_client.chat.completions.create(
             model="anthropic/claude-sonnet-4",
@@ -3901,7 +3901,7 @@ def translate_synthesis(
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
 
         completion = openai_client.chat.completions.create(
             model="anthropic/claude-sonnet-4",
@@ -4033,7 +4033,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
 
         completion = openai_client.chat.completions.create(
             model="anthropic/claude-sonnet-4",
@@ -4596,7 +4596,7 @@ def ai_suggest(
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
 
         completion = openai_client.chat.completions.create(
             model=model,
