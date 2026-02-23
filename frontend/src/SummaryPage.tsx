@@ -661,6 +661,15 @@ export default function SummaryPage() {
 							</div>
 						)}
 
+						{/* Version comparison (side-by-side) — rendered above synthesis so it's immediately visible when toggled */}
+						{showVersionCompare && synthesisVersions.length >= 2 && (
+							<VersionCompare
+								versions={synthesisVersions}
+								currentVersionId={selectedVersionId}
+								onClose={() => setShowVersionCompare(false)}
+							/>
+						)}
+
 						{/* Selected version content */}
 						<SelectedVersionContent
 							selectedVersion={selectedVersion}
@@ -670,15 +679,6 @@ export default function SummaryPage() {
 							token={token}
 							currentUserEmail={email}
 						/>
-
-						{/* Version comparison (side-by-side) */}
-						{showVersionCompare && synthesisVersions.length >= 2 && (
-							<VersionCompare
-								versions={synthesisVersions}
-								currentVersionId={selectedVersionId}
-								onClose={() => setShowVersionCompare(false)}
-							/>
-						)}
 
 						{/* Emergence highlights */}
 						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
