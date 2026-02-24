@@ -4,6 +4,34 @@ import { PageLayout, AuthLayout } from './layouts';
 import PrivateRoute from './PrivateRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import RouteLoadingFallback from './components/RouteLoadingFallback';
+import { useSynthesisNotifier } from './hooks/useSynthesisNotifier';
+import { useToast } from './components/Toast';
+
+/**
+ * Mounts once for the entire app lifecycle (outside <Routes>).
+ * Opens a background WebSocket only when a synthesis is marked as pending in
+ * sessionStorage, so the user gets a toast notification on synthesis_complete /
+ * synthesis_error regardless of which page they've navigated to.
+ *
+ * When the user IS on SummaryPage, SummaryPage's own WS handles the event
+ * and clears the sessionStorage key — this notifier stays idle (no extra WS).
+ *
+ * Renders nothing — side-effect only.
+ */
+function GlobalSynthesisNotifier() {
+  const { toastSuccess, toastError } = useToast();
+
+  useSynthesisNotifier({
+    onComplete: () => {
+      toastSuccess('✅ Synthesis complete — return to the Summary page to review it.');
+    },
+    onError: (message) => {
+      toastError(`Synthesis failed: ${message}`);
+    },
+  });
+
+  return null;
+}
 
 /* ─── Lazy-loaded route components ─────────────────────────────────── */
 const Dashboard    = lazy(() => import('./Dashboard'));
@@ -48,6 +76,9 @@ const AdminSettings  = lazy(() => import('./AdminSettings'));
 export default function Router() {
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
+      {/* Global synthesis notifier: persists across all routes so synthesis_complete
+          WS events are received even after the user navigates away from SummaryPage */}
+      <GlobalSynthesisNotifier />
       <Routes>
         {/* ── Public auth pages (centred layout) ── */}
         <Route element={<AuthLayout />}>

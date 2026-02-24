@@ -56,6 +56,7 @@ import {
 } from './components/summary';
 
 import { usePresence } from './hooks/usePresence';
+import { markSynthesisPending, clearSynthesisPending } from './hooks/useSynthesisNotifier';
 
 import type {
 	Round,
@@ -197,7 +198,9 @@ export default function SummaryPage() {
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
 	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
 		if (data.type === 'synthesis_complete' && data.form_id === formId) {
-			// Synthesis finished (possibly in background) — reload data
+			// Synthesis finished (possibly in background) — reload data.
+			// Clear pending flag so GlobalSynthesisNotifier stays idle (we're here).
+			clearSynthesisPending();
 			loadAll().then(() => {
 				if (data.round_id && typeof data.round_id === 'number') {
 					loadSynthesisVersions(data.round_id);
@@ -206,7 +209,8 @@ export default function SummaryPage() {
 			toastSuccess('Synthesis complete!');
 		}
 		if (data.type === 'synthesis_error' && data.form_id === formId) {
-			// Background synthesis failed — show error to user
+			// Background synthesis failed — clear pending + show error.
+			clearSynthesisPending();
 			toastError(
 				typeof data.error === 'string'
 					? data.error
@@ -468,14 +472,18 @@ export default function SummaryPage() {
 
 			// ── Async path: synthesis running in the background ──
 			if (data.status === 'started') {
+				// Register as pending so GlobalSynthesisNotifier can deliver the
+				// synthesis_complete notification even if the user navigates away.
+				markSynthesisPending(formId, targetRound.id);
 				toastSuccess(
 					data.message || 'Synthesis running in background — you\u2019ll be notified when complete'
 				);
-				// Reset UI immediately so the user can navigate away
+				// Reset UI immediately so the user can navigate away.
 				setSynthesisStage('preparing');
 				setSynthesisStep(0);
 				setIsGenerating(false);
 				// The synthesis_complete WS event will auto-refresh via handleWsMessage
+				// when on SummaryPage, or via GlobalSynthesisNotifier when elsewhere.
 				return;
 			}
 
@@ -497,6 +505,7 @@ export default function SummaryPage() {
 				if (selectedRound?.id === targetRound.id) setSelectedRound(updatedRound);
 			}
 
+			clearSynthesisPending(); // mock/sync synthesis completed inline — no background wait needed
 			setSynthesisViewMode('view');
 			// Reload round data and versions to stay in sync with backend
 			await loadAll();
@@ -506,6 +515,7 @@ export default function SummaryPage() {
 			setSynthesisStep(5);
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
 		} catch (error) {
+			clearSynthesisPending(); // synthesis failed before starting — nothing to wait for
 			toastError((error as Error).message || 'Failed to generate synthesis');
 			setSynthesisStage('preparing');
 			setSynthesisStep(0);

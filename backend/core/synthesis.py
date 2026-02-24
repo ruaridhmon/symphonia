@@ -533,7 +533,17 @@ class ConsensusLibraryAdapter:
 
     @staticmethod
     def _resolve_prompts_dir() -> Path:
-        """Locate the consensus library's prompts directory."""
+        """Locate the consensus library's prompts directory.
+
+        Search order (first existing directory wins):
+          0. CONSENSUS_PROMPTS_DIR env var (highest priority, explicit override)
+          1. backend/prompts/ — sibling of backend/core/ (the deployed layout)
+          2. package_dir.parent/prompts — works for editable/dev installs from repo
+          3. ../../../../symphonia/prompts — legacy fallback for nested checkouts
+
+        Candidate 1 is the correct path in all deployed and Docker configurations
+        and must remain here.  Do not remove it.
+        """
         candidates: list[Path] = []
 
         # 0. Environment override (highest priority)
@@ -541,18 +551,24 @@ class ConsensusLibraryAdapter:
         if env_prompts:
             candidates.append(Path(env_prompts))
 
+        # 1. backend/prompts/ — relative to this file (backend/core/synthesis.py).
+        #    Path(__file__).parent       → backend/core/
+        #    Path(__file__).parent.parent → backend/
+        #    + "prompts"                 → backend/prompts/   ← correct for prod
+        candidates.append(Path(__file__).resolve().parent.parent / "prompts")
+
         try:
             import consensus
 
             package_dir = Path(consensus.__file__).resolve().parent
-            # 1. Sibling to the package's src directory
+            # 2. Sibling to the package's src directory (editable/dev installs)
             candidates.append(package_dir.parent / "prompts")
         except (ImportError, AttributeError) as exc:
             raise SynthesisConfigError(
                 f"Cannot locate consensus package directory: {exc}"
             ) from exc
 
-        # 2. Fallback: adjacent symphonia repo (dev-mode install)
+        # 3. Legacy fallback: adjacent symphonia repo (nested checkout layout)
         candidates.append(
             Path(__file__).resolve().parent.parent.parent.parent
             / "symphonia"
