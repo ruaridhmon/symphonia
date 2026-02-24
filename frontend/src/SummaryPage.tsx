@@ -94,7 +94,7 @@ class SectionErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 			return (
 				<div className="card p-4" style={{ borderColor: 'var(--destructive)', borderWidth: '1px' }}>
 					<div className="text-center py-4">
-						<div className="text-2xl mb-2">⚠️</div>
+						<div className="text-2xl mb-2"><span aria-hidden="true">⚠️</span></div>
 						<h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--foreground)' }}>
 							{this.props.fallbackTitle || 'This section encountered an error'}
 						</h3>
@@ -550,7 +550,7 @@ export default function SummaryPage() {
 	if (loadError && !form) return (
 		<div className="min-h-screen bg-background text-foreground flex items-center justify-center">
 			<div className="text-center max-w-md mx-auto px-4">
-				<div className="text-4xl mb-4">⚠️</div>
+				<div className="text-4xl mb-4"><span aria-hidden="true">⚠️</span></div>
 				<h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
 					Failed to Load
 				</h2>
@@ -589,9 +589,9 @@ export default function SummaryPage() {
 					>
 						← Back to Dashboard
 					</button>
-					<h2 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
+					<h1 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
 						{form.title}
-					</h2>
+					</h1>
 				</div>
 
 				{/* Round timeline */}
@@ -607,12 +607,14 @@ export default function SummaryPage() {
 				)}
 
 				{/* Synthesis progress bar */}
+				<div aria-live="polite">
 				<SynthesisProgress
 					stage={synthesisStage}
 					step={synthesisStep}
 					totalSteps={synthesisTotalSteps}
 					visible={isGenerating}
 				/>
+				</div>
 
 				{/* Floating sidebar toggle */}
 				<button
@@ -875,7 +877,7 @@ export default function SummaryPage() {
 							className="flex items-center justify-between px-1 py-1"
 							style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}
 						>
-							<span className="text-xs font-medium truncate" style={{ color: 'var(--foreground)', maxWidth: '10rem' }}>
+							<span className="text-xs font-medium truncate" style={{ color: 'var(--foreground)', maxWidth: '18rem' }}>
 								{form.title}
 							</span>
 							<span

@@ -58,7 +58,7 @@
       "committeeDesc": "Multi-analyst structured synthesis",
       "committeeDetail": "Multiple independent AI analysts each read all responses and identify agreements, disagreements, nuances, and probes. A meta-synthesiser then combines their analyses into a structured output with provenance tracking.",
       "committeeBestFor": "Final rounds, policy-critical topics, panels with strong disagreement",
-      "ttd": "TTD",
+      "ttd": "Thorough",
       "ttdDesc": "Iterative diffusion refinement",
       "ttdDetail": "Think-Through-Diffusion: an iterative process where the synthesis is refined across multiple passes, with each pass deepening the analysis. Produces the most thorough output but takes longer.",
       "ttdBestFor": "Complex multi-dimensional topics, high-stakes decisions, large panels",

@@ -241,15 +241,36 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # SYNTHESIS HELPERS
 # ---------------------------------------------------------
 
+def _sanitize_error_message(raw: str) -> str:
+    """
+    Sanitize an error message before broadcasting to the frontend.
+
+    Strips out payment/credit/billing details from upstream API errors
+    (e.g. OpenRouter 402 messages) so users don't see confusing financial text.
+    """
+    lowered = raw.lower()
+    payment_keywords = ("402", "payment", "credit", "billing", "balance", "insufficient funds", "quota")
+    if any(kw in lowered for kw in payment_keywords):
+        return (
+            "Synthesis is temporarily unavailable. "
+            "Please try again in a moment or contact support if this persists."
+        )
+    # Truncate very long messages (raw library exceptions can be huge)
+    if len(raw) > 300:
+        return raw[:300] + "…"
+    return raw
+
+
 async def _broadcast_synthesis_error(form_id: int, round_id: int | None, error_message: str):
     """Broadcast a synthesis error event via WebSocket so clients can show feedback."""
+    safe_message = _sanitize_error_message(error_message)
     for conn in ws_manager.active_connections.copy():
         try:
             await conn.send_json({
                 "type": "synthesis_error",
                 "form_id": form_id,
                 "round_id": round_id,
-                "error": error_message,
+                "error": safe_message,
             })
         except Exception:
             ws_manager.disconnect(conn)
@@ -935,6 +956,7 @@ The dimensional analysis reveals a **temporal paradox**: governance frameworks d
             raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
         completion = openai_client.chat.completions.create(
             model=payload.model,
+            max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
             messages=[
                 {
                     "role": "system",
@@ -1394,6 +1416,7 @@ If expert discussion comments are included above, integrate those perspectives i
 
                 completion = openai_client.chat.completions.create(
                     model=model,
+                    max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
                     messages=[
                         {
                             "role": "system",
@@ -3846,6 +3869,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
 
         completion = openai_client.chat.completions.create(
             model=resolved_model,
+            max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
             messages=[
                 {
                     "role": "system",
@@ -4010,6 +4034,7 @@ def translate_synthesis(
 
         completion = openai_client.chat.completions.create(
             model=resolved_model,
+            max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
             messages=[
                 {
                     "role": "system",
@@ -4191,6 +4216,7 @@ Return ONLY a JSON object in this exact format:
 
         completion = openai_client.chat.completions.create(
             model=resolved_model,
+            max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
             messages=[
                 {
                     "role": "system",
@@ -4336,6 +4362,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
 
         completion = openai_client.chat.completions.create(
             model=resolved_model,
+            max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
             messages=[
                 {
                     "role": "system",
@@ -4899,6 +4926,7 @@ def ai_suggest(
 
         completion = openai_client.chat.completions.create(
             model=model,
+            max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},

@@ -1,4 +1,5 @@
 import { LoadingButton, SynthesisModeSelector } from '../index';
+import { Cpu } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -29,10 +30,11 @@ export default function AISynthesisPanel({
       }}
     >
       <h3
-        className="text-[10px] font-semibold uppercase tracking-wider mb-2"
+        className="text-[10px] font-semibold uppercase tracking-wider mb-2 flex items-center gap-1"
         style={{ color: 'var(--accent)' }}
       >
-        🤖 AI Synthesis
+        <Cpu size={10} aria-hidden="true" />
+        AI Synthesis
       </h3>
       <div className="space-y-2">
         <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} />
