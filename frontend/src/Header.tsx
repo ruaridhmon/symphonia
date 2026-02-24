@@ -63,7 +63,7 @@ export default function Header() {
           />
           <div>
             <h1
-              className="text-lg font-semibold leading-tight"
+              className="text-base font-semibold leading-tight"
               style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
             >
               Symphonia

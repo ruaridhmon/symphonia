@@ -6,7 +6,7 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
-import { ChartNoAxesColumn, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, Clock, GitBranch, Info, Link2, MapPin, Settings, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { getMe } from './api/auth';
@@ -82,6 +82,17 @@ function extractQuestionText(q: unknown): string {
 	return '';
 }
 
+// ─── FAB Panel type ──────────────────────────────────────────────────────────
+
+type FabPanel = 'actions' | 'ai' | 'versions' | 'history' | null;
+
+const FAB_PANEL_LABELS: Record<Exclude<FabPanel, null>, string> = {
+	actions: 'Actions & Export',
+	ai: 'AI Synthesis',
+	versions: 'Version History',
+	history: 'Round History',
+};
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SummaryPage() {
@@ -126,7 +137,10 @@ export default function SummaryPage() {
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
 	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
-	const [sidebarOpen, setSidebarOpen] = useState(true);
+
+	// ── Floating Action Bar panel state ──
+	const [activePanel, setActivePanel] = useState<FabPanel>(null);
+	const [formInfoOpen, setFormInfoOpen] = useState(false);
 
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
 	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
@@ -455,6 +469,11 @@ export default function SummaryPage() {
 		);
 	}
 
+	// ── FAB panel toggle ──
+	function togglePanel(panel: Exclude<FabPanel, null>) {
+		setActivePanel(prev => prev === panel ? null : panel);
+	}
+
 	// ─── Render ──────────────────────────────────────────────────────────────
 
 	if (loadError && !form) return (
@@ -480,6 +499,32 @@ export default function SummaryPage() {
 	);
 	if (!form) return <SummaryLoadingSkeleton />;
 
+	// ── FAB button helper ──
+	const fabBtn = (panel: Exclude<FabPanel, null>, icon: React.ReactNode) => (
+		<button
+			key={panel}
+			onClick={() => togglePanel(panel)}
+			title={FAB_PANEL_LABELS[panel]}
+			className="transition-colors"
+			style={{
+				width: '2.5rem',
+				height: '2.5rem',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				borderRadius: 'var(--radius, 0.5rem)',
+				border: 'none',
+				cursor: 'pointer',
+				background: activePanel === panel ? 'var(--accent)' : 'transparent',
+				color: activePanel === panel ? '#fff' : 'var(--muted-foreground)',
+			}}
+			onMouseEnter={e => { if (activePanel !== panel) e.currentTarget.style.background = 'var(--muted)'; }}
+			onMouseLeave={e => { if (activePanel !== panel) e.currentTarget.style.background = 'transparent'; }}
+		>
+			{icon}
+		</button>
+	);
+
 	return (
 		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
 			<SummaryHeader email={email} viewers={viewers} onLogout={logout} />
@@ -499,6 +544,57 @@ export default function SummaryPage() {
 					<h2 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
 						{form.title}
 					</h2>
+				</div>
+
+				{/* ── Collapsible Form Info banner ── */}
+				<div className="mb-4">
+					<button
+						onClick={() => setFormInfoOpen(v => !v)}
+						className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+						style={{
+							background: 'var(--card)',
+							border: '1px solid var(--border)',
+							color: 'var(--foreground)',
+							cursor: 'pointer',
+						}}
+						onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
+							e.currentTarget.style.borderColor = 'var(--accent)';
+						}}
+						onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
+							e.currentTarget.style.borderColor = 'var(--border)';
+						}}
+					>
+						<span className="flex items-center gap-2">
+							<Info size={15} style={{ color: 'var(--accent)' }} />
+							Form Details
+							{activeRound && (
+								<span
+									className="text-xs px-2 py-0.5 rounded-full"
+									style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+								>
+									Round {activeRound.round_number} · {activeRound.response_count} responses
+								</span>
+							)}
+						</span>
+						<ChevronDown
+							size={15}
+							style={{
+								color: 'var(--muted-foreground)',
+								transform: formInfoOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+								transition: 'transform 0.2s ease',
+							}}
+						/>
+					</button>
+					{formInfoOpen && (
+						<div
+							className="mt-2"
+							style={{
+								animation: 'fadeIn 0.15s ease',
+							}}
+						>
+							<FormInfoCard form={form} activeRound={activeRound} />
+						</div>
+					)}
 				</div>
 
 				{/* Round timeline */}
@@ -521,267 +617,321 @@ export default function SummaryPage() {
 					visible={isGenerating}
 				/>
 
-				{/* Floating sidebar toggle */}
-				<button
-					onClick={() => setSidebarOpen(v => !v)}
-					className="fixed z-50 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium shadow-lg transition-all"
-					style={{
-						right: sidebarOpen ? 'calc(20rem + 12px)' : '12px',
-						top: '4.75rem',
-						background: 'var(--card)',
-						border: '1px solid var(--border)',
-						color: 'var(--foreground)',
-					}}
-					title={sidebarOpen ? 'Hide panel' : 'Show panel'}
-				>
-					{sidebarOpen ? <X size={15} /> : <PanelRight size={15} />}
-					<span className="hidden sm:inline">{sidebarOpen ? 'Hide' : 'Controls'}</span>
-				</button>
-
-				{/* Main content — full width */}
+				{/* Main content — full width, no sidebar offset */}
 				<div className="space-y-4 sm:space-y-6">
-						{/* Non-active round card */}
-						{selectedRound && !selectedRound.is_active && (
-							<RoundCard
-								round={selectedRound}
-								isCurrentRound={false}
+					{/* Non-active round card */}
+					{selectedRound && !selectedRound.is_active && (
+						<RoundCard
+							round={selectedRound}
+							isCurrentRound={false}
+							expertLabels={resolvedExpertLabels}
+							formId={formId}
+							token={token}
+							currentUserEmail={email}
+						/>
+					)}
+
+					{/* Inline responses accordion — toggle per round */}
+					<ResponsesAccordion
+						structuredRounds={structuredRounds}
+						rounds={rounds}
+						formQuestions={form.questions || []}
+						formId={formId}
+						token={token}
+						onResponseUpdated={handleResponseUpdated}
+					/>
+
+					{/* Synthesis editor (active round only) */}
+					{(!selectedRound || selectedRound.is_active) && (
+						<SynthesisEditorCard
+							activeRound={activeRound}
+							synthesisViewMode={synthesisViewMode}
+							onSetViewMode={setSynthesisViewMode}
+							editor={editor}
+						/>
+					)}
+
+					{/* Read-only synthesis for non-active rounds */}
+					{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
+						<div className="card p-4 sm:p-6">
+							<h2 className="text-lg font-semibold mb-3 text-foreground">
+								Synthesis (Round {selectedRound.round_number})
+							</h2>
+							<MarkdownRenderer content={selectedRound.synthesis} />
+						</div>
+					)}
+
+					{/* Structured synthesis data */}
+					{structuredSynthesisData && (
+						<div className="card p-4 sm:p-6">
+							<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
+								<h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+									<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
+								</h2>
+							</div>
+							{/* Audience Translation toggle */}
+							{displayRound && (
+								<div className="mb-4">
+									<AudienceTranslation
+										formId={formId}
+										roundId={displayRound.id}
+										synthesisText={(() => {
+											const parts: string[] = [];
+											if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
+											for (const a of structuredSynthesisData.agreements || []) {
+												parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
+											}
+											for (const d of structuredSynthesisData.disagreements || []) {
+												parts.push(`Disagreement: ${d.topic}`);
+												for (const p of d.positions || []) {
+													parts.push(`  - ${p.position}: ${p.evidence}`);
+												}
+											}
+											for (const n of structuredSynthesisData.nuances || []) {
+												parts.push(`Nuance: ${n.claim} — ${n.context}`);
+											}
+											return parts.join('\n');
+										})()}
+									/>
+								</div>
+							)}
+							<StructuredSynthesis
+								data={structuredSynthesisData}
+								convergenceScore={displayRound?.convergence_score ?? undefined}
 								expertLabels={resolvedExpertLabels}
 								formId={formId}
+								roundId={displayRound?.id}
 								token={token}
 								currentUserEmail={email}
 							/>
-						)}
+						</div>
+					)}
 
-						{/* Inline responses accordion — toggle per round */}
-						<ResponsesAccordion
-							structuredRounds={structuredRounds}
-							rounds={rounds}
-							formQuestions={form.questions || []}
-							formId={formId}
-							token={token}
-							onResponseUpdated={handleResponseUpdated}
-						/>
+					{/* AI Devil's Advocate — after structured analysis */}
+					{displayRound && structuredSynthesisData && (
+						<DevilsAdvocate formId={formId} roundId={displayRound.id} />
+					)}
 
-						{/* Synthesis editor (active round only) */}
-						{(!selectedRound || selectedRound.is_active) && (
-							<SynthesisEditorCard
-								activeRound={activeRound}
-								synthesisViewMode={synthesisViewMode}
-								onSetViewMode={setSynthesisViewMode}
-								editor={editor}
+					{/* Cross-matrix */}
+					{structuredSynthesisData && (
+						<div className="card p-4 sm:p-6">
+							<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
+								<Link2 size={20} style={{ color: 'var(--accent)' }} /> Expert Cross-Analysis
+							</h2>
+							<CrossMatrix
+								structuredData={structuredSynthesisData}
+								resolvedExpertLabels={resolvedExpertLabels}
+								expertLabelPreset="default"
 							/>
-						)}
+						</div>
+					)}
 
-						{/* Read-only synthesis for non-active rounds */}
-						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
-							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground">
-									Synthesis (Round {selectedRound.round_number})
-								</h2>
-								<MarkdownRenderer content={selectedRound.synthesis} />
-							</div>
-						)}
-
-						{/* Structured synthesis data */}
-						{structuredSynthesisData && (
-							<div className="card p-4 sm:p-6">
-								<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
-									<h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-										<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
-									</h2>
-								</div>
-								{/* Audience Translation toggle */}
-								{displayRound && (
-									<div className="mb-4">
-										<AudienceTranslation
-											formId={formId}
-											roundId={displayRound.id}
-											synthesisText={(() => {
-												const parts: string[] = [];
-												if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
-												for (const a of structuredSynthesisData.agreements || []) {
-													parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
-												}
-												for (const d of structuredSynthesisData.disagreements || []) {
-													parts.push(`Disagreement: ${d.topic}`);
-													for (const p of d.positions || []) {
-														parts.push(`  - ${p.position}: ${p.evidence}`);
-													}
-												}
-												for (const n of structuredSynthesisData.nuances || []) {
-													parts.push(`Nuance: ${n.claim} — ${n.context}`);
-												}
-												return parts.join('\n');
-											})()}
-										/>
-									</div>
-								)}
-								<StructuredSynthesis
-									data={structuredSynthesisData}
-									convergenceScore={displayRound?.convergence_score ?? undefined}
-									expertLabels={resolvedExpertLabels}
-									formId={formId}
-									roundId={displayRound?.id}
-									token={token}
-									currentUserEmail={email}
-								/>
-							</div>
-						)}
-
-						{/* AI Devil's Advocate — after structured analysis */}
-						{displayRound && structuredSynthesisData && (
-							<DevilsAdvocate formId={formId} roundId={displayRound.id} />
-						)}
-
-						{/* Cross-matrix */}
-						{structuredSynthesisData && (
-							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<Link2 size={20} style={{ color: 'var(--accent)' }} /> Expert Cross-Analysis
-								</h2>
-								<CrossMatrix
-									structuredData={structuredSynthesisData}
-									resolvedExpertLabels={resolvedExpertLabels}
-									expertLabelPreset="default"
-								/>
-							</div>
-						)}
-
-						{/* Consensus heatmap */}
-						{structuredSynthesisData && (
-							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<MapPin size={20} style={{ color: 'var(--accent)' }} /> Consensus Heatmap
-								</h2>
-								<ConsensusHeatmap
-									structuredData={structuredSynthesisData}
-									resolvedExpertLabels={resolvedExpertLabels}
-									questions={displayRound?.questions}
-								/>
-							</div>
-						)}
-
-						{/* Version comparison (side-by-side) — rendered above synthesis so it's immediately visible when toggled */}
-						{showVersionCompare && synthesisVersions.length >= 2 && (
-							<VersionCompare
-								versions={synthesisVersions}
-								currentVersionId={selectedVersionId}
-								onClose={() => setShowVersionCompare(false)}
+					{/* Consensus heatmap */}
+					{structuredSynthesisData && (
+						<div className="card p-4 sm:p-6">
+							<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
+								<MapPin size={20} style={{ color: 'var(--accent)' }} /> Consensus Heatmap
+							</h2>
+							<ConsensusHeatmap
+								structuredData={structuredSynthesisData}
+								resolvedExpertLabels={resolvedExpertLabels}
+								questions={displayRound?.questions}
 							/>
-						)}
+						</div>
+					)}
 
-						{/* Selected version content */}
-						<SelectedVersionContent
-							selectedVersion={selectedVersion}
-							displayRound={displayRound}
-							resolvedExpertLabels={resolvedExpertLabels}
-							formId={formId}
-							token={token}
-							currentUserEmail={email}
+					{/* Version comparison (side-by-side) */}
+					{showVersionCompare && synthesisVersions.length >= 2 && (
+						<VersionCompare
+							versions={synthesisVersions}
+							currentVersionId={selectedVersionId}
+							onClose={() => setShowVersionCompare(false)}
 						/>
+					)}
 
-						{/* Emergence highlights */}
-						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
-							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<Sparkles size={20} style={{ color: 'var(--accent)' }} /> Emergent Insights
-								</h2>
-								<EmergenceHighlights
-									insights={structuredSynthesisData.emergent_insights ?? []}
-									expertLabels={resolvedExpertLabels}
-									formId={formId}
-									roundId={displayRound?.id}
-									token={token}
-									currentUserEmail={email}
-								/>
-							</div>
-						)}
+					{/* Selected version content */}
+					<SelectedVersionContent
+						selectedVersion={selectedVersion}
+						displayRound={displayRound}
+						resolvedExpertLabels={resolvedExpertLabels}
+						formId={formId}
+						token={token}
+						currentUserEmail={email}
+					/>
 
-						{/* Next round questions */}
-						<NextRoundQuestionsCard
-							questions={nextRoundQuestions}
-							onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
-							onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
-							onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
-						/>
-					</div>
+					{/* Emergence highlights */}
+					{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
+						<div className="card p-4 sm:p-6">
+							<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
+								<Sparkles size={20} style={{ color: 'var(--accent)' }} /> Emergent Insights
+							</h2>
+							<EmergenceHighlights
+								insights={structuredSynthesisData.emergent_insights ?? []}
+								expertLabels={resolvedExpertLabels}
+								formId={formId}
+								roundId={displayRound?.id}
+								token={token}
+								currentUserEmail={email}
+							/>
+						</div>
+					)}
 
-					{/* ── Floating Sidebar ── */}
+					{/* Next round questions */}
+					<NextRoundQuestionsCard
+						questions={nextRoundQuestions}
+						onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
+						onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
+						onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
+					/>
+				</div>
+			</main>
+
+			{/* ── Floating Action Bar ── */}
+			<div
+				style={{
+					position: 'fixed',
+					bottom: '1.5rem',
+					right: '1.5rem',
+					zIndex: 50,
+					display: 'flex',
+					flexDirection: 'column',
+					alignItems: 'flex-end',
+					gap: '0.5rem',
+				}}
+			>
+				{/* Active panel popover */}
+				{activePanel && (
 					<div
 						style={{
-							position: 'fixed',
-							right: 0,
-							top: '4.5rem',
-							width: '20rem',
-							height: 'calc(100vh - 4.5rem)',
+							width: 'min(18rem, calc(100vw - 3rem))',
+							maxHeight: 'calc(100vh - 10rem)',
 							overflowY: 'auto',
-							zIndex: 40,
-							borderLeft: '1px solid var(--border)',
-							background: 'var(--background)',
-							transform: sidebarOpen ? 'translateX(0)' : 'translateX(100%)',
-							transition: 'transform 0.2s ease',
-							padding: '1rem',
-							display: 'flex',
-							flexDirection: 'column',
-							gap: '1rem',
+							background: 'var(--card)',
+							border: '1px solid var(--border)',
+							borderRadius: 'var(--radius, 0.75rem)',
+							padding: '0.75rem',
+							boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+							marginBottom: '0.25rem',
 						}}
 					>
-						<FormInfoCard form={form} activeRound={activeRound} />
+						{/* Panel header */}
+						<div
+							className="flex items-center justify-between mb-3 pb-2"
+							style={{ borderBottom: '1px solid var(--border)' }}
+						>
+							<span
+								className="text-sm font-semibold"
+								style={{ color: 'var(--foreground)' }}
+							>
+								{FAB_PANEL_LABELS[activePanel]}
+							</span>
+							<button
+								onClick={() => setActivePanel(null)}
+								className="transition-colors"
+								style={{
+									width: '1.5rem',
+									height: '1.5rem',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									borderRadius: 'var(--radius, 0.375rem)',
+									border: 'none',
+									background: 'transparent',
+									color: 'var(--muted-foreground)',
+									cursor: 'pointer',
+								}}
+								onMouseEnter={e => { e.currentTarget.style.background = 'var(--muted)'; }}
+								onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+							>
+								<X size={14} />
+							</button>
+						</div>
 
-						<ActionsCard
-							responsesOpen={responsesOpen}
-							onToggleResponses={viewAllResponses}
-							onDownloadResponses={downloadResponses}
-							onSaveSynthesis={saveSynthesis}
-							onStartNextRound={startNextRound}
-							loading={loading}
-							formTitle={form.title}
-							rounds={rounds}
-							structuredSynthesisData={structuredSynthesisData}
-							expertLabels={resolvedExpertLabels}
-						/>
+						{/* Panel content */}
+						<div className="space-y-3">
+							{activePanel === 'actions' && (
+								<ActionsCard
+									responsesOpen={responsesOpen}
+									onToggleResponses={viewAllResponses}
+									onDownloadResponses={downloadResponses}
+									onSaveSynthesis={saveSynthesis}
+									onStartNextRound={startNextRound}
+									loading={loading}
+									formTitle={form.title}
+									rounds={rounds}
+									structuredSynthesisData={structuredSynthesisData}
+									expertLabels={resolvedExpertLabels}
+								/>
+							)}
 
-						<AISynthesisPanel
-							synthesisMode={synthesisMode}
-							onModeChange={setSynthesisMode}
-							selectedModel={selectedModel}
-							onModelChange={setSelectedModel}
-							models={MODELS}
-							isGenerating={isGenerating}
-							onGenerate={generateSummary}
-						/>
+							{activePanel === 'ai' && (
+								<AISynthesisPanel
+									synthesisMode={synthesisMode}
+									onModeChange={setSynthesisMode}
+									selectedModel={selectedModel}
+									onModelChange={setSelectedModel}
+									models={MODELS}
+									isGenerating={isGenerating}
+									onGenerate={generateSummary}
+								/>
+							)}
 
-						<SynthesisVersionPanel
-							displayRound={displayRound}
-							synthesisVersions={synthesisVersions}
-							selectedVersionId={selectedVersionId}
-							onSelectVersion={setSelectedVersionId}
-							selectedVersion={selectedVersion}
-							onActivateVersion={activateVersion}
-							resolvedExpertLabels={resolvedExpertLabels}
-							formId={formId}
-							token={token}
-							currentUserEmail={email}
-							showCompare={showVersionCompare}
-							onToggleCompare={() => setShowVersionCompare(v => !v)}
-						/>
+							{activePanel === 'versions' && (
+								<>
+									<SynthesisVersionPanel
+										displayRound={displayRound}
+										synthesisVersions={synthesisVersions}
+										selectedVersionId={selectedVersionId}
+										onSelectVersion={setSelectedVersionId}
+										selectedVersion={selectedVersion}
+										onActivateVersion={activateVersion}
+										resolvedExpertLabels={resolvedExpertLabels}
+										formId={formId}
+										token={token}
+										currentUserEmail={email}
+										showCompare={showVersionCompare}
+										onToggleCompare={() => setShowVersionCompare(v => !v)}
+									/>
+									{synthesisVersions.length > 0 && (
+										<VersionTimeline
+											versions={synthesisVersions}
+											selectedVersionId={selectedVersionId}
+											onSelectVersion={setSelectedVersionId}
+										/>
+									)}
+								</>
+							)}
 
-						{/* Version History Timeline */}
-						{synthesisVersions.length > 0 && (
-							<VersionTimeline
-								versions={synthesisVersions}
-								selectedVersionId={selectedVersionId}
-								onSelectVersion={setSelectedVersionId}
-							/>
-						)}
-
-						<RoundHistoryCard
-							rounds={rounds}
-							selectedRoundId={selectedRound?.id || null}
-							onSelectRound={handleSelectRound}
-						/>
+							{activePanel === 'history' && (
+								<RoundHistoryCard
+									rounds={rounds}
+									selectedRoundId={selectedRound?.id || null}
+									onSelectRound={handleSelectRound}
+								/>
+							)}
+						</div>
 					</div>
-			</main>
+				)}
+
+				{/* FAB button group */}
+				<div
+					style={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: '0.25rem',
+						background: 'var(--card)',
+						border: '1px solid var(--border)',
+						borderRadius: 'var(--radius, 0.75rem)',
+						padding: '0.375rem',
+						boxShadow: '0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)',
+					}}
+				>
+					{fabBtn('history', <Clock size={18} />)}
+					{fabBtn('versions', <GitBranch size={18} />)}
+					{fabBtn('ai', <Sparkles size={18} />)}
+					{fabBtn('actions', <Settings size={18} />)}
+				</div>
+			</div>
 
 			{/* Responses modal */}
 			<ResponsesModal

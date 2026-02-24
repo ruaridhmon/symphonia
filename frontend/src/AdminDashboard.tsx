@@ -20,6 +20,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
 
   const fetchForms = () => {
     if (!token) {
@@ -57,6 +58,14 @@ export default function AdminDashboard() {
     fetchForms();
   }, [token]);
 
+  /* ── Analytics computations ── */
+  const totalParticipants = forms.reduce((sum, f) => sum + (f.participant_count || 0), 0);
+  const avgRound =
+    forms.length > 0
+      ? (forms.reduce((sum, f) => sum + (f.current_round || 0), 0) / forms.length).toFixed(1)
+      : '0';
+  const activeForms = forms.filter(f => f.is_active).length;
+  const completedForms = forms.length - activeForms;
 
   /* ── Filtered forms for search ── */
   const filteredForms = forms.filter(f => {
@@ -81,7 +90,6 @@ export default function AdminDashboard() {
   return (
     <section className="flex-1 py-6 sm:py-8">
       <Container size="lg">
-
 
         {/* ── Error banner ── */}
         {error && (
@@ -108,11 +116,11 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── Create form CTA ── */}
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
+        {/* ── Header row ── */}
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1
-              className="text-2xl font-bold tracking-tight"
+              className="text-xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
               Admin Dashboard
@@ -122,6 +130,15 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            {forms.length > 0 && (
+              <LoadingButton
+                variant="ghost"
+                size="md"
+                onClick={() => setAnalyticsOpen(prev => !prev)}
+              >
+                {analyticsOpen ? '✕ Analytics' : '📊 Analytics'}
+              </LoadingButton>
+            )}
             <LoadingButton
               variant="ghost"
               size="md"
@@ -139,6 +156,116 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* ── Analytics panel (collapsed by default) ── */}
+        {analyticsOpen && forms.length > 0 && (
+          <div
+            className="rounded-lg p-4 mb-6 slide-down"
+            style={{
+              backgroundColor: 'var(--muted)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Total forms */}
+              <div
+                className="rounded-lg p-3 text-center"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <div
+                  className="text-xl font-bold"
+                  style={{ color: 'var(--foreground)', fontVariantNumeric: 'tabular-nums' }}
+                >
+                  {forms.length}
+                </div>
+                <div
+                  className="text-xs font-medium mt-0.5"
+                  style={{ color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                >
+                  Total Forms
+                </div>
+              </div>
+
+              {/* Total participants */}
+              <div
+                className="rounded-lg p-3 text-center"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <div
+                  className="text-xl font-bold"
+                  style={{ color: 'var(--accent)', fontVariantNumeric: 'tabular-nums' }}
+                >
+                  {totalParticipants}
+                </div>
+                <div
+                  className="text-xs font-medium mt-0.5"
+                  style={{ color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                >
+                  Participants
+                </div>
+              </div>
+
+              {/* Avg round */}
+              <div
+                className="rounded-lg p-3 text-center"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <div
+                  className="text-xl font-bold"
+                  style={{ color: 'var(--foreground)', fontVariantNumeric: 'tabular-nums' }}
+                >
+                  R{avgRound}
+                </div>
+                <div
+                  className="text-xs font-medium mt-0.5"
+                  style={{ color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                >
+                  Avg Round
+                </div>
+              </div>
+
+              {/* Active / Completed */}
+              <div
+                className="rounded-lg p-3 text-center"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <span
+                    className="text-xl font-bold"
+                    style={{ color: 'var(--accent)', fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    {activeForms}
+                  </span>
+                  <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>/</span>
+                  <span
+                    className="text-xl font-bold"
+                    style={{ color: 'var(--muted-foreground)', fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    {completedForms}
+                  </span>
+                </div>
+                <div
+                  className="text-xs font-medium mt-0.5"
+                  style={{ color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                >
+                  Active / Done
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── Empty state when no forms ── */}
         {!loading && forms.length === 0 && !error && (
           <div
@@ -149,9 +276,9 @@ export default function AdminDashboard() {
               boxShadow: 'var(--card-shadow, none)',
             }}
           >
-            <div className="text-4xl mb-4 opacity-40">🎼</div>
+            <div className="text-3xl mb-4 opacity-40">🎼</div>
             <h2
-              className="text-lg font-semibold mb-2"
+              className="text-base font-semibold mb-2"
               style={{ color: 'var(--foreground)' }}
             >
               No consultations yet
@@ -184,14 +311,12 @@ export default function AdminDashboard() {
             }}
           >
             {/* Section header + search */}
-            <div
-              className="p-4 sm:p-6 pb-0 sm:pb-0"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div className="p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 {/* Left: title + count badge */}
                 <div className="flex items-center gap-3">
                   <h2
-                    className="text-lg font-semibold"
+                    className="text-base font-semibold"
                     style={{ color: 'var(--foreground)' }}
                   >
                     Existing Forms
@@ -252,7 +377,7 @@ export default function AdminDashboard() {
 
             {/* ── Empty search state ── */}
             {filteredForms.length === 0 && search && (
-              <div className="px-4 sm:px-6 py-12 text-center">
+              <div className="px-4 sm:px-5 py-12 text-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -297,7 +422,7 @@ export default function AdminDashboard() {
                     >
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left"
+                        className="px-5 py-3 text-left"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.6875rem',
@@ -311,7 +436,7 @@ export default function AdminDashboard() {
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left"
+                        className="px-5 py-3 text-left"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.6875rem',
@@ -325,7 +450,7 @@ export default function AdminDashboard() {
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left"
+                        className="px-5 py-3 text-left"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.6875rem',
@@ -339,7 +464,7 @@ export default function AdminDashboard() {
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left"
+                        className="px-5 py-3 text-left"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.6875rem',
@@ -353,7 +478,7 @@ export default function AdminDashboard() {
                       </th>
                       <th
                         scope="col"
-                        className="px-6 py-3 text-right"
+                        className="px-5 py-3 text-right"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.6875rem',
@@ -386,7 +511,7 @@ export default function AdminDashboard() {
                         }}
                       >
                         <td
-                          className="px-6 py-3.5 font-medium"
+                          className="px-5 py-3 font-medium"
                           style={{
                             color: 'var(--foreground)',
                             maxWidth: '20rem',
@@ -397,7 +522,7 @@ export default function AdminDashboard() {
                         >
                           {f.title}
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-5 py-3">
                           <code
                             className="inline-block px-2.5 py-1 rounded-md text-xs font-mono font-semibold"
                             style={{
@@ -410,7 +535,7 @@ export default function AdminDashboard() {
                             {f.join_code}
                           </code>
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-5 py-3">
                           <span
                             className="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 rounded-full text-xs font-bold"
                             style={{
@@ -427,7 +552,7 @@ export default function AdminDashboard() {
                             {f.participant_count}
                           </span>
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-5 py-3">
                           <span
                             className="inline-flex items-center justify-center min-w-[2rem] h-6 px-2 rounded-full text-xs font-medium"
                             style={{
@@ -438,7 +563,7 @@ export default function AdminDashboard() {
                             R{f.current_round}
                           </span>
                         </td>
-                        <td className="px-6 py-3.5 text-right">
+                        <td className="px-5 py-3 text-right">
                           <div className="inline-flex items-center gap-1">
                             <a
                               href={`/admin/form/${f.id}`}
@@ -614,7 +739,7 @@ export default function AdminDashboard() {
             {/* ── Footer with result count ── */}
             {search && filteredForms.length > 0 && (
               <div
-                className="px-4 sm:px-6 py-3 text-xs"
+                className="px-4 sm:px-5 py-3 text-xs"
                 role="status"
                 aria-live="polite"
                 style={{
