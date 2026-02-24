@@ -3741,13 +3741,15 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
   ]
 }}"""
 
+    resolved_model = _resolve_synthesis_model(db)
+
     try:
         openai_client = get_openai_client()
         if not openai_client:
             raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
 
         completion = openai_client.chat.completions.create(
-            model="anthropic/claude-sonnet-4",
+            model=resolved_model,
             messages=[
                 {
                     "role": "system",
@@ -3903,6 +3905,7 @@ def translate_synthesis(
         }
 
     system_prompt = AUDIENCE_PROMPTS[payload.audience]
+    resolved_model = _resolve_synthesis_model(db)
 
     try:
         openai_client = get_openai_client()
@@ -3910,7 +3913,7 @@ def translate_synthesis(
             raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
 
         completion = openai_client.chat.completions.create(
-            model="anthropic/claude-sonnet-4",
+            model=resolved_model,
             messages=[
                 {
                     "role": "system",
@@ -4080,6 +4083,8 @@ Return ONLY a JSON object in this exact format:
   ]
 }}"""
 
+    resolved_model = _resolve_synthesis_model(db)
+
     try:
         openai_client = get_openai_client()
         if not openai_client:
@@ -4089,7 +4094,7 @@ Return ONLY a JSON object in this exact format:
             )
 
         completion = openai_client.chat.completions.create(
-            model="anthropic/claude-sonnet-4",
+            model=resolved_model,
             messages=[
                 {
                     "role": "system",
@@ -4226,13 +4231,15 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
   ]
 }}"""
 
+    resolved_model = _resolve_synthesis_model(db)
+
     try:
         openai_client = get_openai_client()
         if not openai_client:
             raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
 
         completion = openai_client.chat.completions.create(
-            model="anthropic/claude-sonnet-4",
+            model=resolved_model,
             messages=[
                 {
                     "role": "system",
