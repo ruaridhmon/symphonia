@@ -2,6 +2,7 @@ import { Fragment, useState, useMemo } from 'react';
 import { GitCompareArrows, X, ChevronDown } from 'lucide-react';
 import { MarkdownRenderer } from '../index';
 import type { SynthesisVersion } from '../../types/summary';
+import type { SynthesisData, Agreement, Disagreement } from '../../types/synthesis';
 
 type Props = {
   versions: SynthesisVersion[];
@@ -204,9 +205,9 @@ function VersionPane({ version }: { version: SynthesisVersion }) {
             Agreements ({json.agreements.length})
           </h4>
           <ul className="space-y-1">
-            {json.agreements.map((a: Record<string, unknown>, i: number) => (
+            {json.agreements.map((a: Agreement, i: number) => (
               <li key={i} className="text-xs" style={{ color: 'var(--foreground)' }}>
-                • {String(a.claim || '')}
+                • {a.claim || ''}
               </li>
             ))}
           </ul>
@@ -220,9 +221,9 @@ function VersionPane({ version }: { version: SynthesisVersion }) {
             Disagreements ({json.disagreements.length})
           </h4>
           <ul className="space-y-1">
-            {json.disagreements.map((d: Record<string, unknown>, i: number) => (
+            {json.disagreements.map((d: Disagreement, i: number) => (
               <li key={i} className="text-xs" style={{ color: 'var(--foreground)' }}>
-                • {String(d.topic || '')}
+                • {d.topic || ''}
               </li>
             ))}
           </ul>
@@ -249,19 +250,19 @@ function StatsDiff({
   leftVersion,
   rightVersion,
 }: {
-  left: Record<string, unknown>;
-  right: Record<string, unknown>;
+  left: SynthesisData;
+  right: SynthesisData;
   leftVersion: number;
   rightVersion: number;
 }) {
-  const lAgree = (left.agreements as unknown[])?.length ?? 0;
-  const rAgree = (right.agreements as unknown[])?.length ?? 0;
-  const lDisagree = (left.disagreements as unknown[])?.length ?? 0;
-  const rDisagree = (right.disagreements as unknown[])?.length ?? 0;
-  const lNuance = (left.nuances as unknown[])?.length ?? 0;
-  const rNuance = (right.nuances as unknown[])?.length ?? 0;
-  const lEmergent = (left.emergent_insights as unknown[])?.length ?? 0;
-  const rEmergent = (right.emergent_insights as unknown[])?.length ?? 0;
+  const lAgree = left.agreements?.length ?? 0;
+  const rAgree = right.agreements?.length ?? 0;
+  const lDisagree = left.disagreements?.length ?? 0;
+  const rDisagree = right.disagreements?.length ?? 0;
+  const lNuance = left.nuances?.length ?? 0;
+  const rNuance = right.nuances?.length ?? 0;
+  const lEmergent = left.emergent_insights?.length ?? 0;
+  const rEmergent = right.emergent_insights?.length ?? 0;
 
   const rows = [
     { label: 'Agreements', l: lAgree, r: rAgree },

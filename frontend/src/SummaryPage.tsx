@@ -14,6 +14,7 @@ import { useAuth } from './AuthContext';
 import { getMe } from './api/auth';
 import { getForm as apiFetchForm } from './api/forms';
 import { getRounds, getRoundsWithResponses, nextRound as apiNextRound } from './api/rounds';
+import type { Round as ApiRound } from './api/rounds';
 import { getResponses } from './api/responses';
 import {
 	getSynthesisVersions as apiGetSynthesisVersions,
@@ -291,7 +292,7 @@ export default function SummaryPage() {
 			if (!f) throw new Error('Form not found');
 			setForm(f as Form);
 
-			let list;
+			let list: ApiRound[];
 			try {
 				list = await getRounds(formId);
 			} catch {
