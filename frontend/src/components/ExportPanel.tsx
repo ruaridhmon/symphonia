@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FileText, FileJson, FileType2, FileDown, BarChart3 } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import LoadingButton from './LoadingButton';
 import { exportSynthesisFromBackend } from '../api/synthesis';
@@ -997,81 +998,99 @@ export default function ExportPanel({
 
   return (
     <>
-      {/* Backend-generated exports (server-side, includes all round data) */}
-      <p
-        className="text-xs font-semibold uppercase tracking-wider mt-2 mb-1"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
-        Export Synthesis
-      </p>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={() => handleBackendExport('markdown', setExportingBackendMd)}
-        loading={exportingBackendMd}
-        loadingText="Downloading…"
-        className="w-full text-left justify-start"
-      >
-        Download as Markdown
-      </LoadingButton>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={() => handleBackendExport('json', setExportingBackendJson)}
-        loading={exportingBackendJson}
-        loadingText="Downloading…"
-        className="w-full text-left justify-start"
-      >
-        Download as JSON
-      </LoadingButton>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={() => handleBackendExport('pdf', setExportingBackendPdf)}
-        loading={exportingBackendPdf}
-        loadingText="Downloading…"
-        className="w-full text-left justify-start"
-      >
-        Download as PDF
-      </LoadingButton>
+      {/* ── Export Synthesis ─────────────────────────── */}
+      <div style={{
+        borderTop: '1px solid var(--border)',
+        paddingTop: '0.75rem',
+        marginTop: '0.25rem',
+      }}>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-2"
+          style={{ color: 'var(--muted-foreground)' }}>
+          Export Synthesis
+        </p>
+        <div className="flex flex-col gap-1.5">
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={() => handleBackendExport('markdown', setExportingBackendMd)}
+            loading={exportingBackendMd}
+            loadingText="Downloading…"
+            className="w-full text-left justify-start gap-2"
+          >
+            <FileText size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Download as Markdown
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={() => handleBackendExport('json', setExportingBackendJson)}
+            loading={exportingBackendJson}
+            loadingText="Downloading…"
+            className="w-full text-left justify-start gap-2"
+          >
+            <FileJson size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Download as JSON
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={() => handleBackendExport('pdf', setExportingBackendPdf)}
+            loading={exportingBackendPdf}
+            loadingText="Downloading…"
+            className="w-full text-left justify-start gap-2"
+          >
+            <FileDown size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Download as PDF
+          </LoadingButton>
+        </div>
+      </div>
 
-      {/* Client-side exports */}
-      <p
-        className="text-xs font-semibold uppercase tracking-wider mt-3 mb-1"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
-        Client Reports
-      </p>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={handleExportMarkdown}
-        loading={exportingMd}
-        loadingText="Exporting…"
-        className="w-full text-left justify-start"
-      >
-        Export as Markdown
-      </LoadingButton>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={handleExportPdf}
-        loading={exportingPdf}
-        loadingText="Preparing PDF…"
-        className="w-full text-left justify-start"
-      >
-        Export as PDF
-      </LoadingButton>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={handleExportGovUk}
-        loading={exportingGovUk}
-        loadingText="Generating…"
-        className="w-full text-left justify-start"
-      >
-        Export GOV.UK Report
-      </LoadingButton>
+      {/* ── Client Reports ───────────────────────────── */}
+      <div style={{
+        borderTop: '1px solid var(--border)',
+        paddingTop: '0.75rem',
+        marginTop: '0.25rem',
+      }}>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-2"
+          style={{ color: 'var(--muted-foreground)' }}>
+          Client Reports
+        </p>
+        <div className="flex flex-col gap-1.5">
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={handleExportMarkdown}
+            loading={exportingMd}
+            loadingText="Exporting…"
+            className="w-full text-left justify-start gap-2"
+          >
+            <FileText size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Export as Markdown
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={handleExportPdf}
+            loading={exportingPdf}
+            loadingText="Preparing PDF…"
+            className="w-full text-left justify-start gap-2"
+          >
+            <FileType2 size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Export as PDF
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={handleExportGovUk}
+            loading={exportingGovUk}
+            loadingText="Generating…"
+            className="w-full text-left justify-start gap-2"
+          >
+            <BarChart3 size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Export GOV.UK Report
+          </LoadingButton>
+        </div>
+      </div>
     </>
   );
 }
