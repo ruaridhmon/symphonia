@@ -86,7 +86,7 @@ class TestAuthErrors:
 
     def test_protected_endpoint_with_expired_token(self, client: TestClient):
         """Accessing a protected endpoint with an expired JWT → 401."""
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
 
         from jose import jwt as jose_jwt
 
@@ -94,7 +94,7 @@ class TestAuthErrors:
             {
                 "sub": "1",
                 "is_admin": False,
-                "exp": datetime.utcnow() - timedelta(hours=1),
+                "exp": datetime.now(timezone.utc) - timedelta(hours=1),
             },
             "your‑jwt‑secret",
             algorithm="HS256",

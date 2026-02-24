@@ -448,7 +448,7 @@ async def forgot_password(
     if user:
         token = secrets.token_urlsafe(32)
         user.reset_token = token
-        user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+        user.reset_token_expiry = datetime.now(timezone.utc) + timedelta(hours=1)
         db.commit()
 
         frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
@@ -476,7 +476,7 @@ def reset_password(
 ):
     """Reset a user's password using a valid reset token."""
     user = db.query(User).filter(User.reset_token == token).first()
-    if not user or not user.reset_token_expiry or user.reset_token_expiry < datetime.utcnow():
+    if not user or not user.reset_token_expiry or user.reset_token_expiry < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
 
     user.hashed_password = get_password_hash(new_password)
@@ -679,8 +679,8 @@ def save_draft(
 
     if draft:
         draft.answers = payload.answers
-        from datetime import datetime as dt
-        draft.updated_at = dt.utcnow()
+        from datetime import datetime as dt, timezone as _tz
+        draft.updated_at = dt.now(_tz.utc)
     else:
         draft = Draft(
             user_id=user.id,
@@ -2927,11 +2927,11 @@ def edit_response(
             headers={"X-Current-Version": str(response.version)},
         )
 
-    from datetime import datetime as _dt
+    from datetime import datetime as _dt, timezone as _tz
 
     response.answers = payload.answers
     response.version = response.version + 1
-    response.updated_at = _dt.utcnow()
+    response.updated_at = _dt.now(_tz.utc)
     db.commit()
     db.refresh(response)
 
@@ -2967,11 +2967,11 @@ def force_edit_response(
     if not response:
         raise HTTPException(status_code=404, detail="Response not found")
 
-    from datetime import datetime as _dt
+    from datetime import datetime as _dt, timezone as _tz
 
     response.answers = payload.answers
     response.version = response.version + 1
-    response.updated_at = _dt.utcnow()
+    response.updated_at = _dt.now(_tz.utc)
     db.commit()
     db.refresh(response)
 
@@ -4587,7 +4587,7 @@ def admin_analytics(
         ]
 
     # ── Activity timeline (last 30 days) ──
-    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
 
     # Responses per day
     response_timeline = (
@@ -4602,7 +4602,7 @@ def admin_analytics(
     )
 
     # Build a complete 30-day series
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     date_map_responses: dict[str, int] = {}
     for row in response_timeline:
         date_map_responses[str(row[0])] = row[1]

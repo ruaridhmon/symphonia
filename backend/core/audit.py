@@ -9,7 +9,7 @@ Usage in routes:
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import Request
@@ -35,7 +35,7 @@ def audit_log(
         ip = request.headers.get("x-forwarded-for", request.client.host if request.client else None)
 
     entry = AuditLog(
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         user_id=user.id,
         user_email=user.email,
         action=action,

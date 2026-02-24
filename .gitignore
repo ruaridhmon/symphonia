@@ -16,3 +16,6 @@ __pycache__/
 frontend/e2e/.auth/
 frontend/test-results/
 backend/artefacts/
+
+# Leaked SQLite test artifact
+backend/file::memory:

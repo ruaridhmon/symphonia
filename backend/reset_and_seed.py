@@ -15,7 +15,7 @@ if os.environ.get("ALLOW_DB_RESET") != "yes-i-know-what-im-doing":
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import json, uuid, random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import text
 from core.models import FormModel, RoundModel, Response, SynthesisVersion
 from core.db import SessionLocal
@@ -37,7 +37,7 @@ def uid() -> str:
 
 
 def days_ago(n: int) -> datetime:
-    return datetime.utcnow() - timedelta(days=n)
+    return datetime.now(timezone.utc) - timedelta(days=n)
 
 
 # ─── Synthesis JSON builder ───────────────────────────────────────────────────
