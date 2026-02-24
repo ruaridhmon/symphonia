@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Zap, Lightbulb, Target, FileText, Quote, ChevronDown } from 'lucide-react';
 import CommentThread from './CommentThread';
 import type { SynthesisData, EvidenceExcerpt } from '../types/synthesis';
@@ -92,6 +93,7 @@ function EvidenceDrawer({
   isOpen: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   if (!excerpts || excerpts.length === 0) return null;
 
   return (
@@ -103,7 +105,7 @@ function EvidenceDrawer({
       >
         <Quote size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
         <span className="evidence-drawer-label">
-          {excerpts.length} supporting excerpt{excerpts.length !== 1 ? 's' : ''}
+          {t('synthesis.structured.supportingExcerpts', { count: excerpts.length })}
         </span>
         <ChevronDown
           size={14}
@@ -133,19 +135,21 @@ function EvidenceDrawer({
   );
 }
 
-function SeverityBadge({ severity }: { severity: string }) {
+function SeverityBadge({ severity }: { severity: string; }) {
+  const { t } = useTranslation();
   const colors: Record<string, { bg: string; text: string }> = {
     low: { bg: 'rgba(34,197,94,0.15)', text: 'var(--success)' },
     moderate: { bg: 'color-mix(in srgb, var(--warning) 15%, transparent)', text: 'var(--warning)' },
     high: { bg: 'rgba(239,68,68,0.15)', text: 'var(--destructive)' },
   };
   const c = colors[severity] || colors.moderate;
+  const severityKey = `synthesis.severity.${severity}` as const;
   return (
     <span
       className="severity-badge"
       style={{ backgroundColor: c.bg, color: c.text }}
     >
-      {severity}
+      {t(severityKey)}
     </span>
   );
 }
@@ -172,6 +176,7 @@ function getDimensionClass(label?: string): string {
 }
 
 export default function StructuredSynthesis({ data, convergenceScore, expertLabels, formId, roundId, token, currentUserEmail }: StructuredSynthesisProps) {
+  const { t } = useTranslation();
   const commentsEnabled = !!(formId && roundId && token);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     agreements: true,
@@ -204,29 +209,29 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
         <div className="structured-overview-stats">
           <div className="structured-stat">
             <span className="structured-stat-value">{agreements.length}</span>
-            <span className="structured-stat-label">Agreements</span>
+            <span className="structured-stat-label">{t('synthesis.structured.agreements')}</span>
           </div>
           <div className="structured-stat">
             <span className="structured-stat-value">{disagreements.length}</span>
-            <span className="structured-stat-label">Disagreements</span>
+            <span className="structured-stat-label">{t('synthesis.structured.disagreements')}</span>
           </div>
           <div className="structured-stat">
             <span className="structured-stat-value">{nuances.length}</span>
-            <span className="structured-stat-label">Nuances</span>
+            <span className="structured-stat-label">{t('synthesis.structured.nuances')}</span>
           </div>
           <div className="structured-stat">
             <span className="structured-stat-value">{probes.length}</span>
-            <span className="structured-stat-label">Probes</span>
+            <span className="structured-stat-label">{t('synthesis.structured.followUpProbes')}</span>
           </div>
         </div>
         {convergenceScore != null && (
           <div className="structured-convergence">
-            <ConfidenceBar value={convergenceScore} label="Convergence" />
+            <ConfidenceBar value={convergenceScore} label={t('synthesis.structured.convergence')} />
           </div>
         )}
         {confidence.overall != null && (
           <div className="structured-convergence">
-            <ConfidenceBar value={confidence.overall} label="Overall confidence" />
+            <ConfidenceBar value={confidence.overall} label={t('synthesis.structured.overallConfidence')} />
           </div>
         )}
       </div>
@@ -235,7 +240,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       {narrative && (
         <div className="structured-section">
           <SectionHeader
-            title="Narrative Summary"
+            title={t('synthesis.structured.narrativeSummary')}
             count={0}
             icon={<FileText size={16} style={{ color: 'var(--accent)' }} />}
             color="var(--accent)"
@@ -261,7 +266,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       {agreements.length > 0 && (
         <div className="structured-section">
           <SectionHeader
-            title="Agreements"
+            title={t('synthesis.structured.agreements')}
             count={agreements.length}
             icon={<CheckCircle2 size={16} style={{ color: 'var(--success)' }} />}
             color="var(--success)"
@@ -324,7 +329,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       {disagreements.length > 0 && (
         <div className="structured-section">
           <SectionHeader
-            title="Disagreements"
+            title={t('synthesis.structured.disagreements')}
             count={disagreements.length}
             icon={<Zap size={16} style={{ color: 'var(--warning)' }} />}
             color="#eab308"
@@ -391,7 +396,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       {nuances.length > 0 && (
         <div className="structured-section">
           <SectionHeader
-            title="Nuances & Uncertainties"
+            title={t('synthesis.structured.nuances')}
             count={nuances.length}
             icon={<Lightbulb size={16} style={{ color: 'var(--accent)' }} />}
             color="#a855f7"
@@ -434,7 +439,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       {probes.length > 0 && (
         <div className="structured-section">
           <SectionHeader
-            title="Follow-up Probes"
+            title={t('synthesis.structured.followUpProbes')}
             count={probes.length}
             icon={<Target size={16} style={{ color: 'var(--accent)' }} />}
             color="var(--accent)"
@@ -457,7 +462,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                   {(p.target_experts || []).length > 0 && (
                     <div className="structured-card-experts">
                       <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                        Targets:
+                        {t('synthesis.structured.targets')}
                       </span>
                       {(p.target_experts || []).map(id => (
                         <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>

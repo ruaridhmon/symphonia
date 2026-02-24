@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { ThemeToggle } from './theme';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 export default function Header() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -88,18 +91,19 @@ export default function Header() {
               document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
             }}
             className="header-cmd-k-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs"
-            aria-label="Open command palette"
+            aria-label={t('header.openCommandPalette')}
           >
             <span style={{ opacity: 0.7 }}>⌘K</span>
           </button>
+          <LanguageSwitcher />
           <ThemeToggle />
           {user && (
             <button
               onClick={logout}
               className="header-logout-btn text-sm px-3 py-1.5 rounded-lg"
-              aria-label="Log out"
+              aria-label={t('common.logOut')}
             >
-              Log out
+              {t('common.logOut')}
             </button>
           )}
         </div>
@@ -115,7 +119,7 @@ export default function Header() {
             cursor: 'pointer',
           }}
           onClick={() => setMenuOpen(prev => !prev)}
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-label={menuOpen ? t('header.closeMenu') : t('header.openMenu')}
           aria-expanded={menuOpen}
           aria-controls="mobile-nav-menu"
         >
@@ -146,7 +150,11 @@ export default function Header() {
             </p>
           )}
           <div className="flex items-center justify-between">
-            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Theme</span>
+            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('language.label')}</span>
+            <LanguageSwitcher />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('common.theme')}</span>
             <ThemeToggle />
           </div>
           {user && (
@@ -154,7 +162,7 @@ export default function Header() {
               onClick={() => { setMenuOpen(false); logout(); }}
               className="header-logout-btn text-sm text-left px-3 py-2 rounded-lg"
             >
-              Log out
+              {t('common.logOut')}
             </button>
           )}
         </div>

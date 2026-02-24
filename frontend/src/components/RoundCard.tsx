@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users, TrendingUp, ClipboardList, FileText, MessageSquare, ChartNoAxesColumn, HelpCircle } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 import StructuredSynthesis from './StructuredSynthesis';
@@ -15,6 +16,7 @@ interface RoundCardProps {
 }
 
 const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels, formId, token, currentUserEmail }: RoundCardProps) {
+  const { t } = useTranslation();
   const hasSynthesis = !!(round.synthesis && round.synthesis.trim());
   const hasStructured = !!(round.synthesis_json && typeof round.synthesis_json === 'object');
 
@@ -26,28 +28,28 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
       <div className="round-detail-card-header">
         <div className="round-detail-card-title-group">
           <h3 className="round-detail-card-title">
-            Round {round.round_number}
+            {t('rounds.roundNumber', { number: round.round_number })}
             {isCurrentRound && (
               <span className="round-detail-card-live-badge">
                 <span className="round-detail-card-live-dot" />
-                Current Round
+                {t('roundCard.currentRound')}
               </span>
             )}
           </h3>
           <div className="round-detail-card-meta">
             <span className="round-detail-card-meta-item">
               <MessageSquare size={14} style={{ color: 'var(--muted-foreground)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
-              {round.response_count ?? 0} responses
+              {round.response_count ?? 0} {t('rounds.responses')}
             </span>
             {round.convergence_score != null && (
               <span className="round-detail-card-meta-item">
                 <ChartNoAxesColumn size={14} style={{ color: 'var(--accent)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
-                {Math.round(round.convergence_score * 100)}% convergence
+                {Math.round(round.convergence_score * 100)}% {t('rounds.convergence')}
               </span>
             )}
             <span className="round-detail-card-meta-item">
               <HelpCircle size={14} style={{ color: 'var(--muted-foreground)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
-              {round.questions?.length ?? 0} questions
+              {round.questions?.length ?? 0} {t('rounds.questions')}
             </span>
           </div>
         </div>
@@ -57,7 +59,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
       {round.convergence_score != null && (
         <div className="round-detail-convergence">
           <div className="round-detail-convergence-header">
-            <span className="round-detail-convergence-label">Convergence Score</span>
+            <span className="round-detail-convergence-label">{t('roundCard.convergenceScore')}</span>
             <span
               className="round-detail-convergence-value"
               style={{
@@ -92,7 +94,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
       {/* Questions for this round */}
       {round.questions && round.questions.length > 0 && (
         <div className="round-detail-questions">
-          <h4 className="round-detail-questions-title">Questions</h4>
+          <h4 className="round-detail-questions-title">{t('rounds.questions')}</h4>
           <ol className="round-detail-questions-list">
             {round.questions.map((q, i) => (
               <li key={i} className="round-detail-question-item">
@@ -106,7 +108,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
       {/* Synthesis content */}
       {hasSynthesis && (
         <div className="round-detail-synthesis">
-          <h4 className="round-detail-synthesis-title">Synthesis</h4>
+          <h4 className="round-detail-synthesis-title">{t('rounds.synthesisRound', { number: round.round_number })}</h4>
           {hasStructured ? (
             <StructuredSynthesis
               data={round.synthesis_json!}
@@ -130,8 +132,8 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
           <div className="round-detail-empty-icon"><FileText size={24} style={{ color: 'var(--muted-foreground)' }} /></div>
           <p className="round-detail-empty-text">
             {isCurrentRound
-              ? 'No synthesis generated yet for this round. Use the editor above to write or generate one.'
-              : 'No synthesis was recorded for this round.'}
+              ? t('roundCard.noSynthesisCurrent')
+              : t('roundCard.noSynthesisHistoric')}
           </p>
         </div>
       )}

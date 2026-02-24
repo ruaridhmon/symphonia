@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, User, MessageSquare } from 'lucide-react';
 import { ResponseEditor } from '../index';
 import VoiceMirroring from '../VoiceMirroring';
@@ -30,6 +31,7 @@ export default function ResponsesAccordion({
   token,
   onResponseUpdated,
 }: Props) {
+  const { t } = useTranslation();
   const [expandedRounds, setExpandedRounds] = useState<Set<number>>(new Set());
 
   function toggleRound(roundId: number) {
@@ -57,10 +59,10 @@ export default function ResponsesAccordion({
       <div className="card p-4 sm:p-6">
         <h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
           <MessageSquare size={18} />
-          Expert Responses
+          {t('responses.title')}
         </h2>
         <p style={{ color: 'var(--muted-foreground)' }}>
-          No responses yet for this form.
+          {t('responses.noResponses')}
         </p>
       </div>
     );
@@ -77,7 +79,7 @@ export default function ResponsesAccordion({
       >
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <MessageSquare size={18} />
-          Expert Responses
+          {t('responses.title')}
         </h2>
         <button
           onClick={allExpanded ? collapseAll : expandAll}
@@ -89,7 +91,7 @@ export default function ResponsesAccordion({
             cursor: 'pointer',
           }}
         >
-          {allExpanded ? 'Collapse All' : 'Expand All'}
+          {allExpanded ? t('responses.collapseAll') : t('responses.expandAll')}
         </button>
       </div>
 
@@ -145,7 +147,7 @@ export default function ResponsesAccordion({
                     className="font-semibold text-sm"
                     style={{ color: 'var(--foreground)' }}
                   >
-                    Round {round.round_number}
+                    {t('rounds.roundNumber', { number: round.round_number })}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -163,7 +165,7 @@ export default function ResponsesAccordion({
                     }}
                   >
                     <User size={11} />
-                    {responseCount} response{responseCount !== 1 ? 's' : ''}
+                    {t('responses.responseCount', { count: responseCount })}
                   </span>
                 </div>
               </button>
@@ -174,7 +176,7 @@ export default function ResponsesAccordion({
                   id={`responses-round-${round.id}`}
                   className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-3 slide-down"
                   role="region"
-                  aria-label={`Responses for Round ${round.round_number}`}
+                  aria-label={t('rounds.roundNumber', { number: round.round_number })}
                   style={{
                     borderTop: '1px solid var(--border)',
                     maxHeight: '600px',
@@ -188,7 +190,7 @@ export default function ResponsesAccordion({
                         className="text-xs font-semibold uppercase tracking-wider mb-2"
                         style={{ color: 'var(--muted-foreground)' }}
                       >
-                        Questions
+                        {t('responses.questions')}
                       </h4>
                       <ol className="list-decimal list-inside space-y-1">
                         {roundQuestions.map((q, i) => (
@@ -209,7 +211,7 @@ export default function ResponsesAccordion({
                       className="text-sm py-2"
                       style={{ color: 'var(--muted-foreground)' }}
                     >
-                      No responses for this round yet.
+                      {t('responses.noResponsesRound')}
                     </p>
                   ) : (
                     <>

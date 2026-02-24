@@ -191,8 +191,25 @@
     "failedToLoadForms": "Failed to load forms (HTTP {{status}})",
     "failedToLoadGeneric": "Failed to load forms"
   },
+  "responses": {
+    "title": "Expert Responses",
+    "noResponses": "No responses yet for this form.",
+    "noResponsesRound": "No responses for this round yet.",
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "responseCount": "{{count}} response",
+    "responseCount_other": "{{count}} responses",
+    "questions": "Questions"
+  },
+  "roundCard": {
+    "currentRound": "Current Round",
+    "convergenceScore": "Convergence Score",
+    "noSynthesisCurrent": "No synthesis generated yet for this round. Use the editor above to write or generate one.",
+    "noSynthesisHistoric": "No synthesis was recorded for this round."
+  },
   "language": {
     "label": "Language",
-    "en": "English"
+    "en": "English",
+    "el": "Ελληνικά"
   }
 }

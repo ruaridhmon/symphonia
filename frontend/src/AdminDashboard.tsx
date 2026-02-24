@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
@@ -16,6 +17,7 @@ const ANALYTICS_STORAGE_KEY = 'symphonia-admin-analytics-visible';
  * Rendered inside PageLayout via Dashboard component.
  */
 export default function AdminDashboard() {
+  const { t } = useTranslation();
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -135,7 +137,7 @@ export default function AdminDashboard() {
                 color: 'var(--destructive-foreground)',
               }}
             >
-              Retry
+              {t('common.retry')}
             </button>
           </div>
         )}
@@ -147,10 +149,10 @@ export default function AdminDashboard() {
               className="text-lg sm:text-xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
-              Admin Dashboard
+              {t('adminDashboard.title')}
             </h1>
             <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-              Create and manage your Delphi consultation forms
+              {t('adminDashboard.subtitle')}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -177,7 +179,7 @@ export default function AdminDashboard() {
               size="sm"
               onClick={() => navigate('/admin/forms/new')}
             >
-              + New Form
+              {t('adminDashboard.newForm')}
             </LoadingButton>
           </div>
         </div>
@@ -234,7 +236,7 @@ export default function AdminDashboard() {
                     className="text-base font-semibold"
                     style={{ color: 'var(--foreground)' }}
                   >
-                    Existing Forms
+                    {t('adminDashboard.existingForms')}
                   </h2>
                   <span
                     className="inline-flex items-center justify-center text-xs font-bold px-2.5 py-0.5 rounded-full"
@@ -272,11 +274,11 @@ export default function AdminDashboard() {
                   </svg>
                   <input
                     type="text"
-                    placeholder="Search forms by title or code…"
+                    placeholder={t('adminDashboard.searchPlaceholder')}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     className="w-full text-sm pl-9 pr-3"
-                    aria-label="Search forms"
+                    aria-label={t('adminDashboard.searchLabel')}
                     style={{
                       height: '2.5rem',
                       borderRadius: 'var(--radius)',
@@ -322,13 +324,13 @@ export default function AdminDashboard() {
                   />
                 </svg>
                 <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>
-                  No forms match "<span style={{ color: 'var(--foreground)' }}>{search}</span>"
+                  {t('adminDashboard.noFormsMatch', { query: search })}
                 </p>
                 <p
                   className="text-xs mt-1"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
-                  Try a different title or join code
+                  {t('adminDashboard.tryDifferent')}
                 </p>
               </div>
             )}
@@ -343,7 +345,7 @@ export default function AdminDashboard() {
                         backgroundColor: 'var(--muted)',
                       }}
                     >
-                      {['Form Title', 'Join Code', 'Participants', 'Round'].map(label => (
+                      {[t('adminDashboard.formTitle'), t('adminDashboard.joinCode'), t('adminDashboard.participants'), t('adminDashboard.round')].map(label => (
                         <th
                           key={label}
                           className="px-4 py-2.5 text-left"
@@ -370,7 +372,7 @@ export default function AdminDashboard() {
                           borderBottom: '1px solid var(--border)',
                         }}
                       >
-                        Actions
+                        {t('adminDashboard.actions')}
                       </th>
                     </tr>
                   </thead>
@@ -462,7 +464,7 @@ export default function AdminDashboard() {
                                 e.currentTarget.style.backgroundColor = 'transparent';
                               }}
                             >
-                              Edit
+                              {t('adminDashboard.edit')}
                             </a>
                             <a
                               href={`/admin/form/${f.id}/summary`}
@@ -477,7 +479,7 @@ export default function AdminDashboard() {
                                 e.currentTarget.style.backgroundColor = 'transparent';
                               }}
                             >
-                              Summary
+                              {t('adminDashboard.summary')}
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 16 16"
@@ -594,7 +596,7 @@ export default function AdminDashboard() {
                           color: 'var(--muted-foreground)',
                         }}
                       >
-                        Edit
+                        {t('adminDashboard.edit')}
                       </a>
                       <div
                         style={{
@@ -610,7 +612,7 @@ export default function AdminDashboard() {
                           color: 'var(--accent)',
                         }}
                       >
-                        Summary →
+                        {t('adminDashboard.summary')} →
                       </a>
                     </div>
                   </div>
@@ -627,7 +629,7 @@ export default function AdminDashboard() {
                   color: 'var(--muted-foreground)',
                 }}
               >
-                Showing {filteredForms.length} of {forms.length} form{forms.length !== 1 ? 's' : ''}
+                {t('common.showingResults', { count: filteredForms.length, total: forms.length })}
               </div>
             )}
           </div>

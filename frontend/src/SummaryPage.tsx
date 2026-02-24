@@ -1,5 +1,6 @@
 import { Component, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -147,7 +148,8 @@ function extractQuestionText(q: unknown): string {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SummaryPage() {
-	useDocumentTitle('Synthesis Summary');
+	const { t } = useTranslation();
+	useDocumentTitle(t('summary.pageTitle'));
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const formId = Number(id);
@@ -552,17 +554,17 @@ export default function SummaryPage() {
 			<div className="text-center max-w-md mx-auto px-4">
 				<div className="text-4xl mb-4"><span aria-hidden="true">⚠️</span></div>
 				<h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
-					Failed to Load
+					{t('summary.failedToLoad')}
 				</h2>
 				<p className="text-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>
 					{loadError}
 				</p>
 				<div className="flex gap-3 justify-center">
 					<LoadingButton variant="accent" size="md" onClick={() => { loadAll(); loadResponses(); }}>
-						Retry
+						{t('common.retry')}
 					</LoadingButton>
 					<LoadingButton variant="secondary" size="md" onClick={() => navigate('/')}>
-						Back to Dashboard
+						{t('common.backToDashboard')}
 					</LoadingButton>
 				</div>
 			</div>
@@ -573,7 +575,7 @@ export default function SummaryPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
 			<a href="#main-content" className="skip-to-main">
-				Skip to main content
+				{t('common.skipToMainContent')}
 			</a>
 			<SummaryHeader email={email} viewers={viewers} onLogout={logout} />
 
@@ -587,7 +589,7 @@ export default function SummaryPage() {
 						onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.color = 'var(--accent)'}
 						onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.color = 'var(--muted-foreground)'}
 					>
-						← Back to Dashboard
+						{t('common.backToDashboard')}
 					</button>
 					<h1 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
 						{form.title}
@@ -630,7 +632,7 @@ export default function SummaryPage() {
 					title={sidebarOpen ? 'Hide panel' : 'Show panel'}
 				>
 					{sidebarOpen ? <X size={15} /> : <PanelRight size={15} />}
-					<span className="hidden sm:inline">{sidebarOpen ? 'Hide' : 'Controls'}</span>
+					<span className="hidden sm:inline">{sidebarOpen ? t('summary.hide') : t('summary.controls')}</span>
 				</button>
 
 				{/* Main content — full width */}
@@ -673,7 +675,7 @@ export default function SummaryPage() {
 						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
 							<div className="card p-4">
 								<h2 className="text-base font-semibold mb-2 text-foreground">
-									Synthesis (Round {selectedRound.round_number})
+									{t('rounds.synthesisRound', { number: selectedRound.round_number })}
 								</h2>
 								<MarkdownRenderer content={selectedRound.synthesis} />
 							</div>
@@ -685,7 +687,7 @@ export default function SummaryPage() {
 								<div className="card p-4">
 									<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
 										<h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-											<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
+											<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> {t('summary.structuredAnalysis')}
 										</h2>
 									</div>
 									{/* Audience Translation toggle */}
@@ -763,7 +765,7 @@ export default function SummaryPage() {
 							<SectionErrorBoundary fallbackTitle="Failed to render cross-analysis">
 								<div className="card p-4">
 									<h2 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
-										<Link2 size={20} style={{ color: 'var(--accent)' }} /> Expert Cross-Analysis
+										<Link2 size={20} style={{ color: 'var(--accent)' }} /> {t('summary.expertCrossAnalysis')}
 									</h2>
 									<CrossMatrix
 										structuredData={structuredSynthesisData}
@@ -779,7 +781,7 @@ export default function SummaryPage() {
 							<SectionErrorBoundary fallbackTitle="Failed to render consensus heatmap">
 								<div className="card p-4">
 									<h2 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
-										<MapPin size={20} style={{ color: 'var(--accent)' }} /> Consensus Heatmap
+										<MapPin size={20} style={{ color: 'var(--accent)' }} /> {t('summary.consensusHeatmap')}
 									</h2>
 									<ConsensusHeatmap
 										structuredData={structuredSynthesisData}
@@ -818,7 +820,7 @@ export default function SummaryPage() {
 							<SectionErrorBoundary fallbackTitle="Failed to render emergent insights">
 								<div className="card p-4">
 									<h2 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
-										<Sparkles size={20} style={{ color: 'var(--accent)' }} /> Emergent Insights
+										<Sparkles size={20} style={{ color: 'var(--accent)' }} /> {t('summary.emergentInsights')}
 									</h2>
 									<EmergenceHighlights
 										insights={structuredSynthesisData.emergent_insights ?? []}
@@ -853,7 +855,7 @@ export default function SummaryPage() {
 					{/* ── Floating Sidebar ── */}
 					<aside
 						role="complementary"
-						aria-label="Synthesis controls"
+						aria-label={t('summary.synthesisControls')}
 						className="summary-sidebar"
 						style={{
 							position: 'fixed',
