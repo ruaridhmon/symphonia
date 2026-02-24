@@ -146,6 +146,19 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
     )
 
 
+# 405 handler — serve SPA index.html for GET requests to API-only paths.
+# FastAPI raises 405 (before the catch-all route runs) when a path is
+# registered for POST/PUT/etc but not GET (e.g. POST /login, POST /register).
+# React Router owns these paths client-side; the browser should get index.html.
+@app.exception_handler(405)
+async def method_not_allowed_spa_handler(request: Request, exc: Exception):
+    if request.method in ("GET", "HEAD") and FRONTEND_DIR.exists():
+        index_html = FRONTEND_DIR / "index.html"
+        if index_html.exists():
+            return FileResponse(str(index_html))
+    return JSONResponse({"detail": "Method Not Allowed"}, status_code=405)
+
+
 # Global exception handler — catches unhandled exceptions and returns clean JSON
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
