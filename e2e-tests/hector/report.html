@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hector — Symphonia E2E Test Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; color: #fff; }
+    h2 { font-size: 1.5rem; margin: 2rem 0 1rem; color: #fff; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
+    h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; color: #ccc; }
+    .subtitle { color: #888; margin-bottom: 2rem; }
+    .summary-banner {
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .summary-banner.pass { background: #0a2e0a; border: 1px solid #1a5c1a; color: #4caf50; }
+    .summary-banner.fail { background: #2e0a0a; border: 1px solid #5c1a1a; color: #f44336; }
+    .stats { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .stat {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1rem 1.5rem;
+      min-width: 120px;
+    }
+    .stat-value { font-size: 2rem; font-weight: 700; }
+    .stat-label { font-size: 0.8rem; text-transform: uppercase; color: #888; }
+    .stat.passed .stat-value { color: #4caf50; }
+    .stat.failed .stat-value { color: #f44336; }
+    .stat.skipped .stat-value { color: #ff9800; }
+    .stat.total .stat-value { color: #2196f3; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+    th { text-align: left; padding: 0.75rem; background: #1a1a1a; border-bottom: 2px solid #333; font-size: 0.85rem; text-transform: uppercase; color: #888; }
+    td { padding: 0.75rem; border-bottom: 1px solid #222; }
+    tr:hover { background: #1a1a1a; }
+    .status-pass { color: #4caf50; font-weight: 600; }
+    .status-fail { color: #f44336; font-weight: 600; }
+    .status-skip { color: #ff9800; }
+    .error-msg { font-family: monospace; font-size: 0.8rem; color: #f44336; background: #1a0505; padding: 0.5rem; border-radius: 4px; margin-top: 0.25rem; max-width: 600px; overflow-x: auto; }
+
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    .screenshot-card {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .screenshot-card img { width: 100%; display: block; cursor: pointer; }
+    .screenshot-card img:hover { opacity: 0.9; }
+    .screenshot-card .caption { padding: 0.5rem 0.75rem; font-size: 0.85rem; color: #aaa; }
+    .fullscreen-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9); z-index: 1000; cursor: pointer;
+      justify-content: center; align-items: center;
+    }
+    .fullscreen-overlay img { max-width: 95%; max-height: 95%; object-fit: contain; }
+    .fullscreen-overlay.active { display: flex; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛡️ Hector — Symphonia E2E Test Report</h1>
+    <p class="subtitle">Generated: 2026-02-24T00:15:16.160Z</p>
+
+    <div class="summary-banner pass">
+      ✅ ALL TESTS PASSED
+    </div>
+
+    <div class="stats">
+      <div class="stat total"><div class="stat-value">24</div><div class="stat-label">Total Tests</div></div>
+      <div class="stat passed"><div class="stat-value">24</div><div class="stat-label">Passed</div></div>
+      <div class="stat failed"><div class="stat-value">0</div><div class="stat-label">Failed</div></div>
+      <div class="stat skipped"><div class="stat-value">0</div><div class="stat-label">Skipped</div></div>
+    </div>
+
+    <h2>Test Results</h2>
+    <table>
+      <thead>
+        <tr><th>Suite</th><th>Test</th><th>Status</th><th>Duration</th></tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td>01-page-load.spec.ts > Public Pages</td>
+          <td>
+            Login page loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Public Pages</td>
+          <td>
+            Register page loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Public Pages</td>
+          <td>
+            404 page loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Authenticated Pages</td>
+          <td>
+            Dashboard (/) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>1.2s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Authenticated Pages</td>
+          <td>
+            Atlas (/atlas) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.9s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Authenticated Pages</td>
+          <td>
+            Waiting page (/waiting) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Authenticated Pages</td>
+          <td>
+            Result page (/result) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.9s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Authenticated Pages</td>
+          <td>
+            Thank You page (/thank-you) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.9s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Authenticated Pages</td>
+          <td>
+            Form page (/form/1) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Admin Pages</td>
+          <td>
+            Admin Settings (/admin/settings) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Admin Pages</td>
+          <td>
+            Admin New Form (/admin/forms/new) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Admin Pages</td>
+          <td>
+            Form Editor (/admin/form/1) loads cleanly
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>01-page-load.spec.ts > Admin Pages</td>
+          <td>
+            Summary Page (/admin/form/1/summary) loads cleanly — THE CRITICAL PAGE
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>02-round-navigation.spec.ts > Round Navigation Flow</td>
+          <td>
+            Login → Dashboard → Summary → Round navigation (no crash)
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>1.6s</td>
+        </tr>
+        <tr>
+          <td>02-round-navigation.spec.ts > Round Navigation Flow</td>
+          <td>
+            Summary page for each form loads without crash
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>3.2s</td>
+        </tr>
+        <tr>
+          <td>02-round-navigation.spec.ts > Round Navigation Flow</td>
+          <td>
+            Form editor pages load without crash
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>2.0s</td>
+        </tr>
+        <tr>
+          <td>02-round-navigation.spec.ts > Login Flow</td>
+          <td>
+            Valid login leads to dashboard
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>2.0s</td>
+        </tr>
+        <tr>
+          <td>02-round-navigation.spec.ts > Login Flow</td>
+          <td>
+            Invalid login shows error (not crash)
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>1.0s</td>
+        </tr>
+        <tr>
+          <td>03-error-detection.spec.ts > Error Detection Helper</td>
+          <td>
+            checkForErrorBoundary returns null on a clean page
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>03-error-detection.spec.ts > Error Detection Helper</td>
+          <td>
+            checkForErrorBoundary detects injected error UI
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>03-error-detection.spec.ts > Error Detection Helper</td>
+          <td>
+            checkForErrorBoundary detects "Can't find variable" text
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>03-error-detection.spec.ts > Error Detection Helper</td>
+          <td>
+            checkForErrorBoundary detects "is not defined" errors
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>0.8s</td>
+        </tr>
+        <tr>
+          <td>03-error-detection.spec.ts > Full Page Sweep — No Errors Anywhere</td>
+          <td>
+            Every route is free of ErrorBoundary crashes
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>8.0s</td>
+        </tr>
+        <tr>
+          <td>03-error-detection.spec.ts > Console Error Detection</td>
+          <td>
+            No JavaScript errors thrown during full navigation
+            
+          </td>
+          <td class="status-pass">
+            ✅ PASS
+          </td>
+          <td>3.3s</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Screenshots (28)</h2>
+    <div class="screenshots-grid">
+      
+      <div class="screenshot-card">
+        <img src="screenshots/01-login.png" alt="01-login.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">01-login</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/02-register.png" alt="02-register.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">02-register</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/03-not-found.png" alt="03-not-found.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">03-not-found</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/04-dashboard.png" alt="04-dashboard.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">04-dashboard</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/05-atlas.png" alt="05-atlas.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">05-atlas</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/06-waiting.png" alt="06-waiting.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">06-waiting</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/07-result.png" alt="07-result.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">07-result</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/08-thank-you.png" alt="08-thank-you.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">08-thank-you</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/09-form-1.png" alt="09-form-1.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">09-form-1</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/10-admin-settings.png" alt="10-admin-settings.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">10-admin-settings</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/11-admin-new-form.png" alt="11-admin-new-form.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">11-admin-new-form</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/12-admin-form-editor.png" alt="12-admin-form-editor.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">12-admin-form-editor</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/13-admin-summary.png" alt="13-admin-summary.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">13-admin-summary</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-01-dashboard.png" alt="flow-01-dashboard.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-01-dashboard</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-03-summary-page.png" alt="flow-03-summary-page.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-03-summary-page</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-04-round-clicked.png" alt="flow-04-round-clicked.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-04-round-clicked</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-05-round-navigation-complete.png" alt="flow-05-round-navigation-complete.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-05-round-navigation-complete</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-form-editor-1.png" alt="flow-form-editor-1.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-form-editor-1</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-form-editor-2.png" alt="flow-form-editor-2.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-form-editor-2</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-form-editor-3.png" alt="flow-form-editor-3.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-form-editor-3</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-summary-form-1.png" alt="flow-summary-form-1.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-summary-form-1</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-summary-form-2.png" alt="flow-summary-form-2.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-summary-form-2</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-summary-form-3.png" alt="flow-summary-form-3.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-summary-form-3</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-summary-form-4.png" alt="flow-summary-form-4.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-summary-form-4</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/flow-summary-form-5.png" alt="flow-summary-form-5.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">flow-summary-form-5</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/login-01-form.png" alt="login-01-form.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">login-01-form</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/login-03-success-dashboard.png" alt="login-03-success-dashboard.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">login-03-success-dashboard</div>
+      </div>
+      <div class="screenshot-card">
+        <img src="screenshots/login-04-invalid-credentials.png" alt="login-04-invalid-credentials.png" onclick="showFullscreen(this.src)" loading="lazy" />
+        <div class="caption">login-04-invalid-credentials</div>
+      </div>
+    </div>
+
+    <div class="fullscreen-overlay" id="fullscreen" onclick="this.classList.remove('active')">
+      <img id="fullscreen-img" src="" alt="Fullscreen" />
+    </div>
+  </div>
+  <script>
+    function showFullscreen(src) {
+      document.getElementById('fullscreen-img').src = src;
+      document.getElementById('fullscreen').classList.add('active');
+    }
+  </script>
+</body>
+</html>

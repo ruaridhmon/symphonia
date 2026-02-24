@@ -44,35 +44,35 @@ export default function ActionsCard({
   }, [onDownloadResponses]);
 
   return (
-    <div className="card p-4">
+    <div className="card p-3">
       <h3
-        className="text-xs font-semibold uppercase tracking-wider mb-3"
+        className="text-[10px] font-semibold uppercase tracking-wider mb-2"
         style={{ color: 'var(--muted-foreground)' }}
       >
         Actions
       </h3>
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-1.5">
         <LoadingButton
           variant="accent"
-          size="md"
+          size="sm"
           onClick={onToggleResponses}
           className="w-full text-left justify-start"
         >
-          {responsesOpen ? 'Hide Responses' : 'View All Responses'}
+          {responsesOpen ? 'Hide Responses' : 'View Responses'}
         </LoadingButton>
         <LoadingButton
           variant="secondary"
-          size="md"
+          size="sm"
           onClick={handleDownload}
           loading={downloading}
           loadingText="Downloading…"
           className="w-full text-left justify-start"
         >
-          Download Responses
+          Download
         </LoadingButton>
         <LoadingButton
           variant="success"
-          size="md"
+          size="sm"
           onClick={handleSave}
           loading={saving}
           loadingText="Saving…"
@@ -87,17 +87,17 @@ export default function ActionsCard({
           structuredSynthesisData={structuredSynthesisData}
           expertLabels={expertLabels}
         />
-        <div className="pt-2">
+        <div className="pt-1">
           <LoadingButton
             variant="accent"
-            size="md"
+            size="sm"
             onClick={onStartNextRound}
             loading={loading}
             loadingText="Starting…"
             className="w-full font-semibold"
             style={{ backgroundColor: 'var(--accent-hover)' }}
           >
-            Start Next Round
+            Next Round →
           </LoadingButton>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
@@ -7,6 +7,8 @@ import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
 
 const AdminAnalytics = lazy(() => import('./components/AdminAnalytics'));
+
+const ANALYTICS_STORAGE_KEY = 'symphonia-admin-analytics-visible';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -21,6 +23,10 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [analyticsVisible, setAnalyticsVisible] = useState(() => {
+    try { return localStorage.getItem(ANALYTICS_STORAGE_KEY) === 'true'; } catch { return false; }
+  });
+  const analyticsRef = useRef<HTMLDivElement>(null);
 
   const fetchForms = () => {
     if (!token) {
@@ -76,6 +82,14 @@ export default function AdminDashboard() {
   }, [token]);
 
 
+  function toggleAnalytics() {
+    setAnalyticsVisible(prev => {
+      const next = !prev;
+      try { localStorage.setItem(ANALYTICS_STORAGE_KEY, String(next)); } catch {}
+      return next;
+    });
+  }
+
   /* ── Filtered forms for search ── */
   const filteredForms = forms.filter(f => {
     if (!search.trim()) return true;
@@ -127,29 +141,40 @@ export default function AdminDashboard() {
         )}
 
         {/* ── Create form CTA ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6">
           <div>
             <h1
-              className="text-xl sm:text-2xl font-bold tracking-tight"
+              className="text-lg sm:text-xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
               Admin Dashboard
             </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
               Create and manage your Delphi consultation forms
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <LoadingButton
               variant="ghost"
-              size="md"
+              size="sm"
+              onClick={toggleAnalytics}
+              style={analyticsVisible ? {
+                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                color: 'var(--accent)',
+              } : undefined}
+            >
+              📊 Analytics
+            </LoadingButton>
+            <LoadingButton
+              variant="ghost"
+              size="sm"
               onClick={() => navigate('/admin/settings')}
             >
               ⚙ Settings
             </LoadingButton>
             <LoadingButton
               variant="accent"
-              size="md"
+              size="sm"
               onClick={() => navigate('/admin/forms/new')}
             >
               + New Form
@@ -157,20 +182,36 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* ── Analytics section ── */}
-        <Suspense
-          fallback={
-            <div className="mb-8 animate-pulse">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="rounded-lg h-24" style={{ backgroundColor: 'var(--muted)' }} />
-                ))}
-              </div>
-            </div>
-          }
+        {/* ── Analytics section (toggleable) ── */}
+        <div
+          ref={analyticsRef}
+          style={{
+            display: 'grid',
+            gridTemplateRows: analyticsVisible ? '1fr' : '0fr',
+            transition: 'grid-template-rows 0.3s ease, opacity 0.3s ease',
+            opacity: analyticsVisible ? 1 : 0,
+          }}
         >
-          <AdminAnalytics />
-        </Suspense>
+          <div style={{ overflow: 'hidden' }}>
+            {analyticsVisible && (
+              <Suspense
+                fallback={
+                  <div className="mb-6 animate-pulse">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="rounded-lg h-20" style={{ backgroundColor: 'var(--muted)' }} />
+                      ))}
+                    </div>
+                  </div>
+                }
+              >
+                <div className="mb-6">
+                  <AdminAnalytics />
+                </div>
+              </Suspense>
+            )}
+          </div>
+        </div>
 
         {/* ── Existing forms ── */}
         {forms.length > 0 && (
@@ -184,13 +225,13 @@ export default function AdminDashboard() {
           >
             {/* Section header + search */}
             <div
-              className="p-4 sm:p-6 pb-0 sm:pb-0"
+              className="p-3 sm:p-4 pb-0 sm:pb-0"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                 {/* Left: title + count badge */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <h2
-                    className="text-lg font-semibold"
+                    className="text-base font-semibold"
                     style={{ color: 'var(--foreground)' }}
                   >
                     Existing Forms
@@ -259,7 +300,7 @@ export default function AdminDashboard() {
 
             {/* ── Empty search state ── */}
             {filteredForms.length === 0 && search && (
-              <div className="px-4 sm:px-6 py-12 text-center">
+              <div className="px-3 sm:px-4 py-10 text-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -302,60 +343,24 @@ export default function AdminDashboard() {
                         backgroundColor: 'var(--muted)',
                       }}
                     >
+                      {['Form Title', 'Join Code', 'Participants', 'Round'].map(label => (
+                        <th
+                          key={label}
+                          className="px-4 py-2.5 text-left"
+                          style={{
+                            color: 'var(--muted-foreground)',
+                            fontSize: '0.6875rem',
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            borderBottom: '1px solid var(--border)',
+                          }}
+                        >
+                          {label}
+                        </th>
+                      ))}
                       <th
-                        className="px-6 py-3 text-left"
-                        style={{
-                          color: 'var(--muted-foreground)',
-                          fontSize: '0.6875rem',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          borderBottom: '1px solid var(--border)',
-                        }}
-                      >
-                        Form Title
-                      </th>
-                      <th
-                        className="px-6 py-3 text-left"
-                        style={{
-                          color: 'var(--muted-foreground)',
-                          fontSize: '0.6875rem',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          borderBottom: '1px solid var(--border)',
-                        }}
-                      >
-                        Join Code
-                      </th>
-                      <th
-                        className="px-6 py-3 text-left"
-                        style={{
-                          color: 'var(--muted-foreground)',
-                          fontSize: '0.6875rem',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          borderBottom: '1px solid var(--border)',
-                        }}
-                      >
-                        Participants
-                      </th>
-                      <th
-                        className="px-6 py-3 text-left"
-                        style={{
-                          color: 'var(--muted-foreground)',
-                          fontSize: '0.6875rem',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          borderBottom: '1px solid var(--border)',
-                        }}
-                      >
-                        Round
-                      </th>
-                      <th
-                        className="px-6 py-3 text-right"
+                        className="px-4 py-2.5 text-right"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.6875rem',
@@ -388,7 +393,7 @@ export default function AdminDashboard() {
                         }}
                       >
                         <td
-                          className="px-6 py-3.5 font-medium"
+                          className="px-4 py-2.5 font-medium text-sm"
                           style={{
                             color: 'var(--foreground)',
                             maxWidth: '20rem',
@@ -399,9 +404,9 @@ export default function AdminDashboard() {
                         >
                           {f.title}
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-4 py-2.5">
                           <code
-                            className="inline-block px-2.5 py-1 rounded-md text-xs font-mono font-semibold"
+                            className="inline-block px-2 py-0.5 rounded-md text-xs font-mono font-semibold"
                             style={{
                               backgroundColor: 'var(--muted)',
                               color: 'var(--foreground)',
@@ -412,9 +417,9 @@ export default function AdminDashboard() {
                             {f.join_code}
                           </code>
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-4 py-2.5">
                           <span
-                            className="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 rounded-full text-xs font-bold"
+                            className="inline-flex items-center justify-center min-w-[1.75rem] h-5 px-1.5 rounded-full text-xs font-bold"
                             style={{
                               backgroundColor:
                                 f.participant_count > 0
@@ -429,9 +434,9 @@ export default function AdminDashboard() {
                             {f.participant_count}
                           </span>
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-4 py-2.5">
                           <span
-                            className="inline-flex items-center justify-center min-w-[2rem] h-6 px-2 rounded-full text-xs font-medium"
+                            className="inline-flex items-center justify-center min-w-[2rem] h-5 px-1.5 rounded-full text-xs font-medium"
                             style={{
                               backgroundColor: 'var(--muted)',
                               color: 'var(--foreground)',
@@ -440,11 +445,11 @@ export default function AdminDashboard() {
                             R{f.current_round}
                           </span>
                         </td>
-                        <td className="px-6 py-3.5 text-right">
+                        <td className="px-4 py-2.5 text-right">
                           <div className="inline-flex items-center gap-1">
                             <a
                               href={`/admin/form/${f.id}`}
-                              className="inline-flex items-center px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors duration-150"
+                              className="inline-flex items-center px-2 py-1 rounded-md text-sm font-medium transition-colors duration-150"
                               style={{
                                 color: 'var(--muted-foreground)',
                               }}
@@ -461,7 +466,7 @@ export default function AdminDashboard() {
                             </a>
                             <a
                               href={`/admin/form/${f.id}/summary`}
-                              className="inline-flex items-center px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors duration-150"
+                              className="inline-flex items-center px-2 py-1 rounded-md text-sm font-medium transition-colors duration-150"
                               style={{
                                 color: 'var(--accent)',
                               }}
@@ -616,7 +621,7 @@ export default function AdminDashboard() {
             {/* ── Footer with result count ── */}
             {search && filteredForms.length > 0 && (
               <div
-                className="px-4 sm:px-6 py-3 text-xs"
+                className="px-3 sm:px-4 py-2.5 text-xs"
                 style={{
                   borderTop: '1px solid var(--border)',
                   color: 'var(--muted-foreground)',

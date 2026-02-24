@@ -1,0 +1,13 @@
+{
+  "screenshot_path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/prometheus/screenshots/05-dashboard.png",
+  "screenshot_name": "05-dashboard",
+  "verdict": "PASS",
+  "summary": "Heuristic analysis: No errors detected",
+  "details": "DOM errors: []\nAnomalies: []\nConsole errors: []",
+  "error_detected": false,
+  "error_description": "",
+  "visual_anomalies": [],
+  "confidence": 0.5,
+  "analysis_method": "dom_heuristic",
+  "raw_response": ""
+}

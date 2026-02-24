@@ -1,0 +1,14 @@
+{
+  "name": "hector-symphonia-e2e",
+  "version": "1.0.0",
+  "description": "Symphonia E2E visual + functional test suite by Hector",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "report": "node generate-report.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.0"
+  }
+}

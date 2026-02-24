@@ -1,0 +1,1213 @@
+{
+  "config": {
+    "configFile": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/playwright.config.ts",
+    "rootDir": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests",
+    "forbidOnly": true,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.2",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "01-page-load.spec.ts",
+      "file": "01-page-load.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Public Pages",
+          "file": "01-page-load.spec.ts",
+          "line": 21,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Login page loads cleanly",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 67,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts:26:32",
+                        "location": {
+                          "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                          "column": 32,
+                          "line": 26
+                        },
+                        "snippet": "  24 |     const response = await page.goto('/login');\n  25 |\n> 26 |     expect(response?.status()).toBeLessThan(400);\n     |                                ^\n  27 |     await waitForPageSettle(page);\n  28 |     await assertNoErrors(page, '/login');\n  29 |     await takeScreenshot(page, '01-login');"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                            "column": 32,
+                            "line": 26
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m\n\n  24 |     const response = await page.goto('/login');\n  25 |\n> 26 |     expect(response?.status()).toBeLessThan(400);\n     |                                ^\n  27 |     await waitForPageSettle(page);\n  28 |     await assertNoErrors(page, '/login');\n  29 |     await takeScreenshot(page, '01-login');\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts:26:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:14.226Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/01-page-load-Public-Pages-Login-page-loads-cleanly-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                        "column": 32,
+                        "line": 26
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 80,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts:26:32",
+                        "location": {
+                          "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                          "column": 32,
+                          "line": 26
+                        },
+                        "snippet": "  24 |     const response = await page.goto('/login');\n  25 |\n> 26 |     expect(response?.status()).toBeLessThan(400);\n     |                                ^\n  27 |     await waitForPageSettle(page);\n  28 |     await assertNoErrors(page, '/login');\n  29 |     await takeScreenshot(page, '01-login');"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                            "column": 32,
+                            "line": 26
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m\n\n  24 |     const response = await page.goto('/login');\n  25 |\n> 26 |     expect(response?.status()).toBeLessThan(400);\n     |                                ^\n  27 |     await waitForPageSettle(page);\n  28 |     await assertNoErrors(page, '/login');\n  29 |     await takeScreenshot(page, '01-login');\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts:26:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-02-24T00:22:15.416Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/01-page-load-Public-Pages-Login-page-loads-cleanly-chromium-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/01-page-load-Public-Pages-Login-page-loads-cleanly-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                        "column": 32,
+                        "line": 26
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-995396ea5b37d1b272f7",
+              "file": "01-page-load.spec.ts",
+              "line": 22,
+              "column": 7
+            },
+            {
+              "title": "Register page loads cleanly",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 67,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts:39:32",
+                        "location": {
+                          "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                          "column": 32,
+                          "line": 39
+                        },
+                        "snippet": "  37 |     const response = await page.goto('/register');\n  38 |\n> 39 |     expect(response?.status()).toBeLessThan(400);\n     |                                ^\n  40 |     await waitForPageSettle(page);\n  41 |     await assertNoErrors(page, '/register');\n  42 |     await takeScreenshot(page, '02-register');"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                            "column": 32,
+                            "line": 39
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m\n\n  37 |     const response = await page.goto('/register');\n  38 |\n> 39 |     expect(response?.status()).toBeLessThan(400);\n     |                                ^\n  40 |     await waitForPageSettle(page);\n  41 |     await assertNoErrors(page, '/register');\n  42 |     await takeScreenshot(page, '02-register');\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts:39:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:16.512Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/01-page-load-Public-Pages-Register-page-loads-cleanly-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                        "column": 32,
+                        "line": 39
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 82,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts:39:32",
+                        "location": {
+                          "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                          "column": 32,
+                          "line": 39
+                        },
+                        "snippet": "  37 |     const response = await page.goto('/register');\n  38 |\n> 39 |     expect(response?.status()).toBeLessThan(400);\n     |                                ^\n  40 |     await waitForPageSettle(page);\n  41 |     await assertNoErrors(page, '/register');\n  42 |     await takeScreenshot(page, '02-register');"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                            "column": 32,
+                            "line": 39
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m400\u001b[39m\nReceived:   \u001b[31m405\u001b[39m\n\n  37 |     const response = await page.goto('/register');\n  38 |\n> 39 |     expect(response?.status()).toBeLessThan(400);\n     |                                ^\n  40 |     await waitForPageSettle(page);\n  41 |     await assertNoErrors(page, '/register');\n  42 |     await takeScreenshot(page, '02-register');\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts:39:32"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-02-24T00:22:17.585Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/01-page-load-Public-Pages-Register-page-loads-cleanly-chromium-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/01-page-load-Public-Pages-Register-page-loads-cleanly-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/01-page-load.spec.ts",
+                        "column": 32,
+                        "line": 39
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-38a2c6175f3c016a5f24",
+              "file": "01-page-load.spec.ts",
+              "line": 35,
+              "column": 7
+            },
+            {
+              "title": "404 page loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 825,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:18.676Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-f65e74646df365e60540",
+              "file": "01-page-load.spec.ts",
+              "line": 48,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Authenticated Pages",
+          "file": "01-page-load.spec.ts",
+          "line": 58,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Dashboard (/) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1555,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:19.921Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-800fe58978016ce27042",
+              "file": "01-page-load.spec.ts",
+              "line": 63,
+              "column": 7
+            },
+            {
+              "title": "Atlas (/atlas) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1064,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:21.483Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-4c12c127abab7a5bf0cd",
+              "file": "01-page-load.spec.ts",
+              "line": 76,
+              "column": 7
+            },
+            {
+              "title": "Waiting page (/waiting) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1034,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:22.554Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-3004fc9a239e3bd28956",
+              "file": "01-page-load.spec.ts",
+              "line": 89,
+              "column": 7
+            },
+            {
+              "title": "Result page (/result) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1019,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:23.594Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-d582ddd7b20f9e49c015",
+              "file": "01-page-load.spec.ts",
+              "line": 101,
+              "column": 7
+            },
+            {
+              "title": "Thank You page (/thank-you) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1046,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:24.620Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-e313aca0d909dced6cb0",
+              "file": "01-page-load.spec.ts",
+              "line": 111,
+              "column": 7
+            },
+            {
+              "title": "Form page (/form/1) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1126,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:25.672Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-72036ff80a149d5748ed",
+              "file": "01-page-load.spec.ts",
+              "line": 121,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Admin Pages",
+          "file": "01-page-load.spec.ts",
+          "line": 134,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Admin Settings (/admin/settings) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 880,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:26.804Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-8ad4a17ae4034ed5a275",
+              "file": "01-page-load.spec.ts",
+              "line": 139,
+              "column": 7
+            },
+            {
+              "title": "Admin New Form (/admin/forms/new) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1188,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:27.690Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-d9a2e3957381cf8b9788",
+              "file": "01-page-load.spec.ts",
+              "line": 149,
+              "column": 7
+            },
+            {
+              "title": "Form Editor (/admin/form/1) loads cleanly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1081,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:28.884Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-c59d19e612d106340b62",
+              "file": "01-page-load.spec.ts",
+              "line": 159,
+              "column": 7
+            },
+            {
+              "title": "Summary Page (/admin/form/1/summary) loads cleanly — THE CRITICAL PAGE",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1134,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:29.971Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "391f31131cf8193ea685-de7c9aec1de2b7afb757",
+              "file": "01-page-load.spec.ts",
+              "line": 169,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "02-round-navigation.spec.ts",
+      "file": "02-round-navigation.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Round Navigation Flow",
+          "file": "02-round-navigation.spec.ts",
+          "line": 26,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Login → Dashboard → Summary → Round navigation (no crash)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1458,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:31.112Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "348b8e475d9a673a6ea0-65b3715aa67785e200c8",
+              "file": "02-round-navigation.spec.ts",
+              "line": 27,
+              "column": 7
+            },
+            {
+              "title": "Summary page for each form loads without crash",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3074,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:32.576Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "348b8e475d9a673a6ea0-56bcf5f5d0237ee2bd77",
+              "file": "02-round-navigation.spec.ts",
+              "line": 70,
+              "column": 7
+            },
+            {
+              "title": "Form editor pages load without crash",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1913,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:35.654Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "348b8e475d9a673a6ea0-0a69aeb464d6314e1252",
+              "file": "02-round-navigation.spec.ts",
+              "line": 87,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Login Flow",
+          "file": "02-round-navigation.spec.ts",
+          "line": 104,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Valid login leads to dashboard",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1252,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:37.573Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "348b8e475d9a673a6ea0-5ae26a339eb1c941e33c",
+              "file": "02-round-navigation.spec.ts",
+              "line": 115,
+              "column": 7
+            },
+            {
+              "title": "Invalid login shows error (not crash)",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 10587,
+                      "error": {
+                        "message": "TimeoutError: page.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-email')\u001b[22m\n",
+                        "stack": "TimeoutError: page.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-email')\u001b[22m\n\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts:136:16",
+                        "location": {
+                          "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts",
+                          "column": 16,
+                          "line": 136
+                        },
+                        "snippet": "  134 |     await waitForPageSettle(page);\n  135 |\n> 136 |     await page.fill('#login-email', 'wrong@test.com');\n      |                ^\n  137 |     await page.fill('#login-password', 'wrongpassword');\n  138 |     await page.click('button[type=\"submit\"]');\n  139 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts",
+                            "column": 16,
+                            "line": 136
+                          },
+                          "message": "TimeoutError: page.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-email')\u001b[22m\n\n\n  134 |     await waitForPageSettle(page);\n  135 |\n> 136 |     await page.fill('#login-email', 'wrong@test.com');\n      |                ^\n  137 |     await page.fill('#login-password', 'wrongpassword');\n  138 |     await page.click('button[type=\"submit\"]');\n  139 |\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts:136:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:22:38.830Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/02-round-navigation-Login--4bead-ogin-shows-error-not-crash--chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts",
+                        "column": 16,
+                        "line": 136
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 10592,
+                      "error": {
+                        "message": "TimeoutError: page.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-email')\u001b[22m\n",
+                        "stack": "TimeoutError: page.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-email')\u001b[22m\n\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts:136:16",
+                        "location": {
+                          "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts",
+                          "column": 16,
+                          "line": 136
+                        },
+                        "snippet": "  134 |     await waitForPageSettle(page);\n  135 |\n> 136 |     await page.fill('#login-email', 'wrong@test.com');\n      |                ^\n  137 |     await page.fill('#login-password', 'wrongpassword');\n  138 |     await page.click('button[type=\"submit\"]');\n  139 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts",
+                            "column": 16,
+                            "line": 136
+                          },
+                          "message": "TimeoutError: page.fill: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#login-email')\u001b[22m\n\n\n  134 |     await waitForPageSettle(page);\n  135 |\n> 136 |     await page.fill('#login-email', 'wrong@test.com');\n      |                ^\n  137 |     await page.fill('#login-password', 'wrongpassword');\n  138 |     await page.click('button[type=\"submit\"]');\n  139 |\n    at /Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts:136:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-02-24T00:22:50.017Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/02-round-navigation-Login--4bead-ogin-shows-error-not-crash--chromium-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/test-results/02-round-navigation-Login--4bead-ogin-shows-error-not-crash--chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/hector/tests/02-round-navigation.spec.ts",
+                        "column": 16,
+                        "line": 136
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "348b8e475d9a673a6ea0-b2de100c5a003585f8ba",
+              "file": "02-round-navigation.spec.ts",
+              "line": 131,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "03-error-detection.spec.ts",
+      "file": "03-error-detection.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Error Detection Helper",
+          "file": "03-error-detection.spec.ts",
+          "line": 19,
+          "column": 6,
+          "specs": [
+            {
+              "title": "checkForErrorBoundary returns null on a clean page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 603,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:23:01.716Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f10144ec6d91f8678546-2aee5445ce9ea8d509db",
+              "file": "03-error-detection.spec.ts",
+              "line": 20,
+              "column": 7
+            },
+            {
+              "title": "checkForErrorBoundary detects injected error UI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 599,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:23:02.885Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f10144ec6d91f8678546-86a07df37f00fec97c72",
+              "file": "03-error-detection.spec.ts",
+              "line": 28,
+              "column": 7
+            },
+            {
+              "title": "checkForErrorBoundary detects \"Can't find variable\" text",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 595,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:23:03.489Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f10144ec6d91f8678546-7607914e9f1f107d81a1",
+              "file": "03-error-detection.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "checkForErrorBoundary detects \"is not defined\" errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 589,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:23:04.090Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f10144ec6d91f8678546-4022545f9eb9ee441301",
+              "file": "03-error-detection.spec.ts",
+              "line": 67,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Full Page Sweep — No Errors Anywhere",
+          "file": "03-error-detection.spec.ts",
+          "line": 83,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Every route is free of ErrorBoundary crashes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6600,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:23:04.685Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f10144ec6d91f8678546-a6c4d45e474cf2441150",
+              "file": "03-error-detection.spec.ts",
+              "line": 88,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Console Error Detection",
+          "file": "03-error-detection.spec.ts",
+          "line": 143,
+          "column": 6,
+          "specs": [
+            {
+              "title": "No JavaScript errors thrown during full navigation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2588,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-24T00:23:11.290Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f10144ec6d91f8678546-aac871433e3377e10144",
+              "file": "03-error-detection.spec.ts",
+              "line": 144,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-24T00:22:13.640Z",
+    "duration": 60274.407,
+    "expected": 21,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}
