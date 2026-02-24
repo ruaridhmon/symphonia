@@ -268,7 +268,7 @@ class TestSynthesisVersioningIntegration:
         assert resp.status_code == 200
         data = resp.json()
         assert data["version"] == 1
-        assert data["is_active"] is False
+        assert data["is_active"] is True  # latest version is auto-activated
         TestSynthesisVersioningIntegration.version_1_id = data["id"]
 
     def test_03_generate_second_version(
@@ -311,8 +311,10 @@ class TestSynthesisVersioningIntegration:
         versions = resp.json()
         assert len(versions) == 3
         assert [v["version"] for v in versions] == [1, 2, 3]
-        # All should be inactive initially
-        assert all(v["is_active"] is False for v in versions)
+        # Each generation auto-activates the latest; only v3 is active
+        assert versions[0]["is_active"] is False
+        assert versions[1]["is_active"] is False
+        assert versions[2]["is_active"] is True
 
     def test_06_activate_version_2(
         self, client: TestClient, admin_headers: dict
