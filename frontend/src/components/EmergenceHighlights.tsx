@@ -98,9 +98,9 @@ export default function EmergenceHighlights({ insights, expertLabels, formId, ro
                   )}
                 </div>
               </div>
-              {insight.contributing_experts.length > 0 && (
+              {(insight.contributing_experts || []).length > 0 && (
                 <div className="structured-card-experts">
-                  {insight.contributing_experts.map(id => (
+                  {(insight.contributing_experts || []).map(id => (
                     <span
                       key={id}
                       className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`}

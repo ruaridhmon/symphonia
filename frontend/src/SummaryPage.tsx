@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Component, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -42,7 +43,6 @@ import {
 	SynthesisVersionPanel,
 	SelectedVersionContent,
 	NextRoundQuestionsCard,
-	FormInfoCard,
 	ActionsCard,
 	ResponsesModal,
 	ResponsesAccordion,
@@ -60,6 +60,68 @@ import type {
 	RoundWithResponses,
 	SynthesisVersion,
 } from './types/summary';
+
+// ─── Error Boundary ──────────────────────────────────────────────────────────
+
+interface ErrorBoundaryProps {
+	children: ReactNode;
+	fallbackTitle?: string;
+	onReset?: () => void;
+}
+
+interface ErrorBoundaryState {
+	hasError: boolean;
+	error: Error | null;
+}
+
+class SectionErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+	constructor(props: ErrorBoundaryProps) {
+		super(props);
+		this.state = { hasError: false, error: null };
+	}
+
+	static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+		return { hasError: true, error };
+	}
+
+	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+		console.error('[SectionErrorBoundary]', error, errorInfo);
+	}
+
+	render() {
+		if (this.state.hasError) {
+			return (
+				<div className="card p-4" style={{ borderColor: 'var(--destructive)', borderWidth: '1px' }}>
+					<div className="text-center py-4">
+						<div className="text-2xl mb-2">⚠️</div>
+						<h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--foreground)' }}>
+							{this.props.fallbackTitle || 'This section encountered an error'}
+						</h3>
+						<p className="text-xs mb-3" style={{ color: 'var(--muted-foreground)' }}>
+							{this.state.error?.message || 'An unexpected error occurred'}
+						</p>
+						<button
+							onClick={() => {
+								this.setState({ hasError: false, error: null });
+								this.props.onReset?.();
+							}}
+							className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+							style={{
+								backgroundColor: 'var(--muted)',
+								color: 'var(--foreground)',
+								border: '1px solid var(--border)',
+								cursor: 'pointer',
+							}}
+						>
+							Try Again
+						</button>
+					</div>
+				</div>
+			);
+		}
+		return this.props.children;
+	}
+}
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -436,9 +498,17 @@ export default function SummaryPage() {
 	}
 
 	function handleSelectRound(round: Round) {
-		setSelectedRound(round);
-		if (round.is_active && editor) editor.commands.setContent(round.synthesis || '');
-		loadSynthesisVersions(round.id);
+		try {
+			setSelectedRound(round);
+			if (round.is_active && editor) editor.commands.setContent(round.synthesis || '');
+			loadSynthesisVersions(round.id).catch((err) => {
+				console.error('[handleSelectRound] Failed to load synthesis versions:', err);
+				toastError('Failed to load synthesis versions for this round');
+			});
+		} catch (err) {
+			console.error('[handleSelectRound] Error selecting round:', err);
+			toastError('Failed to switch to the selected round');
+		}
 	}
 
 	function handleResponseUpdated(roundId: number, updated: { id: number; answers: Record<string, string>; version: number }) {
@@ -541,14 +611,16 @@ export default function SummaryPage() {
 				<div className="space-y-4 sm:space-y-6">
 						{/* Non-active round card */}
 						{selectedRound && !selectedRound.is_active && (
-							<RoundCard
-								round={selectedRound}
-								isCurrentRound={false}
-								expertLabels={resolvedExpertLabels}
-								formId={formId}
-								token={token}
-								currentUserEmail={email}
-							/>
+							<SectionErrorBoundary fallbackTitle="Failed to render round details">
+								<RoundCard
+									round={selectedRound}
+									isCurrentRound={false}
+									expertLabels={resolvedExpertLabels}
+									formId={formId}
+									token={token}
+									currentUserEmail={email}
+								/>
+							</SectionErrorBoundary>
 						)}
 
 						{/* Inline responses accordion — toggle per round */}
@@ -573,8 +645,8 @@ export default function SummaryPage() {
 
 						{/* Read-only synthesis for non-active rounds */}
 						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
-							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground">
+							<div className="card p-4">
+								<h2 className="text-base font-semibold mb-2 text-foreground">
 									Synthesis (Round {selectedRound.round_number})
 								</h2>
 								<MarkdownRenderer content={selectedRound.synthesis} />
@@ -583,117 +655,131 @@ export default function SummaryPage() {
 
 						{/* Structured synthesis data */}
 						{structuredSynthesisData && (
-							<div className="card p-4 sm:p-6">
-								<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
-									<h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-										<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
-									</h2>
-								</div>
-								{/* Audience Translation toggle */}
-								{displayRound && (
-									<div className="mb-4">
-										<AudienceTranslation
-											formId={formId}
-											roundId={displayRound.id}
-											synthesisText={(() => {
-												const parts: string[] = [];
-												if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
-												for (const a of structuredSynthesisData.agreements || []) {
-													parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
-												}
-												for (const d of structuredSynthesisData.disagreements || []) {
-													parts.push(`Disagreement: ${d.topic}`);
-													for (const p of d.positions || []) {
-														parts.push(`  - ${p.position}: ${p.evidence}`);
-													}
-												}
-												for (const n of structuredSynthesisData.nuances || []) {
-													parts.push(`Nuance: ${n.claim} — ${n.context}`);
-												}
-												return parts.join('\n');
-											})()}
-										/>
+							<SectionErrorBoundary fallbackTitle="Failed to render structured analysis">
+								<div className="card p-4">
+									<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
+										<h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+											<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
+										</h2>
 									</div>
-								)}
-								<StructuredSynthesis
-									data={structuredSynthesisData}
-									convergenceScore={displayRound?.convergence_score ?? undefined}
-									expertLabels={resolvedExpertLabels}
-									formId={formId}
-									roundId={displayRound?.id}
-									token={token}
-									currentUserEmail={email}
-								/>
-							</div>
+									{/* Audience Translation toggle */}
+									{displayRound && (
+										<div className="mb-4">
+											<AudienceTranslation
+												formId={formId}
+												roundId={displayRound.id}
+												synthesisText={(() => {
+													const parts: string[] = [];
+													if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
+													for (const a of structuredSynthesisData.agreements || []) {
+														parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
+													}
+													for (const d of structuredSynthesisData.disagreements || []) {
+														parts.push(`Disagreement: ${d.topic}`);
+														for (const p of d.positions || []) {
+															parts.push(`  - ${p.position}: ${p.evidence}`);
+														}
+													}
+													for (const n of structuredSynthesisData.nuances || []) {
+														parts.push(`Nuance: ${n.claim} — ${n.context}`);
+													}
+													return parts.join('\n');
+												})()}
+											/>
+										</div>
+									)}
+									<StructuredSynthesis
+										data={structuredSynthesisData}
+										convergenceScore={displayRound?.convergence_score ?? undefined}
+										expertLabels={resolvedExpertLabels}
+										formId={formId}
+										roundId={displayRound?.id}
+										token={token}
+										currentUserEmail={email}
+									/>
+								</div>
+							</SectionErrorBoundary>
 						)}
 
 						{/* AI Devil's Advocate — after structured analysis */}
 						{displayRound && structuredSynthesisData && (
-							<DevilsAdvocate formId={formId} roundId={displayRound.id} />
+							<SectionErrorBoundary fallbackTitle="Failed to render AI counterpoints">
+								<DevilsAdvocate formId={formId} roundId={displayRound.id} />
+							</SectionErrorBoundary>
 						)}
 
 						{/* Cross-matrix */}
 						{structuredSynthesisData && (
-							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<Link2 size={20} style={{ color: 'var(--accent)' }} /> Expert Cross-Analysis
-								</h2>
-								<CrossMatrix
-									structuredData={structuredSynthesisData}
-									resolvedExpertLabels={resolvedExpertLabels}
-									expertLabelPreset="default"
-								/>
-							</div>
+							<SectionErrorBoundary fallbackTitle="Failed to render cross-analysis">
+								<div className="card p-4">
+									<h2 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
+										<Link2 size={20} style={{ color: 'var(--accent)' }} /> Expert Cross-Analysis
+									</h2>
+									<CrossMatrix
+										structuredData={structuredSynthesisData}
+										resolvedExpertLabels={resolvedExpertLabels}
+										expertLabelPreset="default"
+									/>
+								</div>
+							</SectionErrorBoundary>
 						)}
 
 						{/* Consensus heatmap */}
 						{structuredSynthesisData && (
-							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<MapPin size={20} style={{ color: 'var(--accent)' }} /> Consensus Heatmap
-								</h2>
-								<ConsensusHeatmap
-									structuredData={structuredSynthesisData}
-									resolvedExpertLabels={resolvedExpertLabels}
-									questions={displayRound?.questions}
-								/>
-							</div>
+							<SectionErrorBoundary fallbackTitle="Failed to render consensus heatmap">
+								<div className="card p-4">
+									<h2 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
+										<MapPin size={20} style={{ color: 'var(--accent)' }} /> Consensus Heatmap
+									</h2>
+									<ConsensusHeatmap
+										structuredData={structuredSynthesisData}
+										resolvedExpertLabels={resolvedExpertLabels}
+										questions={displayRound?.questions}
+									/>
+								</div>
+							</SectionErrorBoundary>
 						)}
 
 						{/* Selected version content */}
-						<SelectedVersionContent
-							selectedVersion={selectedVersion}
-							displayRound={displayRound}
-							resolvedExpertLabels={resolvedExpertLabels}
-							formId={formId}
-							token={token}
-							currentUserEmail={email}
-						/>
+						<SectionErrorBoundary fallbackTitle="Failed to render version content">
+							<SelectedVersionContent
+								selectedVersion={selectedVersion}
+								displayRound={displayRound}
+								resolvedExpertLabels={resolvedExpertLabels}
+								formId={formId}
+								token={token}
+								currentUserEmail={email}
+							/>
+						</SectionErrorBoundary>
 
 						{/* Version comparison (side-by-side) */}
 						{showVersionCompare && synthesisVersions.length >= 2 && (
-							<VersionCompare
-								versions={synthesisVersions}
-								currentVersionId={selectedVersionId}
-								onClose={() => setShowVersionCompare(false)}
-							/>
+							<SectionErrorBoundary fallbackTitle="Failed to render version comparison">
+								<VersionCompare
+									versions={synthesisVersions}
+									currentVersionId={selectedVersionId}
+									onClose={() => setShowVersionCompare(false)}
+								/>
+							</SectionErrorBoundary>
 						)}
 
 						{/* Emergence highlights */}
 						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
-							<div className="card p-4 sm:p-6">
-								<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
-									<Sparkles size={20} style={{ color: 'var(--accent)' }} /> Emergent Insights
-								</h2>
-								<EmergenceHighlights
-									insights={structuredSynthesisData.emergent_insights ?? []}
-									expertLabels={resolvedExpertLabels}
-									formId={formId}
-									roundId={displayRound?.id}
-									token={token}
-									currentUserEmail={email}
-								/>
-							</div>
+							<SectionErrorBoundary fallbackTitle="Failed to render emergent insights">
+								<div className="card p-4">
+									<h2 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
+										<Sparkles size={20} style={{ color: 'var(--accent)' }} /> Emergent Insights
+									</h2>
+									<EmergenceHighlights
+										insights={structuredSynthesisData.emergent_insights ?? []}
+										expertLabels={resolvedExpertLabels}
+										formId={formId}
+										roundId={displayRound?.id}
+										token={token}
+										currentUserEmail={email}
+									/>
+								</div>
+							</SectionErrorBoundary>
 						)}
 
 						{/* Next round questions */}
@@ -730,13 +816,38 @@ export default function SummaryPage() {
 							background: 'var(--background)',
 							transform: sidebarOpen ? 'translateX(0)' : 'translateX(100%)',
 							transition: 'transform 0.2s ease',
-							padding: '1rem',
+							padding: '0.75rem',
 							display: 'flex',
 							flexDirection: 'column',
-							gap: '1rem',
+							gap: '0.5rem',
 						}}
 					>
-						<FormInfoCard form={form} activeRound={activeRound} />
+						{/* Compact form title + round badge */}
+						<div
+							className="flex items-center justify-between px-1 py-1"
+							style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}
+						>
+							<span className="text-xs font-medium truncate" style={{ color: 'var(--foreground)', maxWidth: '10rem' }}>
+								{form.title}
+							</span>
+							<span
+								className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0"
+								style={{
+									backgroundColor: activeRound
+										? 'color-mix(in srgb, var(--accent) 12%, transparent)'
+										: 'var(--muted)',
+									color: activeRound ? 'var(--accent)' : 'var(--muted-foreground)',
+								}}
+							>
+								{activeRound && (
+									<span
+										className="w-1 h-1 rounded-full"
+										style={{ backgroundColor: 'var(--accent)' }}
+									/>
+								)}
+								{activeRound ? `R${activeRound.round_number}` : 'No round'}
+							</span>
+						</div>
 
 						<ActionsCard
 							responsesOpen={responsesOpen}

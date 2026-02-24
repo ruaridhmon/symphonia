@@ -82,15 +82,15 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
   // Collect all expert IDs
   const expertIds = useMemo(() => {
     const ids = new Set<number>();
-    for (const a of structuredData.agreements || []) {
-      for (const id of a.supporting_experts) ids.add(id);
+    for (const a of structuredData?.agreements || []) {
+      for (const id of a.supporting_experts || []) ids.add(id);
     }
-    for (const d of structuredData.disagreements || []) {
-      for (const pos of d.positions) {
-        for (const id of pos.experts) ids.add(id);
+    for (const d of structuredData?.disagreements || []) {
+      for (const pos of d.positions || []) {
+        for (const id of pos.experts || []) ids.add(id);
       }
     }
-    for (const n of structuredData.nuances || []) {
+    for (const n of structuredData?.nuances || []) {
       for (const id of n.relevant_experts || []) ids.add(id);
     }
     for (const idStr of Object.keys(resolvedExpertLabels)) {
@@ -134,7 +134,7 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
     (structuredData.agreements || []).forEach((a, aIdx) => {
       const topicIdx = aIdx; // agreements come first in topics
       const confidence = a.confidence ?? 0.75;
-      for (const eid of a.supporting_experts) {
+      for (const eid of a.supporting_experts || []) {
         const key = `${topicIdx}:${eid}`;
         if (cellMap[key]) {
           cellMap[key].value = confidence;
@@ -158,8 +158,8 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
       };
       const baseValue = severityMap[d.severity] ?? -0.5;
 
-      for (const pos of d.positions) {
-        for (const eid of pos.experts) {
+      for (const pos of d.positions || []) {
+        for (const eid of pos.experts || []) {
           const key = `${topicIdx}:${eid}`;
           if (cellMap[key]) {
             // Experts on opposing sides of the same topic

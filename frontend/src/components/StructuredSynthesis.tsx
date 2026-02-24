@@ -189,13 +189,13 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
 
   const {
-    agreements,
-    disagreements,
-    nuances,
-    follow_up_probes: probes,
-    confidence_map: confidence,
+    agreements = [],
+    disagreements = [],
+    nuances = [],
+    follow_up_probes: probes = [],
+    confidence_map: confidence = {} as Record<string, number>,
     narrative,
-  } = data;
+  } = data || {};
 
   return (
     <div className="structured-synthesis fade-in">
@@ -296,9 +296,9 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                     </div>
                   </div>
                   <p className="structured-card-evidence">{a.evidence_summary}</p>
-                  {a.supporting_experts.length > 0 && (
+                  {(a.supporting_experts || []).length > 0 && (
                     <div className="structured-card-experts">
-                      {a.supporting_experts.map(id => (
+                      {(a.supporting_experts || []).map(id => (
                         <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
                           {expertLabels?.[id] || `E${id}`}
                         </span>
@@ -359,7 +359,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                     </div>
                   </div>
                   <div className="disagreement-positions">
-                    {d.positions.map((pos, j) => (
+                    {(d.positions || []).map((pos, j) => (
                       <div key={j} className="disagreement-position">
                         <div className="disagreement-position-marker" />
                         <div>
@@ -367,9 +367,9 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                           {pos.evidence && (
                             <p className="disagreement-position-evidence">{pos.evidence}</p>
                           )}
-                          {pos.experts.length > 0 && (
+                          {(pos.experts || []).length > 0 && (
                             <div className="structured-card-experts">
-                              {pos.experts.map(id => (
+                              {(pos.experts || []).map(id => (
                                 <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
                                   {expertLabels?.[id] || `E${id}`}
                                 </span>
@@ -454,12 +454,12 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                 <div key={i} className="structured-card probe-card">
                   <p className="structured-card-claim">{p.question}</p>
                   <p className="structured-card-evidence">{p.rationale}</p>
-                  {p.target_experts.length > 0 && (
+                  {(p.target_experts || []).length > 0 && (
                     <div className="structured-card-experts">
                       <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                         Targets:
                       </span>
-                      {p.target_experts.map(id => (
+                      {(p.target_experts || []).map(id => (
                         <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
                           {expertLabels?.[id] || `E${id}`}
                         </span>
