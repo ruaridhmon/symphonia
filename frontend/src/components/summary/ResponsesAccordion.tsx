@@ -172,6 +172,8 @@ export default function ResponsesAccordion({
                   aria-label={`Responses for Round ${round.round_number}`}
                   style={{
                     borderTop: '1px solid var(--border)',
+                    maxHeight: '600px',
+                    overflowY: 'auto',
                   }}
                 >
                   {/* Show questions for this round */}

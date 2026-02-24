@@ -32,6 +32,7 @@ import {
 	MarkdownRenderer,
 	DevilsAdvocate,
 	AudienceTranslation,
+	ProbeQuestionsPanel,
 	LoadingButton,
 	useToast,
 } from './components';
@@ -705,6 +706,30 @@ export default function SummaryPage() {
 						{displayRound && structuredSynthesisData && (
 							<SectionErrorBoundary fallbackTitle="Failed to render AI counterpoints">
 								<DevilsAdvocate formId={formId} roundId={displayRound.id} />
+							</SectionErrorBoundary>
+						)}
+
+						{/* AI Probing Questions — surfaces hidden assumptions and deepens enquiry */}
+						{displayRound && (
+							<SectionErrorBoundary fallbackTitle="Failed to render AI probing questions">
+								<ProbeQuestionsPanel
+									formId={formId}
+									roundId={displayRound.id}
+									synthesisText={structuredSynthesisData ? (() => {
+										const parts: string[] = [];
+										if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
+										for (const a of structuredSynthesisData.agreements || []) {
+											parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
+										}
+										for (const d of structuredSynthesisData.disagreements || []) {
+											parts.push(`Disagreement: ${d.topic}`);
+										}
+										for (const n of structuredSynthesisData.nuances || []) {
+											parts.push(`Nuance: ${n.claim}`);
+										}
+										return parts.join('\n');
+									})() : ''}
+								/>
 							</SectionErrorBoundary>
 						)}
 

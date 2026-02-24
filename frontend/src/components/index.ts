@@ -23,5 +23,6 @@ export { default as PasswordInput } from './PasswordInput';
 export { default as OfflineBanner } from './OfflineBanner';
 export { default as DevilsAdvocate } from './DevilsAdvocate';
 export { default as AudienceTranslation } from './AudienceTranslation';
+export { default as ProbeQuestionsPanel } from './ProbeQuestionsPanel';
 export { default as VoiceMirroring } from './VoiceMirroring';
 export { default as LanguageSwitcher } from './LanguageSwitcher';

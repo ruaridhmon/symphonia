@@ -156,6 +156,39 @@ export function translateSynthesis(
   );
 }
 
+/* ── Probe Questions ── */
+
+export type ProbeCategory =
+  | 'assumption'
+  | 'challenge'
+  | 'disagreement'
+  | 'depth'
+  | 'blind_spot'
+  | 'clarification';
+
+export interface ProbeQuestion {
+  question: string;
+  rationale: string;
+  category: ProbeCategory;
+}
+
+export interface ProbeQuestionsResult {
+  questions: ProbeQuestion[];
+  mock: boolean;
+}
+
+/** Generate AI-powered maximally-probing follow-up questions */
+export function generateProbeQuestions(
+  formId: number,
+  roundId: number,
+  synthesisText: string = ''
+) {
+  return api.post<ProbeQuestionsResult>(
+    `/forms/${formId}/rounds/${roundId}/probe-questions`,
+    { synthesis_text: synthesisText }
+  );
+}
+
 /* ── Voice Mirroring ── */
 
 export interface VoiceMirrorInput {
