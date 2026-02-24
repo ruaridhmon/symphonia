@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { FileText, MessageSquare, BarChart3, HelpCircle } from 'lucide-react';
+import { FileText, MessageSquare, ChartNoAxesColumn, HelpCircle } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 import StructuredSynthesis from './StructuredSynthesis';
 import type { Round } from './RoundTimeline';
@@ -41,7 +41,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
             </span>
             {round.convergence_score != null && (
               <span className="round-detail-card-meta-item">
-                <BarChart3 size={14} style={{ color: 'var(--accent)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
+                <ChartNoAxesColumn size={14} style={{ color: 'var(--accent)', display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
                 {Math.round(round.convergence_score * 100)}% convergence
               </span>
             )}

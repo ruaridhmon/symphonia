@@ -6,7 +6,7 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
-import { BarChart3, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
+import { ChartNoAxesColumn, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { getMe } from './api/auth';
@@ -587,7 +587,7 @@ export default function SummaryPage() {
 							<div className="card p-4 sm:p-6">
 								<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
 									<h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-										<BarChart3 size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
+										<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
 									</h2>
 								</div>
 								{/* Audience Translation toggle */}

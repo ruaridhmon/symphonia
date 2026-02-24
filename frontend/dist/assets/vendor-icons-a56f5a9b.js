@@ -58,7 +58,7 @@ import{r as y}from"./vendor-react-4a6e6145.js";/**
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
- */const $=[["path",{d:"M3 3v16a2 2 0 0 0 2 2h16",key:"c24i48"}],["path",{d:"M18 17V9",key:"2bz60n"}],["path",{d:"M13 17V5",key:"1frdt8"}],["path",{d:"M8 17v-3",key:"17ska0"}]],P1=e("chart-column",$);/**
+ */const $=[["path",{d:"M5 21v-6",key:"1hz6c0"}],["path",{d:"M12 21V3",key:"1lcnhd"}],["path",{d:"M19 21V9",key:"unv183"}]],P1=e("chart-no-axes-column",$);/**
  * @license lucide-react v0.575.0 - ISC
  *
  * This source code is licensed under the ISC license.
