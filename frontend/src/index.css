@@ -3821,7 +3821,7 @@ html[data-theme="axiotic-dark"] img[alt="Symphonia"] {
 /* ------------------------------------------------------------------ */
 
 .summary-sidebar {
-  width: 22rem;
+  width: 26rem;
 }
 
 /* Sidebar toggle button positioning */
@@ -3830,7 +3830,7 @@ html[data-theme="axiotic-dark"] img[alt="Symphonia"] {
 }
 
 .summary-sidebar-toggle[data-open="true"] {
-  right: calc(22rem + 12px);
+  right: calc(26rem + 12px);
 }
 
 @media (max-width: 767px) {

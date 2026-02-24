@@ -1015,7 +1015,7 @@ export default function ExportPanel({
             onClick={() => handleBackendExport('markdown', setExportingBackendMd)}
             loading={exportingBackendMd}
             loadingText="Downloading…"
-            className="w-full text-left justify-start gap-2"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileText size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
             Download as Markdown
@@ -1026,7 +1026,7 @@ export default function ExportPanel({
             onClick={() => handleBackendExport('json', setExportingBackendJson)}
             loading={exportingBackendJson}
             loadingText="Downloading…"
-            className="w-full text-left justify-start gap-2"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileJson size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
             Download as JSON
@@ -1037,7 +1037,7 @@ export default function ExportPanel({
             onClick={() => handleBackendExport('pdf', setExportingBackendPdf)}
             loading={exportingBackendPdf}
             loadingText="Downloading…"
-            className="w-full text-left justify-start gap-2"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileDown size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
             Download as PDF
@@ -1062,7 +1062,7 @@ export default function ExportPanel({
             onClick={handleExportMarkdown}
             loading={exportingMd}
             loadingText="Exporting…"
-            className="w-full text-left justify-start gap-2"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileText size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
             Export as Markdown
@@ -1073,7 +1073,7 @@ export default function ExportPanel({
             onClick={handleExportPdf}
             loading={exportingPdf}
             loadingText="Preparing PDF…"
-            className="w-full text-left justify-start gap-2"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileType2 size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
             Export as PDF
@@ -1084,7 +1084,7 @@ export default function ExportPanel({
             onClick={handleExportGovUk}
             loading={exportingGovUk}
             loadingText="Generating…"
-            className="w-full text-left justify-start gap-2"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <BarChart3 size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
             Export GOV.UK Report
