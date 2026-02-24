@@ -309,6 +309,18 @@ with SessionLocal() as db:
     else:
         sam.is_admin = True
 
+    # Ruaridh
+    for extra_admin in ["ruaridh.mw@ed.ac.uk", "pscmmw@leeds.ac.uk"]:
+        u = db.query(User).filter(User.email == extra_admin).first()
+        if not u:
+            db.add(User(
+                email=extra_admin,
+                hashed_password=get_password_hash("changeme123"),
+                is_admin=True,
+            ))
+        else:
+            u.is_admin = True
+
     db.commit()
 
     print("=" * 60)
@@ -318,6 +330,8 @@ with SessionLocal() as db:
     print("   Admin users:")
     print("   • antreas@axiotic.ai")
     print("   • samuel@axiotic.ai")
+    print("   • ruaridh.mw@ed.ac.uk")
+    print("   • pscmmw@leeds.ac.uk")
     print("=" * 60)
 
 
