@@ -47,6 +47,7 @@
 - [x] Loading states for all async actions (ActionsCard: Save, Download now have spinners)
 - [x] Error recovery — SummaryPage load failure now shows retry + back-to-dashboard
 - [x] Empty states with helpful CTAs (AdminDashboard, UserDashboard already had good ones)
+- [x] **Expert responses scrolling** (2026-02-24) — `ResponsesAccordion` expanded content now `maxHeight: 600px` + `overflowY: auto`; long response lists scroll instead of overflowing
 
 ---
 
@@ -69,6 +70,19 @@
 - [x] Backend: `/forms/{id}/rounds/{round_id}/translate` endpoint with 5 audience profiles
 - [x] Frontend: `AudienceTranslation` dropdown component with live translation
 - [x] Profiles: Policy Maker, Technical, General Public, Executive, Academic
+
+### 3.4 AI Probe Questions ✅ DONE (2026-02-24)
+- [x] Backend: `POST /forms/{id}/rounds/{round_id}/probe-questions` — reads all questions + responses + synthesis, generates 5–7 maximally-probing questions
+- [x] Categories: `assumption`, `challenge`, `disagreement`, `depth`, `blind_spot`, `clarification`
+- [x] Frontend: `ProbeQuestionsPanel` component — generate/regenerate button, category badges, per-question copy button
+- [x] Wired into `SummaryPage` after AI Counterpoints
+- [x] Works in mock mode until API key set, then activates automatically
+
+### 3.5 AI Features API Key Fix ✅ DONE (2026-02-24)
+- [x] Bug: backend only loaded `backend/.env` (no key there); root `.env` was never read
+- [x] Fix: `routes.py` now loads root `.env` first, `backend/.env` overrides
+- [x] `SYNTHESIS_MODE` changed `mock → simple` — real synthesis runs once key is present
+- [x] **Action required:** add `OPENROUTER_API_KEY=sk-or-v1-...` to `symphonia-repo/.env`
 
 ---
 
@@ -143,11 +157,31 @@
 
 | Milestone | Target | Status |
 |-----------|--------|--------|
-| Design polish complete | Feb 24 | 🔄 In Progress (1.2 ✅, 1.3 ✅, 1.1 needs design agent feedback) |
-| AI features MVP | Feb 28 | ✅ Complete (Devil's Advocate + Audience Translation + Voice Mirroring) |
+| Design polish complete | Feb 24 | ✅ Complete (1.2 logo ✅, 1.3 visual consistency ✅, 1.1 design review ✅) |
+| AI features MVP | Feb 28 | ✅ Complete (Devil's Advocate + Audience Translation + Voice Mirroring + Probe Questions) |
 | Structured input complete | Mar 3 | ✅ Complete (templates + server drafts + resume) |
-| SPRIND demo ready | Mar 4 | ⏳ Planned |
+| Expert responses scrolling | Feb 24 | ✅ Complete — ResponsesAccordion maxHeight + scroll |
+| AI features API key fix | Feb 24 | ✅ Complete — root .env loading + SYNTHESIS_MODE=simple |
+| SPRIND demo ready | Mar 4 | 🔄 In Progress — core complete, polish ongoing |
 | Government pilot ready | Mar 15 | ⏳ Planned |
+
+## Completed Features Summary (as of 2026-02-24)
+
+| Phase | Feature | Date |
+|-------|---------|------|
+| Foundation | 3-theme system, Byzantine synthesis adapter, OpenRouter integration | Feb 20 |
+| Phase 1 | UX components, round navigation, synthesis display | Feb 21 |
+| Phase 2 | Structured synthesis (agreements/disagreements/nuances/probes), expert attribution | Feb 21 |
+| Phase 3 | Dimensional labels, cross-matrix heatmap, emergence highlighting, minority report | Feb 21 |
+| Phase 4 | Real-time presence, response editing, comment threads, PDF/Markdown export | Feb 21 |
+| Phase 5 | 171+ tests, Vision QA (8.05/10 avg) | Feb 21 |
+| Phase 6 | Mobile, keyboard nav, skeletons, toast system, ⌘K palette, PWA, code splitting | Feb 21 |
+| Gov/Security | httpOnly cookies, CSRF, audit logging, GOV.UK report export | Feb 22 |
+| AI Features | Devil's Advocate, Audience Translation (5 profiles), Voice Mirroring | Feb 21–22 |
+| Infra | Rate limiting, health endpoints, DB backups, cloudflared watchdog, i18n scaffold | Feb 23 |
+| Analytics | Admin analytics dashboard (Recharts), form templates (7 pre-built), E2E Playwright | Feb 22–23 |
+| AI Features+ | **AI Probe Questions** (assumption/challenge/disagreement/depth/blind_spot) | **Feb 24** |
+| UX fixes | **Expert responses scrolling**, **API key env loading fix** | **Feb 24** |
 
 ---
 
