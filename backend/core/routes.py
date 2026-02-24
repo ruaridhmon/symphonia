@@ -448,7 +448,7 @@ async def forgot_password(
     if user:
         token = secrets.token_urlsafe(32)
         user.reset_token = token
-        user.reset_token_expiry = datetime.now(timezone.utc) + timedelta(hours=1)
+        user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
         db.commit()
 
         frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
@@ -476,7 +476,7 @@ def reset_password(
 ):
     """Reset a user's password using a valid reset token."""
     user = db.query(User).filter(User.reset_token == token).first()
-    if not user or not user.reset_token_expiry or user.reset_token_expiry < datetime.now(timezone.utc):
+    if not user or not user.reset_token_expiry or user.reset_token_expiry < datetime.utcnow():
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
 
     user.hashed_password = get_password_hash(new_password)
