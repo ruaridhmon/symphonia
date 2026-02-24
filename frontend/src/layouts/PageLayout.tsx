@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Header from '../Header';
 import CommandPalette from '../components/CommandPalette';
 
@@ -9,6 +10,7 @@ import CommandPalette from '../components/CommandPalette';
  * Child routes render via <Outlet />.
  */
 export default function PageLayout() {
+  const { t } = useTranslation();
   return (
     <div
       className="min-h-screen flex flex-col"
@@ -19,7 +21,7 @@ export default function PageLayout() {
       }}
     >
       <a href="#main-content" className="skip-to-main">
-        Skip to main content
+        {t('common.skipToMainContent', 'Skip to main content')}
       </a>
 
       <Header />
@@ -30,6 +32,7 @@ export default function PageLayout() {
 
       <footer
         className="border-t text-center py-6 text-xs"
+        role="contentinfo"
         style={{
           backgroundColor: 'transparent',
           borderColor: 'var(--border)',
@@ -37,7 +40,9 @@ export default function PageLayout() {
           opacity: 0.7,
         }}
       >
-        © {new Date().getFullYear()} Symphonia · Collaborative Consensus Platform
+        <span aria-label={`Copyright ${new Date().getFullYear()} Symphonia`}>
+          © {new Date().getFullYear()} Symphonia · Collaborative Consensus Platform
+        </span>
       </footer>
 
       <CommandPalette />

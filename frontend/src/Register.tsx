@@ -52,7 +52,8 @@ export default function Register() {
       onSubmit={handleRegister}
       className="card-lg p-8 sm:p-10 w-full space-y-5"
     >
-      <h2 className="text-base font-medium text-center" style={{ color: 'var(--muted-foreground)' }}>
+      <h1 className="sr-only">{t('auth.createAccount')}</h1>
+      <h2 className="text-base font-medium text-center" aria-hidden="true" style={{ color: 'var(--muted-foreground)' }}>
         {t('auth.createAccount')}
       </h2>
       <div aria-live="polite" aria-atomic="true">

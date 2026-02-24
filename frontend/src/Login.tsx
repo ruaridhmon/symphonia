@@ -52,7 +52,8 @@ export default function Login() {
       onSubmit={handleLogin}
       className="card-lg p-8 sm:p-10 w-full space-y-5"
     >
-      <h2 className="text-base font-medium text-center" style={{ color: 'var(--muted-foreground)' }}>
+      <h1 className="sr-only">{t('auth.signIn')}</h1>
+      <h2 className="text-base font-medium text-center" aria-hidden="true" style={{ color: 'var(--muted-foreground)' }}>
         {t('auth.signIn')}
       </h2>
       <div aria-live="polite" aria-atomic="true" className="space-y-3">

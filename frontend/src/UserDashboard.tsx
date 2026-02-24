@@ -111,12 +111,14 @@ export default function UserDashboard() {
   };
 
   return (
-    <section className="flex-1 py-6 sm:py-8">
+    <section className="flex-1 py-6 sm:py-8" aria-labelledby="user-dashboard-heading">
       <Container size="md">
+        <h1 id="user-dashboard-heading" className="sr-only">My Dashboard</h1>
         {/* ── Error banner ── */}
         {error && (
           <div
             className="rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            role="alert"
             style={{
               backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
               border: '1px solid var(--destructive)',
@@ -165,10 +167,14 @@ export default function UserDashboard() {
                 color: 'var(--foreground)',
               }}
               aria-label="Join code"
+              aria-describedby={joinError ? 'join-error' : undefined}
+              aria-invalid={!!joinError}
             />
             {joinError && (
               <p
+                id="join-error"
                 className="text-sm text-center"
+                role="alert"
                 style={{ color: 'var(--destructive)' }}
               >
                 {joinError}
@@ -245,7 +251,7 @@ export default function UserDashboard() {
                                 color: 'var(--accent)',
                               }}
                             >
-                              <FileText size={11} />
+                              <FileText size={11} aria-hidden="true" />
                               Round {status.roundNumber}
                             </span>
                           )}
@@ -257,7 +263,7 @@ export default function UserDashboard() {
                                 color: 'var(--success)',
                               }}
                             >
-                              <CheckCircle2 size={11} />
+                              <CheckCircle2 size={11} aria-hidden="true" />
                               Submitted
                             </span>
                           ) : status ? (
@@ -268,7 +274,7 @@ export default function UserDashboard() {
                                 color: 'var(--warning-foreground)',
                               }}
                             >
-                              <Clock size={11} />
+                              <Clock size={11} aria-hidden="true" />
                               Awaiting response
                             </span>
                           ) : null}

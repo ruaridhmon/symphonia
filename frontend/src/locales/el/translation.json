@@ -17,7 +17,8 @@
     "backToDashboard": "← Πίσω στον Πίνακα",
     "skipToMainContent": "Μετάβαση στο κύριο περιεχόμενο",
     "showingResults": "Εμφάνιση {{count}} από {{total}} φόρμα(-ες)",
-    "noResults": "Δεν βρέθηκαν αποτελέσματα"
+    "noResults": "Δεν βρέθηκαν αποτελέσματα",
+    "breadcrumb": "Πλοήγηση"
   },
   "auth": {
     "signIn": "Σύνδεση",
@@ -46,7 +47,9 @@
     "appName": "Symphonia",
     "openCommandPalette": "Άνοιγμα παλέτας εντολών",
     "openMenu": "Άνοιγμα μενού",
-    "closeMenu": "Κλείσιμο μενού"
+    "closeMenu": "Κλείσιμο μενού",
+    "primaryNavigation": "Κύρια πλοήγηση",
+    "mobileNavigation": "Πλοήγηση κινητού"
   },
   "synthesis": {
     "modes": {
@@ -131,7 +134,9 @@
     "failedToStartNextRound": "Αποτυχία έναρξης επόμενου γύρου",
     "failedToDownloadResponses": "Αποτυχία λήψης απαντήσεων",
     "noResponsesToDownload": "Δεν υπάρχουν απαντήσεις για λήψη",
-    "addAtLeastOneQuestion": "Προσθέστε τουλάχιστον μία ερώτηση για τον επόμενο γύρο."
+    "addAtLeastOneQuestion": "Προσθέστε τουλάχιστον μία ερώτηση για τον επόμενο γύρο.",
+    "hideSidebar": "Απόκρυψη πίνακα ελέγχου σύνθεσης",
+    "showSidebar": "Εμφάνιση πίνακα ελέγχου σύνθεσης"
   },
   "export": {
     "exportSynthesis": "Εξαγωγή Σύνθεσης",
@@ -189,7 +194,10 @@
     "noFormsMatch": "Καμία φόρμα δεν ταιριάζει με «{{query}}»",
     "tryDifferent": "Δοκιμάστε διαφορετικό τίτλο ή κωδικό",
     "failedToLoadForms": "Αποτυχία φόρτωσης φορμών (HTTP {{status}})",
-    "failedToLoadGeneric": "Αποτυχία φόρτωσης φορμών"
+    "failedToLoadGeneric": "Αποτυχία φόρτωσης φορμών",
+    "hideAnalytics": "Απόκρυψη αναλυτικών",
+    "showAnalytics": "Εμφάνιση αναλυτικών",
+    "openSettings": "Άνοιγμα ρυθμίσεων"
   },
   "responses": {
     "title": "Απαντήσεις Ειδικών",

@@ -51,33 +51,37 @@ export default function ActionsCard({
         <button
           type="button"
           title={responsesOpen ? 'Hide Responses' : 'View Responses'}
+          aria-label={responsesOpen ? 'Hide Responses' : 'View Responses'}
+          aria-pressed={responsesOpen}
           onClick={onToggleResponses}
           className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10"
           style={{ color: responsesOpen ? 'var(--accent)' : 'var(--muted-foreground)' }}
         >
-          {responsesOpen ? <EyeOff size={15} /> : <Eye size={15} />}
+          {responsesOpen ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
         </button>
 
         <button
           type="button"
           title={downloading ? 'Downloading…' : 'Download Responses'}
+          aria-label={downloading ? 'Downloading responses' : 'Download Responses'}
           onClick={handleDownload}
           disabled={downloading}
           className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10 disabled:opacity-50"
           style={{ color: 'var(--muted-foreground)' }}
         >
-          <FileDown size={15} />
+          <FileDown size={15} aria-hidden="true" />
         </button>
 
         <button
           type="button"
           title={saving ? 'Saving…' : 'Save Synthesis'}
+          aria-label={saving ? 'Saving synthesis' : 'Save Synthesis'}
           onClick={handleSave}
           disabled={saving}
           className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10 disabled:opacity-50"
           style={{ color: 'var(--muted-foreground)' }}
         >
-          <Save size={15} />
+          <Save size={15} aria-hidden="true" />
         </button>
 
         <LoadingButton
@@ -87,10 +91,11 @@ export default function ActionsCard({
           loading={loading}
           loadingText=""
           title="Start Next Round"
+          aria-label="Start Next Round"
           className="inline-flex items-center justify-center rounded-md p-1.5 font-semibold"
           style={{ minWidth: 0, padding: '0.375rem' }}
         >
-          <ArrowRight size={15} />
+          <ArrowRight size={15} aria-hidden="true" />
         </LoadingButton>
       </div>
 

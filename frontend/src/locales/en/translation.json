@@ -17,7 +17,8 @@
     "backToDashboard": "← Back to Dashboard",
     "skipToMainContent": "Skip to main content",
     "showingResults": "Showing {{count}} of {{total}} form(s)",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "breadcrumb": "Breadcrumb"
   },
   "auth": {
     "signIn": "Sign In",
@@ -46,7 +47,9 @@
     "appName": "Symphonia",
     "openCommandPalette": "Open command palette",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "primaryNavigation": "Primary navigation",
+    "mobileNavigation": "Mobile navigation"
   },
   "synthesis": {
     "modes": {
@@ -131,7 +134,9 @@
     "failedToStartNextRound": "Failed to start next round",
     "failedToDownloadResponses": "Failed to download responses",
     "noResponsesToDownload": "No responses to download",
-    "addAtLeastOneQuestion": "Add at least one question for the next round."
+    "addAtLeastOneQuestion": "Add at least one question for the next round.",
+    "hideSidebar": "Hide synthesis controls panel",
+    "showSidebar": "Show synthesis controls panel"
   },
   "export": {
     "exportSynthesis": "Export Synthesis",
@@ -189,7 +194,10 @@
     "noFormsMatch": "No forms match \"{{query}}\"",
     "tryDifferent": "Try a different title or join code",
     "failedToLoadForms": "Failed to load forms (HTTP {{status}})",
-    "failedToLoadGeneric": "Failed to load forms"
+    "failedToLoadGeneric": "Failed to load forms",
+    "hideAnalytics": "Hide analytics",
+    "showAnalytics": "Show analytics",
+    "openSettings": "Open settings"
   },
   "responses": {
     "title": "Expert Responses",

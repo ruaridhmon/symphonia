@@ -16,27 +16,28 @@ export default function AuthLayout() {
         fontFamily: 'var(--font-family)',
       }}
     >
-      <div className="w-full max-w-md">
+      <main className="w-full max-w-md">
         {/* Branding — converging waves */}
         <div className="text-center mb-8">
           {/* Symphonia wordmark — starburst + logotype */}
           <div className="inline-flex items-center justify-center mb-3">
             <img
               src="/logo-wordmark.png"
-              alt="Symphonia"
+              alt="Symphonia — Collaborative Consensus Platform"
               className="h-10 w-auto"
               style={{ maxWidth: '220px' }}
             />
           </div>
           <p
             className="text-sm mt-1"
+            aria-hidden="true"
             style={{ color: 'var(--muted-foreground)' }}
           >
             Collaborative Consensus Platform
           </p>
         </div>
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 }

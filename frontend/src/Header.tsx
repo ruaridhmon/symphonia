@@ -83,7 +83,7 @@ export default function Header() {
         </div>
 
         {/* Right: desktop layout */}
-        <div className="hidden sm:flex items-center gap-2">
+        <nav aria-label={t('header.primaryNavigation', 'Primary navigation')} className="hidden sm:flex items-center gap-2">
           {/* Cmd+K shortcut hint */}
           <button
             type="button"
@@ -93,7 +93,7 @@ export default function Header() {
             className="header-cmd-k-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs"
             aria-label={t('header.openCommandPalette')}
           >
-            <span style={{ opacity: 0.7 }}>⌘K</span>
+            <span aria-hidden="true" style={{ opacity: 0.7 }}>⌘K</span>
           </button>
           <LanguageSwitcher />
           <ThemeToggle />
@@ -106,7 +106,7 @@ export default function Header() {
               {t('common.logOut')}
             </button>
           )}
-        </div>
+        </nav>
 
         {/* Right: mobile hamburger button */}
         <button
@@ -128,12 +128,12 @@ export default function Header() {
       </div>
 
       {/* Mobile dropdown menu */}
-      <div
+      <nav
         ref={menuRef}
         id="mobile-nav-menu"
         className="sm:hidden overflow-hidden transition-all duration-200 ease-in-out"
         role="menu"
-        aria-label="Mobile navigation"
+        aria-label={t('header.mobileNavigation', 'Mobile navigation')}
         style={{
           maxHeight: menuOpen ? '200px' : '0',
           opacity: menuOpen ? 1 : 0,
@@ -161,12 +161,13 @@ export default function Header() {
             <button
               onClick={() => { setMenuOpen(false); logout(); }}
               className="header-logout-btn text-sm text-left px-3 py-2 rounded-lg"
+              aria-label={t('common.logOut')}
             >
               {t('common.logOut')}
             </button>
           )}
         </div>
-      </div>
+      </nav>
     </header>
   );
 }

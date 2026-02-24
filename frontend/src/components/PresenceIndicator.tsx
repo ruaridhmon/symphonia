@@ -25,8 +25,8 @@ export default function PresenceIndicator({ viewers, currentUserEmail }: Presenc
   if (otherViewers.length === 0) return null;
 
   return (
-    <div style={styles.container}>
-      <div style={styles.dots}>
+    <div style={styles.container} role="status" aria-label={`${otherViewers.length} other viewer${otherViewers.length === 1 ? '' : 's'} on this page`}>
+      <div style={styles.dots} aria-hidden="true">
         {otherViewers.slice(0, 5).map((viewer) => {
           const initial = viewer.email.split('@')[0]?.[0]?.toUpperCase() || '?';
           return (

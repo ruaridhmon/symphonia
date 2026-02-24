@@ -64,6 +64,9 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Delphi Consultation Guide"
       style={{
         position: 'fixed',
         inset: 0,
@@ -77,6 +80,7 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
     >
       {/* Backdrop */}
       <div
+        aria-hidden="true"
         style={{
           position: 'absolute',
           inset: 0,
@@ -999,12 +1003,14 @@ export default function AdminFormNew() {
           {/* ── Title ─────────────────────────────────────────────── */}
           <div className="space-y-1.5 mb-6">
             <label
+              htmlFor="form-title"
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
               Form title
             </label>
             <input
+              id="form-title"
               type="text"
               placeholder="e.g. AI in Education: Risks & Opportunities"
               value={title}
@@ -1033,12 +1039,14 @@ export default function AdminFormNew() {
           {/* ── Description (Worker A) ────────────────────────────── */}
           <div className="space-y-1.5 mb-6">
             <label
+              htmlFor="form-description"
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
               Description (optional)
             </label>
             <textarea
+              id="form-description"
               placeholder="What is this consultation about? What should participants consider?"
               value={description}
               onChange={e => setDescription(e.target.value)}
@@ -1065,6 +1073,7 @@ export default function AdminFormNew() {
           {/* ── Join Code (Worker A) ──────────────────────────────── */}
           <div className="space-y-1.5 mb-6">
             <label
+              htmlFor="form-join-code"
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
@@ -1072,6 +1081,7 @@ export default function AdminFormNew() {
             </label>
             <div className="flex gap-2 items-center">
               <input
+                id="form-join-code"
                 type="text"
                 value={joinCode}
                 onChange={e => setJoinCode(e.target.value)}
@@ -1113,8 +1123,9 @@ export default function AdminFormNew() {
                   e.currentTarget.style.color = 'var(--muted-foreground)';
                 }}
                 title="Regenerate join code"
+                aria-label="Regenerate join code"
               >
-                <RefreshCw size={16} />
+                <RefreshCw size={16} aria-hidden="true" />
               </button>
             </div>
             <p
@@ -1126,13 +1137,13 @@ export default function AdminFormNew() {
           </div>
 
           {/* ── Opening Questions (Workers A + B) ─────────────────── */}
-          <div className="space-y-2 mb-4">
-            <label
+          <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
+            <legend
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
               Opening questions
-            </label>
+            </legend>
             <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
               Good questions are open-ended, neutral, and invite diverse
               perspectives.
@@ -1223,6 +1234,7 @@ export default function AdminFormNew() {
                   <div className="flex-1" style={{ position: 'relative' }}>
                     <input
                       type="text"
+                      aria-label={`Question ${i + 1}`}
                       placeholder={
                         isOnly && isEmpty
                           ? 'e.g. What do you see as the biggest barrier to AI adoption in your sector?'
@@ -1301,7 +1313,7 @@ export default function AdminFormNew() {
                 </div>
               );
             })}
-          </div>
+          </fieldset>
 
           {/* ── AI Assist button + Panel (Worker D) ────────────────── */}
           {!aiPanelOpen && (

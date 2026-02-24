@@ -233,7 +233,7 @@ export default function CommandPalette() {
         if (e.target === e.currentTarget) close();
       }}
     >
-      <div className="command-palette" role="dialog" aria-label={showShortcuts ? 'Keyboard shortcuts' : 'Command palette'}>
+      <div className="command-palette" role="dialog" aria-modal="true" aria-label={showShortcuts ? 'Keyboard shortcuts' : 'Command palette'}>
         {showShortcuts ? (
           /* ── Keyboard shortcuts panel ── */
           <>
@@ -251,6 +251,7 @@ export default function CommandPalette() {
               </h2>
               <button
                 onClick={() => setShowShortcuts(false)}
+                aria-label="Back to command palette"
                 style={{
                   background: 'none',
                   border: 'none',
@@ -263,7 +264,7 @@ export default function CommandPalette() {
                 onMouseEnter={e => e.currentTarget.style.color = 'var(--foreground)'}
                 onMouseLeave={e => e.currentTarget.style.color = 'var(--muted-foreground)'}
               >
-                ← Back
+                <span aria-hidden="true">←</span> Back
               </button>
             </div>
             <div style={{ padding: '8px 12px', maxHeight: '320px', overflowY: 'auto' }}>

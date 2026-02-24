@@ -121,6 +121,7 @@ export default function AdminDashboard() {
         {error && (
           <div
             className="rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+            role="alert"
             style={{
               backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
               border: '1px solid var(--destructive)',
@@ -160,19 +161,22 @@ export default function AdminDashboard() {
               variant="ghost"
               size="sm"
               onClick={toggleAnalytics}
+              aria-expanded={analyticsVisible}
+              aria-label={analyticsVisible ? t('adminDashboard.hideAnalytics', 'Hide analytics') : t('adminDashboard.showAnalytics', 'Show analytics')}
               style={analyticsVisible ? {
                 backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
                 color: 'var(--accent)',
               } : undefined}
             >
-              📊 Analytics
+              <span aria-hidden="true">📊</span> Analytics
             </LoadingButton>
             <LoadingButton
               variant="ghost"
               size="sm"
               onClick={() => navigate('/admin/settings')}
+              aria-label={t('adminDashboard.openSettings', 'Open settings')}
             >
-              ⚙ Settings
+              <span aria-hidden="true">⚙</span> Settings
             </LoadingButton>
             <LoadingButton
               variant="accent"
@@ -338,7 +342,7 @@ export default function AdminDashboard() {
             {/* ── Desktop table ── */}
             {filteredForms.length > 0 && (
               <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-sm text-left" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+                <table className="w-full text-sm text-left" aria-label={t('adminDashboard.existingForms')} style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
                   <thead>
                     <tr
                       style={{
@@ -348,6 +352,7 @@ export default function AdminDashboard() {
                       {[t('adminDashboard.formTitle'), t('adminDashboard.joinCode'), t('adminDashboard.participants'), t('adminDashboard.round')].map(label => (
                         <th
                           key={label}
+                          scope="col"
                           className="px-4 py-2.5 text-left"
                           style={{
                             color: 'var(--muted-foreground)',
@@ -362,6 +367,7 @@ export default function AdminDashboard() {
                         </th>
                       ))}
                       <th
+                        scope="col"
                         className="px-4 py-2.5 text-right"
                         style={{
                           color: 'var(--muted-foreground)',

@@ -247,7 +247,7 @@ export default function FormPage() {
             <AlertCircle size={48} style={{ color: 'var(--destructive)' }} />
           </div>
           <h2 className="text-xl font-semibold text-foreground">Unable to load form</h2>
-          <p className="text-sm text-muted-foreground" role="alert" aria-live="polite">{friendlyError}</p>
+          <p className="text-sm text-muted-foreground" role="alert">{friendlyError}</p>
           <div className="flex gap-4 justify-center">
             <LoadingButton variant="accent" size="md" onClick={loadForm} style={{ minWidth: '120px' }}>
               Try Again

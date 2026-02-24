@@ -582,7 +582,7 @@ export default function SummaryPage() {
 
 			<main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6" tabIndex={-1}>
 				{/* Navigation breadcrumb */}
-				<div className="mb-4 flex items-center justify-between">
+				<nav aria-label={t('common.breadcrumb', 'Breadcrumb')} className="mb-4 flex items-center justify-between">
 					<button
 						onClick={() => navigate('/')}
 						className="text-sm font-medium transition-colors"
@@ -592,10 +592,10 @@ export default function SummaryPage() {
 					>
 						{t('common.backToDashboard')}
 					</button>
-					<h1 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
+					<h2 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
 						{form.title}
-					</h1>
-				</div>
+					</h2>
+				</nav>
 
 				{/* Round timeline */}
 				{rounds.length > 0 && (
@@ -624,15 +624,17 @@ export default function SummaryPage() {
 					onClick={() => setSidebarOpen(v => !v)}
 					className="summary-sidebar-toggle fixed z-50 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium shadow-lg transition-all min-h-[44px]"
 					data-open={sidebarOpen ? 'true' : 'false'}
+					aria-expanded={sidebarOpen}
+					aria-controls="summary-sidebar"
+					aria-label={sidebarOpen ? t('summary.hideSidebar', 'Hide synthesis controls panel') : t('summary.showSidebar', 'Show synthesis controls panel')}
 					style={{
 						top: '4.75rem',
 						background: 'var(--card)',
 						border: '1px solid var(--border)',
 						color: 'var(--foreground)',
 					}}
-					title={sidebarOpen ? 'Hide panel' : 'Show panel'}
 				>
-					{sidebarOpen ? <X size={15} /> : <PanelRight size={15} />}
+					{sidebarOpen ? <X size={15} aria-hidden="true" /> : <PanelRight size={15} aria-hidden="true" />}
 					<span className="hidden sm:inline">{sidebarOpen ? t('summary.hide') : t('summary.controls')}</span>
 				</button>
 
@@ -855,6 +857,7 @@ export default function SummaryPage() {
 
 					{/* ── Floating Sidebar ── */}
 					<aside
+						id="summary-sidebar"
 						role="complementary"
 						aria-label={t('summary.synthesisControls')}
 						className="summary-sidebar"
