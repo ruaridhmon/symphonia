@@ -496,6 +496,7 @@ class ConsensusLibraryAdapter:
         config = LLMConfig(
             openrouter_api_key=api_key,
             model=self.model,
+            max_tokens=8192,  # Synthesis reports don't need 126K tokens; cap to avoid 402 pre-flight failures
         )
         self._llm_client = OpenRouterClient(config)
 
