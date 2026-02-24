@@ -38,6 +38,11 @@ export default function Login() {
     }
   };
 
+  // Wait for session restore to complete before deciding to redirect.
+  // Without this guard, a stale csrf_token cookie causes an instant bounce
+  // to "/" before the session is validated — triggering an infinite loop.
+  if (isLoading) return null;
+
   if (token) {
     return <Navigate to="/" />;
   }

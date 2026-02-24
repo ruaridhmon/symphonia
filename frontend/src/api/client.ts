@@ -42,6 +42,10 @@ function clearAuthAndRedirect(): void {
   localStorage.removeItem('access_token');
   localStorage.removeItem('email');
   localStorage.removeItem('is_admin');
+  // Also expire the JS-readable csrf_token cookie so the Login page
+  // doesn't see it and bounce straight back to "/" before auth is confirmed.
+  // (The httpOnly session_token cookie is cleared server-side via /logout or expiry.)
+  document.cookie = 'csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax';
   if (!_redirecting) {
     _redirecting = true;
     window.location.href = '/login?expired=1';
