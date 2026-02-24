@@ -1,0 +1,51 @@
+{
+  "scan_directory": "/tmp/test_scan",
+  "total_files_scanned": 1,
+  "total_issues": 4,
+  "critical_count": 4,
+  "high_count": 0,
+  "low_count": 0,
+  "info_count": 0,
+  "issues": [
+    {
+      "file": "/tmp/test_scan/test_component.tsx",
+      "line": 6,
+      "identifier": "MessageSquare",
+      "severity": "CRITICAL",
+      "message": "Icon 'MessageSquare' used in JSX but not imported from 'lucide-react' \u2014 WILL CRASH",
+      "category": "missing-import",
+      "library": "lucide-react",
+      "context": "<MessageSquare size={16} />"
+    },
+    {
+      "file": "/tmp/test_scan/test_component.tsx",
+      "line": 7,
+      "identifier": "BarChart3",
+      "severity": "CRITICAL",
+      "message": "Icon 'BarChart3' used in JSX but not imported from 'lucide-react' \u2014 WILL CRASH",
+      "category": "missing-import",
+      "library": "lucide-react",
+      "context": "<BarChart3 />"
+    },
+    {
+      "file": "/tmp/test_scan/test_component.tsx",
+      "line": 8,
+      "identifier": "HelpCircle",
+      "severity": "CRITICAL",
+      "message": "Icon 'HelpCircle' used in JSX but not imported from 'lucide-react' \u2014 WILL CRASH",
+      "category": "missing-import",
+      "library": "lucide-react",
+      "context": "<HelpCircle size={20} />"
+    },
+    {
+      "file": "/tmp/test_scan/test_component.tsx",
+      "line": 9,
+      "identifier": "MyCustomComponent",
+      "severity": "CRITICAL",
+      "message": "Component 'MyCustomComponent' used in JSX but not imported \u2014 WILL CRASH at runtime",
+      "category": "missing-import",
+      "library": null,
+      "context": "<MyCustomComponent prop=\"test\" />"
+    }
+  ]
+}
