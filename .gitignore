@@ -15,3 +15,4 @@ __pycache__/
 # E2E test artifacts
 frontend/e2e/.auth/
 frontend/test-results/
+backend/artefacts/
