@@ -383,12 +383,13 @@ if FRONTEND_DIR.exists():
             return JSONResponse({"detail": "Not Found"}, status_code=404)
 
         if has_partial_match:
-            # Path exists but only for other HTTP methods
-            return JSONResponse(
-                {"detail": "Method Not Allowed"},
-                status_code=405,
-                headers={"Allow": ", ".join(sorted(allowed_methods))},
-            )
+            # Path exists for other HTTP methods (e.g. POST /login, POST /register).
+            # Do NOT return 405 here — this is a SPA. GET requests to paths that
+            # only have POST/PUT API handlers should be served by the frontend
+            # (React Router handles /login, /register client-side). The actual
+            # POST route handlers will correctly match POST requests before
+            # this catch-all is ever reached.
+            pass  # fall through → serve SPA
 
         # ── No API route matches — serve the SPA ───────────────────────
         # Try serving a static file from the frontend dist first
