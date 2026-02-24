@@ -13,6 +13,7 @@ import logging
 import os
 import re
 from datetime import datetime, timezone
+from pathlib import Path
 from fastapi.responses import JSONResponse
 
 from .rate_limiter import (
@@ -57,7 +58,12 @@ from .synthesis import (
 )
 from core.ws import ws_manager
 
-load_dotenv()
+# Load root .env first (lower priority), then backend/.env overrides.
+# This allows setting OPENROUTER_API_KEY in the project root .env.
+_root_env = Path(__file__).resolve().parent.parent.parent / ".env"
+if _root_env.exists():
+    load_dotenv(dotenv_path=_root_env)
+load_dotenv()  # backend/.env takes precedence
 
 logger = logging.getLogger("symphonia.routes")
 
@@ -3933,6 +3939,196 @@ def translate_synthesis(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to translate synthesis: {e}")
+
+
+# ---------------------------------------------------------
+# AI PROBE QUESTIONS
+# ---------------------------------------------------------
+
+
+class ProbeQuestionsPayload(BaseModel):
+    synthesis_text: str = ""  # Optional: current synthesis for richer probing
+
+
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/probe-questions",
+    tags=["AI Tools"],
+    summary="Generate AI probing questions",
+    description=(
+        "Generate maximally-probing follow-up questions given the full context: "
+        "form questions, all expert responses, and optional synthesis. "
+        "Questions are designed to surface hidden assumptions, resolve disagreements, "
+        "and deepen the enquiry. Requires authentication."
+    ),
+)
+@limiter.limit(AI_LIMIT)
+def generate_probe_questions(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    payload: ProbeQuestionsPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Generate AI-powered probing questions from the full context."""
+    # Verify round belongs to form
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    # Gather form questions
+    questions = round_obj.questions or form.questions or []
+    if not questions:
+        raise HTTPException(status_code=400, detail="No questions found for this round")
+
+    # Gather responses for this round
+    responses = db.query(Response).filter(Response.round_id == round_id).all()
+
+    # Check mode / key
+    synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    if synthesis_mode == "mock" or not api_key:
+        return {
+            "questions": [
+                {
+                    "question": "Can you elaborate on the assumptions underlying your position?",
+                    "rationale": "Surfaces hidden premises that may not withstand scrutiny.",
+                    "category": "assumption",
+                },
+                {
+                    "question": "What evidence would change your view?",
+                    "rationale": "Tests the falsifiability and robustness of expert positions.",
+                    "category": "challenge",
+                },
+                {
+                    "question": "How do you reconcile your view with the opposing position raised by other experts?",
+                    "rationale": "Forces explicit engagement with the sharpest disagreement.",
+                    "category": "disagreement",
+                },
+                {
+                    "question": "What are the second-order consequences of your recommendation?",
+                    "rationale": "Exposes downstream effects not yet considered.",
+                    "category": "depth",
+                },
+                {
+                    "question": "Who is most affected by this decision and whose voice is missing from this discussion?",
+                    "rationale": "Surfaces blind spots around representation and impact.",
+                    "category": "blind_spot",
+                },
+            ],
+            "mock": True,
+        }
+
+    # Build context string
+    q_text = "\n".join(
+        f"{i}. {q.get('label', q.get('text', str(q))) if isinstance(q, dict) else str(q)}"
+        for i, q in enumerate(questions, 1)
+    )
+
+    r_blocks = []
+    for idx, resp in enumerate(responses, 1):
+        answers = resp.answers or {}
+        if isinstance(answers, dict):
+            a_lines = "\n".join(f"  Q: {k}\n  A: {v}" for k, v in answers.items() if v)
+        else:
+            a_lines = str(answers)
+        r_blocks.append(f"Expert {idx}:\n{a_lines}")
+    r_text = "\n\n".join(r_blocks) if r_blocks else "(No responses yet)"
+
+    synthesis_section = (
+        f"\n\nCurrent synthesis:\n{payload.synthesis_text.strip()}"
+        if payload.synthesis_text.strip()
+        else ""
+    )
+
+    prompt = f"""You are a master Delphi facilitator and Socratic questioner. Your task is to generate the most penetrating, maximally-probing follow-up questions that will deepen the expert discussion and surface what is currently hidden, assumed, or unresolved.
+
+Form topic: {form.title}
+
+Questions asked so far:
+{q_text}
+
+Expert responses:
+{r_text}{synthesis_section}
+
+Generate 5-7 probing questions that:
+1. Challenge hidden assumptions in the expert responses
+2. Resolve or sharpen the most significant disagreements
+3. Expose blind spots — perspectives, populations, or second-order effects not yet considered
+4. Deepen the enquiry into areas that are currently shallow or vague
+5. Test the robustness of the areas of consensus
+
+For each question, assign a category from: "assumption", "challenge", "disagreement", "depth", "blind_spot", "clarification".
+
+Return ONLY a JSON object in this exact format:
+{{
+  "questions": [
+    {{
+      "question": "The probing question text",
+      "rationale": "One sentence explaining why this question matters and what it surfaces",
+      "category": "assumption|challenge|disagreement|depth|blind_spot|clarification"
+    }}
+  ]
+}}"""
+
+    try:
+        openai_client = get_openai_client()
+        if not openai_client:
+            raise HTTPException(
+                status_code=503,
+                detail="Synthesis is not configured. Please add an OpenRouter API key.",
+            )
+
+        completion = openai_client.chat.completions.create(
+            model="anthropic/claude-sonnet-4",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an expert Delphi facilitator. You generate incisive, "
+                        "maximally-probing questions that advance expert deliberation. "
+                        "Always respond with valid JSON only."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+            response_format={"type": "json_object"},
+        )
+
+        content = completion.choices[0].message.content or "{}"
+        try:
+            parsed = json.loads(content)
+        except json.JSONDecodeError:
+            import re as _re
+            m = _re.search(r'\{.*\}', content, _re.DOTALL)
+            parsed = json.loads(m.group()) if m else {}
+
+        raw_questions = parsed.get("questions", [])
+        validated = []
+        valid_categories = {"assumption", "challenge", "disagreement", "depth", "blind_spot", "clarification"}
+        for q in raw_questions:
+            if isinstance(q, dict) and q.get("question"):
+                validated.append({
+                    "question": str(q.get("question", "")),
+                    "rationale": str(q.get("rationale", "")),
+                    "category": q.get("category", "depth") if q.get("category") in valid_categories else "depth",
+                })
+
+        return {"questions": validated, "mock": False}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate probe questions: {e}")
 
 
 # ---------------------------------------------------------
