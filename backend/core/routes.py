@@ -3176,20 +3176,30 @@ async def send_email(
 
 # ── Helper: send a styled template email ────────────────────────
 async def _send_templated_email(to: str, subject: str, html: str):
-    """Internal helper to send an email via SMTP."""
+    """Internal helper to send an email via SMTP.
+
+    Supports both credential-based auth (SMTP_USER + SMTP_PASS) and
+    IP-whitelisted relay (no credentials needed — just SMTP_HOST).
+    """
     msg = EmailMessage()
     msg["From"] = os.getenv("SMTP_FROM", "info@colabintel.org")
     msg["To"] = to
     msg["Subject"] = subject
     msg.set_content(html, subtype="html")
-    await aiosmtplib.send(
-        msg,
+
+    smtp_user = os.getenv("SMTP_USER")
+    smtp_pass = os.getenv("SMTP_PASS")
+
+    send_kwargs: dict = dict(
         hostname=os.getenv("SMTP_HOST"),
         port=int(os.getenv("SMTP_PORT", "587")),
         start_tls=True,
-        username=os.getenv("SMTP_USER"),
-        password=os.getenv("SMTP_PASS"),
     )
+    if smtp_user and smtp_pass:
+        send_kwargs["username"] = smtp_user
+        send_kwargs["password"] = smtp_pass
+
+    await aiosmtplib.send(msg, **send_kwargs)
 
 
 class InvitationEmailPayload(BaseModel):
