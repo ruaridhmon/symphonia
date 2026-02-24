@@ -69,8 +69,12 @@ export default function ResponsesAccordion({
   const allExpanded = expandedRounds.size === structuredRounds.length;
 
   return (
-    <div className="card p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="card flex flex-col" style={{ maxHeight: '70vh' }}>
+      {/* Header — always visible, outside scroll area */}
+      <div
+        className="flex items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 flex-shrink-0"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <MessageSquare size={18} />
           Expert Responses
@@ -89,7 +93,8 @@ export default function ResponsesAccordion({
         </button>
       </div>
 
-      <div className="space-y-2">
+      {/* Scrollable rounds list */}
+      <div className="overflow-y-auto flex-1 min-h-0 p-4 sm:p-6 pt-3 sm:pt-4 space-y-2">
         {structuredRounds.map(round => {
           const isExpanded = expandedRounds.has(round.id);
           const roundQuestions =

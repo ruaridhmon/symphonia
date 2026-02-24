@@ -37,8 +37,9 @@ async function registerViaAPI(
   email: string,
   password: string,
 ): Promise<boolean> {
+  // Backend /register expects 'email' field (not 'username' — that's only for OAuth2 /login)
   const response = await page.request.post(`${API_URL}/register`, {
-    form: { username: email, password },
+    form: { email, password },
   });
   return response.status() < 500;
 }
@@ -418,37 +419,32 @@ test.describe('Auth Visual Tests', () => {
   // ─── 15. 405 Routing Bug (Known Issue) ─────────────────────────────────
 
   /**
-   * KNOWN BUG: GET /login hits the FastAPI backend directly instead of
-   * serving the SPA. The backend only handles POST /login, so a direct
-   * GET request returns 405 Method Not Allowed.
+   * REGRESSION GUARD: GET /login was previously returning 405 (Method Not Allowed)
+   * because FastAPI fires MethodNotAllowed before the SPA catch-all can serve index.html.
    *
-   * This happens because the dev server / reverse proxy does not
-   * properly route GET requests to /login and /register to the SPA's
-   * index.html. The SPA expects hash or history routing to handle
-   * these paths client-side.
+   * FIX: Added a 405 exception handler in main.py that serves index.html for GET requests
+   * to API-only paths (e.g. POST /login, POST /register). React Router handles /login
+   * and /register client-side.
    *
-   * Impact: Direct URL navigation (typing /login in browser, refreshing
-   * on /login) may break depending on the server configuration.
-   *
-   * When the SPA is served properly (e.g., via the dev server's proxy),
-   * the React SPA handles /login client-side and the bug doesn't manifest.
-   * But hitting the API server directly with GET /login returns 405.
+   * This test ensures the fix holds — GET /login MUST return 200 with the SPA.
    */
-  test('15 — 405 routing bug: GET /login on API returns Method Not Allowed', async ({ page }) => {
-    // Hit the API endpoint directly (not the SPA)
+  test('15 — 405 routing bug FIXED: GET /login now returns SPA (200)', async ({ page }) => {
+    // Hit the backend directly — should now serve SPA index.html, not 405
     const response = await page.request.get(`${API_URL}/login`);
 
-    // The API should return 405 since it only accepts POST
-    // This documents the known routing bug
-    expect(response.status()).toBe(405);
+    // Bug is fixed: GET /login returns 200 (SPA index.html)
+    expect(response.status()).toBe(200);
 
-    // Take a screenshot of what the SPA shows when navigated via browser
-    // (which should work via client-side routing)
+    // Verify the response is actually the SPA (contains root div or script tag)
+    const body = await response.text();
+    expect(body).toContain('<html');
+
+    // Also verify browser navigation works end-to-end
     await page.goto('/login');
     await waitForPageSettle(page);
-    await takeScreenshot(page, '04-15-405-routing-bug');
+    await takeScreenshot(page, '04-15-405-routing-bug-fixed');
 
-    // Verify SPA routing still works (the SPA handles /login client-side)
+    // The SPA login form must be visible after navigating
     await expect(page.locator('#login-email')).toBeVisible();
   });
 });

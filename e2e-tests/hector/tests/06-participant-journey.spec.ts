@@ -37,9 +37,9 @@ async function registerUser(
   const response = await page.request.post(`${API_URL}/register`, {
     form: { email, password },
   });
-  // 200 = created, 409 = already exists — both acceptable
+  // 200 = created, 400 = already exists (backend behaviour), 409 = conflict — all acceptable
   const status = response.status();
-  if (status !== 200 && status !== 409) {
+  if (status !== 200 && status !== 400 && status !== 409) {
     throw new Error(`Registration failed for ${email}: HTTP ${status}`);
   }
 }

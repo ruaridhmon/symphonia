@@ -248,8 +248,9 @@ test.describe('Mobile Responsive Tests — User Dashboard', () => {
   test.beforeAll(async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
+    // Backend /register expects 'email' field (not 'username' — that's OAuth2 /login only)
     await page.request.post(`${API_URL}/register`, {
-      form: { username: MOBILE_USER_EMAIL, password: MOBILE_USER_PASSWORD },
+      form: { email: MOBILE_USER_EMAIL, password: MOBILE_USER_PASSWORD },
     }).catch(() => {});  // Ignore if already exists
     await context.close();
   });

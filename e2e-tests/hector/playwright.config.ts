@@ -21,7 +21,10 @@ export default defineConfig({
     timeout: 10_000,
   },
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    // Port 8000 = backend serving frontend + API (local dev without Docker).
+    // Override with BASE_URL=http://localhost:3000 when using Docker Compose
+    // (nginx at :3000 proxies to backend at :8000).
+    baseURL: process.env.BASE_URL || 'http://localhost:8000',
     trace: 'on-first-retry',
     screenshot: 'off', // We take our own screenshots
     video: 'off',
