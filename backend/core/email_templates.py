@@ -256,10 +256,35 @@ def welcome(
 
 
 # ── Template preview helper ──────────────────────────────────────
+
+# ── Template: Password Reset ─────────────────────────────────────
+def password_reset(
+    *,
+    reset_url: str,
+    expiry_hours: int = 1,
+) -> tuple[str, str]:
+    """Return (subject, html) for a password reset email."""
+    subject = "Reset your Symphonia password"
+    from html import escape as _escape
+    body = (
+        f'''<h1 style="margin:0 0 8px 0;font-size:20px;font-weight:700;color:{BRAND_TEXT};line-height:1.3;">Reset your password</h1>'''
+        f'''<p style="margin:0 0 20px 0;font-size:14px;color:{BRAND_MUTED};line-height:1.5;">'''
+        "We received a request to reset the password for your Symphonia account. "
+        "Click the button below to choose a new password.</p>"
+        + _button("Reset Password", reset_url)
+        + f'''<p style="margin:20px 0 0 0;font-size:13px;color:{BRAND_MUTED};text-align:center;line-height:1.5;">'''
+        f"This link will expire in <strong>{expiry_hours} hour{'s' if expiry_hours != 1 else ''}</strong>. "
+        "If you didn't request a password reset, you can safely ignore this email.</p>"
+        + f'''<p style="margin:12px 0 0 0;font-size:12px;color:{BRAND_MUTED};text-align:center;line-height:1.5;">'''
+        f'''If the button doesn't work, copy this link:<br/><a href="{_escape(reset_url)}" style="color:{BRAND_BLUE};word-break:break-all;">{_escape(reset_url)}</a></p>'''
+    )
+    return subject, _base_layout(subject, body)
+
 TEMPLATES = {
     "invitation": invitation,
     "new_round": new_round,
     "synthesis_ready": synthesis_ready,
     "round_reminder": round_reminder,
     "welcome": welcome,
+    "password_reset": password_reset,
 }

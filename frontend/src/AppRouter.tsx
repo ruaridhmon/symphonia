@@ -14,7 +14,9 @@ const ThankYouPage = lazy(() => import('./ThankYouPage'));
 const FormEditor   = lazy(() => import('./FormEditor'));
 const FormPage     = lazy(() => import('./FormPage'));
 const Login        = lazy(() => import('./Login'));
-const Register     = lazy(() => import('./Register'));
+const Register       = lazy(() => import('./Register'));
+const ForgotPassword = lazy(() => import('./ForgotPassword'));
+const ResetPassword  = lazy(() => import('./ResetPassword'));
 const Atlas        = lazy(() => import('./Atlas'));
 const NotFoundPage  = lazy(() => import('./NotFoundPage'));
 const AdminFormNew   = lazy(() => import('./AdminFormNew'));
@@ -64,6 +66,22 @@ export default function Router() {
             element={
               <ErrorBoundary fallbackTitle="Registration Error">
                 <Register />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <ErrorBoundary fallbackTitle="Forgot Password Error">
+                <ForgotPassword />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <ErrorBoundary fallbackTitle="Reset Password Error">
+                <ResetPassword />
               </ErrorBoundary>
             }
           />

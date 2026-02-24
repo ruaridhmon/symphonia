@@ -112,6 +112,11 @@ export default function Login() {
           onChange={e => setPassword(e.target.value)}
         />
       </div>
+      <div className="text-right">
+        <Link to="/forgot-password" className="text-sm font-medium" style={{ color: 'var(--accent)' }}>
+          Forgot password?
+        </Link>
+      </div>
       <LoadingButton
         type="submit"
         variant="accent"

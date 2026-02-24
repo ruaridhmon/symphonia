@@ -12,7 +12,8 @@ import json
 import logging
 import os
 import re
-from datetime import datetime, timezone
+import secrets
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from fastapi.responses import JSONResponse
 import asyncio
@@ -432,6 +433,58 @@ def logout(
     response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
     response.delete_cookie(key=CSRF_COOKIE_NAME, path="/")
     return {"message": "Logged out"}
+
+@router.post(
+    "/forgot-password",
+    tags=["Authentication"],
+    summary="Request a password reset link",
+)
+async def forgot_password(
+    email: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    """Request a password reset link. Always returns 200 to prevent user enumeration."""
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        token = secrets.token_urlsafe(32)
+        user.reset_token = token
+        user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+        db.commit()
+
+        frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+        reset_url = f"{frontend_url}/reset-password?token={token}"
+
+        try:
+            from .email_templates import password_reset as password_reset_template
+            subject, html = password_reset_template(reset_url=reset_url)
+            await _send_templated_email(email, subject, html)
+        except Exception:
+            logging.warning("Failed to send password reset email to %s", email)
+
+    return {"message": "If that email is registered, a reset link has been sent."}
+
+
+@router.post(
+    "/reset-password",
+    tags=["Authentication"],
+    summary="Reset password using a valid token",
+)
+def reset_password(
+    token: str = Form(...),
+    new_password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    """Reset a user's password using a valid reset token."""
+    user = db.query(User).filter(User.reset_token == token).first()
+    if not user or not user.reset_token_expiry or user.reset_token_expiry < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+
+    user.hashed_password = get_password_hash(new_password)
+    user.reset_token = None
+    user.reset_token_expiry = None
+    db.commit()
+    return {"message": "Password updated successfully"}
+
 
 
 @router.get(
