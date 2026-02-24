@@ -13,7 +13,7 @@ describe('SynthesisModeSelector', () => {
     render(<SynthesisModeSelector {...defaultProps} />);
     expect(screen.getByText('Simple')).toBeInTheDocument();
     expect(screen.getByText('Committee')).toBeInTheDocument();
-    expect(screen.getByText('TTD')).toBeInTheDocument();
+    expect(screen.getByText('Thorough', { selector: '.synthesis-mode-name' })).toBeInTheDocument();
   });
 
   it('displays descriptions for each mode', () => {
@@ -24,20 +24,22 @@ describe('SynthesisModeSelector', () => {
   });
 
   it('displays speed labels', () => {
-    render(<SynthesisModeSelector {...defaultProps} />);
-    expect(screen.getByText('Fast')).toBeInTheDocument();
-    expect(screen.getByText('Moderate')).toBeInTheDocument();
-    expect(screen.getByText('Thorough')).toBeInTheDocument();
+    const { container } = render(<SynthesisModeSelector {...defaultProps} />);
+    const speedLabels = container.querySelectorAll('.synthesis-mode-speed');
+    const speedTexts = Array.from(speedLabels).map(el => el.textContent);
+    expect(speedTexts).toContain('Fast');
+    expect(speedTexts).toContain('Moderate');
+    expect(speedTexts).toContain('Thorough');
   });
 
   it('marks the selected mode with the "selected" class', () => {
     render(<SynthesisModeSelector mode="committee" onModeChange={vi.fn()} />);
-    const committeeButton = screen.getByRole('button', {
+    const committeeButton = screen.getByRole('radio', {
       name: /committee synthesis mode/i,
     });
     expect(committeeButton.className).toContain('selected');
 
-    const simpleButton = screen.getByRole('button', {
+    const simpleButton = screen.getByRole('radio', {
       name: /simple synthesis mode/i,
     });
     expect(simpleButton.className).not.toContain('selected');
@@ -48,10 +50,10 @@ describe('SynthesisModeSelector', () => {
     const user = userEvent.setup();
     render(<SynthesisModeSelector mode="simple" onModeChange={onModeChange} />);
 
-    await user.click(screen.getByRole('button', { name: /committee synthesis mode/i }));
+    await user.click(screen.getByRole('radio', { name: /committee synthesis mode/i }));
     expect(onModeChange).toHaveBeenCalledWith('committee');
 
-    await user.click(screen.getByRole('button', { name: /ttd synthesis mode/i }));
+    await user.click(screen.getByRole('radio', { name: /thorough synthesis mode/i }));
     expect(onModeChange).toHaveBeenCalledWith('ttd');
   });
 

@@ -1,1 +1,0 @@
-import{r as n}from"./vendor-react-cff1603b.js";const e="Symphonia";function r(t){n.useEffect(()=>{const o=document.title;return document.title=t?`${t} — ${e}`:e,()=>{document.title=o}},[t])}export{r as u};

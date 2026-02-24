@@ -43,8 +43,8 @@ describe('StructuredSynthesis', () => {
     const labelTexts = Array.from(statLabels).map(el => el.textContent);
     expect(labelTexts).toContain('Agreements');
     expect(labelTexts).toContain('Disagreements');
-    expect(labelTexts).toContain('Nuances');
-    expect(labelTexts).toContain('Probes');
+    expect(labelTexts).toContain('Nuances & Uncertainties');
+    expect(labelTexts).toContain('Follow-up Probes');
 
     // Check stat values
     const statValues = container.querySelectorAll('.structured-stat-value');
@@ -162,11 +162,11 @@ describe('StructuredSynthesis', () => {
       ],
     });
 
-    render(<StructuredSynthesis data={data} />);
+    const { container } = render(<StructuredSynthesis data={data} />);
     // Nuances collapsed by default
     expect(screen.queryByText('Nuanced point')).not.toBeInTheDocument();
-    // But the header should be visible
-    expect(screen.getByText('Nuances & Uncertainties')).toBeInTheDocument();
+    // But the section header should be visible (use class selector to avoid stat label duplicate)
+    expect(container.querySelector('.structured-section-title')).toHaveTextContent('Nuances & Uncertainties');
   });
 
   it('expands nuances section on click', async () => {
@@ -178,7 +178,7 @@ describe('StructuredSynthesis', () => {
     });
 
     render(<StructuredSynthesis data={data} />);
-    const header = screen.getByText('Nuances & Uncertainties').closest('button')!;
+    const header = document.getElementById('synthesis-header-nuances')!;
     await user.click(header);
     expect(screen.getByText('Nuanced point')).toBeInTheDocument();
     expect(screen.getByText('Some context')).toBeInTheDocument();
