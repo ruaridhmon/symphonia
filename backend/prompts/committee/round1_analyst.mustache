@@ -1,0 +1,50 @@
+{{> _term_sheet}}
+
+{{> _persona}}
+
+## Task: Independent Analysis (Round 1)
+
+Analyse the expert responses below through the lens of **{{persona.dimension}}**.
+
+Your output will be read by other agents who will challenge your claims. It will also feed an aggregator that produces the final synthesis.
+
+### Question
+{{question}}
+
+### Expert Responses
+{{#expert_responses}}
+--- Expert: {{expert_id}}{{response_id}} ---
+{{response}}
+{{#claims}}
+- {{.}}
+{{/claims}}
+{{#evidence}}
+- {{.}}
+{{/evidence}}
+{{/expert_responses}}
+
+### Instructions
+1. Produce up to {{max_claims}} claims, each grounded in specific expert evidence.
+2. Use claim IDs with prefix "{{persona.initial}}" (e.g. "{{persona.initial}}-001").
+3. Each claim MUST include at least one verbatim quote from the expert responses.
+4. If you notice something outside your dimension, add it to "flags" — do not analyse it.
+
+### Output Format
+Respond with a single JSON object (no other text):
+```json
+{
+  "agent": "{{persona.name}}",
+  "claims": [
+    {
+      "id": "{{persona.initial}}-001",
+      "text": "Your claim statement",
+      "evidence": [
+        {"expert_id": "expert_01", "quote": "verbatim quote from expert", "location": "paragraph N"}
+      ],
+      "confidence": "high",
+      "dimension": "{{persona.dimension}}"
+    }
+  ],
+  "flags": []
+}
+```

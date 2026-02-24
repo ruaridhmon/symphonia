@@ -1,0 +1,143 @@
+You are evaluating **Groundedness** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate graphs. Other evaluators assess different dimensions (coverage, atomicity, etc.). Your singular focus is **groundedness**.
+
+Think of this as communicating with future iterations: your critique shapes how the next candidate will be refined.
+
+---
+
+## Dimension: Groundedness (HARD CONSTRAINT)
+
+**Definition**: The degree to which every extracted claim is anchored to verbatim textual evidence from source responses.
+
+**Why This Matters**: This is a hard constraint for validity. Without verifiable grounding, the graph cannot support transparent scientific advice. Every claim must be traceable to source text.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Argumentation Graph Being Evaluated
+
+### Nodes
+
+{{#draft.nodes}}
+- **[{{node_id}}]** ({{node_type}})
+  Text: "{{text}}"
+  Sources: {{#sources}}{{.}}{{^last}}, {{/last}}{{/sources}}
+  {{#evidence}}
+  Evidence: "{{quote}}" (from {{source_id}})
+  {{/evidence}}
+
+{{/draft.nodes}}
+
+---
+
+## Source Expert Responses
+
+{{#responses}}
+### {{response_id}}
+
+**Claims:**
+{{#claims}}
+- "{{.}}"
+{{/claims}}
+
+**Evidence:**
+{{#evidence}}
+- "{{.}}"
+{{/evidence}}
+
+{{#uncertainties.length}}
+**Uncertainties:**
+{{#uncertainties}}
+- "{{.}}"
+{{/uncertainties}}
+{{/uncertainties.length}}
+
+---
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Groundedness
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Fully Grounded**: Every claim node has ≥1 verbatim evidence quote that directly and unambiguously supports the claim. Quotes are sufficient in length to establish context. Evidence-to-claim mappings are semantically precise—no interpretive leaps required. |
+| **8** | **Highly Grounded**: All claims have evidence, but 1-2 quotes are slightly truncated or require minimal inference to connect to the claim. No claims are unsupported. |
+| **7** | **Well Grounded**: 95%+ claims have direct evidence. A small number (1-3) have evidence that supports the claim indirectly or through reasonable inference. No claim is entirely unsupported. |
+| **6** | **Adequately Grounded**: 90-95% of claims have evidence. A few claims have weak or tangential evidence that does not fully justify the claim as stated. |
+| **5** | **Partially Grounded**: 80-90% of claims have evidence. Several claims rely on paraphrase rather than verbatim quotes, or evidence only partially supports the claim. |
+| **4** | **Inconsistently Grounded**: 70-80% of claims have evidence. Multiple claims have no evidence or have evidence that does not actually support them. |
+| **3** | **Weakly Grounded**: 50-70% of claims have evidence. Many claims appear to be inferences or interpretations not directly stated in sources. |
+| **2** | **Poorly Grounded**: 30-50% of claims have evidence. The graph contains numerous claims that cannot be traced to source material. |
+| **1** | **Ungrounded**: <30% of claims have evidence. Most claims appear fabricated or hallucinated with no basis in source responses. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ Quote is verbatim (not paraphrased)
+- ✓ Quote is from the cited source_id
+- ✓ Quote semantically entails the claim
+- ✗ Quote is fabricated or altered
+- ✗ Quote is attributed to wrong source
+- ✗ Claim makes inference beyond what quote states
+
+**Critical**: Scores below 4 mean the artefact is INVALID as it cannot support transparent policy advice.
+
+---
+
+## Your Task
+
+1. **Systematically verify** each claim node against its evidence quotes
+2. **Check** that quotes are verbatim from the cited sources
+3. **Assess** whether quotes actually support the claims as stated
+4. **Identify** specific nodes that are ungrounded or weakly grounded
+5. **Provide actionable feedback** for the next evolutionary iteration
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>4</score>
+  <rationale>Most nodes have clear provenance to source responses. Node c006 claims 'widespread agreement' but only two of five experts express this view. Node c010 introduces a synthesis interpretation not directly stated by any expert. All other nodes trace well to verbatim or close-paraphrase evidence.</rationale>
+  <suggestions>
+    <suggestion>Node c006: Revise from 'widespread agreement' to 'some experts noted' — only r1_s01 and r1_s03 express this view</suggestion>
+    <suggestion>Node c010: Provide direct source attribution or remove — current text appears to be an interpretation not found in any expert response</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must reference node IDs and source IDs** when identifying issues.
+- **Each `<suggestion>` must be actionable** — cite the specific node IDs and what to change.
+
+### Concrete Example
+
+```xml
+<fitness_evaluation>
+  <score>4</score>
+  <rationale>Most nodes have clear provenance to source responses. Node c006 claims 'widespread agreement' but only two of five experts express this view. Node c010 introduces a synthesis interpretation not directly stated by any expert. All other nodes trace well to verbatim or close-paraphrase evidence.</rationale>
+  <suggestions>
+    <suggestion>Node c006: Revise from 'widespread agreement' to 'some experts noted' — only r1_s01 and r1_s03 express this view</suggestion>
+    <suggestion>Node c010: Provide direct source attribution or remove — current text appears to be an interpretation not found in any expert response</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+**Remember**: Your feedback guides the next generation. Be specific about what to improve and how.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

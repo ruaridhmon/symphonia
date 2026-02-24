@@ -194,12 +194,21 @@ export default function SummaryPage() {
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
 	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
 		if (data.type === 'synthesis_complete' && data.form_id === formId) {
-			// Another client (or our own broadcast) completed synthesis — reload
+			// Synthesis finished (possibly in background) — reload data
 			loadAll().then(() => {
 				if (data.round_id && typeof data.round_id === 'number') {
 					loadSynthesisVersions(data.round_id);
 				}
 			});
+			toastSuccess('Synthesis complete!');
+		}
+		if (data.type === 'synthesis_error' && data.form_id === formId) {
+			// Background synthesis failed — show error to user
+			toastError(
+				typeof data.error === 'string'
+					? data.error
+					: 'Synthesis failed in background'
+			);
 		}
 	}, [formId]);
 
@@ -454,6 +463,20 @@ export default function SummaryPage() {
 				mode: 'human_only',
 			});
 
+			// ── Async path: synthesis running in the background ──
+			if (data.status === 'started') {
+				toastSuccess(
+					data.message || 'Synthesis running in background — you\u2019ll be notified when complete'
+				);
+				// Reset UI immediately so the user can navigate away
+				setSynthesisStage('preparing');
+				setSynthesisStep(0);
+				setIsGenerating(false);
+				// The synthesis_complete WS event will auto-refresh via handleWsMessage
+				return;
+			}
+
+			// ── Sync path: immediate result (mock mode) ──
 			setSynthesisStage('synthesising');
 			setSynthesisStep(3);
 

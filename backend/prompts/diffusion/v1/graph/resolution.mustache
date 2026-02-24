@@ -1,0 +1,76 @@
+You are resolving cross-expert relationships in an argumentation graph for a Delphi-style consultation.
+
+## Your Role
+
+- Identify semantic relationships between claims made by different experts
+- Detect agreements, disagreements, and refinement relationships
+- Suggest merges for claims that are effectively identical
+- Do NOT introduce new claims - only relate existing ones
+
+## Question Being Addressed
+
+{{question}}
+
+## Claims to Resolve
+
+The following claims have been extracted from multiple experts. Your task is to identify how they relate to each other.
+
+{{#claims}}
+### Claim {{node_id}}
+**Text:** {{text}}
+**Sources:** {{#sources}}{{.}}, {{/sources}}
+---
+{{/claims}}
+
+## Resolution Task
+
+Identify relationships between these claims:
+
+1. **Agreement (Merge)**: Claims that are semantically identical and should be merged into a single node.
+2. **Support**: Claim A provides evidence or reasoning that strengthens Claim B.
+3. **Attack (Disagreement)**: Claim A contradicts, undermines, or opposes Claim B.
+4. **Refinement**: Claim A adds necessary nuance, conditions, or specificity to Claim B.
+
+## Required Output Structure
+
+Provide your resolution in the following XML format:
+
+```xml
+<resolution>
+  <edges>
+    <!-- Edge types: supports | attacks | refines | about | depends_on -->
+    <edge from="c001" to="c002" type="attacks">
+      <reasoning>Claim c001 directly contradicts the premise of c002 regarding...</reasoning>
+      <quote source="c001">Exact verbatim substring from the claim's source text (must match character-for-character)</quote>
+    </edge>
+    <edge from="c003" to="c004" type="supports">
+      <reasoning>Claim c003 provides data that backs up the assertion in c004</reasoning>
+      <quote source="c003">Exact verbatim substring from the claim's source text (must match character-for-character)</quote>
+    </edge>
+  </edges>
+
+  <merges>
+    <!-- List of claim IDs that should be merged into a single canonical claim -->
+    <merge>
+      <canonical_id>c005</canonical_id>
+      <merge_ids>
+        <id>c006</id>
+        <id>c007</id>
+      </merge_ids>
+      <reasoning>All three claims state that X is Y using slightly different wording</reasoning>
+    </merge>
+  </merges>
+</resolution>
+```
+
+## Guidelines
+
+1. **Conservative Merging**: Only merge claims that are truly identical in meaning. If there is nuance, use a 'refines' edge instead.
+2. **Explicit Disagreement**: Actively look for contradictions. If experts hold opposing views, link them with an 'attacks' edge.
+3. **Justify**: Provide brief reasoning for every edge or merge to ensure auditability.
+4. **Evidence Required**: Every edge must include a `<quote>` element containing an exact verbatim substring from the source claim text that justifies the relationship. **Quotes must match the source character-for-character — no paraphrasing, synonym substitution, reordering, or grammar cleanup.** Do not propose edges without textual evidence.
+5. **Cross-Expert Focus**: Prioritize relationships between claims from *different* sources.
+
+Begin your resolution:
+
+

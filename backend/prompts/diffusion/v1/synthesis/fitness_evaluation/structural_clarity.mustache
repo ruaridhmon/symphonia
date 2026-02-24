@@ -1,0 +1,148 @@
+You are evaluating **Structural Clarity** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate syntheses. Other evaluators assess different dimensions. Your singular focus is **structural clarity**.
+
+Your role: ensure the synthesis is logically organized to facilitate expert comprehension and review in Delphi rounds.
+
+---
+
+## Dimension: Structural Clarity
+
+**Definition**: The logical organisation of the synthesis into coherent sections that facilitate understanding and use by readers.
+
+**Why This Matters**: Experts reviewing Delphi feedback need clear organization to efficiently assess claims, identify areas of agreement/disagreement, and provide targeted revisions.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Synthesis Being Evaluated
+
+### Commonly-Raised Claims
+
+{{#draft.areas_of_agreement}}
+- "{{.}}"
+{{/draft.areas_of_agreement}}
+
+### Divergent Claims
+
+{{#draft.areas_of_disagreement}}
+- "{{.}}"
+{{/draft.areas_of_disagreement}}
+
+### Explicit Conflicts
+
+{{#draft.explicit_conflicts}}
+- "{{.}}"
+{{/draft.explicit_conflicts}}
+
+### Uncertainties
+
+{{#draft.uncertainties}}
+- "{{.}}"
+{{/draft.uncertainties}}
+
+---
+
+## Evaluation Rubric: Structural Clarity
+
+{{#responses}}
+### {{response_id}}
+
+{{#claims.length}}
+**Claims:**
+{{#claims}}
+- "{{.}}"
+{{/claims}}
+{{/claims.length}}
+{{^claims.length}}
+**Response:**
+<expert_response id="{{response_id}}">{{response}}</expert_response>
+{{/claims.length}}
+
+---
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Structural Clarity
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Exemplary Structure**: Clear, logical hierarchy. Sections are meaningfully distinct with no overlap. Progression aids comprehension. Groupings reflect genuine thematic clusters from the graph. No orphan claims. |
+| **8** | **Excellent Structure**: Clear hierarchy with 1-2 minor organisational choices that could be improved. All claims are logically placed within appropriate sections. |
+| **7** | **Good Structure**: Clear sections with appropriate boundaries. Some claims could be reorganised for better flow. No major structural issues. |
+| **6** | **Adequate Structure**: Recognisable sections with mostly clear boundaries. Some overlap between sections. A few claims seem misplaced. |
+| **5** | **Moderate Structure**: Sections exist but boundaries are sometimes unclear. Some claims appear in unexpected places. Thematic grouping is inconsistent. |
+| **4** | **Weak Structure**: Inconsistent organisation. Sections do not clearly correspond to meaningful themes. Reader must work to understand relationships. |
+| **3** | **Poor Structure**: Minimal coherent organisation. Claims appear in seemingly arbitrary order. Thematic grouping is absent. |
+| **2** | **Very Poor Structure**: Effectively unstructured. Random ordering of claims. Sections are nominal only with no logical basis. |
+| **1** | **No Structure**: No discernible organisation. Stream-of-consciousness presentation. Sections are meaningless. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ "Commonly-raised" contains claims appearing in multiple sources
+- ✓ "Divergent" contains claims with genuine disagreement
+- ✓ Related claims are grouped together
+- ✓ Section headings accurately describe content
+- ✗ Claims about the same topic scattered across sections
+- ✗ "Commonly-raised" contains minority views
+- ✗ Conflicts not grouped with or linked to relevant claims
+
+---
+
+## Your Task
+
+1. **Review section assignments**—are claims in appropriate sections?
+2. **Check internal coherence**—are related claims grouped?
+3. **Assess boundaries**—is there overlap or confusion between sections?
+4. **Identify misplaced claims**—what should be reorganized?
+5. **Provide specific reorganization guidance** for the next generation
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>4</score>
+  <rationale>Claims are generally well-organised with clear agreement levels. However, claims C5-C8 form a thematic cluster on methodology that would benefit from explicit grouping. The disagreement between C3 and C9 is not surfaced through adjacency or cross-referencing, making it easy to miss.</rationale>
+  <suggestions>
+    <suggestion>Group claims C5-C8 under an explicit methodology theme to improve navigability</suggestion>
+    <suggestion>Cross-reference C3 and C9 to make their disagreement visible — currently they appear in separate sections with no link</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must reference claim IDs** when identifying issues.
+- **Each `<suggestion>` must be actionable** — cite the specific claim IDs and what to change.
+
+### Concrete Example
+
+```xml
+<fitness_evaluation>
+  <score>4</score>
+  <rationale>Claims are generally well-organised with clear agreement levels. However, claims C5-C8 form a thematic cluster on methodology that would benefit from explicit grouping. The disagreement between C3 and C9 is not surfaced through adjacency or cross-referencing, making it easy to miss.</rationale>
+  <suggestions>
+    <suggestion>Group claims C5-C8 under an explicit methodology theme to improve navigability</suggestion>
+    <suggestion>Cross-reference C3 and C9 to make their disagreement visible — currently they appear in separate sections with no link</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+**Remember**: Your feedback guides the next generation. Be specific about what to improve and how.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

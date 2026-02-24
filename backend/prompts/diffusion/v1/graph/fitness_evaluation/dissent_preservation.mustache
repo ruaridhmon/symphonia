@@ -1,0 +1,142 @@
+You are evaluating **Dissent Preservation** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate graphs. Other evaluators assess different dimensions. Your singular focus is **dissent preservation**.
+
+Your role: ensure conflicting viewpoints and minority positions are explicitly represented, not collapsed into false consensus. This is critical for legitimate scientific advice.
+
+---
+
+## Dimension: Dissent Preservation
+
+**Definition**: The degree to which conflicting viewpoints, disagreements, and minority positions are explicitly represented rather than collapsed or suppressed.
+
+**Why This Matters**: UK scientific advice must preserve independence and avoid groupthink. Minority views often flag important uncertainties or risks. Collapsing dissent undermines the integrity of the advice artefact.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Argumentation Graph Being Evaluated
+
+### Nodes
+
+{{#draft.nodes}}
+- **[{{node_id}}]** ({{node_type}}): "{{text}}"
+  Sources: {{#sources}}{{.}}{{^last}}, {{/last}}{{/sources}}
+{{/draft.nodes}}
+
+### Edges
+
+{{#draft.edges}}
+- **[{{edge_id}}]** {{from_node}} --[{{edge_type}}]--> {{to_node}}
+{{/draft.edges}}
+
+---
+
+## Source Expert Responses
+
+{{#responses}}
+### {{response_id}}
+
+**Claims:**
+{{#claims}}
+- "{{.}}"
+{{/claims}}
+
+**Evidence:**
+{{#evidence}}
+- "{{.}}"
+{{/evidence}}
+
+{{#uncertainties.length}}
+**Uncertainties:**
+{{#uncertainties}}
+- "{{.}}"
+{{/uncertainties}}
+{{/uncertainties.length}}
+
+---
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Dissent Preservation
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Fully Preserved**: All disagreements between sources are explicitly represented with appropriate attack/contradiction edges. Minority views are given equal structural weight to majority views. Conflicting evidence is linked to both sides of a dispute. |
+| **8** | **Highly Preserved**: All major disagreements are captured. 1-2 minor tensions may be implicit rather than explicit edges. Minority views are present with appropriate evidence. |
+| **7** | **Well Preserved**: 95%+ of disagreements are captured. Some subtle tensions may not have explicit edges. No minority view is entirely suppressed. |
+| **6** | **Adequately Preserved**: 90-95% of disagreements are captured. Some minority views may be underrepresented but are present. |
+| **5** | **Moderately Preserved**: 80-90% of disagreements are captured. Some conflicting claims lack explicit attack edges. Minority views are present but may lack full evidence support. |
+| **4** | **Partially Preserved**: 70-80% of disagreements are captured. Multiple conflicts are implicit or missing. Tendency toward majority view. |
+| **3** | **Weakly Preserved**: 50-70% of disagreements are captured. Significant conflicts are missing entirely. Minority positions are underrepresented. |
+| **2** | **Poorly Preserved**: 30-50% of disagreements are captured. The graph implicitly favours consensus. Dissenting views are marginalised structurally. |
+| **1** | **Not Preserved**: <30% of disagreements are captured. Conflicts are collapsed into false consensus. Minority views are effectively erased. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ Explicit attack edges between contradictory claims
+- ✓ Minority claims have same evidence structure as majority claims
+- ✓ Conflicting experts are both proportionally represented
+- ✗ Disagreement collapsed into vague "some say X"
+- ✗ Missing attack edges between claims that contradict
+- ✗ One side of a debate is absent or underrepresented
+
+---
+
+## Your Task
+
+1. **Read source responses** carefully to identify disagreements
+2. **Check if each disagreement** is represented with appropriate nodes + attack edges
+3. **Assess structural balance**—do minority views have equal evidence quality?
+4. **Identify collapsed conflicts**—where dissent is implicit or absent
+5. **Provide specific guidance** for next generation to make dissent explicit
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>The graph captures the main consensus positions well but underrepresents disagreement. Expert r1_s02's objection to the majority methodology is noted but not connected via attack edges to the claims it challenges. The minority position from r1_s05 is absent entirely.</rationale>
+  <suggestions>
+    <suggestion>Add attack edges from r1_s02's methodological objection to the claims (c003, c004) it challenges</suggestion>
+    <suggestion>Include r1_s05's minority position as nodes with appropriate attack/support edges to existing claims</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must reference source IDs and node IDs** when identifying issues.
+- **Each `<suggestion>` must be actionable** — cite the specific source IDs and what to change.
+
+### Concrete Example
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>The graph captures the main consensus positions well but underrepresents disagreement. Expert r1_s02's objection to the majority methodology is noted but not connected via attack edges to the claims it challenges. The minority position from r1_s05 is absent entirely.</rationale>
+  <suggestions>
+    <suggestion>Add attack edges from r1_s02's methodological objection to the claims (c003, c004) it challenges</suggestion>
+    <suggestion>Include r1_s05's minority position as nodes with appropriate attack/support edges to existing claims</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+**Remember**: Your feedback guides the next generation. Be specific about what to improve and how.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

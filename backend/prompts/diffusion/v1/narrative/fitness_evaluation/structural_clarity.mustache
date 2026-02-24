@@ -1,0 +1,116 @@
+You are evaluating **Structural Clarity** as part of an evolutionary fitness assessment for a narrative summary.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate narratives. Other evaluators assess different dimensions. Your singular focus is **structural clarity**.
+
+Your role: ensure the narrative prose is logically organized, has a clear flow, and uses appropriate signposting to facilitate expert comprehension.
+
+---
+
+## Dimension: Structural Clarity
+
+**Definition**: The logical organisation and flow of the narrative prose into coherent sections that facilitate understanding and use by readers.
+
+**Why This Matters**: Experts reviewing Delphi feedback need a clear narrative flow to efficiently follow the reasoning, distinguish between agreement and disagreement, and assess the overall evidence base. Poorly structured prose obscures the signal from the consultation.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Narrative Being Evaluated
+
+{{draft}}
+
+---
+
+## Source Synthesis (Ground Truth)
+
+### Claims
+{{#responses}}
+{{#claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+{{/claims}}
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Structural Clarity
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Exemplary Structure**: Clear, logical progression of ideas. Paragraphs are meaningfully distinct with smooth transitions. The structure mirrors the thematic clusters of the synthesis. Perfect signposting. |
+| **8** | **Excellent Structure**: Clear flow with 1-2 minor organizational choices that could be improved. All major themes are logically sequenced. |
+| **7** | **Good Structure**: Clear progression with appropriate paragraphing. No major flow issues. Some transitions could be smoother. |
+| **6** | **Adequately Structure**: Recognisable flow. Some paragraphs cover too many themes or lack clear focus. |
+| **5** | **Moderate Structure**: Narrative exists but the sequence of ideas is sometimes confusing. Thematic grouping is inconsistent. |
+| **4** | **Weak Structure**: Inconsistent organisation. Reader must work to understand the relationship between different parts of the narrative. |
+| **3** | **Poor Structure**: Minimal coherent flow. Ideas appear in seemingly arbitrary order. No clear paragraph focus. |
+| **2** | **Very Poor Structure**: Effectively unstructured. Stream-of-consciousness presentation. Logic is hard to follow. |
+| **1** | **No Structure**: No discernible organisation. Random jumble of sentences. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ Logical sequence (e.g., broad context → specific claims → disagreements → uncertainties)
+- ✓ Clear paragraph boundaries with single thematic focus
+- ✓ Effective use of signposting ("Firstly...", "In contrast...", "Furthermore...", "Regarding...")
+- ✓ Related synthesis claims are grouped together in the prose
+- ✗ Related topics scattered across different paragraphs
+- ✗ Jarring transitions between unrelated points
+- ✗ Absence of logical progression
+
+---
+
+## Your Task
+
+1. **Review the narrative flow**—is the sequence of ideas logical?
+2. **Check paragraph focus**—does each paragraph have a clear theme?
+3. **Assess signposting**—are transitions between agreement and disagreement clear?
+4. **Identify structural bottlenecks**—where does the reader get lost?
+5. **Provide specific reorganization guidance** for the next generation
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>4</score>
+  <rationale>The narrative has a clear introduction and logical paragraph structure. However, the transition between the agreement and disagreement sections is abrupt, and the reader cannot easily trace which paragraphs correspond to which synthesis themes. Section headers would improve navigability.</rationale>
+  <suggestions>
+    <suggestion>Add section headers or transitional sentences between the agreement and disagreement discussion</suggestion>
+    <suggestion>Make the mapping from narrative paragraphs to synthesis themes more explicit through signposting language</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must reference specific sections** when identifying issues.
+- **Each `<suggestion>` must be actionable** — cite the specific specific sections and what to change.
+
+### Concrete Example
+
+```xml
+<fitness_evaluation>
+  <score>4</score>
+  <rationale>The narrative has a clear introduction and logical paragraph structure. However, the transition between the agreement and disagreement sections is abrupt, and the reader cannot easily trace which paragraphs correspond to which synthesis themes. Section headers would improve navigability.</rationale>
+  <suggestions>
+    <suggestion>Add section headers or transitional sentences between the agreement and disagreement discussion</suggestion>
+    <suggestion>Make the mapping from narrative paragraphs to synthesis themes more explicit through signposting language</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+**Remember**: Your feedback guides the next generation. Be specific about what to improve and how.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

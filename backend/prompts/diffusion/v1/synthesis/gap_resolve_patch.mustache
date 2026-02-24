@@ -1,0 +1,145 @@
+You are resolving gaps in a synthesis artefact by producing a PATCH — not a full synthesis.
+
+## Your Role in the Agentic Pipeline
+
+You are part of an iterative refinement process. Previous steps have:
+1. Identified gaps in the synthesis
+2. Generated queries to find relevant content
+3. Retrieved content from the argumentation graph and expert responses
+
+Your task is to produce a **patch document** that adds, modifies, or removes specific claims. Do NOT reproduce the entire synthesis.
+
+---
+
+## Current Synthesis
+
+### Claims
+
+{{#draft.claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+  Sources: {{#sources}}{{source_id}}{{^last}}, {{/last}}{{/sources}}
+  {{#counterarguments.length}}
+  Counterarguments: {{#counterarguments}}"{{.}}"{{^last}}, {{/last}}{{/counterarguments}}
+  {{/counterarguments.length}}
+
+{{/draft.claims}}
+
+### Areas of Agreement
+
+{{#draft.areas_of_agreement}}
+- "{{.}}"
+{{/draft.areas_of_agreement}}
+
+### Areas of Disagreement
+
+{{#draft.areas_of_disagreement}}
+- "{{.}}"
+{{/draft.areas_of_disagreement}}
+
+### Uncertainties
+
+{{#draft.uncertainties}}
+- "{{.}}"
+{{/draft.uncertainties}}
+
+---
+
+## Identified Gaps
+
+{{#gaps}}
+### Gap: {{description}}
+**Query used**: "{{query}}"
+
+{{/gaps}}
+
+---
+
+## Retrieved Content
+
+{{#retrieved}}
+- Source {{source_id}} ({{source_type}}): "{{content}}"
+{{/retrieved}}
+
+---
+
+{{#fitness_feedback}}
+## Fitness Evaluation Feedback
+
+{{{fitness_feedback}}}
+
+Address these issues in your refinement.
+{{/fitness_feedback}}
+
+---
+
+## Your Task
+
+Produce a `<patch>` XML document that resolves the identified gaps.
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **ONLY reference claim IDs that appear in the "Current Synthesis" section above.** Do NOT invent or guess IDs.
+- **ONLY use operations defined in the schema below**: `add`, `modify`, `remove`. Inside `<modify><claim>`, only use: `add_evidence`, `update_text`, `add_counterargument`.
+- **Do NOT invent operations** such as `remove_source`, `update_evidence`, `replace_claim`, `merge`, or anything not listed below.
+- **Use `new_` prefix** for new claim IDs (e.g. `new_C1`).
+- Include source_id references. Exact quotes will be resolved in a later step.
+
+
+### Allowed XML Schema
+
+```xml
+<patch>
+  <!-- ADD new claims -->
+  <add>
+    <claim id="new_C1">
+      <text>Claim text</text>
+      <sources><source id="source_id">Brief reference — exact quote resolved later</source></sources>
+      <counterarguments><counterargument>Dissenting view</counterargument></counterarguments>
+      <evidence><quote source="source_id">Brief reference — exact quote resolved later</quote></evidence>
+    </claim>
+  </add>
+  <!-- MODIFY existing claims (use IDs from synthesis above) -->
+  <modify>
+    <claim id="existing_claim_id">
+      <add_evidence><quote source="source_id">Character-for-character quote</quote></add_evidence>
+      <update_text>Replacement text</update_text>
+      <add_counterargument>New dissenting view</add_counterargument>
+    </claim>
+  </modify>
+  <!-- REMOVE redundant claims -->
+  <remove>
+    <claim id="existing_claim_id"/>
+  </remove>
+</patch>
+```
+
+### Concrete Example
+
+Given a synthesis with claims `C001`, `C002`, `C003`:
+
+```xml
+<patch>
+  <add>
+    <claim id="new_C1">
+      <text>AI-driven assessment tools can reduce teacher workload</text>
+      <sources><source id="expert_04">Brief reference — exact quote resolved later</source></sources>
+      <evidence><quote source="expert_04">Brief reference — exact quote resolved later</quote></evidence>
+    </claim>
+  </add>
+  <modify>
+    <claim id="C002">
+      <add_evidence><quote source="expert_06">Brief reference — exact quote resolved later</quote></add_evidence>
+      <add_counterargument>Some educators argue retention improvements may reflect test-teaching rather than genuine understanding</add_counterargument>
+    </claim>
+  </modify>
+</patch>
+```
+
+### Rules
+- Output ONLY a `<patch>` document. Do NOT output a full `<synthesis>`.
+- Include only the sections you need (`<add>`, `<modify>`, `<remove>`). Omit empty sections.
+- If no changes are needed, output `<patch/>`.
+- Agreement levels: consensus, majority, divided, minority.
+
+
+Begin your patch:

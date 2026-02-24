@@ -5,6 +5,8 @@ Protected by Cloudflare Access.
 """
 import os
 import logging
+from dotenv import load_dotenv
+load_dotenv()  # Load .env from the backend directory
 import shutil
 import traceback
 from contextlib import asynccontextmanager

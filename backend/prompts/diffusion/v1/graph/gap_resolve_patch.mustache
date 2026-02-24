@@ -1,0 +1,136 @@
+You are resolving gaps in an argumentation graph by producing a PATCH — not a full graph.
+
+## Your Role in the Agentic Pipeline
+
+You are part of an iterative refinement process. Previous steps have:
+1. Identified gaps in the graph
+2. Generated queries to find relevant content
+3. Retrieved content from expert responses
+
+Your task is to produce a **patch document** that adds, modifies, or removes specific elements. Do NOT reproduce the entire graph.
+
+---
+
+## Current Argumentation Graph
+
+### Nodes
+
+{{#draft.nodes}}
+- **[{{node_id}}]** ({{node_type}}): "{{text}}"
+  Sources: {{#sources}}{{.}}{{^last}}, {{/last}}{{/sources}}
+  {{#evidence}}
+  Evidence: "{{quote}}" (from {{source_id}})
+  {{/evidence}}
+
+{{/draft.nodes}}
+
+### Edges
+
+{{#draft.edges}}
+- **[{{edge_id}}]** {{from_node}} --[{{edge_type}}]--> {{to_node}}
+{{/draft.edges}}
+
+---
+
+## Identified Gaps
+
+{{#gaps}}
+### Gap: {{description}}
+**Query used**: "{{query}}"
+
+{{/gaps}}
+
+---
+
+## Retrieved Content
+
+{{#retrieved}}
+- Source {{source_id}} ({{source_type}}): "{{content}}"
+{{/retrieved}}
+
+---
+
+{{#fitness_feedback}}
+## Fitness Evaluation Feedback
+
+{{{fitness_feedback}}}
+
+Address these issues in your refinement.
+{{/fitness_feedback}}
+
+---
+
+## Your Task
+
+Produce a `<patch>` XML document that resolves the identified gaps.
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **ONLY reference node/edge IDs that appear in the "Current Argumentation Graph" section above.** Do NOT invent or guess IDs.
+- **ONLY use operations defined in the schema below**: `add`, `modify`, `remove`. Inside `<modify><node>`, only use: `add_evidence`, `update_text`, `add_source`. Inside `<modify><edge>`, only use: `update_type`.
+- **Do NOT invent operations** such as `remove_source`, `update_evidence`, `replace_node`, `merge`, or anything not listed below.
+- **Use `new_` prefix** for new node/edge IDs (e.g. `new_n1`, `new_e1`).
+- **All quotes must be exact verbatim substrings** of the source text. Do not paraphrase.
+
+### Allowed XML Schema
+
+```xml
+<patch>
+  <!-- ADD new nodes and edges -->
+  <add>
+    <node id="new_n1" type="claim|evidence_quote|counterclaim">
+      <text>Node text</text>
+      <sources><source>source_id</source></sources>
+      <evidence><quote source="source_id">Exact verbatim quote</quote></evidence>
+    </node>
+    <edge id="new_e1" type="supports|attacks|refines|about|depends_on" from="new_n1" to="existing_node_id"/>
+  </add>
+  <!-- MODIFY existing nodes/edges (use IDs from graph above) -->
+  <modify>
+    <node id="existing_node_id">
+      <add_evidence><quote source="source_id">Verbatim quote</quote></add_evidence>
+      <update_text>Replacement text</update_text>
+      <add_source>source_id</add_source>
+    </node>
+    <edge id="existing_edge_id">
+      <update_type>new_edge_type</update_type>
+    </edge>
+  </modify>
+  <!-- REMOVE redundant nodes/edges -->
+  <remove>
+    <node id="existing_node_id"/>
+    <edge id="existing_edge_id"/>
+  </remove>
+</patch>
+```
+
+### Concrete Example
+
+Given a graph with nodes `expert_01_c001`, `expert_02_c003`, and edge `e001`:
+
+```xml
+<patch>
+  <add>
+    <node id="new_n1" type="claim">
+      <text>AI tutoring improves outcomes for struggling students</text>
+      <sources><source>expert_03</source></sources>
+      <evidence><quote source="expert_03">studies show a 15% improvement in test scores for at-risk students using AI tutors</quote></evidence>
+    </node>
+    <edge id="new_e1" type="supports" from="new_n1" to="expert_01_c001"/>
+  </add>
+  <modify>
+    <node id="expert_02_c003">
+      <add_evidence><quote source="expert_05">the digital divide remains a significant barrier to equitable AI deployment</quote></add_evidence>
+    </node>
+  </modify>
+</patch>
+```
+
+### Rules
+- Output ONLY a `<patch>` document. Do NOT output a full `<graph>`.
+- Include only the sections you need (`<add>`, `<modify>`, `<remove>`). Omit empty sections.
+- If no changes are needed, output `<patch/>`.
+- Node types: claim, evidence_quote, counterclaim.
+- Edge types: supports, attacks, refines, about, depends_on.
+
+Begin your patch:

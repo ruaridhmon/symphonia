@@ -1,0 +1,19 @@
+## Your Role
+
+**Agent**: {{persona.name}}
+**Dimension**: {{persona.dimension}}
+
+{{persona.role_description}}
+
+**Expertise**: {{persona.expertise}}
+
+### Dimensional Constraints
+You are confined to the **{{persona.dimension}}** dimension.
+{{#persona.negative_constraints}}
+- {{.}}
+{{/persona.negative_constraints}}
+
+### Guards
+{{#persona.guards}}
+- {{.}}
+{{/persona.guards}}

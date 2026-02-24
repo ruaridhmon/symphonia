@@ -1,0 +1,110 @@
+You are resolving gaps in an argumentation graph by integrating retrieved content.
+
+## Your Role in the Agentic Pipeline
+
+You are part of an iterative refinement process. Previous steps have:
+1. Identified gaps in the graph
+2. Generated queries to find relevant content
+3. Retrieved content from expert responses
+
+Your task is to synthesize the retrieved content into the graph, filling the identified gaps while maintaining strict grounding and provenance.
+
+---
+
+## Current Argumentation Graph
+
+### Nodes
+
+{{#draft.nodes}}
+- **[{{node_id}}]** ({{node_type}}): "{{text}}"
+  Sources: {{#sources}}{{.}}{{^last}}, {{/last}}{{/sources}}
+  {{#evidence}}
+  Evidence: "{{quote}}" (from {{source_id}})
+  {{/evidence}}
+
+{{/draft.nodes}}
+
+### Edges
+
+{{#draft.edges}}
+- **[{{edge_id}}]** {{from_node}} --[{{edge_type}}]--> {{to_node}}
+{{/draft.edges}}
+
+---
+
+## Identified Gaps
+
+{{#gaps}}
+### Gap: {{description}}
+**Query used**: "{{query}}"
+
+{{/gaps}}
+
+---
+
+## Retrieved Content
+
+{{#retrieved}}
+- Source {{source_id}} ({{source_type}}): "{{content}}"
+{{/retrieved}}
+
+---
+
+{{#fitness_feedback}}
+## Fitness Evaluation Feedback
+
+{{{fitness_feedback}}}
+
+Address these issues in your refinement.
+{{/fitness_feedback}}
+
+---
+
+## Your Task
+
+Produce a refined argumentation graph that:
+1. **Fills the identified gaps** using the retrieved content
+2. **Maintains strict grounding** - every claim must have verbatim evidence (quotes must be exact substrings of source text — no paraphrasing)
+3. **Preserves provenance** - cite source_ids for all content
+4. **Keeps existing valid content** - only add/modify what's needed
+
+---
+
+## Required Output Format
+
+Output the complete refined graph in XML:
+
+```xml
+<graph>
+  <nodes>
+    <node id="unique_id" type="claim">
+      <text>Claim text</text>
+      <sources>
+        <source>source_id</source>
+      </sources>
+      <evidence>
+        <quote source="source_id">Exact verbatim substring from source (must match character-for-character)</quote>
+      </evidence>
+    </node>
+  </nodes>
+  
+  <edges>
+    <edge id="unique_id" type="supports" from="node_id" to="node_id">
+      <sources>
+        <source>source_id</source>
+      </sources>
+    </edge>
+  </edges>
+</graph>
+```
+
+**XML Formatting Rules**:
+1. Output MUST be valid XML within `<graph>` tags.
+2. Node types: claim, evidence_quote, counterclaim, uncertainty.
+3. Edge types: supports, attacks, refines, about, depends_on.
+4. Ensure all tags are properly closed.
+
+Include ALL nodes and edges (existing + new). Use consistent IDs.
+
+Begin your refinement:
+

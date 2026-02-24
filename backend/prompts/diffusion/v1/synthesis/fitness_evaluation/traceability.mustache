@@ -1,0 +1,116 @@
+You are evaluating **Traceability** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate syntheses. Other evaluators assess different dimensions. Your singular focus is **traceability**.
+
+Your role: ensure every statement can be traced to specific sources via explicit citations, enabling verification and audit.
+
+---
+
+## Dimension: Traceability
+
+**Definition**: The degree to which every statement can be traced to specific sources via explicit citations, enabling verification and audit.
+
+**Why This Matters**: Transparent scientific advice requires complete audit trails. Experts reviewing Delphi feedback must be able to verify claims against source material. Missing citations undermine trust and auditability.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Synthesis Being Evaluated
+
+{{#draft.claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+  Sources:
+  {{#sources}}
+    - {{source_id}}: "{{quote}}"
+  {{/sources}}
+{{/draft.claims}}
+
+---
+
+## Source Expert Responses
+
+{{#responses}}
+### {{response_id}}
+
+{{#claims.length}}
+**Claims:**
+{{#claims}}
+- "{{.}}"
+{{/claims}}
+{{/claims.length}}
+{{^claims.length}}
+**Response:**
+<expert_response id="{{response_id}}">{{response}}</expert_response>
+{{/claims.length}}
+
+---
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Traceability
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Fully Traceable**: Every claim cites specific source_ids. Every evidence quote is verbatim with source attribution. A reader can verify every statement against source material without ambiguity. Provenance chain from synthesis → graph → source is complete and unambiguous. |
+| **8** | **Highly Traceable**: All substantive claims have sources. 1-2 minor statements (e.g., structural/transitional language) lack citations but are obviously synthesis scaffolding, not claims. |
+| **7** | **Well Traceable**: 95%+ claims have explicit source citations. A few claims have implicit or slightly unclear attribution that can be resolved. |
+| **6** | **Adequately Traceable**: 90-95% of claims have sources. Some citations are to groups ("several experts", "multiple sources") rather than specific IDs. |
+| **5** | **Moderately Traceable**: 80-90% of claims have sources. Some claims have vague attribution. Audit trail has noticeable gaps. |
+| **4** | **Partially Traceable**: 70-80% of claims have sources. Multiple claims lack clear attribution. Verification is difficult. |
+| **3** | **Weakly Traceable**: 50-70% of claims have sources. Significant audit trail gaps. Attribution is often vague or missing. |
+| **2** | **Poorly Traceable**: 30-50% of claims have sources. Most claims lack verifiable attribution. Provenance cannot be established for much content. |
+| **1** | **Not Traceable**: <30% of claims have sources. Provenance cannot be established. Verification is impossible. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ Every claim cites source_id(s) or graph node_id(s)
+- ✓ Evidence quotes are verbatim with source_id
+- ✓ Audit trail supports verification from synthesis back to original response
+- ✗ Claims attributed to "experts" or "some" without IDs
+- ✗ Missing source_ids on substantive claims
+- ✗ Evidence quotes without source attribution
+
+---
+
+## Your Task
+
+1. **Check each claim** for explicit source citations
+2. **Verify evidence quotes** are attributed with source_ids
+3. **Identify vague attributions** ("several experts", "some")
+4. **Test the audit trail**—can you trace back to original responses?
+5. **Provide specific citation guidance** for the next generation
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Multi-line analysis of traceability: identify specific issues, cite claim IDs where relevant, assess overall quality against the rubric.</rationale>
+  <suggestions>
+    <suggestion>Specific actionable improvement with claim ID reference</suggestion>
+    <suggestion>Another specific improvement</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must be plain text** (no nested XML tags inside rationale).
+- **Each `<suggestion>` must be actionable** — cite the claim ID and what to change.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

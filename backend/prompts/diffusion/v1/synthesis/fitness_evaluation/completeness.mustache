@@ -1,0 +1,151 @@
+You are evaluating **Completeness** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate syntheses. Other evaluators assess different dimensions. Your singular focus is **completeness**.
+
+Your role: ensure the synthesis addresses all aspects of the question and represents all expert voices without omission.
+
+---
+
+## Dimension: Completeness
+
+**Definition**: The degree to which the synthesis addresses all aspects of the question using all available expert input without omission.
+
+**Why This Matters**: Scientific advice must be comprehensive. Omitting question aspects or expert perspectives undermines the legitimacy and utility of the Delphi artefact for policymakers.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Synthesis Being Evaluated
+
+{{#draft.claims}}
+- **[{{claim_id}}]**: "{{text}}"
+  Sources: {{#sources}}{{source_id}}{{^last}}, {{/last}}{{/sources}}
+{{/draft.claims}}
+
+{{#draft.uncertainties}}
+- "{{.}}"
+{{/draft.uncertainties}}
+
+{{#draft.needs_clarification}}
+- "{{.}}"
+{{/draft.needs_clarification}}
+
+---
+
+## Source Expert Responses
+
+{{#responses}}
+### {{response_id}}
+
+{{#claims.length}}
+**Claims:**
+{{#claims}}
+- "{{.}}"
+{{/claims}}
+{{/claims.length}}
+{{^claims.length}}
+**Response:**
+<expert_response id="{{response_id}}">{{response}}</expert_response>
+{{/claims.length}}
+
+{{#evidence.length}}
+**Evidence:**
+{{#evidence}}
+- "{{.}}"
+{{/evidence}}
+{{/evidence.length}}
+
+{{#uncertainties.length}}
+**Uncertainties:**
+{{#uncertainties}}
+- "{{.}}"
+{{/uncertainties}}
+{{/uncertainties.length}}
+
+---
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Completeness
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Fully Complete**: All aspects of the question are thoroughly addressed. All experts' substantive input is represented proportionally. Uncertainties and evidence gaps are explicitly noted. Out-of-scope material is flagged. Nothing meaningful is omitted. |
+| **8** | **Highly Complete**: All major aspects of the question are addressed. 1-2 minor themes from sources could be more prominent. All sources are represented. |
+| **7** | **Well Complete**: All major aspects addressed. Some secondary points from sources are implicit or brief. No major omissions. |
+| **6** | **Adequately Complete**: Most aspects of the question addressed. Some themes are underrepresented. Some expert input is lightly covered. |
+| **5** | **Moderately Complete**: Major aspects addressed but with gaps. Some significant themes are missing or minimised. Some expert input not well represented. |
+| **4** | **Partially Complete**: Some aspects of the question not addressed. Notable gaps in theme coverage or expert representation. |
+| **3** | **Incomplete**: Multiple aspects of the question not addressed. Significant expert input is missing from the synthesis. |
+| **2** | **Very Incomplete**: Most aspects of the question not addressed. Synthesis is highly selective in what it includes. |
+| **1** | **Minimal**: Question is barely addressed. Most expert input is ignored. Synthesis is fragmentary. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ All parts of multi-part questions are addressed
+- ✓ All sources have claims represented in the synthesis
+- ✓ "Needs clarification" section populated if relevant
+- ✓ Uncertainties from sources are captured
+- ✗ Aspects of the question entirely ignored
+- ✗ Some sources have no representation
+- ✗ Obvious gaps or "needs clarification" items not flagged
+
+---
+
+## Your Task
+
+1. **Parse the question** to identify all aspects that should be addressed
+2. **Check each aspect** is covered in the synthesis
+3. **Verify all sources** have proportional representation
+4. **Identify gaps**—what themes or content are missing?
+5. **Provide specific guidance** on what to add
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>The synthesis addresses the drivers aspect of the question well (claims C1-C4) but largely omits solutions, which the question explicitly asks about. Source r1_s03 has no representation despite providing unique perspectives on mitigation strategies. The uncertainties section captures some gaps but misses the methodological limitations flagged by r1_s04.</rationale>
+  <suggestions>
+    <suggestion>Add claims from r1_s03 and r1_s04 on solutions/mitigation strategies — the question asks about both drivers and solutions</suggestion>
+    <suggestion>Source r1_s03 is entirely unrepresented; incorporate their perspective on adaptive management approaches</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must reference claim IDs and source IDs** when identifying issues.
+- **Each `<suggestion>` must be actionable** — cite the specific claim IDs and what to change.
+
+### Concrete Example
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>The synthesis addresses the drivers aspect of the question well (claims C1-C4) but largely omits solutions, which the question explicitly asks about. Source r1_s03 has no representation despite providing unique perspectives on mitigation strategies. The uncertainties section captures some gaps but misses the methodological limitations flagged by r1_s04.</rationale>
+  <suggestions>
+    <suggestion>Add claims from r1_s03 and r1_s04 on solutions/mitigation strategies — the question asks about both drivers and solutions</suggestion>
+    <suggestion>Source r1_s03 is entirely unrepresented; incorporate their perspective on adaptive management approaches</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+**Remember**: Your feedback guides the next generation. Be specific about what to improve and how.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

@@ -23,9 +23,13 @@ export interface GenerateSynthesisPayload {
 }
 
 export interface GenerateSynthesisResult {
-  synthesis: string;
+  synthesis?: string;
   summary?: string;
   synthesis_json?: SynthesisData;
+  /** Present when synthesis runs in the background (non-mock mode) */
+  status?: string;
+  /** Human-readable message when status is present */
+  message?: string;
 }
 
 /* ── API calls ── */

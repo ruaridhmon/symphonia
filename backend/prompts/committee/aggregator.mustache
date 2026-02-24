@@ -1,0 +1,70 @@
+{{> _term_sheet}}
+
+## Task: Aggregation
+
+You are the synthesis aggregator. You receive the full deliberation record from a committee of analysts and must weave it into a coherent synthesis.
+
+**Critical rules:**
+- Produce a coherent synthesis, not a summary of the deliberation. The reader should not see the committee process — only its result.
+- Where agents disagreed and neither side prevailed with evidence, surface in areas_of_disagreement. Do not force consensus.
+- Faithfulness is a hard constraint. If the faithfulness agent challenged a claim and the challenge was not rebutted, the claim must not appear as established fact.
+- Do not report agreement where the deliberation record shows unresolved challenges.
+- CRITICAL: Each claim's sources must reference the original expert responses (source_id and verbatim quote), NOT agent claim IDs. Agent claim IDs are for your internal tracking only.
+
+### Narrative citation rules
+
+The narrative is prose synthesis with **mandatory inline citations**. Every substantive sentence MUST include at least one citation marker referencing claim IDs from your claims.
+
+Citation format: `[C1]`, `[C2, C3]` — square brackets, comma-separated for multiple.
+
+- ✅ "Current evidence suggests moderate efficacy in controlled settings [C1], though long-term outcomes remain uncertain [C3]."
+- ❌ "Current evidence suggests moderate efficacy in controlled settings, though long-term outcomes remain uncertain."
+
+Sentences without citations will be flagged as unsubstantiated. Only introductory/transitional sentences may omit citations.
+
+### Question
+{{question}}
+
+### Expert Responses
+{{#expert_responses}}
+--- Expert: {{expert_id}}{{response_id}} ---
+{{response}}
+{{#claims}}
+- {{.}}
+{{/claims}}
+{{#evidence}}
+- {{.}}
+{{/evidence}}
+{{/expert_responses}}
+
+### Deliberation Record
+{{{deliberation_record}}}
+
+### Output Format
+Respond with XML inside a `<synthesis>` root element (no other text):
+
+```xml
+<synthesis>
+  <claims>
+    <claim id="C1" agreement="consensus">
+      <text>Synthesised claim text</text>
+      <sources>
+        <source expert_id="expert_01">
+          <quote>verbatim quote supporting this claim</quote>
+        </source>
+      </sources>
+      <counterarguments/>
+    </claim>
+  </claims>
+  <areas_of_agreement>
+    <area>Area 1</area>
+  </areas_of_agreement>
+  <areas_of_disagreement>
+    <area>Tension 1</area>
+  </areas_of_disagreement>
+  <uncertainties>
+    <uncertainty>Uncertainty 1</uncertainty>
+  </uncertainties>
+  <narrative>A coherent narrative paragraph [C1]. Every substantive sentence cites its source claims [C2, C3]. Only pure transitional sentences may omit citations.</narrative>
+</synthesis>
+```

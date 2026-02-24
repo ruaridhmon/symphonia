@@ -15,6 +15,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from fastapi.responses import JSONResponse
+import asyncio
 
 from .rate_limiter import (
     limiter,
@@ -1222,197 +1223,120 @@ def list_synthesis_versions(
     ]
 
 
-class GenerateSynthesisVersionPayload(BaseModel):
-    model: str = "anthropic/claude-sonnet-4"
-    strategy: str = "simple"  # "simple" | "committee" | "ttd"
-    n_analysts: int = 3
-    mode: str = "human_only"
+# ---------------------------------------------------------
+# BACKGROUND SYNTHESIS TASK
+# ---------------------------------------------------------
 
-
-@router.post(
-    "/forms/{form_id}/rounds/{round_id}/generate_synthesis",
-    tags=["Synthesis"],
-    summary="Generate synthesis for any round",
-    description=(
-        "Generate a new synthesis version for ANY round (not just active). Supports "
-        "'simple', 'committee', and 'ttd' strategies. Auto-activates the new version "
-        "and broadcasts via WebSocket. Admin only."
-    ),
-    response_description="New synthesis version with id, text, JSON, model, and strategy",
-)
-@limiter.limit(SYNTHESIS_LIMIT)
-async def generate_synthesis_for_round(
-    request: Request,
+async def _synthesis_background(
+    *,
     form_id: int,
     round_id: int,
-    payload: GenerateSynthesisVersionPayload,
-    background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    round_number: int,
+    questions: list,
+    response_dicts: list[dict],
+    comments_context: str,
+    next_version: int,
+    strategy: str,
+    model: str,
+    n_analysts: int,
+    mode_str: str,
+    admin_email: str | None,
 ):
-    """Generate a NEW synthesis version for ANY round (not just active).
+    """Run synthesis in the background (committee/ttd/simple).
 
-    Creates a new SynthesisVersion record with an incremented version number.
-    If strategy is 'committee' or 'ttd', runs the consensus library adapter.
-    Otherwise, falls back to simple single-prompt synthesis.
+    Launched via asyncio.create_task() from the HTTP handler.
+    Creates its own DB session, runs synthesis, saves the result, and
+    broadcasts completion (or error) via WebSocket.
     """
-    # Verify round belongs to form
-    round_obj = (
-        db.query(RoundModel)
-        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
-        .first()
-    )
-    if not round_obj:
-        raise HTTPException(status_code=404, detail="Round not found")
+    db = SessionLocal()
+    try:
+        synthesis_text = None
+        synthesis_json_data = None
 
-    # Fetch questions for this round
-    questions = round_obj.questions or []
-    if not questions:
-        form = db.query(FormModel).filter(FormModel.id == form_id).first()
-        if form:
-            questions = form.questions or []
-    if not questions:
-        raise HTTPException(status_code=400, detail="No questions found for this round")
+        if strategy in ("committee", "ttd"):
+            # ── Committee / TTD synthesis ──
+            try:
+                flow_mode = FlowMode(mode_str)
+            except ValueError:
+                flow_mode = FlowMode.HUMAN_ONLY
 
-    # Fetch responses for this round
-    responses = (
-        db.query(Response)
-        .filter(Response.round_id == round_id)
-        .order_by(Response.created_at.asc())
-        .all()
-    )
-    if not responses:
-        raise HTTPException(status_code=404, detail="No responses to synthesise for this round")
+            resolved_model = _resolve_synthesis_model(db, model)
 
-    # Determine next version number
-    max_version = (
-        db.query(SynthesisVersion.version)
-        .filter(SynthesisVersion.round_id == round_id)
-        .order_by(SynthesisVersion.version.desc())
-        .first()
-    )
-    next_version = (max_version[0] + 1) if max_version else 1
-
-    synthesis_text = None
-    synthesis_json_data = None
-
-    strategy = payload.strategy.lower()
-
-    # Check for mock mode or missing API key
-    synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
-    api_key = os.getenv("OPENROUTER_API_KEY", "")
-
-    # Fetch expert discussion comments for this round
-    round_comments = _fetch_comments_for_round(db, round_id)
-    round_comments_context = _format_comments_as_context(round_comments)
-
-    if synthesis_mode_env == "mock" or not api_key:
-        # Mock synthesis for demo/testing
-        synthesis_text = (
-            f"## Synthesis v{next_version} (Mock Mode)\n\n"
-            f"**Round {round_obj.round_number}** — {len(responses)} responses analysed.\n\n"
-            f"*Strategy: {strategy} | Model: {payload.model}*\n\n"
-            "This is a mock synthesis. Enable OPENROUTER_API_KEY for real LLM synthesis."
-        )
-    elif strategy in ("committee", "ttd"):
-        # Run consensus-library synthesis (committee or TTD/diffusion)
-        response_dicts = [
-            {
-                "answers": r.answers,
-                "email": r.user.email if r.user else f"Expert {i}",
-            }
-            for i, r in enumerate(responses)
-        ]
-
-        try:
-            flow_mode = FlowMode(payload.mode)
-        except ValueError:
-            flow_mode = FlowMode.HUMAN_ONLY
-
-        resolved_model = _resolve_synthesis_model(db, payload.model)
-
-        try:
-            synthesiser = get_synthesiser(
-                api_key=api_key,
-                n_analysts=payload.n_analysts,
-                strategy=strategy,
-                model=resolved_model,
-            )
-
-            result = await synthesiser.run(
-                questions=questions,
-                responses=response_dicts,
-                model=resolved_model,
-                mode=flow_mode,
-                comments_context=round_comments_context,
-            )
-        except SynthesisConfigError as exc:
-            logger.warning("Synthesis config error (round %d): %s", round_id, exc)
-            await _broadcast_synthesis_error(form_id, round_id, str(exc))
-            raise HTTPException(status_code=400, detail=f"Synthesis configuration error: {exc}")
-        except SynthesisTimeoutError as exc:
-            logger.warning("Synthesis timeout (round %d): %s", round_id, exc)
-            await _broadcast_synthesis_error(form_id, round_id, str(exc))
-            raise HTTPException(status_code=504, detail=f"Synthesis timed out: {exc}")
-        except SynthesisError as exc:
-            logger.error("Synthesis error (round %d): %s", round_id, exc, exc_info=True)
-            await _broadcast_synthesis_error(form_id, round_id, str(exc))
-            raise HTTPException(status_code=500, detail=f"Synthesis failed: {exc}")
-        except Exception as exc:
-            logger.error("Unexpected synthesis error (round %d): %s", round_id, exc, exc_info=True)
-            await _broadcast_synthesis_error(form_id, round_id, "An unexpected error occurred")
-            raise HTTPException(status_code=500, detail=f"Synthesis failed unexpectedly: {exc}")
-
-        synthesis_json_data = result.to_dict()
-
-        # Build text representation for backwards compat
-        text_parts = []
-        if result.agreements:
-            text_parts.append("<h3>Agreements</h3>")
-            for a in result.agreements:
-                text_parts.append(
-                    f"<p><strong>{a.claim}</strong> "
-                    f"(confidence: {a.confidence:.0%}) — {a.evidence_summary}</p>"
+            try:
+                synthesiser = get_synthesiser(
+                    api_key=os.getenv("OPENROUTER_API_KEY", ""),
+                    n_analysts=n_analysts,
+                    strategy=strategy,
+                    model=resolved_model,
                 )
-        if result.disagreements:
-            text_parts.append("<h3>Disagreements</h3>")
-            for d in result.disagreements:
-                text_parts.append(f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>")
-                for pos in d.positions:
+
+                result = await synthesiser.run(
+                    questions=questions,
+                    responses=response_dicts,
+                    model=resolved_model,
+                    mode=flow_mode,
+                    comments_context=comments_context,
+                )
+            except (SynthesisConfigError, SynthesisTimeoutError, SynthesisError) as exc:
+                logger.error("Background synthesis error (round %d): %s", round_id, exc, exc_info=True)
+                await _broadcast_synthesis_error(form_id, round_id, str(exc))
+                return
+            except Exception as exc:
+                logger.error("Unexpected background synthesis error (round %d): %s", round_id, exc, exc_info=True)
+                await _broadcast_synthesis_error(form_id, round_id, "An unexpected error occurred")
+                return
+
+            synthesis_json_data = result.to_dict()
+
+            # Build text representation for backwards compat
+            text_parts = []
+            if result.agreements:
+                text_parts.append("<h3>Agreements</h3>")
+                for a in result.agreements:
                     text_parts.append(
-                        f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
+                        f"<p><strong>{a.claim}</strong> "
+                        f"(confidence: {a.confidence:.0%}) — {a.evidence_summary}</p>"
                     )
-                text_parts.append("</ul>")
-        if result.nuances:
-            text_parts.append("<h3>Nuances</h3>")
-            for n in result.nuances:
-                text_parts.append(f"<p><strong>{n.claim}</strong> — {n.context}</p>")
+            if result.disagreements:
+                text_parts.append("<h3>Disagreements</h3>")
+                for d in result.disagreements:
+                    text_parts.append(f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>")
+                    for pos in d.positions:
+                        text_parts.append(
+                            f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
+                        )
+                    text_parts.append("</ul>")
+            if result.nuances:
+                text_parts.append("<h3>Nuances</h3>")
+                for n in result.nuances:
+                    text_parts.append(f"<p><strong>{n.claim}</strong> — {n.context}</p>")
 
-        synthesis_text = "".join(text_parts) if text_parts else "Synthesis complete."
+            synthesis_text = "".join(text_parts) if text_parts else "Synthesis complete."
 
-    else:
-        # Simple single-prompt synthesis — produces structured JSON
-        prompt_content = "Synthesize the following expert responses.\n\n"
-        prompt_content += "Questions:\n"
-        for i, q in enumerate(questions, 1):
-            prompt_content += f"{i}. {q}\n"
+        else:
+            # ── Simple single-prompt synthesis ──
+            prompt_content = "Synthesize the following expert responses.\n\n"
+            prompt_content += "Questions:\n"
+            for i, q in enumerate(questions, 1):
+                prompt_content += f"{i}. {q}\n"
 
-        prompt_content += "\n--- Responses ---\n"
-        for i, r in enumerate(responses, 1):
-            prompt_content += f"\nResponse {i}:\n"
-            answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
-            for q_idx, q_text in enumerate(questions, 1):
-                answer = answers.get(f'q{q_idx}', 'No answer')
-                prompt_content += f"  - Q: {q_text}\n"
-                prompt_content += f"    A: {answer}\n"
+            prompt_content += "\n--- Responses ---\n"
+            for i, rd in enumerate(response_dicts, 1):
+                prompt_content += f"\nResponse {i}:\n"
+                answers = rd.get("answers", {})
+                if isinstance(answers, str):
+                    answers = json.loads(answers) if answers else {}
+                for q_idx, q_text in enumerate(questions, 1):
+                    answer = answers.get(f'q{q_idx}', 'No answer')
+                    prompt_content += f"  - Q: {q_text}\n"
+                    prompt_content += f"    A: {answer}\n"
 
-        prompt_content += "\n--- End of Responses ---\n"
+            prompt_content += "\n--- End of Responses ---\n"
 
-        # Include expert discussion comments if any exist
-        if round_comments_context:
-            prompt_content += round_comments_context + "\n"
+            if comments_context:
+                prompt_content += comments_context + "\n"
 
-        prompt_content += """
+            prompt_content += """
 Return your synthesis as a JSON object with the following structure (and ONLY the JSON, no markdown fences, no extra text):
 {
   "narrative": "A 2-3 paragraph narrative summary of the overall synthesis",
@@ -1462,152 +1386,324 @@ IMPORTANT: For each agreement, include "evidence_excerpts" with direct quotes fr
 If expert discussion comments are included above, integrate those perspectives into the synthesis naturally. Comments represent additional qualitative input raised during deliberation — they may reinforce, challenge, or add nuance to the structured responses.
 """
 
-        try:
-            openai_client = get_openai_client()
-            if not openai_client:
-                raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
-            completion = openai_client.chat.completions.create(
-                model=payload.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "You are an expert Delphi method facilitator. You synthesize expert responses "
-                            "into structured analyses identifying agreements, disagreements, nuances, and "
-                            "follow-up questions. Always return valid JSON matching the requested schema."
-                        ),
-                    },
-                    {"role": "user", "content": prompt_content},
-                ],
-            )
-            raw_output = completion.choices[0].message.content or ""
-
-            # Try to parse as structured JSON
             try:
-                # Strip markdown code fences if present
-                cleaned = raw_output.strip()
-                if cleaned.startswith("```"):
-                    # Remove ```json and trailing ```
-                    lines = cleaned.split("\n")
-                    lines = [l for l in lines if not l.strip().startswith("```")]
-                    cleaned = "\n".join(lines)
-                parsed = json.loads(cleaned)
+                openai_client = get_openai_client()
+                if not openai_client:
+                    await _broadcast_synthesis_error(form_id, round_id, "Synthesis is not configured. Please add an OpenRouter API key in Settings.")
+                    return
 
-                # Validate required keys exist, fill defaults
-                synthesis_json_data = {
-                    "narrative": parsed.get("narrative", ""),
-                    "agreements": parsed.get("agreements", []),
-                    "disagreements": parsed.get("disagreements", []),
-                    "nuances": parsed.get("nuances", []),
-                    "confidence_map": parsed.get("confidence_map", {"overall": 0.5}),
-                    "follow_up_probes": parsed.get("follow_up_probes", []),
-                    "meta_synthesis_reasoning": parsed.get("meta_synthesis_reasoning", ""),
-                }
+                completion = openai_client.chat.completions.create(
+                    model=model,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are an expert Delphi method facilitator. You synthesize expert responses "
+                                "into structured analyses identifying agreements, disagreements, nuances, and "
+                                "follow-up questions. Always return valid JSON matching the requested schema."
+                            ),
+                        },
+                        {"role": "user", "content": prompt_content},
+                    ],
+                )
+                raw_output = completion.choices[0].message.content or ""
 
-                # Build readable text from the structured data
-                text_parts = []
-                if synthesis_json_data.get("narrative"):
-                    text_parts.append(f"<p>{synthesis_json_data['narrative']}</p>")
-                if synthesis_json_data["agreements"]:
-                    text_parts.append("<h3>Agreements</h3>")
-                    for a in synthesis_json_data["agreements"]:
-                        conf = a.get("confidence", 0)
-                        text_parts.append(
-                            f"<p><strong>{a.get('claim', '')}</strong> "
-                            f"(confidence: {conf:.0%}) — {a.get('evidence_summary', '')}</p>"
-                        )
-                if synthesis_json_data["disagreements"]:
-                    text_parts.append("<h3>Disagreements</h3>")
-                    for d in synthesis_json_data["disagreements"]:
-                        text_parts.append(
-                            f"<p><strong>{d.get('topic', '')}</strong> ({d.get('severity', 'moderate')})</p><ul>"
-                        )
-                        for pos in d.get("positions", []):
+                try:
+                    cleaned = raw_output.strip()
+                    if cleaned.startswith("```"):
+                        lines = cleaned.split("\n")
+                        lines = [l for l in lines if not l.strip().startswith("```")]
+                        cleaned = "\n".join(lines)
+                    parsed = json.loads(cleaned)
+
+                    synthesis_json_data = {
+                        "narrative": parsed.get("narrative", ""),
+                        "agreements": parsed.get("agreements", []),
+                        "disagreements": parsed.get("disagreements", []),
+                        "nuances": parsed.get("nuances", []),
+                        "confidence_map": parsed.get("confidence_map", {"overall": 0.5}),
+                        "follow_up_probes": parsed.get("follow_up_probes", []),
+                        "meta_synthesis_reasoning": parsed.get("meta_synthesis_reasoning", ""),
+                    }
+
+                    text_parts = []
+                    if synthesis_json_data.get("narrative"):
+                        text_parts.append(f"<p>{synthesis_json_data['narrative']}</p>")
+                    if synthesis_json_data["agreements"]:
+                        text_parts.append("<h3>Agreements</h3>")
+                        for a in synthesis_json_data["agreements"]:
+                            conf = a.get("confidence", 0)
                             text_parts.append(
-                                f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
+                                f"<p><strong>{a.get('claim', '')}</strong> "
+                                f"(confidence: {conf:.0%}) — {a.get('evidence_summary', '')}</p>"
                             )
-                        text_parts.append("</ul>")
-                if synthesis_json_data["nuances"]:
-                    text_parts.append("<h3>Nuances</h3>")
-                    for n in synthesis_json_data["nuances"]:
-                        text_parts.append(
-                            f"<p><strong>{n.get('claim', '')}</strong> — {n.get('context', '')}</p>"
-                        )
-                synthesis_text = "".join(text_parts) if text_parts else raw_output
+                    if synthesis_json_data["disagreements"]:
+                        text_parts.append("<h3>Disagreements</h3>")
+                        for d in synthesis_json_data["disagreements"]:
+                            text_parts.append(
+                                f"<p><strong>{d.get('topic', '')}</strong> ({d.get('severity', 'moderate')})</p><ul>"
+                            )
+                            for pos in d.get("positions", []):
+                                text_parts.append(
+                                    f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
+                                )
+                            text_parts.append("</ul>")
+                    if synthesis_json_data["nuances"]:
+                        text_parts.append("<h3>Nuances</h3>")
+                        for n in synthesis_json_data["nuances"]:
+                            text_parts.append(
+                                f"<p><strong>{n.get('claim', '')}</strong> — {n.get('context', '')}</p>"
+                            )
+                    synthesis_text = "".join(text_parts) if text_parts else raw_output
 
-            except (json.JSONDecodeError, KeyError, TypeError):
-                # LLM didn't return valid JSON — fall back to raw text
-                synthesis_text = raw_output
-                synthesis_json_data = None
+                except (json.JSONDecodeError, KeyError, TypeError):
+                    synthesis_text = raw_output
+                    synthesis_json_data = None
 
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to generate synthesis: {e}")
+            except Exception as exc:
+                logger.error("Background simple synthesis error (round %d): %s", round_id, exc, exc_info=True)
+                await _broadcast_synthesis_error(form_id, round_id, f"Synthesis failed: {exc}")
+                return
 
-    # Create the version record — auto-activate so the round updates immediately
-    # Deactivate all existing versions for this round first
-    db.query(SynthesisVersion).filter(
-        SynthesisVersion.round_id == round_id,
-    ).update({"is_active": False})
+        # ── Save to DB ──
+        round_obj = db.query(RoundModel).filter(RoundModel.id == round_id).first()
+        if not round_obj:
+            logger.error("Background synthesis: round %d disappeared", round_id)
+            await _broadcast_synthesis_error(form_id, round_id, "Round not found after synthesis completed")
+            return
 
-    new_version = SynthesisVersion(
-        round_id=round_id,
-        version=next_version,
-        synthesis=synthesis_text,
-        synthesis_json=synthesis_json_data,
-        model_used=payload.model,
-        strategy=strategy,
-        is_active=True,
-    )
-    db.add(new_version)
+        # Deactivate existing versions
+        db.query(SynthesisVersion).filter(
+            SynthesisVersion.round_id == round_id,
+        ).update({"is_active": False})
 
-    # Copy synthesis onto the round model so it's immediately visible
-    round_obj.synthesis = synthesis_text
-    round_obj.synthesis_json = synthesis_json_data
+        new_version = SynthesisVersion(
+            round_id=round_id,
+            version=next_version,
+            synthesis=synthesis_text,
+            synthesis_json=synthesis_json_data,
+            model_used=model,
+            strategy=strategy,
+            is_active=True,
+        )
+        db.add(new_version)
 
-    db.commit()
-    db.refresh(new_version)
+        round_obj.synthesis = synthesis_text
+        round_obj.synthesis_json = synthesis_json_data
 
-    # Broadcast synthesis update via WebSocket so other clients auto-refresh
-    if synthesis_text:
-        await ws_manager.broadcast_summary(synthesis_text)
-    for conn in ws_manager.active_connections.copy():
+        db.commit()
+        db.refresh(new_version)
+
+        # ── Broadcast completion via WebSocket ──
+        if synthesis_text:
+            await ws_manager.broadcast_summary(synthesis_text)
+        for conn in ws_manager.active_connections.copy():
+            try:
+                await conn.send_json({
+                    "type": "synthesis_complete",
+                    "form_id": form_id,
+                    "round_id": round_id,
+                    "version_id": new_version.id,
+                    "synthesis_json": synthesis_json_data,
+                })
+            except Exception:
+                ws_manager.disconnect(conn)
+
+        # ── Send email notifications ──
+        convergence = None
+        if synthesis_json_data and isinstance(synthesis_json_data.get("confidence_map"), dict):
+            vals = list(synthesis_json_data["confidence_map"].values())
+            convergence = sum(vals) / len(vals) if vals else None
+
+        await _notify_synthesis_ready(
+            form_id=form_id,
+            round_id=round_id,
+            round_number=round_number,
+            admin_email=admin_email,
+            convergence_score=convergence,
+        )
+
+        logger.info("Background synthesis complete for round %d (version %d)", round_id, next_version)
+
+    except Exception as exc:
+        logger.error("Unhandled error in background synthesis (round %d): %s", round_id, exc, exc_info=True)
         try:
-            await conn.send_json({
-                "type": "synthesis_complete",
-                "form_id": form_id,
-                "round_id": round_id,
-                "version_id": new_version.id,
-                "synthesis_json": synthesis_json_data,
-            })
+            await _broadcast_synthesis_error(form_id, round_id, f"Synthesis failed unexpectedly: {exc}")
         except Exception:
-            ws_manager.disconnect(conn)
+            pass
+    finally:
+        db.close()
 
-    # Schedule email notifications in the background
-    convergence = None
-    if synthesis_json_data and isinstance(synthesis_json_data.get("confidence_map"), dict):
-        vals = list(synthesis_json_data["confidence_map"].values())
-        convergence = sum(vals) / len(vals) if vals else None
-    background_tasks.add_task(
-        _notify_synthesis_ready,
-        form_id=form_id,
-        round_id=round_id,
-        round_number=round_obj.round_number,
-        admin_email=user.email,
-        convergence_score=convergence,
+
+class GenerateSynthesisVersionPayload(BaseModel):
+    model: str = "anthropic/claude-sonnet-4"
+    strategy: str = "simple"  # "simple" | "committee" | "ttd"
+    n_analysts: int = 3
+    mode: str = "human_only"
+
+
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/generate_synthesis",
+    tags=["Synthesis"],
+    summary="Generate synthesis for any round",
+    description=(
+        "Generate a new synthesis version for ANY round (not just active). Supports "
+        "'simple', 'committee', and 'ttd' strategies. For real (non-mock) strategies, "
+        "synthesis runs asynchronously in the background — the endpoint returns "
+        "immediately and broadcasts completion via WebSocket. Admin only."
+    ),
+    response_description=(
+        "Immediate result for mock mode, or status='started' for real synthesis"
+    ),
+)
+@limiter.limit(SYNTHESIS_LIMIT)
+async def generate_synthesis_for_round(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    payload: GenerateSynthesisVersionPayload,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """Generate a NEW synthesis version for ANY round (not just active).
+
+    Mock mode returns the result synchronously (instant, no LLM).
+    Real synthesis (committee/ttd/simple) is launched as a background
+    asyncio task — the HTTP response returns within milliseconds and
+    the client is notified via the ``synthesis_complete`` WebSocket event.
+    """
+    # ── 1. Validate (fast, synchronous) ──
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    questions = round_obj.questions or []
+    if not questions:
+        form = db.query(FormModel).filter(FormModel.id == form_id).first()
+        if form:
+            questions = form.questions or []
+    if not questions:
+        raise HTTPException(status_code=400, detail="No questions found for this round")
+
+    responses = (
+        db.query(Response)
+        .filter(Response.round_id == round_id)
+        .order_by(Response.created_at.asc())
+        .all()
+    )
+    if not responses:
+        raise HTTPException(status_code=404, detail="No responses to synthesise for this round")
+
+    # ── 2. Pre-fetch everything we need from DB ──
+    max_version = (
+        db.query(SynthesisVersion.version)
+        .filter(SynthesisVersion.round_id == round_id)
+        .order_by(SynthesisVersion.version.desc())
+        .first()
+    )
+    next_version = (max_version[0] + 1) if max_version else 1
+
+    strategy = payload.strategy.lower()
+    synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    round_comments = _fetch_comments_for_round(db, round_id)
+    round_comments_context = _format_comments_as_context(round_comments)
+
+    # Materialise response data while the ORM session is still open
+    response_dicts = [
+        {
+            "answers": r.answers,
+            "email": r.user.email if r.user else f"Expert {i}",
+        }
+        for i, r in enumerate(responses)
+    ]
+    round_number = round_obj.round_number
+
+    # ── 3a. Mock mode → return synchronously (instant, no LLM call) ──
+    if synthesis_mode_env == "mock" or not api_key:
+        synthesis_text = (
+            f"## Synthesis v{next_version} (Mock Mode)\n\n"
+            f"**Round {round_number}** — {len(responses)} responses analysed.\n\n"
+            f"*Strategy: {strategy} | Model: {payload.model}*\n\n"
+            "This is a mock synthesis. Enable OPENROUTER_API_KEY for real LLM synthesis."
+        )
+
+        db.query(SynthesisVersion).filter(
+            SynthesisVersion.round_id == round_id,
+        ).update({"is_active": False})
+
+        new_version = SynthesisVersion(
+            round_id=round_id,
+            version=next_version,
+            synthesis=synthesis_text,
+            synthesis_json=None,
+            model_used=payload.model,
+            strategy=strategy,
+            is_active=True,
+        )
+        db.add(new_version)
+        round_obj.synthesis = synthesis_text
+        round_obj.synthesis_json = None
+        db.commit()
+        db.refresh(new_version)
+
+        # Still broadcast so other tabs / clients update
+        if synthesis_text:
+            await ws_manager.broadcast_summary(synthesis_text)
+        for conn in ws_manager.active_connections.copy():
+            try:
+                await conn.send_json({
+                    "type": "synthesis_complete",
+                    "form_id": form_id,
+                    "round_id": round_id,
+                    "version_id": new_version.id,
+                    "synthesis_json": None,
+                })
+            except Exception:
+                ws_manager.disconnect(conn)
+
+        return {
+            "id": new_version.id,
+            "round_id": new_version.round_id,
+            "version": new_version.version,
+            "synthesis": new_version.synthesis,
+            "synthesis_json": new_version.synthesis_json,
+            "model_used": new_version.model_used,
+            "strategy": new_version.strategy,
+            "created_at": new_version.created_at.isoformat() if new_version.created_at else None,
+            "is_active": new_version.is_active,
+        }
+
+    # ── 3b. Real synthesis → launch background task, return immediately ──
+    asyncio.create_task(
+        _synthesis_background(
+            form_id=form_id,
+            round_id=round_id,
+            round_number=round_number,
+            questions=list(questions),
+            response_dicts=response_dicts,
+            comments_context=round_comments_context,
+            next_version=next_version,
+            strategy=strategy,
+            model=payload.model,
+            n_analysts=payload.n_analysts,
+            mode_str=payload.mode,
+            admin_email=user.email,
+        )
     )
 
     return {
-        "id": new_version.id,
-        "round_id": new_version.round_id,
-        "version": new_version.version,
-        "synthesis": new_version.synthesis,
-        "synthesis_json": new_version.synthesis_json,
-        "model_used": new_version.model_used,
-        "strategy": new_version.strategy,
-        "created_at": new_version.created_at.isoformat() if new_version.created_at else None,
-        "is_active": new_version.is_active,
+        "status": "started",
+        "message": (
+            "Synthesis running in background. "
+            "You will be notified via WebSocket when complete."
+        ),
     }
 
 

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { Eye, EyeOff, FileDown, Save, ArrowRight } from 'lucide-react';
 import { LoadingButton, ExportPanel } from '../index';
 import type { Round } from '../../types/summary';
 import type { SynthesisData } from '../../types/synthesis';
@@ -44,42 +45,57 @@ export default function ActionsCard({
   }, [onDownloadResponses]);
 
   return (
-    <div className="card p-3">
-      <h3
-        className="text-[10px] font-semibold uppercase tracking-wider mb-2"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
-        Actions
-      </h3>
-      <div className="flex flex-col space-y-1.5">
+    <div className="card p-2">
+      {/* Icon row: responses · download · save · next */}
+      <div className="flex items-center gap-1 flex-wrap">
+        <button
+          type="button"
+          title={responsesOpen ? 'Hide Responses' : 'View Responses'}
+          onClick={onToggleResponses}
+          className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10"
+          style={{ color: responsesOpen ? 'var(--accent)' : 'var(--muted-foreground)' }}
+        >
+          {responsesOpen ? <EyeOff size={15} /> : <Eye size={15} />}
+        </button>
+
+        <button
+          type="button"
+          title={downloading ? 'Downloading…' : 'Download Responses'}
+          onClick={handleDownload}
+          disabled={downloading}
+          className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10 disabled:opacity-50"
+          style={{ color: 'var(--muted-foreground)' }}
+        >
+          <FileDown size={15} />
+        </button>
+
+        <button
+          type="button"
+          title={saving ? 'Saving…' : 'Save Synthesis'}
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10 disabled:opacity-50"
+          style={{ color: 'var(--muted-foreground)' }}
+        >
+          <Save size={15} />
+        </button>
+
         <LoadingButton
           variant="accent"
           size="sm"
-          onClick={onToggleResponses}
-          className="w-full text-left justify-start"
+          onClick={onStartNextRound}
+          loading={loading}
+          loadingText=""
+          title="Start Next Round"
+          className="inline-flex items-center justify-center rounded-md p-1.5 font-semibold"
+          style={{ minWidth: 0, padding: '0.375rem' }}
         >
-          {responsesOpen ? 'Hide Responses' : 'View Responses'}
+          <ArrowRight size={15} />
         </LoadingButton>
-        <LoadingButton
-          variant="secondary"
-          size="sm"
-          onClick={handleDownload}
-          loading={downloading}
-          loadingText="Downloading…"
-          className="w-full text-left justify-start"
-        >
-          Download
-        </LoadingButton>
-        <LoadingButton
-          variant="success"
-          size="sm"
-          onClick={handleSave}
-          loading={saving}
-          loadingText="Saving…"
-          className="w-full text-left justify-start"
-        >
-          Save Synthesis
-        </LoadingButton>
+      </div>
+
+      {/* Export panel — full width below icons */}
+      <div className="mt-1.5">
         <ExportPanel
           formTitle={formTitle}
           formId={formId}
@@ -87,19 +103,6 @@ export default function ActionsCard({
           structuredSynthesisData={structuredSynthesisData}
           expertLabels={expertLabels}
         />
-        <div className="pt-1">
-          <LoadingButton
-            variant="accent"
-            size="sm"
-            onClick={onStartNextRound}
-            loading={loading}
-            loadingText="Starting…"
-            className="w-full font-semibold"
-            style={{ backgroundColor: 'var(--accent-hover)' }}
-          >
-            Next Round →
-          </LoadingButton>
-        </div>
       </div>
     </div>
   );

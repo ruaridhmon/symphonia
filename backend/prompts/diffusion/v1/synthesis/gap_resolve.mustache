@@ -1,0 +1,133 @@
+You are resolving gaps in a synthesis artefact by integrating retrieved content.
+
+## Your Role in the Agentic Pipeline
+
+You are part of an iterative refinement process. Previous steps have:
+1. Identified gaps in the synthesis
+2. Generated queries to find relevant content
+3. Retrieved content from the argumentation graph and expert responses
+
+Your task is to synthesize the retrieved content into the artefact, filling the identified gaps while maintaining faithfulness and neutrality.
+
+---
+
+## Current Synthesis
+
+### Claims
+
+{{#draft.claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+  Sources: {{#sources}}{{source_id}}{{^last}}, {{/last}}{{/sources}}
+  {{#counterarguments.length}}
+  Counterarguments: {{#counterarguments}}"{{.}}"{{^last}}, {{/last}}{{/counterarguments}}
+  {{/counterarguments.length}}
+
+{{/draft.claims}}
+
+### Areas of Agreement
+
+{{#draft.areas_of_agreement}}
+- "{{.}}"
+{{/draft.areas_of_agreement}}
+
+### Areas of Disagreement
+
+{{#draft.areas_of_disagreement}}
+- "{{.}}"
+{{/draft.areas_of_disagreement}}
+
+### Uncertainties
+
+{{#draft.uncertainties}}
+- "{{.}}"
+{{/draft.uncertainties}}
+
+---
+
+## Identified Gaps
+
+{{#gaps}}
+### Gap: {{description}}
+**Query used**: "{{query}}"
+
+{{/gaps}}
+
+---
+
+## Retrieved Content
+
+{{#retrieved}}
+- Source {{source_id}} ({{source_type}}): "{{content}}"
+{{/retrieved}}
+
+---
+
+{{#fitness_feedback}}
+## Fitness Evaluation Feedback
+
+{{{fitness_feedback}}}
+
+Address these issues in your refinement.
+{{/fitness_feedback}}
+
+---
+
+## Your Task
+
+Produce a refined synthesis that:
+1. **Fills the identified gaps** using the retrieved content
+2. **Maintains faithfulness** - no novel claims; accurately represent sources. Exact quotes will be resolved in a later step — include source_id references.
+
+3. **Preserves neutrality** - no evaluative language or advocacy
+4. **Ensures traceability** - cite source_ids for all claims
+5. **Keeps existing valid content** - only add/modify what's needed
+
+---
+
+## Required Output Format
+
+Output the complete refined synthesis in XML:
+
+```xml
+<synthesis>
+  <claims>
+    <claim id="unique_id" agreement_level="consensus">
+      <text>Claim text</text>
+      <sources>
+        <source id="source_id">
+          <quote>Brief reference or placeholder — exact quote resolved later</quote>
+        </source>
+      </sources>
+      <counterarguments>
+        <counterargument>Counterargument if any</counterargument>
+      </counterarguments>
+    </claim>
+  </claims>
+  
+  <areas_of_agreement>
+    <item>Summary of agreed points</item>
+  </areas_of_agreement>
+  
+  <areas_of_disagreement>
+    <item>Summary of disagreements</item>
+  </areas_of_disagreement>
+  
+  <uncertainties>
+    <item>Identified uncertainties</item>
+  </uncertainties>
+  
+  <needs_clarification>
+    <item>Items needing expert clarification</item>
+  </needs_clarification>
+</synthesis>
+```
+
+**XML Formatting Rules**:
+1. Output MUST be valid XML within `<synthesis>` tags.
+2. Agreement levels: consensus, majority, divided, minority.
+3. Ensure all tags are properly closed.
+
+Include ALL claims and sections (existing + new). Use consistent IDs.
+
+
+Begin your refinement:

@@ -1,0 +1,84 @@
+You are analyzing an argumentation graph to identify gaps and generate retrieval queries.
+
+## Your Role in the Agentic Pipeline
+
+You are part of an iterative refinement process. Your task is to:
+1. Analyze the current graph for what is missing or weak
+2. Generate targeted search queries to find relevant content from expert responses
+
+Your output will guide retrieval from the source material, and a subsequent step will integrate the retrieved content.
+
+---
+
+## Current Argumentation Graph
+
+### Nodes
+
+{{#draft.nodes}}
+- **[{{node_id}}]** ({{node_type}}): "{{text}}"
+  Sources: {{#sources}}{{.}}{{^last}}, {{/last}}{{/sources}}
+  {{#evidence}}
+  Evidence: "{{quote}}" (from {{source_id}})
+  {{/evidence}}
+
+{{/draft.nodes}}
+
+### Edges
+
+{{#draft.edges}}
+- **[{{edge_id}}]** {{from_node}} --[{{edge_type}}]--> {{to_node}}
+{{/draft.edges}}
+
+---
+
+{{#fitness_feedback}}
+## Fitness Evaluation Feedback
+
+The graph was evaluated and the following issues were identified:
+
+{{{fitness_feedback}}}
+
+Use this feedback to prioritize which gaps to address.
+{{/fitness_feedback}}
+
+---
+
+## Your Task
+
+Identify gaps in the graph that need to be filled. For each gap:
+1. **Describe** what is missing or weak
+2. **Generate a query** that will find relevant content from expert responses
+
+Focus on:
+- Claims lacking evidence
+- Missing coverage of source material
+- Unrepresented conflicts or minority views
+- Weak or missing relationships between nodes
+- Issues highlighted in the fitness feedback
+
+---
+
+## Required Output Format
+
+```xml
+<gaps>
+  <gap>
+    <description>What is missing or weak in the graph</description>
+    <query>Search query to find relevant content from expert responses</query>
+  </gap>
+  <gap>
+    <description>Another gap</description>
+    <query>Another search query</query>
+  </gap>
+</gaps>
+```
+
+**XML Formatting Rules**:
+1. Output MUST be valid XML within `<gaps>` tags.
+2. Use `<gap>` tags for each gap item.
+3. Ensure all tags are properly closed.
+
+Generate 3-5 gaps, prioritized by importance. Each query should be specific enough to retrieve targeted content.
+
+Begin your analysis:
+

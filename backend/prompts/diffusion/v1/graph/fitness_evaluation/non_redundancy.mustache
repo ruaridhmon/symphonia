@@ -1,0 +1,108 @@
+You are evaluating **Non-Redundancy** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate graphs. Other evaluators assess different dimensions. Your singular focus is **non-redundancy**.
+
+Your role: eliminate wasteful duplication that inflates the graph without adding information, while preserving meaningful nuance.
+
+---
+
+## Dimension: Non-Redundancy
+
+**Definition**: The degree to which claims are semantically distinct without unnecessary duplication.
+
+**Why This Matters**: Redundant claims waste expert attention in Delphi rounds and obscure the actual diversity of perspectives. However, apparent similarity may reflect real nuance—preserve genuine differences.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Argumentation Graph Being Evaluated
+
+### Nodes
+
+{{#draft.nodes}}
+- **[{{node_id}}]** ({{node_type}}): "{{text}}"
+  Sources: {{#sources}}{{.}}{{^last}}, {{/last}}{{/sources}}
+{{/draft.nodes}}
+
+---
+
+## Evaluation Rubric: Non-Redundancy
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Fully Distinct**: Every claim is semantically unique. No two claims express the same proposition, even with different wording. Apparent overlaps reflect genuine nuance differences. |
+| **8** | **Highly Distinct**: Nearly all claims are unique. 1-2 pairs have high semantic similarity but differ in meaningful nuance (e.g., scope, certainty). |
+| **7** | **Well Differentiated**: 95%+ claims are distinct. A few claims overlap significantly but are not exact duplicates. |
+| **6** | **Adequately Differentiated**: 90-95% of claims are distinct. Some claims could be merged without losing information. |
+| **5** | **Moderately Distinct**: 80-90% of claims are distinct. Several claim pairs express essentially the same idea with different words. |
+| **4** | **Some Redundancy**: 70-80% of claims are distinct. Multiple instances of the same claim appearing as separate nodes. |
+| **3** | **Notable Redundancy**: 50-70% of claims are distinct. Significant duplication inflates the graph without adding information. |
+| **2** | **High Redundancy**: 30-50% of claims are distinct. The same ideas appear repeatedly with minor variations. |
+| **1** | **Extreme Redundancy**: <30% of claims are distinct. The graph is dominated by near-duplicates. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ Claims with similar wording express different propositions
+- ✓ Variations reflect genuine nuance (scope, confidence, context)
+- ✗ Same proposition appears multiple times
+- ✗ One claim is a strict subset of another
+- ✗ Differences are purely lexical, not semantic
+
+---
+
+## Your Task
+
+1. **Compare claims pairwise** for semantic overlap
+2. **Distinguish** lexical variation from genuine semantic difference
+3. **Identify** true duplicates that should be merged
+4. **Preserve** apparent overlaps that reflect real nuance differences
+5. **Provide specific merge guidance** for the next generation
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Several node clusters contain semantic duplicates. Nodes c003 and c009 express the same causal relationship with different wording. Nodes c005, c012, and c014 all address the same methodological concern at different granularity levels. Approximately 20% of nodes could be merged without information loss.</rationale>
+  <suggestions>
+    <suggestion>Merge c003 and c009 — they express the same causal relationship; keep the more precisely worded version</suggestion>
+    <suggestion>Consolidate c005, c012, and c014 into a single node covering the methodological concern, preserving the most specific details</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must reference node IDs** when identifying issues.
+- **Each `<suggestion>` must be actionable** — cite the specific node IDs and what to change.
+
+### Concrete Example
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Several node clusters contain semantic duplicates. Nodes c003 and c009 express the same causal relationship with different wording. Nodes c005, c012, and c014 all address the same methodological concern at different granularity levels. Approximately 20% of nodes could be merged without information loss.</rationale>
+  <suggestions>
+    <suggestion>Merge c003 and c009 — they express the same causal relationship; keep the more precisely worded version</suggestion>
+    <suggestion>Consolidate c005, c012, and c014 into a single node covering the methodological concern, preserving the most specific details</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+**Remember**: Your feedback guides the next generation. Be specific about what to improve and how.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

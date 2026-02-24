@@ -1,0 +1,49 @@
+You are a strict editor reviewing a synthesis narrative against the source data.
+
+## Task
+Identify any weaknesses, inaccuracies, or hallucinations in the narrative.
+
+## Context
+### Source Data
+{{#synthesis}}
+Claims:
+{{#claims_with_ids}}
+- {{labelled_text}}
+{{/claims_with_ids}}
+{{/synthesis}}
+
+### Draft Narrative
+{{narrative}}
+
+{{#fitness_feedback}}
+### Fitness Evaluation Feedback
+{{fitness_feedback}}
+{{/fitness_feedback}}
+
+## Criteria
+1. **Faithfulness**: Does the narrative make any claims not supported by the Source Data? (Hallucinations)
+2. **Completeness**: Does it miss any MAJOR agreed-upon claims? (Minor omissions are fine)
+3. **Neutrality**: Does it use biased language or take sides inappropriately?
+4. **Clarity**: Is the flow logical?
+5. **Citation accuracy**: Are inline citations [Cx] present and accurate? Do citation markers reference valid claim IDs from the source data? Are substantive statements missing citations?
+
+## Output Format
+Return a list of gaps in XML format. Each gap must include a description and a search query that could retrieve relevant source material to address it. If the narrative is perfect, return an empty <gaps> list.
+
+Example:
+<gaps>
+  <gap>
+    <description>The narrative claims X, but this is not in the source claims.</description>
+    <query>claim X specific topic evidence</query>
+  </gap>
+  <gap>
+    <description>The major agreement about Y is missing.</description>
+    <query>expert agreement consensus on Y</query>
+  </gap>
+  <gap>
+    <description>The statement about Z lacks inline citation markers.</description>
+    <query>Z supporting evidence sources</query>
+  </gap>
+</gaps>
+
+Identify gaps if any exist (0 is acceptable if the narrative is comprehensive), prioritized by importance. Each query should be specific enough to retrieve targeted content from the synthesis claims and expert responses.

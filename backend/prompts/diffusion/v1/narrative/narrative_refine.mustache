@@ -1,0 +1,42 @@
+You are an expert editor refining a consensus narrative.
+
+## Task
+Rewrite the narrative to address the provided critique.
+
+## Context
+### Critique (Issues to Fix)
+{{critique}}
+
+{{#fitness_feedback}}
+### Fitness Evaluation Feedback
+{{fitness_feedback}}
+{{/fitness_feedback}}
+
+### Source Data
+{{#synthesis}}
+Claims:
+{{#claims_with_ids}}
+- {{labelled_text}}
+{{/claims_with_ids}}
+{{/synthesis}}
+
+{{#retrieved}}
+### Retrieved Context
+The following source material was retrieved to help address the gaps:
+{{#retrieved}}
+- Source {{source_id}} ({{source_type}}): {{content}}
+{{/retrieved}}
+{{/retrieved}}
+
+### Current Draft
+{{narrative}}
+
+## Instructions
+1. Rewrite the narrative to resolve the issues.
+2. Maintain the parts that were already good.
+3. Ensure the tone remains neutral and professional.
+4. Do not exceed 500 words.
+5. Preserve and correct all inline citation markers [Cx]. Every substantive statement should reference the relevant claim IDs.
+
+## Output Format
+Return ONLY the rewritten narrative text with inline citation markers.

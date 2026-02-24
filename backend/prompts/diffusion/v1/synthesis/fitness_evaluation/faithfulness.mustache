@@ -1,0 +1,139 @@
+You are evaluating **Faithfulness** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate syntheses. Other evaluators assess different dimensions. Your singular focus is **faithfulness**.
+
+Your role: ensure the synthesis accurately represents source material without introducing novel claims or distortions. This is a hard constraint for validity.
+
+---
+
+## Dimension: Faithfulness (HARD CONSTRAINT)
+
+**Definition**: The degree to which the synthesis accurately represents source material without introducing novel claims, interpretations, or distortions.
+
+**Why This Matters**: The synthesis serves as controlled feedback in a Delphi process. Any novel claims or misattributions undermine trust and compromise the scientific integrity of the advice artefact.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Synthesis Being Evaluated
+
+{{#draft.claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+  Sources: {{#sources}}{{source_id}}{{^last}}, {{/last}}{{/sources}}
+{{/draft.claims}}
+
+---
+
+## Source Expert Responses
+
+{{#responses}}
+### {{response_id}}
+
+{{#claims.length}}
+**Claims:**
+{{#claims}}
+- "{{.}}"
+{{/claims}}
+{{/claims.length}}
+{{^claims.length}}
+**Response:**
+<expert_response id="{{response_id}}">{{response}}</expert_response>
+{{/claims.length}}
+
+{{#evidence.length}}
+**Evidence:**
+{{#evidence}}
+- "{{.}}"
+{{/evidence}}
+{{/evidence.length}}
+
+---
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Faithfulness
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Fully Faithful**: Every statement traces directly to source responses. No novel claims, interpretations, or implications. Wording preserves source nuance precisely. No hedging added or removed. |
+| **8** | **Highly Faithful**: All statements trace to sources. 1-2 instances of minor rephrasing that slightly shift emphasis but do not distort meaning or introduce new propositions. |
+| **7** | **Well Faithful**: 95%+ statements trace directly to sources. Minor interpretive summaries exist but do not introduce new propositions. All attributions are correct. |
+| **6** | **Adequately Faithful**: 90-95% of statements trace to sources. Some synthesis language makes reasonable inferences explicit that were implicit in sources. |
+| **5** | **Moderately Faithful**: 80-90% of statements trace to sources. Several instances of interpretation or generalisation that go slightly beyond source text. |
+| **4** | **Partially Faithful**: 70-80% of statements trace to sources. Multiple instances of claims not clearly supported by sources. Some misattribution. |
+| **3** | **Weakly Faithful**: 50-70% of statements trace to sources. The synthesis introduces interpretations, implications, or framings not present in sources. |
+| **2** | **Poorly Faithful**: 30-50% of statements trace to sources. Significant distortion of source material. Novel claims appear without basis. |
+| **1** | **Unfaithful**: <30% of statements trace to sources. The synthesis is largely disconnected from or contradicts source material. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ Every claim cites source responses with verbatim evidence
+- ✓ Wording does not add evaluative language absent in source
+- ✓ No "this suggests...", "this implies...", "clearly..." inferences
+- ✓ Hedging matches source (don't add/remove "may", "might", "possibly")
+- ✗ Claims appear with no source attribution
+- ✗ Synthesis draws conclusions sources did not draw
+- ✗ Qualifications from sources are dropped
+
+**Critical**: Scores below 4 mean the artefact is INVALID for Delphi controlled feedback.
+
+---
+
+## Your Task
+
+1. **For each synthesis claim**, trace it back to source responses
+2. **Check for novel content**—any claims/implications not in sources?
+3. **Verify attribution accuracy**—are claims correctly attributed?
+4. **Check hedging preservation**—has certainty been altered?
+5. **Provide specific corrections** for the next generation
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Multi-line analysis of faithfulness: what proportion of claims trace accurately to sources, which claim IDs introduce novel content, any misattributions or distortions, dropped qualifications or added inferences.</rationale>
+  <suggestions>
+    <suggestion>Claim C3 states "X clearly leads to Y" but source only suggests correlation; revise to match source hedging</suggestion>
+    <suggestion>Claim C7 not found in any source; remove or find supporting evidence</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must reference specific claim IDs** when identifying issues.
+- **Each `<suggestion>` must be actionable** — cite the claim ID and what to change.
+
+### Concrete Example
+
+```xml
+<fitness_evaluation>
+  <score>4</score>
+  <rationale>Most claims (C1, C2, C4, C5) trace accurately to expert responses with correct attribution. C3 adds evaluative language ("clearly demonstrates") not present in the source, which only states correlation. C6 combines two expert views in a way that creates an implication neither expert made individually.</rationale>
+  <suggestions>
+    <suggestion>C3: Replace "clearly demonstrates" with "suggests a correlation" to match expert_02's hedging</suggestion>
+    <suggestion>C6: Split into two separate claims to avoid implying a connection the experts did not make</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+**Remember**: Your feedback guides the next generation toward accurate, grounded synthesis. Be specific about what is unfaithful and how to correct it.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):**
+
