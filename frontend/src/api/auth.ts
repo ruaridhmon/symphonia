@@ -35,3 +35,13 @@ export function login(email: string, password: string) {
 export function logout() {
   return api.post<{ message: string }>('/logout');
 }
+
+/** Request a password reset email */
+export function forgotPassword(email: string) {
+  return api.postForm<{ message: string }>('/forgot-password', { email });
+}
+
+/** Reset password using a valid token */
+export function resetPassword(token: string, newPassword: string) {
+  return api.postForm<{ message: string }>('/reset-password', { token, new_password: newPassword });
+}

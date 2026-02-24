@@ -13,6 +13,7 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     has_submitted_feedback = Column(Boolean, default=False)
     reset_token = Column(String, nullable=True)
+    reset_token_expiry = Column(DateTime, nullable=True)
 
     responses = relationship("Response", back_populates="user")
     feedback_entries = relationship("Feedback", back_populates="user")
