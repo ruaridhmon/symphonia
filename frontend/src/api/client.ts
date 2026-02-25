@@ -32,12 +32,23 @@ async function apiClient<T>(
 
   if (!response.ok) {
     if (response.status === 401) {
-      // Session expired — clear ALL local auth state and redirect
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('email');
-      localStorage.removeItem('is_admin');
-      window.location.href = '/login?expired=1';
-      throw new ApiError(401, 'Session expired. Please log in again.');
+      // Auth endpoints (/login, /register) return 401 for bad credentials — that is
+      // NOT a session expiry. Skip the redirect so the caller (AuthContext) can catch
+      // the ApiError and display "Invalid email or password." instead of bouncing the
+      // user to the session-expired screen before they ever log in.
+      // startsWith() handles query params, e.g. /login?next=/dashboard.
+      const isAuthEndpoint =
+        endpoint.startsWith('/login') || endpoint.startsWith('/register');
+      if (!isAuthEndpoint) {
+        // Session expired on an authenticated route — clear ALL local auth state and redirect
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('email');
+        localStorage.removeItem('is_admin');
+        window.location.href = '/login?expired=1';
+        throw new ApiError(401, 'Session expired. Please log in again.');
+      }
+      // Auth endpoint 401 falls through to the general error handler below,
+      // which reads the backend error body and surfaces it to the caller.
     }
     throw new ApiError(response.status, await response.text(), response.headers);
   }
