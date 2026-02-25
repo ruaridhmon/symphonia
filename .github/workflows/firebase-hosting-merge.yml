@@ -21,4 +21,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SYMPHONIA_488513 }}
           channelId: live
           projectId: symphonia-488513
-          entryPoint: frontend
+          entryPoint: .
