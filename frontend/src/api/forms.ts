@@ -63,3 +63,38 @@ export function getMyForms() {
 export function unlockForm(joinCode: string) {
   return api.post<{ message: string }>('/forms/unlock', { join_code: joinCode });
 }
+
+/* ── User-created forms ── */
+
+export interface OwnedForm {
+  id: number;
+  title: string;
+  join_code: string;
+  allow_join: boolean;
+  round_count: number;
+  participant_count?: number;
+}
+
+/** Create a consultation form as the current user */
+export function createUserForm(data: { title: string; questions?: unknown[]; allow_join?: boolean }) {
+  return api.post<OwnedForm & { owner_id: number }>('/forms/create', {
+    questions: [],
+    allow_join: true,
+    ...data,
+  });
+}
+
+/** List forms created by current user */
+export function getMyCreatedForms() {
+  return api.get<OwnedForm[]>('/forms/my-created');
+}
+
+/** Regenerate the join code for a form I own */
+export function regenerateJoinCode(formId: number) {
+  return api.post<{ join_code: string; form_id: number }>(`/forms/${formId}/regenerate-join-code`);
+}
+
+/** Delete a form I own */
+export function deleteMyForm(formId: number) {
+  return api.delete<{ deleted: number; title: string }>(`/forms/${formId}/delete`);
+}

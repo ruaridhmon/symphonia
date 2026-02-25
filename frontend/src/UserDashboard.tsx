@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Clock, FileText } from 'lucide-react';
+import { CheckCircle2, Clock, FileText, PlusCircle, ClipboardCopy, Trash2, RefreshCw } from 'lucide-react';
 import { useAuth } from './AuthContext';
-import { getMyForms, unlockForm, Form } from './api/forms';
+import {
+  getMyForms, unlockForm, Form,
+  OwnedForm, createUserForm, getMyCreatedForms, deleteMyForm, regenerateJoinCode,
+} from './api/forms';
 import { api } from './api/client';
 import { ApiError } from './api/client';
 import Container from './layouts/Container';
@@ -32,6 +35,16 @@ export default function UserDashboard() {
   const [joinError, setJoinError] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Owned-form state
+  const [ownedForms, setOwnedForms] = useState<OwnedForm[]>([]);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newFormTitle, setNewFormTitle] = useState('');
+  const [newFormAllowJoin, setNewFormAllowJoin] = useState(true);
+  const [createdCode, setCreatedCode] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [regenLoading, setRegenLoading] = useState<Record<number, boolean>>({});
 
   /** Fetch submission status + round info for a list of forms */
   const fetchStatuses = useCallback(async (forms: Form[]) => {
@@ -86,6 +99,50 @@ export default function UserDashboard() {
     fetchMyForms();
   }, [fetchMyForms]);
 
+  useEffect(() => {
+    getMyCreatedForms().then(setOwnedForms).catch(() => {});
+  }, []);
+
+  const handleCreateForm = async () => {
+    if (!newFormTitle.trim()) return;
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const result = await createUserForm({ title: newFormTitle, allow_join: newFormAllowJoin });
+      setOwnedForms(prev => [result, ...prev]);
+      setCreatedCode(result.join_code);
+      setNewFormTitle('');
+      setShowCreateForm(false);
+    } catch (e) {
+      setCreateError(e instanceof ApiError ? `Error: ${e.message}` : 'Could not create form. Please try again.');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleDeleteOwned = async (formId: number) => {
+    try {
+      await deleteMyForm(formId);
+      setOwnedForms(prev => prev.filter(f => f.id !== formId));
+    } catch {
+      // silently ignore for now
+    }
+  };
+
+  const handleRegenCode = async (formId: number) => {
+    setRegenLoading(prev => ({ ...prev, [formId]: true }));
+    try {
+      const result = await regenerateJoinCode(formId);
+      setOwnedForms(prev =>
+        prev.map(f => f.id === formId ? { ...f, join_code: result.join_code } : f)
+      );
+    } catch {
+      // silent fail acceptable
+    } finally {
+      setRegenLoading(prev => ({ ...prev, [formId]: false }));
+    }
+  };
+
   const handleUnlock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!joinCode) return;
@@ -131,6 +188,178 @@ export default function UserDashboard() {
             </LoadingButton>
           </div>
         )}
+
+        {/* ── My Consultations (owned forms) ── */}
+        <div
+          className="rounded-xl p-6 sm:p-8 mb-6 sm:mb-8"
+          style={{
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--card-shadow, none)',
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
+              My Consultations
+            </h2>
+            <button
+              onClick={() => { setShowCreateForm(v => !v); setCreateError(null); setCreatedCode(null); }}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                color: 'var(--accent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+              }}
+            >
+              <PlusCircle size={14} />
+              New Consultation
+            </button>
+          </div>
+
+          {/* Inline create form */}
+          {showCreateForm && (
+            <div
+              className="rounded-lg p-4 mb-4 space-y-3"
+              style={{
+                backgroundColor: 'var(--muted)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                  Consultation Title
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter title…"
+                  value={newFormTitle}
+                  onChange={e => setNewFormTitle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg text-sm"
+                  style={{
+                    border: '1px solid var(--input)',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                  }}
+                />
+              </div>
+              <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: 'var(--foreground)' }}>
+                <input
+                  type="checkbox"
+                  checked={newFormAllowJoin}
+                  onChange={e => setNewFormAllowJoin(e.target.checked)}
+                />
+                Allow participants to join via code
+              </label>
+              {createError && (
+                <p className="text-sm" style={{ color: 'var(--destructive)' }}>{createError}</p>
+              )}
+              <div className="flex gap-2">
+                <LoadingButton
+                  variant="accent"
+                  size="sm"
+                  loading={creating}
+                  onClick={handleCreateForm}
+                >
+                  Create
+                </LoadingButton>
+                <LoadingButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setShowCreateForm(false); setCreateError(null); }}
+                >
+                  Cancel
+                </LoadingButton>
+              </div>
+            </div>
+          )}
+
+          {/* Success banner with join code */}
+          {createdCode && (
+            <div
+              className="rounded-lg p-3 mb-4 flex items-center justify-between gap-3"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--success) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--success) 40%, transparent)',
+              }}
+            >
+              <div>
+                <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--success)' }}>
+                  Form created! Share this join code:
+                </p>
+                <p className="text-sm font-mono font-bold" style={{ color: 'var(--foreground)' }}>
+                  {createdCode}
+                </p>
+              </div>
+              <button
+                onClick={() => { navigator.clipboard.writeText(createdCode); }}
+                className="p-1.5 rounded"
+                title="Copy join code"
+                style={{ color: 'var(--success)' }}
+              >
+                <ClipboardCopy size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* List of owned forms */}
+          {ownedForms.length === 0 && !showCreateForm ? (
+            <div className="text-center py-6">
+              <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                No consultations created yet. Click <strong>New Consultation</strong> to start one.
+              </p>
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {ownedForms.map(f => (
+                <li
+                  key={f.id}
+                  className="rounded-lg p-3 flex items-center justify-between gap-3"
+                  style={{
+                    backgroundColor: 'var(--muted)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>{f.title}</p>
+                    <div className="flex items-center gap-3 mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                      <span>Round {f.round_count}</span>
+                      {f.participant_count !== undefined && <span>{f.participant_count} participants</span>}
+                      <button
+                        className="inline-flex items-center gap-1 hover:underline"
+                        title="Copy join code"
+                        onClick={() => navigator.clipboard.writeText(f.join_code)}
+                        style={{ color: 'var(--accent)' }}
+                      >
+                        <ClipboardCopy size={11} />
+                        {f.join_code}
+                      </button>
+                      <button
+                        className="inline-flex items-center gap-1 hover:opacity-70"
+                        title="Regenerate join code"
+                        onClick={() => handleRegenCode(f.id)}
+                        disabled={regenLoading[f.id]}
+                        style={{ color: 'var(--muted-foreground)' }}
+                      >
+                        <RefreshCw
+                          size={11}
+                          style={regenLoading[f.id] ? { animation: 'spin 1s linear infinite' } : {}}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteOwned(f.id)}
+                    className="p-1.5 rounded hover:opacity-80"
+                    title="Delete form"
+                    style={{ color: 'var(--destructive)' }}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {/* ── Join form card ── */}
         <div
