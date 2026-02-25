@@ -19,6 +19,7 @@ class User(Base):
     feedback_entries = relationship("Feedback", back_populates="user")
     archived_responses = relationship("ArchivedResponse", back_populates="user")
     unlocked_forms = relationship("UserFormUnlock", back_populates="user", cascade="all, delete-orphan")
+    owned_forms = relationship("FormModel", foreign_keys="[FormModel.owner_id]", back_populates="owner")
 
 
 class UserFormUnlock(Base):
@@ -42,11 +43,13 @@ class FormModel(Base):
     join_code = Column(String, unique=True, nullable=False)
 
     expert_labels = Column(JSON, nullable=True)  # {"preset": "temporal"|"custom"|"default"|"methodological"|"stakeholder", "custom_labels": {1: "Label", ...}}
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     rounds = relationship("RoundModel", back_populates="form", cascade="all, delete-orphan")
     responses = relationship("Response", back_populates="form", cascade="all, delete-orphan")
     archived_responses = relationship("ArchivedResponse", back_populates="form", cascade="all, delete-orphan")
     unlocked_by_users = relationship("UserFormUnlock", back_populates="form", cascade="all, delete-orphan")
+    owner = relationship("User", foreign_keys=[owner_id], back_populates="owned_forms")
 
 
 
