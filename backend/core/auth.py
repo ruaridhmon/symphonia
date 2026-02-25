@@ -113,3 +113,12 @@ def get_current_admin_user(user: User = Depends(get_current_user)):
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     return user
+
+
+def assert_form_owner_or_admin(form: "FormModel", user: "User") -> None:
+    """Raise 403 if user is neither owner of form nor platform admin."""
+    if form.owner_id != user.id and not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the form owner or an admin can perform this action",
+        )
