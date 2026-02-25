@@ -18,7 +18,7 @@ steps:
         IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE_NAMESPACE}/${_IMAGE_NAME}:${COMMIT_SHA}"
         docker build --no-cache \
           --build-arg GITHUB_TOKEN="$$GITHUB_TOKEN" \
-          -t "$IMAGE" \
+          -t "$$IMAGE" \
           backend -f backend/Dockerfile
 
   - name: gcr.io/cloud-builders/docker
