@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { Pencil, Save, AlertTriangle } from 'lucide-react';
 import { ApiError } from '../api/client';
 import { updateResponse as apiUpdateResponse, forceUpdateResponse } from '../api/responses';
-import { extractQuestionText } from '../utils/questions';
+import { extractQuestionText, extractAnswerText } from '../utils/questions';
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ export default function ResponseEditor({
     // Deep copy current answers as the editing baseline
     const copy: Record<string, string> = {};
     for (const [k, v] of Object.entries(currentAnswers)) {
-      copy[k] = String(v ?? '');
+      copy[k] = extractAnswerText(v);
     }
     setEditedAnswers(copy);
     setIsEditing(true);
@@ -181,7 +181,7 @@ export default function ResponseEditor({
                 className="text-sm leading-relaxed"
                 style={{ color: 'var(--foreground)' }}
               >
-                {String(answer)}
+                {extractAnswerText(answer)}
               </div>
             </div>
           );
@@ -334,7 +334,7 @@ export default function ResponseEditor({
               {questions.map((q, i) => {
                 const key = `q${i + 1}`;
                 const local = conflict.localAnswers[key] ?? '';
-                const original = String(currentAnswers[key] ?? '');
+                const original = extractAnswerText(currentAnswers[key]);
                 if (local === original) return null;
                 return (
                   <div key={key}>

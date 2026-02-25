@@ -56,6 +56,7 @@ import {
 } from './components/summary';
 
 import { usePresence } from './hooks/usePresence';
+import { extractAnswerText } from './utils/questions';
 import { markSynthesisPending, clearSynthesisPending } from './hooks/useSynthesisNotifier';
 
 import type {
@@ -439,7 +440,7 @@ export default function SummaryPage() {
 				});
 				const qa = Object.entries(r.answers).flatMap(([k, v]: [string, unknown]) => [
 					new Paragraph({ children: [new TextRun({ text: k, bold: true })], spacing: { after: 80 } }),
-					new Paragraph({ text: String(v ?? ''), spacing: { after: 160 } }),
+					new Paragraph({ text: extractAnswerText(v), spacing: { after: 160 } }),
 				]);
 				return [header, ...qa, new Paragraph('')];
 			});

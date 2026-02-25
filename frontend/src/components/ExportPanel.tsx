@@ -991,6 +991,10 @@ export default function ExportPanel({
       saveAs(blob, filename);
     } catch (err) {
       console.error('Backend export failed:', err);
+      // PDF not available server-side — fall back to client-side print-to-PDF
+      if (format === 'pdf') {
+        exportAsPdf(formTitle, rounds, structuredSynthesisData, expertLabels);
+      }
     } finally {
       setLoading(false);
     }

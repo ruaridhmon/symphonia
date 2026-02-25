@@ -2045,14 +2045,11 @@ em {{ color: #505a5f; }}
                     "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
                 },
             )
-        except ImportError:
-            # weasyprint or markdown not available — fall back to .md download
-            return FastAPIResponse(
-                content=md_content.encode("utf-8"),
-                media_type="text/markdown; charset=utf-8",
-                headers={
-                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.md"',
-                },
+        except Exception as exc:
+            # weasyprint unavailable or broken (e.g. missing system libraries)
+            raise HTTPException(
+                status_code=503,
+                detail=f"PDF generation unavailable on this server: {exc}",
             )
 
     # Default: markdown
