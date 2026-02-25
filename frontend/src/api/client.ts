@@ -91,7 +91,14 @@ async function apiClient<T>(
 
   if (!response.ok) {
     if (response.status === 401) {
-      // Session expired — clear ALL local auth state and redirect
+      // Don't redirect if we're already on the login page or this IS the login request
+      // (wrong credentials should show an inline error, not a redirect).
+      const onLoginPage = window.location.pathname === '/login';
+      const isLoginEndpoint = endpoint === '/login' || endpoint === '/auth/login';
+      if (onLoginPage || isLoginEndpoint) {
+        throw new ApiError(401, 'Invalid email or password.');
+      }
+      // Session expired mid-session — clear ALL local auth state and redirect
       clearAuthAndRedirect();
       throw new ApiError(401, 'Session expired. Please log in again.');
     }
