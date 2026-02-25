@@ -1,5 +1,5 @@
-// Backend routes are at root (no /api prefix)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+// Default to Firebase Hosting proxy path in production.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 /**
  * Read a cookie value by name.
