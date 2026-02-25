@@ -30,6 +30,7 @@ from .auth import (
     generate_csrf_token,
     get_current_user,
     get_current_admin_user,
+    assert_form_owner_or_admin,
     AUTH_COOKIE_NAME,
     CSRF_COOKIE_NAME,
     COOKIE_MAX_AGE,
@@ -1460,6 +1461,13 @@ class FormCreate(BaseModel):
     join_code: str
 
 
+class UserFormCreate(BaseModel):
+    """Payload for user-initiated form creation. Join code is auto-generated."""
+    title: str
+    questions: list = []
+    allow_join: bool = True
+
+
 class FormUpdate(BaseModel):
     title: str
     questions: list[str]
@@ -1616,6 +1624,135 @@ def get_my_forms(
 ):
     unlocked_forms = db.query(FormModel).join(UserFormUnlock).filter(UserFormUnlock.user_id == user.id).order_by(FormModel.id).all()
     return unlocked_forms
+
+
+# ---------------------------------------------------------
+# USER-CREATED FORMS  (any authenticated user, not admin-only)
+# ---------------------------------------------------------
+
+@router.post("/forms/create", status_code=201, summary="Create a consultation form (any user)")
+def user_create_form(
+    payload: UserFormCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """
+    Any authenticated user can create a Delphi consultation form.
+    A unique join code is automatically generated.
+    The creating user becomes the owner and can manage the form.
+    """
+    if not payload.title.strip():
+        raise HTTPException(status_code=400, detail="Title cannot be empty")
+
+    # Auto-generate a collision-free join code
+    for _ in range(10):
+        code = secrets.token_urlsafe(8)
+        if not db.query(FormModel).filter(FormModel.join_code == code).first():
+            break
+    else:
+        raise HTTPException(status_code=500, detail="Could not generate unique join code")
+
+    form = FormModel(
+        title=payload.title,
+        questions=payload.questions,
+        allow_join=payload.allow_join,
+        join_code=code,
+        owner_id=user.id,
+    )
+    db.add(form)
+    db.flush()
+    first_round = RoundModel(
+        form_id=form.id,
+        round_number=1,
+        is_active=True,
+        questions=payload.questions,
+    )
+    db.add(first_round)
+    db.commit()
+    db.refresh(form)
+    audit_log(
+        db, user=user, action="user_create_form",
+        resource_type="form", resource_id=form.id,
+        detail={"title": form.title}, request=request,
+    )
+    return {
+        "id": form.id,
+        "title": form.title,
+        "join_code": form.join_code,
+        "allow_join": form.allow_join,
+        "owner_id": form.owner_id,
+        "current_round": 1,
+    }
+
+
+@router.get("/forms/my-created", summary="List forms created by the current user")
+def my_created_forms(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Return all forms owned by the current user, newest first."""
+    forms = (
+        db.query(FormModel)
+        .filter(FormModel.owner_id == user.id)
+        .order_by(FormModel.id.desc())
+        .all()
+    )
+    return [
+        {
+            "id": f.id,
+            "title": f.title,
+            "join_code": f.join_code,
+            "allow_join": f.allow_join,
+            "round_count": len(f.rounds),
+            "participant_count": len(f.unlocked_by_users),
+        }
+        for f in forms
+    ]
+
+
+@router.post("/forms/{form_id}/regenerate-join-code", summary="Regenerate the join code (owner only)")
+def regenerate_form_join_code(
+    form_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Generate a new join code for a form. Old code becomes invalid immediately."""
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_admin(form, user)
+    for _ in range(10):
+        code = secrets.token_urlsafe(8)
+        if not db.query(FormModel).filter(FormModel.join_code == code, FormModel.id != form_id).first():
+            break
+    form.join_code = code
+    db.commit()
+    return {"join_code": form.join_code, "form_id": form_id}
+
+
+@router.delete("/forms/{form_id}/delete", summary="Delete a form (owner only)")
+def delete_owned_form(
+    form_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Permanently delete a form. Only the owner or an admin may do this."""
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_admin(form, user)
+    title = form.title
+    db.delete(form)
+    db.commit()
+    audit_log(
+        db, user=user, action="delete_form",
+        resource_type="form", resource_id=form_id,
+        detail={"title": title}, request=request,
+    )
+    return {"deleted": form_id, "title": title}
 
 
 @router.get("/forms/{form_id}")
