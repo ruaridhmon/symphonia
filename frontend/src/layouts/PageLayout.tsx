@@ -36,7 +36,7 @@ export default function PageLayout() {
         style={{
           backgroundColor: 'transparent',
           borderColor: 'var(--border)',
-          color: 'var(--muted-foreground)',
+          color: '#a855f7',
           opacity: 0.7,
         }}
       >

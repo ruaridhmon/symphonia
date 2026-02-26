@@ -31,7 +31,7 @@ export default function AuthLayout() {
           <p
             className="text-sm mt-1"
             aria-hidden="true"
-            style={{ color: 'var(--muted-foreground)' }}
+            style={{ color: '#a855f7' }}
           >
             Collaborative Consensus Platform
           </p>
