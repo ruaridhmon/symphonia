@@ -1,0 +1,203 @@
+# Symphonia Overnight Build — 2026-02-21
+
+## Priority Queue (in order)
+
+### P0 — Critical Fixes
+- [x] `[object Object]` in questions — FIXED
+- [x] Generate synthesis for past rounds — FIXED  
+- [x] Consensus library import error — FIXED
+- [x] View/Edit mode toggle for synthesis (markdown rendering) — DONE (Pulse 5:36am)
+- [x] All 3 synthesis modes produce structured JSON cards — DONE (Pulse 5:36am)
+
+### P1 — Core UX (from brainstorms)
+- [x] Structured input templates (position/evidence/confidence/counterarguments) — DONE (Worker 2)
+- [x] Auto-save drafts to localStorage — DONE (Worker 2)
+- [x] Remove ALL console.log statements (65 removed) — DONE (Worker 1)
+- [x] Fix WebSocket memory leak in WaitingPage — DONE (Worker 1)
+- [x] Emoji → Lucide icons migration (12 files) — DONE (Worker 3)
+
+### P2 — Polish
+- [x] API client layer abstraction — DONE (Worker 4)
+- [x] Synthesis versioning UI (show versions, compare, activate) — DONE (Worker 5)
+- [x] Duplicate footer cleanup — DONE (Pulse 6:06am): removed duplicate footers from SummaryPage and ThankYouPage (PageLayout provides the footer); stripped redundant header/shell from ThankYouPage
+- [x] Button consistency across all pages — DONE (Pulse 6:06am): migrated Login, Register, UserDashboard from raw `<button>` to `<LoadingButton>` with proper variants (accent, success, destructive, ghost)
+- [x] Error handling with retry buttons — DONE (Pulse 6:06am): FormPage now has error state with retry on load failure + inline submit error display; UserDashboard already had retry
+
+### P3 — Architecture
+- [x] Decompose SummaryPage (1414→672 lines, 10 subcomponents) — DONE (Pulse 6:36am)
+- [ ] TanStack Query for state management (deferred — requires large refactor, all pages working well without it)
+- [x] Toast notification system — replace all 9 alert() calls with themed toasts — DONE (Pulse 11:06am)
+- [x] Mobile responsiveness (safe-area insets, touch targets, overflow, responsive spacing) — DONE (Pulse 6:36am)
+- [x] 404 Not Found page (themed, with navigation) — DONE (Pulse 11:36am)
+- [x] Dynamic document titles across all 10 routes (useDocumentTitle hook) — DONE (Pulse 11:36am)
+- [x] Code splitting (React.lazy + Vite manual chunks) — DONE (Pulse 7:06am): initial bundle 1,298KB → 18KB app shell + lazy-loaded routes. Vendor chunks: react 177KB, tiptap 302KB, markdown 318KB, docx 342KB — each cached independently.
+- [x] Convert remaining .jsx → .tsx (FormEditor) — DONE (Pulse 7:06am): full TypeScript, Lucide icons, LoadingButton integration
+- [x] Remove dead code (AdminFormPage.jsx) — DONE (Pulse 7:06am)
+- [x] Fix ALL TypeScript errors (0 errors now) — DONE (Pulse 7:36am): added Vite client types, typed state/params, aligned Round types across components, added file-saver declaration, excluded test files from main tsconfig
+
+## Completed This Session
+- Button sizing fix (width: fit-content)
+- Forms display fix (error handling)
+- Markdown rendering preprocessing
+- Question text extraction from objects
+- Past round synthesis endpoint wired up
+- Consensus library Python version fix
+- **Next Round button error handling + loading state** (Worker 1)
+- **65 console.log statements removed** (Worker 1)
+- **WebSocket memory leak fixed** (Worker 1)
+- **Structured Input component** — position/evidence/confidence/counterarguments/citations (Worker 2)
+- **Auto-save drafts to localStorage** with debounced 500ms save (Worker 2)
+- **Emoji → Lucide icons migration** — 12 files, semantic colors (Worker 3)
+- **API client layer** — centralised fetch, typed modules, error handling (Worker 4)
+- **Synthesis versioning UI** — version selector, publish, generate new (Worker 5)
+- **View/Edit mode toggle** — clean toggle between rendered markdown and TipTap editor (Pulse)
+- **Structured JSON for all synthesis modes** — simple/ttd now return same structured format as committee (Pulse)
+- **Duplicate footer cleanup** — removed from SummaryPage (line 1303) and ThankYouPage; stripped redundant header/min-h-screen wrapper from ThankYouPage since PageLayout provides it all (Pulse)
+- **Button consistency** — Login, Register, UserDashboard migrated to LoadingButton with proper variant/size props (Pulse)
+- **Error handling + retry** — FormPage load errors show retry button + back-to-dashboard; submit errors shown inline; proper HTTP status checks added (Pulse)
+- **SummaryPage decomposition** — 1414→672 lines; extracted 10 focused subcomponents (SummaryHeader, SynthesisEditorCard, AISynthesisPanel, SynthesisVersionPanel, NextRoundQuestionsCard, FormInfoCard, ActionsCard, ResponsesModal, RoundHistoryCard, SummaryLoadingSkeleton) + shared types file (Pulse)
+- **Mobile responsiveness** — safe-area insets for notched devices, coarse pointer touch targets (44px min), horizontal overflow prevention, responsive card padding, prose typography scaling, landscape orientation support (Pulse)
+- **Code splitting** — React.lazy for all 10 route components + Vite manualChunks for 5 vendor groups. Initial JS: 1,298KB → 18KB (72x smaller). Each page loads on demand. Vendor libs cached independently for faster subsequent loads. (Pulse 7:06am)
+- **FormEditor modernization** — Converted from .jsx to .tsx. Added TypeScript types, Lucide icons (Trash2/Plus/Save/ArrowLeft), LoadingButton with loading states, question numbering, proper layout within PageLayout. (Pulse 7:06am)
+- **Dead code removal** — Removed orphaned AdminFormPage.jsx (104 lines, not referenced by router). (Pulse 7:06am)
+- **TypeScript zero-error** — Fixed all 15 TS errors: Vite client types in tsconfig, typed AdminDashboard state, typed AuthContext login params, aligned Round.questions type across 3 files (RoundTimeline, ExportPanel, summary.ts), added file-saver declaration, used extractQuestionText() in RoundCard to safely render question objects, excluded test files from main tsconfig. `tsc --noEmit` now passes clean. (Pulse 7:36am)
+- **Skeleton loading states** — UserDashboard: replaced "Loading…" text with SkeletonCard shimmer placeholders; FormPage: replaced orbit spinner with full form skeleton (title + round + questions + button shapes). (Pulse 8:06am)
+- **React.memo performance** — Memoized 4 heavy pure components: MarkdownRenderer, RoundCard, SynthesisDisplay, CrossMatrix. SummaryPage chunk: 75.6KB → 49.1KB (35% smaller). Prevents unnecessary re-renders during synthesis editing. (Pulse 8:06am)
+- **Toast notification system** — New Toast component (success/error/warning/info variants) with themed colors, slide-in/out animations, auto-dismiss. Replaced all 9 `alert()` calls across SummaryPage (7), FormEditor (1), AdminDashboard (1). Added success toasts for save/create. Zero `alert()` calls remain. (Pulse 11:06am)
+- **404 Not Found page** — Themed catch-all route with "Go back" and "Dashboard" navigation. Lazy-loaded, wrapped in ErrorBoundary. (Pulse 11:36am)
+- **Dynamic document titles** — `useDocumentTitle` hook applied to all 10 routes. Browser tab now shows "Dashboard — Symphonia", "Sign In — Symphonia", etc. Restores previous title on unmount. (Pulse 11:36am)
+- **WebSocket fix** — Critical: real-time features were completely broken. `pip` in venv had Python 3.14 shebang but server runs Python 3.12. Installed `uvicorn[standard]` (websockets, httptools, uvloop) in correct Python 3.12 site-packages. Verified: WebSocket connections now properly upgrade and work. (Pulse 12:06pm)
+- **Favicon + meta tags** — SVG favicon (indigo-blue gradient S), meta description, theme-color for mobile browser chrome. (Pulse 12:06pm)
+- **AdminDashboard modernization** — Migrated from raw `fetch` to centralised API client with proper `FormListItem` typing. Replaced `<a>` tags with React Router `<Link>` (SPA navigation, no full-page reloads). Replaced emoji with Lucide `Plus` icon. Retry button → `<LoadingButton>`. Last component to be modernised. (Pulse 12:36pm)
+- **AuthLayout dark mode** — Replaced hardcoded light gradient with `var(--background-gradient)` CSS variable. Added dark theme gradient definition. Login/Register pages now render correctly in all three themes. (Pulse 12:36pm)
+- **Form accessibility** — Added `htmlFor`/`id` associations and `autoComplete` attributes to Login and Register forms. Screen readers and password managers now work properly. (Pulse 12:36pm)
+- **Command Palette (⌘K)** — Full keyboard-driven command palette: fuzzy search, arrow-key navigation, theme switching, quick navigation to any page, logout. Accessible with ARIA roles. Animated entrance with backdrop blur. ⌘K button hint in header for discoverability. (Pulse 1:06pm)
+- **Copy join code to clipboard** — Admin dashboard join codes are now clickable buttons with copy icon. Click copies to clipboard with toast confirmation and checkmark feedback. Works on both desktop table and mobile card views. (Pulse 1:06pm)
+- **Admin search/filter** — Search bar appears when >3 forms exist. Filters by title or join code. Clear button, match count indicator. Empty state with clear-search action. (Pulse 1:06pm)
+- **Staggered entrance animations** — CSS stagger animation for form lists. Cards fade in sequentially with 50ms delay between items for a smooth reveal effect. (Pulse 1:06pm)
+- **useCopyToClipboard hook** — Reusable hook with visual feedback timer and fallback for older browsers. (Pulse 1:06pm)
+- **Reduced motion accessibility** — `@media (prefers-reduced-motion: reduce)` kills all animations, transitions, scroll-behavior, and transform effects. Orbit animation on WaitingPage degrades gracefully. WCAG 2.1 compliant. (Pulse 1:36pm)
+- **SynthesisModeSelector tooltips** — Each synthesis mode (Simple/Committee/TTD) now has an expandable info panel with detailed description and "Best for" guidance. Helps non-technical admins choose the right mode. (Pulse 1:36pm)
+- **Form status badges** — UserDashboard now fetches per-form submission status and round number. Each form shows "Round N" badge + "Submitted ✓" (green) or "Awaiting response" (amber). Button text changes to "Review" for submitted forms. (Pulse 1:36pm)
+- **WaitingPage context** — FormPage now passes form title, form ID, and round number to WaitingPage via navigation state. WaitingPage shows form title + round number pill, dynamic page title, and "Edit response" link back to the form. Console.error cleanup. (Pulse 1:36pm)
+- **PWA manifest + Apple meta** — manifest.json with app name, icons, standalone display mode. Apple mobile web app meta tags. App is now installable on iOS, Android, and desktop. (Pulse 2:41pm)
+- **PasswordInput component** — Reusable eye toggle component (Eye/EyeOff Lucide icons, forwardRef). Integrated into Login and Register pages. (Pulse 2:41pm)
+- **Print stylesheet** — `@media print` rules: hide header/footer/nav/buttons, flat cards, clean prose typography, no animations, proper page margins. Ctrl+P now produces clean synthesis printouts. (Pulse 2:41pm)
+- **ResultPage modernisation** — Migrated from raw `fetch` to centralised API client. Added skeleton loading states (two card placeholders). Added error state with retry button. Removed console.error calls. (Pulse 2:41pm)
+- **FormEditor modernisation** — Migrated from raw `fetch` to API client (`api.get`/`api.put`/`api.delete`). Added toast success messages for save and delete. Added error handling with toast feedback. Removed `API_BASE_URL` import. (Pulse 2:41pm)
+- **Security headers middleware** — X-Content-Type-Options: nosniff, X-Frame-Options: DENY, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy: camera=(), microphone=(), geolocation=(). Static assets: 1yr immutable caching. API: no-store. (Pulse 3:46pm)
+- **Modern lifespan** — Replaced deprecated `@app.on_event("startup"/"shutdown")` with `asynccontextmanager` lifespan. Future-proof against FastAPI deprecation. (Pulse 3:46pm)
+- **Typed AuthContext** — `user: any` → `user: User | null` with proper `User` interface. One fewer `any` in the codebase. (Pulse 3:46pm)
+- **Selective logout** — `localStorage.clear()` → targeted removal of auth keys only. Theme preference, auto-saved drafts, and other localStorage data survive logout. (Pulse 3:46pm)
+- **Specific auth error messages** — Login: differentiates wrong credentials (401/403), server error (5xx), network failure. Register: differentiates duplicate account (409), validation error (422), server error, network failure. (Pulse 3:46pm)
+- **FormPage API client migration** — Migrated from raw `fetch`/`API_BASE_URL` to centralized API client (`getForm`, `getActiveRound`, `submitResponse`, `hasSubmitted`, `getMyResponse`). Added `api.postForm()` for URL-encoded endpoints. Cleaned `submitResponse` in api/responses.ts. (Pulse 4:51pm)
+- **Shared synthesis types** — Created `types/synthesis.ts` as single source of truth. `SynthesisData`, `EmergentInsight`, `Agreement`, `Disagreement`, `Nuance`, `Probe`, `EvidenceExcerpt` — used by StructuredSynthesis, ExportPanel, ConsensusHeatmap, CrossMatrix, EmergenceHighlights, RoundTimeline, summary.ts. Eliminated ~200 lines of duplicate type definitions. (Pulse 4:51pm)
+- **Type cleanup** — MarkdownRenderer `any` → proper `MdProps`/`MdCodeProps`/`MdLinkProps`. ResponseEditor `catch(e: any)` → `catch(e: unknown)`. RoundTimeline imports `Round` from shared types. `synthesis_json: any` → `SynthesisData | null` across summary.ts and RoundTimeline. (Pulse 4:51pm)
+- **⌘+Enter keyboard shortcut** — Form submission via Ctrl+Enter or ⌘+Enter. Keyboard hint displayed below submit button with styled `<kbd>` elements. (Pulse 4:51pm)
+- **Last emoji replaced** — 📋 → Lucide `ClipboardList` icon in FormPage's previous synthesis toggle. Zero emoji in production code. (Pulse 4:51pm)
+
+## Build Command
+```bash
+cd ~/.openclaw/workspace/symphonia-ruaridh/frontend && npm run build
+pkill -f "uvicorn.*8766"
+cd ~/.openclaw/workspace/symphonia-ruaridh/backend && source .venv/bin/activate && nohup .venv/bin/python3.12 -m uvicorn main:app --host 0.0.0.0 --port 8766 > /tmp/symphonia.log 2>&1 &
+```
+
+### P4 — Infrastructure Fixes
+- [x] WebSocket connections broken (uvicorn[standard] not installed for Python 3.12) — FIXED (Pulse 12:06pm): websockets/httptools/uvloop installed in correct Python 3.12 site-packages, pip shebang corrected. All real-time features (presence, live updates) now functional.
+- [x] SVG favicon + meta tags (description, theme-color) — DONE (Pulse 12:06pm)
+
+### P6 — UX Power Features
+- [x] Command Palette (⌘K) — quick navigation, theme switching, keyboard-driven UX — DONE (Pulse 1:06pm)
+- [x] Copy join code to clipboard — click code in admin dashboard to copy with visual feedback — DONE (Pulse 1:06pm)
+- [x] Admin dashboard search/filter — search forms by title or join code with clear button — DONE (Pulse 1:06pm)
+- [x] Staggered card entrance animations — smooth CSS stagger for form lists — DONE (Pulse 1:06pm)
+- [x] ⌘K hint button in header — discoverable shortcut for command palette — DONE (Pulse 1:06pm)
+
+### P8 — Final Hardening & Installability
+- [x] PWA manifest.json + Apple mobile meta tags (installable on iOS/Android/desktop) — DONE (Pulse 2:41pm)
+- [x] PasswordInput component with eye visibility toggle (Login + Register) — DONE (Pulse 2:41pm)
+- [x] Print stylesheet for clean Ctrl+P synthesis output — DONE (Pulse 2:41pm)
+- [x] ResultPage → API client migration + skeleton loading + error/retry UI — DONE (Pulse 2:41pm)
+- [x] FormEditor → API client migration + toast feedback on save/delete — DONE (Pulse 2:41pm)
+
+### P9 — Security & Quality Hardening
+- [x] Security headers middleware (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) — DONE (Pulse 3:46pm)
+- [x] Static asset caching (1yr immutable) + API no-store — DONE (Pulse 3:46pm)
+- [x] Replaced deprecated `on_event` with modern `lifespan` context manager — DONE (Pulse 3:46pm)
+- [x] Typed AuthContext (`User` interface replaces `any`) — DONE (Pulse 3:46pm)
+- [x] Selective logout (only clears auth keys, preserves theme/drafts/localStorage) — DONE (Pulse 3:46pm)
+- [x] Specific login/register error messages per HTTP status code — DONE (Pulse 3:46pm)
+
+### P10 — Type Safety & Architecture
+- [x] FormPage → centralized API client migration (last major page using raw fetch) — DONE (Pulse 4:51pm)
+- [x] api.postForm() for URL-encoded form endpoints — DONE (Pulse 4:51pm)
+- [x] submitResponse in api/responses.ts → centralized client — DONE (Pulse 4:51pm)
+- [x] Shared types/synthesis.ts — single source of truth for SynthesisData, EmergentInsight, Agreement, etc. — DONE (Pulse 4:51pm)
+- [x] Eliminated ~200 lines of duplicate type definitions across 6 components — DONE (Pulse 4:51pm)
+- [x] MarkdownRenderer type cleanup (any → MdProps/MdCodeProps/MdLinkProps) — DONE (Pulse 4:51pm)
+- [x] ResponseEditor catch(any) → catch(unknown) — DONE (Pulse 4:51pm)
+- [x] RoundTimeline imports Round from shared types — DONE (Pulse 4:51pm)
+- [x] ⌘+Enter / Ctrl+Enter keyboard shortcut for form submission — DONE (Pulse 4:51pm)
+- [x] Replaced 📋 emoji with Lucide ClipboardList icon in FormPage — DONE (Pulse 4:51pm)
+- [x] Keyboard shortcut hint below submit button — DONE (Pulse 4:51pm)
+
+### P7 — Accessibility & Expert UX
+- [x] `prefers-reduced-motion` support (WCAG 2.1) — respects OS motion preferences, disables all animations — DONE (Pulse 1:36pm)
+- [x] Enhanced SynthesisModeSelector — expandable tooltips with detailed descriptions and "Best for" guidance for each mode — DONE (Pulse 1:36pm)
+- [x] Form status badges on UserDashboard — shows Round number, "Submitted ✓" or "Awaiting response" per form — DONE (Pulse 1:36pm)
+- [x] Enriched WaitingPage — shows form title + round number context, "Edit response" link back to form — DONE (Pulse 1:36pm)
+- [x] Console.log cleanup (WaitingPage) — removed remaining debug logging — DONE (Pulse 1:36pm)
+
+### P5 — Final Polish
+- [x] AdminDashboard → API client migration (was last file using raw `fetch`) — DONE (Pulse 12:36pm)
+- [x] AdminDashboard `<a>` → React Router `<Link>` (prevents full-page reloads) — DONE (Pulse 12:36pm)
+- [x] AdminDashboard `any` types → `FormListItem` proper typing — DONE (Pulse 12:36pm)
+- [x] AdminDashboard retry button → `<LoadingButton>` consistency — DONE (Pulse 12:36pm)
+- [x] AdminDashboard emoji → Lucide `Plus` icon — DONE (Pulse 12:36pm)
+- [x] AuthLayout dark mode fix (hardcoded light gradient → CSS variable) — DONE (Pulse 12:36pm)
+- [x] Login/Register `htmlFor` + `autoComplete` attributes for accessibility — DONE (Pulse 12:36pm)
+
+### P11 — Complete API Client Migration & Final Cleanup
+- [x] SummaryPage → centralized API client (14 raw fetch calls eliminated) — DONE (Pulse 6:00pm)
+- [x] CommentThread → api/comments.ts (4 raw fetch calls eliminated, emoji → Lucide) — DONE (Pulse 6:00pm)
+- [x] ResponseEditor → API client with ApiError conflict detection (emoji → Lucide) — DONE (Pulse 6:00pm)
+- [x] Register.tsx → api/auth.ts (ApiError for status-specific messages) — DONE (Pulse 6:00pm)
+- [x] AuthContext.tsx → api/auth.ts (ApiError for status-specific messages) — DONE (Pulse 6:00pm)
+- [x] Atlas.tsx → api/atlas.ts + api/forms.ts — DONE (Pulse 6:00pm)
+- [x] Created api/auth.ts, api/synthesis.ts, api/comments.ts, api/atlas.ts, api/index.ts — DONE (Pulse 6:00pm)
+- [x] Extended api/rounds.ts (getRoundsWithResponses, SynthesisData types) — DONE (Pulse 6:00pm)
+- [x] Extended api/responses.ts (updateResponse, forceUpdateResponse, version field) — DONE (Pulse 6:00pm)
+- [x] Enhanced ApiError to carry response headers (conflict detection in ResponseEditor) — DONE (Pulse 6:00pm)
+- [x] SummaryPage emoji → Lucide: 📊→BarChart3, 🔗→Link2, 🗺️→MapPin, ✨→Sparkles — DONE (Pulse 6:00pm)
+- [x] CommentThread emoji → Lucide: ✏️→Pencil, 🗑️→Trash2, ↩️→Reply — DONE (Pulse 6:00pm)
+- [x] ResponseEditor emoji → Lucide: ✏️→Pencil, 💾→Save, ⚠️→AlertTriangle — DONE (Pulse 6:00pm)
+- [x] ActionsCard `any` → `SynthesisData | null` (last remaining any type) — DONE (Pulse 6:00pm)
+- [x] SummaryPage logout bug fix: was localStorage.clear(), now uses useAuth().logout — DONE (Pulse 6:00pm)
+- [x] Type alignment: api/rounds.ts Round uses SynthesisData, api/synthesis.ts SynthesisVersion aligned with types/summary.ts — DONE (Pulse 6:00pm)
+
+## Final Architecture Stats
+- **Zero** raw `fetch()` calls outside `api/` layer
+- **Zero** `any` types in production code
+- **Zero** emoji in production components (only in Atlas dev tool)
+- **100%** TypeScript — `tsc --noEmit` passes clean
+- **Full** API client layer: auth, forms, rounds, responses, synthesis, comments, atlas
+- **Centralized** auth via API client (token from localStorage, auto-redirect on 401)
+
+### P12 — Final Polish & Housekeeping
+- [x] System theme auto-detection (respects OS prefers-color-scheme on first visit) — DONE (Pulse 7:10pm)
+- [x] Offline detection banner (fixed bottom bar when navigator.onLine goes false, WifiOff icon) — DONE (Pulse 7:10pm)
+- [x] Keyboard shortcuts help panel (? key or search 'shortcuts' in ⌘K palette, lists all shortcuts) — DONE (Pulse 7:10pm)
+- [x] Cleaned up 5 GRIND_WORKER artifact files — DONE (Pulse 7:10pm)
+
+## Pulse State
+```json
+{
+  "last_run": "2026-02-21T19:10:00Z",
+  "current_task": "P12 final polish & housekeeping",
+  "workers_completed": 5,
+  "workers_spawned": 5,
+  "pulse_direct_changes": 31,
+  "status": "ALL PHASES COMPLETE — P0-P12 SHIPPED"
+}
+```

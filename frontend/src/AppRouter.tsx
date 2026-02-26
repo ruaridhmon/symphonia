@@ -1,27 +1,195 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import App from './App';
-import SummaryPage from './SummaryPage';
-import WaitingPage from './WaitingPage';
-import ResultPage from './ResultPage';
-import ThankYouPage from './ThankYouPage';
+import { PageLayout, AuthLayout } from './layouts';
 import PrivateRoute from './PrivateRoute';
-import FormEditor from './FormEditor';
-import FormPage from './FormPage';
-import Login from './Login';
-import Register from './Register';
+import ErrorBoundary from './components/ErrorBoundary';
+import RouteLoadingFallback from './components/RouteLoadingFallback';
 
+/* ─── Lazy-loaded route components ─────────────────────────────────── */
+const Dashboard    = lazy(() => import('./Dashboard'));
+const SummaryPage  = lazy(() => import('./SummaryPage'));
+const WaitingPage  = lazy(() => import('./WaitingPage'));
+const ResultPage   = lazy(() => import('./ResultPage'));
+const ThankYouPage = lazy(() => import('./ThankYouPage'));
+const FormEditor   = lazy(() => import('./FormEditor'));
+const FormPage     = lazy(() => import('./FormPage'));
+const Login           = lazy(() => import('./Login'));
+const Register        = lazy(() => import('./Register'));
+const ForgotPassword  = lazy(() => import('./ForgotPassword'));
+const ResetPassword   = lazy(() => import('./ResetPassword'));
+const Atlas        = lazy(() => import('./Atlas'));
+const NotFoundPage  = lazy(() => import('./NotFoundPage'));
+const AdminFormNew   = lazy(() => import('./AdminFormNew'));
+const AdminSettings  = lazy(() => import('./AdminSettings'));
+
+/**
+ * Application routes organised by layout shell.
+ *
+ * All page components are lazy-loaded via React.lazy for code-splitting.
+ * This reduces the initial JS bundle and loads each page on first visit.
+ *
+ * ┌─ AuthLayout (centred card) ──────────────────────┐
+ * │  /login                                          │
+ * │  /register                                       │
+ * └──────────────────────────────────────────────────┘
+ *
+ * ┌─ PrivateRoute → PageLayout (Header+Footer) ─────┐
+ * │  /               Dashboard (admin or user)       │
+ * │  /atlas          UX Atlas                        │
+ * │  /waiting        Post-submission waiting room    │
+ * │  /result         Synthesis result + feedback     │
+ * │  /thank-you      Thank-you confirmation          │
+ * │  /form/:id       User form submission            │
+ * └──────────────────────────────────────────────────┘
+ *
+ * ┌─ PrivateRoute (admin) → PageLayout ──────────────┐
+ * │  /admin/form/:id          Form editor            │
+ * │  /admin/form/:id/summary  Summary workspace      │
+ * └──────────────────────────────────────────────────┘
+ */
 export default function Router() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/" element={<PrivateRoute><App /></PrivateRoute>} />
-      <Route path="/admin/form/:id/summary" element={<PrivateRoute isAdminRoute={true}><SummaryPage /></PrivateRoute>} />
-      <Route path="/waiting" element={<PrivateRoute><WaitingPage /></PrivateRoute>} />
-      <Route path="/result" element={<PrivateRoute><ResultPage /></PrivateRoute>} />
-      <Route path="/thank-you" element={<PrivateRoute><ThankYouPage /></PrivateRoute>} />
-      <Route path="/form/:id" element={<PrivateRoute><FormPage /></PrivateRoute>} />
-      <Route path="/admin/form/:id" element={<PrivateRoute isAdminRoute={true}><FormEditor /></PrivateRoute>} />
-    </Routes>
+    <Suspense fallback={<RouteLoadingFallback />}>
+      <Routes>
+        {/* ── Public auth pages (centred layout) ── */}
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/login"
+            element={
+              <ErrorBoundary fallbackTitle="Login Error">
+                <Login />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <ErrorBoundary fallbackTitle="Registration Error">
+                <Register />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <ErrorBoundary fallbackTitle="Forgot Password Error">
+                <ForgotPassword />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <ErrorBoundary fallbackTitle="Reset Password Error">
+                <ResetPassword />
+              </ErrorBoundary>
+            }
+          />
+        </Route>
+
+        {/* ── Authenticated pages (shared page shell) ── */}
+        <Route element={<PrivateRoute />}>
+          <Route element={<PageLayout />}>
+            <Route
+              path="/"
+              element={
+                <ErrorBoundary fallbackTitle="Dashboard Error">
+                  <Dashboard />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/atlas"
+              element={
+                <ErrorBoundary fallbackTitle="Atlas Error">
+                  <Atlas />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/waiting"
+              element={
+                <ErrorBoundary fallbackTitle="Waiting Page Error">
+                  <WaitingPage />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/result"
+              element={
+                <ErrorBoundary fallbackTitle="Result Page Error">
+                  <ResultPage />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/thank-you"
+              element={
+                <ErrorBoundary fallbackTitle="Thank You Page Error">
+                  <ThankYouPage />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/form/:id"
+              element={
+                <ErrorBoundary fallbackTitle="Form Submission Error">
+                  <FormPage />
+                </ErrorBoundary>
+              }
+            />
+          </Route>
+        </Route>
+
+        {/* ── Admin pages (shared page shell, admin-only) ── */}
+        <Route element={<PrivateRoute isAdminRoute />}>
+          <Route element={<PageLayout />}>
+            <Route
+              path="/admin/settings"
+              element={
+                <ErrorBoundary fallbackTitle="Settings Error">
+                  <AdminSettings />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/forms/new"
+              element={
+                <ErrorBoundary fallbackTitle="New Form Error">
+                  <AdminFormNew />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/form/:id"
+              element={
+                <ErrorBoundary fallbackTitle="Form Editor Error">
+                  <FormEditor />
+                </ErrorBoundary>
+              }
+            />
+          </Route>
+          {/* SummaryPage has its own SummaryHeader — render outside PageLayout
+              to avoid double header (PageLayout Header + SummaryHeader). */}
+          <Route
+            path="/admin/form/:id/summary"
+            element={
+              <ErrorBoundary fallbackTitle="Summary Page Error">
+                <SummaryPage />
+              </ErrorBoundary>
+            }
+          />
+        </Route>
+        {/* ── 404 catch-all ── */}
+        <Route
+          path="*"
+          element={
+            <ErrorBoundary fallbackTitle="Page Error">
+              <NotFoundPage />
+            </ErrorBoundary>
+          }
+        />
+      </Routes>
+    </Suspense>
   );
 }

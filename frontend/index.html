@@ -2,12 +2,179 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SAC Consensus</title>
+    <meta name="description" content="Symphonia — Expert consensus platform for structured multi-round deliberation. By Axiotic AI." />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Symphonia" />
+    <title>Symphonia — Collaborative Consensus</title>
+
+    <!-- Google Fonts preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Zero-flash theme script: sets data-theme + CSS vars BEFORE first paint -->
+    <script>
+      ;(function() {
+        var STORAGE_KEY = 'symphonia-theme';
+        var DEFAULT = 'axiotic-light';
+        var VALID = ['axiotic-dark', 'axiotic-light', 'apple'];
+
+        var themes = {
+          'axiotic-light': {
+            type: 'light',
+            vars: {
+              '--background':'#ffffff','--foreground':'#0f172a',
+              '--card':'#f8faff','--card-foreground':'#0f172a',
+              '--card-shadow':'0 1px 3px rgba(37, 99, 235, 0.06), 0 1px 2px rgba(0,0,0,0.04)',
+              '--card-shadow-lg':'0 4px 12px rgba(37, 99, 235, 0.12), 0 2px 4px -2px rgba(0,0,0,0.05)',
+              '--secondary':'#f1f5f9','--secondary-foreground':'#0f172a',
+              '--muted':'#f1f5f9','--muted-foreground':'#64748b',
+              '--accent':'#2563eb','--accent-foreground':'#ffffff','--accent-hover':'#1d4ed8',
+              '--destructive':'#dc2626','--destructive-foreground':'#ffffff',
+              '--success':'#16a34a',
+              '--highlight':'#eff6ff','--highlight-foreground':'#1e40af','--highlight-border':'#bfdbfe',
+              '--border':'#e2e8f0','--input':'#e2e8f0',
+              '--ring':'#2563eb','--radius':'0.5rem',
+              '--font-family':"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+            }
+          },
+          'axiotic-dark': {
+            type: 'dark',
+            vars: {
+              '--background':'#0a0f1e','--foreground':'#f0f4ff',
+              '--card':'#0f172a','--card-foreground':'#f0f4ff',
+              '--card-shadow':'0 1px 3px 0 rgba(0,0,0,0.3), 0 1px 2px -1px rgba(0,0,0,0.3)',
+              '--card-shadow-lg':'0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3)',
+              '--secondary':'#1e293b','--secondary-foreground':'#f0f4ff',
+              '--muted':'#1e293b','--muted-foreground':'#94a3b8',
+              '--accent':'#3b82f6','--accent-foreground':'#ffffff','--accent-hover':'#60a5fa',
+              '--destructive':'#ef4444','--destructive-foreground':'#ffffff',
+              '--success':'#22c55e',
+              '--highlight':'#172554','--highlight-foreground':'#93c5fd','--highlight-border':'#1e3a5f',
+              '--border':'#1e293b','--input':'#1e293b',
+              '--ring':'#3b82f6','--radius':'0.5rem',
+              '--font-family':"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+            }
+          },
+          'apple': {
+            type: 'light',
+            vars: {
+              '--background':'#f5f5f7','--foreground':'#1d1d1f',
+              '--card':'#ffffff','--card-foreground':'#1d1d1f',
+              '--card-shadow':'0 1px 3px rgba(0,0,0,0.06)',
+              '--card-shadow-lg':'0 4px 6px -1px rgba(0,0,0,0.08)',
+              '--secondary':'#f5f5f7','--secondary-foreground':'#1d1d1f',
+              '--muted':'#f5f5f7','--muted-foreground':'#86868b',
+              '--accent':'#007aff','--accent-foreground':'#ffffff','--accent-hover':'#0056b3',
+              '--destructive':'#ff3b30','--destructive-foreground':'#ffffff',
+              '--success':'#34c759',
+              '--highlight':'#e8f0fe','--highlight-foreground':'#0055d4','--highlight-border':'#a8c8f0',
+              '--border':'#d2d2d7','--input':'#d2d2d7',
+              '--ring':'#007aff','--radius':'0.625rem',
+              '--font-family':"'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', sans-serif"
+            }
+          }
+        };
+
+        try {
+          var stored = localStorage.getItem(STORAGE_KEY);
+          var id = (stored && VALID.indexOf(stored) !== -1) ? stored : DEFAULT;
+        } catch(e) {
+          var id = DEFAULT;
+        }
+
+        var t = themes[id];
+        var root = document.documentElement;
+        root.setAttribute('data-theme', id);
+
+        if (t.type === 'dark') {
+          root.classList.add('dark');
+        } else {
+          root.classList.remove('dark');
+        }
+
+        var vars = t.vars;
+        for (var k in vars) {
+          if (vars.hasOwnProperty(k)) {
+            root.style.setProperty(k, vars[k]);
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Branded loading screen — replaced when React mounts -->
+      <style>
+        .symphonia-loader {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          background: var(--background, #ffffff);
+          color: var(--foreground, #0f172a);
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          gap: 1.5rem;
+          transition: opacity 0.3s ease;
+        }
+        .symphonia-loader__icon {
+          width: 48px;
+          height: 48px;
+          opacity: 0.85;
+        }
+        .symphonia-loader__bars {
+          display: flex;
+          align-items: flex-end;
+          gap: 4px;
+          height: 28px;
+        }
+        .symphonia-loader__bar {
+          width: 4px;
+          border-radius: 2px;
+          background: var(--accent, #2563eb);
+          animation: symphonia-pulse 1.2s ease-in-out infinite;
+        }
+        .symphonia-loader__bar:nth-child(1) { height: 12px; animation-delay: 0s; }
+        .symphonia-loader__bar:nth-child(2) { height: 20px; animation-delay: 0.15s; }
+        .symphonia-loader__bar:nth-child(3) { height: 28px; animation-delay: 0.3s; }
+        .symphonia-loader__bar:nth-child(4) { height: 20px; animation-delay: 0.45s; }
+        .symphonia-loader__bar:nth-child(5) { height: 12px; animation-delay: 0.6s; }
+        @keyframes symphonia-pulse {
+          0%, 100% { transform: scaleY(0.4); opacity: 0.4; }
+          50% { transform: scaleY(1); opacity: 1; }
+        }
+        .symphonia-loader__text {
+          font-size: 0.8125rem;
+          font-weight: 500;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--muted-foreground, #64748b);
+          animation: symphonia-fade 2s ease-in-out infinite;
+        }
+        @keyframes symphonia-fade {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 1; }
+        }
+      </style>
+      <div class="symphonia-loader">
+        <img src="/logo-mark.png" alt="" class="symphonia-loader__icon" />
+        <div class="symphonia-loader__bars">
+          <div class="symphonia-loader__bar"></div>
+          <div class="symphonia-loader__bar"></div>
+          <div class="symphonia-loader__bar"></div>
+          <div class="symphonia-loader__bar"></div>
+          <div class="symphonia-loader__bar"></div>
+        </div>
+        <div class="symphonia-loader__text">Loading Symphonia</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

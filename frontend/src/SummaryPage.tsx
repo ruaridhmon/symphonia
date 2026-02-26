@@ -1,140 +1,300 @@
-import { useEffect, useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
-import { API_BASE_URL } from './config';
+import { ChartNoAxesColumn, ChevronDown, Clock, GitBranch, Info, Link2, MapPin, Settings, Sparkles, X } from 'lucide-react';
+import { useDocumentTitle } from './hooks/useDocumentTitle';
+import { useAuth } from './AuthContext';
+import { getMe } from './api/auth';
+import { getForm as apiFetchForm } from './api/forms';
+import { getRounds, getRoundsWithResponses, nextRound as apiNextRound } from './api/rounds';
+import { getResponses } from './api/responses';
+import {
+	getSynthesisVersions as apiGetSynthesisVersions,
+	activateVersion as apiActivateVersion,
+	generateSynthesis as apiGenerateSynthesis,
+	pollSynthesisJob as apiPollSynthesisJob,
+	pushSummary as apiPushSummary,
+} from './api/synthesis';
 
-type Round = {
-	id: number;
-	round_number: number;
-	synthesis: string;
-	is_active: boolean;
-	questions: string[];
+import {
+	RoundTimeline,
+	RoundCard,
+	SynthesisProgress,
+	StructuredSynthesis,
+	CrossMatrix,
+	ConsensusHeatmap,
+	EmergenceHighlights,
+	MarkdownRenderer,
+	DevilsAdvocate,
+	AudienceTranslation,
+	LoadingButton,
+	useToast,
+} from './components';
+
+import {
+	SummaryHeader,
+	SynthesisEditorCard,
+	AISynthesisPanel,
+	SynthesisVersionPanel,
+	SelectedVersionContent,
+	NextRoundQuestionsCard,
+	FormInfoCard,
+	ActionsCard,
+	ResponsesModal,
+	ResponsesAccordion,
+	RoundHistoryCard,
+	SummaryLoadingSkeleton,
+	VersionCompare,
+	VersionTimeline,
+} from './components/summary';
+
+import { usePresence } from './hooks/usePresence';
+
+import type {
+	Round,
+	Form,
+	RoundWithResponses,
+	SynthesisVersion,
+} from './types/summary';
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const MODELS = [
+	'anthropic/claude-opus-4-6',
+	'anthropic/claude-sonnet-4',
+	'openai/gpt-4o',
+	'google/gemini-3-flash-preview',
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function extractQuestionText(q: unknown): string {
+	if (typeof q === 'string') return q;
+	if (q && typeof q === 'object') {
+		const obj = q as Record<string, unknown>;
+		return String(obj.text || obj.label || obj.question || '');
+	}
+	return '';
+}
+
+// ─── FAB Panel type ──────────────────────────────────────────────────────────
+
+type FabPanel = 'actions' | 'ai' | 'versions' | 'history' | null;
+
+const FAB_PANEL_LABELS: Record<Exclude<FabPanel, null>, string> = {
+	actions: 'Actions & Export',
+	ai: 'AI Synthesis',
+	versions: 'Version History',
+	history: 'Round History',
 };
 
-type Form = {
-	id: number;
-	title: string;
-	questions: string[];
-	allow_join: boolean;
-	join_code: string;
-};
+// ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SummaryPage() {
+	useDocumentTitle('Synthesis Summary');
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const formId = Number(id);
+	const { toastError, toastWarning, toastSuccess } = useToast();
 
-	const token = useMemo(() => localStorage.getItem('access_token') || '', []);
-	const authHeaders = useMemo(
-		() => ({ Authorization: `Bearer ${token}` }),
-		[token]
-	);
+	const { token: rawToken, logout: authLogout } = useAuth();
+	const token = rawToken ?? '';
 
+	// ── Core state ──
 	const [email, setEmail] = useState('');
 	const [form, setForm] = useState<Form | null>(null);
 	const [rounds, setRounds] = useState<Round[]>([]);
 	const [activeRound, setActiveRound] = useState<Round | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [loadError, setLoadError] = useState<string | null>(null);
 
+	// ── Responses modal ──
 	const [responsesOpen, setResponsesOpen] = useState(false);
-	const [responsesHTML, setResponsesHTML] = useState('');
+	const [structuredRounds, setStructuredRounds] = useState<RoundWithResponses[]>([]);
 
+	// ── Round selection ──
+	const [selectedRound, setSelectedRound] = useState<Round | null>(null);
+
+	// ── Synthesis generation UI ──
+	const [synthesisStage, setSynthesisStage] = useState('preparing');
+	const [synthesisStep, setSynthesisStep] = useState(0);
+	const [synthesisTotalSteps] = useState(5);
+	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
+	const [synthesisViewMode, setSynthesisViewMode] = useState<'view' | 'edit'>('view');
+	const [selectedModel, setSelectedModel] = useState('anthropic/claude-opus-4-6');
+	const [isGenerating, setIsGenerating] = useState(false);
+
+	// ── Synthesis versioning ──
+	const [synthesisVersions, setSynthesisVersions] = useState<SynthesisVersion[]>([]);
+	const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
+	const [showVersionCompare, setShowVersionCompare] = useState(false);
+
+	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
 	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
 
-	const [selectedModel, setSelectedModel] = useState('openai/gpt-3.5-turbo');
-	const [isGenerating, setIsGenerating] = useState(false);
+	// ── Floating Action Bar panel state ──
+	const [activePanel, setActivePanel] = useState<FabPanel>(null);
+	const [formInfoOpen, setFormInfoOpen] = useState(false);
 
-	const models = [
-		'openai/gpt-3.5-turbo',
-		'google/gemini-pro',
-		'anthropic/claude-2',
-		'meta-llama/llama-2-70b-chat'
-	];
+	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
+	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
+		if (data.type === 'synthesis_complete' && data.form_id === formId) {
+			// Another client (or our own broadcast) completed synthesis — reload
+			loadAll().then(() => {
+				if (data.round_id && typeof data.round_id === 'number') {
+					loadSynthesisVersions(data.round_id);
+				}
+			});
+		}
+	}, [formId]);
 
+	// ── Presence ──
+	const { viewers } = usePresence({
+		formId: formId || null,
+		page: 'summary',
+		userEmail: email,
+		onMessage: handleWsMessage,
+	});
+
+	// ── Editor ──
 	const editor = useEditor({
 		extensions: [
 			StarterKit,
 			Underline,
-			Placeholder.configure({
-				placeholder: 'Write the synthesis for this round…'
-			})
+			Placeholder.configure({ placeholder: 'Write the synthesis for this round…' }),
 		],
 		content: '',
-		editorProps: {
-			attributes: {
-				class: 'prose prose-neutral max-w-none focus:outline-none'
+		editorProps: { attributes: { class: 'prose prose-sm max-w-none focus:outline-none' } },
+	});
+
+	// ── Derived values ──
+	const displayRound = selectedRound || activeRound;
+	const structuredSynthesisData = displayRound?.synthesis_json || null;
+
+	const resolvedExpertLabels: Record<number, string> = useMemo(() => {
+		if (!structuredSynthesisData) return {};
+		const labels: Record<number, string> = {};
+		const allExperts = new Set<number>();
+		for (const a of structuredSynthesisData.agreements || []) {
+			for (const e of a.supporting_experts || []) allExperts.add(e);
+		}
+		for (const d of structuredSynthesisData.disagreements || []) {
+			for (const p of d.positions || []) {
+				for (const e of p.experts || []) allExperts.add(e);
 			}
 		}
-	});
+		for (const id of allExperts) labels[id] = `Expert ${id}`;
+		return labels;
+	}, [structuredSynthesisData]);
+
+	const selectedVersion = useMemo(
+		() => synthesisVersions.find(v => v.id === selectedVersionId) || null,
+		[synthesisVersions, selectedVersionId]
+	);
+
+	// ─── Data loading ────────────────────────────────────────────────────────
 
 	useEffect(() => {
 		if (!token) return;
-		fetch(`${API_BASE_URL}/me`, { headers: authHeaders })
-			.then(r => r.json())
-			.then(d => setEmail(d.email || ''));
-	}, [token, authHeaders]);
+		getMe()
+			.then(d => setEmail(d.email || ''))
+			.catch(() => {});
+	}, [token]);
 
 	useEffect(() => {
 		if (!token || !formId) return;
-		loadAll();
-	}, [token, formId, authHeaders, editor]);
+		loadAll().then(() => loadResponses()).catch(() => {});
+	}, [token, formId, editor]);
 
 	async function loadAll() {
 		setLoading(true);
+		setLoadError(null);
 		try {
-			const formRes = await fetch(`${API_BASE_URL}/forms/${formId}`, {
-				headers: authHeaders
-			});
-			const f = await formRes.json();
-			setForm(f);
+			const f = await apiFetchForm(formId);
+			setForm(f as Form);
 
-			const roundsRes = await fetch(`${API_BASE_URL}/forms/${formId}/rounds`, {
-				headers: authHeaders
-			});
-			const list = await roundsRes.json();
-
-			const mapped: Round[] = (Array.isArray(list) ? list : []).map(
-				(x: any) => ({
-					id: x.id,
-					round_number: x.round_number,
-					synthesis: x.synthesis || '',
-					is_active: !!x.is_active,
-					questions: Array.isArray(x.questions) ? x.questions : []
-				})
-			);
+			const list = await getRounds(formId);
+			const mapped: Round[] = (Array.isArray(list) ? list : []).map(x => ({
+				id: x.id,
+				round_number: x.round_number,
+				synthesis: x.synthesis || '',
+				synthesis_json: x.synthesis_json || null,
+				is_active: !!x.is_active,
+				questions: Array.isArray(x.questions) ? x.questions : [],
+				convergence_score: x.convergence_score ?? null,
+				response_count: x.response_count ?? 0,
+			}));
 			setRounds(mapped);
 
 			const active = mapped.find(x => x.is_active) || null;
-			setActiveRound(active || null);
+			setActiveRound(active);
+
+			if (active && !selectedRound) {
+				setSelectedRound(active);
+				loadSynthesisVersions(active.id);
+			}
 
 			if (active && editor) {
 				editor.commands.setContent(active.synthesis || '');
-				setHasSavedSynthesis(
-					!!(active.synthesis && active.synthesis.trim().length > 0)
-				);
-
-				if (active.questions && active.questions.length) {
-					setNextRoundQuestions(active.questions);
-				} else if (Array.isArray(f.questions)) {
-					setNextRoundQuestions(f.questions);
-				}
+				setHasSavedSynthesis(!!(active.synthesis && active.synthesis.trim().length > 0));
+				const qs = active.questions?.length ? active.questions : (Array.isArray(f.questions) ? f.questions : []);
+				setNextRoundQuestions(qs.map(extractQuestionText));
 			} else if (f && Array.isArray(f.questions)) {
-				setNextRoundQuestions(f.questions);
+				setNextRoundQuestions(f.questions.map(extractQuestionText));
 			}
+		} catch (err) {
+			setLoadError((err as Error).message || 'Failed to load consultation data');
 		} finally {
 			setLoading(false);
 		}
 	}
 
+	async function loadResponses() {
+		try {
+			const data = await getRoundsWithResponses(formId);
+			if (Array.isArray(data)) {
+				setStructuredRounds(
+					data.map(r => ({
+						id: r.id,
+						round_number: r.round_number,
+						synthesis: r.synthesis || '',
+						is_active: !!r.is_active,
+						responses: (r.responses || []).map(resp => ({
+							id: resp.id,
+							answers: typeof resp.answers === 'string' ? JSON.parse(resp.answers as string) : resp.answers || {},
+							email: resp.email || null,
+							timestamp: resp.timestamp,
+							version: resp.version ?? 1,
+							round_id: r.id,
+						})),
+					}))
+				);
+			}
+		} catch {}
+	}
+
+	async function loadSynthesisVersions(roundId: number) {
+		try {
+			const versions = await apiGetSynthesisVersions(formId, roundId);
+			setSynthesisVersions(versions);
+			const active = versions.find(v => v.is_active);
+			setSelectedVersionId(active?.id || (versions.length > 0 ? versions[versions.length - 1].id : null));
+		} catch {
+			setSynthesisVersions([]);
+			setSelectedVersionId(null);
+		}
+	}
+
+	// ─── Actions ─────────────────────────────────────────────────────────────
+
 	function logout() {
-		localStorage.clear();
+		authLogout();
 		navigate('/');
 	}
 
@@ -143,388 +303,646 @@ export default function SummaryPage() {
 			setResponsesOpen(false);
 			return;
 		}
-
-		const roundsWithResponses = await fetch(
-			`${API_BASE_URL}/forms/${formId}/rounds_with_responses`,
-			{ headers: authHeaders }
-		).then(r => r.json());
-
-		let html = '';
-		if (!roundsWithResponses || roundsWithResponses.length === 0) {
-			html = '<p class="text-neutral-600">No responses yet for this form.</p>';
-		} else {
-			for (const round of roundsWithResponses) {
-				html += `<div class="mb-8 p-4 border border-neutral-200 rounded-lg bg-neutral-50">
-                            <h2 class="text-xl font-bold mb-3 text-neutral-800">Round ${round.round_number}</h2>`;
-
-				if (round.responses.length === 0) {
-					html += '<p class="text-neutral-600">No responses for this round.</p>';
-					html += `</div>`; // Close round div
-					continue;
-				}
-
-				const questions =
-					rounds.find(r => r.id === round.id)?.questions ||
-					form?.questions ||
-					[];
-
-				// Group responses by question for better readability
-				for (let i = 0; i < questions.length; i++) {
-					const question = questions[i];
-					const questionKey = `q${i + 1}`;
-					html += `<div class="mb-6 p-3 border-l-4 border-neutral-300 bg-white shadow-sm rounded">
-                                <h3 class="text-lg font-semibold mb-2 text-neutral-700">${question}</h3>`;
-
-					let hasAnswers = false;
-					for (const response of round.responses) {
-						const answer = response.answers[questionKey];
-						if (answer) {
-							hasAnswers = true;
-							html += `
-                                <div class="pl-4 py-2 my-2 border-t border-neutral-100 last:border-b-0">
-                                    <p class="text-base text-neutral-800 leading-relaxed">${answer}</p>
-                                    <p class="text-xs text-neutral-500 mt-1 italic">
-                                        – ${response.email || 'Anonymous'}
-                                    </p>
-                                </div>
-                            `;
-						}
-					}
-					if (!hasAnswers) {
-						html += `<p class="text-sm text-neutral-500 italic">No responses for this question.</p>`;
-					}
-					html += `</div>`; // Close question div
-				}
-				html += `</div>`; // Close round div
-			}
-		}
-
-		setResponsesHTML(html);
+		await loadResponses();
 		setResponsesOpen(true);
 	}
 
 	async function saveSynthesis() {
 		if (!activeRound || !formId) return;
 		const summary = editor?.getHTML() || '';
-
-		await fetch(`${API_BASE_URL}/forms/${formId}/push_summary`, {
-			method: 'POST',
-			headers: { ...authHeaders, 'Content-Type': 'application/json' },
-			body: JSON.stringify({ summary })
-		});
-
-		setHasSavedSynthesis(true);
-	}
-
-	function updateNextQuestion(index: number, value: string) {
-		setNextRoundQuestions(prev => {
-			const copy = [...prev];
-			copy[index] = value;
-			return copy;
-		});
-	}
-
-	function addNextQuestion() {
-		setNextRoundQuestions(prev => [...prev, '']);
-	}
-
-	function removeNextQuestion(index: number) {
-		setNextRoundQuestions(prev => prev.filter((_, i) => i !== index));
+		try {
+			await apiPushSummary(formId, summary);
+			setHasSavedSynthesis(true);
+			toastSuccess('Synthesis saved');
+		} catch (err) {
+			toastError((err as Error).message || 'Failed to save synthesis');
+		}
 	}
 
 	async function startNextRound() {
 		if (!formId) return;
-
-		const cleaned = nextRoundQuestions
-			.map(q => q.trim())
-			.filter(q => q.length > 0);
+		const cleaned = nextRoundQuestions.map(q => q.trim()).filter(q => q.length > 0);
 		if (!cleaned.length) {
-			alert('Add at least one question for the next round.');
+			toastWarning('Add at least one question for the next round.');
 			return;
 		}
-
-		await fetch(`${API_BASE_URL}/forms/${formId}/next_round`, {
-			method: 'POST',
-			headers: { ...authHeaders, 'Content-Type': 'application/json' },
-			body: JSON.stringify({ questions: cleaned })
-		});
-
-		await loadAll();
-		setHasSavedSynthesis(false);
+		setLoading(true);
+		try {
+			await apiNextRound(formId, { questions: cleaned });
+			await loadAll();
+			await loadResponses();
+			setHasSavedSynthesis(false);
+			setSelectedRound(null);
+		} catch (err) {
+			toastError((err as Error).message || 'Failed to start next round');
+		} finally {
+			setLoading(false);
+		}
 	}
 
 	async function downloadResponses() {
-		const raw = await fetch(
-			`${API_BASE_URL}/form/${formId}/responses?all_rounds=true`,
-			{ headers: authHeaders }
-		).then(r => r.json());
+		try {
+			const raw = await getResponses(formId, true);
 
-		if (!Array.isArray(raw) || raw.length === 0) {
-			alert('No responses to download');
-			return;
-		}
+			if (!Array.isArray(raw) || raw.length === 0) {
+				toastWarning('No responses to download');
+				return;
+			}
 
-		const paragraphs = raw.flatMap((r: any, i: number) => {
-			const header = new Paragraph({
-				children: [new TextRun({ text: `Response ${i + 1}`, bold: true })],
-				spacing: { after: 200 }
+			const paragraphs = raw.flatMap((r, i: number) => {
+				const header = new Paragraph({
+					children: [new TextRun({ text: `Response ${i + 1}`, bold: true })],
+					spacing: { after: 200 },
+				});
+				const qa = Object.entries(r.answers).flatMap(([k, v]: [string, unknown]) => [
+					new Paragraph({ children: [new TextRun({ text: k, bold: true })], spacing: { after: 80 } }),
+					new Paragraph({ text: String(v ?? ''), spacing: { after: 160 } }),
+				]);
+				return [header, ...qa, new Paragraph('')];
 			});
 
-			const qa = Object.entries(r.answers).flatMap(([k, v]: any) => [
-				new Paragraph({
-					children: [new TextRun({ text: k, bold: true })],
-					spacing: { after: 80 }
-				}),
-				new Paragraph({
-					text: String(v ?? ''),
-					spacing: { after: 160 }
-				})
-			]);
-
-			return [header, ...qa, new Paragraph('')];
-		});
-
-		const doc = new Document({ sections: [{ children: paragraphs }] });
-		const blob = await Packer.toBlob(doc);
-		saveAs(blob, 'responses.docx');
+			const doc = new Document({ sections: [{ children: paragraphs }] });
+			const blob = await Packer.toBlob(doc);
+			saveAs(blob, 'responses.docx');
+		} catch (err) {
+			toastError((err as Error).message || 'Failed to download responses');
+		}
 	}
 
 	async function generateSummary() {
-		if (!formId || !selectedModel) return;
+		const targetRound = selectedRound || activeRound;
+		if (!formId || !selectedModel || !targetRound) return;
 
 		setIsGenerating(true);
+		setSynthesisStage('preparing');
+		setSynthesisStep(0);
 		try {
-			const res = await fetch(
-				`${API_BASE_URL}/forms/${formId}/generate_summary`,
-				{
-					method: 'POST',
-					headers: { ...authHeaders, 'Content-Type': 'application/json' },
-					body: JSON.stringify({ model: selectedModel })
+			setSynthesisStage('analyzing');
+			setSynthesisStep(1);
+
+			const initial = await apiGenerateSynthesis(formId, targetRound.id, {
+				model: selectedModel,
+				strategy: synthesisMode,
+				n_analysts: 3,
+				mode: 'human_only',
+			});
+
+			// ── Async job pattern: poll until the background synthesis is done ──
+			let data = initial;
+			if (initial.job_id && initial.status === 'pending') {
+				setSynthesisStage('synthesising');
+				setSynthesisStep(2);
+				const jobId = initial.job_id;
+				// Poll every 3 s; timeout after 10 min
+				const deadline = Date.now() + 10 * 60 * 1000;
+				while (Date.now() < deadline) {
+					await new Promise(res => setTimeout(res, 3000));
+					const jobStatus = await apiPollSynthesisJob(jobId);
+					if (jobStatus.status === 'complete' && jobStatus.result) {
+						data = jobStatus.result;
+						break;
+					}
+					if (jobStatus.status === 'failed') {
+						throw new Error(jobStatus.error || 'Synthesis job failed');
+					}
+					// Still pending — update step animation
+					setSynthesisStep(prev => prev < 4 ? prev + 1 : 2);
 				}
-			);
-
-			if (!res.ok) {
-				const errorData = await res.json();
-				throw new Error(errorData.detail || 'Failed to generate summary');
 			}
 
-			const data = await res.json();
-			if (data.summary && editor) {
-				editor.commands.setContent(data.summary);
+			setSynthesisStage('synthesising');
+			setSynthesisStep(3);
+			setSynthesisStage('formatting');
+			setSynthesisStep(4);
+
+			const content = data.synthesis || data.summary || '';
+			if (content && editor) editor.commands.setContent(content);
+
+			// Optimistic update: immediately reflect synthesis in UI state
+			if (data.synthesis_json && targetRound) {
+				const updatedRound = { ...targetRound, synthesis: content, synthesis_json: data.synthesis_json };
+				setRounds(prev => prev.map(r => r.id === targetRound.id ? updatedRound : r));
+				if (activeRound?.id === targetRound.id) setActiveRound(updatedRound);
+				if (selectedRound?.id === targetRound.id) setSelectedRound(updatedRound);
 			}
+
+			setSynthesisViewMode('view');
+			// Reload round data and versions to stay in sync with backend
+			await loadAll();
+			if (targetRound) await loadSynthesisVersions(targetRound.id);
+
+			setSynthesisStage('complete');
+			setSynthesisStep(5);
+			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
 		} catch (error) {
-			console.error('Error generating summary:', error);
-			alert((error as Error).message);
+			toastError((error as Error).message || 'Failed to generate synthesis');
+			setSynthesisStage('preparing');
+			setSynthesisStep(0);
 		} finally {
 			setIsGenerating(false);
 		}
 	}
 
-	if (!form) return <div>Loading…</div>;
+	async function activateVersion(versionId: number) {
+		try {
+			await apiActivateVersion(versionId);
+			if (displayRound) await loadSynthesisVersions(displayRound.id);
+			await loadAll();
+		} catch (error) {
+			toastError((error as Error).message || 'Failed to activate version');
+		}
+	}
+
+	function handleSelectRound(round: Round) {
+		setSelectedRound(round);
+		if (round.is_active && editor) editor.commands.setContent(round.synthesis || '');
+		loadSynthesisVersions(round.id);
+	}
+
+	function handleResponseUpdated(roundId: number, updated: { id: number; answers: Record<string, string>; version: number }) {
+		setStructuredRounds(prev =>
+			prev.map(r =>
+				r.id === roundId
+					? { ...r, responses: r.responses.map(rr => rr.id === updated.id ? { ...rr, answers: updated.answers, version: updated.version } : rr) }
+					: r
+			)
+		);
+	}
+
+	// ── FAB panel toggle ──
+	function togglePanel(panel: Exclude<FabPanel, null>) {
+		setActivePanel(prev => prev === panel ? null : panel);
+	}
+
+	// ─── Render ──────────────────────────────────────────────────────────────
+
+	if (loadError && !form) return (
+		<div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+			<div className="text-center max-w-md mx-auto px-4">
+				<div className="text-4xl mb-4">⚠️</div>
+				<h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>
+					Failed to Load
+				</h2>
+				<p className="text-sm mb-6" style={{ color: 'var(--muted-foreground)' }}>
+					{loadError}
+				</p>
+				<div className="flex gap-3 justify-center">
+					<LoadingButton variant="accent" size="md" onClick={() => { loadAll(); loadResponses(); }}>
+						Retry
+					</LoadingButton>
+					<LoadingButton variant="secondary" size="md" onClick={() => navigate('/')}>
+						Back to Dashboard
+					</LoadingButton>
+				</div>
+			</div>
+		</div>
+	);
+	if (!form) return <SummaryLoadingSkeleton />;
+
+	// ── FAB button helper ──
+	const fabBtn = (panel: Exclude<FabPanel, null>, icon: React.ReactNode) => (
+		<button
+			key={panel}
+			onClick={() => togglePanel(panel)}
+			title={FAB_PANEL_LABELS[panel]}
+			className="transition-colors"
+			style={{
+				width: '2.5rem',
+				height: '2.5rem',
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				borderRadius: 'var(--radius, 0.5rem)',
+				border: 'none',
+				cursor: 'pointer',
+				background: activePanel === panel ? 'var(--accent)' : 'transparent',
+				color: activePanel === panel ? '#fff' : 'var(--muted-foreground)',
+			}}
+			onMouseEnter={e => { if (activePanel !== panel) e.currentTarget.style.background = 'var(--muted)'; }}
+			onMouseLeave={e => { if (activePanel !== panel) e.currentTarget.style.background = 'transparent'; }}
+		>
+			{icon}
+		</button>
+	);
 
 	return (
-		<div className="min-h-screen bg-neutral-100 text-neutral-900 font-sans flex flex-col">
-			<header className="bg-white border-b shadow-sm">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-					<div>
-						<h1 className="text-xl font-bold tracking-tight">Admin Workspace</h1>
-						<p className="text-sm text-neutral-500">
-							Logged in as <strong>{email}</strong>
-						</p>
-					</div>
-					<button onClick={logout} className="text-sm text-red-600 underline">
-						Log out
-					</button>
-				</div>
-			</header>
+		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
+			<SummaryHeader email={email} viewers={viewers} onLogout={logout} />
 
-			<main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-				<div className="mb-4">
+			<main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+				{/* Navigation breadcrumb */}
+				<div className="mb-4 flex items-center justify-between">
 					<button
 						onClick={() => navigate('/')}
-						className="text-sm text-blue-600 underline"
+						className="text-sm font-medium transition-colors"
+						style={{ color: 'var(--muted-foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
+						onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.color = 'var(--accent)'}
+						onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.color = 'var(--muted-foreground)'}
 					>
 						← Back to Dashboard
 					</button>
+					<h2 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
+						{form.title}
+					</h2>
 				</div>
 
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-					{/* Main Content */}
-					<div className="lg:col-span-2 space-y-6">
-						<div className="bg-white border shadow rounded-xl p-6 min-h-[200px] lg:min-h-[300px]">
-							<h2 className="text-lg font-semibold mb-3">
-								Synthesis for Round {activeRound?.round_number || ''}
+				{/* ── Collapsible Form Info banner ── */}
+				<div className="mb-4">
+					<button
+						onClick={() => setFormInfoOpen(v => !v)}
+						className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
+						style={{
+							background: 'var(--card)',
+							border: '1px solid var(--border)',
+							color: 'var(--foreground)',
+							cursor: 'pointer',
+						}}
+						onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
+							e.currentTarget.style.borderColor = 'var(--accent)';
+						}}
+						onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
+							e.currentTarget.style.borderColor = 'var(--border)';
+						}}
+					>
+						<span className="flex items-center gap-2">
+							<Info size={15} style={{ color: 'var(--accent)' }} />
+							Form Details
+							{activeRound && (
+								<span
+									className="text-xs px-2 py-0.5 rounded-full"
+									style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
+								>
+									Round {activeRound.round_number} · {activeRound.response_count} responses
+								</span>
+							)}
+						</span>
+						<ChevronDown
+							size={15}
+							style={{
+								color: 'var(--muted-foreground)',
+								transform: formInfoOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+								transition: 'transform 0.2s ease',
+							}}
+						/>
+					</button>
+					{formInfoOpen && (
+						<div
+							className="mt-2"
+							style={{
+								animation: 'fadeIn 0.15s ease',
+							}}
+						>
+							<FormInfoCard form={form} activeRound={activeRound} />
+						</div>
+					)}
+				</div>
+
+				{/* Round timeline */}
+				{rounds.length > 0 && (
+					<div className="mb-4 sm:mb-6 overflow-x-auto">
+						<RoundTimeline
+							rounds={rounds}
+							activeRoundId={activeRound?.id || null}
+							selectedRoundId={selectedRound?.id || null}
+							onSelectRound={handleSelectRound}
+						/>
+					</div>
+				)}
+
+				{/* Synthesis progress bar */}
+				<SynthesisProgress
+					stage={synthesisStage}
+					step={synthesisStep}
+					totalSteps={synthesisTotalSteps}
+					visible={isGenerating}
+				/>
+
+				{/* Main content — full width, no sidebar offset */}
+				<div className="space-y-4 sm:space-y-6">
+					{/* Non-active round card */}
+					{selectedRound && !selectedRound.is_active && (
+						<RoundCard
+							round={selectedRound}
+							isCurrentRound={false}
+							expertLabels={resolvedExpertLabels}
+							formId={formId}
+							token={token}
+							currentUserEmail={email}
+						/>
+					)}
+
+					{/* Inline responses accordion — toggle per round */}
+					<ResponsesAccordion
+						structuredRounds={structuredRounds}
+						rounds={rounds}
+						formQuestions={form.questions || []}
+						formId={formId}
+						token={token}
+						onResponseUpdated={handleResponseUpdated}
+					/>
+
+					{/* Synthesis editor (active round only) */}
+					{(!selectedRound || selectedRound.is_active) && (
+						<SynthesisEditorCard
+							activeRound={activeRound}
+							synthesisViewMode={synthesisViewMode}
+							onSetViewMode={setSynthesisViewMode}
+							editor={editor}
+						/>
+					)}
+
+					{/* Read-only synthesis for non-active rounds */}
+					{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
+						<div className="card p-4 sm:p-6">
+							<h2 className="text-lg font-semibold mb-3 text-foreground">
+								Synthesis (Round {selectedRound.round_number})
 							</h2>
-							<div className="prose max-w-none">
-								<EditorContent editor={editor} />
-							</div>
+							<MarkdownRenderer content={selectedRound.synthesis} />
 						</div>
+					)}
 
-						<div className="bg-white border shadow rounded-xl p-6">
-							<h2 className="text-lg font-semibold">Next Round Questions</h2>
-							<div className="space-y-3">
-								{nextRoundQuestions.map((q, index) => (
-									<div key={index} className="flex gap-2 items-center">
-										<input
-											type="text"
-											className="flex-1 border rounded px-3 py-2 text-sm"
-											value={q}
-											onChange={e => updateNextQuestion(index, e.target.value)}
-											placeholder={`Question ${index + 1}`}
-										/>
-										<button
-											className="px-3 py-2 rounded bg-red-100 text-red-700 text-sm hover:bg-red-200"
-											onClick={() => removeNextQuestion(index)}
-										>
-											Remove
-										</button>
-									</div>
-								))}
+					{/* Structured synthesis data */}
+					{structuredSynthesisData && (
+						<div className="card p-4 sm:p-6">
+							<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
+								<h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+									<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> Structured Analysis
+								</h2>
 							</div>
-							<button
-								onClick={addNextQuestion}
-								className="mt-4 px-3 py-1 rounded bg-neutral-800 text-white text-sm hover:bg-neutral-900"
-							>
-								Add Question
-							</button>
+							{/* Audience Translation toggle */}
+							{displayRound && (
+								<div className="mb-4">
+									<AudienceTranslation
+										formId={formId}
+										roundId={displayRound.id}
+										synthesisText={(() => {
+											const parts: string[] = [];
+											if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
+											for (const a of structuredSynthesisData.agreements || []) {
+												parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
+											}
+											for (const d of structuredSynthesisData.disagreements || []) {
+												parts.push(`Disagreement: ${d.topic}`);
+												for (const p of d.positions || []) {
+													parts.push(`  - ${p.position}: ${p.evidence}`);
+												}
+											}
+											for (const n of structuredSynthesisData.nuances || []) {
+												parts.push(`Nuance: ${n.claim} — ${n.context}`);
+											}
+											return parts.join('\n');
+										})()}
+									/>
+								</div>
+							)}
+							<StructuredSynthesis
+								data={structuredSynthesisData}
+								convergenceScore={displayRound?.convergence_score ?? undefined}
+								expertLabels={resolvedExpertLabels}
+								formId={formId}
+								roundId={displayRound?.id}
+								token={token}
+								currentUserEmail={email}
+							/>
 						</div>
-					</div>
+					)}
 
-					{/* Sidebar */}
-					<div className="lg:col-span-1 space-y-6">
-						<div className="bg-white border shadow rounded-xl p-4">
-							<h3 className="text-base font-semibold mb-2">Form Info</h3>
-							<div className="text-sm space-y-1">
-								<div>
-									<strong>Form:</strong> {form.title}
-								</div>
-								<div>
-									<strong>Active round:</strong>{' '}
-									{activeRound ? `Round ${activeRound.round_number}` : 'None'}
-								</div>
-							</div>
-						</div>
-						<div className="bg-white border shadow rounded-xl p-4">
-							<h3 className="text-base font-semibold mb-3">Actions</h3>
-							<div className="flex flex-col space-y-2">
-								<button
-									onClick={viewAllResponses}
-									className="w-full text-left bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm"
-								>
-									{responsesOpen ? 'Hide Responses' : 'View All Responses'}
-								</button>
-								<button
-									onClick={downloadResponses}
-									className="w-full text-left bg-neutral-700 hover:bg-neutral-800 text-white px-3 py-2 rounded text-sm"
-								>
-									Download Responses
-								</button>
-								<button
-									className="w-full text-left bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded text-sm"
-									onClick={saveSynthesis}
-								>
-									Save Synthesis
-								</button>
-								<div className="pt-2">
-									<button
-										onClick={startNextRound}
-										className="w-full bg-blue-800 hover:bg-blue-900 text-white px-3 py-2 rounded font-semibold"
-										disabled={loading}
-									>
-										Start Next Round
-									</button>
-								</div>
-							</div>
-						</div>
+					{/* AI Devil's Advocate — after structured analysis */}
+					{displayRound && structuredSynthesisData && (
+						<DevilsAdvocate formId={formId} roundId={displayRound.id} />
+					)}
 
-						<div className="bg-white border shadow rounded-xl p-4">
-							<h3 className="text-base font-semibold mb-3">AI-Powered Synthesis</h3>
-							<div className="space-y-3">
-								<div>
-									<label htmlFor="model-select" className="block text-sm font-medium text-neutral-700 mb-1">
-										Choose a model
-									</label>
-									<select
-										id="model-select"
-										className="w-full border rounded px-3 py-2 text-sm"
-										value={selectedModel}
-										onChange={e => setSelectedModel(e.target.value)}
-									>
-										{models.map(model => (
-											<option key={model} value={model}>
-												{model}
-											</option>
-										))}
-									</select>
-								</div>
-								<button
-									onClick={generateSummary}
-									className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded font-semibold text-sm"
-									disabled={isGenerating}
-								>
-									{isGenerating ? 'Generating...' : 'Generate Summary'}
-								</button>
-							</div>
+					{/* Cross-matrix */}
+					{structuredSynthesisData && (
+						<div className="card p-4 sm:p-6">
+							<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
+								<Link2 size={20} style={{ color: 'var(--accent)' }} /> Expert Cross-Analysis
+							</h2>
+							<CrossMatrix
+								structuredData={structuredSynthesisData}
+								resolvedExpertLabels={resolvedExpertLabels}
+								expertLabelPreset="default"
+							/>
 						</div>
+					)}
 
-						{rounds.length > 0 && (
-							<div className="bg-white border shadow rounded-xl p-4">
-								<h3 className="text-base font-semibold mb-2">Round History</h3>
-								<ul className="text-sm space-y-1">
-									{rounds.map(r => (
-										<li
-											key={r.id}
-											className="flex justify-between items-center border-b last:border-b-0 py-1"
-										>
-											<span>
-												Round {r.round_number}{' '}
-												{r.is_active && (
-													<span className="text-green-600 font-semibold">
-														(active)
-													</span>
-												)}
-											</span>
-											<span
-												className={`text-xs px-2 py-0.5 rounded-full ${
-													r.synthesis
-														? 'bg-green-100 text-green-700'
-														: 'bg-neutral-100 text-neutral-500'
-												}`}
-											>
-												{r.synthesis ? 'Synthesis' : 'No Synthesis'}
-											</span>
-										</li>
-									))}
-								</ul>
-							</div>
-						)}
-					</div>
+					{/* Consensus heatmap */}
+					{structuredSynthesisData && (
+						<div className="card p-4 sm:p-6">
+							<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
+								<MapPin size={20} style={{ color: 'var(--accent)' }} /> Consensus Heatmap
+							</h2>
+							<ConsensusHeatmap
+								structuredData={structuredSynthesisData}
+								resolvedExpertLabels={resolvedExpertLabels}
+								questions={displayRound?.questions}
+							/>
+						</div>
+					)}
+
+					{/* Version comparison (side-by-side) */}
+					{showVersionCompare && synthesisVersions.length >= 2 && (
+						<VersionCompare
+							versions={synthesisVersions}
+							currentVersionId={selectedVersionId}
+							onClose={() => setShowVersionCompare(false)}
+						/>
+					)}
+
+					{/* Selected version content */}
+					<SelectedVersionContent
+						selectedVersion={selectedVersion}
+						displayRound={displayRound}
+						resolvedExpertLabels={resolvedExpertLabels}
+						formId={formId}
+						token={token}
+						currentUserEmail={email}
+					/>
+
+					{/* Emergence highlights */}
+					{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
+						<div className="card p-4 sm:p-6">
+							<h2 className="text-lg font-semibold mb-3 text-foreground flex items-center gap-2">
+								<Sparkles size={20} style={{ color: 'var(--accent)' }} /> Emergent Insights
+							</h2>
+							<EmergenceHighlights
+								insights={structuredSynthesisData.emergent_insights ?? []}
+								expertLabels={resolvedExpertLabels}
+								formId={formId}
+								roundId={displayRound?.id}
+								token={token}
+								currentUserEmail={email}
+							/>
+						</div>
+					)}
+
+					{/* Next round questions */}
+					<NextRoundQuestionsCard
+						questions={nextRoundQuestions}
+						onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
+						onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
+						onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
+					/>
 				</div>
 			</main>
 
-			{responsesOpen &&
-				createPortal(
-					<div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-						<div className="bg-white max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-lg shadow-xl p-6 text-left">
-							<h3 className="text-xl font-semibold mb-4 text-neutral-800">All Responses</h3>
-							<div
-								className="prose prose-sm max-w-none custom-prose"
-								dangerouslySetInnerHTML={{ __html: responsesHTML }}
-							/>
-							<button
-								className="mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
-								onClick={() => setResponsesOpen(false)}
+			{/* ── Floating Action Bar ── */}
+			<div
+				style={{
+					position: 'fixed',
+					bottom: '1.5rem',
+					right: '1.5rem',
+					zIndex: 50,
+					display: 'flex',
+					flexDirection: 'column',
+					alignItems: 'flex-end',
+					gap: '0.5rem',
+				}}
+			>
+				{/* Active panel popover */}
+				{activePanel && (
+					<div
+						style={{
+							width: 'min(18rem, calc(100vw - 3rem))',
+							maxHeight: 'calc(100vh - 10rem)',
+							overflowY: 'auto',
+							background: 'var(--card)',
+							border: '1px solid var(--border)',
+							borderRadius: 'var(--radius, 0.75rem)',
+							padding: '0.75rem',
+							boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
+							marginBottom: '0.25rem',
+						}}
+					>
+						{/* Panel header */}
+						<div
+							className="flex items-center justify-between mb-3 pb-2"
+							style={{ borderBottom: '1px solid var(--border)' }}
+						>
+							<span
+								className="text-sm font-semibold"
+								style={{ color: 'var(--foreground)' }}
 							>
-								Close
+								{FAB_PANEL_LABELS[activePanel]}
+							</span>
+							<button
+								onClick={() => setActivePanel(null)}
+								className="transition-colors"
+								style={{
+									width: '1.5rem',
+									height: '1.5rem',
+									display: 'flex',
+									alignItems: 'center',
+									justifyContent: 'center',
+									borderRadius: 'var(--radius, 0.375rem)',
+									border: 'none',
+									background: 'transparent',
+									color: 'var(--muted-foreground)',
+									cursor: 'pointer',
+								}}
+								onMouseEnter={e => { e.currentTarget.style.background = 'var(--muted)'; }}
+								onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+							>
+								<X size={14} />
 							</button>
 						</div>
-					</div>,
-					document.body
+
+						{/* Panel content */}
+						<div className="space-y-3">
+							{activePanel === 'actions' && (
+								<ActionsCard
+									responsesOpen={responsesOpen}
+									onToggleResponses={viewAllResponses}
+									onDownloadResponses={downloadResponses}
+									onSaveSynthesis={saveSynthesis}
+									onStartNextRound={startNextRound}
+									loading={loading}
+									formTitle={form.title}
+									rounds={rounds}
+									structuredSynthesisData={structuredSynthesisData}
+									expertLabels={resolvedExpertLabels}
+								/>
+							)}
+
+							{activePanel === 'ai' && (
+								<AISynthesisPanel
+									synthesisMode={synthesisMode}
+									onModeChange={setSynthesisMode}
+									selectedModel={selectedModel}
+									onModelChange={setSelectedModel}
+									models={MODELS}
+									isGenerating={isGenerating}
+									onGenerate={generateSummary}
+								/>
+							)}
+
+							{activePanel === 'versions' && (
+								<>
+									<SynthesisVersionPanel
+										displayRound={displayRound}
+										synthesisVersions={synthesisVersions}
+										selectedVersionId={selectedVersionId}
+										onSelectVersion={setSelectedVersionId}
+										selectedVersion={selectedVersion}
+										onActivateVersion={activateVersion}
+										resolvedExpertLabels={resolvedExpertLabels}
+										formId={formId}
+										token={token}
+										currentUserEmail={email}
+										showCompare={showVersionCompare}
+										onToggleCompare={() => setShowVersionCompare(v => !v)}
+									/>
+									{synthesisVersions.length > 0 && (
+										<VersionTimeline
+											versions={synthesisVersions}
+											selectedVersionId={selectedVersionId}
+											onSelectVersion={setSelectedVersionId}
+										/>
+									)}
+								</>
+							)}
+
+							{activePanel === 'history' && (
+								<RoundHistoryCard
+									rounds={rounds}
+									selectedRoundId={selectedRound?.id || null}
+									onSelectRound={handleSelectRound}
+								/>
+							)}
+						</div>
+					</div>
 				)}
 
-			<footer className="bg-white border-t text-center py-4 text-sm text-neutral-500 mt-8">
-				© {new Date().getFullYear()} – Summary workspace
-			</footer>
+				{/* FAB button group */}
+				<div
+					style={{
+						display: 'flex',
+						flexDirection: 'column',
+						gap: '0.25rem',
+						background: 'var(--card)',
+						border: '1px solid var(--border)',
+						borderRadius: 'var(--radius, 0.75rem)',
+						padding: '0.375rem',
+						boxShadow: '0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)',
+					}}
+				>
+					{fabBtn('history', <Clock size={18} />)}
+					{fabBtn('versions', <GitBranch size={18} />)}
+					{fabBtn('ai', <Sparkles size={18} />)}
+					{fabBtn('actions', <Settings size={18} />)}
+				</div>
+			</div>
+
+			{/* Responses modal */}
+			<ResponsesModal
+				open={responsesOpen}
+				onClose={() => setResponsesOpen(false)}
+				structuredRounds={structuredRounds}
+				rounds={rounds}
+				formQuestions={form.questions || []}
+				token={token}
+				onResponseUpdated={handleResponseUpdated}
+			/>
 		</div>
 	);
 }

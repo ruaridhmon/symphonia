@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 openai
 newspaper3k
 feedparser
@@ -13,3 +13,6 @@ bcrypt==4.0.1
 aiosmtplib
 pydantic[email]
 python-dotenv
+
+# Axiotic consensus library (CC-BY-4.0)
+consensus @ git+https://github.com/axiotic-ai/consensus.git@main
