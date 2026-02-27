@@ -11,7 +11,6 @@ __pycache__/
 .venv/
 .env
 
-
 # E2E test artifacts
 frontend/e2e/.auth/
 frontend/test-results/

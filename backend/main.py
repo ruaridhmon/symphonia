@@ -194,7 +194,8 @@ async def add_security_headers(request: Request, call_next):
 # CSRF protection — validates X-CSRF-Token header on state-changing requests
 # Uses double-submit cookie pattern: csrf_token cookie (JS-readable) must
 # match the X-CSRF-Token header sent by the frontend.
-CSRF_EXEMPT_PATHS = {"/login", "/register", "/logout", "/ws"}
+_CSRF_EXEMPT_BASE_PATHS = {"/login", "/register", "/logout", "/ws"}
+CSRF_EXEMPT_PATHS = _CSRF_EXEMPT_BASE_PATHS | {f"/api{path}" for path in _CSRF_EXEMPT_BASE_PATHS}
 
 @app.middleware("http")
 async def csrf_protection(request: Request, call_next):
@@ -276,7 +277,10 @@ def health_check():
 # =============================================================================
 
 # Main application routes
+# Keep root routes for local/dev compatibility and also serve /api/*
+# for Firebase Hosting -> Cloud Run rewrites.
 app.include_router(core_routes.router)
+app.include_router(core_routes.router, prefix="/api")
 
 # =============================================================================
 # DATABASE INIT

@@ -1,0 +1,378 @@
+current_draft:
+  text: |-
+    The current special educational needs (SEN) landscape is characterized by a gap between statutory funding levels and the reported cost of provision [T1_C1, T2_C1]. There is a broad consensus that the present financial trajectory is unsustainable, as local government budgets face a high volume of Education, Health and Care Plan (EHCP) requests [T2_C1, Agreement_0, Agreement_7]. Experts largely agree that while early intervention is theoretically cost-effective, the system remains focused on crisis management [T0_C2, Agreement_3, Agreement_5]. This situation is associated with a shortage of qualified specialist staff and educational psychologists, which experts describe as a "systemic starvation" of expertise [T0_C4, T2_C1, Agreement_6].
+
+    A majority of experts identify a perceived weakness in oversight and accountability as a primary driver of the current situation, noting that existing legal frameworks may be insufficient to ensure authorities meet statutory duties [T0_new_C7, T0_new_C9]. This lack of accountability is linked to a "de-professionalisation" of the workforce, where a devaluation of specialist expertise leads to a reliance on generalist educators who may lack training for complex needs [T0_new_C6, T2_new_C8].
+
+    Diagnosis of the root causes reveals significant expert disagreement. While some characterize the funding gap as a result of "policy neglect," others argue that framing the situation as a "crisis" is a narrative used to obscure deliberate resource distribution choices [T0_C1, T2_C5]. There is also a divide over whether the rise in SEN cases reflects improved clinical identification or the failure of a rigid education system to accommodate difference [T1_new_C9, T2_C5]. Furthermore, the 2014 SEN reforms remain a point of contention; some view them as providing necessary "legal clarity," while others describe them as a legislative attempt that increased demand without providing resources [T0_new_C9, T2_new_C9].
+
+    The system is frequently described by experts as a "bureaucratic labyrinth" that may favor families with greater socio-economic resources [T0_C5, T2_C4, T2_new_C9]. This can result in "de facto inequality" where those able to navigate legal hurdles secure better provision [T0_C5, T1_C5]. While a minority of experts highlight a "postcode lottery" where support depends on local authority capacity, others point to the role of private providers in draining state resources [T0_new_C10, T2_new_C10, Agreement_8].
+
+    Ultimately, some experts characterize the system as possessing "systemic amnesia" and "willful inertia," arguing that policy rhetoric has become decoupled from the lived experiences of families and the exhaustion of the specialist workforce [T1_C6, T2_C4, T2_new_C7].
+  type: narrative
+initial_draft:
+  text: |-
+    The current special educational needs (SEN) landscape is defined by a profound tension between escalating demand and a system described by experts as being in a state of "systemic starvation" and "deliberate neglect" [T0_C4, T2_C1]. There is a broad consensus that the present financial trajectory is unsustainable, as local government budgets buckle under the volume of Education, Health and Care Plan (EHCP) requests [T1_C1, Agreement]. Experts largely agree that while early intervention offers an "astronomical" return on investment, the system remains trapped in a reactive cycle, prioritizing expensive crisis management over proactive support [T0_C2, T1_C6, Agreement]. This failure is exacerbated by a critical shortage of educational psychologists and specialist staff, leading to a "de-professionalisation" where generalist educators are left to manage increasingly complex needs without adequate training or infrastructure [T0_C4, T0_new_C6, T2_C6].
+
+    However, the diagnosis of the root causes reveals significant expert disagreement. While some view the funding gap as a predictable result of "policy neglect," others argue that the "crisis" narrative itself is used to mask intentional choices regarding resource distribution [T0_C1, T2_C5]. There is a sharp divide over whether the rise in SEN cases reflects improved clinical identification and reduced stigma or a failure of a rigid, high-stakes education system to accommodate difference [T1_new_C9, T2_C5]. Furthermore, the 2014 SEN reforms are a point of contention; some experts defend the legal framework as a clear mandate for rights, while others view it as a "failed legislative attempt" that increased demand without providing the necessary resources or accountability [T0_new_C9, T2_new_C9].
+
+    The system’s "bureaucratic labyrinth" is also seen as a driver of "de facto inequality," where families with greater socio-economic resources are better equipped to navigate legal hurdles and secure provision through the tribunal system [T0_C5, T2_C4, T1_new_C10]. This creates a "postcode lottery" where access to support depends on local authority capacity rather than universal statutory compliance [T0_new_C10, Agreement]. While some experts point to a "private provider" industry as a drain on state resources, others focus on a "fragmentation of knowledge" where academic research is siloed from frontline practice [T0_C3, T2_new_C10].
+
+    Significant uncertainties remain regarding the long-term efficacy of mainstream inclusion for children with the most complex needs and the impact of the COVID-19 pandemic on developmental trajectories [Uncertainties]. Ultimately, the consultation highlights a system characterized by "systemic amnesia" and "willful inertia," where polished policy rhetoric remains decoupled from the lived experiences of families and the exhaustion of the specialist workforce [T1_new_C7, T2_new_C7, T2_new_C8].
+  type: narrative
+is_complete: false
+sampling_config:
+  temperature: 0.7473165823109031
+  top_k: 40
+  top_p: 0.9598409522055185
+steps:
+- changes_summary: 'Step 0: resolved 7 gaps using 44 retrieved items; addressed weak dimensions: neutrality'
+  fitness_evaluation:
+    completeness:
+      dimension: completeness
+      rationale: The narrative is "Well Complete" (Band 7), effectively capturing most major consensus themes, disagreements,
+        and nuances. However, several substantive claims are omitted or under-represented. Specifically, while it mentions
+        mainstream capacity, it misses [T2_C2] regarding how high-stakes school accountability and metrics disincentivize
+        inclusivity. It also omits [T0_new_C8] and [T1_new_C8] regarding the "deficit-model" perspective and societal ambivalence
+        toward neurodiversity. Additionally, while one uncertainty is mentioned, it collapses six distinct uncertainties into
+        a brief sentence, omitting [Uncertainties] regarding diagnostic overshadowing, private assessments, and the impact
+        of digital technology/social media.
+      score: 4
+      suggestions:
+      - Incorporate claim [T2_C2] to address how school performance metrics and high-stakes accountability act as a driver
+        of exclusion.
+      - Address the cultural/societal drivers identified in [T0_new_C8] and [T1_new_C8], specifically the 'deficit-model'
+        and societal ambivalence toward neurodiversity.
+      - Expand the Uncertainties section to include the unquantified impact of digital technology/social media and the role
+        of private diagnostic assessments in increasing inequity.
+    dissent_visibility:
+      dimension: dissent_visibility
+      rationale: The narrative does a good job of moving beyond simple consensus by dedicating a full paragraph to "significant
+        expert disagreement." It explicitly highlights the divide over the root of SEN identification (T1_new_C9, T2_C5) and
+        the contentious nature of the 2014 reforms (T0_new_C9, T2_new_C9). However, it stops short of Exemplary Visibility
+        because several minority views and "divided" claims are either missing or softened. For example, the minority view
+        regarding the "deficit-model" and "societal ambivalence" (T0_new_8, T1_new_8) is excluded. The disagreement regarding
+        "private providers" (T2_new_10) is presented as an "others focus on..." comparison rather than a direct clash of causal
+        drivers. While uncertainties are mentioned at the end, they are briefly listed rather than integrated into the critical
+        drivers of the crisis. The narrative structure still leads with a strong consensus-oriented first paragraph before
+        introducing the dissent.
+      score: 4
+      suggestions:
+      - Incorporate the minority view from T0_new_C8 and T1_new_C8 that the crisis is driven by a 'deficit-model' perspective
+        and 'societal ambivalence' toward neurodiversity to provide better coverage of cultural drivers.
+      - Clarify the conflict in T2_new_10 by explicitly framing the 'private provider' industry not just as a point of focus,
+        but as a 'perverse incentive' that actively drains state resources, as argued by a specific subset of experts.
+      - Address the uncertainty regarding 'diagnostic overshadowing' and 'private assessments' (from the synthesis uncertainties
+        list) to explain why the data on identification remains contested.
+      - In the 2014 reform section, make the dissent sharper by contrasting the view of the legal framework as a 'clear mandate'
+        [E4] against the view of it as a 'bureaucratic labyrinth' [E1, E12] used to exploit vulnerability (T2_new_9).
+    faithfulness:
+      dimension: faithfulness
+      rationale: The narrative is highly faithful to the source synthesis. Every sentence directly maps to specified claim
+        IDs, including consensus [T0_C4, T2_C1], majority [T1_C1, T0_C2], and divided perspectives [T0_C1, T1_new_C9, T2_new_C9].
+        It accurately captures the tension between different expert viewpoints without adding facilitator interpretations.
+        The terminology used, such as 'systemic starvation', 'bureaucratic labyrinth', and 'systemic amnesia', is taken directly
+        from the source claims [T2_C1, T2_C4, T2_new_C7]. Hedging is preserved (e.g., 'interpreted by some', 'significant
+        uncertainties remain'), and no novel conclusions or policy recommendations were introduced.
+      score: 5
+      suggestions:
+      - In paragraph 1, ensure the 'astronomical' return on investment is explicitly attributed to 'Early intervention' as
+        per claim T0_C2 to maintain precise context.
+      - The mention of 'expensive crisis management' in paragraph 1 is a valid synthesis of the 'reactive rather than preventative'
+        agreement, but ensure it doesn't overshadow the specific lack of 'early stages' funding mentioned in T0_C2.
+    neutrality:
+      dimension: neutrality
+      rationale: The narrative frequently adopts the emotive and evaluative language of the experts as its own prose, rather
+        than attributing these views neutrally. The use of 'profound tension', 'catastrophic failure', 'critical shortage',
+        'buckle', and 'trapped' represents an evaluative framing of the data. While the text attributes phrases like 'systemic
+        starvation' to experts, the surrounding narrative structure implicitly endorses the 'crisis' narrative by using leading
+        descriptors like 'failure is exacerbated by' or 'this creates a postcode lottery'. The final paragraph is particularly
+        non-neutral, using terms like 'systemic amnesia' and 'willful inertia' without sufficiently clear distance between
+        the facilitator's voice and the expert's rhetoric. It also uses 'significant' twice, which is a flagged evaluative
+        adjective [T0_C4, T1_new_C7].
+      score: 3
+      suggestions:
+      - In the opening sentence [T0_C4, T2_C1], remove 'profound tension' and 'catastrophic' to maintain a neutral facilitator
+        posture.
+      - Rewrite the transition 'This failure is exacerbated by' [T0_C4, T0_new_C6] to a neutral form such as 'Experts also
+        identified a shortage of...' to avoid adopting the 'failure' framing as fact.
+      - Change 'significant expert disagreement' and 'significant uncertainties' to 'differing expert perspectives' and 'noted
+        uncertainties' to remove evaluative adjectives.
+      - Reframe the final sentence regarding 'systemic amnesia' [T1_new_C7, T2_new_C7] to state 'A subgroup of experts characterized
+        the system as having...' to ensure the facilitator is not endorsing the metaphorical language.
+      - Replace 'astronomical' [T0_C2] and 'bureaucratic labyrinth' [T0_C5] with more descriptive, less hyperbolic language
+        unless explicitly and carefully attributed as a direct quote within a neutral sentence.
+    structural_clarity:
+      dimension: structural_clarity
+      rationale: The narrative demonstrates exemplary structural clarity, moving logically from high-level systemic consensus
+        to specific causal disagreements, then to socio-economic impacts and final uncertainties. Paragraphs are thematic
+        and distinct. The use of signposting ("However...", "Furthermore...", "Ultimately...") effectively signals the transition
+        between areas of expert agreement and the "sharp divide" in the diagnosis of root causes. The thematic clustering
+        of synthesis claims (e.g., grouping T0_C4 and T2_C6 regarding workforce) is handled with professional precision.
+      score: 5
+      suggestions:
+      - In paragraph two, the transition from the 'crisis narrative' to 'clinical identification' (T1_new_C9) is slightly
+        dense; consider a sub-connector like 'Relatedly' to bridge the two types of causal disagreement.
+      - Ensure the final paragraph's transition from specific uncertainties (COVID-19) to the concluding broad summary ('systemic
+        amnesia') is clearly marked as a concluding synthesis of the consultation's overall tone.
+    traceability:
+      dimension: traceability
+      rationale: The narrative is broadly well-traceable, with approximately 90-95% of substantive claims supported by explicit
+        IDs (e.g., [T0_C4], [T1_C1]). All paragraphs contain multiple citations, and the use of the [Agreement] and [Uncertainties]
+        tags helps clarify the consensus level and information type. However, there are minor traceability gaps where specific
+        descriptors or claims are not directly linked to an ID. For instance, the terms 'de-professionalisation' and 'systemic
+        exhaustion' are used in the first paragraph but cited alongside several IDs, making it slightly ambiguous which specific
+        ID supports which term. The mention of 'high-stakes education system' in paragraph 2 and 'postcode lottery' in paragraph
+        3 lack direct corresponding IDs within the immediate sentence, though they relate to the broader themes of the cited
+        claims. This places it in the 'Well Traceable' band (7-6), which converts to a 4.
+      score: 4
+      suggestions:
+      - Explicitly attribute the 'high-stakes school accountability' claim in paragraph 2 to [T2_C2] to close the gap in the
+        root cause discussion.
+      - Ensure the 'postcode lottery' and 'universal statutory compliance' statements in paragraph 3 are explicitly linked
+        to [T0_new_C7] or [T0_new_10] to clarify the source of the accountability critique.
+      - Attach [T1_C3] to the sentence regarding the rise in SEN cases and clinical identification in paragraph 2 to strengthen
+        the audit trail for that specific debate.
+    type: synthesis
+  gaps_identified:
+  - The narrative uses evaluative and hyperbolic language ('profound tension', 'buckle', 'trapped') as its own prose, violating
+    neutrality guidelines by adopting the experts' emotive framing.
+  - The narrative attributes the term 'catastrophic failure' to the source data, but this specific phrase does not appear
+    in the provided claims (T0_C4 or T2_C1).
+  - The claim that the situation is a 'postcode lottery' is presented as an expert agreement, but the source data [T0_new_C10]
+    identifies this as a 'minority' view rather than a consensus.
+  - The citation [T1_new_C10] in the third paragraph is a hallucination; the source data contains T0_new_C10 and T2_new_C10,
+    but no T1_new_C10.
+  - The narrative mentions 'uncertainties' regarding COVID-19 and long-term efficacy of inclusion, but these topics are not
+    present in the provided source data claims.
+  - The final paragraph uses the terms 'systemic amnesia' and 'willful inertia' without clear attribution, making it appear
+    as the editor's conclusion rather than a specific expert perspective.
+  - The narrative omits the majority claim [T0_new_C7] regarding the perceived weakness in oversight and legal frameworks
+    as a primary driver of the crisis.
+  retrieval_queries:
+  - neutral framing of SEN funding and systemic tension
+  - origin of catastrophic failure phrase in source claims
+  - T0_new_C10 minority view versus agreement on postcode lottery
+  - source data for tribunal system inequity and socio-economic resources
+  - impact of COVID-19 and efficacy of inclusion in source claims
+  - expert attribution for systemic amnesia and willful inertia T2_new_C7 T2_C4
+  - T0_new_C7 oversight and accountability weakness
+  retrieved_items:
+  - content: '(majority): Experts identified a primary driver as the gap between statutory funding levels and the reported
+      cost of provision.'
+    relevance_score: 0.13043478260869565
+    source_id: synthesis:claim_10
+    source_type: synthesis_claim
+  - content: '(consensus): "There is a systemic starvation of qualified specialist staff and a dilution of expertise, which
+      prevents the sustainable implementation of support."'
+    relevance_score: 0.125
+    source_id: synthesis:claim_3
+    source_type: synthesis_claim
+  - content: '(divided): "The SEN system is characterized by a de-professionalisation of staff and systemic exhaustion, where
+      the devaluation of specialist expertise leads to a reliance on generalist educators who may lack the training for complex
+      needs."'
+    relevance_score: 0.1111111111111111
+    source_id: synthesis:claim_5
+    source_type: synthesis_claim
+  - content: '(majority): Drivers include a "loss of momentum" in policy (E6), alongside systemic exhaustion and weariness
+      that prevents the implementation of proactive solutions (E11).'
+    relevance_score: 0.1111111111111111
+    source_id: synthesis:claim_15
+    source_type: synthesis_claim
+  - content: There is a critical shortage of educational psychologists and specialist teaching staff.
+    relevance_score: 0.1111111111111111
+    source_id: synthesis:agreement_6
+    source_type: synthesis_agreement
+  - content: '(minority): The duration of funding gaps and the allocation of resources are identified as drivers of inequality,
+      where support access may be influenced by socio-economic background.'
+    relevance_score: 0.10714285714285714
+    source_id: synthesis:claim_14
+    source_type: synthesis_claim
+  - content: '(minority): Experts point to a "societal ambivalence" (E8) toward difference and a deficit in "genuine empathy"
+      (E12) as underlying cultural drivers of systemic failure.'
+    relevance_score: 0.10714285714285714
+    source_id: synthesis:claim_17
+    source_type: synthesis_claim
+  - content: '(majority): The current funding model is described by Expert E1 as "systemic starvation" and "deliberate neglect,"
+      failing to meet the statutory requirements of the increasing number of EHCPs.'
+    relevance_score: 0.1
+    source_id: synthesis:claim_19
+    source_type: synthesis_claim
+  - content: Mainstream schools currently lack the physical and human infrastructure to support the increasing complexity
+      of needs.
+    relevance_score: 0.09523809523809523
+    source_id: synthesis:agreement_4
+    source_type: synthesis_agreement
+  - content: '(divided): "Experts disagree on the nature of the funding gap; while some characterize it as a predictable outcome
+      of ''policy neglect'' and ''intentional underfunding,'' others (notably E1) argue that framing the situation as a ''crisis''
+      is a disingenuous narrative used to obscure deliberate resource distribution choices."'
+    relevance_score: 0.09090909090909091
+    source_id: synthesis:claim_0
+    source_type: synthesis_claim
+  - content: The rise in mental health needs and neurodiversity awareness has significantly increased demand for SEN services.
+    relevance_score: 0.09090909090909091
+    source_id: synthesis:agreement_2
+    source_type: synthesis_agreement
+  - content: Whether the solution lies in increasing total funding or fundamentally reforming the 2014 Children and Families
+      Act.
+    relevance_score: 0.09090909090909091
+    source_id: synthesis:disagreement_7
+    source_type: synthesis_disagreement
+  - content: '(majority): Workforce shortages and a lack of specialist training impact the delivery of early intervention
+      in mainstream settings.'
+    relevance_score: 0.08695652173913043
+    source_id: synthesis:claim_23
+    source_type: synthesis_claim
+  - content: The extent to which the legal framework (Children and Families Act 2014) is the solution or part of the problem.
+    relevance_score: 0.08695652173913043
+    source_id: synthesis:disagreement_8
+    source_type: synthesis_disagreement
+  - content: '(divided): The crisis is driven by a shift toward "metrics, standardisation, and efficiency" [E5], which Expert
+      E6 argues leads to the "de-professionalisation" of SEN expertise and an oversight of the emotional toll on families.'
+    relevance_score: 0.08571428571428572
+    source_id: synthesis:claim_25
+    source_type: synthesis_claim
+  - content: '(divided): "The situation is compounded by a ''fragmentation of knowledge'' where academic research is siloed
+      from frontline practice (E2), and a tendency for institutions to retreat into rigid structures during times of systemic
+      stress."'
+    relevance_score: 0.08333333333333333
+    source_id: synthesis:claim_2
+    source_type: synthesis_claim
+  - content: '(divided): There is an explicit conflict regarding the rise in SEN cases: whether it represents a success in
+      clinical practice and reduced stigma (E10) or a failure of a rigid education system to accommodate difference (E1, E9).'
+    relevance_score: 0.07692307692307693
+    source_id: synthesis:claim_18
+    source_type: synthesis_claim
+  - content: '(divided): Experts disagree on the root of rising SEN identification; E10 views it as an "infrastructure lag"
+      where systems struggle to adapt to evolving understanding, while E1 views it as a result of "deliberate policy neglect"
+      and "calculated indifference."'
+    relevance_score: 0.07692307692307693
+    source_id: synthesis:claim_22
+    source_type: synthesis_claim
+  - content: Whether the rise in SEN is due to better clinical identification or a failure of the general education system
+      to be flexible.
+    relevance_score: 0.07692307692307693
+    source_id: synthesis:disagreement_6
+    source_type: synthesis_disagreement
+  - content: '(majority): "A central driver of the current situation is the failure in early identification and intervention.
+      While E3 describes the potential return on investment for proactive support as ''astronomical,'' other experts emphasize
+      that funding for these early stages remains fragmented and inadequate."'
+    relevance_score: 0.07142857142857142
+    source_id: synthesis:claim_1
+    source_type: synthesis_claim
+  - content: '(divided): Perspectives on systemic failure range from "ideological dismantling" and "budgetary efficiencies"
+      (E9) to a "deliberate systemic starvation" (E1) involving private providers and lobbying interests.'
+    relevance_score: 0.06896551724137931
+    source_id: synthesis:claim_16
+    source_type: synthesis_claim
+  - content: '(divided): Experts described the adversarial nature of the statutory process as a "bureaucratic quagmire" (E8)
+      that exhausts local authority resources and prioritizes process over individual needs.'
+    relevance_score: 0.06666666666666667
+    source_id: synthesis:claim_11
+    source_type: synthesis_claim
+  - content: '(divided): Experts E2 and E6 describe a "fragmentation of knowledge" and "systemic amnesia," where polished
+      policy rhetoric remains decoupled from the lived experiences of families [E2, E6, E11, E12].'
+    relevance_score: 0.06060606060606061
+    source_id: synthesis:claim_24
+    source_type: synthesis_claim
+  - content: The efficacy of the SEND tribunal system in ensuring equitable outcomes.
+    relevance_score: 0.058823529411764705
+    source_id: synthesis:disagreement_3
+    source_type: synthesis_disagreement
+  - content: '(majority): "A primary driver of the crisis is a perceived weakness in oversight and accountability, where existing
+      legal frameworks are seen as insufficient to prevent authorities from failing to meet statutory duties."'
+    relevance_score: 0.05405405405405406
+    source_id: synthesis:claim_6
+    source_type: synthesis_claim
+  - content: Whether the rise in EHCP requests is driven by increased need or by the failure of mainstream 'ordinarily available'
+      provision.
+    relevance_score: 0.13043478260869565
+    source_id: synthesis:disagreement_4
+    source_type: synthesis_disagreement
+  - content: The role of private/independent special school placements in draining budgets from the state sector.
+    relevance_score: 0.10526315789473684
+    source_id: synthesis:disagreement_5
+    source_type: synthesis_disagreement
+  - content: Early intervention is theoretically more cost-effective but currently underfunded in favor of crisis management.
+    relevance_score: 0.1
+    source_id: synthesis:agreement_5
+    source_type: synthesis_agreement
+  - content: The current system is financially unsustainable in its present trajectory.
+    relevance_score: 0.058823529411764705
+    source_id: synthesis:agreement_0
+    source_type: synthesis_agreement
+  - content: The current volume of EHCP requests is unsustainable for local government budgets.
+    relevance_score: 0.05263157894736842
+    source_id: synthesis:agreement_7
+    source_type: synthesis_agreement
+  - content: Whether the increase in SEN cases reflects a genuine rise in biological conditions or a societal/educational
+      shift.
+    relevance_score: 0.045454545454545456
+    source_id: synthesis:disagreement_2
+    source_type: synthesis_disagreement
+  - content: '(majority): Experts noted gaps in mainstream infrastructure, staff training, and inclusive capacity required
+      to support high-needs pupils.'
+    relevance_score: 0.041666666666666664
+    source_id: synthesis:claim_13
+    source_type: synthesis_claim
+  - content: The current system is reactive rather than preventative, focusing resources on crisis management.
+    relevance_score: 0.05
+    source_id: synthesis:agreement_3
+    source_type: synthesis_agreement
+  - content: The extent to which the 2014 reforms are responsible for the current crisis versus subsequent underfunding.
+    relevance_score: 0.047619047619047616
+    source_id: synthesis:disagreement_0
+    source_type: synthesis_disagreement
+  - content: There is a significant "postcode lottery" where access to support depends on local authority capacity.
+    relevance_score: 0.045454545454545456
+    source_id: synthesis:agreement_8
+    source_type: synthesis_agreement
+  - content: '(divided): While many experts cite a mismatch between increased neurodiversity identification and infrastructure,
+      some view this narrative as a distraction from structural resource distribution.'
+    relevance_score: 0.03333333333333333
+    source_id: synthesis:claim_12
+    source_type: synthesis_claim
+  - content: '(divided): There is a fundamental conflict between the legal framework of the Children and Families Act 2014
+      as a "clear mandate" for rights [E4] versus a "bureaucratic labyrinth" that exploits parental vulnerability [E1, E12].'
+    relevance_score: 0.02631578947368421
+    source_id: synthesis:claim_26
+    source_type: synthesis_claim
+  - content: '(divided): "The 2014 SEN reforms are a point of significant contention; some experts view them as a failed legislative
+      attempt that increased demand without resources, while others argue the ''legal clarity'' they intended is undermined
+      by a lack of accountability."'
+    relevance_score: 0.022727272727272728
+    source_id: synthesis:claim_8
+    source_type: synthesis_claim
+  - content: '(minority): "The SEND tribunal system is viewed by some as an inequitable mechanism that favors families with
+      the resources to litigate, rather than ensuring universal statutory compliance."'
+    relevance_score: 0.09090909090909091
+    source_id: synthesis:claim_9
+    source_type: synthesis_claim
+  - content: '(consensus): A "bureaucratic labyrinth" and "willful inertia" within the system force parents to navigate complex
+      legal and diagnostic pathways to secure support.'
+    relevance_score: 0.07407407407407407
+    source_id: synthesis:claim_21
+    source_type: synthesis_claim
+  - content: '(minority): The "private provider" industry and independent special school placements create "perverse incentives"
+      that drain essential resources from the state sector [E1, E8].'
+    relevance_score: 0.06896551724137931
+    source_id: synthesis:claim_27
+    source_type: synthesis_claim
+  - content: '(majority): "The current system is described as favoring families with greater socio-economic resources, creating
+      a ''de facto inequality'' where those who can navigate bureaucratic hurdles secure better provision."'
+    relevance_score: 0.05714285714285714
+    source_id: synthesis:claim_4
+    source_type: synthesis_claim
+  - content: High-stakes school accountability and performance metrics disincentivize mainstream schools from being inclusive.
+    relevance_score: 0.05
+    source_id: synthesis:claim_20
+    source_type: synthesis_claim
+  - content: '(minority): "The crisis is underpinned by a ''deficit-model'' perspective—viewing children as problems to be
+      managed—and a societal ambivalence toward neurodiversity which results in inertia regarding systemic reform."'
+    relevance_score: 0.058823529411764705
+    source_id: synthesis:claim_7
+    source_type: synthesis_claim
+  step_number: 0
+  timestamp: '2026-02-23T01:13:47.127039'
+total_steps: 2
+trajectory_id: traj_01

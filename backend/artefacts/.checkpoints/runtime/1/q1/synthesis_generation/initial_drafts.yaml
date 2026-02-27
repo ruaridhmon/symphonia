@@ -1,0 +1,399 @@
+- areas_of_agreement:
+  - The current system is financially unsustainable in its present trajectory.
+  - Early intervention is more cost-effective than crisis management, yet remains underfunded.
+  - The rise in mental health needs and neurodiversity awareness has significantly increased demand for SEN services.
+  areas_of_disagreement:
+  - Whether the rise in EHCP requests is driven by increased need or by the failure of mainstream 'ordinarily available' provision.
+  - The extent to which the 2014 reforms are responsible for the current crisis versus subsequent underfunding.
+  - The efficacy of the SEND tribunal system in ensuring equitable outcomes.
+  claims:
+  - agreement_level: consensus
+    claim_id: C1
+    counterarguments:
+    - Some argue that the issue is not just the volume of funding, but its inefficient allocation toward reactive, high-cost
+      placements.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: The funding gap is the primary driver of systemic failure.
+      source_id: E1
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: High-needs deficits are now a structural feature of local government finance.
+      source_id: E5
+      verification_status: unverified
+    text: The current funding formula for local authorities is fundamentally mismatched with the actual prevalence and complexity
+      of SEN needs.
+  - agreement_level: majority
+    claim_id: C2
+    counterarguments:
+    - Demographic shifts are secondary to the broader trend of neurodiversity identification in the general population.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: Improved survival rates for extremely premature infants have increased the cohort of children with profound and
+        multiple learning difficulties.
+      source_id: E3
+      verification_status: unverified
+    text: Advances in medical science and neonatal care have increased the survival rates of children with complex disabilities,
+      leading to higher demand for specialized support.
+  - agreement_level: divided
+    claim_id: C3
+    counterarguments:
+    - The accountability system ensures high standards for all pupils; inclusion failure is a resource issue, not a metric
+      issue.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: League tables and performance metrics penalize schools that prioritize inclusion over academic attainment.
+      source_id: E2
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: Schools are often forced to use EHCPs as a 'passport' for basic resources that should be available via the core
+        offer.
+      source_id: E7
+      verification_status: unverified
+    text: The accountability system for mainstream schools creates disincentives for inclusive practices, pushing pupils toward
+      statutory assessments.
+  - agreement_level: consensus
+    claim_id: C4
+    counterarguments:
+    - Staffing shortages are a symptom of underfunded contracts rather than a lack of qualified professionals in the labor
+      market.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: The workforce crisis means that even when funding is secured, the specialized provision often does not exist.
+      source_id: E4
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: Waiting lists for assessments have become a primary barrier to early intervention.
+      source_id: E10
+      verification_status: unverified
+    text: There is an acute shortage of specialist staff, including Educational Psychologists and Speech and Language Therapists,
+      which delays intervention.
+  - agreement_level: majority
+    claim_id: C5
+    counterarguments:
+    - The legal framework is the only protection parents have against unlawful rationing of services by local authorities.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: The system rewards those with the cultural and financial capital to navigate the tribunal process.
+      source_id: E8
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: Legal challenges are driving a disproportionate amount of spending toward a small number of children.
+      source_id: E12
+      verification_status: unverified
+    text: The 'adversarial' nature of the legal system encourages a middle-class advantage where parents with resources can
+      secure better provision through tribunals.
+  code_version: adapter-v2
+  generated_at: '2026-02-23T01:11:24.761711+00:00'
+  model: google/gemini-3-flash-preview
+  narrative: The consultation reveals a complex, multi-faceted crisis driven by structural, financial, and societal shifts.
+    While there is a strong consensus that the current funding model is insufficient to meet rising demand, experts are divided
+    on the root causes of that demand. Some attribute the increase to genuine changes in child health and neurodiversity awareness,
+    while others point to "identification inflation" driven by a lack of universal support in mainstream schools. A significant
+    tension exists between the legal framework, which grants individual rights to support, and the practical reality of local
+    authority budget constraints. Furthermore, the workforce crisis is identified as a critical bottleneck, where even if
+    funding were available, the lack of qualified specialists prevents effective intervention.
+  narrative_statements: []
+  prompt_version: v1
+  question_id: ''
+  round_id: ''
+  schema_version: '1.0'
+  study_id: ''
+  type: synthesis
+  uncertainties:
+  - The long-term impact of COVID-19 lockdowns on the developmental trajectories of early-years cohorts.
+  - The degree to which diagnostic overshadowing is affecting the accuracy of SEN identification.
+- areas_of_agreement:
+  - The current system is reactive rather than preventative, focusing resources on crisis management.
+  - There is a significant "postcode lottery" where access to support depends on local authority capacity.
+  - Mainstream schools currently lack the physical and human infrastructure to support the increasing complexity of needs.
+  areas_of_disagreement:
+  - Whether the increase in SEN cases reflects a genuine rise in biological conditions or a societal/educational shift.
+  - The extent to which the legal framework (Children and Families Act 2014) is the solution or part of the problem.
+  - The role of private/independent special school placements in draining budgets from the state sector.
+  claims:
+  - agreement_level: consensus
+    claim_id: C1
+    counterarguments:
+    - Some argue the issue is not just total funding but the inefficient distribution of existing high-needs blocks.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: funding has not kept pace with the statutory obligations
+      source_id: E1
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: resource allocation is fundamentally decoupled from the actual cost of provision
+      source_id: E5
+      verification_status: unverified
+    text: The current funding model is insufficient to meet the statutory requirements of the increasing number of EHCPs.
+  - agreement_level: majority
+    claim_id: C2
+    counterarguments:
+    - Accountability measures are necessary to ensure high standards for all pupils, including those with SEN.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: league tables and Progress 8 measures penalize schools with high SEN cohorts
+      source_id: E3
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: the accountability regime creates a perverse incentive to off-roll pupils
+      source_id: E8
+      verification_status: unverified
+    text: High-stakes school accountability and performance metrics disincentivize mainstream schools from being inclusive.
+  - agreement_level: majority
+    claim_id: C3
+    counterarguments:
+    - The pandemic merely exposed pre-existing structural weaknesses rather than being a primary driver.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: lockdowns resulted in a surge of social, emotional, and mental health (SEMH) needs
+      source_id: E4
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: lost early years intervention during the pandemic has led to more complex presentations later
+      source_id: E10
+      verification_status: unverified
+    text: The COVID-19 pandemic significantly accelerated the crisis by increasing developmental delays and mental health
+      needs.
+  - agreement_level: consensus
+    claim_id: C4
+    counterarguments:
+    - Statutory protections are essential to prevent local authorities from ignoring their duties.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: parents feel they must 'fight' for a legal document to access basic adjustments
+      source_id: E2
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: the EHCP has become a 'golden ticket' in a resource-scarce environment
+      source_id: E12
+      verification_status: unverified
+    text: A "diagnosis-led" system forces parents to seek EHCPs as the only way to guarantee any level of support.
+  - agreement_level: divided
+    claim_id: C5
+    counterarguments:
+    - Over-medicalization and "diagnostic creep" may be labeling behavioral issues as clinical disorders (E7).
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: increased awareness of autism and ADHD has led to a natural rise in identified prevalence
+      source_id: E6
+      verification_status: unverified
+    text: The rise in SEN demand is primarily driven by better identification and reduced stigma regarding neurodiversity.
+  - agreement_level: majority
+    claim_id: C6
+    counterarguments:
+    - Training alone cannot compensate for the physical lack of staff and space in overcrowded schools.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: the loss of specialist advisory teachers has left mainstream schools unsupported
+      source_id: E9
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: teaching assistants are often expected to provide complex support without adequate training
+      source_id: E11
+      verification_status: unverified
+    text: Workforce shortages and a lack of specialist training in mainstream settings prevent effective early intervention.
+  code_version: adapter-v2
+  generated_at: '2026-02-23T01:11:26.915712+00:00'
+  model: google/gemini-3-flash-preview
+  narrative: 'The expert consultation reveals a complex, multi-faceted crisis in Special Educational Needs (SEN) provision,
+    driven by a combination of systemic funding gaps, shifting diagnostic thresholds, and structural misalignments within
+    the education system. There is a strong consensus that the current demand for Education, Health and Care Plans (EHCPs)
+    has outpaced the available resources, creating a "vicious cycle" where late intervention necessitates more intensive,
+    costly support. Experts are divided, however, on the primary catalyst for this demand: while some point to a genuine increase
+    in neurodivergent conditions and the long-term impacts of the COVID-19 pandemic, others highlight the role of high-stakes
+    accountability measures in mainstream schools that inadvertently exclude pupils with additional needs. Furthermore, the
+    tension between statutory legal duties and local authority budget constraints is identified as a central driver of systemic
+    friction. While the need for "inclusive" mainstream environments is widely supported in principle, experts express significant
+    uncertainty regarding the practical feasibility of this model given current staffing shortages and the lack of specialized
+    training across the workforce.'
+  narrative_statements: []
+  prompt_version: v1
+  question_id: ''
+  round_id: ''
+  schema_version: '1.0'
+  study_id: ''
+  type: synthesis
+  uncertainties:
+  - The long-term impact of digital technology and social media on neurodevelopmental trends remains unquantified.
+  - It is unclear if "inclusion" in mainstream settings is always the best clinical or educational outcome for all children
+    with complex needs.
+- areas_of_agreement:
+  - The current volume of EHCP requests is unsustainable for local government budgets.
+  - There is a critical shortage of educational psychologists and specialist teaching staff.
+  - Early intervention is theoretically more cost-effective but currently underfunded in favor of crisis management.
+  areas_of_disagreement:
+  - Whether the solution lies in increasing total funding or fundamentally reforming the 2014 Children and Families Act.
+  - The extent to which "parental choice" should dictate high-cost independent specialist placements.
+  - Whether the rise in SEN is due to better clinical identification or a failure of the general education system to be flexible.
+  claims:
+  - agreement_level: majority
+    claim_id: C1
+    counterarguments:
+    - Some argue that the issue is not the amount of funding but the inefficient and adversarial way it is allocated through
+      legal tribunals.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: funding has not kept pace with inflation or the increasing complexity of needs
+      source_id: E1
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: real-terms deficits in High Needs Blocks are now systemic
+      source_id: E5
+      verification_status: unverified
+    text: The primary driver of the crisis is a significant and widening gap between statutory funding and the actual cost
+      of provision.
+  - agreement_level: divided
+    claim_id: C2
+    counterarguments:
+    - EHCPs are viewed by others as the only remaining safeguard for children's rights in a failing system.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: the system forces parents into an adversarial battle to secure basic support
+      source_id: E3
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: legal fees and tribunal costs are diverting millions from frontline service delivery
+      source_id: E8
+      verification_status: unverified
+    text: The legalistic nature of the Education, Health and Care Plan (EHCP) process incentivizes parental litigation and
+      exhausts local authority resources.
+  - agreement_level: consensus
+    claim_id: C3
+    counterarguments:
+    - A minority of experts suggest that "diagnostic overshadowing" may lead to over-medicalization of social or educational
+      issues.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: unprecedented rise in neurodevelopmental diagnoses over the last decade
+      source_id: E2
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: societal shift toward better recognition of hidden disabilities
+      source_id: E10
+      verification_status: unverified
+    text: Increased identification of neurodivergence, particularly Autism and ADHD, has placed unprecedented pressure on
+      diagnostic and support services.
+  - agreement_level: majority
+    claim_id: C4
+    counterarguments:
+    - Some argue that with proper leadership and culture, mainstream schools can be inclusive without massive capital investment.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: mainstream teachers feel ill-equipped to manage complex behavioral and medical needs
+      source_id: E4
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: lack of specialist spaces within mainstream settings leads to placement breakdowns
+      source_id: E12
+      verification_status: unverified
+    text: Mainstream schools lack the inclusive capacity, staff training, and physical infrastructure to support high-needs
+      pupils effectively.
+  - agreement_level: minority
+    claim_id: C5
+    counterarguments:
+    - The immediate crisis is focused on the 5-16 age bracket; post-16 issues are a secondary symptom.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: failure to plan for transition to adulthood leads to more expensive interventions later
+      source_id: E7
+      verification_status: unverified
+    text: The "cliff-edge" of support at age 16 and 25 creates a bottleneck and long-term dependency on high-cost adult social
+      care.
+  - agreement_level: majority
+    claim_id: C6
+    counterarguments:
+    - Pandemic effects are temporary and should not be used to justify permanent structural changes to SEN law.
+    sources:
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: lockdown-related social and communication delays are now manifesting as SEN demand
+      source_id: E6
+      verification_status: unverified
+    - confidence: null
+      match_score: -1.0
+      matched_text: null
+      quote: spike in school refusal and anxiety-based non-attendance
+      source_id: E11
+      verification_status: unverified
+    text: Post-pandemic developmental delays and mental health issues have exacerbated the underlying SEN demand.
+  code_version: adapter-v2
+  generated_at: '2026-02-23T01:11:27.526159+00:00'
+  model: google/gemini-3-flash-preview
+  narrative: The expert consultation reveals a complex, multi-faceted crisis in the Special Educational Needs (SEN) sector,
+    characterized by a significant tension between increasing demand and systemic resource constraints. While there is a strong
+    consensus that funding levels have failed to keep pace with the rising volume and complexity of needs, experts are divided
+    on the root causes of this demand. Some point to improved diagnostic capabilities and societal awareness, while others
+    suggest that the current legal framework and the "EHCP-driven" model create perverse incentives that escalate costs. Significant
+    disagreement exists regarding whether the crisis is primarily a failure of central government funding or a result of inefficient
+    local allocation and systemic design flaws. Furthermore, experts highlight a growing "wait-and-see" uncertainty regarding
+    the long-term impact of post-pandemic developmental delays on the system's sustainability.
+  narrative_statements: []
+  prompt_version: v1
+  question_id: ''
+  round_id: ''
+  schema_version: '1.0'
+  study_id: ''
+  type: synthesis
+  uncertainties:
+  - The long-term efficacy of "inclusion" in mainstream settings for children with the most complex needs.
+  - The degree to which private diagnostic assessments are contributing to inequity in the system.
