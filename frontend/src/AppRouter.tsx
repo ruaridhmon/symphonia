@@ -21,6 +21,8 @@ const Atlas        = lazy(() => import('./Atlas'));
 const NotFoundPage  = lazy(() => import('./NotFoundPage'));
 const AdminFormNew   = lazy(() => import('./AdminFormNew'));
 const AdminSettings  = lazy(() => import('./AdminSettings'));
+const AdminUsers     = lazy(() => import('./AdminUsers'));
+const JoinPage       = lazy(() => import('./JoinPage'));
 
 /**
  * Application routes organised by layout shell.
@@ -138,6 +140,14 @@ export default function Router() {
                 </ErrorBoundary>
               }
             />
+            <Route
+              path="/join/:code"
+              element={
+                <ErrorBoundary fallbackTitle="Join Error">
+                  <JoinPage />
+                </ErrorBoundary>
+              }
+            />
           </Route>
         </Route>
 
@@ -157,6 +167,14 @@ export default function Router() {
               element={
                 <ErrorBoundary fallbackTitle="New Form Error">
                   <AdminFormNew />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ErrorBoundary fallbackTitle="User Management Error">
+                  <AdminUsers />
                 </ErrorBoundary>
               }
             />

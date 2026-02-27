@@ -1,7 +1,15 @@
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, String, Boolean, JSON, Float
+from enum import Enum as PyEnum
+
+from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, String, Boolean, JSON, Float, UniqueConstraint
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime, timezone
 from .db import Base
+
+
+class UserRole(str, PyEnum):
+    EXPERT = "expert"
+    FACILITATOR = "facilitator"
+    PLATFORM_ADMIN = "platform_admin"
 
 
 class User(Base):
@@ -11,9 +19,11 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_admin = Column(Boolean, default=False)
+    role = Column(String(20), nullable=False, default=UserRole.EXPERT.value, server_default="expert")
     has_submitted_feedback = Column(Boolean, default=False)
     reset_token = Column(String, nullable=True)
     reset_token_expiry = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     responses = relationship("Response", back_populates="user")
     feedback_entries = relationship("Feedback", back_populates="user")
@@ -24,10 +34,15 @@ class User(Base):
 
 class UserFormUnlock(Base):
     __tablename__ = "user_form_unlocks"
+    __table_args__ = (
+        UniqueConstraint("user_id", "form_id", name="uq_user_form"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     form_id = Column(Integer, ForeignKey("forms.id"), nullable=False)
+    form_role = Column(String(20), nullable=False, default="expert", server_default="expert")
+    joined_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
 
     user = relationship("User", back_populates="unlocked_forms")
     form = relationship("FormModel", back_populates="unlocked_by_users")
@@ -38,6 +53,7 @@ class FormModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
     questions = Column(JSON, nullable=False)
     allow_join = Column(Boolean, default=True)
     join_code = Column(String, unique=True, nullable=False)
@@ -219,6 +235,30 @@ class SynthesisComment(Base):
     )
 
 
+class InviteCode(Base):
+    """A join code associated with a specific form.
+
+    Supports expiry, max uses, soft deactivation, and form_role assignment.
+    Backfilled from FormModel.join_code in Phase 2 migration.
+    """
+    __tablename__ = "invite_codes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    form_id = Column(Integer, ForeignKey("forms.id", ondelete="CASCADE"), nullable=False)
+    code = Column(String(20), unique=True, nullable=False, index=True)
+    form_role = Column(String(20), nullable=False, default="expert", server_default="expert")
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    expires_at = Column(DateTime, nullable=True)
+    max_uses = Column(Integer, nullable=True)
+    use_count = Column(Integer, nullable=False, default=0, server_default="0")
+    is_active = Column(Boolean, nullable=False, default=True, server_default="1")
+    label = Column(String(100), nullable=True)
+
+    form = relationship("FormModel", backref="invite_codes")
+    creator = relationship("User")
+
+
 class AuditLog(Base):
     """Immutable audit trail for admin actions (Gov readiness requirement).
 
@@ -237,6 +277,7 @@ class AuditLog(Base):
     resource_id = Column(Integer, nullable=True)  # PK of affected resource
     detail = Column(JSON, nullable=True)  # action-specific context
     ip_address = Column(String, nullable=True)
+    acting_role = Column(String(20), nullable=True)
 
     user = relationship("User")
 

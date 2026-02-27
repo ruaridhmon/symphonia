@@ -31,7 +31,7 @@ from .rate_limiter import (
 from .models import (
     User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
     UserFormUnlock, FollowUp, FollowUpResponse, SynthesisComment,
-    SynthesisVersion, Draft, AuditLog, Setting,
+    SynthesisVersion, Draft, AuditLog, Setting, InviteCode,
 )
 from .audit import audit_log
 from .auth import (
@@ -43,12 +43,19 @@ from .auth import (
     get_current_user,
     get_current_admin_user,
     assert_form_owner_or_admin,
+    assert_form_owner_or_facilitator,
+    require_role,
+    require_facilitator,
+    require_platform_admin,
+    generate_join_code,
+    normalize_join_code,
     AUTH_COOKIE_NAME,
     CSRF_COOKIE_NAME,
     COOKIE_MAX_AGE,
     COOKIE_SECURE,
     COOKIE_SAMESITE,
 )
+from .models import UserRole
 from .db import SessionLocal
 from .synthesis import (
     CommitteeSynthesiser,
@@ -383,7 +390,7 @@ def login(
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token(
-        data={"sub": str(user.id), "is_admin": user.is_admin}
+        data={"sub": str(user.id), "is_admin": user.is_admin, "role": user.role}
     )
     csrf_token = generate_csrf_token()
 
@@ -413,6 +420,7 @@ def login(
         "access_token": token,
         "token_type": "bearer",
         "is_admin": user.is_admin,
+        "role": user.role,
         "email": user.email,
         "csrf_token": csrf_token,
     }
@@ -500,7 +508,7 @@ def me(
     request: Request,
     user: User = Depends(get_current_user),
 ):
-    return {"email": user.email, "is_admin": user.is_admin}
+    return {"email": user.email, "is_admin": user.is_admin, "role": user.role}
 
 
 # ---------------------------------------------------------
@@ -827,7 +835,7 @@ def submit_feedback(
 def all_feedback(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     f = db.query(Feedback).order_by(Feedback.created_at.desc()).all()
 
@@ -866,7 +874,7 @@ async def push_summary(
     form_id: int,
     payload: SummaryPayload,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     summary = payload.summary.strip()
 
@@ -911,7 +919,7 @@ def generate_summary(
     payload: GenerateSummaryPayload,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     active_round = (
         db.query(RoundModel)
@@ -1059,7 +1067,7 @@ async def synthesise_committee(
     payload: CommitteeSynthesisPayload,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Run committee-based synthesis on the active round's responses.
 
@@ -1641,7 +1649,7 @@ async def generate_synthesis_for_round(
     payload: GenerateSynthesisVersionPayload,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Generate a NEW synthesis version for ANY round (not just active).
 
@@ -1799,7 +1807,7 @@ def activate_synthesis_version(
     request: Request,
     version_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Set a synthesis version as the active/published one.
 
@@ -2316,13 +2324,23 @@ def create_form(
     payload: FormCreate,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_facilitator)
 ):
+    """Deprecated — use POST /forms/create instead. Kept as alias."""
+    # Accept client-supplied join_code for backward compat; auto-generate if empty
+    code = payload.join_code
+    if not code:
+        for _ in range(10):
+            code = generate_join_code()
+            if not db.query(FormModel).filter(FormModel.join_code == code).first():
+                break
+
     f = FormModel(
         title=payload.title,
         questions=payload.questions,
         allow_join=payload.allow_join,
-        join_code=payload.join_code
+        join_code=code,
+        owner_id=user.id,
     )
     db.add(f)
     db.commit()
@@ -2357,26 +2375,27 @@ def create_form(
 
 class UserFormCreate(BaseModel):
     title: str
+    description: str | None = None
     questions: list = []
     allow_join: bool = True
 
 
 @router.post("/forms/create", tags=["Forms"], status_code=201,
-             summary="Create a form (any authenticated user)")
+             summary="Create a consultation (facilitator/admin)")
 @limiter.limit(CRUD_LIMIT)
 def user_create_form(
     payload: UserFormCreate,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_facilitator),
 ):
-    """Any authenticated user can create a consultation form. Join code is auto-generated."""
+    """Facilitators and platform admins can create consultation forms. Join code is auto-generated."""
     title = payload.title.strip()
     if not title:
         raise HTTPException(status_code=400, detail="title is required")
 
     for _ in range(10):
-        code = secrets.token_urlsafe(8)
+        code = generate_join_code()
         if not db.query(FormModel).filter(FormModel.join_code == code).first():
             break
     else:
@@ -2384,6 +2403,7 @@ def user_create_form(
 
     form = FormModel(
         title=title,
+        description=payload.description,
         questions=payload.questions,
         allow_join=payload.allow_join,
         join_code=code,
@@ -2393,9 +2413,12 @@ def user_create_form(
     db.flush()
     first_round = RoundModel(form_id=form.id, round_number=1, is_active=True, questions=payload.questions)
     db.add(first_round)
+    # Also create an InviteCode row for the default join code
+    invite = InviteCode(form_id=form.id, code=code, form_role="expert", created_by=user.id)
+    db.add(invite)
     db.commit()
     db.refresh(form)
-    audit_log(db, user=user, action="user_create_form", resource_type="form",
+    audit_log(db, user=user, action="create_form", resource_type="form",
               resource_id=form.id, detail={"title": title}, request=request)
     return {
         "id": form.id,
@@ -2410,7 +2433,7 @@ def user_create_form(
 @router.get("/forms/my-created", tags=["Forms"], summary="List forms I created")
 def my_created_forms(
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_facilitator),
 ):
     """Return all forms owned by the current user, newest first."""
     forms = db.query(FormModel).filter(FormModel.owner_id == user.id).order_by(FormModel.id.desc()).all()
@@ -2439,9 +2462,9 @@ def regenerate_join_code(
     form = db.query(FormModel).filter(FormModel.id == form_id).first()
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
-    assert_form_owner_or_admin(form, user)
+    assert_form_owner_or_facilitator(form, user)
     for _ in range(10):
-        code = secrets.token_urlsafe(8)
+        code = generate_join_code()
         if not db.query(FormModel).filter(FormModel.join_code == code, FormModel.id != form_id).first():
             break
     form.join_code = code
@@ -2462,7 +2485,7 @@ def delete_owned_form(
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
     title = form.title
-    assert_form_owner_or_admin(form, user)
+    assert_form_owner_or_facilitator(form, user)
     db.delete(form)
     db.commit()
     audit_log(db, user=user, action="delete_form", resource_type="form",
@@ -2484,11 +2507,12 @@ def update_form(
     payload: FormUpdate,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(get_current_user)
 ):
     f = db.query(FormModel).filter(FormModel.id == form_id).first()
     if not f:
         raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(f, user)
 
     old_title = f.title
     f.title = payload.title
@@ -2512,12 +2536,13 @@ def delete_form(
     form_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(get_current_user)
 ):
     # Now delete the form itself
     f = db.query(FormModel).filter(FormModel.id == form_id).first()
     if not f:
         raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(f, user)
 
     audit_log(db, user=user, action="delete_form", resource_type="form",
               resource_id=form_id, detail={"title": f.title}, request=request)
@@ -2538,7 +2563,7 @@ def delete_form(
 def get_forms(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     items = db.query(FormModel).order_by(FormModel.id).all()
 
@@ -2583,11 +2608,24 @@ def unlock_form(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
+    raw_code = payload.join_code.strip()
+
+    # Try exact match first (handles both old-format and new-format codes)
     form = db.query(FormModel).filter(
-        FormModel.join_code == payload.join_code,
+        FormModel.join_code == raw_code,
         FormModel.allow_join == True
     ).first()
-    
+
+    # If no exact match, try normalized matching for SYM-XXXX-NNNN codes
+    if not form:
+        normalized = normalize_join_code(raw_code)
+        if normalized:
+            all_forms = db.query(FormModel).filter(FormModel.allow_join == True).all()
+            for f in all_forms:
+                if normalize_join_code(f.join_code) == normalized:
+                    form = f
+                    break
+
     if not form:
         raise HTTPException(status_code=404, detail="Form not found or closed.")
 
@@ -2604,7 +2642,7 @@ def unlock_form(
     new_unlock = UserFormUnlock(user_id=user.id, form_id=form.id)
     db.add(new_unlock)
     db.commit()
-        
+
     return {"message": "Form unlocked successfully."}
 
 
@@ -2698,17 +2736,19 @@ def create_form_from_template(
     template_id: str,
     payload: TemplateCreatePayload | None = None,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_facilitator),
 ):
     """Create a new form pre-filled from a template."""
     template = get_template(template_id)
     if not template:
         raise HTTPException(status_code=404, detail=f"Template '{template_id}' not found")
 
-    import uuid
-
     title = (payload.title if payload and payload.title else template.name).strip()
-    join_code = (payload.join_code if payload and payload.join_code else str(uuid.uuid4())[:8])
+    # Auto-generate join code in SYM format
+    for _ in range(10):
+        join_code = generate_join_code()
+        if not db.query(FormModel).filter(FormModel.join_code == join_code).first():
+            break
 
     f = FormModel(
         title=title,
@@ -2716,6 +2756,7 @@ def create_form_from_template(
         allow_join=payload.allow_join if payload else True,
         join_code=join_code,
         expert_labels=template.expert_label_preset,
+        owner_id=user.id,
     )
     db.add(f)
     db.commit()
@@ -2790,7 +2831,7 @@ def put_expert_labels(
     form_id: int,
     payload: ExpertLabelsPayload,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     f = db.query(FormModel).filter(FormModel.id == form_id).first()
     if not f:
@@ -2869,7 +2910,7 @@ def open_next_round(
     form_id: int,
     payload: RoundConfig | None = None,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     current = (
         db.query(RoundModel)
@@ -2981,7 +3022,7 @@ def form_responses(
     form_id: int,
     all_rounds: bool = False,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     q = db.query(Response).filter(Response.form_id == form_id)
 
@@ -3028,7 +3069,7 @@ def edit_response(
     response_id: int,
     payload: ResponseEditPayload,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Edit a participant response (admin only) with optimistic locking.
 
@@ -3080,7 +3121,7 @@ def force_edit_response(
     response_id: int,
     payload: ResponseEditPayload,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Force-edit a response, overwriting any concurrent changes (admin only)."""
     response = db.query(Response).filter(Response.id == response_id).first()
@@ -3119,7 +3160,7 @@ def form_archived(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     items = (
         db.query(ArchivedResponse)
@@ -3152,7 +3193,7 @@ def rounds_with_responses(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     rounds = (
         db.query(RoundModel)
@@ -3207,7 +3248,7 @@ def synthesise_simple(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     active = (
         db.query(RoundModel)
@@ -3266,7 +3307,7 @@ async def send_email(
     to: str = Form(...),
     subject: str = Form(...),
     html: str = Form(...),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     # This function requires the following environment variables to be set in the .env file:
     # SMTP_HOST: The hostname of the SMTP server.
@@ -3343,7 +3384,7 @@ async def send_invitation_email(
     payload: InvitationEmailPayload,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Send a branded invitation email to an expert."""
     from .email_templates import invitation
@@ -3383,7 +3424,7 @@ class NewRoundEmailPayload(BaseModel):
 async def send_new_round_email(
     request: Request,
     payload: NewRoundEmailPayload,
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Notify experts that a new round is open."""
     from .email_templates import new_round
@@ -3424,7 +3465,7 @@ class SynthesisReadyEmailPayload(BaseModel):
 async def send_synthesis_ready_email(
     request: Request,
     payload: SynthesisReadyEmailPayload,
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Notify participants that synthesis is ready."""
     from .email_templates import synthesis_ready
@@ -3465,7 +3506,7 @@ class ReminderEmailPayload(BaseModel):
 async def send_reminder_email(
     request: Request,
     payload: ReminderEmailPayload,
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Send a gentle reminder to experts who haven't responded."""
     from .email_templates import round_reminder
@@ -3504,7 +3545,7 @@ async def notify_synthesis_ready(
     form_id: int,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Manually trigger synthesis notification emails for the latest round."""
     form = db.query(FormModel).filter(FormModel.id == form_id).first()
@@ -3565,7 +3606,7 @@ async def notify_synthesis_ready(
 async def preview_email_template(
     request: Request,
     template_name: str,
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Preview a template with sample data (returns HTML string)."""
     from .email_templates import TEMPLATES
@@ -3627,7 +3668,7 @@ def get_audit_log(
     action: str | None = Query(None),
     user_id: int | None = Query(None),
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Retrieve the audit trail. Admin-only. Supports filtering by action type and user."""
     q = db.query(AuditLog).order_by(AuditLog.timestamp.desc())
@@ -3670,7 +3711,7 @@ def get_audit_log(
 def get_audit_log_actions(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Return distinct action types in the audit log (for filter dropdowns)."""
     rows = db.query(AuditLog.action).distinct().order_by(AuditLog.action).all()
@@ -4596,7 +4637,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
 def admin_analytics(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
+    user: User = Depends(require_platform_admin),
 ):
     """Return aggregated analytics for the admin dashboard.
 
@@ -4774,7 +4815,7 @@ def admin_analytics(
 def seed_atlas_data(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_admin_user)
+    user: User = Depends(require_platform_admin)
 ):
     """Seed the database with test forms for UX testing."""
     import uuid
@@ -4968,12 +5009,10 @@ DEFAULT_SETTINGS = {
 @limiter.limit(READ_LIMIT)
 def get_settings(
     request: Request,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_platform_admin),
     db: Session = Depends(get_db),
 ):
-    """Return all app settings (admin only)."""
-    if not user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin access required")
+    """Return all app settings (platform admin only)."""
     rows = db.query(Setting).all()
     result = dict(DEFAULT_SETTINGS)  # start with defaults
     for row in rows:
@@ -4992,13 +5031,11 @@ def get_settings(
 @limiter.limit(CRUD_LIMIT)
 def update_settings(
     payload: dict,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_platform_admin),
     db: Session = Depends(get_db),
     request: Request = None,
 ):
-    """Update one or more settings (admin only)."""
-    if not user.is_admin:
-        raise HTTPException(status_code=403, detail="Admin access required")
+    """Update one or more settings (platform admin only)."""
     allowed_keys = set(DEFAULT_SETTINGS.keys())
     for key, value in payload.items():
         if key not in allowed_keys:
@@ -5170,3 +5207,490 @@ def ai_suggest(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI suggestion failed: {e}")
+
+
+# ---------------------------------------------------------
+# PHASE 2 — INVITE CODES, USER MANAGEMENT, PARTICIPANTS
+# ---------------------------------------------------------
+
+
+class JoinFormPayload(BaseModel):
+    code: str
+
+
+@router.post(
+    "/forms/join",
+    tags=["Forms"],
+    summary="Join a form via invite code (invite-code-aware)",
+    description=(
+        "Join a consultation using an invite code. Validates expiry, max_uses, "
+        "and is_active from the invite_codes table. Falls back to legacy "
+        "FormModel.join_code matching."
+    ),
+)
+@limiter.limit(CRUD_LIMIT)
+def join_form(
+    request: Request,
+    payload: JoinFormPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Invite-code-aware join. Supplements the legacy /forms/unlock endpoint."""
+    raw_code = payload.code.strip()
+    normalized = normalize_join_code(raw_code)
+
+    # 1. Try invite_codes table (preferred path)
+    invite = db.query(InviteCode).filter(InviteCode.code == raw_code).first()
+    if not invite and normalized:
+        # Try normalized match
+        all_invites = db.query(InviteCode).filter(InviteCode.is_active == True).all()
+        for ic in all_invites:
+            if normalize_join_code(ic.code) == normalized:
+                invite = ic
+                break
+
+    if invite:
+        if not invite.is_active:
+            raise HTTPException(status_code=400, detail="This invite code has been deactivated.")
+        if invite.expires_at and invite.expires_at < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="This invite code has expired.")
+        if invite.max_uses is not None and invite.use_count >= invite.max_uses:
+            raise HTTPException(status_code=400, detail="This invite code has reached its usage limit.")
+
+        form = db.query(FormModel).filter(FormModel.id == invite.form_id).first()
+        if not form:
+            raise HTTPException(status_code=404, detail="Form not found.")
+
+        # Check idempotent
+        existing = db.query(UserFormUnlock).filter(
+            UserFormUnlock.user_id == user.id,
+            UserFormUnlock.form_id == form.id,
+        ).first()
+        if existing:
+            return {"message": "Already joined.", "form_id": form.id}
+
+        unlock = UserFormUnlock(
+            user_id=user.id,
+            form_id=form.id,
+            form_role=invite.form_role,
+        )
+        db.add(unlock)
+        invite.use_count += 1
+        db.commit()
+        audit_log(db, user=user, action="join_form", resource_type="form",
+                  resource_id=form.id, detail={"invite_code_id": invite.id}, request=request)
+        return {"message": "Joined successfully.", "form_id": form.id}
+
+    # 2. Fall back to legacy FormModel.join_code matching
+    form = db.query(FormModel).filter(
+        FormModel.join_code == raw_code,
+        FormModel.allow_join == True,
+    ).first()
+    if not form and normalized:
+        all_forms = db.query(FormModel).filter(FormModel.allow_join == True).all()
+        for f in all_forms:
+            if normalize_join_code(f.join_code) == normalized:
+                form = f
+                break
+
+    if not form:
+        raise HTTPException(status_code=404, detail="Invalid join code.")
+
+    existing = db.query(UserFormUnlock).filter(
+        UserFormUnlock.user_id == user.id,
+        UserFormUnlock.form_id == form.id,
+    ).first()
+    if existing:
+        return {"message": "Already joined.", "form_id": form.id}
+
+    unlock = UserFormUnlock(user_id=user.id, form_id=form.id)
+    db.add(unlock)
+    db.commit()
+    audit_log(db, user=user, action="join_form", resource_type="form",
+              resource_id=form.id, request=request)
+    return {"message": "Joined successfully.", "form_id": form.id}
+
+
+# ── Invite code CRUD ──
+
+
+class CreateInviteCodePayload(BaseModel):
+    form_role: str = "expert"
+    expires_at: str | None = None
+    max_uses: int | None = None
+    label: str | None = None
+
+
+@router.get(
+    "/forms/{form_id}/invite-codes",
+    tags=["Forms"],
+    summary="List invite codes for a form",
+)
+@limiter.limit(READ_LIMIT)
+def list_invite_codes(
+    form_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(form, user)
+
+    codes = (
+        db.query(InviteCode)
+        .filter(InviteCode.form_id == form_id)
+        .order_by(InviteCode.created_at.desc())
+        .all()
+    )
+    return [
+        {
+            "id": c.id,
+            "code": c.code,
+            "form_role": c.form_role,
+            "created_at": c.created_at.isoformat() if c.created_at else None,
+            "expires_at": c.expires_at.isoformat() if c.expires_at else None,
+            "max_uses": c.max_uses,
+            "use_count": c.use_count,
+            "is_active": c.is_active,
+            "label": c.label,
+        }
+        for c in codes
+    ]
+
+
+@router.post(
+    "/forms/{form_id}/invite-codes",
+    tags=["Forms"],
+    summary="Create a new invite code for a form",
+    status_code=201,
+)
+@limiter.limit(CRUD_LIMIT)
+def create_invite_code(
+    form_id: int,
+    request: Request,
+    payload: CreateInviteCodePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(form, user)
+
+    if payload.form_role not in ("expert", "collaborator"):
+        raise HTTPException(status_code=400, detail="form_role must be 'expert' or 'collaborator'")
+
+    # Generate unique code
+    for _ in range(10):
+        code = generate_join_code()
+        if not db.query(InviteCode).filter(InviteCode.code == code).first():
+            break
+    else:
+        raise HTTPException(status_code=500, detail="Could not generate unique invite code")
+
+    expires = None
+    if payload.expires_at:
+        try:
+            expires = datetime.fromisoformat(payload.expires_at.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid expires_at format")
+
+    invite = InviteCode(
+        form_id=form_id,
+        code=code,
+        form_role=payload.form_role,
+        created_by=user.id,
+        expires_at=expires,
+        max_uses=payload.max_uses,
+        label=payload.label,
+    )
+    db.add(invite)
+    db.commit()
+    db.refresh(invite)
+    audit_log(db, user=user, action="create_invite_code", resource_type="invite_code",
+              resource_id=invite.id, detail={"form_id": form_id, "code": code}, request=request)
+    return {
+        "id": invite.id,
+        "code": invite.code,
+        "form_role": invite.form_role,
+        "expires_at": invite.expires_at.isoformat() if invite.expires_at else None,
+        "max_uses": invite.max_uses,
+        "use_count": invite.use_count,
+        "is_active": invite.is_active,
+        "label": invite.label,
+    }
+
+
+class UpdateInviteCodePayload(BaseModel):
+    is_active: bool | None = None
+    label: str | None = None
+    max_uses: int | None = None
+    expires_at: str | None = None
+
+
+@router.patch(
+    "/forms/{form_id}/invite-codes/{code_id}",
+    tags=["Forms"],
+    summary="Update an invite code (deactivate, label, etc.)",
+)
+@limiter.limit(CRUD_LIMIT)
+def update_invite_code(
+    form_id: int,
+    code_id: int,
+    request: Request,
+    payload: UpdateInviteCodePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(form, user)
+
+    invite = db.query(InviteCode).filter(
+        InviteCode.id == code_id,
+        InviteCode.form_id == form_id,
+    ).first()
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invite code not found")
+
+    if payload.is_active is not None:
+        invite.is_active = payload.is_active
+    if payload.label is not None:
+        invite.label = payload.label
+    if payload.max_uses is not None:
+        invite.max_uses = payload.max_uses
+    if payload.expires_at is not None:
+        try:
+            invite.expires_at = datetime.fromisoformat(payload.expires_at.replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid expires_at format")
+
+    db.commit()
+    audit_log(db, user=user, action="update_invite_code", resource_type="invite_code",
+              resource_id=invite.id, detail={"form_id": form_id}, request=request)
+    return {
+        "id": invite.id,
+        "code": invite.code,
+        "is_active": invite.is_active,
+        "label": invite.label,
+        "max_uses": invite.max_uses,
+        "use_count": invite.use_count,
+    }
+
+
+# ── User management (platform admin) ──
+
+
+@router.get(
+    "/admin/users",
+    tags=["Admin"],
+    summary="List all users for role management",
+)
+@limiter.limit(READ_LIMIT)
+def list_users(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    """Return all users with their roles. Platform admin only."""
+    users = db.query(User).order_by(User.id).all()
+    return [
+        {
+            "id": u.id,
+            "email": u.email,
+            "role": u.role,
+            "is_admin": u.is_admin,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
+        }
+        for u in users
+    ]
+
+
+class UpdateUserRolePayload(BaseModel):
+    role: str
+
+
+@router.patch(
+    "/admin/users/{user_id}/role",
+    tags=["Admin"],
+    summary="Change a user's platform role",
+)
+@limiter.limit(CRUD_LIMIT)
+def update_user_role(
+    user_id: int,
+    request: Request,
+    payload: UpdateUserRolePayload,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_platform_admin),
+):
+    """Promote or demote a user. Platform admin only. Self-modification prevented."""
+    valid_roles = {r.value for r in UserRole}
+    if payload.role not in valid_roles:
+        raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}")
+
+    if user_id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot change your own role.")
+
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    old_role = target.role
+    target.role = payload.role
+    # Keep is_admin in sync for backward compat
+    target.is_admin = payload.role == UserRole.PLATFORM_ADMIN.value
+    db.commit()
+
+    audit_log(db, user=admin, action="change_user_role", resource_type="user",
+              resource_id=user_id, detail={"old_role": old_role, "new_role": payload.role},
+              request=request)
+    return {"id": target.id, "email": target.email, "role": target.role}
+
+
+# ── Participants ──
+
+
+@router.get(
+    "/forms/{form_id}/participants",
+    tags=["Forms"],
+    summary="List experts who joined a form",
+)
+@limiter.limit(READ_LIMIT)
+def list_participants(
+    form_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(form, user)
+
+    unlocks = (
+        db.query(UserFormUnlock)
+        .filter(UserFormUnlock.form_id == form_id)
+        .all()
+    )
+    result = []
+    for u in unlocks:
+        participant = db.query(User).filter(User.id == u.user_id).first()
+        if participant:
+            result.append({
+                "user_id": participant.id,
+                "email": participant.email,
+                "form_role": u.form_role,
+                "joined_at": u.joined_at.isoformat() if u.joined_at else None,
+            })
+    return result
+
+
+@router.delete(
+    "/forms/{form_id}/participants/{target_user_id}",
+    tags=["Forms"],
+    summary="Remove an expert from a form",
+)
+@limiter.limit(CRUD_LIMIT)
+def remove_participant(
+    form_id: int,
+    target_user_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(form, user)
+
+    unlock = db.query(UserFormUnlock).filter(
+        UserFormUnlock.form_id == form_id,
+        UserFormUnlock.user_id == target_user_id,
+    ).first()
+    if not unlock:
+        raise HTTPException(status_code=404, detail="Participant not found")
+
+    db.delete(unlock)
+    db.commit()
+    audit_log(db, user=user, action="remove_participant", resource_type="form",
+              resource_id=form_id, detail={"removed_user_id": target_user_id}, request=request)
+    return {"removed": target_user_id, "form_id": form_id}
+
+
+# ── Magic-link join (GET /join/{code}) ──
+
+
+@router.get(
+    "/join/{code}",
+    tags=["Forms"],
+    summary="Magic-link join — auto-join or return join info",
+)
+@limiter.limit(CRUD_LIMIT)
+def magic_join(
+    code: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(get_current_user),
+):
+    """If authenticated, auto-join the form. Returns form_id for frontend redirect."""
+    raw_code = code.strip()
+    normalized = normalize_join_code(raw_code)
+
+    # Try invite_codes table first
+    invite = db.query(InviteCode).filter(InviteCode.code == raw_code).first()
+    if not invite and normalized:
+        all_invites = db.query(InviteCode).filter(InviteCode.is_active == True).all()
+        for ic in all_invites:
+            if normalize_join_code(ic.code) == normalized:
+                invite = ic
+                break
+
+    if invite:
+        if not invite.is_active:
+            raise HTTPException(status_code=400, detail="This invite code has been deactivated.")
+        if invite.expires_at and invite.expires_at < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="This invite code has expired.")
+        if invite.max_uses is not None and invite.use_count >= invite.max_uses:
+            raise HTTPException(status_code=400, detail="This invite code has reached its usage limit.")
+
+        form = db.query(FormModel).filter(FormModel.id == invite.form_id).first()
+        if not form:
+            raise HTTPException(status_code=404, detail="Form not found.")
+
+        existing = db.query(UserFormUnlock).filter(
+            UserFormUnlock.user_id == user.id,
+            UserFormUnlock.form_id == form.id,
+        ).first()
+        if not existing:
+            unlock = UserFormUnlock(user_id=user.id, form_id=form.id, form_role=invite.form_role)
+            db.add(unlock)
+            invite.use_count += 1
+            db.commit()
+
+        return {"message": "Joined.", "form_id": form.id, "title": form.title}
+
+    # Fall back to legacy
+    form = db.query(FormModel).filter(FormModel.join_code == raw_code, FormModel.allow_join == True).first()
+    if not form and normalized:
+        all_forms = db.query(FormModel).filter(FormModel.allow_join == True).all()
+        for f in all_forms:
+            if normalize_join_code(f.join_code) == normalized:
+                form = f
+                break
+
+    if not form:
+        raise HTTPException(status_code=404, detail="Invalid join code.")
+
+    existing = db.query(UserFormUnlock).filter(
+        UserFormUnlock.user_id == user.id,
+        UserFormUnlock.form_id == form.id,
+    ).first()
+    if not existing:
+        unlock = UserFormUnlock(user_id=user.id, form_id=form.id)
+        db.add(unlock)
+        db.commit()
+
+    return {"message": "Joined.", "form_id": form.id, "title": form.title}

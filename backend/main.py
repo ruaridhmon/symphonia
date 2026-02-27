@@ -21,7 +21,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from core import routes as core_routes
 from core.db import engine, SessionLocal
-from core.models import Base, User, UserFormUnlock, Setting
+from core.models import Base, User, UserFormUnlock, Setting, FormModel, InviteCode
 from core.auth import get_password_hash
 from core.rate_limiter import limiter
 from core.ws import ws_manager
@@ -292,10 +292,12 @@ with SessionLocal() as db:
         db.add(User(
             email=admin_email,
             hashed_password=get_password_hash(admin_password),
-            is_admin=True
+            is_admin=True,
+            role="platform_admin",
         ))
     else:
         admin.is_admin = True
+        admin.role = "platform_admin"
 
     # Also ensure samuel@axiotic.ai exists as admin
     sam_email = "samuel@axiotic.ai"
@@ -305,9 +307,11 @@ with SessionLocal() as db:
             email=sam_email,
             hashed_password=get_password_hash("test123"),
             is_admin=True,
+            role="platform_admin",
         ))
     else:
         sam.is_admin = True
+        sam.role = "platform_admin"
 
     # Ruaridh
     for extra_admin in ["ruaridh.mw@ed.ac.uk", "pscmmw@leeds.ac.uk"]:
@@ -317,11 +321,43 @@ with SessionLocal() as db:
                 email=extra_admin,
                 hashed_password=get_password_hash("changeme123"),
                 is_admin=True,
+                role="platform_admin",
             ))
         else:
             u.is_admin = True
+            u.role = "platform_admin"
 
     db.commit()
+
+    # Phase 2: Backfill invite_codes from existing FormModel.join_code values
+    forms_without_invite = (
+        db.query(FormModel)
+        .filter(
+            FormModel.join_code.isnot(None),
+            FormModel.join_code != "",
+        )
+        .all()
+    )
+    backfilled = 0
+    for form in forms_without_invite:
+        exists = db.query(InviteCode).filter(InviteCode.code == form.join_code).first()
+        if not exists:
+            creator_id = form.owner_id
+            if not creator_id:
+                # Use a platform admin as fallback creator
+                fallback = db.query(User).filter(User.role == "platform_admin").first()
+                creator_id = fallback.id if fallback else 1
+            db.add(InviteCode(
+                form_id=form.id,
+                code=form.join_code,
+                form_role="expert",
+                created_by=creator_id,
+                is_active=form.allow_join,
+            ))
+            backfilled += 1
+    if backfilled:
+        db.commit()
+        logger.info("Backfilled %d invite_codes from existing forms", backfilled)
 
     print("=" * 60)
     print("🎵 SYMPHONIA - Expert Consensus Platform")

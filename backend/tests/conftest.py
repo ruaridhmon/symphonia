@@ -91,6 +91,7 @@ def client(test_db) -> Generator[TestClient, None, None]:
                     email=email,
                     hashed_password=get_password_hash("test123"),
                     is_admin=True,
+                    role="platform_admin",
                 )
             )
     db.commit()
