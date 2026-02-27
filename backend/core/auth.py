@@ -105,32 +105,57 @@ async def get_current_user(
     token: str | None = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ):
-    resolved_token = _resolve_token(request, token)
-    if not resolved_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    """Resolve the current user from cookie or Bearer token.
 
-    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    Tries candidates in order (cookie preferred, then Bearer). If the cookie
+    is stale/invalid (e.g. old JWT secret after a redeploy), the Bearer token
+    is used as a fallback rather than immediately returning 401. This prevents
+    the "session expired" loop where a valid Bearer token is ignored because
+    an expired cookie is present.
+    """
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com")
 
-    if resolved_token == "dummy-token":
-        admin = db.query(User).filter(User.email == admin_email).first()
-        if not admin:
-            raise HTTPException(status_code=401, detail="Dummy admin not found")
-        return admin
+    # Build candidate list: httpOnly cookie first (XSS-proof), then Bearer
+    candidates: list[str] = []
+    cookie_token = request.cookies.get(AUTH_COOKIE_NAME)
+    if cookie_token:
+        candidates.append(cookie_token)
+    if token:
+        candidates.append(token)
 
-    try:
-        payload = jwt.decode(resolved_token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
+    if not candidates:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
-    # Role is always read from DB, never from JWT (security requirement)
-    user = db.query(User).filter(User.id == int(user_id)).first()
-    if not user:
-        raise credentials_exception
-    return user
+    for candidate in candidates:
+        # Legacy dev dummy token
+        if candidate == "dummy-token":
+            admin = db.query(User).filter(User.email == admin_email).first()
+            if admin:
+                return admin
+            continue
+
+        # Validate JWT
+        try:
+            payload = jwt.decode(candidate, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = payload.get("sub")
+            if user_id is None:
+                continue
+        except JWTError:
+            continue  # Try next candidate
+
+        # Guard against legacy tokens with email in sub (old format)
+        try:
+            user_id_int = int(user_id)
+        except (ValueError, TypeError):
+            continue  # Try next candidate
+
+        # Role is always read from DB, never from JWT (security requirement)
+        user = db.query(User).filter(User.id == user_id_int).first()
+        if user:
+            return user
+        # User ID valid but not in DB — try next candidate
+
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 # ── Role-based dependencies ──
