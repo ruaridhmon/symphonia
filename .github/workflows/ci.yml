@@ -62,7 +62,7 @@ jobs:
           # is never actually imported. Filter it out to avoid auth failures.
           grep -v "git+https://github.com/axiotic-ai/consensus" requirements.txt \
             | pip install -r /dev/stdin
-          pip install pytest pytest-asyncio ruff
+          pip install pytest pytest-asyncio pytest-timeout ruff
         env:
           GIT_TERMINAL_PROMPT: "0"
 
