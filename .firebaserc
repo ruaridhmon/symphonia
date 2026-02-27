@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "symphonia-488513"
+    "default": "symphonia-488513",
+    "prod": "symphonia-488513",
+    "dev": "symphonia-dev"
   }
 }

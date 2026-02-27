@@ -11,15 +11,45 @@ jobs:
   build_and_preview:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
+    env:
+      TARGET_IS_PROD: ${{ github.event.pull_request.base.ref == 'main' }}
+      TARGET_IS_DEV: ${{ github.event.pull_request.base.ref == 'develop' }}
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
         working-directory: frontend
-      - run: npm run build
+      - name: Build frontend (production mode)
+        if: env.TARGET_IS_PROD == 'true'
+        run: npm run build -- --mode production
         working-directory: frontend
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Build frontend (development mode)
+        if: env.TARGET_IS_DEV == 'true'
+        run: npm run build -- --mode development
+        working-directory: frontend
+      - name: Prepare Firebase config (prod)
+        if: env.TARGET_IS_PROD == 'true'
+        run: cp firebase.prod.json firebase.json
+      - name: Prepare Firebase config (dev)
+        if: env.TARGET_IS_DEV == 'true'
+        run: |
+          cp firebase.dev.json firebase.json
+          if grep -n "REPLACE_WITH_DEV_CLOUD_RUN_SERVICE_ID" firebase.json; then
+            echo "Set the real dev Cloud Run serviceId in firebase.dev.json before deploying."
+            exit 1
+          fi
+      - name: Deploy preview (prod project)
+        if: env.TARGET_IS_PROD == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SYMPHONIA_488513 }}
           projectId: symphonia-488513
+          entryPoint: .
+      - name: Deploy preview (dev project)
+        if: env.TARGET_IS_DEV == 'true'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SYMPHONIA_DEV }}
+          projectId: symphonia-dev
           entryPoint: .

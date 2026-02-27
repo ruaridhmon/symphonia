@@ -35,6 +35,8 @@ This is intentional. Never hardcode a model string in a new AI endpoint. Always 
 ### History
 
 - **2026-02-24:** Discovered `translate_synthesis`, `counterarguments`, `generate_probe_questions`, and `clarify_responses` all had `model="anthropic/claude-sonnet-4"` baked in — bypassing the settings entirely. Fixed: all 4 now call `_resolve_synthesis_model(db)`. Backend restarted. (Directive: Antreas)
+- **2026-02-27:** Added branch-aware Firebase hosting deploy flow: `develop` now builds frontend with Vite `--mode development` and deploys to Firebase/GCP dev project; `main` builds with `--mode production` and deploys to prod. Added `frontend/.env.development` + `frontend/.env.production` (both default to `/api`) and set `.firebaserc` aliases (`dev`, `prod`).
+- **2026-02-27:** Added split Firebase Hosting configs by environment (`firebase.dev.json`, `firebase.prod.json`) so each branch can target a different Cloud Run `serviceId`. CI copies the correct config to `firebase.json` before deploy and fails fast if dev `serviceId` is still a placeholder.
 
 ### Template for any new AI endpoint
 
