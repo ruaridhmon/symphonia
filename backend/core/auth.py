@@ -148,31 +148,7 @@ require_facilitator = require_role(UserRole.FACILITATOR, UserRole.PLATFORM_ADMIN
 require_platform_admin = require_role(UserRole.PLATFORM_ADMIN)
 
 
-# ── Legacy admin dependencies (kept for backward compat during migration) ──
-
-async def get_admin_user(user: User = Depends(get_current_user)):
-    if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    return user
-
-
-def get_current_admin_user(user: User = Depends(get_current_user)):
-    if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    return user
-
-
 # ── Form-level access control ──
-
-def assert_form_owner_or_admin(form: object, user: User) -> None:
-    """Raise 403 if user is neither the form's owner nor a platform admin.
-    Legacy — use assert_form_owner_or_facilitator for new code."""
-    if getattr(form, "owner_id", None) != user.id and not user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only the form owner or an admin can perform this action",
-        )
-
 
 def assert_form_owner_or_facilitator(form: object, user: User) -> None:
     """Raise 403 unless user owns the form or is a platform admin."""

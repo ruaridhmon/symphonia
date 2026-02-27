@@ -42,22 +42,23 @@ def _setup_form_with_responses(
     client: TestClient,
     admin_headers: dict,
     title: str = "Integration Test Form",
-    join_code: str = "INT001",
     questions: list | None = None,
     n_participants: int = 3,
     participant_prefix: str = "integ",
+    **kwargs,
 ) -> dict:
     """Create a form, register participants, submit responses, and return metadata.
 
-    Returns dict with keys: form_id, participant_tokens, participant_headers_list.
+    Returns dict with keys: form_id, join_code, participant_tokens, participant_headers_list.
     """
     if questions is None:
         questions = ["What is the main challenge?", "What is your proposed solution?"]
 
     form = create_form(
-        client, admin_headers, title=title, questions=questions, join_code=join_code
+        client, admin_headers, title=title, questions=questions
     )
     form_id = form["id"]
+    join_code = form["join_code"]
 
     tokens: List[str] = []
     headers_list: List[dict] = []
@@ -82,6 +83,7 @@ def _setup_form_with_responses(
 
     return {
         "form_id": form_id,
+        "join_code": join_code,
         "participant_tokens": tokens,
         "participant_headers_list": headers_list,
     }
@@ -576,14 +578,14 @@ class TestErrorScenarios:
             admin_headers,
             title="No Active Round Form",
             questions=["Q?"],
-            join_code="NOACT1",
         )
         form_id = form["id"]
+        join_code = form["join_code"]
 
         # Submit a response first (needed so round 1 has data)
         tok = register_and_login(client, "noact_user@test.com")
         h = {"Authorization": f"Bearer {tok}"}
-        client.post("/forms/unlock", json={"join_code": "NOACT1"}, headers=h)
+        client.post("/forms/unlock", json={"join_code": join_code}, headers=h)
         submit_response(client, h, form_id, {"q1": "answer"})
 
         # Advance to round 2 (deactivates round 1)
@@ -607,7 +609,6 @@ class TestErrorScenarios:
             admin_headers,
             title="Empty Round Form",
             questions=["Q?"],
-            join_code="EMPTY1",
         )
         resp = client.post(
             f"/forms/{form['id']}/synthesise_committee",

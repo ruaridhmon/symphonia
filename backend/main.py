@@ -292,11 +292,9 @@ with SessionLocal() as db:
         db.add(User(
             email=admin_email,
             hashed_password=get_password_hash(admin_password),
-            is_admin=True,
             role="platform_admin",
         ))
     else:
-        admin.is_admin = True
         admin.role = "platform_admin"
 
     # Also ensure samuel@axiotic.ai exists as admin
@@ -306,11 +304,9 @@ with SessionLocal() as db:
         db.add(User(
             email=sam_email,
             hashed_password=get_password_hash("test123"),
-            is_admin=True,
             role="platform_admin",
         ))
     else:
-        sam.is_admin = True
         sam.role = "platform_admin"
 
     # Ruaridh
@@ -320,11 +316,9 @@ with SessionLocal() as db:
             db.add(User(
                 email=extra_admin,
                 hashed_password=get_password_hash("changeme123"),
-                is_admin=True,
                 role="platform_admin",
             ))
         else:
-            u.is_admin = True
             u.role = "platform_admin"
 
     db.commit()

@@ -52,11 +52,10 @@ class TestAdminFullFlow:
             admin_headers,
             title="AI Governance Survey",
             questions=["What is the biggest risk?", "How should we respond?"],
-            join_code="ADM001",
         )
         TestAdminFullFlow.form_id = data["id"]
+        TestAdminFullFlow.join_code = data["join_code"]
         assert data["title"] == "AI Governance Survey"
-        assert len(data["questions"]) == 2
         assert data["current_round"] == 1
 
     def test_03_form_appears_in_listings(
@@ -81,7 +80,7 @@ class TestAdminFullFlow:
             # Unlock form
             resp = client.post(
                 "/forms/unlock",
-                json={"join_code": "ADM001"},
+                json={"join_code": TestAdminFullFlow.join_code},
                 headers=headers,
             )
             assert resp.status_code == 200
@@ -245,9 +244,9 @@ class TestParticipantFlow:
             admin_headers,
             title="Participant Survey",
             questions=["What do you think?", "Any concerns?"],
-            join_code="PART01",
         )
         TestParticipantFlow.form_id = data["id"]
+        TestParticipantFlow.join_code = data["join_code"]
 
     def test_03_unlock_form_with_join_code(self, client: TestClient):
         """Participant unlocks the form using the join code."""
@@ -256,7 +255,7 @@ class TestParticipantFlow:
         }
         resp = client.post(
             "/forms/unlock",
-            json={"join_code": "PART01"},
+            json={"join_code": TestParticipantFlow.join_code},
             headers=headers,
         )
         assert resp.status_code == 200
@@ -376,9 +375,9 @@ class TestMultiRoundDelphi:
             admin_headers,
             title="Delphi Multi-Round",
             questions=["Key challenge?", "Proposed solution?", "Timeline?"],
-            join_code="DELPH1",
         )
         TestMultiRoundDelphi.form_id = data["id"]
+        TestMultiRoundDelphi.join_code = data["join_code"]
 
     def test_02_register_participants(self, client: TestClient):
         """Register 4 participants."""
@@ -392,7 +391,7 @@ class TestMultiRoundDelphi:
             headers = {"Authorization": f"Bearer {token}"}
             client.post(
                 "/forms/unlock",
-                json={"join_code": "DELPH1"},
+                json={"join_code": TestMultiRoundDelphi.join_code},
                 headers=headers,
             )
 
@@ -545,9 +544,9 @@ class TestSynthesisComments:
             admin_headers,
             title="Comment Test Form",
             questions=["Thoughts?"],
-            join_code="CMNT01",
         )
         TestSynthesisComments.form_id = data["id"]
+        TestSynthesisComments.join_code = data["join_code"]
 
         # Register two users for commenting
         TestSynthesisComments.user_a_token = register_and_login(
@@ -565,7 +564,7 @@ class TestSynthesisComments:
             headers = {"Authorization": f"Bearer {token}"}
             client.post(
                 "/forms/unlock",
-                json={"join_code": "CMNT01"},
+                json={"join_code": TestSynthesisComments.join_code},
                 headers=headers,
             )
             submit_response(
@@ -724,7 +723,6 @@ class TestResponseEditing:
             admin_headers,
             title="Response Edit Test",
             questions=["Your opinion?"],
-            join_code="EDIT01",
         )
         TestResponseEditing.form_id = data["id"]
 
@@ -738,7 +736,7 @@ class TestResponseEditing:
         # Unlock + submit
         client.post(
             "/forms/unlock",
-            json={"join_code": "EDIT01"},
+            json={"join_code": data["join_code"]},
             headers=headers,
         )
         submit_response(
@@ -846,12 +844,11 @@ class TestEdgeCases:
     ):
         """Non-admin user cannot create forms."""
         resp = client.post(
-            "/create_form",
+            "/forms/create",
             json={
                 "title": "Should Fail",
                 "questions": ["Q?"],
                 "allow_join": True,
-                "join_code": "FAIL01",
             },
             headers=participant_headers,
         )
@@ -878,7 +875,6 @@ class TestEdgeCases:
             admin_headers,
             title="No-Round Form",
             questions=["Q?"],
-            join_code="NORND1",
         )
         form_id = data["id"]
 
@@ -887,7 +883,7 @@ class TestEdgeCases:
         headers = {"Authorization": f"Bearer {tok}"}
         client.post(
             "/forms/unlock",
-            json={"join_code": "NORND1"},
+            json={"join_code": data["join_code"]},
             headers=headers,
         )
         submit_response(client, headers, form_id, {"q1": "answer"})
@@ -916,7 +912,6 @@ class TestEdgeCases:
             admin_headers,
             title="Nested Comment Test",
             questions=["Q?"],
-            join_code="NEST01",
         )
         form_id = data["id"]
 
@@ -983,7 +978,6 @@ class TestEdgeCases:
             admin_headers,
             title="Edit Others Comment Test",
             questions=["Q?"],
-            join_code="EDOC01",
         )
         form_id = data["id"]
 

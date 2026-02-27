@@ -41,8 +41,6 @@ from .auth import (
     create_access_token,
     generate_csrf_token,
     get_current_user,
-    get_current_admin_user,
-    assert_form_owner_or_admin,
     assert_form_owner_or_facilitator,
     require_role,
     require_facilitator,
@@ -347,7 +345,11 @@ def synthesis_status(
     "/register",
     tags=["Authentication"],
     summary="Register a new user",
-    description="Create a new user account with email and password. Returns an error if the email is already registered.",
+    description=(
+        "Create a new user account with email and password. "
+        "Behaviour depends on the `registration_mode` platform setting: "
+        "open (default), invite-only, or domain-restricted."
+    ),
     response_description="Success confirmation message",
 )
 @limiter.limit(AUTH_LIMIT)
@@ -357,6 +359,25 @@ def register(
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    # ── Enforce registration_mode ──
+    mode_row = db.query(Setting).filter(Setting.key == "registration_mode").first()
+    reg_mode = mode_row.value if mode_row else "open"
+
+    if reg_mode == "invite_only":
+        raise HTTPException(
+            status_code=403,
+            detail="Registration is currently invite-only. Contact your administrator.",
+        )
+    elif reg_mode == "domain_restricted":
+        allowed_row = db.query(Setting).filter(Setting.key == "allowed_domains").first()
+        allowed_domains = [d.strip().lower() for d in (allowed_row.value if allowed_row else "").split(",") if d.strip()]
+        email_domain = email.rsplit("@", 1)[-1].lower() if "@" in email else ""
+        if allowed_domains and email_domain not in allowed_domains:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Registration restricted to approved domains. Contact your administrator.",
+            )
+
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -390,7 +411,7 @@ def login(
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token(
-        data={"sub": str(user.id), "is_admin": user.is_admin, "role": user.role}
+        data={"sub": str(user.id), "role": user.role}
     )
     csrf_token = generate_csrf_token()
 
@@ -419,7 +440,7 @@ def login(
     return {
         "access_token": token,
         "token_type": "bearer",
-        "is_admin": user.is_admin,
+        "is_admin": user.role == UserRole.PLATFORM_ADMIN.value,
         "role": user.role,
         "email": user.email,
         "csrf_token": csrf_token,
@@ -508,7 +529,7 @@ def me(
     request: Request,
     user: User = Depends(get_current_user),
 ):
-    return {"email": user.email, "is_admin": user.is_admin, "role": user.role}
+    return {"email": user.email, "is_admin": user.role == UserRole.PLATFORM_ADMIN.value, "role": user.role}
 
 
 # ---------------------------------------------------------
@@ -2311,64 +2332,6 @@ class FormUpdate(BaseModel):
     questions: list[str]
 
 
-@router.post(
-    "/create_form",
-    tags=["Forms"],
-    summary="Create a consultation form",
-    description=(
-        "Create a new Delphi consultation form with title, questions, join settings, and a join code. Automatically creates the first round. Admin-only."
-    ),
-)
-@limiter.limit(CRUD_LIMIT)
-def create_form(
-    payload: FormCreate,
-    request: Request,
-    db: Session = Depends(get_db),
-    user: User = Depends(require_facilitator)
-):
-    """Deprecated — use POST /forms/create instead. Kept as alias."""
-    # Accept client-supplied join_code for backward compat; auto-generate if empty
-    code = payload.join_code
-    if not code:
-        for _ in range(10):
-            code = generate_join_code()
-            if not db.query(FormModel).filter(FormModel.join_code == code).first():
-                break
-
-    f = FormModel(
-        title=payload.title,
-        questions=payload.questions,
-        allow_join=payload.allow_join,
-        join_code=code,
-        owner_id=user.id,
-    )
-    db.add(f)
-    db.commit()
-    db.refresh(f)
-
-    first_round = RoundModel(
-        form_id=f.id,
-        round_number=1,
-        is_active=True,
-        questions=payload.questions
-    )
-    db.add(first_round)
-
-    audit_log(db, user=user, action="create_form", resource_type="form",
-              resource_id=f.id, detail={"title": f.title}, request=request)
-    db.commit()
-
-    return {
-        "id": f.id,
-        "title": f.title,
-        "questions": f.questions,
-        "allow_join": f.allow_join,
-        "join_code": f.join_code,
-        "participant_count": 0,
-        "current_round": 1
-    }
-
-
 # ---------------------------------------------------------------------------
 # User-scoped form management (any authenticated user)
 # ---------------------------------------------------------------------------
@@ -3942,7 +3905,7 @@ def delete_comment(
     comment = db.query(SynthesisComment).filter(SynthesisComment.id == comment_id).first()
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
-    if comment.author_id != user.id and not user.is_admin:
+    if comment.author_id != user.id and user.role != UserRole.PLATFORM_ADMIN.value:
         raise HTTPException(status_code=403, detail="Can only delete your own comments")
 
     db.delete(comment)
@@ -4890,7 +4853,6 @@ def seed_atlas_data(
                         test_user = User(
                             email=test_email,
                             hashed_password=get_password_hash("test123"),
-                            is_admin=False
                         )
                         db.add(test_user)
                         db.flush()
@@ -4996,6 +4958,8 @@ DEFAULT_SETTINGS = {
     "ai_suggestions_count": "5",
     "synthesis_strategy": "single_prompt",
     "allow_late_join": "true",
+    "registration_mode": "open",
+    "allowed_domains": "",
 }
 
 @router.get(
@@ -5502,7 +5466,7 @@ def list_users(
             "id": u.id,
             "email": u.email,
             "role": u.role,
-            "is_admin": u.is_admin,
+            "is_admin": u.role == UserRole.PLATFORM_ADMIN.value,
             "created_at": u.created_at.isoformat() if u.created_at else None,
         }
         for u in users
@@ -5540,8 +5504,6 @@ def update_user_role(
 
     old_role = target.role
     target.role = payload.role
-    # Keep is_admin in sync for backward compat
-    target.is_admin = payload.role == UserRole.PLATFORM_ADMIN.value
     db.commit()
 
     audit_log(db, user=admin, action="change_user_role", resource_type="user",

@@ -116,12 +116,11 @@ class TestAuthErrors:
     ):
         """Creating a form as a non-admin user → 403."""
         resp = client.post(
-            "/create_form",
+            "/forms/create",
             json={
                 "title": "Should Fail",
                 "questions": ["Q?"],
                 "allow_join": True,
-                "join_code": "FAILCODE",
             },
             headers=participant_headers,
         )
@@ -166,12 +165,11 @@ class TestFormErrors:
         self, client: TestClient, admin_headers: dict, participant_headers: dict
     ):
         """Unlocking a form with a wrong join code → 404."""
-        # Create a form with a known join code
+        # Create a form (join code is auto-generated)
         create_form(
             client,
             admin_headers,
             title="UnlockTest",
-            join_code="RIGHTCODE1",
         )
 
         # Try to unlock with a wrong code
@@ -189,7 +187,7 @@ class TestFormErrors:
         """Submitting a response to a form with no active round → 400."""
         # Create a form (it gets an active round automatically)
         form = create_form(
-            client, admin_headers, title="NoRoundForm", join_code="NOROUND01"
+            client, admin_headers, title="NoRoundForm"
         )
         form_id = form["id"]
 

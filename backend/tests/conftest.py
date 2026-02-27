@@ -90,7 +90,6 @@ def client(test_db) -> Generator[TestClient, None, None]:
                 User(
                     email=email,
                     hashed_password=get_password_hash("test123"),
-                    is_admin=True,
                     role="platform_admin",
                 )
             )
@@ -163,16 +162,15 @@ def create_form(
     if questions is None:
         questions = ["Question 1?", "Question 2?"]
     resp = client.post(
-        "/create_form",
+        "/forms/create",
         json={
             "title": title,
             "questions": questions,
             "allow_join": True,
-            "join_code": join_code,
         },
         headers=headers,
     )
-    assert resp.status_code == 200, f"create_form failed: {resp.text}"
+    assert resp.status_code == 201, f"create_form failed: {resp.text}"
     return resp.json()
 
 

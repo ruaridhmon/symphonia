@@ -108,7 +108,7 @@ class TestMissingApiKey:
 
         # Create form + submit a response
         form = create_form(
-            client, admin_headers, title="NoKeyTest", join_code="NOKEY001"
+            client, admin_headers, title="NoKeyTest"
         )
         form_id = form["id"]
 
@@ -179,7 +179,7 @@ class TestMalformedApiResponse:
 
         # Create form + submit
         form = create_form(
-            client, admin_headers, title="MalformedTest", join_code="MALFM001"
+            client, admin_headers, title="MalformedTest"
         )
         form_id = form["id"]
         ptk = register_and_login(client, "malformed_expert@test.com")
@@ -259,7 +259,7 @@ class TestMalformedApiResponse:
         monkeypatch.setenv("OPENROUTER_API_KEY", "sk-fake-key")
 
         form = create_form(
-            client, admin_headers, title="ValidJsonTest", join_code="VALID001"
+            client, admin_headers, title="ValidJsonTest"
         )
         form_id = form["id"]
         ptk = register_and_login(client, "valid_json_expert@test.com")

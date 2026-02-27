@@ -176,7 +176,7 @@ class TestRateLimitKeyFunction:
         from core.auth import create_access_token
         from starlette.requests import Request
 
-        token = create_access_token(data={"sub": "42", "is_admin": False})
+        token = create_access_token(data={"sub": "42", "role": "expert"})
 
         scope = {
             "type": "http",

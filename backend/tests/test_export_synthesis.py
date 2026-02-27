@@ -23,14 +23,13 @@ def seeded_form(client: TestClient, admin_headers: dict, participant_token: str)
         admin_headers,
         title="Export Test Form",
         questions=["What is your view on X?", "How confident are you?"],
-        join_code="EXPORT01",
     )
     form_id = form["id"]
 
     # Unlock form for participant
     client.post(
         "/forms/unlock",
-        json={"join_code": "EXPORT01"},
+        json={"join_code": form["join_code"]},
         headers=participant_headers,
     )
 
