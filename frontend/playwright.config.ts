@@ -3,24 +3,18 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * Symphonia E2E Test Configuration
  *
- * All tests run against the FastAPI backend (default :8767) which serves
- * both the built frontend and the API.
+ * Locally: run against the full stack (FastAPI + frontend) on :8767
+ *   PLAYWRIGHT_BASE_URL=http://localhost:8767 npx playwright test
  *
- * In CI (PLAYWRIGHT_BASE_URL not set), uses the Vite dev server on :5173.
- * Smoke tests only check static UI — they don't need the backend API.
- *
- * Override the base URL with:  PLAYWRIGHT_BASE_URL=http://localhost:8767
- *
- * Global setup logs in as admin once and saves storageState so individual
- * tests don't each need to perform login (avoids rate-limiting).
- * In CI without a live backend, global-setup skips auth gracefully.
+ * CI: build the frontend and serve it via `vite preview` on :5173.
+ *   Smoke tests only check static UI — no backend API needed.
+ *   Global setup skips auth gracefully when backend is unavailable.
  *
  * Run smoke only:  npm run test:e2e:smoke
  * Run all:         npm run test:e2e
  */
 const isCI = !!process.env.CI;
 
-// In CI: use Vite dev server. Locally: use the full stack on :8767
 const baseURL =
   process.env.PLAYWRIGHT_BASE_URL ??
   (isCI ? 'http://localhost:5173' : 'http://localhost:8767');
@@ -34,28 +28,16 @@ export default defineConfig({
   reporter: 'list',
   timeout: 30_000,
 
-  // In CI, auto-start the Vite dev server so the frontend is served
-  ...(isCI && {
-    webServer: {
-      command: 'npm run dev -- --port 5173',
-      port: 5173,
-      reuseExistingServer: false,
-      timeout: 60_000,
-    },
-  }),
-
   globalSetup: './e2e/global-setup.ts',
 
-  // In CI there is no running backend — build the frontend and serve it via
-  // `vite preview` so smoke tests (which only test static UI) can run.
-  webServer: process.env.CI
+  // In CI, serve the pre-built dist/ via vite preview (fast static server).
+  // The CI workflow runs `npm run build` before this step to populate dist/.
+  webServer: isCI
     ? {
-        command: 'npm run build && npx vite preview --port 8767 --strictPort',
-        url: baseURL,
+        command: 'npm run preview -- --port 5173 --host localhost',
+        url: 'http://localhost:5173',
         reuseExistingServer: false,
-        timeout: 120_000,
-        stdout: 'ignore',
-        stderr: 'pipe',
+        timeout: 30_000,
       }
     : undefined,
 

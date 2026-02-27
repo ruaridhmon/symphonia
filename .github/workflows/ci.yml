@@ -124,6 +124,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build frontend (required for vite preview server)
+        run: npm run build
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
