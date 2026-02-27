@@ -19,6 +19,6 @@ COPY . .
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
-CMD ["sh", "-c", "gunicorn -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:${PORT:-8080}"]
+CMD ["sh", "-c", "gunicorn -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:${PORT:-8000}"]
 
-EXPOSE 8080
+EXPOSE 8000

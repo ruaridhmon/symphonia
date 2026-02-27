@@ -1,5 +1,6 @@
-// Backend routes are at root (no /api prefix)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+// In Docker production, nginx proxies /api/* to the backend.
+// In local Vite dev, VITE_API_BASE_URL should be set to http://localhost:8000.
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').trim();
 
 /**
  * Read a cookie value by name.
