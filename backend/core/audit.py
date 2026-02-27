@@ -9,7 +9,7 @@ Usage in routes:
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import Request
@@ -27,15 +27,21 @@ def audit_log(
     resource_id: int | None = None,
     detail: dict[str, Any] | None = None,
     request: Request | None = None,
+    acting_role: str | None = None,
 ) -> AuditLog:
     """Write one audit row and flush (but don't commit — let the caller's
     transaction handle that)."""
     ip = None
     if request:
-        ip = request.headers.get("x-forwarded-for", request.client.host if request.client else None)
+        ip = request.headers.get(
+            "x-forwarded-for", request.client.host if request.client else None
+        )
+
+    # Auto-populate acting_role from user if not explicitly provided
+    role = acting_role or getattr(user, "role", None)
 
     entry = AuditLog(
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         user_id=user.id,
         user_email=user.email,
         action=action,
@@ -43,6 +49,7 @@ def audit_log(
         resource_id=resource_id,
         detail=detail,
         ip_address=ip,
+        acting_role=role,
     )
     db.add(entry)
     db.flush()

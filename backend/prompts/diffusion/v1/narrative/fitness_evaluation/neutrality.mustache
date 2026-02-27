@@ -1,0 +1,102 @@
+You are evaluating **Neutrality** as part of an evolutionary fitness assessment for a narrative summary.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate narratives. Other evaluators assess different dimensions. Your singular focus is **neutrality**.
+
+Your role: ensure the narrative maintains strict neutrality—no evaluative language, advocacy, or implicit recommendations that compromise the facilitator posture.
+
+---
+
+## Dimension: Neutrality
+
+**Definition**: The absence of evaluative language, advocacy, implicit endorsement, or policy recommendations in the narrative prose.
+
+**Why This Matters**: UK scientific advice must maintain appropriate boundaries. The narrative summary is a facilitator's report, not an advocate's brief. Any departure from neutrality (e.g., using "persuasive", "concerning", or implying what "should" happen) compromises the independence and credibility of the Delphi process.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Narrative Being Evaluated
+
+{{draft}}
+
+---
+
+## Source Synthesis (Ground Truth)
+
+### Claims
+{{#responses}}
+{{#claims}}
+- **[{{claim_id}}]**: "{{text}}"
+{{/claims}}
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Neutrality
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Perfectly Neutral**: No evaluative adjectives (good, bad, important, concerning, significant, key). No recommendations or implicit "shoulds". No implicit endorsement of any position through word choice, sentence structure, or ordering. Pure facilitator voice throughout. |
+| **8** | **Highly Neutral**: Essentially neutral. 1-2 instances of mildly evaluative language that do not clearly indicate a preference. |
+| **7** | **Well Neutral**: Generally neutral. Minor evaluative language (e.g., "notable") that does not clearly favour one expert view over another. |
+| **6** | **Adequately Neutral**: Mostly neutral. Some language could be read as favouring one position, but not clearly advocacy. |
+| **5** | **Moderately Neutral**: Some evaluative language present. Reader could potentially infer a mild preference, but no explicit advocacy. |
+| **4** | **Partially Neutral**: Noticeable evaluative language. One side of a conflict is presented more favourably through word choice or placement. |
+| **3** | **Weakly Neutral**: Clear evaluative slant. Narrative systematically favours one view or frames the issue in a leading way. |
+| **2** | **Poorly Neutral**: Explicit or strong implicit advocacy. The narrative takes a discernible position on the policy question. |
+| **1** | **Not Neutral**: Overtly advocacy or editorial. Explicit recommendations present. The narrative acts as adjudicator rather than facilitator. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ No "should", "must", "ought", "need to"
+- ✓ No "important", "significant", "key", "concerning", "promising", "worrying"
+- ✓ Passive facilitator voice ("Experts noted...", "Evidence from the consultation indicates...")
+- ✓ Equal linguistic treatment of opposing views
+- ✗ "The weight of expert opinion clearly shows..."
+- ✗ "A compelling argument was made that..."
+- ✗ "This is a significant risk that must be addressed..."
+- ✗ Implicit recommendations through leading framing or choice of adjectives
+
+---
+
+## Your Task
+
+1. **Scan for evaluative adjectives** and adverbs in the prose
+2. **Check for implicit recommendations** or "should" statements
+3. **Assess linguistic balance**—are opposing views treated with equivalent language?
+4. **Identify leading framing** that implicitly endorses a position
+5. **Provide specific rewording** for the next generation
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Multi-line analysis of neutrality: identify specific issues, cite claim IDs where relevant, assess overall quality against the rubric.</rationale>
+  <suggestions>
+    <suggestion>Specific actionable improvement with claim ID reference</suggestion>
+    <suggestion>Another specific improvement</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must be plain text** (no nested XML tags inside rationale).
+- **Each `<suggestion>` must be actionable** — cite the claim ID and what to change.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

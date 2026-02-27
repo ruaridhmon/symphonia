@@ -17,27 +17,20 @@ All tests are pure-unit: no network, no LLM calls, no filesystem side-effects.
 
 from __future__ import annotations
 
-import asyncio
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Optional, Tuple
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 # Import the module under test
 from core.synthesis_worker_b import (
     AdapterSynthesisContext,
-    Agreement,
     ConfigurationError,
     ConsensusLibraryAdapter,
-    Disagreement,
-    FlowMode,
-    LibraryError,
     MockSynthesis,
-    Nuance,
-    Probe,
     ProseResponse,
     ResponseMappingError,
     SynthesisError,
@@ -196,8 +189,11 @@ class TestAdapterSynthesisContext:
 
     def test_frozen(self) -> None:
         ctx = AdapterSynthesisContext(
-            study_id="s", round_id="r", question_id="q",
-            question_text="t", code_version="v",
+            study_id="s",
+            round_id="r",
+            question_id="q",
+            question_text="t",
+            code_version="v",
         )
         with pytest.raises(AttributeError):
             ctx.study_id = "changed"  # type: ignore[misc]
@@ -219,7 +215,11 @@ class TestBuildProseResponses:
         assert result[0].expert_id == "E1"
 
     def test_multiple_responses_get_sequential_ids(self) -> None:
-        responses = [{"answers": {"q1": "A"}}, {"answers": {"q1": "B"}}, {"answers": {"q1": "C"}}]
+        responses = [
+            {"answers": {"q1": "A"}},
+            {"answers": {"q1": "B"}},
+            {"answers": {"q1": "C"}},
+        ]
         result = ConsensusLibraryAdapter._build_prose_responses(responses)
         assert [r.expert_id for r in result] == ["E1", "E2", "E3"]
 
@@ -251,7 +251,6 @@ class TestBuildProseResponses:
 
 
 class TestBuildQuestionText:
-
     def test_dict_with_label(self) -> None:
         qs = [{"label": "What matters?", "id": "q1"}]
         text = ConsensusLibraryAdapter._build_question_text(qs)
@@ -275,7 +274,6 @@ class TestBuildQuestionText:
 
 
 class TestMapToAppFormat:
-
     def _make_pipeline_result(
         self,
         claims: tuple = (),
@@ -302,7 +300,9 @@ class TestMapToAppFormat:
             agreement_level="consensus",
         )
         pr = self._make_pipeline_result(claims=(claim,))
-        result = ConsensusLibraryAdapter._map_to_app_format(pr, num_responses=3, strategy_name="simple")
+        result = ConsensusLibraryAdapter._map_to_app_format(
+            pr, num_responses=3, strategy_name="simple"
+        )
         assert len(result.agreements) == 1
         assert result.agreements[0].confidence == 0.9
 
@@ -314,7 +314,9 @@ class TestMapToAppFormat:
             agreement_level="majority",
         )
         pr = self._make_pipeline_result(claims=(claim,))
-        result = ConsensusLibraryAdapter._map_to_app_format(pr, num_responses=3, strategy_name="simple")
+        result = ConsensusLibraryAdapter._map_to_app_format(
+            pr, num_responses=3, strategy_name="simple"
+        )
         assert result.agreements[0].confidence == 0.7
 
     def test_divided_claim_becomes_disagreement(self) -> None:
@@ -326,13 +328,17 @@ class TestMapToAppFormat:
             counterarguments=("But also…",),
         )
         pr = self._make_pipeline_result(claims=(claim,))
-        result = ConsensusLibraryAdapter._map_to_app_format(pr, num_responses=2, strategy_name="ttd")
+        result = ConsensusLibraryAdapter._map_to_app_format(
+            pr, num_responses=2, strategy_name="ttd"
+        )
         assert len(result.disagreements) == 1
         assert len(result.disagreements[0].positions) == 2  # original + counter
 
     def test_uncertainty_becomes_nuance(self) -> None:
         pr = self._make_pipeline_result(uncertainties=("Unclear timeline",))
-        result = ConsensusLibraryAdapter._map_to_app_format(pr, num_responses=5, strategy_name="simple")
+        result = ConsensusLibraryAdapter._map_to_app_format(
+            pr, num_responses=5, strategy_name="simple"
+        )
         assert len(result.nuances) == 1
         assert result.nuances[0].claim == "Unclear timeline"
 
@@ -347,29 +353,38 @@ class TestMapToAppFormat:
             claims=(claim,),
             agreement_areas=("Shared concern", "New area"),
         )
-        result = ConsensusLibraryAdapter._map_to_app_format(pr, num_responses=3, strategy_name="simple")
+        result = ConsensusLibraryAdapter._map_to_app_format(
+            pr, num_responses=3, strategy_name="simple"
+        )
         # "Shared concern" from claim + "New area" from areas = 2 total (not 3)
         assert len(result.agreements) == 2
 
     def test_narrative_preserved(self) -> None:
         pr = self._make_pipeline_result(narrative="Expert summary text.")
-        result = ConsensusLibraryAdapter._map_to_app_format(pr, num_responses=1, strategy_name="simple")
+        result = ConsensusLibraryAdapter._map_to_app_format(
+            pr, num_responses=1, strategy_name="simple"
+        )
         assert result.narrative == "Expert summary text."
 
     def test_claims_raw_populated(self) -> None:
         claim = FakeClaim(
-            claim_id="c1", text="A claim",
+            claim_id="c1",
+            text="A claim",
             sources=(FakeSourceReference("E1", "q"),),
             agreement_level="consensus",
         )
         pr = self._make_pipeline_result(claims=(claim,))
-        result = ConsensusLibraryAdapter._map_to_app_format(pr, num_responses=1, strategy_name="simple")
+        result = ConsensusLibraryAdapter._map_to_app_format(
+            pr, num_responses=1, strategy_name="simple"
+        )
         assert result.claims_raw is not None
         assert result.claims_raw[0]["id"] == "c1"
 
     def test_empty_synthesis_produces_valid_result(self) -> None:
         pr = self._make_pipeline_result()
-        result = ConsensusLibraryAdapter._map_to_app_format(pr, num_responses=1, strategy_name="simple")
+        result = ConsensusLibraryAdapter._map_to_app_format(
+            pr, num_responses=1, strategy_name="simple"
+        )
         assert result.confidence_map["overall"] == 0.5  # no claims → default
 
 
@@ -379,7 +394,6 @@ class TestMapToAppFormat:
 
 
 class TestFactory:
-
     def test_mock_mode(self) -> None:
         s = get_synthesiser(mode="mock")
         assert isinstance(s, MockSynthesis)
@@ -425,7 +439,6 @@ class TestFactory:
 
 
 class TestErrorPropagation:
-
     def test_unsupported_strategy_at_construction(self) -> None:
         with pytest.raises(ConfigurationError, match="Strategy must be"):
             ConsensusLibraryAdapter(strategy="bogus")
@@ -441,7 +454,9 @@ class TestErrorPropagation:
         adapter = ConsensusLibraryAdapter(strategy="simple")
         with patch.dict(os.environ, {}, clear=True):
             # Remove OPENROUTER_API_KEY from env
-            env_without_key = {k: v for k, v in os.environ.items() if k != "OPENROUTER_API_KEY"}
+            env_without_key = {
+                k: v for k, v in os.environ.items() if k != "OPENROUTER_API_KEY"
+            }
             with patch.dict(os.environ, env_without_key, clear=True):
                 with pytest.raises((ConfigurationError, SynthesisError)):
                     await adapter.run(
@@ -456,13 +471,15 @@ class TestErrorPropagation:
 
 
 class TestExtractExpertIds:
-
     def test_valid_ids(self) -> None:
         sources = [FakeSourceReference("E1", ""), FakeSourceReference("E3", "")]
         assert _extract_expert_ids(sources) == [1, 3]
 
     def test_non_expert_ids_ignored(self) -> None:
-        sources = [FakeSourceReference("X99", ""), FakeSourceReference("synthesis:1", "")]
+        sources = [
+            FakeSourceReference("X99", ""),
+            FakeSourceReference("synthesis:1", ""),
+        ]
         assert _extract_expert_ids(sources) == []
 
     def test_empty_sources(self) -> None:
@@ -475,11 +492,12 @@ class TestExtractExpertIds:
 
 
 class TestBackwardsCompat:
-
     def test_committee_synthesiser_alias(self) -> None:
         from core.synthesis_worker_b import CommitteeSynthesiser
+
         assert CommitteeSynthesiser is ConsensusLibraryAdapter
 
     def test_openrouter_synthesis_alias(self) -> None:
         from core.synthesis_worker_b import OpenRouterSynthesis
+
         assert OpenRouterSynthesis is ConsensusLibraryAdapter

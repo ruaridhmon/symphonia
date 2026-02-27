@@ -1,0 +1,11 @@
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+# E402: main.py must call load_dotenv() before other imports (env vars read at import time)
+# E712: SQLAlchemy ORM == True comparisons are intentional (generates correct SQL)
+per-file-ignores = { "main.py" = ["E402"], "core/routes.py" = ["E712"] }
+ignore = ["E712"]
+
+[tool.ruff.format]
+quote-style = "double"

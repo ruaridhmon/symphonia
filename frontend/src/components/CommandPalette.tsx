@@ -6,7 +6,6 @@ import {
   FileText,
   PenTool,
   LogOut,
-  Compass,
   Sun,
   Moon,
   Palette,
@@ -52,14 +51,6 @@ export default function CommandPalette() {
         icon: <LayoutDashboard size={16} />,
         action: () => { navigate('/'); close(); },
         keywords: ['home', 'main', 'forms'],
-      },
-      {
-        id: 'atlas',
-        label: 'Open Atlas',
-        description: 'UX exploration map',
-        icon: <Compass size={16} />,
-        action: () => { navigate('/atlas'); close(); },
-        keywords: ['map', 'explore', 'navigation'],
       },
     ];
 
@@ -233,7 +224,7 @@ export default function CommandPalette() {
         if (e.target === e.currentTarget) close();
       }}
     >
-      <div className="command-palette" role="dialog" aria-label={showShortcuts ? 'Keyboard shortcuts' : 'Command palette'}>
+      <div className="command-palette" role="dialog" aria-modal="true" aria-label={showShortcuts ? 'Keyboard shortcuts' : 'Command palette'}>
         {showShortcuts ? (
           /* ── Keyboard shortcuts panel ── */
           <>
@@ -251,6 +242,7 @@ export default function CommandPalette() {
               </h2>
               <button
                 onClick={() => setShowShortcuts(false)}
+                aria-label="Back to command palette"
                 style={{
                   background: 'none',
                   border: 'none',
@@ -263,7 +255,7 @@ export default function CommandPalette() {
                 onMouseEnter={e => e.currentTarget.style.color = 'var(--foreground)'}
                 onMouseLeave={e => e.currentTarget.style.color = 'var(--muted-foreground)'}
               >
-                ← Back
+                <span aria-hidden="true">←</span> Back
               </button>
             </div>
             <div style={{ padding: '8px 12px', maxHeight: '320px', overflowY: 'auto' }}>
@@ -316,6 +308,7 @@ export default function CommandPalette() {
               onKeyDown={handleInputKeyDown}
               aria-autocomplete="list"
               aria-activedescendant={filtered[activeIndex]?.id}
+              aria-label="Search commands"
             />
 
             <div className="command-palette-list" ref={listRef} role="listbox">

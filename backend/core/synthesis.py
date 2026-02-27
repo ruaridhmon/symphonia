@@ -18,6 +18,7 @@ domain model (which expects structured claims/evidence tuples).
 
 Byzantine-integrated from two independent implementations.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -130,6 +131,7 @@ class Nuance:
 @dataclass
 class MinorityReport:
     """A perspective held by few experts that was outvoted or lost in synthesis."""
+
     claim: str
     expert_ids: List[int]  # Which experts held this view
     agreement_level: str  # "minority" or "divided"
@@ -182,9 +184,7 @@ class SynthesisResult:
 # PROGRESS CALLBACK TYPE
 # =============================================================================
 
-ProgressCallback = Optional[
-    Callable[[str, int, int], Coroutine[Any, Any, None]]
-]
+ProgressCallback = Optional[Callable[[str, int, int], Coroutine[Any, Any, None]]]
 
 
 # =============================================================================
@@ -281,9 +281,28 @@ class MockSynthesis:
                 confidence=0.85,
                 evidence_summary="Multiple responses emphasised clear documentation",
                 evidence_excerpts=[
-                    EvidenceExcerpt(expert_id=1, expert_label="E1", quote="Clear documentation is essential for team alignment and reduces misunderstandings significantly."),
-                    EvidenceExcerpt(expert_id=2, expert_label="E2", quote="Structured communication protocols should be established from day one of any project."),
-                ] + ([EvidenceExcerpt(expert_id=3, expert_label="E3", quote="Without proper documentation standards, knowledge silos form rapidly.")] if num_responses > 2 else []),
+                    EvidenceExcerpt(
+                        expert_id=1,
+                        expert_label="E1",
+                        quote="Clear documentation is essential for team alignment and reduces misunderstandings significantly.",
+                    ),
+                    EvidenceExcerpt(
+                        expert_id=2,
+                        expert_label="E2",
+                        quote="Structured communication protocols should be established from day one of any project.",
+                    ),
+                ]
+                + (
+                    [
+                        EvidenceExcerpt(
+                            expert_id=3,
+                            expert_label="E3",
+                            quote="Without proper documentation standards, knowledge silos form rapidly.",
+                        )
+                    ]
+                    if num_responses > 2
+                    else []
+                ),
             ),
             Agreement(
                 claim="There is consensus on prioritising user experience",
@@ -291,8 +310,16 @@ class MockSynthesis:
                 confidence=0.92,
                 evidence_summary="Responses consistently mentioned UX as key",
                 evidence_excerpts=[
-                    EvidenceExcerpt(expert_id=1, expert_label="E1", quote="User experience should be the north star metric for all product decisions."),
-                    EvidenceExcerpt(expert_id=2, expert_label="E2", quote="Investing in UX research early pays dividends throughout the product lifecycle."),
+                    EvidenceExcerpt(
+                        expert_id=1,
+                        expert_label="E1",
+                        quote="User experience should be the north star metric for all product decisions.",
+                    ),
+                    EvidenceExcerpt(
+                        expert_id=2,
+                        expert_label="E2",
+                        quote="Investing in UX research early pays dividends throughout the product lifecycle.",
+                    ),
                 ],
             ),
         ]
@@ -446,7 +473,15 @@ class ConsensusLibraryAdapter:
                 f"Must be one of {self.SUPPORTED_STRATEGIES}."
             )
 
-        self._effective_strategy = strategy
+        # If committee requested, log and degrade to TTD
+        if strategy == "committee":
+            logger.warning(
+                "CommitteeStrategy is not yet implemented in the consensus library. "
+                "Falling back to TTD (DiffusionStrategy)."
+            )
+            self._effective_strategy = "ttd"
+        else:
+            self._effective_strategy = strategy
 
         self.strategy_name = strategy  # preserve original for provenance
         self.model = model
@@ -488,13 +523,11 @@ class ConsensusLibraryAdapter:
         config = LLMConfig(
             openrouter_api_key=api_key,
             model=self.model,
+            max_tokens=8192,  # Synthesis reports don't need 126K tokens; cap to avoid 402 pre-flight failures
         )
         self._llm_client = OpenRouterClient(config)
 
         prompts_dir = self._resolve_prompts_dir()
-
-        artefacts_dir = Path(__file__).resolve().parent.parent / "artefacts"
-        artefacts_dir.mkdir(parents=True, exist_ok=True)
 
         if self._effective_strategy == "simple":
             self._strategy_instance = SinglePromptStrategy(
@@ -506,34 +539,15 @@ class ConsensusLibraryAdapter:
                 n_initial_drafts=self.n_drafts,
                 n_denoise_steps=self.n_denoise_steps,
             )
+            artefacts_dir = Path(__file__).resolve().parent.parent / "artefacts"
+            artefacts_dir.mkdir(parents=True, exist_ok=True)
+
             self._strategy_instance = DiffusionStrategy(
                 llm_client=self._llm_client,
                 prompts_dir=prompts_dir,
                 ttd_config=ttd_config,
                 artefacts_dir=artefacts_dir,
             )
-        elif self._effective_strategy == "committee":
-            try:
-                from consensus.summarise.strategies import CommitteeStrategy
-                self._strategy_instance = CommitteeStrategy(
-                    llm_client=self._llm_client,
-                    prompts_dir=prompts_dir,
-                    artefacts_dir=artefacts_dir,
-                    num_agents=self.n_drafts,
-                )
-                logger.info("CommitteeStrategy initialised (num_agents=%d)", self.n_drafts)
-            except (ImportError, TypeError) as exc:
-                logger.warning("CommitteeStrategy init failed (%s) — falling back to TTD", exc)
-                ttd_config = TTDConfig(
-                    n_initial_drafts=self.n_drafts,
-                    n_denoise_steps=self.n_denoise_steps,
-                )
-                self._strategy_instance = DiffusionStrategy(
-                    llm_client=self._llm_client,
-                    prompts_dir=prompts_dir,
-                    ttd_config=ttd_config,
-                    artefacts_dir=artefacts_dir,
-                )
 
         logger.info(
             "Initialised %s strategy (model=%s, drafts=%d)",
@@ -605,9 +619,7 @@ class ConsensusLibraryAdapter:
                             for key, val in answers.items()
                             if val is not None and str(val).strip()
                         ]
-                        text = (
-                            "\n\n".join(lines) if lines else "(no answers provided)"
-                        )
+                        text = "\n\n".join(lines) if lines else "(no answers provided)"
                     elif isinstance(answers, str):
                         text = answers
                     else:
@@ -629,9 +641,7 @@ class ConsensusLibraryAdapter:
         parts: List[str] = []
         for i, q in enumerate(questions, 1):
             if isinstance(q, dict):
-                text = (
-                    q.get("label") or q.get("text") or q.get("id") or str(q)
-                )
+                text = q.get("label") or q.get("text") or q.get("id") or str(q)
             else:
                 text = str(q)
             parts.append(f"{i}. {text}")
@@ -670,9 +680,7 @@ class ConsensusLibraryAdapter:
         except SynthesisError:
             raise  # Already wrapped
         except Exception as exc:
-            raise SynthesisConfigError(
-                f"Adapter initialisation failed: {exc}"
-            ) from exc
+            raise SynthesisConfigError(f"Adapter initialisation failed: {exc}") from exc
 
         if progress_callback:
             await progress_callback("preparing", 1, 4)
@@ -684,7 +692,8 @@ class ConsensusLibraryAdapter:
         # are visible to the library's synthesis prompt as additional context
         if comments_context:
             question_text += (
-                "\n\n" + comments_context
+                "\n\n"
+                + comments_context
                 + "\n\nIncorporate these discussion comments into the synthesis "
                 "where relevant, noting them as points raised during expert deliberation."
             )
@@ -743,9 +752,7 @@ class ConsensusLibraryAdapter:
 
     # --------------------------------------------------------- result mapping
 
-    def _map_to_app_format(
-        self, result: Any, num_responses: int
-    ) -> SynthesisResult:
+    def _map_to_app_format(self, result: Any, num_responses: int) -> SynthesisResult:
         """
         Map a library ``PipelineResult`` to the app's ``SynthesisResult``.
 
@@ -756,7 +763,7 @@ class ConsensusLibraryAdapter:
 
         agreements: List[Agreement] = []
         disagreements: List[Disagreement] = []
-        
+
         # With only 1 expert, there CAN'T be disagreement - it's logically impossible
         allow_disagreements = num_responses >= 2
 
@@ -765,19 +772,19 @@ class ConsensusLibraryAdapter:
             source_ids = _extract_expert_ids(claim.sources)
 
             if claim.agreement_level in ("consensus", "majority"):
-                confidence = (
-                    0.9 if claim.agreement_level == "consensus" else 0.7
-                )
-                evidence = "; ".join(
-                    s.quote for s in claim.sources if s.quote
-                )
+                confidence = 0.9 if claim.agreement_level == "consensus" else 0.7
+                evidence = "; ".join(s.quote for s in claim.sources if s.quote)
                 # Build per-expert evidence excerpts
                 excerpts: List[EvidenceExcerpt] = []
                 for s in claim.sources:
                     if s.quote:
                         sid = getattr(s, "source_id", "")
                         eid = 0
-                        if isinstance(sid, str) and sid.startswith("E") and sid[1:].isdigit():
+                        if (
+                            isinstance(sid, str)
+                            and sid.startswith("E")
+                            and sid[1:].isdigit()
+                        ):
                             eid = int(sid[1:])
                         excerpts.append(
                             EvidenceExcerpt(
@@ -819,9 +826,7 @@ class ConsensusLibraryAdapter:
                             }
                         )
                     topic = (
-                        claim.text[:80] + "…"
-                        if len(claim.text) > 80
-                        else claim.text
+                        claim.text[:80] + "…" if len(claim.text) > 80 else claim.text
                     )
                     disagreements.append(
                         Disagreement(
@@ -839,7 +844,8 @@ class ConsensusLibraryAdapter:
                             confidence=0.6,  # Lower confidence for single-expert
                             evidence_summary="; ".join(
                                 s.quote for s in claim.sources if s.quote
-                            ) or "Single expert opinion",
+                            )
+                            or "Single expert opinion",
                         )
                     )
 
@@ -913,7 +919,9 @@ class ConsensusLibraryAdapter:
 
         # --- Emergent insights ---
         # Collect expert ids that appear on opposite sides of disagreements
-        disagreement_experts: Dict[int, set] = {}  # expert_id → set of disagreement indices
+        disagreement_experts: Dict[
+            int, set
+        ] = {}  # expert_id → set of disagreement indices
         for d_idx, d in enumerate(disagreements):
             for pos in d.positions:
                 for eid in pos.get("experts", []):
@@ -936,13 +944,11 @@ class ConsensusLibraryAdapter:
                 if d_idx < len(disagreements):
                     d = disagreements[d_idx]
                     sides_with_experts = [
-                        set(pos.get("experts", []))
-                        for pos in d.positions
+                        set(pos.get("experts", [])) for pos in d.positions
                     ]
                     source_set = set(source_ids)
                     sides_hit = sum(
-                        1 for side in sides_with_experts
-                        if side & source_set
+                        1 for side in sides_with_experts if side & source_set
                     )
                     if sides_hit >= 2:
                         is_cross_pollination = True
@@ -955,12 +961,15 @@ class ConsensusLibraryAdapter:
                         contributing_experts=source_ids,
                         emergence_type="cross-pollination",
                         explanation=(
-                            f"This insight draws from experts on opposing sides of a disagreement, "
-                            f"suggesting a perspective that transcends individual positions"
+                            "This insight draws from experts on opposing sides of a disagreement, "
+                            "suggesting a perspective that transcends individual positions"
                         ),
                     )
                 )
-            elif claim.agreement_level in ("consensus", "majority") and len(source_ids) >= 2:
+            elif (
+                claim.agreement_level in ("consensus", "majority")
+                and len(source_ids) >= 2
+            ):
                 # Multi-expert agreement that synthesises across sources
                 emergent_insights.append(
                     EmergentInsight(
@@ -985,9 +994,10 @@ class ConsensusLibraryAdapter:
                     if claim.counterarguments
                     else "The majority held a different view"
                 )
-                evidence = "; ".join(
-                    s.quote for s in claim.sources if s.quote
-                ) or "From synthesis"
+                evidence = (
+                    "; ".join(s.quote for s in claim.sources if s.quote)
+                    or "From synthesis"
+                )
                 minority_reports.append(
                     MinorityReport(
                         claim=claim.text,
@@ -1004,9 +1014,10 @@ class ConsensusLibraryAdapter:
                     if claim.counterarguments
                     else "Other experts took a different position"
                 )
-                evidence = "; ".join(
-                    s.quote for s in claim.sources if s.quote
-                ) or "From synthesis"
+                evidence = (
+                    "; ".join(s.quote for s in claim.sources if s.quote)
+                    or "From synthesis"
+                )
                 minority_reports.append(
                     MinorityReport(
                         claim=claim.text,
@@ -1023,9 +1034,10 @@ class ConsensusLibraryAdapter:
             ):
                 # Claim with counterarguments where few experts support it
                 counterpoint = claim.counterarguments[0]
-                evidence = "; ".join(
-                    s.quote for s in claim.sources if s.quote
-                ) or "From synthesis"
+                evidence = (
+                    "; ".join(s.quote for s in claim.sources if s.quote)
+                    or "From synthesis"
+                )
                 minority_reports.append(
                     MinorityReport(
                         claim=claim.text,
@@ -1062,8 +1074,7 @@ class ConsensusLibraryAdapter:
                     "text": c.text,
                     "agreement_level": c.agreement_level,
                     "sources": [
-                        {"id": s.source_id, "quote": s.quote}
-                        for s in c.sources
+                        {"id": s.source_id, "quote": s.quote} for s in c.sources
                     ],
                     "counterarguments": list(c.counterarguments),
                 }
@@ -1138,9 +1149,7 @@ def get_synthesiser(
                    in the consensus library).
     """
     effective_mode = (
-        mode
-        or strategy
-        or os.getenv("SYNTHESIS_MODE", "simple").strip().lower()
+        mode or strategy or os.getenv("SYNTHESIS_MODE", "simple").strip().lower()
     )
 
     if effective_mode == "mock":

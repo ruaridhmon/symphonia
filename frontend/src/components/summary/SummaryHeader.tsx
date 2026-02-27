@@ -23,10 +23,14 @@ export default function SummaryHeader({ email, viewers, onLogout }: Props) {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+        <h1 className="sr-only">Admin Workspace — Summary</h1>
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <div
+          <button
+            type="button"
             className="flex items-center gap-2 sm:gap-3 min-w-0 cursor-pointer"
             onClick={() => navigate('/')}
+            aria-label="Go to dashboard"
+            style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', textAlign: 'left' }}
           >
             <img
               src="/logo-mark.png"
@@ -34,17 +38,18 @@ export default function SummaryHeader({ email, viewers, onLogout }: Props) {
               className="h-7 w-auto flex-shrink-0"
             />
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-tight">
+              <span className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-tight block">
                 Admin Workspace
-              </h1>
-              <p className="text-xs text-muted-foreground leading-tight truncate">{email}</p>
+              </span>
+              <span className="text-xs text-muted-foreground leading-tight truncate block">{email}</span>
             </div>
-          </div>
+          </button>
           <PresenceIndicator viewers={viewers} currentUserEmail={email} />
         </div>
         <button
           onClick={onLogout}
           className="text-sm px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+          aria-label="Log out"
           style={{
             color: 'var(--muted-foreground)',
             backgroundColor: 'transparent',

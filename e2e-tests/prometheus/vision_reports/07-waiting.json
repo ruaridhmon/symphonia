@@ -1,0 +1,13 @@
+{
+  "screenshot_path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/prometheus/screenshots/07-waiting.png",
+  "screenshot_name": "07-waiting",
+  "verdict": "FAIL",
+  "summary": "Heuristic analysis: ERRORS FOUND",
+  "details": "DOM errors: [\"ErrorBoundary detected: 'Waiting Page Error'\", \"ErrorBoundary detected: 'Page Error'\", 'Warning icon (\u26a0) found \u2014 possible ErrorBoundary render', \"'Try Again' button found \u2014 ErrorBoundary is rendered\", \"Page text contains: 'Try Again'\"]\nAnomalies: []\nConsole errors: []",
+  "error_detected": true,
+  "error_description": "ErrorBoundary detected: 'Waiting Page Error'; ErrorBoundary detected: 'Page Error'; Warning icon (\u26a0) found \u2014 possible ErrorBoundary render; 'Try Again' button found \u2014 ErrorBoundary is rendered; Page text contains: 'Try Again'",
+  "visual_anomalies": [],
+  "confidence": 0.7,
+  "analysis_method": "dom_heuristic",
+  "raw_response": ""
+}

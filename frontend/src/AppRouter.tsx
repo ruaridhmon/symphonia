@@ -13,14 +13,15 @@ const ResultPage   = lazy(() => import('./ResultPage'));
 const ThankYouPage = lazy(() => import('./ThankYouPage'));
 const FormEditor   = lazy(() => import('./FormEditor'));
 const FormPage     = lazy(() => import('./FormPage'));
-const Login           = lazy(() => import('./Login'));
-const Register        = lazy(() => import('./Register'));
-const ForgotPassword  = lazy(() => import('./ForgotPassword'));
-const ResetPassword   = lazy(() => import('./ResetPassword'));
-const Atlas        = lazy(() => import('./Atlas'));
+const Login        = lazy(() => import('./Login'));
+const Register       = lazy(() => import('./Register'));
+const ForgotPassword = lazy(() => import('./ForgotPassword'));
+const ResetPassword  = lazy(() => import('./ResetPassword'));
 const NotFoundPage  = lazy(() => import('./NotFoundPage'));
 const AdminFormNew   = lazy(() => import('./AdminFormNew'));
 const AdminSettings  = lazy(() => import('./AdminSettings'));
+const AdminUsers     = lazy(() => import('./AdminUsers'));
+const JoinPage       = lazy(() => import('./JoinPage'));
 
 /**
  * Application routes organised by layout shell.
@@ -35,7 +36,7 @@ const AdminSettings  = lazy(() => import('./AdminSettings'));
  *
  * ┌─ PrivateRoute → PageLayout (Header+Footer) ─────┐
  * │  /               Dashboard (admin or user)       │
- * │  /atlas          UX Atlas                        │
+ * │  /join/:code     Magic join link                  │
  * │  /waiting        Post-submission waiting room    │
  * │  /result         Synthesis result + feedback     │
  * │  /thank-you      Thank-you confirmation          │
@@ -99,14 +100,6 @@ export default function Router() {
               }
             />
             <Route
-              path="/atlas"
-              element={
-                <ErrorBoundary fallbackTitle="Atlas Error">
-                  <Atlas />
-                </ErrorBoundary>
-              }
-            />
-            <Route
               path="/waiting"
               element={
                 <ErrorBoundary fallbackTitle="Waiting Page Error">
@@ -138,6 +131,22 @@ export default function Router() {
                 </ErrorBoundary>
               }
             />
+            <Route
+              path="/join"
+              element={
+                <ErrorBoundary fallbackTitle="Join Error">
+                  <JoinPage />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/join/:code"
+              element={
+                <ErrorBoundary fallbackTitle="Join Error">
+                  <JoinPage />
+                </ErrorBoundary>
+              }
+            />
           </Route>
         </Route>
 
@@ -157,6 +166,14 @@ export default function Router() {
               element={
                 <ErrorBoundary fallbackTitle="New Form Error">
                   <AdminFormNew />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ErrorBoundary fallbackTitle="User Management Error">
+                  <AdminUsers />
                 </ErrorBoundary>
               }
             />

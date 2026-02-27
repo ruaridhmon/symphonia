@@ -1,0 +1,101 @@
+You are extracting an argumentation graph from a single expert's response for a Delphi-style consultation.
+
+## Your Role
+
+- Extract atomic claims, evidence quotes, and relationships from the expert's response
+- Preserve provenance: every claim must link to its source response
+- Identify support and conflict relationships between claims *within this response*
+- Do NOT introduce novel claims or inferences - only extract what the expert explicitly states
+
+## Question Being Addressed
+
+{{question}}
+
+## Expert Response
+
+### Response from {{expert_id}}
+
+<expert_response id="{{expert_id}}">{{{response}}}</expert_response>
+
+---
+
+## Extraction Task
+
+From the prose response above, extract:
+
+1. **Claims**: Atomic assertions made by the expert (one idea per claim)
+   - Position statements on the question
+   - Recommendations or suggestions
+   - Predictions or forecasts
+   - Identified risks, opportunities, or concerns
+
+2. **Evidence**: Specific examples, data, experiences, or citations that support claims
+   - Research findings mentioned
+   - Personal experiences described
+   - Case studies or examples cited
+   - Statistics or data points referenced
+
+3. **Relationships**: How claims relate to each other *within this response*
+   - Support: Evidence or claims that strengthen other claims
+   - Qualification: Claims that add nuance or conditions to other claims
+   - Internal Contradiction: If the expert explores conflicting viewpoints
+
+## Required Output Structure
+
+Provide your extraction in the following XML format:
+
+```xml
+<graph>
+  <nodes>
+    <!-- Node types: claim | evidence_quote | counterclaim | uncertainty -->
+    <node id="c001" type="claim">
+      <text>Atomic claim statement extracted from the response</text>
+      <sources>
+        <source>{{expert_id}}</source>
+      </sources>
+      <evidence>
+        <quote source="{{expert_id}}">EXACT verbatim substring copied from the response (must match character-for-character)</quote>
+      </evidence>
+    </node>
+
+    <node id="e001" type="evidence_quote">
+      <text>Verbatim evidence or example from response</text>
+      <sources>
+        <source>{{expert_id}}</source>
+      </sources>
+    </node>
+  </nodes>
+
+  <edges>
+    <!-- Edge types: supports | attacks | refines | about | depends_on -->
+    <edge id="x001" type="supports" from="e001" to="c001">
+      <sources>
+        <source>{{expert_id}}</source>
+      </sources>
+      <evidence>
+        <quote source="{{expert_id}}">Text from response justifying this relationship</quote>
+      </evidence>
+    </edge>
+  </edges>
+</graph>
+```
+
+## Guidelines
+
+1. **Atomicity**: Each claim should express exactly one proposition. Break complex arguments into multiple claims.
+2. **Groundedness**: Every claim must have at least one verbatim quote from the source response. **Quotes MUST be exact substrings of the expert's response — copy-paste, do not paraphrase, reorder, or clean up.** A quote that cannot be found character-for-character in the source text is a failure.
+3. **Internal Consistency**: Focus on how the expert's own arguments hang together.
+4. **Completeness**: Extract all substantive claims - don't cherry-pick.
+5. **Neutrality**: Do not evaluate or judge claims, just extract them faithfully.
+6. **Preserve Voice**: Use the expert's own words in quotes. Never substitute synonyms, fix grammar, or rephrase.
+
+## Node ID Conventions
+
+- Claims: c001, c002, c003...
+- Evidence quotes: e001, e002, e003...
+- Uncertainties: u001, u002, u003...
+- Counterclaims: cc001, cc002...
+
+Begin your extraction:
+
+

@@ -1,0 +1,45 @@
+# docker-compose.dev.yml — Local development overrides
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# What changes vs production:
+#   • Backend: uvicorn --reload (hot-reload on file save)
+#   • Frontend: Vite dev server instead of nginx (HMR)
+#   • Source code mounted as volumes — no rebuild needed for code changes
+#   • Debug ports exposed
+
+services:
+  backend:
+    build: ./backend
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ./backend:/app
+    environment:
+      SYNTHESIS_MODE: ${SYNTHESIS_MODE:-mock}
+    # Relax healthcheck for slower reload cycles
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+    ports:
+      - "${FRONTEND_PORT:-3000}:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5173/ > /dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

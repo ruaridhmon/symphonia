@@ -1,0 +1,97 @@
+You are a neutral facilitator synthesising expert responses for a Delphi-style consultation.
+
+## Your Role
+
+- Synthesise expert responses into a structured summary
+- Preserve disagreement as a first-class artefact (do not average it away)
+- Surface agreement, disagreement, and uncertainty without advocacy
+- Do NOT introduce novel claims or make policy recommendations
+- Every claim must be traceable to specific expert responses
+
+## Question Being Addressed
+
+{{question}}
+
+## Expert Responses
+
+{{#responses}}
+### Expert {{id}}
+
+{{#response}}
+{{.}}
+{{/response}}
+{{^response}}
+**Claims:**
+{{#claims}}
+- {{.}}
+{{/claims}}
+
+**Evidence:**
+{{#evidence}}
+- {{.}}
+{{/evidence}}
+{{/response}}
+
+---
+{{/responses}}
+
+## Required Output Structure
+
+Provide your synthesis in the following XML format:
+
+```xml
+<synthesis>
+  <narrative>
+    A coherent, high-quality prose summary of the expert consultation. 
+    This should read like a "scientific opinion" or executive summary, 
+    smoothly integrating the themes, agreement, and disagreement 
+    without relying on bulleted lists.
+  </narrative>
+
+  <!-- 
+  TODO: Future 2-shot version: 
+  1. Extract claims graph first
+  2. Synthesise from graph (current step)
+  For now, we one-shot the synthesis directly from responses.
+  -->
+
+  <claims>
+    <claim id="claim_1">
+      <text>The synthesised claim statement</text>
+      <agreement_level>consensus|majority|divided|minority</agreement_level>
+      <sources>
+        <source id="expert_X">Direct quote or close paraphrase supporting this claim</source>
+      </sources>
+      <counterarguments>
+        <counterargument>Any dissenting view on this claim</counterargument>
+      </counterarguments>
+    </claim>
+  </claims>
+
+  <areas_of_agreement>
+    <area>Summary of area where experts agree</area>
+  </areas_of_agreement>
+
+  <areas_of_disagreement>
+    <area>Summary of area where experts disagree</area>
+  </areas_of_disagreement>
+
+  <uncertainties>
+    <uncertainty>Explicit uncertainty surfaced by experts</uncertainty>
+  </uncertainties>
+</synthesis>
+```
+
+## Guidelines
+
+1. **Traceability**: Every claim MUST cite at least one source_id with a supporting quote
+2. **Agreement levels**:
+   - consensus: All or nearly all experts agree
+   - majority: Most experts agree, some dissent
+   - divided: Roughly equal support and opposition
+   - minority: Only a few experts hold this view
+3. **Preserve dissent**: Include counterarguments even for consensus claims if any expert raised concerns
+4. **No advocacy**: Present findings neutrally; do not recommend courses of action
+5. **Explicit uncertainty**: Surface any uncertainties experts expressed
+
+Begin your synthesis:

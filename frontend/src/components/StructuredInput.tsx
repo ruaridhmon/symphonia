@@ -253,11 +253,7 @@ export default function StructuredInput({
               value={value.confidence}
               onChange={e => update({ confidence: Number(e.target.value) })}
               style={styles.slider}
-              aria-label={`Confidence level: ${value.confidence} out of 10 — ${conf.label}`}
-              aria-valuemin={1}
-              aria-valuemax={10}
-              aria-valuenow={value.confidence}
-              aria-valuetext={`${value.confidence} — ${conf.label}`}
+              aria-label={`Confidence level: ${value.confidence} out of 10`}
             />
             <div style={styles.sliderLabels}>
               <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>1</span>
@@ -302,8 +298,10 @@ export default function StructuredInput({
         type="button"
         onClick={() => setAdvancedOpen(!advancedOpen)}
         style={styles.advancedToggle}
+        aria-expanded={advancedOpen}
+        aria-label="Advanced options: Citations, Expert Nominations"
       >
-        {advancedOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+        {advancedOpen ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
         <span>Advanced</span>
         <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)', fontWeight: 400 }}>
           Citations, Expert Nominations
@@ -314,14 +312,14 @@ export default function StructuredInput({
         <div style={styles.advancedPanel} className="slide-down">
           {/* Citations */}
           <div style={styles.advancedSection}>
-            <div style={styles.fieldLabel}>
+            <label style={styles.fieldLabel}>
               <BookOpen size={12} /> Citations
-            </div>
+            </label>
             <div style={styles.chipList}>
               {(value.citations ?? []).map((c, i) => (
                 <span key={i} style={styles.chip}>
                   {c}
-                  <button type="button" onClick={() => removeCitation(i)} style={styles.chipRemove} aria-label={`Remove citation: ${c}`}>
+                  <button type="button" onClick={() => removeCitation(i)} style={styles.chipRemove}>
                     <X size={10} />
                   </button>
                 </span>
@@ -331,14 +329,14 @@ export default function StructuredInput({
               <input
                 type="text"
                 placeholder="Add a citation (URL, DOI, or reference)…"
-                aria-label="Add a citation"
                 className="rounded-lg px-3 py-2 bg-muted"
                 style={{ flex: 1, fontSize: '0.8125rem' }}
                 value={newCitation}
                 onChange={e => setNewCitation(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCitation(); } }}
+                aria-label="Add a citation"
               />
-              <button type="button" onClick={addCitation} style={styles.addButton} aria-label="Add citation">
+              <button type="button" onClick={addCitation} style={styles.addButton}>
                 <Plus size={14} />
               </button>
             </div>
@@ -346,9 +344,9 @@ export default function StructuredInput({
 
           {/* Expert Nominations */}
           <div style={styles.advancedSection}>
-            <div style={styles.fieldLabel}>
+            <label style={styles.fieldLabel}>
               <Users size={12} /> Nominate Experts
-            </div>
+            </label>
             <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', margin: '0 0 0.5rem 0' }}>
               Who else should contribute to this question?
             </p>
@@ -356,7 +354,7 @@ export default function StructuredInput({
               {(value.expertNominations ?? []).map((n, i) => (
                 <span key={i} style={styles.chip}>
                   {n}
-                  <button type="button" onClick={() => removeNomination(i)} style={styles.chipRemove} aria-label={`Remove nomination: ${n}`}>
+                  <button type="button" onClick={() => removeNomination(i)} style={styles.chipRemove}>
                     <X size={10} />
                   </button>
                 </span>
@@ -366,14 +364,14 @@ export default function StructuredInput({
               <input
                 type="text"
                 placeholder="Name or email of expert…"
-                aria-label="Nominate an expert"
                 className="rounded-lg px-3 py-2 bg-muted"
                 style={{ flex: 1, fontSize: '0.8125rem' }}
                 value={newNomination}
                 onChange={e => setNewNomination(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNomination(); } }}
+                aria-label="Nominate an expert"
               />
-              <button type="button" onClick={addNomination} style={styles.addButton} aria-label="Add expert nomination">
+              <button type="button" onClick={addNomination} style={styles.addButton}>
                 <Plus size={14} />
               </button>
             </div>
@@ -387,8 +385,6 @@ export default function StructuredInput({
 /* ------------------------------------------------------------------ */
 /* Section sub-component                                              */
 /* ------------------------------------------------------------------ */
-let sectionIdCounter = 0;
-
 function Section({
   icon,
   label,
@@ -400,14 +396,13 @@ function Section({
   required?: boolean;
   children: React.ReactNode;
 }) {
-  const [labelId] = useState(() => `si-label-${++sectionIdCounter}`);
   return (
-    <div style={styles.section} role="group" aria-labelledby={labelId}>
-      <div id={labelId} style={styles.fieldLabel}>
+    <div style={styles.section}>
+      <label style={styles.fieldLabel}>
         {icon}
         <span>{label}</span>
-        {required && <span style={{ color: 'var(--destructive)', marginLeft: '0.25rem' }} aria-label="required">*</span>}
-      </div>
+        {required && <span style={{ color: 'var(--destructive)', marginLeft: '0.25rem' }}>*</span>}
+      </label>
       {children}
     </div>
   );

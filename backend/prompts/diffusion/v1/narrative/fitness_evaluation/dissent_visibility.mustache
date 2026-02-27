@@ -1,0 +1,112 @@
+You are evaluating **Dissent Visibility** as part of an evolutionary fitness assessment for a narrative summary.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate narratives. Other evaluators assess different dimensions. Your singular focus is **dissent visibility**.
+
+Your role: ensure disagreement, minority views, and uncertainty are prominently and fairly represented in the narrative prose, not collapsed into a false consensus.
+
+---
+
+## Dimension: Dissent Visibility
+
+**Definition**: The degree to which disagreement, minority views, and uncertainty are prominently and fairly represented in the narrative summary.
+
+**Why This Matters**: Scientific advice must preserve disagreement as diagnostic information. Narrative summaries often tend toward "smoothing" over conflicts, which creates false confidence and suppresses important counterarguments policymakers need.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Narrative Being Evaluated
+
+{{draft}}
+
+---
+
+## Source Synthesis (Ground Truth)
+
+### Claims
+{{#responses}}
+{{#claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+  {{#counterarguments.length}}
+  Counterarguments: {{#counterarguments}}"{{.}}"{{^last}}, {{/last}}{{/counterarguments}}
+  {{/counterarguments.length}}
+{{/claims}}
+
+### Areas of Disagreement
+{{#areas_of_disagreement}}
+- "{{.}}"
+{{/areas_of_disagreement}}
+
+### Uncertainties
+{{#uncertainties}}
+- "{{.}}"
+{{/uncertainties}}
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Dissent Visibility
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Exemplary Visibility**: Disagreements are explicitly stated with equal prominence to agreements. Minority views and counterarguments are presented clearly. No false consensus implied. Uncertainties are prominent. |
+| **8** | **Excellent Visibility**: All major disagreements are explicit. 1-2 minor tensions could be more prominently positioned in the prose. |
+| **7** | **Good Visibility**: Disagreements are clearly visible. Some minority views could have more space or clearer phrasing. |
+| **6** | **Adequately Visibility**: Most disagreements are visible. Some minority views are lightly covered or relegated to end-notes. |
+| **5** | **Moderate Visibility**: Major disagreements are present but the narrative structure favors consensus. Some conflicts are implicit rather than explicit. |
+| **4** | **Partial Visibility**: Some disagreements are noted but not emphasised. Tendency to foreground agreement ("Experts agreed that..."). |
+| **3** | **Weak Visibility**: Disagreements are downplayed or buried. Narrative creates an impression of more consensus than exists in the synthesis. |
+| **2** | **Poor Visibility**: Disagreements are largely hidden. Narrative implies false consensus throughout. |
+| **1** | **Not Visible**: Dissent is effectively erased. Narrative presents a unified view that contradicts the synthesis ground truth. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ Phrases like "Experts disagreed on...", "A minority view suggests...", "Uncertainty remains regarding..."
+- ✓ Counterarguments from the synthesis are incorporated into the flow
+- ✓ "Divided" or "Minority" claims have proportional word count to "Consensus" claims
+- ✗ Language like "The experts concluded..." when there was significant dissent
+- ✗ Relegating all disagreement to a single, small "Other views" paragraph at the end
+
+---
+
+## Your Task
+
+1. **Identify all disagreements** and minority views in the Source Synthesis
+2. **Check if each is prominently represented** in the narrative prose
+3. **Assess structural balance**—is the narrative "smoothing" over nuance?
+4. **Identify hidden or collapsed conflicts**
+5. **Provide specific guidance** for making dissent more visible in the prose
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Multi-line analysis of dissent visibility: identify specific issues, cite claim IDs where relevant, assess overall quality against the rubric.</rationale>
+  <suggestions>
+    <suggestion>Specific actionable improvement with claim ID reference</suggestion>
+    <suggestion>Another specific improvement</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must be plain text** (no nested XML tags inside rationale).
+- **Each `<suggestion>` must be actionable** — cite the claim ID and what to change.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

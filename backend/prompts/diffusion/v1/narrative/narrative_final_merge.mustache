@@ -1,0 +1,34 @@
+You are merging multiple narrative drafts into a final consensus summary.
+
+## Task
+Combine the strengths of the provided drafts into a single, high-quality narrative that is faithful to the source claims below.
+
+## Source Claims
+{{#synthesis}}
+{{#claims_with_ids}}
+- {{labelled_text}}
+{{/claims_with_ids}}
+{{/synthesis}}
+
+## Drafts to Merge
+
+{{#narratives}}
+### Draft
+
+{{.}}
+
+---
+
+{{/narratives}}
+
+## Instructions
+1. Synthesize a single narrative that captures the best phrasing and structure from the drafts above.
+2. Do not drop any claims from the source data. If drafts disagree about a claim, preserve both perspectives. Faithfulness to the source claims takes priority over narrative flow.
+3. Ensure it covers all the key points raised across the drafts.
+4. Resolve any inconsistencies between drafts by favoring the most neutral/supported phrasing.
+5. Aim for clarity, flow, and professional tone.
+6. The output should be approximately 300-500 words.
+7. Preserve all inline citation markers [Cx] from the source drafts. Do not remove or renumber them. Every substantive statement should retain its citation markers.
+
+## Output Format
+Return ONLY the merged narrative text with inline citation markers. Do not include section headers or metadata.

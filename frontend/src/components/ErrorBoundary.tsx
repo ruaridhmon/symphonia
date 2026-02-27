@@ -1,4 +1,5 @@
 import { Component, ReactNode, ErrorInfo } from 'react';
+import i18n from '../i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -20,6 +21,7 @@ interface ErrorBoundaryState {
  * - Component stack trace logging
  * - Retry button to reset error state
  * - Styled to match app theme
+ * - i18n-ready: uses translation keys for all user-facing strings
  * 
  * Usage:
  * ```tsx
@@ -72,7 +74,8 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   render(): ReactNode {
     if (this.state.hasError) {
-      const { fallbackTitle = 'Something went wrong' } = this.props;
+      const t = i18n.t.bind(i18n);
+      const { fallbackTitle = t('errorBoundary.defaultTitle') } = this.props;
       const { error } = this.state;
 
       return (
@@ -148,8 +151,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
               maxWidth: '500px',
             }}
           >
-            An unexpected error occurred. This has been logged to the console. 
-            You can try reloading the page or contact support if the problem persists.
+            {t('errorBoundary.description')}
           </p>
 
           {/* Retry Button */}
@@ -162,7 +164,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
               marginTop: '0.5rem',
             }}
           >
-            Try Again
+            {t('errorBoundary.tryAgain')}
           </button>
 
           {/* Development mode: show stack trace */}
@@ -183,7 +185,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
                   marginBottom: '0.5rem',
                 }}
               >
-                Component Stack (Dev Mode)
+                {t('errorBoundary.componentStack')}
               </summary>
               <pre
                 style={{

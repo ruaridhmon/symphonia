@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { FileText, FileJson, FileType2, FileDown, BarChart3 } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import LoadingButton from './LoadingButton';
+import { exportSynthesisFromBackend } from '../api/synthesis';
 import type { SynthesisData } from '../types/synthesis';
 import type { Round } from '../types/summary';
 
 interface ExportPanelProps {
   formTitle: string;
+  formId: number;
   rounds: Round[];
   structuredSynthesisData: SynthesisData | null;
   expertLabels: Record<number, string>;
@@ -843,7 +846,7 @@ function generateGovUkReport(
   <h3 class="govuk-heading-m">Round ${r.round_number}</h3>
   ${r.questions.length > 0 ? `
   <h4 class="govuk-heading-s">Questions posed</h4>
-  <ol class="govuk-body">${r.questions.map(q => `<li style="margin-bottom:8px">${escHtml(typeof q === 'string' ? q : String((q as Record<string, unknown>).text || (q as Record<string, unknown>).label || (q as Record<string, unknown>).question || ''))}</li>`).join('')}</ol>` : ''}
+  <ol class="govuk-body">${r.questions.map(q => `<li style="margin-bottom:8px">${escHtml(typeof q === 'string' ? q : JSON.stringify(q))}</li>`).join('')}</ol>` : ''}
   ${r.synthesis ? `
   <h4 class="govuk-heading-s">Round synthesis</h4>
   <div class="govuk-inset-text"><p class="govuk-body">${escHtml(r.synthesis)}</p></div>` : ''}
@@ -939,6 +942,7 @@ function exportAsGovUkReport(
 
 export default function ExportPanel({
   formTitle,
+  formId,
   rounds,
   structuredSynthesisData,
   expertLabels,
@@ -946,6 +950,9 @@ export default function ExportPanel({
   const [exportingMd, setExportingMd] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportingGovUk, setExportingGovUk] = useState(false);
+  const [exportingBackendMd, setExportingBackendMd] = useState(false);
+  const [exportingBackendJson, setExportingBackendJson] = useState(false);
+  const [exportingBackendPdf, setExportingBackendPdf] = useState(false);
 
   const handleExportMarkdown = () => {
     setExportingMd(true);
@@ -977,38 +984,113 @@ export default function ExportPanel({
     }
   };
 
+  const handleBackendExport = async (format: 'markdown' | 'json' | 'pdf', setLoading: (v: boolean) => void) => {
+    setLoading(true);
+    try {
+      const { blob, filename } = await exportSynthesisFromBackend(formId, format);
+      saveAs(blob, filename);
+    } catch (err) {
+      console.error('Backend export failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={handleExportMarkdown}
-        loading={exportingMd}
-        loadingText="Exporting…"
-        className="w-full text-left justify-start"
-      >
-        Export as Markdown
-      </LoadingButton>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={handleExportPdf}
-        loading={exportingPdf}
-        loadingText="Preparing PDF…"
-        className="w-full text-left justify-start"
-      >
-        Export as PDF
-      </LoadingButton>
-      <LoadingButton
-        variant="secondary"
-        size="md"
-        onClick={handleExportGovUk}
-        loading={exportingGovUk}
-        loadingText="Generating…"
-        className="w-full text-left justify-start"
-      >
-        Export GOV.UK Report
-      </LoadingButton>
+      {/* ── Export Synthesis ─────────────────────────── */}
+      <div style={{
+        borderTop: '1px solid var(--border)',
+        paddingTop: '0.75rem',
+        marginTop: '0.25rem',
+      }}>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-2"
+          style={{ color: 'var(--muted-foreground)' }}>
+          Export Synthesis
+        </p>
+        <div className="flex flex-col gap-1.5">
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={() => handleBackendExport('markdown', setExportingBackendMd)}
+            loading={exportingBackendMd}
+            loadingText="Downloading…"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
+          >
+            <FileText size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Download as Markdown
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={() => handleBackendExport('json', setExportingBackendJson)}
+            loading={exportingBackendJson}
+            loadingText="Downloading…"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
+          >
+            <FileJson size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Download as JSON
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={() => handleBackendExport('pdf', setExportingBackendPdf)}
+            loading={exportingBackendPdf}
+            loadingText="Downloading…"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
+          >
+            <FileDown size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Download as PDF
+          </LoadingButton>
+        </div>
+      </div>
+
+      {/* ── Client Reports ───────────────────────────── */}
+      <div style={{
+        borderTop: '1px solid var(--border)',
+        paddingTop: '0.75rem',
+        marginTop: '0.25rem',
+      }}>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-2"
+          style={{ color: 'var(--muted-foreground)' }}>
+          Client Reports
+        </p>
+        <div className="flex flex-col gap-1.5">
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={handleExportMarkdown}
+            loading={exportingMd}
+            loadingText="Exporting…"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
+          >
+            <FileText size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Export as Markdown
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={handleExportPdf}
+            loading={exportingPdf}
+            loadingText="Preparing PDF…"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
+          >
+            <FileType2 size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Export as PDF
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={handleExportGovUk}
+            loading={exportingGovUk}
+            loadingText="Generating…"
+            className="w-full text-left justify-start gap-2 whitespace-nowrap"
+          >
+            <BarChart3 size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+            Export GOV.UK Report
+          </LoadingButton>
+        </div>
+      </div>
     </>
   );
 }

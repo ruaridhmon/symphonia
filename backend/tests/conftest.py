@@ -4,6 +4,7 @@ Shared fixtures for Symphonia E2E tests.
 Provides an in-memory SQLite database, FastAPI TestClient with dependency
 overrides, and pre-authenticated admin/participant tokens.
 """
+
 from __future__ import annotations
 
 import json
@@ -17,6 +18,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 # Force mock synthesis mode BEFORE any app imports
 os.environ["SYNTHESIS_MODE"] = "mock"
+# Disable rate limiting in tests to avoid 429s
+os.environ["RATE_LIMIT_ENABLED"] = "false"
 
 from core.auth import get_db, get_password_hash
 from core.db import Base
@@ -34,6 +37,7 @@ _engine = create_engine(
     connect_args={"check_same_thread": False},
 )
 
+
 # Enable WAL-style foreign keys for SQLite
 @event.listens_for(_engine, "connect")
 def _set_sqlite_pragma(dbapi_conn, _connection_record):
@@ -41,9 +45,8 @@ def _set_sqlite_pragma(dbapi_conn, _connection_record):
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=_engine
-)
+
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
 
 
 # ---------------------------------------------------------------------------
@@ -88,7 +91,7 @@ def client(test_db) -> Generator[TestClient, None, None]:
                 User(
                     email=email,
                     hashed_password=get_password_hash("test123"),
-                    is_admin=True,
+                    role="platform_admin",
                 )
             )
     db.commit()
@@ -124,13 +127,42 @@ def admin_headers(admin_token: str) -> dict:
 def register_and_login(
     client: TestClient, email: str, password: str = "pass1234"
 ) -> str:
-    """Register a user (if needed) and return a bearer token."""
+    """Register a user (if needed) and return a bearer token.
+
+    Note: registered users receive the default ``expert`` role.
+    For a facilitator, use :func:`create_facilitator_and_login` instead.
+    """
     client.post("/register", data={"email": email, "password": password})
-    resp = client.post(
-        "/login", data={"username": email, "password": password}
-    )
+    resp = client.post("/login", data={"username": email, "password": password})
     assert resp.status_code == 200, f"Login failed for {email}: {resp.text}"
     return resp.json()["access_token"]
+
+
+def create_facilitator_and_login(
+    client: TestClient, email: str, password: str = "pass1234"
+) -> str:
+    """Create a facilitator user directly in the DB (bypassing /register which
+    always assigns the default *expert* role) and return a bearer token."""
+    db = TestingSessionLocal()
+    if not db.query(User).filter(User.email == email).first():
+        db.add(
+            User(
+                email=email,
+                hashed_password=get_password_hash(password),
+                role="facilitator",
+            )
+        )
+        db.commit()
+    db.close()
+    resp = client.post("/login", data={"username": email, "password": password})
+    assert resp.status_code == 200, f"Facilitator login failed for {email}: {resp.text}"
+    return resp.json()["access_token"]
+
+
+@pytest.fixture(scope="module")
+def facilitator_token(client: TestClient) -> str:
+    """A token for a user with the *facilitator* role."""
+    return create_facilitator_and_login(client, "facilitator@test.com")
 
 
 @pytest.fixture(scope="module")
@@ -160,16 +192,15 @@ def create_form(
     if questions is None:
         questions = ["Question 1?", "Question 2?"]
     resp = client.post(
-        "/create_form",
+        "/forms/create",
         json={
             "title": title,
             "questions": questions,
             "allow_join": True,
-            "join_code": join_code,
         },
         headers=headers,
     )
-    assert resp.status_code == 200, f"create_form failed: {resp.text}"
+    assert resp.status_code == 201, f"create_form failed: {resp.text}"
     return resp.json()
 
 

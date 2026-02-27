@@ -1,77 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Zap, Lightbulb, Target, FileText, Quote, ChevronDown } from 'lucide-react';
 import CommentThread from './CommentThread';
 import type { SynthesisData, EvidenceExcerpt } from '../types/synthesis';
-
-/** Strip TTD provenance markers like [T0_C1] [T1_C2] from narrative text. */
-const CLAIM_REF_RE = /\[[A-Z]\d+_[A-Z]\d+\]/g;
-
-interface InlineSpan {
-  text: string;
-  type: 'plain' | 'agreement' | 'disagreement';
-  index: number; // which agreement/disagreement to scroll to
-}
-
-/**
- * Parse narrative text into spans, identifying phrases that match
- * agreement claims or disagreement topics for inline link rendering.
- * TTD provenance markers ([T0_C1] etc.) are stripped silently.
- */
-function buildNarrativeSpans(
-  raw: string,
-  agreements: Array<{ claim: string }> | null | undefined,
-  disagreements: Array<{ topic: string }> | null | undefined,
-): InlineSpan[] {
-  if (!raw) return [{ text: raw ?? '', type: 'plain', index: -1 }];
-  // Strip TTD provenance markers
-  const text = raw.replace(CLAIM_REF_RE, '');
-
-  // Build a sorted list of phrases to link (longest first to prefer longer matches)
-  type Phrase = { needle: string; type: 'agreement' | 'disagreement'; index: number };
-  const phrases: Phrase[] = [];
-  (agreements ?? []).forEach((a, i) => {
-    const n = a.claim.trim();
-    if (n.length > 10) phrases.push({ needle: n, type: 'agreement', index: i });
-    // Also try first clause (up to first comma or semicolon)
-    const clause = n.split(/[,;]/)[0].trim();
-    if (clause.length > 15 && clause !== n) phrases.push({ needle: clause, type: 'agreement', index: i });
-  });
-  (disagreements ?? []).forEach((d, i) => {
-    const n = d.topic.trim();
-    if (n.length > 10) phrases.push({ needle: n, type: 'disagreement', index: i });
-    const clause = n.split(/[,;]/)[0].trim();
-    if (clause.length > 15 && clause !== n) phrases.push({ needle: clause, type: 'disagreement', index: i });
-  });
-  phrases.sort((a, b) => b.needle.length - a.needle.length);
-
-  const spans: InlineSpan[] = [];
-  let pos = 0;
-  const lower = text.toLowerCase();
-
-  while (pos < text.length) {
-    let matched = false;
-    for (const ph of phrases) {
-      const idx = lower.indexOf(ph.needle.toLowerCase(), pos);
-      if (idx === pos) {
-        spans.push({ text: text.slice(pos, pos + ph.needle.length), type: ph.type, index: ph.index });
-        pos += ph.needle.length;
-        matched = true;
-        break;
-      }
-    }
-    if (!matched) {
-      // Append plain char (or extend last plain span)
-      if (spans.length > 0 && spans[spans.length - 1].type === 'plain') {
-        spans[spans.length - 1] = { ...spans[spans.length - 1], text: spans[spans.length - 1].text + text[pos] };
-      } else {
-        spans.push({ text: text[pos], type: 'plain', index: -1 });
-      }
-      pos++;
-    }
-  }
-
-  return spans;
-}
 
 interface StructuredSynthesisProps {
   data: SynthesisData;
@@ -136,10 +67,17 @@ function ConfidenceBar({ value, label }: { value: number; label?: string }) {
   return (
     <div className="confidence-bar">
       {label && <span className="confidence-label">{label}</span>}
-      <div className="confidence-track">
+      <div
+        className="confidence-track"
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={label ? `${label}: ${pct}%` : `Confidence: ${pct}%`}
+      >
         <div className="confidence-fill" style={{ width: `${pct}%`, backgroundColor: color }} />
       </div>
-      <span className="confidence-value">{pct}%</span>
+      <span className="confidence-value" aria-hidden="true">{pct}%</span>
     </div>
   );
 }
@@ -155,6 +93,7 @@ function EvidenceDrawer({
   isOpen: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   if (!excerpts || excerpts.length === 0) return null;
 
   return (
@@ -166,7 +105,7 @@ function EvidenceDrawer({
       >
         <Quote size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
         <span className="evidence-drawer-label">
-          {excerpts.length} supporting excerpt{excerpts.length !== 1 ? 's' : ''}
+          {t('synthesis.structured.supportingExcerpts', { count: excerpts.length })}
         </span>
         <ChevronDown
           size={14}
@@ -196,19 +135,21 @@ function EvidenceDrawer({
   );
 }
 
-function SeverityBadge({ severity }: { severity: string }) {
+function SeverityBadge({ severity }: { severity: string; }) {
+  const { t } = useTranslation();
   const colors: Record<string, { bg: string; text: string }> = {
     low: { bg: 'rgba(34,197,94,0.15)', text: 'var(--success)' },
     moderate: { bg: 'color-mix(in srgb, var(--warning) 15%, transparent)', text: 'var(--warning)' },
     high: { bg: 'rgba(239,68,68,0.15)', text: 'var(--destructive)' },
   };
   const c = colors[severity] || colors.moderate;
+  const severityKey = `synthesis.severity.${severity}` as const;
   return (
     <span
       className="severity-badge"
       style={{ backgroundColor: c.bg, color: c.text }}
     >
-      {severity}
+      {t(severityKey)}
     </span>
   );
 }
@@ -235,13 +176,14 @@ function getDimensionClass(label?: string): string {
 }
 
 export default function StructuredSynthesis({ data, convergenceScore, expertLabels, formId, roundId, token, currentUserEmail }: StructuredSynthesisProps) {
+  const { t } = useTranslation();
   const commentsEnabled = !!(formId && roundId && token);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    narrative: true,
     agreements: true,
     disagreements: true,
     nuances: false,
     probes: true,
+    narrative: false,
   });
   const [openEvidence, setOpenEvidence] = useState<Record<number, boolean>>({});
 
@@ -251,100 +193,80 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
   const toggle = (section: string) =>
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
 
-  /** Expand the parent section then smooth-scroll to a specific card. */
-  const scrollToCard = (section: 'agreements' | 'disagreements' | 'nuances', index: number) => {
-    // Ensure the section is expanded
-    setExpandedSections(prev => ({ ...prev, [section]: true }));
-    // Wait a frame for the DOM to update, then scroll
-    setTimeout(() => {
-      const el = document.getElementById(`syn-${section.slice(0, -1)}-${index}`);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Brief highlight flash
-      el?.classList.add('syn-card-highlight');
-      setTimeout(() => el?.classList.remove('syn-card-highlight'), 1500);
-    }, 80);
-  };
-
   const {
-    agreements,
-    disagreements,
-    nuances,
-    follow_up_probes: probes,
-    confidence_map: confidence,
+    agreements = [],
+    disagreements = [],
+    nuances = [],
+    follow_up_probes: probes = [],
+    confidence_map: confidence = {} as Record<string, number>,
     narrative,
-  } = data;
-
-  // Pre-compute narrative spans — MUST come after destructuring to avoid TDZ
-  const narrativeSpans = useMemo(
-    () => narrative ? buildNarrativeSpans(narrative, agreements, disagreements) : [],
-    [narrative, agreements, disagreements],
-  );
+  } = data || {};
 
   return (
     <div className="structured-synthesis fade-in">
-      {/* ── Narrative Summary — always visible, always first ── */}
-      {narrative && (
-        <div className="structured-narrative-top">
-          <div className="structured-narrative-top-label">
-            <FileText size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-            <span>Narrative Summary</span>
-          </div>
-          <div className="structured-narrative">
-            {narrativeSpans.map((span, i) => {
-              if (span.type === 'plain') return <span key={i}>{span.text}</span>;
-              const isAgreement = span.type === 'agreement';
-              return (
-                <button
-                  key={i}
-                  className={`narrative-inline-link ${isAgreement ? 'narrative-inline-agreement' : 'narrative-inline-disagreement'}`}
-                  onClick={() => scrollToCard(isAgreement ? 'agreements' : 'disagreements', span.index)}
-                  title={`Jump to ${isAgreement ? 'agreement' : 'disagreement'} ↓`}
-                >
-                  {span.text}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* ── Overview Bar ── */}
       <div className="structured-overview">
         <div className="structured-overview-stats">
           <div className="structured-stat">
             <span className="structured-stat-value">{agreements.length}</span>
-            <span className="structured-stat-label">Agreements</span>
+            <span className="structured-stat-label">{t('synthesis.structured.agreements')}</span>
           </div>
           <div className="structured-stat">
             <span className="structured-stat-value">{disagreements.length}</span>
-            <span className="structured-stat-label">Disagreements</span>
+            <span className="structured-stat-label">{t('synthesis.structured.disagreements')}</span>
           </div>
           <div className="structured-stat">
             <span className="structured-stat-value">{nuances.length}</span>
-            <span className="structured-stat-label">Nuances</span>
+            <span className="structured-stat-label">{t('synthesis.structured.nuances')}</span>
           </div>
           <div className="structured-stat">
             <span className="structured-stat-value">{probes.length}</span>
-            <span className="structured-stat-label">Probes</span>
+            <span className="structured-stat-label">{t('synthesis.structured.followUpProbes')}</span>
           </div>
         </div>
         {convergenceScore != null && (
           <div className="structured-convergence">
-            <ConfidenceBar value={convergenceScore} label="Convergence" />
+            <ConfidenceBar value={convergenceScore} label={t('synthesis.structured.convergence')} />
           </div>
         )}
         {confidence.overall != null && (
           <div className="structured-convergence">
-            <ConfidenceBar value={confidence.overall} label="Overall confidence" />
+            <ConfidenceBar value={confidence.overall} label={t('synthesis.structured.overallConfidence')} />
           </div>
         )}
       </div>
+
+      {/* ── Narrative ── */}
+      {narrative && (
+        <div className="structured-section">
+          <SectionHeader
+            title={t('synthesis.structured.narrativeSummary')}
+            count={0}
+            icon={<FileText size={16} style={{ color: 'var(--accent)' }} />}
+            color="var(--accent)"
+            expanded={expandedSections.narrative}
+            onToggle={() => toggle('narrative')}
+            sectionId="synthesis-section-narrative"
+            headerId="synthesis-header-narrative"
+          />
+          {expandedSections.narrative && (
+            <div
+              className="structured-section-body slide-down"
+              id="synthesis-section-narrative"
+              role="region"
+              aria-labelledby="synthesis-header-narrative"
+            >
+              <div className="structured-narrative">{narrative}</div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Agreements ── */}
       {agreements.length > 0 && (
         <div className="structured-section">
           <SectionHeader
-            title="Agreements"
+            title={t('synthesis.structured.agreements')}
             count={agreements.length}
             icon={<CheckCircle2 size={16} style={{ color: 'var(--success)' }} />}
             color="var(--success)"
@@ -361,7 +283,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
               aria-labelledby="synthesis-header-agreements"
             >
               {agreements.map((a, i) => (
-                <div key={i} id={`syn-agreement-${i}`} className="structured-card agreement-card">
+                <div key={i} className="structured-card agreement-card">
                   <div className="structured-card-header">
                     <p className="structured-card-claim">{a.claim}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -379,9 +301,9 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                     </div>
                   </div>
                   <p className="structured-card-evidence">{a.evidence_summary}</p>
-                  {a.supporting_experts.length > 0 && (
+                  {(a.supporting_experts || []).length > 0 && (
                     <div className="structured-card-experts">
-                      {a.supporting_experts.map(id => (
+                      {(a.supporting_experts || []).map(id => (
                         <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
                           {expertLabels?.[id] || `E${id}`}
                         </span>
@@ -407,7 +329,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       {disagreements.length > 0 && (
         <div className="structured-section">
           <SectionHeader
-            title="Disagreements"
+            title={t('synthesis.structured.disagreements')}
             count={disagreements.length}
             icon={<Zap size={16} style={{ color: 'var(--warning)' }} />}
             color="#eab308"
@@ -424,7 +346,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
               aria-labelledby="synthesis-header-disagreements"
             >
               {disagreements.map((d, i) => (
-                <div key={i} id={`syn-disagreement-${i}`} className="structured-card disagreement-card">
+                <div key={i} className="structured-card disagreement-card">
                   <div className="structured-card-header">
                     <p className="structured-card-claim">{d.topic}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -442,7 +364,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                     </div>
                   </div>
                   <div className="disagreement-positions">
-                    {d.positions.map((pos, j) => (
+                    {(d.positions || []).map((pos, j) => (
                       <div key={j} className="disagreement-position">
                         <div className="disagreement-position-marker" />
                         <div>
@@ -450,9 +372,9 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                           {pos.evidence && (
                             <p className="disagreement-position-evidence">{pos.evidence}</p>
                           )}
-                          {pos.experts.length > 0 && (
+                          {(pos.experts || []).length > 0 && (
                             <div className="structured-card-experts">
-                              {pos.experts.map(id => (
+                              {(pos.experts || []).map(id => (
                                 <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
                                   {expertLabels?.[id] || `E${id}`}
                                 </span>
@@ -474,7 +396,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       {nuances.length > 0 && (
         <div className="structured-section">
           <SectionHeader
-            title="Nuances & Uncertainties"
+            title={t('synthesis.structured.nuances')}
             count={nuances.length}
             icon={<Lightbulb size={16} style={{ color: 'var(--accent)' }} />}
             color="#a855f7"
@@ -517,7 +439,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       {probes.length > 0 && (
         <div className="structured-section">
           <SectionHeader
-            title="Follow-up Probes"
+            title={t('synthesis.structured.followUpProbes')}
             count={probes.length}
             icon={<Target size={16} style={{ color: 'var(--accent)' }} />}
             color="var(--accent)"
@@ -537,12 +459,12 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
                 <div key={i} className="structured-card probe-card">
                   <p className="structured-card-claim">{p.question}</p>
                   <p className="structured-card-evidence">{p.rationale}</p>
-                  {p.target_experts.length > 0 && (
+                  {(p.target_experts || []).length > 0 && (
                     <div className="structured-card-experts">
                       <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                        Targets:
+                        {t('synthesis.structured.targets')}
                       </span>
-                      {p.target_experts.map(id => (
+                      {(p.target_experts || []).map(id => (
                         <span key={id} className={`expert-chip ${getDimensionClass(expertLabels?.[id])}`} title={`Expert ${id}`}>
                           {expertLabels?.[id] || `E${id}`}
                         </span>

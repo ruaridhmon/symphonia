@@ -1,0 +1,8 @@
+# Lightweight dev image — no production build, just deps
+FROM node:20
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+# Source code is mounted as a volume at runtime
+EXPOSE 5173

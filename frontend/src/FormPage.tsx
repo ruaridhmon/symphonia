@@ -168,7 +168,11 @@ export default function FormPage() {
       setPreviousSynthesis(roundData?.previous_round_synthesis || '')
     } catch (err) {
       if (err instanceof ApiError) {
+        // Status 0 or 401 = handled by apiClient (CF redirect / session expiry)
+        if (err.status === 0 || err.status === 401) return;
         setLoadError(`Failed to load form (HTTP ${err.status})`)
+      } else if (err instanceof TypeError) {
+        setLoadError('Network error. Please check your connection and try again.')
       } else {
         setLoadError(err instanceof Error ? err.message : 'Failed to load form. Please try again.')
       }
@@ -243,7 +247,7 @@ export default function FormPage() {
             <AlertCircle size={48} style={{ color: 'var(--destructive)' }} />
           </div>
           <h2 className="text-xl font-semibold text-foreground">Unable to load form</h2>
-          <p className="text-sm text-muted-foreground" role="alert" aria-live="polite">{friendlyError}</p>
+          <p className="text-sm text-muted-foreground" role="alert">{friendlyError}</p>
           <div className="flex gap-4 justify-center">
             <LoadingButton variant="accent" size="md" onClick={loadForm} style={{ minWidth: '120px' }}>
               Try Again
@@ -477,6 +481,8 @@ function PreviousSynthesisToggle({ content }: { content: string }) {
           cursor: 'pointer',
           fontFamily: 'inherit',
         }}
+        aria-expanded={isOpen}
+        aria-label="Previous Round Synthesis"
       >
         <div className="flex items-center gap-2">
           <ClipboardList size={16} style={{ color: 'var(--accent)' }} />

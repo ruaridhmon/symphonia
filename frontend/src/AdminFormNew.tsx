@@ -7,6 +7,7 @@ import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
+import TemplatePicker, { type FormTemplate } from './TemplatePicker';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
@@ -63,6 +64,9 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Delphi Consultation Guide"
       style={{
         position: 'fixed',
         inset: 0,
@@ -76,6 +80,7 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
     >
       {/* Backdrop */}
       <div
+        aria-hidden="true"
         style={{
           position: 'absolute',
           inset: 0,
@@ -119,8 +124,9 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
             justifyContent: 'center',
           }}
           title="Close guide"
+          aria-label="Close guide"
         >
-          <X size={20} />
+          <X size={20} aria-hidden="true" />
         </button>
 
         {/* Header */}
@@ -480,8 +486,9 @@ function AiAssistantPanel({
             alignItems: 'center',
           }}
           title="Close AI assistant"
+          aria-label="Close AI assistant"
         >
-          <X size={16} />
+          <X size={16} aria-hidden="true" />
         </button>
       </div>
 
@@ -759,6 +766,10 @@ export default function AdminFormNew() {
   const { token } = useAuth();
   const navigate = useNavigate();
 
+  /* Template picker state */
+  const [showTemplatePicker, setShowTemplatePicker] = useState(true);
+  const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
+
   /* Core state */
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -784,6 +795,28 @@ export default function AdminFormNew() {
       .then(data => { if (data.synthesis_model) setSynthesisModel(data.synthesis_model); })
       .catch(() => {}); // silently fall back to default
   }, []);
+
+  /* Template selection handlers */
+  const handleSelectTemplate = (template: FormTemplate) => {
+    setSelectedTemplate(template);
+    setTitle(template.name);
+    setDescription(template.description);
+    setQuestions(template.default_questions);
+    setShowTemplatePicker(false);
+  };
+
+  const handleStartBlank = () => {
+    setSelectedTemplate(null);
+    setTitle('');
+    setDescription('');
+    setQuestions(['']);
+    setShowTemplatePicker(false);
+  };
+
+  const handleBackToTemplates = () => {
+    setShowTemplatePicker(true);
+    setSelectedTemplate(null);
+  };
 
   /* Worker D state — Guide modal + AI panel */
   const [guideOpen, setGuideOpen] = useState(false);
@@ -858,7 +891,7 @@ export default function AdminFormNew() {
         {/* Back button */}
         <button
           type="button"
-          onClick={() => navigate('/admin')}
+          onClick={() => showTemplatePicker ? navigate('/admin') : handleBackToTemplates()}
           className="inline-flex items-center gap-1.5 text-sm mb-6 transition-colors"
           style={{
             color: 'var(--muted-foreground)',
@@ -870,19 +903,44 @@ export default function AdminFormNew() {
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
         >
-          ← Back to Dashboard
+          ← {showTemplatePicker ? 'Back to Dashboard' : 'Back to Templates'}
         </button>
 
+        {/* ── Template Picker View ────────────────────────────── */}
+        {showTemplatePicker ? (
+          <div>
+            <div className="mb-6">
+              <h1
+                className="text-2xl font-bold tracking-tight"
+                style={{ color: 'var(--foreground)' }}
+              >
+                Create a New Form
+              </h1>
+              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                Pick a template to get started quickly, or create a blank form from scratch.
+              </p>
+            </div>
+            <TemplatePicker
+              onSelectTemplate={handleSelectTemplate}
+              onStartBlank={handleStartBlank}
+            />
+          </div>
+        ) : (
+        <>
+
+        {/* ── Form Editor View ────────────────────────────────── */}
         <div className="mb-6" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
           <div>
             <h1
               className="text-2xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
-              Create a New Form
+              {selectedTemplate ? `New Form — ${selectedTemplate.icon} ${selectedTemplate.name}` : 'Create a New Form'}
             </h1>
             <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-              Set up a new Delphi consultation with title and opening questions.
+              {selectedTemplate
+                ? 'Customise the template below, then create your consultation.'
+                : 'Set up a new Delphi consultation with title and opening questions.'}
             </p>
           </div>
 
@@ -945,14 +1003,14 @@ export default function AdminFormNew() {
           {/* ── Title ─────────────────────────────────────────────── */}
           <div className="space-y-1.5 mb-6">
             <label
-              htmlFor="form-title-input"
+              htmlFor="form-title"
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
               Form title
             </label>
             <input
-              id="form-title-input"
+              id="form-title"
               type="text"
               placeholder="e.g. AI in Education: Risks & Opportunities"
               value={title}
@@ -981,12 +1039,14 @@ export default function AdminFormNew() {
           {/* ── Description (Worker A) ────────────────────────────── */}
           <div className="space-y-1.5 mb-6">
             <label
+              htmlFor="form-description"
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
               Description (optional)
             </label>
             <textarea
+              id="form-description"
               placeholder="What is this consultation about? What should participants consider?"
               value={description}
               onChange={e => setDescription(e.target.value)}
@@ -1013,6 +1073,7 @@ export default function AdminFormNew() {
           {/* ── Join Code (Worker A) ──────────────────────────────── */}
           <div className="space-y-1.5 mb-6">
             <label
+              htmlFor="form-join-code"
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
@@ -1020,6 +1081,7 @@ export default function AdminFormNew() {
             </label>
             <div className="flex gap-2 items-center">
               <input
+                id="form-join-code"
                 type="text"
                 value={joinCode}
                 onChange={e => setJoinCode(e.target.value)}
@@ -1061,8 +1123,9 @@ export default function AdminFormNew() {
                   e.currentTarget.style.color = 'var(--muted-foreground)';
                 }}
                 title="Regenerate join code"
+                aria-label="Regenerate join code"
               >
-                <RefreshCw size={16} />
+                <RefreshCw size={16} aria-hidden="true" />
               </button>
             </div>
             <p
@@ -1074,13 +1137,13 @@ export default function AdminFormNew() {
           </div>
 
           {/* ── Opening Questions (Workers A + B) ─────────────────── */}
-          <div className="space-y-2 mb-4">
-            <label
+          <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
+            <legend
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
               Opening questions
-            </label>
+            </legend>
             <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
               Good questions are open-ended, neutral, and invite diverse
               perspectives.
@@ -1135,8 +1198,9 @@ export default function AdminFormNew() {
                           lineHeight: 1,
                         }}
                         title="Move up"
+                        aria-label={`Move question ${i + 1} up`}
                       >
-                        <ChevronUp size={14} />
+                        <ChevronUp size={14} aria-hidden="true" />
                       </button>
                     ) : (
                       <span style={{ height: 14 }} />
@@ -1157,8 +1221,9 @@ export default function AdminFormNew() {
                           lineHeight: 1,
                         }}
                         title="Move down"
+                        aria-label={`Move question ${i + 1} down`}
                       >
-                        <ChevronDown size={14} />
+                        <ChevronDown size={14} aria-hidden="true" />
                       </button>
                     ) : (
                       <span style={{ height: 14 }} />
@@ -1169,6 +1234,7 @@ export default function AdminFormNew() {
                   <div className="flex-1" style={{ position: 'relative' }}>
                     <input
                       type="text"
+                      aria-label={`Question ${i + 1}`}
                       placeholder={
                         isOnly && isEmpty
                           ? 'e.g. What do you see as the biggest barrier to AI adoption in your sector?'
@@ -1239,14 +1305,15 @@ export default function AdminFormNew() {
                         flexShrink: 0,
                       }}
                       title="Remove question"
+                      aria-label={`Remove question ${i + 1}`}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} aria-hidden="true" />
                     </button>
                   )}
                 </div>
               );
             })}
-          </div>
+          </fieldset>
 
           {/* ── AI Assist button + Panel (Worker D) ────────────────── */}
           {!aiPanelOpen && (
@@ -1305,6 +1372,8 @@ export default function AdminFormNew() {
               type="button"
               onClick={() => setSettingsOpen(prev => !prev)}
               className="w-full flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors duration-150"
+              aria-expanded={settingsOpen}
+              aria-label="Advanced Settings"
               style={{
                 background: 'none',
                 border: 'none',
@@ -1485,6 +1554,8 @@ export default function AdminFormNew() {
             </div>
           </div>
         </div>
+        </>
+        )}
       </Container>
     </section>
   );

@@ -1,0 +1,58 @@
+{{> _term_sheet}}
+
+{{> _persona}}
+
+## Task: Cross-Review (Round 2)
+
+You produced claims in Round 1. You now receive claims from agents in different dimensions. Review them from your **{{persona.dimension}}** perspective.
+
+### Question
+{{question}}
+
+### Expert Responses
+{{#expert_responses}}
+--- Expert: {{expert_id}}{{response_id}} ---
+{{response}}
+{{#claims}}
+- {{.}}
+{{/claims}}
+{{#evidence}}
+- {{.}}
+{{/evidence}}
+{{/expert_responses}}
+
+### Your Round 1 Claims
+{{{own_claims}}}
+
+### Other Agents' Claims
+{{#other_agents_claims}}
+--- Agent: {{agent_name}} ---
+{{{claims_json}}}
+
+{{/other_agents_claims}}
+
+### Instructions
+1. Review each of the other agents' claims from your dimensional perspective.
+2. Verify each claim against the source text independently — do not defer to another agent's confidence.
+3. If a claim lacks evidence or cites sources you cannot verify, flag as unsupported.
+4. If you find an irreconcilable problem, say so. Do not manufacture agreement.
+5. Agreement requires independent evidence, not just absence of objection.
+6. You may also note self-corrections to your own Round 1 claims.
+
+### Output Format
+Respond with a single JSON object (no other text):
+```json
+{
+  "agent": "{{persona.name}}",
+  "reviews": [
+    {
+      "target_claim_id": "C-003",
+      "verdict": "challenge",
+      "reasoning": "Your reasoning",
+      "evidence": [{"expert_id": "expert_02", "quote": "verbatim quote", "location": "paragraph N"}],
+      "revised_claim": null
+    }
+  ],
+  "self_corrections": []
+}
+```

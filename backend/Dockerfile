@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends git tini \
+RUN apt-get update && apt-get install -y --no-install-recommends git tini curl \
     && rm -rf /var/lib/apt/lists/*
 
 ARG GITHUB_TOKEN

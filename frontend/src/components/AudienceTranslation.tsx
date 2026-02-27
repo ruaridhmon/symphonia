@@ -72,6 +72,7 @@ export default function AudienceTranslation({
           value={selectedAudience}
           onChange={e => handleAudienceChange(e.target.value as AudienceType | '')}
           disabled={loading}
+          aria-label="Select audience for synthesis translation"
           className="text-sm rounded-lg px-3 py-1.5 transition-colors"
           style={{
             backgroundColor: 'var(--muted)',
@@ -99,8 +100,9 @@ export default function AudienceTranslation({
               cursor: 'pointer',
             }}
             title="Clear translation"
+            aria-label="Clear audience translation"
           >
-            <X size={14} />
+            <X size={14} aria-hidden="true" />
           </button>
         )}
         {loading && <Loader2 size={16} className="animate-spin" style={{ color: 'var(--accent)' }} />}

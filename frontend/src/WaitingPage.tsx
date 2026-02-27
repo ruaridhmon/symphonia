@@ -23,8 +23,15 @@ export default function WaitingPage() {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    // WebSocket setup for live synthesis notification
-    const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${new URL(API_BASE_URL).host}/ws`;
+    // WebSocket setup for live synthesis notification.
+    // API_BASE_URL may be empty (same-origin SPA) — fall back to window.location.host.
+    let wsHost: string;
+    try {
+      wsHost = API_BASE_URL ? new URL(API_BASE_URL).host : window.location.host;
+    } catch {
+      wsHost = window.location.host;
+    }
+    const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${wsHost}/ws`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 

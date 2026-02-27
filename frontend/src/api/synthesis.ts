@@ -23,18 +23,13 @@ export interface GenerateSynthesisPayload {
 }
 
 export interface GenerateSynthesisResult {
-  synthesis: string;
+  synthesis?: string;
   summary?: string;
   synthesis_json?: SynthesisData;
-  // Async job pattern: POST returns immediately with job_id; poll GET /jobs/{job_id}
-  job_id?: string;
-  status?: 'pending' | 'complete' | 'failed';
-}
-
-export interface JobStatusResult {
-  status: 'pending' | 'complete' | 'failed';
-  result: GenerateSynthesisResult | null;
-  error: string | null;
+  /** Present when synthesis runs in the background (non-mock mode) */
+  status?: string;
+  /** Human-readable message when status is present */
+  message?: string;
 }
 
 /* ── API calls ── */
@@ -54,10 +49,7 @@ export function activateVersion(versionId: number) {
   );
 }
 
-/** Generate a new synthesis for a round.
- *  Returns immediately with {job_id, status: 'pending'}.
- *  Poll pollSynthesisJob(job_id) until status === 'complete'.
- */
+/** Generate a new synthesis for a round */
 export function generateSynthesis(
   formId: number,
   roundId: number,
@@ -69,16 +61,56 @@ export function generateSynthesis(
   );
 }
 
-/** Poll the status of a background synthesis job. */
-export function pollSynthesisJob(jobId: string) {
-  return api.get<JobStatusResult>(`/jobs/${jobId}`);
-}
-
 /** Save/push the editor synthesis content */
 export function pushSummary(formId: number, summary: string) {
   return api.post<{ ok: boolean }>(`/forms/${formId}/push_summary`, {
     summary,
   });
+}
+
+/* ── Synthesis Export (backend) ── */
+
+/**
+ * Download synthesis export from the backend.
+ * Returns a Blob suitable for file-saver.
+ */
+export async function exportSynthesisFromBackend(
+  formId: number,
+  format: 'markdown' | 'json' | 'pdf'
+): Promise<{ blob: Blob; filename: string }> {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+  const bearerToken = localStorage.getItem('access_token');
+
+  function getCookie(name: string): string | null {
+    const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+  const csrfToken = getCookie('csrf_token');
+
+  const response = await fetch(
+    `${API_BASE_URL}/forms/${formId}/export_synthesis?format=${format}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+        ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}),
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Export failed: ${response.statusText}`);
+  }
+
+  const blob = await response.blob();
+
+  // Extract filename from Content-Disposition header, or use a default
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const filenameMatch = disposition.match(/filename="?([^";\n]+)"?/);
+  const filename = filenameMatch?.[1] || `synthesis-export.${format === 'json' ? 'json' : format === 'pdf' ? 'pdf' : 'md'}`;
+
+  return { blob, filename };
 }
 
 /* ── Devil's Advocate ── */
@@ -125,6 +157,39 @@ export function translateSynthesis(
   return api.post<TranslateResult>(
     `/forms/${formId}/rounds/${roundId}/translate`,
     { audience, synthesis_text: synthesisText }
+  );
+}
+
+/* ── Probe Questions ── */
+
+export type ProbeCategory =
+  | 'assumption'
+  | 'challenge'
+  | 'disagreement'
+  | 'depth'
+  | 'blind_spot'
+  | 'clarification';
+
+export interface ProbeQuestion {
+  question: string;
+  rationale: string;
+  category: ProbeCategory;
+}
+
+export interface ProbeQuestionsResult {
+  questions: ProbeQuestion[];
+  mock: boolean;
+}
+
+/** Generate AI-powered maximally-probing follow-up questions */
+export function generateProbeQuestions(
+  formId: number,
+  roundId: number,
+  synthesisText: string = ''
+) {
+  return api.post<ProbeQuestionsResult>(
+    `/forms/${formId}/rounds/${roundId}/probe-questions`,
+    { synthesis_text: synthesisText }
   );
 }
 

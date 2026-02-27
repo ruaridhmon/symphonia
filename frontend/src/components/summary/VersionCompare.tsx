@@ -1,4 +1,4 @@
-import { Fragment, useState, useMemo, useEffect, useRef } from 'react';
+import { Fragment, useState, useMemo } from 'react';
 import { GitCompareArrows, X, ChevronDown } from 'lucide-react';
 import { MarkdownRenderer } from '../index';
 import type { SynthesisVersion } from '../../types/summary';
@@ -25,25 +25,17 @@ function formatTs(iso: string | null): string {
  * Shows narrative text and key structured data differences.
  */
 export default function VersionCompare({ versions, currentVersionId, onClose }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   const sorted = useMemo(
     () => [...versions].sort((a, b) => a.version - b.version),
     [versions],
   );
 
-  // Default: right = currently selected version (or latest); left = latest version that isn't right
-  // Ensures A !== B even when currentVersionId is the second-to-last version
-  const defaultB = currentVersionId ?? sorted.at(-1)?.id ?? null;
-  const defaultA = sorted.filter(v => v.id !== defaultB).at(-1)?.id ?? sorted.at(0)?.id ?? null;
+  // Default: compare the two most recent versions, or current vs previous
+  const defaultA = sorted.length >= 2 ? sorted[sorted.length - 2].id : sorted[0]?.id ?? null;
+  const defaultB = currentVersionId ?? (sorted.length >= 1 ? sorted[sorted.length - 1].id : null);
 
   const [leftId, setLeftId] = useState<number | null>(defaultA);
   const [rightId, setRightId] = useState<number | null>(defaultB);
-
-  // Scroll into view on mount so user immediately sees the comparison panel
-  useEffect(() => {
-    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
 
   const left = versions.find(v => v.id === leftId) ?? null;
   const right = versions.find(v => v.id === rightId) ?? null;
@@ -51,7 +43,7 @@ export default function VersionCompare({ versions, currentVersionId, onClose }: 
   if (versions.length < 2) return null;
 
   return (
-    <div ref={containerRef} className="card p-4 sm:p-6">
+    <div className="card p-4 sm:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -63,8 +55,9 @@ export default function VersionCompare({ versions, currentVersionId, onClose }: 
           className="p-1.5 rounded-lg transition-colors"
           style={{ background: 'none', border: 'none', color: 'var(--muted-foreground)', cursor: 'pointer' }}
           title="Close comparison"
+          aria-label="Close version comparison"
         >
-          <X size={18} />
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
 

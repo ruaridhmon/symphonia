@@ -184,9 +184,9 @@ export default function FormEditor() {
         </p>
         <div className="space-y-3">
           {questions.map((q, i) => (
-            <div key={i} className="flex items-center gap-2">
+            <div key={i} className="flex items-start sm:items-center gap-2">
               <span
-                className="text-xs font-medium shrink-0"
+                className="text-xs font-medium shrink-0 mt-3 sm:mt-0"
                 style={{
                   color: 'var(--muted-foreground)',
                   width: '1.5rem',
@@ -198,18 +198,19 @@ export default function FormEditor() {
               <input
                 value={extractQuestionText(q)}
                 onChange={(e) => updateQuestion(i, e.target.value)}
-                className="w-full rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
+                className="w-full min-w-0 rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
                 placeholder={`Question ${i + 1}`}
               />
               {questions.length > 1 && (
                 <button
-                  className="shrink-0 p-2 rounded-lg transition-colors"
+                  className="shrink-0 p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                   style={{ color: 'var(--destructive)' }}
                   type="button"
                   onClick={() => removeQuestion(i)}
                   title="Remove question"
+                  aria-label={`Remove question ${i + 1}`}
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={16} aria-hidden="true" />
                 </button>
               )}
             </div>

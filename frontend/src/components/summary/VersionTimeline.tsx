@@ -70,23 +70,23 @@ export default function VersionTimeline({
   const hasMore = sorted.length > 3;
 
   return (
-    <div className="card p-4 sm:p-5">
-      <div className="flex items-center justify-between mb-4">
+    <div className="card p-3">
+      <div className="flex items-center justify-between mb-2">
         <h3
-          className="text-sm font-semibold flex items-center gap-2"
-          style={{ color: 'var(--foreground)' }}
+          className="text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5"
+          style={{ color: 'var(--muted-foreground)' }}
         >
-          <Clock size={15} style={{ color: 'var(--accent)' }} />
-          Version History
+          <Clock size={11} style={{ color: 'var(--accent)' }} />
+          History
         </h3>
         <span
-          className="text-xs px-2 py-0.5 rounded-full"
+          className="text-[10px] px-1.5 py-0.5 rounded-full"
           style={{
             backgroundColor: 'var(--muted)',
             color: 'var(--muted-foreground)',
           }}
         >
-          {versions.length} version{versions.length !== 1 ? 's' : ''}
+          {versions.length}
         </span>
       </div>
 
@@ -109,6 +109,8 @@ export default function VersionTimeline({
                 type="button"
                 onClick={() => onSelectVersion(v.id)}
                 className="relative w-full text-left group transition-all"
+                aria-pressed={isSelected}
+                aria-label={`Version ${v.version}${v.is_active ? ' (published)' : ''} — ${formatTimestamp(v.created_at)}`}
                 style={{
                   padding: '0.625rem 0.75rem 0.625rem 1.25rem',
                   background: 'none',

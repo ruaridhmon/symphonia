@@ -1,0 +1,128 @@
+You are evaluating **Dissent Visibility** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate syntheses. Other evaluators assess different dimensions. Your singular focus is **dissent visibility**.
+
+Your role: ensure disagreement, minority views, and uncertainty are prominently and fairly represented, not collapsed or hidden.
+
+---
+
+## Dimension: Dissent Visibility
+
+**Definition**: The degree to which disagreement, minority views, and uncertainty are prominently and fairly represented in the synthesis.
+
+**Why This Matters**: Scientific advice must preserve disagreement as diagnostic information. Collapsed dissent creates false confidence and suppresses important counterarguments that policymakers need to consider.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Synthesis Being Evaluated
+
+{{#draft.claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+  {{#counterarguments.length}}
+  Counterarguments: {{#counterarguments}}"{{.}}"{{^last}}, {{/last}}{{/counterarguments}}
+  {{/counterarguments.length}}
+{{/draft.claims}}
+
+### Areas of Disagreement
+
+{{#draft.areas_of_disagreement}}
+- "{{.}}"
+{{/draft.areas_of_disagreement}}
+
+### Explicit Conflicts
+
+{{#draft.explicit_conflicts}}
+- "{{.}}"
+{{/draft.explicit_conflicts}}
+
+---
+
+## Source Expert Responses
+
+{{#responses}}
+### {{response_id}}
+
+{{#claims.length}}
+**Claims:**
+{{#claims}}
+- "{{.}}"
+{{/claims}}
+{{/claims.length}}
+{{^claims.length}}
+**Response:**
+<expert_response id="{{response_id}}">{{response}}</expert_response>
+{{/claims.length}}
+
+---
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Dissent Visibility
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Exemplary Visibility**: All disagreements from sources are explicitly stated with equal prominence to agreements. Minority views are presented with full evidence support equivalent to majority views. Conflicts have dedicated representation. Uncertainties are prominent. No false consensus implied anywhere. |
+| **8** | **Excellent Visibility**: All major disagreements are explicit and prominent. Minority views are present with good evidence. 1-2 minor tensions could be more prominently positioned. |
+| **7** | **Good Visibility**: Disagreements are clearly visible in appropriate sections. Some minority views could have more evidence or prominence. Conflicts are identified. |
+| **6** | **Adequate Visibility**: Most disagreements are visible. Some minority views are underrepresented in evidence or placement. Conflicts are present but could be clearer. |
+| **5** | **Moderate Visibility**: Major disagreements are present but not always prominent. Some conflicts are implicit. Minority views have noticeably less evidence than majority. |
+| **4** | **Partial Visibility**: Some disagreements are noted but not emphasised. Tendency to foreground agreement. Minority views are structurally marginalised. |
+| **3** | **Weak Visibility**: Disagreements are downplayed or buried. Synthesis creates an impression of more consensus than actually exists. Few minority views are visible. |
+| **2** | **Poor Visibility**: Disagreements are largely hidden. Synthesis implies false consensus. Minority views are absent or trivialised. |
+| **1** | **Not Visible**: Dissent is effectively erased. Synthesis presents a unified view that does not exist in the sources. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ "Areas of disagreement" section is substantive, not empty
+- ✓ Minority views have same evidence quality/quantity as majority
+- ✓ "Explicit conflicts" section is populated
+- ✓ Counterarguments are listed for divided claims
+- ✗ Disagreement sections are empty or trivial
+- ✗ Language like "experts agree..." when they don't
+- ✗ Counterarguments missing for clearly divided claims
+
+---
+
+## Your Task
+
+1. **Identify all disagreements** in source responses
+2. **Check if each is prominently represented** in the synthesis
+3. **Assess structural balance**—are minority views marginalised?
+4. **Identify implicit or hidden conflicts**
+5. **Provide specific guidance** for making dissent more visible
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Multi-line analysis of dissent visibility: identify specific issues, cite claim IDs where relevant, assess overall quality against the rubric.</rationale>
+  <suggestions>
+    <suggestion>Specific actionable improvement with claim ID reference</suggestion>
+    <suggestion>Another specific improvement</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must be plain text** (no nested XML tags inside rationale).
+- **Each `<suggestion>` must be actionable** — cite the claim ID and what to change.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

@@ -1,11 +1,8 @@
 import { createPortal } from 'react-dom';
-import { useEffect, useRef, useCallback } from 'react';
 import { LoadingButton, ResponseEditor } from '../index';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import type { Round, RoundWithResponses, StructuredResponse } from '../../types/summary';
 import { extractQuestionText } from '../../utils/questions';
-
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 type Props = {
   open: boolean;
@@ -26,62 +23,7 @@ export default function ResponsesModal({
   token,
   onResponseUpdated,
 }: Props) {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-
-  // Focus trap: keep focus within the modal
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-        return;
-      }
-      if (e.key === 'Tab') {
-        const modal = modalRef.current;
-        if (!modal) return;
-        const focusable = Array.from(
-          modal.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-        );
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey) {
-          if (document.activeElement === first) {
-            e.preventDefault();
-            last.focus();
-          }
-        } else {
-          if (document.activeElement === last) {
-            e.preventDefault();
-            first.focus();
-          }
-        }
-      }
-    },
-    [onClose],
-  );
-
-  // On open: save previous focus, focus first element, add keydown listener
-  useEffect(() => {
-    if (!open) return;
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
-    const timer = setTimeout(() => {
-      const modal = modalRef.current;
-      if (modal) {
-        const first = modal.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-        first?.focus();
-      }
-    }, 50);
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('keydown', handleKeyDown);
-      // Restore focus on close
-      previousFocusRef.current?.focus();
-    };
-  }, [open, handleKeyDown]);
+  const modalRef = useFocusTrap({ active: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -114,6 +56,7 @@ export default function ResponsesModal({
             }}
             onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = 'var(--muted)'}
             onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = 'transparent'}
+            aria-label="Close responses modal"
           >
             ✕
           </button>

@@ -40,14 +40,14 @@ export default function SynthesisVersionPanel({
   if (!displayRound) return null;
 
   return (
-    <div className="card p-4">
+    <div className="card p-3">
       <h3
-        className="text-xs font-semibold uppercase tracking-wider mb-3"
+        className="text-[10px] font-semibold uppercase tracking-wider mb-2"
         style={{ color: 'var(--muted-foreground)' }}
       >
-        Synthesis Versions
-        <span className="ml-2 font-normal normal-case tracking-normal">
-          · Round {displayRound.round_number}
+        Versions
+        <span className="ml-1.5 font-normal normal-case tracking-normal">
+          · R{displayRound.round_number}
         </span>
       </h3>
 
@@ -78,10 +78,12 @@ export default function SynthesisVersionPanel({
                     cursor: 'pointer',
                   }}
                   title={`v${v.version}${v.is_active ? ' (published)' : ''} — ${formatTimestamp(v.created_at)}`}
+                  aria-pressed={isSelected}
+                  aria-label={`Version ${v.version}${v.is_active ? ' (published)' : ''}`}
                 >
                   v{v.version}
                   {v.is_active && (
-                    <CheckCircle size={12} style={{ color: 'var(--success)' }} />
+                    <CheckCircle size={12} style={{ color: 'var(--success)' }} aria-hidden="true" />
                   )}
                 </button>
               );
@@ -191,9 +193,9 @@ export function SelectedVersionContent({
   return (
     <>
       {selectedVersion.synthesis && (
-        <div className="card p-4 sm:p-6">
+        <div className="card p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
-            <h2 className="text-lg font-semibold text-foreground">
+            <h2 className="text-base font-semibold text-foreground">
               Synthesis v{selectedVersion.version}
               {selectedVersion.is_active && (
                 <span className="ml-2 text-xs font-normal px-2 py-0.5 rounded-full bg-success/10 text-success">
@@ -212,8 +214,8 @@ export function SelectedVersionContent({
       )}
 
       {selectedVersion.synthesis_json && (
-        <div className="card p-4 sm:p-6">
-          <h2 className="text-lg font-semibold mb-3 text-foreground">
+        <div className="card p-4">
+          <h2 className="text-base font-semibold mb-2 text-foreground">
             Structured Analysis (v{selectedVersion.version})
           </h2>
           <StructuredSynthesis

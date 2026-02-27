@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { ThemeToggle } from './theme';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 export default function Header() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -45,7 +50,6 @@ export default function Header() {
   return (
     <header
       className="border-b sticky top-0 z-40"
-      role="banner"
       style={{
         backgroundColor: 'var(--card)',
         borderColor: 'var(--border)',
@@ -54,8 +58,13 @@ export default function Header() {
       }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex justify-between items-center">
-        {/* Left: branding — converging waves */}
-        <div className="flex items-center gap-2.5">
+        {/* Left: branding — converging waves, clicks to home */}
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2.5"
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+          aria-label="Go to home"
+        >
           <img
             src="/logo-mark.png"
             alt="Symphonia"
@@ -63,7 +72,7 @@ export default function Header() {
           />
           <div>
             <h1
-              className="text-base font-semibold leading-tight"
+              className="text-lg font-semibold leading-tight"
               style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
             >
               Symphonia
@@ -78,10 +87,10 @@ export default function Header() {
               </p>
             )}
           </div>
-        </div>
+        </button>
 
         {/* Right: desktop layout */}
-        <nav className="hidden sm:flex items-center gap-2" aria-label="User actions">
+        <nav aria-label={t('header.primaryNavigation', 'Primary navigation')} className="hidden sm:flex items-center gap-2">
           {/* Cmd+K shortcut hint */}
           <button
             type="button"
@@ -89,17 +98,19 @@ export default function Header() {
               document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
             }}
             className="header-cmd-k-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs"
-            aria-label="Open command palette"
+            aria-label={t('header.openCommandPalette')}
           >
-            <span style={{ opacity: 0.7 }}>⌘K</span>
+            <span aria-hidden="true" style={{ opacity: 0.7 }}>⌘K</span>
           </button>
+          <LanguageSwitcher />
           <ThemeToggle />
           {user && (
             <button
               onClick={logout}
               className="header-logout-btn text-sm px-3 py-1.5 rounded-lg"
+              aria-label={t('common.logOut')}
             >
-              Log out
+              {t('common.logOut')}
             </button>
           )}
         </nav>
@@ -115,7 +126,7 @@ export default function Header() {
             cursor: 'pointer',
           }}
           onClick={() => setMenuOpen(prev => !prev)}
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-label={menuOpen ? t('header.closeMenu') : t('header.openMenu')}
           aria-expanded={menuOpen}
           aria-controls="mobile-nav-menu"
         >
@@ -124,12 +135,12 @@ export default function Header() {
       </div>
 
       {/* Mobile dropdown menu */}
-      <div
+      <nav
         ref={menuRef}
         id="mobile-nav-menu"
         className="sm:hidden overflow-hidden transition-all duration-200 ease-in-out"
         role="menu"
-        aria-label="Mobile navigation"
+        aria-label={t('header.mobileNavigation', 'Mobile navigation')}
         style={{
           maxHeight: menuOpen ? '200px' : '0',
           opacity: menuOpen ? 1 : 0,
@@ -146,19 +157,24 @@ export default function Header() {
             </p>
           )}
           <div className="flex items-center justify-between">
-            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Theme</span>
+            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('language.label')}</span>
+            <LanguageSwitcher />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('common.theme')}</span>
             <ThemeToggle />
           </div>
           {user && (
             <button
               onClick={() => { setMenuOpen(false); logout(); }}
               className="header-logout-btn text-sm text-left px-3 py-2 rounded-lg"
+              aria-label={t('common.logOut')}
             >
-              Log out
+              {t('common.logOut')}
             </button>
           )}
         </div>
-      </div>
+      </nav>
     </header>
   );
 }

@@ -65,21 +65,27 @@ export default function MinorityReport({ reports, expertLabels, totalExperts }: 
 
   return (
     <div className="minority-section fade-in">
-      <button className="structured-section-header" onClick={() => setExpanded(!expanded)}>
+      <button
+        className="structured-section-header"
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        aria-controls="minority-report-body"
+        aria-label={`Minority Report — ${reports.length} item${reports.length !== 1 ? 's' : ''}`}
+      >
         <div className="structured-section-left">
-          <span className="structured-section-emoji"><VolumeX size={16} style={{ color: 'var(--warning)' }} /></span>
+          <span className="structured-section-emoji" aria-hidden="true"><VolumeX size={16} style={{ color: 'var(--warning)' }} /></span>
           <span className="structured-section-title">Minority Report</span>
           <span className="structured-section-badge" style={{ backgroundColor: 'var(--warning)' }}>
             {reports.length}
           </span>
         </div>
-        <span className={`structured-section-chevron ${expanded ? 'expanded' : ''}`}>
+        <span className={`structured-section-chevron ${expanded ? 'expanded' : ''}`} aria-hidden="true">
           ▸
         </span>
       </button>
 
       {expanded && (
-        <div className="structured-section-body slide-down">
+        <div className="structured-section-body slide-down" id="minority-report-body" role="region" aria-label="Minority Report">
           {reports.map((report, i) => {
             const badge = getAgreementBadge(report.agreement_level);
             const minorityCount = report.expert_ids.length;
@@ -128,8 +134,10 @@ export default function MinorityReport({ reports, expertLabels, totalExperts }: 
                     <button
                       className="minority-evidence-toggle"
                       onClick={() => toggleEvidence(i)}
+                      aria-expanded={!!expandedEvidence[i]}
+                      aria-label={expandedEvidence[i] ? 'Hide supporting evidence' : 'Show supporting evidence'}
                     >
-                      <span className={`minority-evidence-chevron ${expandedEvidence[i] ? 'expanded' : ''}`}>
+                      <span className={`minority-evidence-chevron ${expandedEvidence[i] ? 'expanded' : ''}`} aria-hidden="true">
                         ▸
                       </span>
                       Supporting evidence

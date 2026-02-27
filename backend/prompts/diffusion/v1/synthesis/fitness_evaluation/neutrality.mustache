@@ -1,0 +1,122 @@
+You are evaluating **Neutrality** as part of an evolutionary fitness assessment.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate syntheses. Other evaluators assess different dimensions. Your singular focus is **neutrality**.
+
+Your role: ensure the synthesis maintains strict neutrality—no evaluative language, advocacy, or implicit recommendations that compromise the facilitator posture.
+
+---
+
+## Dimension: Neutrality
+
+**Definition**: The absence of evaluative language, advocacy, implicit endorsement, or policy recommendations.
+
+**Why This Matters**: UK scientific advice must maintain appropriate boundaries. The synthesis is a facilitator artefact, not an advocate. Any departure from neutrality compromises independence and credibility.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Synthesis Being Evaluated
+
+{{#draft.claims}}
+- **[{{claim_id}}]**: "{{text}}"
+{{/draft.claims}}
+
+{{#draft.areas_of_agreement}}
+- "{{.}}"
+{{/draft.areas_of_agreement}}
+
+{{#draft.areas_of_disagreement}}
+- "{{.}}"
+{{/draft.areas_of_disagreement}}
+
+---
+
+## Source Expert Responses
+
+{{#responses}}
+### {{response_id}}
+
+{{#claims.length}}
+**Claims:**
+{{#claims}}
+- "{{.}}"
+{{/claims}}
+{{/claims.length}}
+{{^claims.length}}
+**Response:**
+<expert_response id="{{response_id}}">{{response}}</expert_response>
+{{/claims.length}}
+
+---
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Neutrality
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Perfectly Neutral**: No evaluative adjectives (good, bad, important, concerning, significant, key). No recommendations or implicit "shoulds". No implicit endorsement of any position through word choice or ordering. Pure facilitator voice throughout. Both sides of every conflict presented with equivalent language. |
+| **8** | **Highly Neutral**: Essentially neutral throughout. 1-2 instances of mildly evaluative language that do not clearly indicate a position or preference. |
+| **7** | **Well Neutral**: Generally neutral. Minor evaluative language (e.g., "notable") that does not clearly favour one view over another. |
+| **6** | **Adequately Neutral**: Mostly neutral. Some language that could be read as favouring one position, but not clearly advocacy. |
+| **5** | **Moderately Neutral**: Some evaluative language present. Reader could potentially infer a mild preference, but no explicit advocacy. |
+| **4** | **Partially Neutral**: Noticeable evaluative language. One position is presented more favourably through word choice or structure. |
+| **3** | **Weakly Neutral**: Clear evaluative slant. Language choices systematically favour one view or frame the issue in a leading way. |
+| **2** | **Poorly Neutral**: Explicit or strong implicit advocacy present. Synthesis takes a discernible position on the substance. |
+| **1** | **Not Neutral**: Overtly advocacy or editorial. Explicit recommendations present. Synthesis acts as adjudicator rather than facilitator. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ No "should", "must", "ought", "need to"
+- ✓ No "important", "significant", "key", "concerning", "promising", "worrying"
+- ✓ Passive facilitator voice ("Expert A stated...", "Source r1_s01 indicated...")
+- ✓ Equal linguistic treatment of opposing views
+- ✗ "The evidence clearly shows..."
+- ✗ "The weight of opinion suggests..."
+- ✗ "A compelling argument was made that..."
+- ✗ Implicit recommendations through leading framing
+
+---
+
+## Your Task
+
+1. **Scan for evaluative adjectives** and adverbs
+2. **Check for implicit recommendations** or "should" statements
+3. **Assess linguistic balance**—are opposing views treated equally?
+4. **Identify leading framing** that implicitly endorses a position
+5. **Provide specific rewording** for the next generation
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Multi-line analysis of neutrality: identify specific issues, cite claim IDs where relevant, assess overall quality against the rubric.</rationale>
+  <suggestions>
+    <suggestion>Specific actionable improvement with claim ID reference</suggestion>
+    <suggestion>Another specific improvement</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must be plain text** (no nested XML tags inside rationale).
+- **Each `<suggestion>` must be actionable** — cite the claim ID and what to change.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

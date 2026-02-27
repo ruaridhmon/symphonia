@@ -72,12 +72,12 @@ const CrossMatrix = memo(function CrossMatrix({
   // Collect all expert IDs mentioned in the data
   const expertIds = useMemo(() => {
     const ids = new Set<number>();
-    for (const a of structuredData.agreements) {
-      for (const id of a.supporting_experts) ids.add(id);
+    for (const a of structuredData?.agreements || []) {
+      for (const id of a.supporting_experts || []) ids.add(id);
     }
-    for (const d of structuredData.disagreements) {
-      for (const pos of d.positions) {
-        for (const id of pos.experts) ids.add(id);
+    for (const d of structuredData?.disagreements || []) {
+      for (const pos of d.positions || []) {
+        for (const id of pos.experts || []) ids.add(id);
       }
     }
     // Also include any IDs from labels
@@ -103,8 +103,8 @@ const CrossMatrix = memo(function CrossMatrix({
     }
 
     // Agreements: if both experts appear in the same agreement, +1
-    for (const a of structuredData.agreements) {
-      const experts = a.supporting_experts;
+    for (const a of structuredData?.agreements || []) {
+      const experts = a.supporting_experts || [];
       for (let i = 0; i < experts.length; i++) {
         for (let j = i + 1; j < experts.length; j++) {
           const key = pairKey(experts[i], experts[j]);
@@ -117,13 +117,13 @@ const CrossMatrix = memo(function CrossMatrix({
     }
 
     // Disagreements: if experts are on opposing sides, -1 per pair
-    for (const d of structuredData.disagreements) {
-      const positions = d.positions;
+    for (const d of structuredData?.disagreements || []) {
+      const positions = d.positions || [];
       // Compare experts across different positions
       for (let pi = 0; pi < positions.length; pi++) {
         for (let pj = pi + 1; pj < positions.length; pj++) {
-          for (const eA of positions[pi].experts) {
-            for (const eB of positions[pj].experts) {
+          for (const eA of positions[pi].experts || []) {
+            for (const eB of positions[pj].experts || []) {
               const key = pairKey(eA, eB);
               if (rawScores[key] !== undefined) {
                 rawScores[key] -= 1;

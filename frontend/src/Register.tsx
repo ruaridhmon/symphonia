@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';
 import { Link, Navigate } from 'react-router-dom';
 import { ApiError } from './api/client';
@@ -7,7 +8,8 @@ import { LoadingButton, PasswordInput } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Register() {
-  useDocumentTitle('Register');
+  const { t } = useTranslation();
+  useDocumentTitle(t('auth.createAccount'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,18 +26,18 @@ export default function Register() {
         await apiRegister(email, password);
       } catch (e) {
         if (e instanceof ApiError) {
-          if (e.status === 409) throw new Error('An account with this email already exists.');
-          if (e.status === 422) throw new Error('Invalid email or password format.');
-          if (e.status >= 500) throw new Error('Server error — please try again later.');
-          throw new Error('Registration failed. Please try again.');
+          if (e.status === 409) throw new Error(t('auth.emailExists'));
+          if (e.status === 422) throw new Error(t('auth.invalidFormat'));
+          if (e.status >= 500) throw new Error(t('auth.serverError'));
+          throw new Error(t('auth.registrationFailed'));
         }
-        throw new Error('Unable to reach the server. Please check your connection.');
+        throw new Error(t('auth.connectionError'));
       }
 
       await login(email, password);
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+      setError(err instanceof Error ? err.message : t('auth.registrationFailed'));
     } finally {
       setIsRegistering(false);
     }
@@ -50,8 +52,9 @@ export default function Register() {
       onSubmit={handleRegister}
       className="card-lg p-8 sm:p-10 w-full space-y-5"
     >
-      <h2 className="text-base font-medium text-center" style={{ color: 'var(--muted-foreground)' }}>
-        Create Account
+      <h1 className="sr-only">{t('auth.createAccount')}</h1>
+      <h2 className="text-base font-medium text-center" aria-hidden="true" style={{ color: 'var(--muted-foreground)' }}>
+        {t('auth.createAccount')}
       </h2>
       <div aria-live="polite" aria-atomic="true">
         {error && (
@@ -70,12 +73,12 @@ export default function Register() {
       </div>
       <div className="space-y-1.5">
         <label htmlFor="register-email" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          Email address
+          {t('auth.emailLabel')}
         </label>
         <input
           id="register-email"
           type="email"
-          placeholder="you@example.com"
+          placeholder={t('auth.emailPlaceholder')}
           required
           autoComplete="email"
           value={email}
@@ -85,11 +88,11 @@ export default function Register() {
       </div>
       <div className="space-y-1.5">
         <label htmlFor="register-password" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          Password
+          {t('auth.passwordLabel')}
         </label>
         <PasswordInput
           id="register-password"
-          placeholder="••••••••"
+          placeholder={t('auth.passwordPlaceholder')}
           required
           autoComplete="new-password"
           value={password}
@@ -101,15 +104,15 @@ export default function Register() {
         variant="accent"
         size="lg"
         loading={isRegistering || isLoading}
-        loadingText="Creating account…"
+        loadingText={t('auth.creatingAccount')}
         className="w-full"
       >
-        Create Account
+        {t('auth.createAccount')}
       </LoadingButton>
       <div className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
-        Already have an account?{' '}
+        {t('auth.alreadyHaveAccount')}{' '}
         <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>
-          Sign in
+          {t('auth.signInLink')}
         </Link>
       </div>
     </form>

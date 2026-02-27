@@ -6,6 +6,7 @@ import { AuthProvider } from './AuthContext'
 import { ThemeProvider } from './theme'
 import { ToastProvider } from './components/Toast'
 import OfflineBanner from './components/OfflineBanner'
+import './i18n'
 import RouteAnnouncer from './components/RouteAnnouncer'
 import './index.css'
 

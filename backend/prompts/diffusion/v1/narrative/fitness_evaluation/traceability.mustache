@@ -1,0 +1,99 @@
+You are evaluating **Traceability** as part of an evolutionary fitness assessment for a narrative summary.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate narratives. Other evaluators assess different dimensions. Your singular focus is **traceability**.
+
+Your role: ensure every claim in the narrative can be traced back to the source synthesis via explicit citations or clear attribution, enabling verification and audit.
+
+---
+
+## Dimension: Traceability
+
+**Definition**: The degree to which every substantive claim in the narrative prose can be traced back to the synthesis ground truth via explicit citations or identifiers.
+
+**Why This Matters**: Transparent scientific advice requires complete audit trails. Experts and policymakers must be able to verify narrative statements against the consolidated synthesis claims. Missing citations in the prose undermine trust and auditability.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Narrative Being Evaluated
+
+{{draft}}
+
+---
+
+## Source Synthesis (Ground Truth)
+
+### Claims
+{{#responses}}
+{{#claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+{{/claims}}
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Traceability
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Fully Traceable**: Every substantive claim in the narrative cites its corresponding synthesis claim ID (e.g., "[C1]"). A reader can verify every sentence against the ground truth without ambiguity. |
+| **8** | **Highly Traceable**: All major claims have IDs. 1-2 minor statements lack explicit citations but are clearly linked to nearby cited claims. |
+| **7** | **Well Traceable**: 95%+ of claims have explicit citations. A few claims have clear thematic attribution but missing IDs. |
+| **6** | **Adequately Traceable**: 90-95% of claims have IDs. Some citations are to broad sections rather than specific claim IDs. |
+| **5** | **Moderately Traceable**: 80-90% of claims have citations. Audit trail has noticeable gaps in the prose. |
+| **4** | **Partially Traceable**: 70-80% of claims have citations. Multiple claims lack clear attribution. Verification is difficult. |
+| **3** | **Weakly Traceable**: 50-70% of claims have citations. Significant audit trail gaps. Attribution is often missing. |
+| **2** | **Poorly Traceable**: 30-50% of claims have citations. Most narrative content lacks verifiable attribution. |
+| **1** | **Not Traceable**: <30% of claims have citations. Provenance cannot be established. Verification is impossible. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ Presence of synthesis claim IDs in brackets (e.g., "[C1]", "[C2, C5]")
+- ✓ Every substantive paragraph/section has at least one citation
+- ✓ Audit trail supports verification from narrative back to synthesis claim
+- ✗ Claims made in the prose without any ID or specific attribution
+- ✗ Vague attributions ("Some claims...", "The synthesis indicated...") without IDs
+
+---
+
+## Your Task
+
+1. **Check each substantive claim** in the narrative for an explicit citation (e.g., claim ID)
+2. **Verify citations match** the content of the referenced synthesis claims
+3. **Identify missing citations** for key points
+4. **Test the audit trail**—can you quickly find the source for each narrative statement?
+5. **Provide specific citation guidance** for the next generation
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>Multi-line analysis of traceability: identify specific issues, cite claim IDs where relevant, assess overall quality against the rubric.</rationale>
+  <suggestions>
+    <suggestion>Specific actionable improvement with claim ID reference</suggestion>
+    <suggestion>Another specific improvement</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must be plain text** (no nested XML tags inside rationale).
+- **Each `<suggestion>` must be actionable** — cite the claim ID and what to change.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

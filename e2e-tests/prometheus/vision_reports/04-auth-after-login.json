@@ -1,0 +1,15 @@
+{
+  "screenshot_path": "/Users/hephaestus/.openclaw/workspace/projects/symphonia-repo/e2e-tests/prometheus/screenshots/04-auth-after-login.png",
+  "screenshot_name": "04-auth-after-login",
+  "verdict": "WARNING",
+  "summary": "Heuristic analysis: No errors detected",
+  "details": "DOM errors: []\nAnomalies: ['Very little visible text \u2014 possibly blank/broken page']\nConsole errors: ['[error] Failed to load resource: the server responded with a status of 405 (Method Not Allowed)']",
+  "error_detected": false,
+  "error_description": "",
+  "visual_anomalies": [
+    "Very little visible text \u2014 possibly blank/broken page"
+  ],
+  "confidence": 0.5,
+  "analysis_method": "dom_heuristic",
+  "raw_response": ""
+}

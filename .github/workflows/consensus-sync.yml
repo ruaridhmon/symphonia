@@ -1,0 +1,99 @@
+# Consensus Library Sync
+#
+# Keeps the pinned consensus library in sync with axiotic-ai/consensus@main.
+# Triggered by:
+#   1. repository_dispatch from the consensus repo (webhook/GitHub Action)
+#   2. Daily schedule as fallback (06:00 UTC)
+#   3. Manual workflow_dispatch
+#
+# When the consensus library has changed, this workflow:
+#   - Installs the latest version
+#   - Checks if requirements.txt hash changed (the git+ ref is always @main,
+#     so we detect changes via the installed package version)
+#   - Opens a PR to bump/verify the dependency
+
+name: Consensus Sync
+
+on:
+  repository_dispatch:
+    types: [consensus-update]
+  schedule:
+    # Daily at 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: "Sync consensus library"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: axiotic/redesign
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install consensus (latest main)
+        run: |
+          pip install --upgrade pip
+          pip install "consensus @ git+https://github.com/axiotic-ai/consensus.git@main"
+        env:
+          # TODO: If axiotic-ai/consensus is private, add GH_TOKEN secret
+          # with repo read scope and uncomment:
+          # GIT_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GIT_TERMINAL_PROMPT: "0"
+
+      - name: Capture installed version
+        id: version
+        run: |
+          VERSION=$(pip show consensus | grep ^Version | awk '{print $2}')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Consensus version: $VERSION"
+
+      - name: Install all backend deps (compatibility check)
+        run: |
+          pip install -r backend/requirements.txt
+        env:
+          GIT_TERMINAL_PROMPT: "0"
+
+      - name: Run backend tests with new consensus
+        run: |
+          pip install pytest pytest-asyncio
+          cd backend && python -m pytest tests/ -v --tb=short -x --timeout=60
+        env:
+          SYNTHESIS_MODE: mock
+          OPENAI_API_KEY: "sk-test-not-a-real-key"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          # Generate a pip freeze snapshot to detect version drift
+          pip freeze | grep -i consensus > /tmp/consensus-version.txt
+          echo "Consensus pinned: $(cat /tmp/consensus-version.txt)"
+          # If tests pass with new consensus, that's the signal.
+          # We create a marker file with the version for the PR.
+          echo "consensus_version=${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "deps: bump consensus to ${{ steps.version.outputs.version }}"
+          title: "deps: bump consensus library to ${{ steps.version.outputs.version }}"
+          body: |
+            Automated consensus library sync.
+
+            **Consensus version:** `${{ steps.version.outputs.version }}`
+            **Trigger:** ${{ github.event_name }}
+
+            Backend tests passed with the updated library. ✅
+          branch: deps/consensus-sync
+          base: axiotic/redesign
+          labels: dependencies,automated
+          delete-branch: true

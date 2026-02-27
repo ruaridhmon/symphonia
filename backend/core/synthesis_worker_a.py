@@ -14,13 +14,13 @@ The adapter maps between the app's data structures and the library's domain mode
 handling the mismatch between the library's frozen-dataclass ExpertResponse and the
 app's dict-based responses via a lightweight ProseResponse bridge type.
 """
+
 from __future__ import annotations
 
 import asyncio
 import logging
 import os
-import time
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 
 class FlowMode(str, Enum):
     """Delphi flow mode — determines whether AI-generated follow-ups are included."""
+
     HUMAN_ONLY = "human_only"
     AI_ASSISTED = "ai_assisted"
 
@@ -52,6 +53,7 @@ class FlowMode(str, Enum):
 @dataclass
 class Agreement:
     """A point of consensus among experts."""
+
     claim: str
     supporting_experts: List[int]
     confidence: float
@@ -61,6 +63,7 @@ class Agreement:
 @dataclass
 class Disagreement:
     """A point of divergence among experts."""
+
     topic: str
     positions: List[Dict[str, Any]]
     severity: str  # "low" | "moderate" | "high"
@@ -69,6 +72,7 @@ class Disagreement:
 @dataclass
 class Nuance:
     """A contextual qualification or uncertainty around a claim."""
+
     claim: str
     context: str
     relevant_experts: List[int]
@@ -77,6 +81,7 @@ class Nuance:
 @dataclass
 class Probe:
     """A follow-up question generated to resolve ambiguity."""
+
     question: str
     target_experts: List[int]
     rationale: str
@@ -90,6 +95,7 @@ class SynthesisResult:
     Fields are compatible with the route handler's serialisation and
     WebSocket broadcasting logic in routes.py.
     """
+
     agreements: List[Agreement]
     disagreements: List[Disagreement]
     nuances: List[Nuance]
@@ -115,14 +121,13 @@ class SynthesisResult:
 # PROGRESS CALLBACK TYPE
 # =============================================================================
 
-ProgressCallback = Optional[
-    Callable[[str, int, int], Coroutine[Any, Any, None]]
-]
+ProgressCallback = Optional[Callable[[str, int, int], Coroutine[Any, Any, None]]]
 
 
 # =============================================================================
 # SYNTHESISER PROTOCOL (for duck-typing against routes.py)
 # =============================================================================
+
 
 @runtime_checkable
 class Synthesiser(Protocol):
@@ -142,6 +147,7 @@ class Synthesiser(Protocol):
 # BRIDGE TYPE: ProseResponse
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class ProseResponse:
     """
@@ -153,6 +159,7 @@ class ProseResponse:
     This class satisfies that contract without depending on the frozen
     ``ExpertResponse`` domain model which expects structured claims/evidence.
     """
+
     expert_id: str
     response: str  # full text of the expert's answers
 
@@ -160,6 +167,7 @@ class ProseResponse:
 # =============================================================================
 # MOCK SYNTHESIS
 # =============================================================================
+
 
 class MockSynthesis:
     """Returns pre-baked synthesis results for UX testing without API costs."""
@@ -244,7 +252,10 @@ class MockSynthesis:
             analyst_reports=[
                 {
                     "index": i,
-                    "payload": {"mode": "mock", "summary": f"Mock analyst {i + 1} report"},
+                    "payload": {
+                        "mode": "mock",
+                        "summary": f"Mock analyst {i + 1} report",
+                    },
                 }
                 for i in range(self.analysts)
             ],
@@ -257,12 +268,14 @@ class MockSynthesis:
 # SYNTHESIS CONTEXT (satisfies library's SynthesisContext protocol)
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class AdapterContext:
     """
     Satisfies the ``SynthesisContext`` protocol expected by the library's
     strategy ``run()`` methods.  All attributes are explicitly typed.
     """
+
     study_id: str
     round_id: str
     question_id: str
@@ -274,6 +287,7 @@ class AdapterContext:
 # =============================================================================
 # CUSTOM EXCEPTIONS
 # =============================================================================
+
 
 class SynthesisError(Exception):
     """Base exception for synthesis adapter errors."""
@@ -294,6 +308,7 @@ class SynthesisTimeoutError(SynthesisError):
 # =============================================================================
 # LIBRARY ADAPTER
 # =============================================================================
+
 
 class ConsensusLibraryAdapter:
     """
@@ -410,6 +425,7 @@ class ConsensusLibraryAdapter:
         """Locate the consensus library's prompts directory."""
         try:
             import consensus
+
             package_dir = Path(consensus.__file__).resolve().parent
         except (ImportError, AttributeError) as exc:
             raise SynthesisConfigError(
@@ -422,13 +438,16 @@ class ConsensusLibraryAdapter:
             return prompts_dir
 
         # Fallback: adjacent symphonia repo (dev-mode install)
-        fallback = Path(__file__).resolve().parent.parent.parent.parent / "symphonia" / "prompts"
+        fallback = (
+            Path(__file__).resolve().parent.parent.parent.parent
+            / "symphonia"
+            / "prompts"
+        )
         if fallback.is_dir():
             return fallback
 
         raise SynthesisConfigError(
-            f"Could not find prompts directory. "
-            f"Checked: {prompts_dir}, {fallback}"
+            f"Could not find prompts directory. Checked: {prompts_dir}, {fallback}"
         )
 
     # --------------------------------------------------------- response prep
@@ -550,9 +569,7 @@ class ConsensusLibraryAdapter:
         return result
 
     # --------------------------------------------------------- result mapping
-    def _map_to_app_format(
-        self, result: Any, num_responses: int
-    ) -> SynthesisResult:
+    def _map_to_app_format(self, result: Any, num_responses: int) -> SynthesisResult:
         """
         Map a library ``PipelineResult`` to the app's ``SynthesisResult``.
 
@@ -570,61 +587,74 @@ class ConsensusLibraryAdapter:
 
             if claim.agreement_level in ("consensus", "majority"):
                 confidence = 0.9 if claim.agreement_level == "consensus" else 0.7
-                evidence = "; ".join(
-                    s.quote for s in claim.sources if s.quote
+                evidence = "; ".join(s.quote for s in claim.sources if s.quote)
+                agreements.append(
+                    Agreement(
+                        claim=claim.text,
+                        supporting_experts=source_ids
+                        or list(range(1, num_responses + 1)),
+                        confidence=confidence,
+                        evidence_summary=evidence
+                        or "Synthesised from expert responses",
+                    )
                 )
-                agreements.append(Agreement(
-                    claim=claim.text,
-                    supporting_experts=source_ids or list(range(1, num_responses + 1)),
-                    confidence=confidence,
-                    evidence_summary=evidence or "Synthesised from expert responses",
-                ))
             else:
                 # "divided" or "minority" → disagreement
                 positions: List[Dict[str, Any]] = [
                     {
                         "position": claim.text,
                         "experts": source_ids,
-                        "evidence": "; ".join(s.quote for s in claim.sources if s.quote) or "From synthesis",
+                        "evidence": "; ".join(s.quote for s in claim.sources if s.quote)
+                        or "From synthesis",
                     }
                 ]
                 for ca in claim.counterarguments:
-                    positions.append({
-                        "position": ca,
-                        "experts": [],
-                        "evidence": "Counterargument identified in synthesis",
-                    })
+                    positions.append(
+                        {
+                            "position": ca,
+                            "experts": [],
+                            "evidence": "Counterargument identified in synthesis",
+                        }
+                    )
                 topic = claim.text[:80] + "…" if len(claim.text) > 80 else claim.text
-                disagreements.append(Disagreement(
-                    topic=topic,
-                    positions=positions,
-                    severity="moderate",
-                ))
+                disagreements.append(
+                    Disagreement(
+                        topic=topic,
+                        positions=positions,
+                        severity="moderate",
+                    )
+                )
 
         # --- Areas of agreement (deduplicated) ---
         existing_agreement_claims = {a.claim for a in agreements}
         for area in synthesis.areas_of_agreement:
             if area not in existing_agreement_claims:
-                agreements.append(Agreement(
-                    claim=area,
-                    supporting_experts=list(range(1, num_responses + 1)),
-                    confidence=0.8,
-                    evidence_summary="Identified as area of agreement",
-                ))
+                agreements.append(
+                    Agreement(
+                        claim=area,
+                        supporting_experts=list(range(1, num_responses + 1)),
+                        confidence=0.8,
+                        evidence_summary="Identified as area of agreement",
+                    )
+                )
 
         # --- Areas of disagreement (deduplicated) ---
         existing_disagreement_topics = {d.topic for d in disagreements}
         for area in synthesis.areas_of_disagreement:
             if area not in existing_disagreement_topics:
-                disagreements.append(Disagreement(
-                    topic=area,
-                    positions=[{
-                        "position": area,
-                        "experts": [],
-                        "evidence": "Identified as area of disagreement",
-                    }],
-                    severity="moderate",
-                ))
+                disagreements.append(
+                    Disagreement(
+                        topic=area,
+                        positions=[
+                            {
+                                "position": area,
+                                "experts": [],
+                                "evidence": "Identified as area of disagreement",
+                            }
+                        ],
+                        severity="moderate",
+                    )
+                )
 
         # --- Uncertainties → Nuances ---
         nuances: List[Nuance] = [
@@ -639,10 +669,14 @@ class ConsensusLibraryAdapter:
         # --- Confidence map ---
         num_claims = len(synthesis.claims)
         if num_claims > 0:
-            consensus_ratio = sum(
-                1 for c in synthesis.claims
-                if c.agreement_level in ("consensus", "majority")
-            ) / num_claims
+            consensus_ratio = (
+                sum(
+                    1
+                    for c in synthesis.claims
+                    if c.agreement_level in ("consensus", "majority")
+                )
+                / num_claims
+            )
         else:
             consensus_ratio = 0.5
 
@@ -679,8 +713,7 @@ class ConsensusLibraryAdapter:
                     "text": c.text,
                     "agreement_level": c.agreement_level,
                     "sources": [
-                        {"id": s.source_id, "quote": s.quote}
-                        for s in c.sources
+                        {"id": s.source_id, "quote": s.quote} for s in c.sources
                     ],
                     "counterarguments": list(c.counterarguments),
                 }
@@ -712,6 +745,7 @@ class ConsensusLibraryAdapter:
 # =============================================================================
 # FACTORY FUNCTION
 # =============================================================================
+
 
 def get_synthesiser(
     api_key: Optional[str] = None,
@@ -749,9 +783,7 @@ def get_synthesiser(
                    in the consensus library).
     """
     effective_mode = (
-        mode
-        or strategy
-        or os.getenv("SYNTHESIS_MODE", "simple").strip().lower()
+        mode or strategy or os.getenv("SYNTHESIS_MODE", "simple").strip().lower()
     )
 
     if effective_mode == "mock":

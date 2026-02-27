@@ -1,0 +1,129 @@
+You are evaluating **Completeness** as part of an evolutionary fitness assessment for a narrative summary.
+
+## Your Role in the Evolutionary Process
+
+You are one fitness evaluator in a multi-objective evolutionary system. Your feedback will guide the next generation of candidate narratives. Other evaluators assess different dimensions. Your singular focus is **completeness**.
+
+Your role: ensure the narrative prose summary addresses all substantive content from the synthesis claims and reflects the balance of the expert consultation.
+
+---
+
+## Dimension: Completeness
+
+**Definition**: The degree to which the narrative summary addresses all major claims, agreements, disagreements, and uncertainties from the synthesis without omission.
+
+**Why This Matters**: A narrative summary must be comprehensive. Omitting major themes or conflicting viewpoints from the consolidated synthesis undermines the utility of the Delphi process.
+
+---
+
+## Question Being Addressed
+
+{{question}}
+
+---
+
+## Narrative Being Evaluated
+
+{{draft}}
+
+---
+
+## Source Synthesis (Ground Truth)
+
+### Claims
+{{#responses}}
+{{#claims}}
+- **[{{claim_id}}]** ({{agreement_level}}): "{{text}}"
+{{/claims}}
+
+### Areas of Agreement
+{{#areas_of_agreement}}
+- "{{.}}"
+{{/areas_of_agreement}}
+
+### Areas of Disagreement
+{{#areas_of_disagreement}}
+- "{{.}}"
+{{/areas_of_disagreement}}
+
+### Uncertainties
+{{#uncertainties}}
+- "{{.}}"
+{{/uncertainties}}
+{{/responses}}
+
+---
+
+## Evaluation Rubric: Completeness
+
+| Band | Descriptor |
+|------|------------|
+| **9** | **Fully Complete**: All synthesis claims and themes are thoroughly represented in the narrative. Balance between agreement and disagreement is perfectly preserved. All uncertainties are captured. |
+| **8** | **Highly Complete**: All major synthesis claims are represented. 1-2 minor claims or uncertainties could be more prominent. |
+| **7** | **Well Complete**: All major themes addressed. Some secondary claims are implicit or brief. No major omissions. |
+| **6** | **Adequately Complete**: Most major themes addressed. Some substantive claims are underrepresented. |
+| **5** | **Moderately Complete**: Major themes addressed but with gaps. Some significant claims are missing or minimised. |
+| **4** | **Partially Complete**: Several major claims or themes from the synthesis are not addressed in the narrative. |
+| **3** | **Incomplete**: Multiple major sections of the synthesis are not represented. Significant content is missing. |
+| **2** | **Very Incomplete**: Most synthesis content is not addressed. Narrative is highly selective and fragmentary. |
+| **1** | **Minimal**: Synthesis content is barely addressed. Most claims are ignored. |
+
+**Score Conversion**: Bands 9,8→5 | Bands 7,6→4 | Band 5→3 | Bands 4,3→2 | Bands 2,1→1
+
+**Key Indicators to Check**:
+- ✓ All "consensus" and "majority" claims are present
+- ✓ Major areas of disagreement are included
+- ✓ Uncertainties are reflected
+- ✓ No major thematic section of the synthesis is ignored
+- ✗ Substantive claims entirely missing from prose
+- ✗ Disagreement areas suppressed in favor of consensus
+
+---
+
+## Your Task
+
+1. **Review the Source Synthesis** to identify all major themes and claims
+2. **Check each theme/claim** is covered in the narrative
+3. **Identify gaps**—what substantive content from the synthesis is missing?
+4. **Provide specific guidance** on what to add to the narrative
+
+---
+
+## Required Output Format
+
+Output ONLY the following XML block. Do NOT include preamble, commentary, or markdown code fences.
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>The narrative covers the main agreement areas well but drops several synthesis claims entirely. Claims C7, C11, and C14 from the synthesis have no corresponding content in the narrative. The uncertainties section from the synthesis is compressed into a single sentence, losing important nuance about methodological limitations.</rationale>
+  <suggestions>
+    <suggestion>Claims C7, C11, and C14 are absent from the narrative; incorporate their content in the relevant sections</suggestion>
+    <suggestion>Expand the uncertainties discussion — the synthesis flags three distinct types of uncertainty that are collapsed into one sentence</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+### ⚠️ CRITICAL CONSTRAINTS
+
+- **Output ONLY the `<fitness_evaluation>` XML block.** No preamble, no markdown fences, no commentary.
+- **`<score>` must be an integer from 1-5** (use the Score Conversion table in the rubric above).
+- **`<rationale>` must reference claim IDs** when identifying issues.
+- **Each `<suggestion>` must be actionable** — cite the specific claim IDs and what to change.
+
+### Concrete Example
+
+```xml
+<fitness_evaluation>
+  <score>3</score>
+  <rationale>The narrative covers the main agreement areas well but drops several synthesis claims entirely. Claims C7, C11, and C14 from the synthesis have no corresponding content in the narrative. The uncertainties section from the synthesis is compressed into a single sentence, losing important nuance about methodological limitations.</rationale>
+  <suggestions>
+    <suggestion>Claims C7, C11, and C14 are absent from the narrative; incorporate their content in the relevant sections</suggestion>
+    <suggestion>Expand the uncertainties discussion — the synthesis flags three distinct types of uncertainty that are collapsed into one sentence</suggestion>
+  </suggestions>
+</fitness_evaluation>
+```
+
+**Remember**: Your feedback guides the next generation. Be specific about what to improve and how.
+
+Begin your evaluation (output raw XML only, starting with `<fitness_evaluation>`):

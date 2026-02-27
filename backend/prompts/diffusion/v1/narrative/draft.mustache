@@ -1,0 +1,38 @@
+You are summarizing the results of a multi-expert consultation.
+
+## Task
+Write a cohesive narrative synthesis that weaves together the agreed-upon claims, areas of debate, and identified uncertainties.
+
+## Input Context
+{{#synthesis}}
+### Synthesized Claims
+{{#claims_with_ids}}
+- {{labelled_text}} (Agreement: {{agreement_level}})
+{{/claims_with_ids}}
+
+### Areas of Agreement
+{{#areas_of_agreement}}
+- {{.}}
+{{/areas_of_agreement}}
+
+### Areas of Disagreement
+{{#areas_of_disagreement}}
+- {{.}}
+{{/areas_of_disagreement}}
+
+### Uncertainties
+{{#uncertainties}}
+- {{.}}
+{{/uncertainties}}
+{{/synthesis}}
+
+## Instructions
+1. Write a fluent, professional summary (approx. 300-500 words).
+2. Do not just list the claims; weave them into a coherent story about the expert consensus.
+3. Highlight the tension between agreement and disagreement.
+4. Maintain a neutral, facilitator tone.
+5. Do not introduce new information not present in the claims.
+6. Include inline citations using claim IDs (e.g., [C1, C3]) after each substantive statement. Every factual assertion should reference at least one claim ID from the list above.
+
+## Output Format
+Return ONLY the narrative text with inline citation markers. Do not use Markdown formatting or headings.

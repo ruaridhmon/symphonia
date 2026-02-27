@@ -131,8 +131,8 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="flex-1 px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto space-y-6">
-      <div className="max-w-3xl mx-auto bounce-in">
+    <div className="flex-1 px-4 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto space-y-6 overflow-x-hidden">
+      <div className="max-w-3xl mx-auto bounce-in overflow-x-hidden">
         <SynthesisDisplay
           content={html}
           title="Final Synthesis"

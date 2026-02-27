@@ -264,6 +264,8 @@ export default function VoiceMirroring({
                       cursor: 'pointer',
                       border: 'none',
                     }}
+                    aria-pressed={isActive}
+                    aria-label={isActive ? 'Switch to original response' : 'Switch to AI-clarified response'}
                   >
                     {isActive ? (
                       <>

@@ -77,6 +77,8 @@ interface SettingsState {
   convergence_threshold: string;
   default_anonymous: string;
   allow_late_join: string;
+  registration_mode: string;
+  allowed_domains: string;
 }
 
 const DEFAULTS: SettingsState = {
@@ -87,6 +89,8 @@ const DEFAULTS: SettingsState = {
   convergence_threshold: '70',
   default_anonymous: 'false',
   allow_late_join: 'true',
+  registration_mode: 'open',
+  allowed_domains: '',
 };
 
 /* ── Styled input focus helpers ───────────────────────────────── */
@@ -181,7 +185,7 @@ export default function AdminSettings() {
         {/* Back */}
         <button
           type="button"
-          onClick={() => navigate('/admin')}
+          onClick={() => navigate('/')}
           className="inline-flex items-center gap-1.5 text-sm mb-6"
           style={{
             color: 'var(--muted-foreground)',
@@ -476,6 +480,85 @@ export default function AdminSettings() {
                     onChange={v => update('allow_late_join', v ? 'true' : 'false')}
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* ── Section: Registration Controls ──────────────────── */}
+            <div className="rounded-lg p-6 sm:p-8" style={cardStyle}>
+              <div className="flex items-center gap-2 mb-5">
+                <User size={18} style={{ color: 'var(--accent)' }} />
+                <h2
+                  className="text-base font-semibold"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  Registration
+                </h2>
+              </div>
+
+              <div className="space-y-4">
+                {/* Registration Mode */}
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    Registration Mode
+                  </label>
+                  <p
+                    className="text-xs mb-2"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  >
+                    Controls who can create new accounts on this platform.
+                  </p>
+                  <select
+                    value={settings.registration_mode}
+                    onChange={e => update('registration_mode', e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-sm"
+                    style={{
+                      border: '1px solid var(--input)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                    }}
+                    onFocus={focusStyle}
+                    onBlur={blurStyle}
+                  >
+                    <option value="open">Open (anyone can register)</option>
+                    <option value="domain_restricted">Domain-restricted (approved email domains only)</option>
+                    <option value="invite_only">Invite-only (registration disabled)</option>
+                  </select>
+                </div>
+
+                {/* Allowed Domains (only shown for domain_restricted) */}
+                {settings.registration_mode === 'domain_restricted' && (
+                  <div>
+                    <label
+                      className="block text-sm font-medium mb-1"
+                      style={{ color: 'var(--foreground)' }}
+                    >
+                      Allowed Email Domains
+                    </label>
+                    <p
+                      className="text-xs mb-2"
+                      style={{ color: 'var(--muted-foreground)' }}
+                    >
+                      Comma-separated list of allowed domains (e.g. gov.uk, ed.ac.uk).
+                    </p>
+                    <input
+                      type="text"
+                      value={settings.allowed_domains}
+                      onChange={e => update('allowed_domains', e.target.value)}
+                      placeholder="e.g. gov.uk, ed.ac.uk, axiotic.ai"
+                      className="w-full px-3 py-2 rounded-lg text-sm"
+                      style={{
+                        border: '1px solid var(--input)',
+                        backgroundColor: 'var(--background)',
+                        color: 'var(--foreground)',
+                      }}
+                      onFocus={focusStyle}
+                      onBlur={blurStyle}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
