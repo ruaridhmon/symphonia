@@ -46,6 +46,19 @@ export default defineConfig({
 
   globalSetup: './e2e/global-setup.ts',
 
+  // In CI there is no running backend — build the frontend and serve it via
+  // `vite preview` so smoke tests (which only test static UI) can run.
+  webServer: process.env.CI
+    ? {
+        command: 'npm run build && npx vite preview --port 8767 --strictPort',
+        url: baseURL,
+        reuseExistingServer: false,
+        timeout: 120_000,
+        stdout: 'ignore',
+        stderr: 'pipe',
+      }
+    : undefined,
+
   use: {
     baseURL,
     trace: 'on-first-retry',

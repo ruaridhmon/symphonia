@@ -4,28 +4,31 @@ Symphonia Backend - Expert Consensus Platform
 Protected by Cloudflare Access.
 """
 
-import os
+# Standard library imports — must come before load_dotenv() call
 import logging
-from dotenv import load_dotenv
-
-load_dotenv()  # Load .env from the backend directory
+import os
 import shutil
 import traceback
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
-from starlette.routing import Match, Mount
-from slowapi.errors import RateLimitExceeded
-from core import routes as core_routes
-from core.db import engine, SessionLocal
-from core.models import Base, User, FormModel, InviteCode
-from core.auth import get_password_hash
-from core.rate_limiter import limiter
-from core.ws import ws_manager
+
+from dotenv import load_dotenv
+
+load_dotenv()  # Load .env from the backend directory — must precede local imports
+
+from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from fastapi.responses import FileResponse, JSONResponse  # noqa: E402
+from fastapi.staticfiles import StaticFiles  # noqa: E402
+from slowapi.errors import RateLimitExceeded  # noqa: E402
+from starlette.routing import Match, Mount  # noqa: E402
+from core import routes as core_routes  # noqa: E402
+from core.auth import get_password_hash  # noqa: E402
+from core.db import engine, SessionLocal  # noqa: E402
+from core.models import Base, FormModel, InviteCode, User  # noqa: E402
+from core.rate_limiter import limiter  # noqa: E402
+from core.ws import ws_manager  # noqa: E402
 
 logger = logging.getLogger("symphonia")
 

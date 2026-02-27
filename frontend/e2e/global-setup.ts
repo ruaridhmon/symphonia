@@ -1,19 +1,32 @@
 import { chromium, type FullConfig } from '@playwright/test';
-import * as fs from 'fs';
-import * as path from 'path';
+import { mkdirSync, writeFileSync } from 'fs';
+import { dirname } from 'path';
 
 /**
  * Global setup: logs in as admin and saves browser state
  * (localStorage, cookies) to a JSON file that all tests can reuse.
  *
- * If the backend is unavailable (e.g. in CI running smoke-only tests
- * against the Vite dev server), authentication is skipped gracefully
- * and an empty storage state is written so Playwright doesn't crash.
+ * If the backend server is unreachable (e.g. CI without a running backend)
+ * the setup writes an empty auth state and exits cleanly.
+ * Smoke tests that override storageState are unaffected.
  */
 const STORAGE_STATE_PATH = 'e2e/.auth/admin.json';
 
 async function globalSetup(config: FullConfig) {
-  const baseURL = config.projects[0].use.baseURL ?? 'http://localhost:8767';
+  // Ensure the auth directory exists before anything else
+  mkdirSync(dirname(STORAGE_STATE_PATH), { recursive: true });
+
+  // In CI without an explicit backend URL, skip the login attempt entirely.
+  // Smoke tests override storageState anyway, so empty auth is fine.
+  if (process.env.CI && !process.env.E2E_BACKEND_URL) {
+    console.log('ℹ CI mode: no backend configured — writing empty auth state.');
+    writeFileSync(STORAGE_STATE_PATH, JSON.stringify({ cookies: [], origins: [] }));
+    return;
+  }
+
+  const baseURL = process.env.E2E_BACKEND_URL
+    ?? config.projects[0].use.baseURL
+    ?? 'http://localhost:8767';
 
   // Ensure the auth directory exists
   const authDir = path.dirname(STORAGE_STATE_PATH);
@@ -36,20 +49,11 @@ async function globalSetup(config: FullConfig) {
 
     // Save storage state (localStorage + cookies)
     await page.context().storageState({ path: STORAGE_STATE_PATH });
-
-    console.log('Global setup: admin auth saved to', STORAGE_STATE_PATH);
+    console.log('✓ Admin auth saved to', STORAGE_STATE_PATH);
   } catch (err) {
-    // Backend not available (e.g. CI running smoke tests against Vite dev server only)
-    console.warn(
-      'Global setup: could not authenticate (backend may not be running).',
-      'Writing empty storage state. Smoke tests use { storageState: empty } so this is fine.',
-    );
-
-    // Write empty storage state so tests that reference the file don't crash
-    fs.writeFileSync(
-      STORAGE_STATE_PATH,
-      JSON.stringify({ cookies: [], origins: [] }),
-    );
+    // Server unreachable — write empty state so tests can still run.
+    console.warn(`⚠ Global setup: login failed, writing empty auth state. (${err})`);
+    writeFileSync(STORAGE_STATE_PATH, JSON.stringify({ cookies: [], origins: [] }));
   } finally {
     await browser.close();
   }

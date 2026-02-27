@@ -615,7 +615,7 @@ def submit_response(
 ):
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
 
@@ -678,7 +678,7 @@ def has_submitted(
 ):
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
     if not active_round:
@@ -708,7 +708,7 @@ def get_my_response(
 ):
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
     if not active_round:
@@ -753,7 +753,7 @@ def save_draft(
     """Upsert a draft for the active round. Called by the frontend auto-save."""
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
     if not active_round:
@@ -804,7 +804,7 @@ def get_draft(
     """Load a saved draft for the active round (if any)."""
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
     if not active_round:
@@ -848,7 +848,7 @@ def delete_draft(
     """Delete a draft after successful submission."""
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
     if not active_round:
@@ -966,7 +966,7 @@ async def push_summary(
 
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
 
@@ -1009,7 +1009,7 @@ def generate_summary(
 ):
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
 
@@ -1179,7 +1179,7 @@ async def synthesise_committee(
     """
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
 
@@ -1637,7 +1637,9 @@ If expert discussion comments are included above, integrate those perspectives i
                     cleaned = raw_output.strip()
                     if cleaned.startswith("```"):
                         lines = cleaned.split("\n")
-                        lines = [ln for ln in lines if not ln.strip().startswith("```")]
+                        lines = [
+                            line for line in lines if not line.strip().startswith("```")
+                        ]
                         cleaned = "\n".join(lines)
                     parsed = json.loads(cleaned)
 
@@ -2356,7 +2358,7 @@ def get_follow_ups(
     """Get all follow-up questions for the active round of a form."""
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
 
@@ -2429,7 +2431,7 @@ def create_follow_up(
     """Create a new follow-up question on the active round."""
     active_round = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
 
@@ -2781,7 +2783,7 @@ def get_forms(
 
         active_round = (
             db.query(RoundModel)
-            .filter(RoundModel.form_id == f.id, RoundModel.is_active == True)
+            .filter(RoundModel.form_id == f.id, RoundModel.is_active)
             .first()
         )
 
@@ -2824,7 +2826,7 @@ def unlock_form(
     # Try exact match first (handles both old-format and new-format codes)
     form = (
         db.query(FormModel)
-        .filter(FormModel.join_code == raw_code, FormModel.allow_join == True)
+        .filter(FormModel.join_code == raw_code, FormModel.allow_join)
         .first()
     )
 
@@ -2832,7 +2834,7 @@ def unlock_form(
     if not form:
         normalized = normalize_join_code(raw_code)
         if normalized:
-            all_forms = db.query(FormModel).filter(FormModel.allow_join == True).all()
+            all_forms = db.query(FormModel).filter(FormModel.allow_join).all()
             for f in all_forms:
                 if normalize_join_code(f.join_code) == normalized:
                     form = f
@@ -3100,7 +3102,7 @@ def get_active_round(
 ):
     active = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
     if not active:
@@ -3143,7 +3145,7 @@ def open_next_round(
 ):
     current = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
 
@@ -3252,7 +3254,7 @@ def form_responses(
     if not all_rounds:
         active = (
             db.query(RoundModel)
-            .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+            .filter(RoundModel.form_id == form_id, RoundModel.is_active)
             .first()
         )
         if active:
@@ -3478,7 +3480,7 @@ def synthesise_simple(
 ):
     active = (
         db.query(RoundModel)
-        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
         .first()
     )
 
@@ -4409,7 +4411,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
         cleaned = raw_output.strip()
         if cleaned.startswith("```"):
             lines = cleaned.split("\n")
-            lines = [ln for ln in lines if not ln.strip().startswith("```")]
+            lines = [line for line in lines if not line.strip().startswith("```")]
             cleaned = "\n".join(lines)
 
         parsed = json.loads(cleaned)
@@ -4934,7 +4936,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
         cleaned = raw_output.strip()
         if cleaned.startswith("```"):
             lines = cleaned.split("\n")
-            lines = [ln for ln in lines if not ln.strip().startswith("```")]
+            lines = [line for line in lines if not line.strip().startswith("```")]
             cleaned = "\n".join(lines)
 
         parsed = json.loads(cleaned)
@@ -5578,7 +5580,7 @@ def ai_suggest(
         cleaned = raw_output.strip()
         if cleaned.startswith("```"):
             lines = cleaned.split("\n")
-            lines = [ln for ln in lines if not ln.strip().startswith("```")]
+            lines = [line for line in lines if not line.strip().startswith("```")]
             cleaned = "\n".join(lines)
 
         parsed = json.loads(cleaned)
@@ -5668,7 +5670,7 @@ def join_form(
     invite = db.query(InviteCode).filter(InviteCode.code == raw_code).first()
     if not invite and normalized:
         # Try normalized match
-        all_invites = db.query(InviteCode).filter(InviteCode.is_active == True).all()
+        all_invites = db.query(InviteCode).filter(InviteCode.is_active).all()
         for ic in all_invites:
             if normalize_join_code(ic.code) == normalized:
                 invite = ic
@@ -5726,12 +5728,12 @@ def join_form(
         db.query(FormModel)
         .filter(
             FormModel.join_code == raw_code,
-            FormModel.allow_join == True,
+            FormModel.allow_join,
         )
         .first()
     )
     if not form and normalized:
-        all_forms = db.query(FormModel).filter(FormModel.allow_join == True).all()
+        all_forms = db.query(FormModel).filter(FormModel.allow_join).all()
         for f in all_forms:
             if normalize_join_code(f.join_code) == normalized:
                 form = f
@@ -6136,7 +6138,7 @@ def magic_join(
     # Try invite_codes table first
     invite = db.query(InviteCode).filter(InviteCode.code == raw_code).first()
     if not invite and normalized:
-        all_invites = db.query(InviteCode).filter(InviteCode.is_active == True).all()
+        all_invites = db.query(InviteCode).filter(InviteCode.is_active).all()
         for ic in all_invites:
             if normalize_join_code(ic.code) == normalized:
                 invite = ic
@@ -6179,11 +6181,11 @@ def magic_join(
     # Fall back to legacy
     form = (
         db.query(FormModel)
-        .filter(FormModel.join_code == raw_code, FormModel.allow_join == True)
+        .filter(FormModel.join_code == raw_code, FormModel.allow_join)
         .first()
     )
     if not form and normalized:
-        all_forms = db.query(FormModel).filter(FormModel.allow_join == True).all()
+        all_forms = db.query(FormModel).filter(FormModel.allow_join).all()
         for f in all_forms:
             if normalize_join_code(f.join_code) == normalized:
                 form = f
