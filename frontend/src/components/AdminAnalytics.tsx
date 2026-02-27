@@ -697,34 +697,36 @@ export default function AdminAnalytics() {
               ariaLabel="Bar chart showing response rates per form"
             >
               {barData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={barData} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
-                    <CartesianGrid vertical={false} stroke={GRID_STROKE} strokeDasharray="3 3" />
+                <ResponsiveContainer width="100%" height={Math.max(240, barData.length * 38)}>
+                  <BarChart
+                    data={barData}
+                    layout="vertical"
+                    margin={{ top: 4, right: 40, bottom: 4, left: 8 }}
+                  >
+                    <CartesianGrid horizontal={false} stroke={GRID_STROKE} strokeDasharray="3 3" />
                     <XAxis
-                      dataKey="name"
+                      type="number"
+                      domain={[0, 100]}
+                      tickFormatter={(v: number) => `${v}%`}
                       tick={TICK_STYLE}
-                      interval={0}
-                      angle={-20}
-                      textAnchor="end"
-                      height={56}
-                      axisLine={{ stroke: GRID_STROKE }}
+                      axisLine={false}
                       tickLine={false}
                     />
                     <YAxis
-                      tick={TICK_STYLE}
-                      domain={[0, 100]}
-                      tickFormatter={(v: number) => `${v}%`}
+                      type="category"
+                      dataKey="name"
+                      tick={{ fontSize: 12, fill: 'var(--muted-foreground, #64748b)' }}
                       axisLine={false}
                       tickLine={false}
-                      width={40}
+                      width={160}
                     />
                     <Tooltip content={<ChartTooltip />} cursor={{ fill: '#f1f5f9' }} />
                     <Bar
                       dataKey="rate"
                       name="Response Rate (%)"
                       fill={PALETTE.blue}
-                      radius={[6, 6, 0, 0]}
-                      maxBarSize={48}
+                      radius={[0, 6, 6, 0]}
+                      maxBarSize={28}
                     />
                   </BarChart>
                 </ResponsiveContainer>

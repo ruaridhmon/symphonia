@@ -198,6 +198,32 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* ── Join consultation banner ── */}
+        <div
+          className="mb-4 rounded-xl flex items-center justify-between gap-4 px-5 py-4"
+          style={{
+            background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), color-mix(in srgb, var(--accent) 3%, transparent))',
+            border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
+          }}
+        >
+          <div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+              Joining a consultation as an expert?
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+              Enter the join code you received from the facilitator
+            </p>
+          </div>
+          <LoadingButton
+            variant="accent"
+            size="sm"
+            onClick={() => navigate('/join')}
+            style={{ flexShrink: 0 }}
+          >
+            🎟️ Enter join code
+          </LoadingButton>
+        </div>
+
         {/* ── Analytics section (toggleable) ── */}
         <div
           ref={analyticsRef}
@@ -652,14 +678,6 @@ export default function AdminDashboard() {
         )}
       </Container>
 
-      {/* ── Participate as Expert ── */}
-      <Container className="mt-6 pb-12">
-        <div className="flex justify-end">
-          <LoadingButton variant="ghost" size="sm" onClick={() => navigate('/join')}>
-            🎟️ Join a consultation as expert
-          </LoadingButton>
-        </div>
-      </Container>
     </section>
   );
 }

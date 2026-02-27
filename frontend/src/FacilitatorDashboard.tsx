@@ -275,10 +275,29 @@ export default function FacilitatorDashboard() {
           )}
         </div>
 
-        {/* Join as Expert */}
-        <div className="flex justify-end mb-4">
-          <LoadingButton variant="accent" size="sm" onClick={() => navigate('/join')}>
-            🎟️ Join a consultation
+        {/* ── Join consultation banner ── */}
+        <div
+          className="mb-6 rounded-xl flex items-center justify-between gap-4 px-5 py-4"
+          style={{
+            background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), color-mix(in srgb, var(--accent) 3%, transparent))',
+            border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
+          }}
+        >
+          <div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+              Joining another consultation as an expert?
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+              Enter the join code you received from the facilitator
+            </p>
+          </div>
+          <LoadingButton
+            variant="accent"
+            size="sm"
+            onClick={() => navigate('/join')}
+            style={{ flexShrink: 0 }}
+          >
+            🎟️ Enter join code
           </LoadingButton>
         </div>
 
