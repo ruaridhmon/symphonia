@@ -156,8 +156,17 @@ function StatCard({ label, value, sub, icon, accentColor }: StatCardProps) {
             {label}
           </p>
           <p
-            className="text-2xl font-bold tracking-tight truncate"
-            style={{ color: 'var(--foreground, #0f172a)', lineHeight: 1.2 }}
+            className="font-bold tracking-tight"
+            style={{
+              color: 'var(--foreground, #0f172a)',
+              lineHeight: 1.25,
+              fontSize:
+                typeof value === 'string' && value.length > 12
+                  ? value.length > 20 ? '0.9rem' : '1.1rem'
+                  : '1.5rem',
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+            }}
           >
             {value}
           </p>
