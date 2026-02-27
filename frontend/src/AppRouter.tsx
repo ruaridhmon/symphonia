@@ -132,6 +132,14 @@ export default function Router() {
               }
             />
             <Route
+              path="/join"
+              element={
+                <ErrorBoundary fallbackTitle="Join Error">
+                  <JoinPage />
+                </ErrorBoundary>
+              }
+            />
+            <Route
               path="/join/:code"
               element={
                 <ErrorBoundary fallbackTitle="Join Error">

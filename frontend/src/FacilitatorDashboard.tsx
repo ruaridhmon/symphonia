@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Clock, FileText, PlusCircle, ClipboardCopy, Trash2, RefreshCw } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import {
-  getMyForms, unlockForm, Form,
+  getMyForms, Form,
   OwnedForm, createUserForm, getMyCreatedForms, deleteMyForm, regenerateJoinCode,
 } from './api/forms';
 import { api } from './api/client';
@@ -28,8 +28,6 @@ export default function FacilitatorDashboard() {
   const navigate = useNavigate();
   const [myForms, setMyForms] = useState<Form[]>([]);
   const [formStatuses, setFormStatuses] = useState<Record<number, FormStatus>>({});
-  const [joinCode, setJoinCode] = useState('');
-  const [joinError, setJoinError] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -126,22 +124,6 @@ export default function FacilitatorDashboard() {
     finally { setRegenLoading(prev => ({ ...prev, [formId]: false })); }
   };
 
-  const handleUnlock = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!joinCode) return;
-    try {
-      await unlockForm(joinCode.trim());
-      setJoinCode('');
-      setJoinError('');
-      fetchMyForms();
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setJoinError(err.status === 404 ? 'Invalid join code.' : `Could not join form (HTTP ${err.status})`);
-      } else {
-        setJoinError('Something went wrong. Please try again.');
-      }
-    }
-  };
 
   return (
     <section className="flex-1 py-6 sm:py-8">
@@ -294,35 +276,10 @@ export default function FacilitatorDashboard() {
         </div>
 
         {/* Join as Expert */}
-        <div
-          className="rounded-xl p-6 sm:p-8 mb-6 sm:mb-8"
-          style={{
-            backgroundColor: 'var(--card)',
-            border: '1px solid var(--border)',
-            boxShadow: 'var(--card-shadow, none)',
-          }}
-        >
-          <h2 className="text-xl font-semibold mb-4 text-center" style={{ color: 'var(--foreground)' }}>
-            Join as Expert
-          </h2>
-          <form onSubmit={handleUnlock} className="space-y-4">
-            <div>
-              <label htmlFor="join-code-input" className="sr-only">Join code</label>
-              <input
-                id="join-code-input"
-                type="text"
-                placeholder="Enter join code (e.g. SYM-ABCD-2345)"
-                value={joinCode}
-                onChange={e => { setJoinCode(e.target.value); setJoinError(''); }}
-                className="w-full px-4 py-2 rounded-lg"
-                style={{ border: '1px solid var(--input)', backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
-              />
-            </div>
-            {joinError && <p className="text-sm text-center" style={{ color: 'var(--destructive)' }}>{joinError}</p>}
-            <LoadingButton type="submit" variant="accent" size="md" className="w-full">
-              Join Consultation
-            </LoadingButton>
-          </form>
+        <div className="flex justify-end mb-4">
+          <LoadingButton variant="accent" size="sm" onClick={() => navigate('/join')}>
+            🎟️ Join a consultation
+          </LoadingButton>
         </div>
 
         {/* Participating In (forms joined via code) */}
