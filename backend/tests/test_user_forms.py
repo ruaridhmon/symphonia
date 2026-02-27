@@ -19,7 +19,8 @@ def expert_token(client: TestClient) -> str:
 
 @pytest.fixture(scope="module")
 def other_token(client: TestClient) -> str:
-    return register_and_login(client, "other_user@test.com")
+    """A second facilitator user — can access /forms/my-created but owns no forms."""
+    return create_facilitator_and_login(client, "other_facilitator@test.com")
 
 
 class TestUserFormCreation:
@@ -84,11 +85,8 @@ class TestMyCreatedForms:
             "/forms/my-created",
             headers={"Authorization": f"Bearer {other_token}"},
         )
-        if r.status_code == 403:
-            pass  # Expected: EXPERTs cannot list created forms
-        else:
-            assert r.status_code == 200
-            assert all(f["title"] != "Private Form" for f in r.json())
+        assert r.status_code == 200
+        assert all(f["title"] != "Private Form" for f in r.json())
 
 
 class TestFormOwnership:
