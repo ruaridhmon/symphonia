@@ -196,6 +196,14 @@ export default function AdminDashboard() {
               <span aria-hidden="true">⚙</span> Settings
             </LoadingButton>
             <LoadingButton
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/admin/users')}
+              aria-label="Manage users"
+            >
+              <span aria-hidden="true">👥</span> Users
+            </LoadingButton>
+            <LoadingButton
               variant="accent"
               size="sm"
               onClick={() => navigate('/admin/forms/new')}
