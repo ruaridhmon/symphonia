@@ -127,11 +127,42 @@ def admin_headers(admin_token: str) -> dict:
 def register_and_login(
     client: TestClient, email: str, password: str = "pass1234"
 ) -> str:
-    """Register a user (if needed) and return a bearer token."""
+    """Register a user (if needed) and return a bearer token.
+
+    Note: registered users receive the default ``expert`` role.
+    For a facilitator, use :func:`create_facilitator_and_login` instead.
+    """
     client.post("/register", data={"email": email, "password": password})
     resp = client.post("/login", data={"username": email, "password": password})
     assert resp.status_code == 200, f"Login failed for {email}: {resp.text}"
     return resp.json()["access_token"]
+
+
+def create_facilitator_and_login(
+    client: TestClient, email: str, password: str = "pass1234"
+) -> str:
+    """Create a facilitator user directly in the DB (bypassing /register which
+    always assigns the default *expert* role) and return a bearer token."""
+    db = TestingSessionLocal()
+    if not db.query(User).filter(User.email == email).first():
+        db.add(
+            User(
+                email=email,
+                hashed_password=get_password_hash(password),
+                role="facilitator",
+            )
+        )
+        db.commit()
+    db.close()
+    resp = client.post("/login", data={"username": email, "password": password})
+    assert resp.status_code == 200, f"Facilitator login failed for {email}: {resp.text}"
+    return resp.json()["access_token"]
+
+
+@pytest.fixture(scope="module")
+def facilitator_token(client: TestClient) -> str:
+    """A token for a user with the *facilitator* role."""
+    return create_facilitator_and_login(client, "facilitator@test.com")
 
 
 @pytest.fixture(scope="module")

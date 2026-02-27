@@ -2,12 +2,19 @@
 
 import pytest
 from fastapi.testclient import TestClient
-from tests.conftest import register_and_login
+from tests.conftest import create_facilitator_and_login, register_and_login
 
 
 @pytest.fixture(scope="module")
 def owner_token(client: TestClient) -> str:
-    return register_and_login(client, "form_owner@test.com")
+    """Token for the form owner — must be a facilitator to create forms."""
+    return create_facilitator_and_login(client, "form_owner@test.com")
+
+
+@pytest.fixture(scope="module")
+def expert_token(client: TestClient) -> str:
+    """Token for a plain expert user (default role after /register)."""
+    return register_and_login(client, "expert_user@test.com")
 
 
 @pytest.fixture(scope="module")
@@ -16,7 +23,8 @@ def other_token(client: TestClient) -> str:
 
 
 class TestUserFormCreation:
-    def test_any_user_can_create_form(self, client, owner_token):
+    def test_facilitator_can_create_form(self, client, owner_token):
+        """Facilitators (and platform admins) may create forms."""
         r = client.post(
             "/forms/create",
             json={"title": "Test Form"},
@@ -27,6 +35,15 @@ class TestUserFormCreation:
         assert d["title"] == "Test Form"
         assert d["owner_id"] is not None
         assert len(d["join_code"]) >= 8
+
+    def test_expert_cannot_create_form(self, client, expert_token):
+        """Plain expert users (default role) must not be able to create forms."""
+        r = client.post(
+            "/forms/create",
+            json={"title": "Unauthorized Form"},
+            headers={"Authorization": f"Bearer {expert_token}"},
+        )
+        assert r.status_code == 403
 
     def test_empty_title_rejected(self, client, owner_token):
         r = client.post(
