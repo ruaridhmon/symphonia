@@ -4,6 +4,7 @@ Shared fixtures for Symphonia E2E tests.
 Provides an in-memory SQLite database, FastAPI TestClient with dependency
 overrides, and pre-authenticated admin/participant tokens.
 """
+
 from __future__ import annotations
 
 import json
@@ -36,6 +37,7 @@ _engine = create_engine(
     connect_args={"check_same_thread": False},
 )
 
+
 # Enable WAL-style foreign keys for SQLite
 @event.listens_for(_engine, "connect")
 def _set_sqlite_pragma(dbapi_conn, _connection_record):
@@ -43,9 +45,8 @@ def _set_sqlite_pragma(dbapi_conn, _connection_record):
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=_engine
-)
+
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
 
 
 # ---------------------------------------------------------------------------
@@ -128,9 +129,7 @@ def register_and_login(
 ) -> str:
     """Register a user (if needed) and return a bearer token."""
     client.post("/register", data={"email": email, "password": password})
-    resp = client.post(
-        "/login", data={"username": email, "password": password}
-    )
+    resp = client.post("/login", data={"username": email, "password": password})
     assert resp.status_code == 200, f"Login failed for {email}: {resp.text}"
     return resp.json()["access_token"]
 

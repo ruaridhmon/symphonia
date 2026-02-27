@@ -15,10 +15,10 @@ Coverage:
   7. Multi-round synthesis (independent synthesis per round)
   8. Synthesis data persistence (round-level fields)
 """
+
 from __future__ import annotations
 
 import json
-import os
 from typing import List
 
 import pytest
@@ -38,6 +38,7 @@ from tests.conftest import create_form, register_and_login, submit_response
 # Helpers
 # =========================================================================
 
+
 def _setup_form_with_responses(
     client: TestClient,
     admin_headers: dict,
@@ -54,9 +55,7 @@ def _setup_form_with_responses(
     if questions is None:
         questions = ["What is the main challenge?", "What is your proposed solution?"]
 
-    form = create_form(
-        client, admin_headers, title=title, questions=questions
-    )
+    form = create_form(client, admin_headers, title=title, questions=questions)
     form_id = form["id"]
     join_code = form["join_code"]
 
@@ -78,7 +77,10 @@ def _setup_form_with_responses(
             client,
             h,
             form_id,
-            {f"q{j+1}": f"Answer {i} to question {j+1}" for j in range(len(questions))},
+            {
+                f"q{j + 1}": f"Answer {i} to question {j + 1}"
+                for j in range(len(questions))
+            },
         )
 
     return {
@@ -258,9 +260,7 @@ class TestSynthesisVersioningIntegration:
         active = [r for r in rounds if r["is_active"]]
         TestSynthesisVersioningIntegration.round_id = active[0]["id"]
 
-    def test_02_generate_first_version(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_02_generate_first_version(self, client: TestClient, admin_headers: dict):
         """POST generate_synthesis creates version 1."""
         resp = client.post(
             f"/forms/{self.form_id}/rounds/{self.round_id}/generate_synthesis",
@@ -273,9 +273,7 @@ class TestSynthesisVersioningIntegration:
         assert data["is_active"] is True  # latest version is auto-activated
         TestSynthesisVersioningIntegration.version_1_id = data["id"]
 
-    def test_03_generate_second_version(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_03_generate_second_version(self, client: TestClient, admin_headers: dict):
         """Second generate increments version to 2."""
         resp = client.post(
             f"/forms/{self.form_id}/rounds/{self.round_id}/generate_synthesis",
@@ -287,9 +285,7 @@ class TestSynthesisVersioningIntegration:
         assert data["version"] == 2
         TestSynthesisVersioningIntegration.version_2_id = data["id"]
 
-    def test_04_generate_third_version(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_04_generate_third_version(self, client: TestClient, admin_headers: dict):
         """Third generate increments version to 3."""
         resp = client.post(
             f"/forms/{self.form_id}/rounds/{self.round_id}/generate_synthesis",
@@ -301,9 +297,7 @@ class TestSynthesisVersioningIntegration:
         assert data["version"] == 3
         TestSynthesisVersioningIntegration.version_3_id = data["id"]
 
-    def test_05_list_all_versions(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_05_list_all_versions(self, client: TestClient, admin_headers: dict):
         """GET synthesis_versions returns all 3 versions in order."""
         resp = client.get(
             f"/forms/{self.form_id}/rounds/{self.round_id}/synthesis_versions",
@@ -318,9 +312,7 @@ class TestSynthesisVersioningIntegration:
         assert versions[1]["is_active"] is False
         assert versions[2]["is_active"] is True
 
-    def test_06_activate_version_2(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_06_activate_version_2(self, client: TestClient, admin_headers: dict):
         """PUT activate sets is_active and copies to round."""
         resp = client.put(
             f"/synthesis_versions/{self.version_2_id}/activate",
@@ -617,9 +609,7 @@ class TestErrorScenarios:
         )
         assert resp.status_code == 404
 
-    def test_synthesis_with_invalid_mode(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_synthesis_with_invalid_mode(self, client: TestClient, admin_headers: dict):
         """Synthesis with invalid flow mode returns 400."""
         meta = _setup_form_with_responses(
             client,
@@ -667,9 +657,7 @@ class TestMultiRoundSynthesis:
         )
         TestMultiRoundSynthesis.form_id = meta["form_id"]
 
-    def test_02_synthesise_round_1(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_02_synthesise_round_1(self, client: TestClient, admin_headers: dict):
         """Run synthesis on round 1."""
         resp = client.post(
             f"/forms/{self.form_id}/synthesise_committee",
@@ -680,16 +668,12 @@ class TestMultiRoundSynthesis:
         TestMultiRoundSynthesis.round_1_synthesis = resp.json()["synthesis"]
 
         # Capture round 1 ID
-        resp = client.get(
-            f"/forms/{self.form_id}/rounds", headers=admin_headers
-        )
+        resp = client.get(f"/forms/{self.form_id}/rounds", headers=admin_headers)
         for r in resp.json():
             if r["round_number"] == 1:
                 TestMultiRoundSynthesis.round_1_id = r["id"]
 
-    def test_03_advance_to_round_2(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_03_advance_to_round_2(self, client: TestClient, admin_headers: dict):
         """Advance to round 2."""
         resp = client.post(
             f"/forms/{self.form_id}/next_round",
@@ -701,9 +685,7 @@ class TestMultiRoundSynthesis:
         assert data["round_number"] == 2
         TestMultiRoundSynthesis.round_2_id = data["id"]
 
-    def test_04_submit_round_2_responses(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_04_submit_round_2_responses(self, client: TestClient, admin_headers: dict):
         """Submit responses for round 2."""
         for i in range(3):
             email = f"mrnd_{i}@test.com"
@@ -717,9 +699,7 @@ class TestMultiRoundSynthesis:
                 {"q1": f"Revised issue {i}", "q2": f"Revised proposal {i}"},
             )
 
-    def test_05_synthesise_round_2(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_05_synthesise_round_2(self, client: TestClient, admin_headers: dict):
         """Run synthesis on round 2."""
         resp = client.post(
             f"/forms/{self.form_id}/synthesise_committee",
@@ -733,9 +713,7 @@ class TestMultiRoundSynthesis:
         self, client: TestClient, admin_headers: dict
     ):
         """Both rounds have their own synthesis_json."""
-        resp = client.get(
-            f"/forms/{self.form_id}/rounds", headers=admin_headers
-        )
+        resp = client.get(f"/forms/{self.form_id}/rounds", headers=admin_headers)
         assert resp.status_code == 200
         rounds = resp.json()
         assert len(rounds) == 2
@@ -774,9 +752,7 @@ class TestSynthesisDataPersistence:
 
     form_id: int = 0
 
-    def test_01_setup_and_synthesise(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_01_setup_and_synthesise(self, client: TestClient, admin_headers: dict):
         """Create form, submit responses, and run synthesis."""
         meta = _setup_form_with_responses(
             client,
@@ -820,9 +796,7 @@ class TestSynthesisDataPersistence:
         assert active["convergence_score"] is not None
         assert isinstance(active["convergence_score"], float)
 
-    def test_04_synthesis_text_stored(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_04_synthesis_text_stored(self, client: TestClient, admin_headers: dict):
         """round.synthesis (text HTML) is stored for backwards compat."""
         resp = client.get(
             f"/forms/{self.form_id}/rounds",

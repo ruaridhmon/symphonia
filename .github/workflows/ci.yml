@@ -57,13 +57,13 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          # axiotic-ai/consensus is a private git repo — lazy-imported only
+          # in LIVE synthesis mode. Tests run with SYNTHESIS_MODE=mock so it
+          # is never actually imported. Filter it out to avoid auth failures.
+          grep -v "git+https://github.com/axiotic-ai/consensus" requirements.txt \
+            | pip install -r /dev/stdin
           pip install pytest pytest-asyncio ruff
         env:
-          # TODO: If axiotic-ai/consensus is private, set this secret in
-          # repo settings → Secrets → Actions → GH_TOKEN with read:packages
-          # scope, then uncomment the line below.
-          # PIP_EXTRA_INDEX_URL: https://${{ secrets.GH_TOKEN }}@github.com/
           GIT_TERMINAL_PROMPT: "0"
 
       - name: Run tests

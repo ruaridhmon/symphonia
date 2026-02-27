@@ -1,4 +1,5 @@
 """Tests for the synthesis export endpoint: GET /forms/{form_id}/export_synthesis."""
+
 from __future__ import annotations
 
 import json
@@ -6,10 +7,11 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from tests.conftest import create_form, submit_response, register_and_login
+from tests.conftest import create_form, submit_response
 
 
 # ── Module-scoped fixtures ────────────────────────────────────────────────────
+
 
 @pytest.fixture(scope="module")
 def seeded_form(client: TestClient, admin_headers: dict, participant_token: str):
@@ -98,7 +100,9 @@ class TestExportSynthesisMarkdown:
         body = resp.text
         assert "## Round 1" in body
 
-    def test_markdown_export_has_content_disposition(self, client: TestClient, seeded_form):
+    def test_markdown_export_has_content_disposition(
+        self, client: TestClient, seeded_form
+    ):
         form_id, admin_headers, _ = seeded_form
         resp = client.get(
             f"/forms/{form_id}/export_synthesis?format=markdown",

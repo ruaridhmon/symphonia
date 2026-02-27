@@ -11,12 +11,11 @@ Journeys:
   4. Synthesis Comments (create, reply, edit, delete, nesting)
   5. Response Editing (admin edit, optimistic locking, force edit)
 """
+
 from __future__ import annotations
 
-import json
-from typing import Dict, List
+from typing import List
 
-import pytest
 from fastapi.testclient import TestClient
 
 from tests.conftest import create_form, register_and_login, submit_response
@@ -58,9 +57,7 @@ class TestAdminFullFlow:
         assert data["title"] == "AI Governance Survey"
         assert data["current_round"] == 1
 
-    def test_03_form_appears_in_listings(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_03_form_appears_in_listings(self, client: TestClient, admin_headers: dict):
         """Created form appears in the admin form listing."""
         resp = client.get("/forms", headers=admin_headers)
         assert resp.status_code == 200
@@ -92,9 +89,7 @@ class TestAdminFullFlow:
                 {"q1": f"Risk answer {i}", "q2": f"Response plan {i}"},
             )
 
-    def test_05_run_committee_synthesis(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_05_run_committee_synthesis(self, client: TestClient, admin_headers: dict):
         """Run mock committee synthesis."""
         resp = client.post(
             f"/forms/{TestAdminFullFlow.form_id}/synthesise_committee",
@@ -154,13 +149,9 @@ class TestAdminFullFlow:
         assert fu["author_type"] == "human"
         TestAdminFullFlow._follow_up_id = fu["id"]
 
-    def test_09_respond_to_follow_ups(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_09_respond_to_follow_ups(self, client: TestClient, admin_headers: dict):
         """Participant responds to a follow-up question."""
-        headers = {
-            "Authorization": f"Bearer {TestAdminFullFlow.participant_tokens[0]}"
-        }
+        headers = {"Authorization": f"Bearer {TestAdminFullFlow.participant_tokens[0]}"}
         resp = client.post(
             f"/follow_ups/{TestAdminFullFlow._follow_up_id}/respond",
             json={"response": "I think 6 months is realistic."},
@@ -169,9 +160,7 @@ class TestAdminFullFlow:
         assert resp.status_code == 200
         assert resp.json()["response"] == "I think 6 months is realistic."
 
-    def test_10_advance_to_next_round(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_10_advance_to_next_round(self, client: TestClient, admin_headers: dict):
         """Admin advances to round 2."""
         resp = client.post(
             f"/forms/{TestAdminFullFlow.form_id}/next_round",
@@ -235,9 +224,7 @@ class TestParticipantFlow:
         assert data["is_admin"] is False
         TestParticipantFlow.participant_token = data["access_token"]
 
-    def test_02_admin_creates_form(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_02_admin_creates_form(self, client: TestClient, admin_headers: dict):
         """Admin creates a form for participant to join."""
         data = create_form(
             client,
@@ -250,9 +237,7 @@ class TestParticipantFlow:
 
     def test_03_unlock_form_with_join_code(self, client: TestClient):
         """Participant unlocks the form using the join code."""
-        headers = {
-            "Authorization": f"Bearer {TestParticipantFlow.participant_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestParticipantFlow.participant_token}"}
         resp = client.post(
             "/forms/unlock",
             json={"join_code": TestParticipantFlow.join_code},
@@ -262,9 +247,7 @@ class TestParticipantFlow:
 
     def test_04_view_form_questions(self, client: TestClient):
         """Participant can view form details and questions."""
-        headers = {
-            "Authorization": f"Bearer {TestParticipantFlow.participant_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestParticipantFlow.participant_token}"}
         resp = client.get(
             f"/forms/{TestParticipantFlow.form_id}",
             headers=headers,
@@ -275,9 +258,7 @@ class TestParticipantFlow:
 
     def test_05_submit_response(self, client: TestClient):
         """Participant submits a response."""
-        headers = {
-            "Authorization": f"Bearer {TestParticipantFlow.participant_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestParticipantFlow.participant_token}"}
         submit_response(
             client,
             headers,
@@ -287,9 +268,7 @@ class TestParticipantFlow:
 
     def test_06_check_submission_status(self, client: TestClient):
         """has_submitted returns True after submitting."""
-        headers = {
-            "Authorization": f"Bearer {TestParticipantFlow.participant_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestParticipantFlow.participant_token}"}
         resp = client.get(
             f"/has_submitted?form_id={TestParticipantFlow.form_id}",
             headers=headers,
@@ -299,9 +278,7 @@ class TestParticipantFlow:
 
     def test_07_retrieve_own_response(self, client: TestClient):
         """Participant can retrieve their own response."""
-        headers = {
-            "Authorization": f"Bearer {TestParticipantFlow.participant_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestParticipantFlow.participant_token}"}
         resp = client.get(
             f"/form/{TestParticipantFlow.form_id}/my_response",
             headers=headers,
@@ -311,9 +288,7 @@ class TestParticipantFlow:
 
     def test_08_resubmit_response(self, client: TestClient):
         """Participant can re-submit (update) their response."""
-        headers = {
-            "Authorization": f"Bearer {TestParticipantFlow.participant_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestParticipantFlow.participant_token}"}
         submit_response(
             client,
             headers,
@@ -332,9 +307,7 @@ class TestParticipantFlow:
         self, client: TestClient, admin_headers: dict
     ):
         """After admin runs synthesis, participant can view rounds."""
-        headers_p = {
-            "Authorization": f"Bearer {TestParticipantFlow.participant_token}"
-        }
+        headers_p = {"Authorization": f"Bearer {TestParticipantFlow.participant_token}"}
 
         # Admin runs synthesis first
         client.post(
@@ -366,9 +339,7 @@ class TestMultiRoundDelphi:
     round_1_id: int = 0
     round_2_id: int = 0
 
-    def test_01_admin_creates_form(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_01_admin_creates_form(self, client: TestClient, admin_headers: dict):
         """Admin creates form for multi-round Delphi."""
         data = create_form(
             client,
@@ -410,9 +381,7 @@ class TestMultiRoundDelphi:
                 },
             )
 
-    def test_04_run_synthesis_round1(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_04_run_synthesis_round1(self, client: TestClient, admin_headers: dict):
         """Admin synthesises round 1."""
         resp = client.post(
             f"/forms/{TestMultiRoundDelphi.form_id}/synthesise_committee",
@@ -450,9 +419,7 @@ class TestMultiRoundDelphi:
         assert data["round_number"] == 2
         TestMultiRoundDelphi.round_2_id = data["id"]
 
-    def test_06_round2_submissions(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_06_round2_submissions(self, client: TestClient, admin_headers: dict):
         """Participants submit round 2 (informed by round 1 synthesis)."""
         # Check that previous synthesis is accessible
         resp = client.get(
@@ -475,9 +442,7 @@ class TestMultiRoundDelphi:
                 },
             )
 
-    def test_07_run_synthesis_round2(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_07_run_synthesis_round2(self, client: TestClient, admin_headers: dict):
         """Admin synthesises round 2."""
         resp = client.post(
             f"/forms/{TestMultiRoundDelphi.form_id}/synthesise_committee",
@@ -486,9 +451,7 @@ class TestMultiRoundDelphi:
         )
         assert resp.status_code == 200
 
-    def test_08_convergence_tracking(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_08_convergence_tracking(self, client: TestClient, admin_headers: dict):
         """Both rounds have convergence scores."""
         resp = client.get(
             f"/forms/{TestMultiRoundDelphi.form_id}/rounds",
@@ -535,9 +498,7 @@ class TestSynthesisComments:
     user_a_token: str = ""
     user_b_token: str = ""
 
-    def test_01_setup_form_and_synthesis(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_01_setup_form_and_synthesis(self, client: TestClient, admin_headers: dict):
         """Create form, submit, and run synthesis so we have a round to comment on."""
         data = create_form(
             client,
@@ -592,9 +553,7 @@ class TestSynthesisComments:
 
     def test_02_add_comment_on_agreement(self, client: TestClient):
         """User A comments on an agreement section."""
-        headers = {
-            "Authorization": f"Bearer {TestSynthesisComments.user_a_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestSynthesisComments.user_a_token}"}
         resp = client.post(
             f"/forms/{TestSynthesisComments.form_id}/rounds/{TestSynthesisComments.round_id}/comments",
             json={
@@ -612,9 +571,7 @@ class TestSynthesisComments:
 
     def test_03_add_comment_on_disagreement(self, client: TestClient):
         """User A comments on a disagreement section."""
-        headers = {
-            "Authorization": f"Bearer {TestSynthesisComments.user_a_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestSynthesisComments.user_a_token}"}
         resp = client.post(
             f"/forms/{TestSynthesisComments.form_id}/rounds/{TestSynthesisComments.round_id}/comments",
             json={
@@ -629,9 +586,7 @@ class TestSynthesisComments:
 
     def test_04_reply_to_comment(self, client: TestClient):
         """User B replies to User A's agreement comment."""
-        headers = {
-            "Authorization": f"Bearer {TestSynthesisComments.user_b_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestSynthesisComments.user_b_token}"}
         resp = client.post(
             f"/forms/{TestSynthesisComments.form_id}/rounds/{TestSynthesisComments.round_id}/comments",
             json={
@@ -647,9 +602,7 @@ class TestSynthesisComments:
 
     def test_05_edit_own_comment(self, client: TestClient):
         """User A edits their own comment."""
-        headers = {
-            "Authorization": f"Bearer {TestSynthesisComments.user_a_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestSynthesisComments.user_a_token}"}
         resp = client.put(
             f"/comments/{TestSynthesisComments.comment_agreement_id}",
             json={"body": "I strongly agree — edited for clarity."},
@@ -660,9 +613,7 @@ class TestSynthesisComments:
 
     def test_06_verify_nested_structure(self, client: TestClient):
         """Comments are returned with nested replies."""
-        headers = {
-            "Authorization": f"Bearer {TestSynthesisComments.user_a_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestSynthesisComments.user_a_token}"}
         resp = client.get(
             f"/forms/{TestSynthesisComments.form_id}/rounds/{TestSynthesisComments.round_id}/comments",
             headers=headers,
@@ -679,15 +630,12 @@ class TestSynthesisComments:
         )
         assert len(agreement_comment["replies"]) == 1
         assert (
-            agreement_comment["replies"][0]["body"]
-            == "I also agree — great synthesis."
+            agreement_comment["replies"][0]["body"] == "I also agree — great synthesis."
         )
 
     def test_07_delete_comment(self, client: TestClient):
         """User A deletes their disagreement comment."""
-        headers = {
-            "Authorization": f"Bearer {TestSynthesisComments.user_a_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestSynthesisComments.user_a_token}"}
         resp = client.delete(
             f"/comments/{TestSynthesisComments.comment_disagreement_id}",
             headers=headers,
@@ -729,9 +677,7 @@ class TestResponseEditing:
         TestResponseEditing.participant_token = register_and_login(
             client, "edit_participant@test.com"
         )
-        headers = {
-            "Authorization": f"Bearer {TestResponseEditing.participant_token}"
-        }
+        headers = {"Authorization": f"Bearer {TestResponseEditing.participant_token}"}
 
         # Unlock + submit
         client.post(
@@ -746,9 +692,7 @@ class TestResponseEditing:
             {"q1": "Original answer"},
         )
 
-    def test_02_get_response_id(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_02_get_response_id(self, client: TestClient, admin_headers: dict):
         """Admin gets the response to edit."""
         resp = client.get(
             f"/form/{TestResponseEditing.form_id}/responses",
@@ -760,9 +704,7 @@ class TestResponseEditing:
         TestResponseEditing.response_id = responses[0]["id"]
         assert responses[0]["version"] == 1
 
-    def test_03_admin_edits_response(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_03_admin_edits_response(self, client: TestClient, admin_headers: dict):
         """Admin edits the response with correct version."""
         resp = client.put(
             f"/responses/{TestResponseEditing.response_id}",
@@ -817,12 +759,8 @@ class TestEdgeCases:
     def test_duplicate_registration(self, client: TestClient):
         """Registering the same email twice returns 400."""
         email = "duplicate@test.com"
-        client.post(
-            "/register", data={"email": email, "password": "pass123"}
-        )
-        resp = client.post(
-            "/register", data={"email": email, "password": "pass123"}
-        )
+        client.post("/register", data={"email": email, "password": "pass123"})
+        resp = client.post("/register", data={"email": email, "password": "pass123"})
         assert resp.status_code == 400
 
     def test_wrong_credentials(self, client: TestClient):
@@ -854,9 +792,7 @@ class TestEdgeCases:
         )
         assert resp.status_code == 403
 
-    def test_invalid_join_code(
-        self, client: TestClient, participant_headers: dict
-    ):
+    def test_invalid_join_code(self, client: TestClient, participant_headers: dict):
         """Unlocking with a non-existent join code returns 404."""
         resp = client.post(
             "/forms/unlock",
@@ -865,9 +801,7 @@ class TestEdgeCases:
         )
         assert resp.status_code == 404
 
-    def test_submit_without_active_round(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_submit_without_active_round(self, client: TestClient, admin_headers: dict):
         """Submitting to a form with no active round returns 400."""
         # Create a form then deactivate its round by advancing
         data = create_form(
@@ -902,9 +836,7 @@ class TestEdgeCases:
         assert resp.status_code == 200
         assert resp.json()["submitted"] is False
 
-    def test_cannot_reply_to_reply(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_cannot_reply_to_reply(self, client: TestClient, admin_headers: dict):
         """Cannot create a comment that replies to a reply (max 1 level)."""
         # Use the form/round from Journey 4 if it exists, or create a new one
         data = create_form(
@@ -916,9 +848,7 @@ class TestEdgeCases:
         form_id = data["id"]
 
         # Submit so synthesis can run
-        submit_response(
-            client, admin_headers, form_id, {"q1": "answer"}
-        )
+        submit_response(client, admin_headers, form_id, {"q1": "answer"})
         client.post(
             f"/forms/{form_id}/synthesise_committee",
             json={"model": "mock", "mode": "human_only", "n_analysts": 2},
@@ -926,9 +856,7 @@ class TestEdgeCases:
         )
 
         # Get round ID
-        rounds_resp = client.get(
-            f"/forms/{form_id}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form_id}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         # Create top-level comment
@@ -969,9 +897,7 @@ class TestEdgeCases:
         )
         assert resp.status_code == 400
 
-    def test_cannot_edit_others_comment(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_cannot_edit_others_comment(self, client: TestClient, admin_headers: dict):
         """User cannot edit another user's comment."""
         data = create_form(
             client,
@@ -982,18 +908,14 @@ class TestEdgeCases:
         form_id = data["id"]
 
         # Submit + synthesis
-        submit_response(
-            client, admin_headers, form_id, {"q1": "answer"}
-        )
+        submit_response(client, admin_headers, form_id, {"q1": "answer"})
         client.post(
             f"/forms/{form_id}/synthesise_committee",
             json={"model": "mock", "mode": "human_only", "n_analysts": 2},
             headers=admin_headers,
         )
 
-        rounds_resp = client.get(
-            f"/forms/{form_id}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form_id}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         # Admin creates a comment

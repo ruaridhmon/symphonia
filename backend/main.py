@@ -3,9 +3,11 @@ Symphonia Backend - Expert Consensus Platform
 
 Protected by Cloudflare Access.
 """
+
 import os
 import logging
 from dotenv import load_dotenv
+
 load_dotenv()  # Load .env from the backend directory
 import shutil
 import traceback
@@ -17,11 +19,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.routing import Match, Mount
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from core import routes as core_routes
 from core.db import engine, SessionLocal
-from core.models import Base, User, UserFormUnlock, Setting, FormModel, InviteCode
+from core.models import Base, User, FormModel, InviteCode
 from core.auth import get_password_hash
 from core.rate_limiter import limiter
 from core.ws import ws_manager
@@ -35,6 +36,7 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 # =============================================================================
 # LIFECYCLE (modern lifespan replaces deprecated on_event)
 # =============================================================================
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -59,6 +61,7 @@ async def lifespan(app: FastAPI):
     db = SessionLocal()
     try:
         from core.models import FormModel as _FormModel
+
         form_count = db.query(_FormModel).count()
         logger.info("Current form count: %d", form_count)
         if form_count == 0:
@@ -175,6 +178,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 # MIDDLEWARE STACK
 # =============================================================================
 
+
 # Security headers — applied to every response
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
@@ -195,7 +199,10 @@ async def add_security_headers(request: Request, call_next):
 # Uses double-submit cookie pattern: csrf_token cookie (JS-readable) must
 # match the X-CSRF-Token header sent by the frontend.
 _CSRF_EXEMPT_BASE_PATHS = {"/login", "/register", "/logout", "/ws"}
-CSRF_EXEMPT_PATHS = _CSRF_EXEMPT_BASE_PATHS | {f"/api{path}" for path in _CSRF_EXEMPT_BASE_PATHS}
+CSRF_EXEMPT_PATHS = _CSRF_EXEMPT_BASE_PATHS | {
+    f"/api{path}" for path in _CSRF_EXEMPT_BASE_PATHS
+}
+
 
 @app.middleware("http")
 async def csrf_protection(request: Request, call_next):
@@ -227,10 +234,15 @@ async def csrf_protection(request: Request, call_next):
 
     return await call_next(request)
 
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://symphonia.axiotic.ai"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://symphonia.axiotic.ai",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -239,6 +251,7 @@ app.add_middleware(
 # =============================================================================
 # HEALTH CHECK (unauthenticated — for Docker healthcheck & load balancer probes)
 # =============================================================================
+
 
 @app.get(
     "/health",
@@ -257,6 +270,7 @@ def health_check():
     form_count = None
     try:
         from sqlalchemy import text
+
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         db_status = "connected"
@@ -264,6 +278,7 @@ def health_check():
         db = SessionLocal()
         try:
             from core.models import FormModel as _FM
+
             form_count = db.query(_FM).count()
         finally:
             db.close()
@@ -293,11 +308,13 @@ with SessionLocal() as db:
     admin_password = os.environ.get("ADMIN_PASSWORD", "test123")
     admin = db.query(User).filter(User.email == admin_email).first()
     if not admin:
-        db.add(User(
-            email=admin_email,
-            hashed_password=get_password_hash(admin_password),
-            role="platform_admin",
-        ))
+        db.add(
+            User(
+                email=admin_email,
+                hashed_password=get_password_hash(admin_password),
+                role="platform_admin",
+            )
+        )
     else:
         admin.role = "platform_admin"
 
@@ -305,11 +322,13 @@ with SessionLocal() as db:
     sam_email = "samuel@axiotic.ai"
     sam = db.query(User).filter(User.email == sam_email).first()
     if not sam:
-        db.add(User(
-            email=sam_email,
-            hashed_password=get_password_hash("test123"),
-            role="platform_admin",
-        ))
+        db.add(
+            User(
+                email=sam_email,
+                hashed_password=get_password_hash("test123"),
+                role="platform_admin",
+            )
+        )
     else:
         sam.role = "platform_admin"
 
@@ -317,11 +336,13 @@ with SessionLocal() as db:
     for extra_admin in ["ruaridh.mw@ed.ac.uk", "pscmmw@leeds.ac.uk"]:
         u = db.query(User).filter(User.email == extra_admin).first()
         if not u:
-            db.add(User(
-                email=extra_admin,
-                hashed_password=get_password_hash("changeme123"),
-                role="platform_admin",
-            ))
+            db.add(
+                User(
+                    email=extra_admin,
+                    hashed_password=get_password_hash("changeme123"),
+                    role="platform_admin",
+                )
+            )
         else:
             u.role = "platform_admin"
 
@@ -345,13 +366,15 @@ with SessionLocal() as db:
                 # Use a platform admin as fallback creator
                 fallback = db.query(User).filter(User.role == "platform_admin").first()
                 creator_id = fallback.id if fallback else 1
-            db.add(InviteCode(
-                form_id=form.id,
-                code=form.join_code,
-                form_role="expert",
-                created_by=creator_id,
-                is_active=form.allow_join,
-            ))
+            db.add(
+                InviteCode(
+                    form_id=form.id,
+                    code=form.join_code,
+                    form_role="expert",
+                    created_by=creator_id,
+                    is_active=form.allow_join,
+                )
+            )
             backfilled += 1
     if backfilled:
         db.commit()
@@ -372,6 +395,7 @@ with SessionLocal() as db:
 # =============================================================================
 # WEBSOCKET
 # =============================================================================
+
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -457,10 +481,7 @@ if FRONTEND_DIR.exists():
         # ── No API route matches — serve the SPA ───────────────────────
         # Try serving a static file from the frontend dist first
         static_file = (FRONTEND_DIR / full_path).resolve()
-        if (
-            static_file.is_relative_to(FRONTEND_DIR.resolve())
-            and static_file.is_file()
-        ):
+        if static_file.is_relative_to(FRONTEND_DIR.resolve()) and static_file.is_file():
             return FileResponse(str(static_file))
 
         # Fall back to index.html for client-side routing

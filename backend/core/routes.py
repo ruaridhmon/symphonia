@@ -1,7 +1,16 @@
 from __future__ import annotations
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, BackgroundTasks, Depends, Form, HTTPException, Request, Query, Response as FastAPIResponse
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Form,
+    HTTPException,
+    Request,
+    Query,
+    Response as FastAPIResponse,
+)
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -11,11 +20,9 @@ import aiosmtplib
 import json
 import logging
 import os
-import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from fastapi.responses import JSONResponse
 import asyncio
 
 from .rate_limiter import (
@@ -29,9 +36,21 @@ from .rate_limiter import (
 )
 
 from .models import (
-    User, Response, ArchivedResponse, Feedback, FormModel, RoundModel,
-    UserFormUnlock, FollowUp, FollowUpResponse, SynthesisComment,
-    SynthesisVersion, Draft, AuditLog, Setting, InviteCode,
+    User,
+    Response,
+    ArchivedResponse,
+    Feedback,
+    FormModel,
+    RoundModel,
+    UserFormUnlock,
+    FollowUp,
+    FollowUpResponse,
+    SynthesisComment,
+    SynthesisVersion,
+    Draft,
+    AuditLog,
+    Setting,
+    InviteCode,
 )
 from .audit import audit_log
 from .auth import (
@@ -42,7 +61,6 @@ from .auth import (
     generate_csrf_token,
     get_current_user,
     assert_form_owner_or_facilitator,
-    require_role,
     require_facilitator,
     require_platform_admin,
     generate_join_code,
@@ -56,11 +74,9 @@ from .auth import (
 from .models import UserRole
 from .db import SessionLocal
 from .synthesis import (
-    CommitteeSynthesiser,
     FlowMode,
     SynthesisConfigError,
     SynthesisError,
-    SynthesisLibraryError,
     SynthesisTimeoutError,
     get_synthesiser,
 )
@@ -79,6 +95,7 @@ logger = logging.getLogger("symphonia.routes")
 # ---------------------------------------------------------
 # SYNTHESIS EMAIL NOTIFICATION HELPER
 # ---------------------------------------------------------
+
 
 async def _notify_synthesis_ready(
     form_id: int,
@@ -101,7 +118,9 @@ async def _notify_synthesis_ready(
 
     # Quick check that SMTP is configured
     if not os.getenv("SMTP_HOST"):
-        logger.warning("NOTIFY_ON_SYNTHESIS is enabled but SMTP_HOST is not set — skipping email notifications.")
+        logger.warning(
+            "NOTIFY_ON_SYNTHESIS is enabled but SMTP_HOST is not set — skipping email notifications."
+        )
         return
 
     from .email_templates import synthesis_ready
@@ -117,8 +136,12 @@ async def _notify_synthesis_ready(
             form_title = form.title or f"Form #{form_id}"
 
             # Build summary URL
-            frontend_url = os.getenv("FRONTEND_URL", os.getenv("APP_URL", "")).rstrip("/")
-            summary_url = f"{frontend_url}/forms/{form_id}/summary" if frontend_url else ""
+            frontend_url = os.getenv("FRONTEND_URL", os.getenv("APP_URL", "")).rstrip(
+                "/"
+            )
+            summary_url = (
+                f"{frontend_url}/forms/{form_id}/summary" if frontend_url else ""
+            )
 
             subject, html = synthesis_ready(
                 consultation_title=form_title,
@@ -134,9 +157,7 @@ async def _notify_synthesis_ready(
 
             # Add emails of experts who responded to this round
             round_responses = (
-                db.query(Response)
-                .filter(Response.round_id == round_id)
-                .all()
+                db.query(Response).filter(Response.round_id == round_id).all()
             )
             for resp in round_responses:
                 if resp.user and resp.user.email:
@@ -147,11 +168,17 @@ async def _notify_synthesis_ready(
                 try:
                     await _send_templated_email(recipient, subject, html)
                 except Exception as exc:
-                    logger.warning("Failed to send synthesis notification to %s: %s", recipient, exc)
+                    logger.warning(
+                        "Failed to send synthesis notification to %s: %s",
+                        recipient,
+                        exc,
+                    )
 
             logger.info(
                 "Synthesis notification sent for form=%s round=%s to %d recipients",
-                form_id, round_id, len(recipients),
+                form_id,
+                round_id,
+                len(recipients),
             )
         finally:
             db.close()
@@ -162,6 +189,7 @@ async def _notify_synthesis_ready(
 # ---------------------------------------------------------
 # COMMENT → SYNTHESIS HELPERS
 # ---------------------------------------------------------
+
 
 def _fetch_comments_for_round(db: Session, round_id: int) -> list[SynthesisComment]:
     """Fetch all comments for a round, ordered chronologically."""
@@ -212,7 +240,9 @@ def _format_comments_as_context(comments: list[SynthesisComment]) -> str:
         lines.append(f"[Comments on {label} section]")
         for c in section_comments:
             author = c.author.email if c.author else f"User {c.author_id}"
-            idx_note = f" (item #{c.section_index + 1})" if c.section_index is not None else ""
+            idx_note = (
+                f" (item #{c.section_index + 1})" if c.section_index is not None else ""
+            )
             prefix = "  ↳ Reply" if c.parent_id else " "
             lines.append(f"{prefix} {author}{idx_note}: {c.body}")
         lines.append("")
@@ -226,6 +256,7 @@ router = APIRouter()
 # Lazy client initialization to avoid startup crash when no API key
 _openai_client = None
 
+
 def get_openai_client():
     global _openai_client
     if _openai_client is None:
@@ -233,10 +264,10 @@ def get_openai_client():
         if not api_key:
             return None
         _openai_client = OpenAI(
-            api_key=api_key,
-            base_url="https://openrouter.ai/api/v1"
+            api_key=api_key, base_url="https://openrouter.ai/api/v1"
         )
     return _openai_client
+
 
 # Keep 'client' for backwards compat but make it a property
 client = None  # Will be set lazily
@@ -248,6 +279,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # SYNTHESIS HELPERS
 # ---------------------------------------------------------
 
+
 def _sanitize_error_message(raw: str) -> str:
     """
     Sanitize an error message before broadcasting to the frontend.
@@ -256,7 +288,15 @@ def _sanitize_error_message(raw: str) -> str:
     (e.g. OpenRouter 402 messages) so users don't see confusing financial text.
     """
     lowered = raw.lower()
-    payment_keywords = ("402", "payment", "credit", "billing", "balance", "insufficient funds", "quota")
+    payment_keywords = (
+        "402",
+        "payment",
+        "credit",
+        "billing",
+        "balance",
+        "insufficient funds",
+        "quota",
+    )
     if any(kw in lowered for kw in payment_keywords):
         return (
             "Synthesis is temporarily unavailable. "
@@ -268,17 +308,21 @@ def _sanitize_error_message(raw: str) -> str:
     return raw
 
 
-async def _broadcast_synthesis_error(form_id: int, round_id: int | None, error_message: str):
+async def _broadcast_synthesis_error(
+    form_id: int, round_id: int | None, error_message: str
+):
     """Broadcast a synthesis error event via WebSocket so clients can show feedback."""
     safe_message = _sanitize_error_message(error_message)
     for conn in ws_manager.active_connections.copy():
         try:
-            await conn.send_json({
-                "type": "synthesis_error",
-                "form_id": form_id,
-                "round_id": round_id,
-                "error": safe_message,
-            })
+            await conn.send_json(
+                {
+                    "type": "synthesis_error",
+                    "form_id": form_id,
+                    "round_id": round_id,
+                    "error": safe_message,
+                }
+            )
         except Exception:
             ws_manager.disconnect(conn)
 
@@ -296,6 +340,7 @@ def _resolve_synthesis_model(db: Session, payload_model: str | None = None) -> s
 # ---------------------------------------------------------
 # SYNTHESIS STATUS
 # ---------------------------------------------------------
+
 
 @router.get(
     "/synthesis/status",
@@ -341,6 +386,7 @@ def synthesis_status(
 # USER AUTH
 # ---------------------------------------------------------
 
+
 @router.post(
     "/register",
     tags=["Authentication"],
@@ -370,12 +416,16 @@ def register(
         )
     elif reg_mode == "domain_restricted":
         allowed_row = db.query(Setting).filter(Setting.key == "allowed_domains").first()
-        allowed_domains = [d.strip().lower() for d in (allowed_row.value if allowed_row else "").split(",") if d.strip()]
+        allowed_domains = [
+            d.strip().lower()
+            for d in (allowed_row.value if allowed_row else "").split(",")
+            if d.strip()
+        ]
         email_domain = email.rsplit("@", 1)[-1].lower() if "@" in email else ""
         if allowed_domains and email_domain not in allowed_domains:
             raise HTTPException(
                 status_code=403,
-                detail=f"Registration restricted to approved domains. Contact your administrator.",
+                detail="Registration restricted to approved domains. Contact your administrator.",
             )
 
     if db.query(User).filter(User.email == email).first():
@@ -410,9 +460,7 @@ def login(
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token(
-        data={"sub": str(user.id), "role": user.role}
-    )
+    token = create_access_token(data={"sub": str(user.id), "role": user.role})
     csrf_token = generate_csrf_token()
 
     # Set JWT as httpOnly cookie (not accessible to JS → XSS-proof)
@@ -464,6 +512,7 @@ def logout(
     response.delete_cookie(key=CSRF_COOKIE_NAME, path="/")
     return {"message": "Logged out"}
 
+
 @router.post(
     "/forgot-password",
     tags=["Authentication"],
@@ -486,6 +535,7 @@ async def forgot_password(
 
         try:
             from .email_templates import password_reset as password_reset_template
+
             subject, html = password_reset_template(reset_url=reset_url)
             await _send_templated_email(email, subject, html)
         except Exception:
@@ -506,7 +556,11 @@ def reset_password(
 ):
     """Reset a user's password using a valid reset token."""
     user = db.query(User).filter(User.reset_token == token).first()
-    if not user or not user.reset_token_expiry or user.reset_token_expiry < datetime.utcnow():
+    if (
+        not user
+        or not user.reset_token_expiry
+        or user.reset_token_expiry < datetime.utcnow()
+    ):
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
 
     user.hashed_password = get_password_hash(new_password)
@@ -514,7 +568,6 @@ def reset_password(
     user.reset_token_expiry = None
     db.commit()
     return {"message": "Password updated successfully"}
-
 
 
 @router.get(
@@ -529,12 +582,17 @@ def me(
     request: Request,
     user: User = Depends(get_current_user),
 ):
-    return {"email": user.email, "is_admin": user.role == UserRole.PLATFORM_ADMIN.value, "role": user.role}
+    return {
+        "email": user.email,
+        "is_admin": user.role == UserRole.PLATFORM_ADMIN.value,
+        "role": user.role,
+    }
 
 
 # ---------------------------------------------------------
 # SUBMIT RESPONSE (Delphi style)
 # ---------------------------------------------------------
+
 
 @router.post(
     "/submit",
@@ -565,10 +623,11 @@ def submit_response(
         raise HTTPException(status_code=400, detail="No active round")
 
     # Check if user has already submitted for this round, and delete old response if so
-    existing_response = db.query(Response).filter(
-        Response.user_id == user.id,
-        Response.round_id == active_round.id
-    ).first()
+    existing_response = (
+        db.query(Response)
+        .filter(Response.user_id == user.id, Response.round_id == active_round.id)
+        .first()
+    )
     if existing_response:
         db.delete(existing_response)
         db.commit()
@@ -615,7 +674,7 @@ def has_submitted(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     active_round = (
         db.query(RoundModel)
@@ -625,10 +684,11 @@ def has_submitted(
     if not active_round:
         return {"submitted": False}
 
-    r = db.query(Response).filter(
-        Response.user_id == user.id,
-        Response.round_id == active_round.id
-    ).first()
+    r = (
+        db.query(Response)
+        .filter(Response.user_id == user.id, Response.round_id == active_round.id)
+        .first()
+    )
     return {"submitted": bool(r)}
 
 
@@ -644,7 +704,7 @@ def get_my_response(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     active_round = (
         db.query(RoundModel)
@@ -654,10 +714,11 @@ def get_my_response(
     if not active_round:
         raise HTTPException(status_code=404, detail="No active round")
 
-    response = db.query(Response).filter(
-        Response.user_id == user.id,
-        Response.round_id == active_round.id
-    ).first()
+    response = (
+        db.query(Response)
+        .filter(Response.user_id == user.id, Response.round_id == active_round.id)
+        .first()
+    )
 
     if not response:
         raise HTTPException(status_code=404, detail="No response found")
@@ -668,6 +729,7 @@ def get_my_response(
 # ---------------------------------------------------------
 # SERVER-SIDE DRAFTS (auto-save)
 # ---------------------------------------------------------
+
 
 class DraftPayload(BaseModel):
     answers: dict
@@ -710,6 +772,7 @@ def save_draft(
     if draft:
         draft.answers = payload.answers
         from datetime import datetime as dt, timezone as _tz
+
         draft.updated_at = dt.now(_tz.utc)
     else:
         draft = Draft(
@@ -804,6 +867,7 @@ def delete_draft(
 # FEEDBACK
 # ---------------------------------------------------------
 
+
 class FeedbackPayload(BaseModel):
     accuracy: str
     influence: str
@@ -823,7 +887,7 @@ def submit_feedback(
     request: Request,
     feedback: FeedbackPayload,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     try:
         with open("summary_cache.txt") as f:
@@ -837,7 +901,7 @@ def submit_feedback(
         further_thoughts=feedback.furtherThoughts,
         usability=feedback.usability,
         summary=summary_html,
-        user_id=user.id
+        user_id=user.id,
     )
     db.add(entry)
     user.has_submitted_feedback = True
@@ -856,7 +920,7 @@ def submit_feedback(
 def all_feedback(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     f = db.query(Feedback).order_by(Feedback.created_at.desc()).all()
 
@@ -868,7 +932,7 @@ def all_feedback(
             "furtherThoughts": x.further_thoughts,
             "summary": x.summary,
             "email": x.user.email,
-            "timestamp": x.created_at.isoformat()
+            "timestamp": x.created_at.isoformat(),
         }
         for x in f
     ]
@@ -877,6 +941,7 @@ def all_feedback(
 # ---------------------------------------------------------
 # SUMMARY (SYNTHESIS)
 # ---------------------------------------------------------
+
 
 class SummaryPayload(BaseModel):
     summary: str
@@ -895,7 +960,7 @@ async def push_summary(
     form_id: int,
     payload: SummaryPayload,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     summary = payload.summary.strip()
 
@@ -940,7 +1005,7 @@ def generate_summary(
     payload: GenerateSummaryPayload,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     active_round = (
         db.query(RoundModel)
@@ -977,15 +1042,21 @@ def generate_summary(
     prompt_content += "Questions:\n"
     for i, q in enumerate(questions, 1):
         prompt_content += f"{i}. {q}\n"
-    
+
     prompt_content += "\n--- Responses ---\n"
 
     for i, r in enumerate(responses, 1):
         prompt_content += f"\nResponse {i}:\n"
         # Parse answers if stored as JSON string
-        answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
+        answers = (
+            r.answers
+            if isinstance(r.answers, dict)
+            else json.loads(r.answers)
+            if r.answers
+            else {}
+        )
         for q_idx, q_text in enumerate(questions, 1):
-            answer = answers.get(f'q{q_idx}', 'No answer')
+            answer = answers.get(f"q{q_idx}", "No answer")
             prompt_content += f"  - Q: {q_text}\n"
             prompt_content += f"    A: {answer}\n"
 
@@ -1007,7 +1078,7 @@ def generate_summary(
     # Check for mock mode or missing API key
     synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
     api_key = os.getenv("OPENROUTER_API_KEY", "")
-    
+
     if synthesis_mode == "mock" or not api_key:
         # Return mock synthesis for demo purposes
         mock_summary = """## Synthesis Summary (Mock Mode)
@@ -1036,7 +1107,10 @@ The dimensional analysis reveals a **temporal paradox**: governance frameworks d
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
+            raise HTTPException(
+                status_code=503,
+                detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.",
+            )
         completion = openai_client.chat.completions.create(
             model=payload.model,
             max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
@@ -1049,8 +1123,15 @@ The dimensional analysis reveals a **temporal paradox**: governance frameworks d
             ],
         )
         summary = completion.choices[0].message.content
-        audit_log(db, user=user, action="generate_summary", resource_type="form",
-                  resource_id=form_id, detail={"model": payload.model, "round": active_round.round_number}, request=request)
+        audit_log(
+            db,
+            user=user,
+            action="generate_summary",
+            resource_type="form",
+            resource_id=form_id,
+            detail={"model": payload.model, "round": active_round.round_number},
+            request=request,
+        )
         db.commit()
         return {"summary": summary}
     except Exception as e:
@@ -1059,10 +1140,10 @@ The dimensional analysis reveals a **temporal paradox**: governance frameworks d
         raise HTTPException(status_code=500, detail=f"Failed to generate summary: {e}")
 
 
-
 # ---------------------------------------------------------
 # COMMITTEE SYNTHESIS
 # ---------------------------------------------------------
+
 
 class CommitteeSynthesisPayload(BaseModel):
     model: str = "anthropic/claude-sonnet-4-5"
@@ -1148,13 +1229,15 @@ async def synthesise_committee(
     async def progress_callback(stage: str, step: int, total: int):
         for conn in ws_manager.active_connections.copy():
             try:
-                await conn.send_json({
-                    "type": "synthesis_progress",
-                    "form_id": form_id,
-                    "stage": stage,
-                    "step": step,
-                    "total_steps": total,
-                })
+                await conn.send_json(
+                    {
+                        "type": "synthesis_progress",
+                        "form_id": form_id,
+                        "stage": stage,
+                        "step": step,
+                        "total_steps": total,
+                    }
+                )
             except Exception:
                 ws_manager.disconnect(conn)
 
@@ -1184,7 +1267,9 @@ async def synthesise_committee(
     except SynthesisConfigError as exc:
         logger.warning("Synthesis config error on form %d: %s", form_id, exc)
         await _broadcast_synthesis_error(form_id, active_round.id, str(exc))
-        raise HTTPException(status_code=400, detail=f"Synthesis configuration error: {exc}")
+        raise HTTPException(
+            status_code=400, detail=f"Synthesis configuration error: {exc}"
+        )
     except SynthesisTimeoutError as exc:
         logger.warning("Synthesis timeout on form %d: %s", form_id, exc)
         await _broadcast_synthesis_error(form_id, active_round.id, str(exc))
@@ -1194,9 +1279,15 @@ async def synthesise_committee(
         await _broadcast_synthesis_error(form_id, active_round.id, str(exc))
         raise HTTPException(status_code=500, detail=f"Synthesis failed: {exc}")
     except Exception as exc:
-        logger.error("Unexpected synthesis error on form %d: %s", form_id, exc, exc_info=True)
-        await _broadcast_synthesis_error(form_id, active_round.id, "An unexpected error occurred during synthesis")
-        raise HTTPException(status_code=500, detail=f"Synthesis failed unexpectedly: {exc}")
+        logger.error(
+            "Unexpected synthesis error on form %d: %s", form_id, exc, exc_info=True
+        )
+        await _broadcast_synthesis_error(
+            form_id, active_round.id, "An unexpected error occurred during synthesis"
+        )
+        raise HTTPException(
+            status_code=500, detail=f"Synthesis failed unexpectedly: {exc}"
+        )
 
     # Store results on the round
     result_dict = result.to_dict()
@@ -1232,7 +1323,9 @@ async def synthesise_committee(
         for n in result.nuances:
             text_parts.append(f"<p><strong>{n.claim}</strong> — {n.context}</p>")
 
-    active_round.synthesis = "".join(text_parts) if text_parts else "Synthesis complete."
+    active_round.synthesis = (
+        "".join(text_parts) if text_parts else "Synthesis complete."
+    )
 
     # If AI-assisted, store generated probes as FollowUp records
     if flow_mode == FlowMode.AI_ASSISTED and result.follow_up_probes:
@@ -1251,11 +1344,13 @@ async def synthesise_committee(
     await ws_manager.broadcast_summary(active_round.synthesis)
     for conn in ws_manager.active_connections.copy():
         try:
-            await conn.send_json({
-                "type": "synthesis_complete",
-                "form_id": form_id,
-                "round_id": active_round.id,
-            })
+            await conn.send_json(
+                {
+                    "type": "synthesis_complete",
+                    "form_id": form_id,
+                    "round_id": active_round.id,
+                }
+            )
         except Exception:
             ws_manager.disconnect(conn)
 
@@ -1279,6 +1374,7 @@ async def synthesise_committee(
 # ---------------------------------------------------------
 # SYNTHESIS VERSIONING
 # ---------------------------------------------------------
+
 
 @router.get(
     "/forms/{form_id}/rounds/{round_id}/synthesis_versions",
@@ -1332,6 +1428,7 @@ def list_synthesis_versions(
 # BACKGROUND SYNTHESIS TASK
 # ---------------------------------------------------------
 
+
 async def _synthesis_background(
     *,
     form_id: int,
@@ -1383,12 +1480,24 @@ async def _synthesis_background(
                     comments_context=comments_context,
                 )
             except (SynthesisConfigError, SynthesisTimeoutError, SynthesisError) as exc:
-                logger.error("Background synthesis error (round %d): %s", round_id, exc, exc_info=True)
+                logger.error(
+                    "Background synthesis error (round %d): %s",
+                    round_id,
+                    exc,
+                    exc_info=True,
+                )
                 await _broadcast_synthesis_error(form_id, round_id, str(exc))
                 return
             except Exception as exc:
-                logger.error("Unexpected background synthesis error (round %d): %s", round_id, exc, exc_info=True)
-                await _broadcast_synthesis_error(form_id, round_id, "An unexpected error occurred")
+                logger.error(
+                    "Unexpected background synthesis error (round %d): %s",
+                    round_id,
+                    exc,
+                    exc_info=True,
+                )
+                await _broadcast_synthesis_error(
+                    form_id, round_id, "An unexpected error occurred"
+                )
                 return
 
             synthesis_json_data = result.to_dict()
@@ -1405,7 +1514,9 @@ async def _synthesis_background(
             if result.disagreements:
                 text_parts.append("<h3>Disagreements</h3>")
                 for d in result.disagreements:
-                    text_parts.append(f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>")
+                    text_parts.append(
+                        f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>"
+                    )
                     for pos in d.positions:
                         text_parts.append(
                             f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
@@ -1414,9 +1525,13 @@ async def _synthesis_background(
             if result.nuances:
                 text_parts.append("<h3>Nuances</h3>")
                 for n in result.nuances:
-                    text_parts.append(f"<p><strong>{n.claim}</strong> — {n.context}</p>")
+                    text_parts.append(
+                        f"<p><strong>{n.claim}</strong> — {n.context}</p>"
+                    )
 
-            synthesis_text = "".join(text_parts) if text_parts else "Synthesis complete."
+            synthesis_text = (
+                "".join(text_parts) if text_parts else "Synthesis complete."
+            )
 
         else:
             # ── Simple single-prompt synthesis ──
@@ -1432,7 +1547,7 @@ async def _synthesis_background(
                 if isinstance(answers, str):
                     answers = json.loads(answers) if answers else {}
                 for q_idx, q_text in enumerate(questions, 1):
-                    answer = answers.get(f'q{q_idx}', 'No answer')
+                    answer = answers.get(f"q{q_idx}", "No answer")
                     prompt_content += f"  - Q: {q_text}\n"
                     prompt_content += f"    A: {answer}\n"
 
@@ -1494,7 +1609,11 @@ If expert discussion comments are included above, integrate those perspectives i
             try:
                 openai_client = get_openai_client()
                 if not openai_client:
-                    await _broadcast_synthesis_error(form_id, round_id, "Synthesis is not configured. Please add an OpenRouter API key in Settings.")
+                    await _broadcast_synthesis_error(
+                        form_id,
+                        round_id,
+                        "Synthesis is not configured. Please add an OpenRouter API key in Settings.",
+                    )
                     return
 
                 completion = openai_client.chat.completions.create(
@@ -1518,7 +1637,7 @@ If expert discussion comments are included above, integrate those perspectives i
                     cleaned = raw_output.strip()
                     if cleaned.startswith("```"):
                         lines = cleaned.split("\n")
-                        lines = [l for l in lines if not l.strip().startswith("```")]
+                        lines = [ln for ln in lines if not ln.strip().startswith("```")]
                         cleaned = "\n".join(lines)
                     parsed = json.loads(cleaned)
 
@@ -1527,9 +1646,13 @@ If expert discussion comments are included above, integrate those perspectives i
                         "agreements": parsed.get("agreements", []),
                         "disagreements": parsed.get("disagreements", []),
                         "nuances": parsed.get("nuances", []),
-                        "confidence_map": parsed.get("confidence_map", {"overall": 0.5}),
+                        "confidence_map": parsed.get(
+                            "confidence_map", {"overall": 0.5}
+                        ),
                         "follow_up_probes": parsed.get("follow_up_probes", []),
-                        "meta_synthesis_reasoning": parsed.get("meta_synthesis_reasoning", ""),
+                        "meta_synthesis_reasoning": parsed.get(
+                            "meta_synthesis_reasoning", ""
+                        ),
                     }
 
                     text_parts = []
@@ -1567,15 +1690,24 @@ If expert discussion comments are included above, integrate those perspectives i
                     synthesis_json_data = None
 
             except Exception as exc:
-                logger.error("Background simple synthesis error (round %d): %s", round_id, exc, exc_info=True)
-                await _broadcast_synthesis_error(form_id, round_id, f"Synthesis failed: {exc}")
+                logger.error(
+                    "Background simple synthesis error (round %d): %s",
+                    round_id,
+                    exc,
+                    exc_info=True,
+                )
+                await _broadcast_synthesis_error(
+                    form_id, round_id, f"Synthesis failed: {exc}"
+                )
                 return
 
         # ── Save to DB ──
         round_obj = db.query(RoundModel).filter(RoundModel.id == round_id).first()
         if not round_obj:
             logger.error("Background synthesis: round %d disappeared", round_id)
-            await _broadcast_synthesis_error(form_id, round_id, "Round not found after synthesis completed")
+            await _broadcast_synthesis_error(
+                form_id, round_id, "Round not found after synthesis completed"
+            )
             return
 
         # Deactivate existing versions
@@ -1605,19 +1737,23 @@ If expert discussion comments are included above, integrate those perspectives i
             await ws_manager.broadcast_summary(synthesis_text)
         for conn in ws_manager.active_connections.copy():
             try:
-                await conn.send_json({
-                    "type": "synthesis_complete",
-                    "form_id": form_id,
-                    "round_id": round_id,
-                    "version_id": new_version.id,
-                    "synthesis_json": synthesis_json_data,
-                })
+                await conn.send_json(
+                    {
+                        "type": "synthesis_complete",
+                        "form_id": form_id,
+                        "round_id": round_id,
+                        "version_id": new_version.id,
+                        "synthesis_json": synthesis_json_data,
+                    }
+                )
             except Exception:
                 ws_manager.disconnect(conn)
 
         # ── Send email notifications ──
         convergence = None
-        if synthesis_json_data and isinstance(synthesis_json_data.get("confidence_map"), dict):
+        if synthesis_json_data and isinstance(
+            synthesis_json_data.get("confidence_map"), dict
+        ):
             vals = list(synthesis_json_data["confidence_map"].values())
             convergence = sum(vals) / len(vals) if vals else None
 
@@ -1629,12 +1765,23 @@ If expert discussion comments are included above, integrate those perspectives i
             convergence_score=convergence,
         )
 
-        logger.info("Background synthesis complete for round %d (version %d)", round_id, next_version)
+        logger.info(
+            "Background synthesis complete for round %d (version %d)",
+            round_id,
+            next_version,
+        )
 
     except Exception as exc:
-        logger.error("Unhandled error in background synthesis (round %d): %s", round_id, exc, exc_info=True)
+        logger.error(
+            "Unhandled error in background synthesis (round %d): %s",
+            round_id,
+            exc,
+            exc_info=True,
+        )
         try:
-            await _broadcast_synthesis_error(form_id, round_id, f"Synthesis failed unexpectedly: {exc}")
+            await _broadcast_synthesis_error(
+                form_id, round_id, f"Synthesis failed unexpectedly: {exc}"
+            )
         except Exception:
             pass
     finally:
@@ -1703,7 +1850,9 @@ async def generate_synthesis_for_round(
         .all()
     )
     if not responses:
-        raise HTTPException(status_code=404, detail="No responses to synthesise for this round")
+        raise HTTPException(
+            status_code=404, detail="No responses to synthesise for this round"
+        )
 
     # ── 2. Pre-fetch everything we need from DB ──
     max_version = (
@@ -1764,13 +1913,15 @@ async def generate_synthesis_for_round(
             await ws_manager.broadcast_summary(synthesis_text)
         for conn in ws_manager.active_connections.copy():
             try:
-                await conn.send_json({
-                    "type": "synthesis_complete",
-                    "form_id": form_id,
-                    "round_id": round_id,
-                    "version_id": new_version.id,
-                    "synthesis_json": None,
-                })
+                await conn.send_json(
+                    {
+                        "type": "synthesis_complete",
+                        "form_id": form_id,
+                        "round_id": round_id,
+                        "version_id": new_version.id,
+                        "synthesis_json": None,
+                    }
+                )
             except Exception:
                 ws_manager.disconnect(conn)
 
@@ -1782,7 +1933,9 @@ async def generate_synthesis_for_round(
             "synthesis_json": new_version.synthesis_json,
             "model_used": new_version.model_used,
             "strategy": new_version.strategy,
-            "created_at": new_version.created_at.isoformat() if new_version.created_at else None,
+            "created_at": new_version.created_at.isoformat()
+            if new_version.created_at
+            else None,
             "is_active": new_version.is_active,
         }
 
@@ -1836,7 +1989,9 @@ def activate_synthesis_version(
     the specified version. Also copies the synthesis text and JSON
     back onto the Round model for backwards compatibility.
     """
-    version = db.query(SynthesisVersion).filter(SynthesisVersion.id == version_id).first()
+    version = (
+        db.query(SynthesisVersion).filter(SynthesisVersion.id == version_id).first()
+    )
     if not version:
         raise HTTPException(status_code=404, detail="Synthesis version not found")
 
@@ -1881,7 +2036,9 @@ def get_synthesis_version(
     user: User = Depends(get_current_user),
 ):
     """Get a specific synthesis version by ID."""
-    version = db.query(SynthesisVersion).filter(SynthesisVersion.id == version_id).first()
+    version = (
+        db.query(SynthesisVersion).filter(SynthesisVersion.id == version_id).first()
+    )
     if not version:
         raise HTTPException(status_code=404, detail="Synthesis version not found")
 
@@ -1929,7 +2086,13 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
             lines.append("### Questions")
             lines.append("")
             for i, q in enumerate(questions, 1):
-                q_text = q if isinstance(q, str) else q.get("label", q.get("text", str(q))) if isinstance(q, dict) else str(q)
+                q_text = (
+                    q
+                    if isinstance(q, str)
+                    else q.get("label", q.get("text", str(q)))
+                    if isinstance(q, dict)
+                    else str(q)
+                )
                 lines.append(f"{i}. {q_text}")
             lines.append("")
 
@@ -1949,17 +2112,23 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
                 lines.append("")
                 for a in agreements:
                     conf = a.get("confidence", 0)
-                    lines.append(f"- **{a.get('claim', '')}** ({conf * 100:.0f}% confidence)")
+                    lines.append(
+                        f"- **{a.get('claim', '')}** ({conf * 100:.0f}% confidence)"
+                    )
                     experts = a.get("supporting_experts", [])
                     if experts:
-                        lines.append(f"  - Supporting experts: {', '.join(f'Expert {e}' for e in experts)}")
+                        lines.append(
+                            f"  - Supporting experts: {', '.join(f'Expert {e}' for e in experts)}"
+                        )
                     if a.get("evidence_summary"):
                         lines.append(f"  - Evidence: {a['evidence_summary']}")
                     excerpts = a.get("evidence_excerpts", [])
                     if excerpts:
                         lines.append("  - **Supporting Excerpts:**")
                         for ex in excerpts:
-                            label = ex.get("expert_label", f"Expert {ex.get('expert_id', '?')}")
+                            label = ex.get(
+                                "expert_label", f"Expert {ex.get('expert_id', '?')}"
+                            )
                             lines.append(f'    - _{label}_: "{ex.get("quote", "")}"')
                 lines.append("")
 
@@ -1975,7 +2144,9 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
                         experts = pos.get("experts", [])
                         lines.append(f"  - *{pos.get('position', '')}*")
                         if experts:
-                            lines.append(f"    - Experts: {', '.join(f'Expert {e}' for e in experts)}")
+                            lines.append(
+                                f"    - Experts: {', '.join(f'Expert {e}' for e in experts)}"
+                            )
                         if pos.get("evidence"):
                             lines.append(f"    - Evidence: {pos['evidence']}")
                 lines.append("")
@@ -1990,7 +2161,9 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
                     lines.append(f"  - Context: {n.get('context', '')}")
                     relevant = n.get("relevant_experts", [])
                     if relevant:
-                        lines.append(f"  - Relevant experts: {', '.join(f'Expert {e}' for e in relevant)}")
+                        lines.append(
+                            f"  - Relevant experts: {', '.join(f'Expert {e}' for e in relevant)}"
+                        )
                 lines.append("")
 
             # Follow-up Probes
@@ -2002,7 +2175,9 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
                     lines.append(f"- **{p.get('question', '')}**")
                     target = p.get("target_experts", [])
                     if target:
-                        lines.append(f"  - Target experts: {', '.join(f'Expert {e}' for e in target)}")
+                        lines.append(
+                            f"  - Target experts: {', '.join(f'Expert {e}' for e in target)}"
+                        )
                     if p.get("rationale"):
                         lines.append(f"  - Rationale: {p['rationale']}")
                 lines.append("")
@@ -2067,7 +2242,12 @@ def export_synthesis(
         .all()
     )
 
-    safe_title = "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in form.title).strip().replace(" ", "-").lower()
+    safe_title = (
+        "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in form.title)
+        .strip()
+        .replace(" ", "-")
+        .lower()
+    )
     if not safe_title:
         safe_title = f"form-{form_id}"
 
@@ -2104,7 +2284,9 @@ def export_synthesis(
             import markdown as md_lib
             from weasyprint import HTML as WeasyHTML
 
-            html_body = md_lib.markdown(md_content, extensions=["tables", "fenced_code"])
+            html_body = md_lib.markdown(
+                md_content, extensions=["tables", "fenced_code"]
+            )
             full_html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"/>
 <style>
@@ -2151,6 +2333,7 @@ em {{ color: #505a5f; }}
 # ---------------------------------------------------------
 # FOLLOW-UPS
 # ---------------------------------------------------------
+
 
 class FollowUpCreatePayload(BaseModel):
     question: str
@@ -2212,16 +2395,18 @@ def get_follow_ups(
             for r in fu.responses
         ]
 
-        result.append({
-            "id": fu.id,
-            "round_id": fu.round_id,
-            "author_type": fu.author_type,
-            "author_id": fu.author_id,
-            "author_email": author_email,
-            "question": fu.question,
-            "created_at": fu.created_at.isoformat(),
-            "responses": responses,
-        })
+        result.append(
+            {
+                "id": fu.id,
+                "round_id": fu.round_id,
+                "author_type": fu.author_type,
+                "author_id": fu.author_id,
+                "author_email": author_email,
+                "question": fu.question,
+                "created_at": fu.created_at.isoformat(),
+                "responses": responses,
+            }
+        )
 
     return result
 
@@ -2320,6 +2505,7 @@ def respond_to_follow_up(
 # FORM MANAGEMENT
 # ---------------------------------------------------------
 
+
 class FormCreate(BaseModel):
     title: str
     questions: list[str]
@@ -2336,6 +2522,7 @@ class FormUpdate(BaseModel):
 # User-scoped form management (any authenticated user)
 # ---------------------------------------------------------------------------
 
+
 class UserFormCreate(BaseModel):
     title: str
     description: str | None = None
@@ -2343,8 +2530,12 @@ class UserFormCreate(BaseModel):
     allow_join: bool = True
 
 
-@router.post("/forms/create", tags=["Forms"], status_code=201,
-             summary="Create a consultation (facilitator/admin)")
+@router.post(
+    "/forms/create",
+    tags=["Forms"],
+    status_code=201,
+    summary="Create a consultation (facilitator/admin)",
+)
 @limiter.limit(CRUD_LIMIT)
 def user_create_form(
     payload: UserFormCreate,
@@ -2362,7 +2553,9 @@ def user_create_form(
         if not db.query(FormModel).filter(FormModel.join_code == code).first():
             break
     else:
-        raise HTTPException(status_code=500, detail="Could not generate unique join code")
+        raise HTTPException(
+            status_code=500, detail="Could not generate unique join code"
+        )
 
     form = FormModel(
         title=title,
@@ -2374,15 +2567,26 @@ def user_create_form(
     )
     db.add(form)
     db.flush()
-    first_round = RoundModel(form_id=form.id, round_number=1, is_active=True, questions=payload.questions)
+    first_round = RoundModel(
+        form_id=form.id, round_number=1, is_active=True, questions=payload.questions
+    )
     db.add(first_round)
     # Also create an InviteCode row for the default join code
-    invite = InviteCode(form_id=form.id, code=code, form_role="expert", created_by=user.id)
+    invite = InviteCode(
+        form_id=form.id, code=code, form_role="expert", created_by=user.id
+    )
     db.add(invite)
     db.commit()
     db.refresh(form)
-    audit_log(db, user=user, action="create_form", resource_type="form",
-              resource_id=form.id, detail={"title": title}, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="create_form",
+        resource_type="form",
+        resource_id=form.id,
+        detail={"title": title},
+        request=request,
+    )
     return {
         "id": form.id,
         "title": form.title,
@@ -2399,7 +2603,12 @@ def my_created_forms(
     user: User = Depends(require_facilitator),
 ):
     """Return all forms owned by the current user, newest first."""
-    forms = db.query(FormModel).filter(FormModel.owner_id == user.id).order_by(FormModel.id.desc()).all()
+    forms = (
+        db.query(FormModel)
+        .filter(FormModel.owner_id == user.id)
+        .order_by(FormModel.id.desc())
+        .all()
+    )
     return [
         {
             "id": f.id,
@@ -2413,8 +2622,11 @@ def my_created_forms(
     ]
 
 
-@router.post("/forms/{form_id}/regenerate-join-code", tags=["Forms"],
-             summary="Regenerate join code (owner/admin only)")
+@router.post(
+    "/forms/{form_id}/regenerate-join-code",
+    tags=["Forms"],
+    summary="Regenerate join code (owner/admin only)",
+)
 def regenerate_join_code(
     form_id: int,
     request: Request,
@@ -2428,15 +2640,22 @@ def regenerate_join_code(
     assert_form_owner_or_facilitator(form, user)
     for _ in range(10):
         code = generate_join_code()
-        if not db.query(FormModel).filter(FormModel.join_code == code, FormModel.id != form_id).first():
+        if (
+            not db.query(FormModel)
+            .filter(FormModel.join_code == code, FormModel.id != form_id)
+            .first()
+        ):
             break
     form.join_code = code
     db.commit()
     return {"join_code": form.join_code, "form_id": form_id}
 
 
-@router.delete("/forms/{form_id}/delete", tags=["Forms"],
-               summary="Delete a form (owner/admin only)")
+@router.delete(
+    "/forms/{form_id}/delete",
+    tags=["Forms"],
+    summary="Delete a form (owner/admin only)",
+)
 def delete_owned_form(
     form_id: int,
     request: Request,
@@ -2451,8 +2670,15 @@ def delete_owned_form(
     assert_form_owner_or_facilitator(form, user)
     db.delete(form)
     db.commit()
-    audit_log(db, user=user, action="delete_form", resource_type="form",
-              resource_id=form_id, detail={"title": title}, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="delete_form",
+        resource_type="form",
+        resource_id=form_id,
+        detail={"title": title},
+        request=request,
+    )
     return {"deleted": form_id, "title": title}
 
 
@@ -2470,7 +2696,7 @@ def update_form(
     payload: FormUpdate,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     f = db.query(FormModel).filter(FormModel.id == form_id).first()
     if not f:
@@ -2480,8 +2706,15 @@ def update_form(
     old_title = f.title
     f.title = payload.title
     f.questions = payload.questions
-    audit_log(db, user=user, action="update_form", resource_type="form",
-              resource_id=form_id, detail={"old_title": old_title, "new_title": payload.title}, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="update_form",
+        resource_type="form",
+        resource_id=form_id,
+        detail={"old_title": old_title, "new_title": payload.title},
+        request=request,
+    )
     db.commit()
     return {"status": "updated"}
 
@@ -2499,7 +2732,7 @@ def delete_form(
     form_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     # Now delete the form itself
     f = db.query(FormModel).filter(FormModel.id == form_id).first()
@@ -2507,8 +2740,15 @@ def delete_form(
         raise HTTPException(status_code=404, detail="Form not found")
     assert_form_owner_or_facilitator(f, user)
 
-    audit_log(db, user=user, action="delete_form", resource_type="form",
-              resource_id=form_id, detail={"title": f.title}, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="delete_form",
+        resource_type="form",
+        resource_id=form_id,
+        detail={"title": f.title},
+        request=request,
+    )
     db.delete(f)
     db.commit()
     return {"status": "deleted"}
@@ -2526,28 +2766,36 @@ def delete_form(
 def get_forms(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     items = db.query(FormModel).order_by(FormModel.id).all()
 
     result = []
     for f in items:
-        participant_count = db.query(Response.user_id).filter(Response.form_id == f.id).distinct().count()
-        
-        active_round = db.query(RoundModel).filter(
-            RoundModel.form_id == f.id,
-            RoundModel.is_active == True
-        ).first()
-        
-        result.append({
-            "id": f.id,
-            "title": f.title,
-            "questions": f.questions,
-            "allow_join": f.allow_join,
-            "join_code": f.join_code,
-            "participant_count": participant_count,
-            "current_round": active_round.round_number if active_round else 0
-        })
+        participant_count = (
+            db.query(Response.user_id)
+            .filter(Response.form_id == f.id)
+            .distinct()
+            .count()
+        )
+
+        active_round = (
+            db.query(RoundModel)
+            .filter(RoundModel.form_id == f.id, RoundModel.is_active == True)
+            .first()
+        )
+
+        result.append(
+            {
+                "id": f.id,
+                "title": f.title,
+                "questions": f.questions,
+                "allow_join": f.allow_join,
+                "join_code": f.join_code,
+                "participant_count": participant_count,
+                "current_round": active_round.round_number if active_round else 0,
+            }
+        )
 
     return result
 
@@ -2569,15 +2817,16 @@ def unlock_form(
     request: Request,
     payload: UnlockFormPayload,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     raw_code = payload.join_code.strip()
 
     # Try exact match first (handles both old-format and new-format codes)
-    form = db.query(FormModel).filter(
-        FormModel.join_code == raw_code,
-        FormModel.allow_join == True
-    ).first()
+    form = (
+        db.query(FormModel)
+        .filter(FormModel.join_code == raw_code, FormModel.allow_join == True)
+        .first()
+    )
 
     # If no exact match, try normalized matching for SYM-XXXX-NNNN codes
     if not form:
@@ -2593,10 +2842,11 @@ def unlock_form(
         raise HTTPException(status_code=404, detail="Form not found or closed.")
 
     # Check if user has already unlocked this form
-    existing_unlock = db.query(UserFormUnlock).filter(
-        UserFormUnlock.user_id == user.id,
-        UserFormUnlock.form_id == form.id
-    ).first()
+    existing_unlock = (
+        db.query(UserFormUnlock)
+        .filter(UserFormUnlock.user_id == user.id, UserFormUnlock.form_id == form.id)
+        .first()
+    )
 
     if existing_unlock:
         return {"message": "Form already unlocked."}
@@ -2621,9 +2871,15 @@ def unlock_form(
 def get_my_forms(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
-    unlocked_forms = db.query(FormModel).join(UserFormUnlock).filter(UserFormUnlock.user_id == user.id).order_by(FormModel.id).all()
+    unlocked_forms = (
+        db.query(FormModel)
+        .join(UserFormUnlock)
+        .filter(UserFormUnlock.user_id == user.id)
+        .order_by(FormModel.id)
+        .all()
+    )
     return unlocked_forms
 
 
@@ -2640,7 +2896,7 @@ def get_form(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     f = db.query(FormModel).filter(FormModel.id == form_id).first()
     if not f:
@@ -2660,7 +2916,7 @@ def get_form(
 # FORM TEMPLATES
 # ---------------------------------------------------------
 
-from .form_templates import list_templates, get_template
+from .form_templates import list_templates, get_template  # noqa: E402
 
 
 @router.get(
@@ -2704,7 +2960,9 @@ def create_form_from_template(
     """Create a new form pre-filled from a template."""
     template = get_template(template_id)
     if not template:
-        raise HTTPException(status_code=404, detail=f"Template '{template_id}' not found")
+        raise HTTPException(
+            status_code=404, detail=f"Template '{template_id}' not found"
+        )
 
     title = (payload.title if payload and payload.title else template.name).strip()
     # Auto-generate join code in SYM format
@@ -2733,8 +2991,15 @@ def create_form_from_template(
     )
     db.add(first_round)
 
-    audit_log(db, user=user, action="create_form_from_template", resource_type="form",
-              resource_id=f.id, detail={"title": f.title, "template_id": template_id}, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="create_form_from_template",
+        resource_type="form",
+        resource_id=f.id,
+        detail={"title": f.title, "template_id": template_id},
+        request=request,
+    )
     db.commit()
 
     return {
@@ -2753,6 +3018,7 @@ def create_form_from_template(
 # ---------------------------------------------------------
 # EXPERT LABELS
 # ---------------------------------------------------------
+
 
 class ExpertLabelsPayload(BaseModel):
     preset: str  # "default" | "temporal" | "custom" | "methodological" | "stakeholder"
@@ -2812,6 +3078,7 @@ def put_expert_labels(
 # ROUNDS (Delphi)
 # ---------------------------------------------------------
 
+
 class RoundConfig(BaseModel):
     questions: list[str] | None = None
 
@@ -2829,7 +3096,7 @@ def get_active_round(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     active = (
         db.query(RoundModel)
@@ -2843,7 +3110,7 @@ def get_active_round(
         db.query(RoundModel)
         .filter(
             RoundModel.form_id == form_id,
-            RoundModel.round_number == active.round_number - 1
+            RoundModel.round_number == active.round_number - 1,
         )
         .first()
     )
@@ -2854,9 +3121,8 @@ def get_active_round(
         "id": active.id,
         "round_number": active.round_number,
         "questions": active.questions or [],
-        "previous_round_synthesis": previous_round_synthesis
+        "previous_round_synthesis": previous_round_synthesis,
     }
-
 
 
 @router.post(
@@ -2873,7 +3139,7 @@ def open_next_round(
     form_id: int,
     payload: RoundConfig | None = None,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     current = (
         db.query(RoundModel)
@@ -2910,18 +3176,13 @@ def open_next_round(
         round_number=next_number,
         is_active=True,
         questions=questions,
-        synthesis=previous_synthesis
+        synthesis=previous_synthesis,
     )
     db.add(new)
     db.commit()
     db.refresh(new)
 
-    return {
-        "id": new.id,
-        "round_number": new.round_number,
-        "questions": new.questions
-    }
-
+    return {"id": new.id, "round_number": new.round_number, "questions": new.questions}
 
 
 @router.get(
@@ -2937,7 +3198,7 @@ def get_rounds(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
 ):
     rounds = (
         db.query(RoundModel)
@@ -2948,21 +3209,19 @@ def get_rounds(
 
     result = []
     for r in rounds:
-        response_count = (
-            db.query(Response)
-            .filter(Response.round_id == r.id)
-            .count()
+        response_count = db.query(Response).filter(Response.round_id == r.id).count()
+        result.append(
+            {
+                "id": r.id,
+                "round_number": r.round_number,
+                "synthesis": r.synthesis,
+                "synthesis_json": r.synthesis_json,
+                "is_active": r.is_active,
+                "questions": r.questions or [],
+                "convergence_score": r.convergence_score,
+                "response_count": response_count,
+            }
         )
-        result.append({
-            "id": r.id,
-            "round_number": r.round_number,
-            "synthesis": r.synthesis,
-            "synthesis_json": r.synthesis_json,
-            "is_active": r.is_active,
-            "questions": r.questions or [],
-            "convergence_score": r.convergence_score,
-            "response_count": response_count,
-        })
 
     return result
 
@@ -2970,6 +3229,7 @@ def get_rounds(
 # ---------------------------------------------------------
 # RESPONSES
 # ---------------------------------------------------------
+
 
 @router.get(
     "/form/{form_id}/responses",
@@ -2985,7 +3245,7 @@ def form_responses(
     form_id: int,
     all_rounds: bool = False,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     q = db.query(Response).filter(Response.form_id == form_id)
 
@@ -3123,7 +3383,7 @@ def form_archived(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     items = (
         db.query(ArchivedResponse)
@@ -3137,7 +3397,7 @@ def form_archived(
             "answers": x.answers,
             "email": x.email,
             "timestamp": x.created_at.isoformat(),
-            "round_id": x.round_id
+            "round_id": x.round_id,
         }
         for x in items
     ]
@@ -3156,7 +3416,7 @@ def rounds_with_responses(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     rounds = (
         db.query(RoundModel)
@@ -3174,22 +3434,24 @@ def rounds_with_responses(
             .all()
         )
 
-        output.append({
-            "id": r.id,
-            "round_number": r.round_number,
-            "synthesis": r.synthesis,
-            "is_active": r.is_active,
-            "responses": [
-                {
-                    "id": x.id,
-                    "answers": x.answers,
-                    "email": x.user.email if x.user else None,
-                    "timestamp": x.created_at.isoformat(),
-                    "version": x.version,
-                }
-                for x in rs
-            ]
-        })
+        output.append(
+            {
+                "id": r.id,
+                "round_number": r.round_number,
+                "synthesis": r.synthesis,
+                "is_active": r.is_active,
+                "responses": [
+                    {
+                        "id": x.id,
+                        "answers": x.answers,
+                        "email": x.user.email if x.user else None,
+                        "timestamp": x.created_at.isoformat(),
+                        "version": x.version,
+                    }
+                    for x in rs
+                ],
+            }
+        )
 
     return output
 
@@ -3197,6 +3459,7 @@ def rounds_with_responses(
 # ---------------------------------------------------------
 # GENERIC SYNTHESIS
 # ---------------------------------------------------------
+
 
 @router.post(
     "/form/{form_id}/synthesise",
@@ -3211,7 +3474,7 @@ def synthesise_simple(
     request: Request,
     form_id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     active = (
         db.query(RoundModel)
@@ -3235,7 +3498,13 @@ def synthesise_simple(
     blocks = []
     for i, r in enumerate(items, start=1):
         parts = []
-        answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
+        answers = (
+            r.answers
+            if isinstance(r.answers, dict)
+            else json.loads(r.answers)
+            if r.answers
+            else {}
+        )
         for key, val in answers.items():
             clean = str(val).replace("\n", "<br/>")
             parts.append(f"<p><strong>{key}</strong>: {clean}</p>")
@@ -3249,6 +3518,7 @@ def synthesise_simple(
 # ---------------------------------------------------------
 # EMAIL
 # ---------------------------------------------------------
+
 
 class EmailRequest(BaseModel):
     to: EmailStr
@@ -3270,7 +3540,7 @@ async def send_email(
     to: str = Form(...),
     subject: str = Form(...),
     html: str = Form(...),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     # This function requires the following environment variables to be set in the .env file:
     # SMTP_HOST: The hostname of the SMTP server.
@@ -3290,7 +3560,7 @@ async def send_email(
             port=int(os.getenv("SMTP_PORT", "587")),
             start_tls=True,
             username=os.getenv("SMTP_USER"),
-            password=os.getenv("SMTP_PASS")
+            password=os.getenv("SMTP_PASS"),
         )
         return {"status": "sent"}
 
@@ -3351,6 +3621,7 @@ async def send_invitation_email(
 ):
     """Send a branded invitation email to an expert."""
     from .email_templates import invitation
+
     subject, html = invitation(
         consultation_title=payload.consultation_title,
         admin_name=payload.admin_name,
@@ -3359,8 +3630,14 @@ async def send_invitation_email(
     )
     try:
         await _send_templated_email(payload.to, subject, html)
-        audit_log(db, user=user, action="send_invitation", resource_type="email",
-                  detail={"to": payload.to, "consultation": payload.consultation_title}, request=request)
+        audit_log(
+            db,
+            user=user,
+            action="send_invitation",
+            resource_type="email",
+            detail={"to": payload.to, "consultation": payload.consultation_title},
+            request=request,
+        )
         db.commit()
         return {"status": "sent", "template": "invitation"}
     except Exception as e:
@@ -3391,6 +3668,7 @@ async def send_new_round_email(
 ):
     """Notify experts that a new round is open."""
     from .email_templates import new_round
+
     subject, html = new_round(
         consultation_title=payload.consultation_title,
         round_number=payload.round_number,
@@ -3405,7 +3683,12 @@ async def send_new_round_email(
             errors.append({"to": recipient, "error": str(e)})
     if errors and len(errors) == len(payload.to):
         raise HTTPException(status_code=500, detail={"errors": errors})
-    return {"status": "sent", "template": "new_round", "sent": len(payload.to) - len(errors), "errors": errors}
+    return {
+        "status": "sent",
+        "template": "new_round",
+        "sent": len(payload.to) - len(errors),
+        "errors": errors,
+    }
 
 
 class SynthesisReadyEmailPayload(BaseModel):
@@ -3432,6 +3715,7 @@ async def send_synthesis_ready_email(
 ):
     """Notify participants that synthesis is ready."""
     from .email_templates import synthesis_ready
+
     subject, html = synthesis_ready(
         consultation_title=payload.consultation_title,
         round_number=payload.round_number,
@@ -3446,7 +3730,12 @@ async def send_synthesis_ready_email(
             errors.append({"to": recipient, "error": str(e)})
     if errors and len(errors) == len(payload.to):
         raise HTTPException(status_code=500, detail={"errors": errors})
-    return {"status": "sent", "template": "synthesis_ready", "sent": len(payload.to) - len(errors), "errors": errors}
+    return {
+        "status": "sent",
+        "template": "synthesis_ready",
+        "sent": len(payload.to) - len(errors),
+        "errors": errors,
+    }
 
 
 class ReminderEmailPayload(BaseModel):
@@ -3473,6 +3762,7 @@ async def send_reminder_email(
 ):
     """Send a gentle reminder to experts who haven't responded."""
     from .email_templates import round_reminder
+
     subject, html = round_reminder(
         consultation_title=payload.consultation_title,
         round_number=payload.round_number,
@@ -3487,7 +3777,12 @@ async def send_reminder_email(
             errors.append({"to": recipient, "error": str(e)})
     if errors and len(errors) == len(payload.to):
         raise HTTPException(status_code=500, detail={"errors": errors})
-    return {"status": "sent", "template": "round_reminder", "sent": len(payload.to) - len(errors), "errors": errors}
+    return {
+        "status": "sent",
+        "template": "round_reminder",
+        "sent": len(payload.to) - len(errors),
+        "errors": errors,
+    }
 
 
 # ── Manual synthesis notification trigger ────────────────────────
@@ -3526,7 +3821,9 @@ async def notify_synthesis_ready(
         .first()
     )
     if not latest_round:
-        raise HTTPException(status_code=404, detail="No synthesised round found for this form")
+        raise HTTPException(
+            status_code=404, detail="No synthesised round found for this form"
+        )
 
     background_tasks.add_task(
         _notify_synthesis_ready,
@@ -3573,8 +3870,12 @@ async def preview_email_template(
 ):
     """Preview a template with sample data (returns HTML string)."""
     from .email_templates import TEMPLATES
+
     if template_name not in TEMPLATES:
-        raise HTTPException(status_code=404, detail=f"Unknown template: {template_name}. Available: {list(TEMPLATES.keys())}")
+        raise HTTPException(
+            status_code=404,
+            detail=f"Unknown template: {template_name}. Available: {list(TEMPLATES.keys())}",
+        )
 
     sample_data = {
         "invitation": dict(
@@ -3586,7 +3887,10 @@ async def preview_email_template(
         "new_round": dict(
             consultation_title="AI Safety in Healthcare",
             round_number=2,
-            questions=["How should we handle AI disagreement with clinicians?", "What oversight mechanisms are essential?"],
+            questions=[
+                "How should we handle AI disagreement with clinicians?",
+                "What oversight mechanisms are essential?",
+            ],
             round_url="https://symphonia.example.com/form/abc123",
         ),
         "synthesis_ready": dict(
@@ -3614,6 +3918,7 @@ async def preview_email_template(
 # ---------------------------------------------------------
 # AUDIT LOG
 # ---------------------------------------------------------
+
 
 @router.get(
     "/audit-log",
@@ -3684,6 +3989,7 @@ def get_audit_log_actions(
 # ---------------------------------------------------------
 # SYNTHESIS COMMENTS
 # ---------------------------------------------------------
+
 
 class CommentCreatePayload(BaseModel):
     section_type: str
@@ -3798,7 +4104,13 @@ async def create_comment(
     if not round_obj:
         raise HTTPException(status_code=404, detail="Round not found")
 
-    valid_section_types = {"agreement", "disagreement", "nuance", "emergence", "general"}
+    valid_section_types = {
+        "agreement",
+        "disagreement",
+        "nuance",
+        "emergence",
+        "general",
+    }
     if payload.section_type not in valid_section_types:
         raise HTTPException(
             status_code=400,
@@ -3842,12 +4154,14 @@ async def create_comment(
     # Broadcast new comment via WebSocket
     for conn in ws_manager.active_connections.copy():
         try:
-            await conn.send_json({
-                "type": "comment_added",
-                "form_id": form_id,
-                "round_id": round_id,
-                "comment": result,
-            })
+            await conn.send_json(
+                {
+                    "type": "comment_added",
+                    "form_id": form_id,
+                    "round_id": round_id,
+                    "comment": result,
+                }
+            )
         except Exception:
             ws_manager.disconnect(conn)
 
@@ -3871,7 +4185,9 @@ def update_comment(
     user: User = Depends(get_current_user),
 ):
     """Edit own comment."""
-    comment = db.query(SynthesisComment).filter(SynthesisComment.id == comment_id).first()
+    comment = (
+        db.query(SynthesisComment).filter(SynthesisComment.id == comment_id).first()
+    )
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
     if comment.author_id != user.id:
@@ -3902,7 +4218,9 @@ def delete_comment(
     user: User = Depends(get_current_user),
 ):
     """Delete own comment (or admin can delete any)."""
-    comment = db.query(SynthesisComment).filter(SynthesisComment.id == comment_id).first()
+    comment = (
+        db.query(SynthesisComment).filter(SynthesisComment.id == comment_id).first()
+    )
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
     if comment.author_id != user.id and user.role != UserRole.PLATFORM_ADMIN.value:
@@ -3969,10 +4287,16 @@ def devil_advocate(
     responses_text = ""
     for i, r in enumerate(responses, 1):
         responses_text += f"\nExpert {i}:\n"
-        answers = r.answers if isinstance(r.answers, dict) else json.loads(r.answers) if r.answers else {}
+        answers = (
+            r.answers
+            if isinstance(r.answers, dict)
+            else json.loads(r.answers)
+            if r.answers
+            else {}
+        )
         for q_idx, q in enumerate(questions, 1):
             q_text = q if isinstance(q, str) else q.get("label", q.get("text", str(q)))
-            answer = answers.get(f'q{q_idx}', 'No answer')
+            answer = answers.get(f"q{q_idx}", "No answer")
             responses_text += f"  Q: {q_text}\n  A: {answer}\n"
 
     # Get synthesis text
@@ -3981,7 +4305,9 @@ def devil_advocate(
         sj = round_obj.synthesis_json
         parts = []
         for a in sj.get("agreements", []):
-            parts.append(f"Agreement: {a.get('claim', '')} — {a.get('evidence_summary', '')}")
+            parts.append(
+                f"Agreement: {a.get('claim', '')} — {a.get('evidence_summary', '')}"
+            )
         for d in sj.get("disagreements", []):
             parts.append(f"Disagreement: {d.get('topic', '')}")
             for p in d.get("positions", []):
@@ -3993,7 +4319,10 @@ def devil_advocate(
         synthesis_text = round_obj.synthesis
 
     if not synthesis_text:
-        raise HTTPException(status_code=400, detail="No synthesis available to critique. Generate a synthesis first.")
+        raise HTTPException(
+            status_code=400,
+            detail="No synthesis available to critique. Generate a synthesis first.",
+        )
 
     # Check for mock mode
     synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
@@ -4052,7 +4381,10 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
+            raise HTTPException(
+                status_code=503,
+                detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.",
+            )
 
         completion = openai_client.chat.completions.create(
             model=resolved_model,
@@ -4077,7 +4409,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
         cleaned = raw_output.strip()
         if cleaned.startswith("```"):
             lines = cleaned.split("\n")
-            lines = [l for l in lines if not l.strip().startswith("```")]
+            lines = [ln for ln in lines if not ln.strip().startswith("```")]
             cleaned = "\n".join(lines)
 
         parsed = json.loads(cleaned)
@@ -4089,20 +4421,26 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
             strength = ca.get("strength", "moderate")
             if strength not in ("strong", "moderate", "weak"):
                 strength = "moderate"
-            validated.append({
-                "argument": ca.get("argument", ""),
-                "rationale": ca.get("rationale", ""),
-                "strength": strength,
-            })
+            validated.append(
+                {
+                    "argument": ca.get("argument", ""),
+                    "rationale": ca.get("rationale", ""),
+                    "strength": strength,
+                }
+            )
 
         return {"counterarguments": validated}
 
     except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Failed to parse devil's advocate response")
+        raise HTTPException(
+            status_code=500, detail="Failed to parse devil's advocate response"
+        )
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate counterarguments: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate counterarguments: {e}"
+        )
 
 
 # ---------------------------------------------------------
@@ -4217,7 +4555,10 @@ def translate_synthesis(
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
+            raise HTTPException(
+                status_code=503,
+                detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.",
+            )
 
         completion = openai_client.chat.completions.create(
             model=resolved_model,
@@ -4249,7 +4590,9 @@ def translate_synthesis(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to translate synthesis: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to translate synthesis: {e}"
+        )
 
 
 # ---------------------------------------------------------
@@ -4423,26 +4766,40 @@ Return ONLY a JSON object in this exact format:
             parsed = json.loads(content)
         except json.JSONDecodeError:
             import re as _re
-            m = _re.search(r'\{.*\}', content, _re.DOTALL)
+
+            m = _re.search(r"\{.*\}", content, _re.DOTALL)
             parsed = json.loads(m.group()) if m else {}
 
         raw_questions = parsed.get("questions", [])
         validated = []
-        valid_categories = {"assumption", "challenge", "disagreement", "depth", "blind_spot", "clarification"}
+        valid_categories = {
+            "assumption",
+            "challenge",
+            "disagreement",
+            "depth",
+            "blind_spot",
+            "clarification",
+        }
         for q in raw_questions:
             if isinstance(q, dict) and q.get("question"):
-                validated.append({
-                    "question": str(q.get("question", "")),
-                    "rationale": str(q.get("rationale", "")),
-                    "category": q.get("category", "depth") if q.get("category") in valid_categories else "depth",
-                })
+                validated.append(
+                    {
+                        "question": str(q.get("question", "")),
+                        "rationale": str(q.get("rationale", "")),
+                        "category": q.get("category", "depth")
+                        if q.get("category") in valid_categories
+                        else "depth",
+                    }
+                )
 
         return {"questions": validated, "mock": False}
 
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate probe questions: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate probe questions: {e}"
+        )
 
 
 # ---------------------------------------------------------
@@ -4452,7 +4809,10 @@ Return ONLY a JSON object in this exact format:
 
 class VoiceMirrorPayload(BaseModel):
     """Payload for clarifying expert responses."""
-    responses: list[dict]  # [{"expert": "Expert 1", "question": "...", "answer": "..."}]
+
+    responses: list[
+        dict
+    ]  # [{"expert": "Expert 1", "question": "...", "answer": "..."}]
 
 
 @router.post(
@@ -4496,12 +4856,14 @@ def voice_mirror(
     if synthesis_mode == "mock" or not api_key:
         clarified = []
         for item in payload.responses:
-            clarified.append({
-                "expert": item.get("expert", "Unknown"),
-                "question": item.get("question", ""),
-                "original": item.get("answer", ""),
-                "clarified": f"[Mock clarification] {item.get('answer', '')}",
-            })
+            clarified.append(
+                {
+                    "expert": item.get("expert", "Unknown"),
+                    "question": item.get("question", ""),
+                    "original": item.get("answer", ""),
+                    "clarified": f"[Mock clarification] {item.get('answer', '')}",
+                }
+            )
         return {"clarified_responses": clarified}
 
     # Build prompt
@@ -4545,7 +4907,10 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
+            raise HTTPException(
+                status_code=503,
+                detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.",
+            )
 
         completion = openai_client.chat.completions.create(
             model=resolved_model,
@@ -4569,7 +4934,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
         cleaned = raw_output.strip()
         if cleaned.startswith("```"):
             lines = cleaned.split("\n")
-            lines = [l for l in lines if not l.strip().startswith("```")]
+            lines = [ln for ln in lines if not ln.strip().startswith("```")]
             cleaned = "\n".join(lines)
 
         parsed = json.loads(cleaned)
@@ -4577,7 +4942,9 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
         return {"clarified_responses": parsed.get("clarified_responses", [])}
 
     except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Failed to parse voice mirroring response")
+        raise HTTPException(
+            status_code=500, detail="Failed to parse voice mirroring response"
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -4587,6 +4954,7 @@ Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:
 # ---------------------------------------------------------
 # ADMIN ANALYTICS
 # ---------------------------------------------------------
+
 
 @router.get(
     "/admin/analytics",
@@ -4611,7 +4979,7 @@ def admin_analytics(
     - synthesis_mode_distribution: [{mode, count}]
     - activity_timeline: [{date, forms_created, responses_submitted}]
     """
-    from sqlalchemy import func, cast, Date
+    from sqlalchemy import func
     from datetime import timedelta
 
     # ── Basic counts ──
@@ -4639,7 +5007,11 @@ def admin_analytics(
         .first()
     )
     most_active_form = (
-        {"id": most_active_row[0], "title": most_active_row[1], "response_count": most_active_row[2]}
+        {
+            "id": most_active_row[0],
+            "title": most_active_row[1],
+            "response_count": most_active_row[2],
+        }
         if most_active_row
         else None
     )
@@ -4664,14 +5036,16 @@ def admin_analytics(
         denominator = max(invited_count, participant_count, 1)
         response_count = db.query(Response).filter(Response.form_id == f.id).count()
         rate = round(participant_count / denominator * 100, 1) if denominator else 0
-        response_rate_per_form.append({
-            "form_id": f.id,
-            "title": f.title,
-            "invited": denominator,
-            "responded": participant_count,
-            "response_count": response_count,
-            "rate": rate,
-        })
+        response_rate_per_form.append(
+            {
+                "form_id": f.id,
+                "title": f.title,
+                "invited": denominator,
+                "responded": participant_count,
+                "response_count": response_count,
+                "rate": rate,
+            }
+        )
 
     # ── Convergence trend per form ──
     convergence_by_form = []
@@ -4685,16 +5059,20 @@ def admin_analytics(
         round_data = []
         for r in rounds:
             resp_count = db.query(Response).filter(Response.round_id == r.id).count()
-            round_data.append({
-                "round_number": r.round_number,
-                "convergence_score": r.convergence_score,
-                "response_count": resp_count,
-            })
-        convergence_by_form.append({
-            "form_id": f.id,
-            "title": f.title,
-            "rounds": round_data,
-        })
+            round_data.append(
+                {
+                    "round_number": r.round_number,
+                    "convergence_score": r.convergence_score,
+                    "response_count": resp_count,
+                }
+            )
+        convergence_by_form.append(
+            {
+                "form_id": f.id,
+                "title": f.title,
+                "rounds": round_data,
+            }
+        )
 
     # ── Synthesis mode distribution ──
     # Count synthesis versions by strategy
@@ -4704,8 +5082,7 @@ def admin_analytics(
         .all()
     )
     synthesis_mode_distribution = [
-        {"mode": row[0] or "simple", "count": row[1]}
-        for row in strategy_counts
+        {"mode": row[0] or "simple", "count": row[1]} for row in strategy_counts
     ]
     # If no synthesis versions, check flow_mode on rounds as fallback
     if not synthesis_mode_distribution:
@@ -4716,8 +5093,7 @@ def admin_analytics(
             .all()
         )
         synthesis_mode_distribution = [
-            {"mode": row[0] or "simple", "count": row[1]}
-            for row in mode_counts
+            {"mode": row[0] or "simple", "count": row[1]} for row in mode_counts
         ]
 
     # ── Activity timeline (last 30 days) ──
@@ -4745,10 +5121,12 @@ def admin_analytics(
     for i in range(30):
         d = today - timedelta(days=29 - i)
         ds = str(d)
-        activity_timeline.append({
-            "date": ds,
-            "responses": date_map_responses.get(ds, 0),
-        })
+        activity_timeline.append(
+            {
+                "date": ds,
+                "responses": date_map_responses.get(ds, 0),
+            }
+        )
 
     return {
         "total_forms": total_forms,
@@ -4766,6 +5144,7 @@ def admin_analytics(
 # ATLAS: UX TESTING DATA SEEDER
 # ---------------------------------------------------------
 
+
 @router.post(
     "/atlas/seed",
     tags=["Admin"],
@@ -4778,76 +5157,136 @@ def admin_analytics(
 def seed_atlas_data(
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(require_platform_admin)
+    user: User = Depends(require_platform_admin),
 ):
     """Seed the database with test forms for UX testing."""
     import uuid
-    
+
     test_forms = [
         {
             "title": "🧪 Round 1: Fresh Form",
             "questions": [
-                {"id": "q1", "type": "text", "label": "What is your main concern?", "required": True},
-                {"id": "q2", "type": "textarea", "label": "Describe your perspective in detail", "required": True},
-                {"id": "q3", "type": "select", "label": "Priority level", "options": ["Low", "Medium", "High", "Critical"], "required": True},
-            ]
+                {
+                    "id": "q1",
+                    "type": "text",
+                    "label": "What is your main concern?",
+                    "required": True,
+                },
+                {
+                    "id": "q2",
+                    "type": "textarea",
+                    "label": "Describe your perspective in detail",
+                    "required": True,
+                },
+                {
+                    "id": "q3",
+                    "type": "select",
+                    "label": "Priority level",
+                    "options": ["Low", "Medium", "High", "Critical"],
+                    "required": True,
+                },
+            ],
         },
         {
             "title": "📊 Round 2: With Responses",
             "questions": [
-                {"id": "q1", "type": "text", "label": "What solution do you propose?", "required": True},
-                {"id": "q2", "type": "rating", "label": "Rate your confidence (1-5)", "required": True},
-                {"id": "q3", "type": "textarea", "label": "Additional comments", "required": False},
+                {
+                    "id": "q1",
+                    "type": "text",
+                    "label": "What solution do you propose?",
+                    "required": True,
+                },
+                {
+                    "id": "q2",
+                    "type": "rating",
+                    "label": "Rate your confidence (1-5)",
+                    "required": True,
+                },
+                {
+                    "id": "q3",
+                    "type": "textarea",
+                    "label": "Additional comments",
+                    "required": False,
+                },
             ],
             "seed_responses": [
-                {"q1": "Implement automated testing", "q2": "4", "q3": "This would significantly reduce bugs"},
-                {"q1": "Hire more developers", "q2": "3", "q3": "We need more hands on deck"},
-                {"q1": "Improve documentation", "q2": "5", "q3": "Clear docs prevent misunderstandings"},
-            ]
+                {
+                    "q1": "Implement automated testing",
+                    "q2": "4",
+                    "q3": "This would significantly reduce bugs",
+                },
+                {
+                    "q1": "Hire more developers",
+                    "q2": "3",
+                    "q3": "We need more hands on deck",
+                },
+                {
+                    "q1": "Improve documentation",
+                    "q2": "5",
+                    "q3": "Clear docs prevent misunderstandings",
+                },
+            ],
         },
         {
             "title": "🎯 Multi-Round Delphi",
             "questions": [
-                {"id": "q1", "type": "text", "label": "Final recommendation", "required": True},
-                {"id": "q2", "type": "textarea", "label": "Justification", "required": True},
+                {
+                    "id": "q1",
+                    "type": "text",
+                    "label": "Final recommendation",
+                    "required": True,
+                },
+                {
+                    "id": "q2",
+                    "type": "textarea",
+                    "label": "Justification",
+                    "required": True,
+                },
             ],
             "rounds": 3,
             "seed_responses": [
-                {"q1": "Consensus reached on Option A", "q2": "After 3 rounds, experts converged on this approach"},
-            ]
+                {
+                    "q1": "Consensus reached on Option A",
+                    "q2": "After 3 rounds, experts converged on this approach",
+                },
+            ],
         },
     ]
-    
+
     created_forms = []
-    
+
     for form_data in test_forms:
         # Check if form with this title already exists
-        existing = db.query(FormModel).filter(FormModel.title == form_data["title"]).first()
+        existing = (
+            db.query(FormModel).filter(FormModel.title == form_data["title"]).first()
+        )
         if existing:
-            created_forms.append({"id": existing.id, "title": existing.title, "status": "exists"})
+            created_forms.append(
+                {"id": existing.id, "title": existing.title, "status": "exists"}
+            )
             continue
-        
+
         # Create form with unique join_code
         form = FormModel(
             title=form_data["title"],
             questions=form_data["questions"],
-            join_code=str(uuid.uuid4())[:8]
+            join_code=str(uuid.uuid4())[:8],
         )
         db.add(form)
         db.flush()
-        
+
         # Create initial round
         num_rounds = form_data.get("rounds", 1)
         for round_num in range(1, num_rounds + 1):
             round_obj = RoundModel(form_id=form.id, round_number=round_num)
             db.add(round_obj)
             db.flush()
-            
+
             # Seed responses if this is the last round and we have seed data
             if round_num == num_rounds and "seed_responses" in form_data:
                 for i, resp_data in enumerate(form_data["seed_responses"]):
                     # Create a test user for this response if needed
-                    test_email = f"test_user_{i+1}@atlas.test"
+                    test_email = f"test_user_{i + 1}@atlas.test"
                     test_user = db.query(User).filter(User.email == test_email).first()
                     if not test_user:
                         test_user = User(
@@ -4856,23 +5295,20 @@ def seed_atlas_data(
                         )
                         db.add(test_user)
                         db.flush()
-                    
+
                     response = Response(
                         user_id=test_user.id,
                         form_id=form.id,
                         round_id=round_obj.id,
-                        answers=json.dumps(resp_data)
+                        answers=json.dumps(resp_data),
                     )
                     db.add(response)
-        
+
         created_forms.append({"id": form.id, "title": form.title, "status": "created"})
-    
+
     db.commit()
-    
-    return {
-        "message": "Atlas data seeded",
-        "forms": created_forms
-    }
+
+    return {"message": "Atlas data seeded", "forms": created_forms}
 
 
 # ---------------------------------------------------------
@@ -4909,14 +5345,18 @@ When suggesting questions for a consultation titled "{title}", generate question
 Respond with JSON only. No prose outside JSON."""
 
 
-def _build_ai_suggest_user_prompt(title: str, description: str, questions: list[str], mode: str, **kwargs) -> str:
+def _build_ai_suggest_user_prompt(
+    title: str, description: str, questions: list[str], mode: str, **kwargs
+) -> str:
     """Build the user prompt for the AI suggest endpoint based on mode."""
     context = f'Consultation title: "{title}"'
     if description:
         context += f'\nDescription: "{description}"'
     if questions and any(q.strip() for q in questions):
         non_empty = [q for q in questions if q.strip()]
-        context += "\nExisting questions:\n" + "\n".join(f"  {i+1}. {q}" for i, q in enumerate(non_empty))
+        context += "\nExisting questions:\n" + "\n".join(
+            f"  {i + 1}. {q}" for i, q in enumerate(non_empty)
+        )
 
     if mode == "suggest":
         count = kwargs.get("suggestion_count", 5)
@@ -4946,8 +5386,6 @@ def _build_ai_suggest_user_prompt(title: str, description: str, questions: list[
         return f"{context}\n\nGenerate 3-5 question suggestions.\n\nRespond with JSON only."
 
 
-
-
 # ── App Settings ─────────────────────────────────────────────────────────────
 
 DEFAULT_SETTINGS = {
@@ -4961,6 +5399,7 @@ DEFAULT_SETTINGS = {
     "registration_mode": "open",
     "allowed_domains": "",
 }
+
 
 @router.get(
     "/admin/settings",
@@ -4988,9 +5427,7 @@ def get_settings(
     "/admin/settings",
     tags=["Admin"],
     summary="Update application settings",
-    description=(
-        "Update one or more settings. Only known keys accepted. Admin-only."
-    ),
+    description=("Update one or more settings. Only known keys accepted. Admin-only."),
 )
 @limiter.limit(CRUD_LIMIT)
 def update_settings(
@@ -5011,6 +5448,7 @@ def update_settings(
             db.add(Setting(key=key, value=str(value)))
     db.commit()
     return {"status": "ok"}
+
 
 @router.post(
     "/ai/suggest",
@@ -5040,7 +5478,10 @@ def ai_suggest(
     mode = payload.get("mode", "suggest")
 
     if mode not in ("suggest", "critique", "improve"):
-        raise HTTPException(status_code=400, detail="Invalid mode. Must be 'suggest', 'critique', or 'improve'.")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid mode. Must be 'suggest', 'critique', or 'improve'.",
+        )
 
     if not title:
         raise HTTPException(status_code=400, detail="Title is required.")
@@ -5048,7 +5489,10 @@ def ai_suggest(
     if mode in ("critique", "improve"):
         non_empty = [q for q in questions if isinstance(q, str) and q.strip()]
         if not non_empty:
-            raise HTTPException(status_code=400, detail=f"At least one question is required for '{mode}' mode.")
+            raise HTTPException(
+                status_code=400,
+                detail=f"At least one question is required for '{mode}' mode.",
+            )
 
     # Check for mock mode or missing API key
     synthesis_mode = os.getenv("SYNTHESIS_MODE", "").lower()
@@ -5060,9 +5504,9 @@ def ai_suggest(
             return {
                 "suggestions": [
                     f"What are the most significant challenges facing {title.lower() if title else 'this domain'} in the next 5 years?",
-                    f"How should organisations adapt their strategies to address emerging trends in this area?",
-                    f"What key factors will determine success or failure in addressing these challenges?",
-                    f"Where do you see the greatest potential for innovation or disruption?",
+                    "How should organisations adapt their strategies to address emerging trends in this area?",
+                    "What key factors will determine success or failure in addressing these challenges?",
+                    "Where do you see the greatest potential for innovation or disruption?",
                 ]
             }
         elif mode == "critique":
@@ -5090,23 +5534,34 @@ def ai_suggest(
     system_prompt = DELPHI_SYSTEM_PROMPT.replace("{title}", title)
     # Read suggestion count from DB setting
     suggestion_count = int(DEFAULT_SETTINGS["ai_suggestions_count"])
-    count_setting = db.query(Setting).filter(Setting.key == "ai_suggestions_count").first()
+    count_setting = (
+        db.query(Setting).filter(Setting.key == "ai_suggestions_count").first()
+    )
     if count_setting:
         try:
             suggestion_count = max(3, min(10, int(count_setting.value)))
         except (ValueError, TypeError):
             pass
-    user_prompt = _build_ai_suggest_user_prompt(title, description, questions, mode, suggestion_count=suggestion_count)
+    user_prompt = _build_ai_suggest_user_prompt(
+        title, description, questions, mode, suggestion_count=suggestion_count
+    )
     # Model: from payload > DB setting > env var > hardcoded default
     model = payload.get("model") or None
     if not model:
         db_setting = db.query(Setting).filter(Setting.key == "synthesis_model").first()
-        model = db_setting.value if db_setting else os.getenv("SYNTHESIS_MODEL", "anthropic/claude-opus-4-6")
+        model = (
+            db_setting.value
+            if db_setting
+            else os.getenv("SYNTHESIS_MODEL", "anthropic/claude-opus-4-6")
+        )
 
     try:
         openai_client = get_openai_client()
         if not openai_client:
-            raise HTTPException(status_code=503, detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.")
+            raise HTTPException(
+                status_code=503,
+                detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.",
+            )
 
         completion = openai_client.chat.completions.create(
             model=model,
@@ -5123,7 +5578,7 @@ def ai_suggest(
         cleaned = raw_output.strip()
         if cleaned.startswith("```"):
             lines = cleaned.split("\n")
-            lines = [l for l in lines if not l.strip().startswith("```")]
+            lines = [ln for ln in lines if not ln.strip().startswith("```")]
             cleaned = "\n".join(lines)
 
         parsed = json.loads(cleaned)
@@ -5145,11 +5600,13 @@ def ai_suggest(
                 severity = item.get("severity", "medium")
                 if severity not in ("low", "medium", "high"):
                     severity = "medium"
-                validated.append({
-                    "question": item.get("question", ""),
-                    "issue": item.get("issue", ""),
-                    "severity": severity,
-                })
+                validated.append(
+                    {
+                        "question": item.get("question", ""),
+                        "issue": item.get("issue", ""),
+                        "severity": severity,
+                    }
+                )
             return {"critique": validated}
 
         elif mode == "improve":
@@ -5158,15 +5615,19 @@ def ai_suggest(
                 raise ValueError("Invalid improved format")
             validated = []
             for item in improved:
-                validated.append({
-                    "original": item.get("original", ""),
-                    "improved": item.get("improved", ""),
-                    "reason": item.get("reason", ""),
-                })
+                validated.append(
+                    {
+                        "original": item.get("original", ""),
+                        "improved": item.get("improved", ""),
+                        "reason": item.get("reason", ""),
+                    }
+                )
             return {"improved": validated}
 
     except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Failed to parse AI response as JSON")
+        raise HTTPException(
+            status_code=500, detail="Failed to parse AI response as JSON"
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -5215,21 +5676,29 @@ def join_form(
 
     if invite:
         if not invite.is_active:
-            raise HTTPException(status_code=400, detail="This invite code has been deactivated.")
+            raise HTTPException(
+                status_code=400, detail="This invite code has been deactivated."
+            )
         if invite.expires_at and invite.expires_at < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="This invite code has expired.")
         if invite.max_uses is not None and invite.use_count >= invite.max_uses:
-            raise HTTPException(status_code=400, detail="This invite code has reached its usage limit.")
+            raise HTTPException(
+                status_code=400, detail="This invite code has reached its usage limit."
+            )
 
         form = db.query(FormModel).filter(FormModel.id == invite.form_id).first()
         if not form:
             raise HTTPException(status_code=404, detail="Form not found.")
 
         # Check idempotent
-        existing = db.query(UserFormUnlock).filter(
-            UserFormUnlock.user_id == user.id,
-            UserFormUnlock.form_id == form.id,
-        ).first()
+        existing = (
+            db.query(UserFormUnlock)
+            .filter(
+                UserFormUnlock.user_id == user.id,
+                UserFormUnlock.form_id == form.id,
+            )
+            .first()
+        )
         if existing:
             return {"message": "Already joined.", "form_id": form.id}
 
@@ -5241,15 +5710,26 @@ def join_form(
         db.add(unlock)
         invite.use_count += 1
         db.commit()
-        audit_log(db, user=user, action="join_form", resource_type="form",
-                  resource_id=form.id, detail={"invite_code_id": invite.id}, request=request)
+        audit_log(
+            db,
+            user=user,
+            action="join_form",
+            resource_type="form",
+            resource_id=form.id,
+            detail={"invite_code_id": invite.id},
+            request=request,
+        )
         return {"message": "Joined successfully.", "form_id": form.id}
 
     # 2. Fall back to legacy FormModel.join_code matching
-    form = db.query(FormModel).filter(
-        FormModel.join_code == raw_code,
-        FormModel.allow_join == True,
-    ).first()
+    form = (
+        db.query(FormModel)
+        .filter(
+            FormModel.join_code == raw_code,
+            FormModel.allow_join == True,
+        )
+        .first()
+    )
     if not form and normalized:
         all_forms = db.query(FormModel).filter(FormModel.allow_join == True).all()
         for f in all_forms:
@@ -5260,18 +5740,28 @@ def join_form(
     if not form:
         raise HTTPException(status_code=404, detail="Invalid join code.")
 
-    existing = db.query(UserFormUnlock).filter(
-        UserFormUnlock.user_id == user.id,
-        UserFormUnlock.form_id == form.id,
-    ).first()
+    existing = (
+        db.query(UserFormUnlock)
+        .filter(
+            UserFormUnlock.user_id == user.id,
+            UserFormUnlock.form_id == form.id,
+        )
+        .first()
+    )
     if existing:
         return {"message": "Already joined.", "form_id": form.id}
 
     unlock = UserFormUnlock(user_id=user.id, form_id=form.id)
     db.add(unlock)
     db.commit()
-    audit_log(db, user=user, action="join_form", resource_type="form",
-              resource_id=form.id, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="join_form",
+        resource_type="form",
+        resource_id=form.id,
+        request=request,
+    )
     return {"message": "Joined successfully.", "form_id": form.id}
 
 
@@ -5344,7 +5834,9 @@ def create_invite_code(
     assert_form_owner_or_facilitator(form, user)
 
     if payload.form_role not in ("expert", "collaborator"):
-        raise HTTPException(status_code=400, detail="form_role must be 'expert' or 'collaborator'")
+        raise HTTPException(
+            status_code=400, detail="form_role must be 'expert' or 'collaborator'"
+        )
 
     # Generate unique code
     for _ in range(10):
@@ -5352,7 +5844,9 @@ def create_invite_code(
         if not db.query(InviteCode).filter(InviteCode.code == code).first():
             break
     else:
-        raise HTTPException(status_code=500, detail="Could not generate unique invite code")
+        raise HTTPException(
+            status_code=500, detail="Could not generate unique invite code"
+        )
 
     expires = None
     if payload.expires_at:
@@ -5373,8 +5867,15 @@ def create_invite_code(
     db.add(invite)
     db.commit()
     db.refresh(invite)
-    audit_log(db, user=user, action="create_invite_code", resource_type="invite_code",
-              resource_id=invite.id, detail={"form_id": form_id, "code": code}, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="create_invite_code",
+        resource_type="invite_code",
+        resource_id=invite.id,
+        detail={"form_id": form_id, "code": code},
+        request=request,
+    )
     return {
         "id": invite.id,
         "code": invite.code,
@@ -5413,10 +5914,14 @@ def update_invite_code(
         raise HTTPException(status_code=404, detail="Form not found")
     assert_form_owner_or_facilitator(form, user)
 
-    invite = db.query(InviteCode).filter(
-        InviteCode.id == code_id,
-        InviteCode.form_id == form_id,
-    ).first()
+    invite = (
+        db.query(InviteCode)
+        .filter(
+            InviteCode.id == code_id,
+            InviteCode.form_id == form_id,
+        )
+        .first()
+    )
     if not invite:
         raise HTTPException(status_code=404, detail="Invite code not found")
 
@@ -5428,13 +5933,22 @@ def update_invite_code(
         invite.max_uses = payload.max_uses
     if payload.expires_at is not None:
         try:
-            invite.expires_at = datetime.fromisoformat(payload.expires_at.replace("Z", "+00:00"))
+            invite.expires_at = datetime.fromisoformat(
+                payload.expires_at.replace("Z", "+00:00")
+            )
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid expires_at format")
 
     db.commit()
-    audit_log(db, user=user, action="update_invite_code", resource_type="invite_code",
-              resource_id=invite.id, detail={"form_id": form_id}, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="update_invite_code",
+        resource_type="invite_code",
+        resource_id=invite.id,
+        detail={"form_id": form_id},
+        request=request,
+    )
     return {
         "id": invite.id,
         "code": invite.code,
@@ -5493,7 +6007,10 @@ def update_user_role(
     """Promote or demote a user. Platform admin only. Self-modification prevented."""
     valid_roles = {r.value for r in UserRole}
     if payload.role not in valid_roles:
-        raise HTTPException(status_code=400, detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid role. Must be one of: {', '.join(valid_roles)}",
+        )
 
     if user_id == admin.id:
         raise HTTPException(status_code=400, detail="Cannot change your own role.")
@@ -5506,9 +6023,15 @@ def update_user_role(
     target.role = payload.role
     db.commit()
 
-    audit_log(db, user=admin, action="change_user_role", resource_type="user",
-              resource_id=user_id, detail={"old_role": old_role, "new_role": payload.role},
-              request=request)
+    audit_log(
+        db,
+        user=admin,
+        action="change_user_role",
+        resource_type="user",
+        resource_id=user_id,
+        detail={"old_role": old_role, "new_role": payload.role},
+        request=request,
+    )
     return {"id": target.id, "email": target.email, "role": target.role}
 
 
@@ -5532,21 +6055,19 @@ def list_participants(
         raise HTTPException(status_code=404, detail="Form not found")
     assert_form_owner_or_facilitator(form, user)
 
-    unlocks = (
-        db.query(UserFormUnlock)
-        .filter(UserFormUnlock.form_id == form_id)
-        .all()
-    )
+    unlocks = db.query(UserFormUnlock).filter(UserFormUnlock.form_id == form_id).all()
     result = []
     for u in unlocks:
         participant = db.query(User).filter(User.id == u.user_id).first()
         if participant:
-            result.append({
-                "user_id": participant.id,
-                "email": participant.email,
-                "form_role": u.form_role,
-                "joined_at": u.joined_at.isoformat() if u.joined_at else None,
-            })
+            result.append(
+                {
+                    "user_id": participant.id,
+                    "email": participant.email,
+                    "form_role": u.form_role,
+                    "joined_at": u.joined_at.isoformat() if u.joined_at else None,
+                }
+            )
     return result
 
 
@@ -5568,17 +6089,28 @@ def remove_participant(
         raise HTTPException(status_code=404, detail="Form not found")
     assert_form_owner_or_facilitator(form, user)
 
-    unlock = db.query(UserFormUnlock).filter(
-        UserFormUnlock.form_id == form_id,
-        UserFormUnlock.user_id == target_user_id,
-    ).first()
+    unlock = (
+        db.query(UserFormUnlock)
+        .filter(
+            UserFormUnlock.form_id == form_id,
+            UserFormUnlock.user_id == target_user_id,
+        )
+        .first()
+    )
     if not unlock:
         raise HTTPException(status_code=404, detail="Participant not found")
 
     db.delete(unlock)
     db.commit()
-    audit_log(db, user=user, action="remove_participant", resource_type="form",
-              resource_id=form_id, detail={"removed_user_id": target_user_id}, request=request)
+    audit_log(
+        db,
+        user=user,
+        action="remove_participant",
+        resource_type="form",
+        resource_id=form_id,
+        detail={"removed_user_id": target_user_id},
+        request=request,
+    )
     return {"removed": target_user_id, "form_id": form_id}
 
 
@@ -5612,22 +6144,32 @@ def magic_join(
 
     if invite:
         if not invite.is_active:
-            raise HTTPException(status_code=400, detail="This invite code has been deactivated.")
+            raise HTTPException(
+                status_code=400, detail="This invite code has been deactivated."
+            )
         if invite.expires_at and invite.expires_at < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="This invite code has expired.")
         if invite.max_uses is not None and invite.use_count >= invite.max_uses:
-            raise HTTPException(status_code=400, detail="This invite code has reached its usage limit.")
+            raise HTTPException(
+                status_code=400, detail="This invite code has reached its usage limit."
+            )
 
         form = db.query(FormModel).filter(FormModel.id == invite.form_id).first()
         if not form:
             raise HTTPException(status_code=404, detail="Form not found.")
 
-        existing = db.query(UserFormUnlock).filter(
-            UserFormUnlock.user_id == user.id,
-            UserFormUnlock.form_id == form.id,
-        ).first()
+        existing = (
+            db.query(UserFormUnlock)
+            .filter(
+                UserFormUnlock.user_id == user.id,
+                UserFormUnlock.form_id == form.id,
+            )
+            .first()
+        )
         if not existing:
-            unlock = UserFormUnlock(user_id=user.id, form_id=form.id, form_role=invite.form_role)
+            unlock = UserFormUnlock(
+                user_id=user.id, form_id=form.id, form_role=invite.form_role
+            )
             db.add(unlock)
             invite.use_count += 1
             db.commit()
@@ -5635,7 +6177,11 @@ def magic_join(
         return {"message": "Joined.", "form_id": form.id, "title": form.title}
 
     # Fall back to legacy
-    form = db.query(FormModel).filter(FormModel.join_code == raw_code, FormModel.allow_join == True).first()
+    form = (
+        db.query(FormModel)
+        .filter(FormModel.join_code == raw_code, FormModel.allow_join == True)
+        .first()
+    )
     if not form and normalized:
         all_forms = db.query(FormModel).filter(FormModel.allow_join == True).all()
         for f in all_forms:
@@ -5646,10 +6192,14 @@ def magic_join(
     if not form:
         raise HTTPException(status_code=404, detail="Invalid join code.")
 
-    existing = db.query(UserFormUnlock).filter(
-        UserFormUnlock.user_id == user.id,
-        UserFormUnlock.form_id == form.id,
-    ).first()
+    existing = (
+        db.query(UserFormUnlock)
+        .filter(
+            UserFormUnlock.user_id == user.id,
+            UserFormUnlock.form_id == form.id,
+        )
+        .first()
+    )
     if not existing:
         unlock = UserFormUnlock(user_id=user.id, form_id=form.id)
         db.add(unlock)

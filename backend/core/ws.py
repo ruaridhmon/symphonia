@@ -180,10 +180,12 @@ class ConnectionManager:
     async def broadcast_summary(self, summary: str):
         for conn in self.active_connections.copy():
             try:
-                await conn.send_json({
-                    "type": "summary_updated",
-                    "summary": summary,
-                })
+                await conn.send_json(
+                    {
+                        "type": "summary_updated",
+                        "summary": summary,
+                    }
+                )
             except Exception:
                 self.disconnect(conn)
 

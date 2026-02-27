@@ -12,17 +12,22 @@ Covers real-mode error paths that were never tested:
 
 All tests are pure-unit or use TestClient: no real API calls.
 """
+
 from __future__ import annotations
 
 import asyncio
 import json
-import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
-from tests.conftest import create_form, register_and_login, submit_response, TestingSessionLocal
+from tests.conftest import (
+    create_form,
+    register_and_login,
+    submit_response,
+    TestingSessionLocal,
+)
 
 
 # =============================================================================
@@ -33,9 +38,7 @@ from tests.conftest import create_form, register_and_login, submit_response, Tes
 class TestSynthesisStatus:
     """Tests for the /synthesis/status endpoint."""
 
-    def test_status_returns_mock_mode(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_status_returns_mock_mode(self, client: TestClient, admin_headers: dict):
         """Status endpoint reports mock mode when SYNTHESIS_MODE=mock."""
         resp = client.get("/synthesis/status", headers=admin_headers)
         assert resp.status_code == 200
@@ -107,22 +110,16 @@ class TestMissingApiKey:
         monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
 
         # Create form + submit a response
-        form = create_form(
-            client, admin_headers, title="NoKeyTest"
-        )
+        form = create_form(client, admin_headers, title="NoKeyTest")
         form_id = form["id"]
 
         # Submit as a participant
         ptk = register_and_login(client, "nokey_expert@test.com")
         ph = {"Authorization": f"Bearer {ptk}"}
-        submit_response(
-            client, ph, form_id, {"q1": "My answer 1", "q2": "My answer 2"}
-        )
+        submit_response(client, ph, form_id, {"q1": "My answer 1", "q2": "My answer 2"})
 
         # Get round
-        rounds_resp = client.get(
-            f"/forms/{form_id}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form_id}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         # Generate synthesis - should fall back to mock, not crash
@@ -178,25 +175,23 @@ class TestMalformedApiResponse:
         monkeypatch.setenv("OPENROUTER_API_KEY", "sk-fake-key")
 
         # Create form + submit
-        form = create_form(
-            client, admin_headers, title="MalformedTest"
-        )
+        form = create_form(client, admin_headers, title="MalformedTest")
         form_id = form["id"]
         ptk = register_and_login(client, "malformed_expert@test.com")
         ph = {"Authorization": f"Bearer {ptk}"}
-        submit_response(
-            client, ph, form_id, {"q1": "answer 1", "q2": "answer 2"}
-        )
+        submit_response(client, ph, form_id, {"q1": "answer 1", "q2": "answer 2"})
 
-        rounds_resp = client.get(
-            f"/forms/{form_id}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form_id}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         # Mock the OpenAI client to return malformed text
         mock_completion = MagicMock()
         mock_completion.choices = [
-            MagicMock(message=MagicMock(content="This is not valid JSON at all, just rambling text."))
+            MagicMock(
+                message=MagicMock(
+                    content="This is not valid JSON at all, just rambling text."
+                )
+            )
         ]
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = mock_completion
@@ -212,8 +207,10 @@ class TestMalformedApiResponse:
             fut.set_result(None)
             return fut
 
-        with patch("core.routes.get_openai_client", return_value=mock_client), \
-             patch("asyncio.create_task", side_effect=_intercept_create_task):
+        with (
+            patch("core.routes.get_openai_client", return_value=mock_client),
+            patch("asyncio.create_task", side_effect=_intercept_create_task),
+        ):
             resp = client.post(
                 f"/forms/{form_id}/rounds/{round_id}/generate_synthesis",
                 json={"model": "test-model", "strategy": "simple"},
@@ -224,8 +221,10 @@ class TestMalformedApiResponse:
 
         # Run the captured background task synchronously against the test DB
         assert captured_coro is not None
-        with patch("core.routes.SessionLocal", TestingSessionLocal), \
-             patch("core.routes.get_openai_client", return_value=mock_client):
+        with (
+            patch("core.routes.SessionLocal", TestingSessionLocal),
+            patch("core.routes.get_openai_client", return_value=mock_client),
+        ):
             _loop = asyncio.new_event_loop()
             try:
                 _loop.run_until_complete(captured_coro)
@@ -258,43 +257,37 @@ class TestMalformedApiResponse:
         monkeypatch.setenv("SYNTHESIS_MODE", "live")
         monkeypatch.setenv("OPENROUTER_API_KEY", "sk-fake-key")
 
-        form = create_form(
-            client, admin_headers, title="ValidJsonTest"
-        )
+        form = create_form(client, admin_headers, title="ValidJsonTest")
         form_id = form["id"]
         ptk = register_and_login(client, "valid_json_expert@test.com")
         ph = {"Authorization": f"Bearer {ptk}"}
-        submit_response(
-            client, ph, form_id, {"q1": "ans 1", "q2": "ans 2"}
-        )
+        submit_response(client, ph, form_id, {"q1": "ans 1", "q2": "ans 2"})
 
-        rounds_resp = client.get(
-            f"/forms/{form_id}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form_id}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
-        valid_json = json.dumps({
-            "narrative": "Test narrative",
-            "agreements": [
-                {
-                    "claim": "Experts agree on X",
-                    "supporting_experts": [1],
-                    "confidence": 0.9,
-                    "evidence_summary": "Based on response 1",
-                    "evidence_excerpts": [],
-                }
-            ],
-            "disagreements": [],
-            "nuances": [],
-            "confidence_map": {"overall": 0.85},
-            "follow_up_probes": [],
-            "meta_synthesis_reasoning": "Direct synthesis",
-        })
+        valid_json = json.dumps(
+            {
+                "narrative": "Test narrative",
+                "agreements": [
+                    {
+                        "claim": "Experts agree on X",
+                        "supporting_experts": [1],
+                        "confidence": 0.9,
+                        "evidence_summary": "Based on response 1",
+                        "evidence_excerpts": [],
+                    }
+                ],
+                "disagreements": [],
+                "nuances": [],
+                "confidence_map": {"overall": 0.85},
+                "follow_up_probes": [],
+                "meta_synthesis_reasoning": "Direct synthesis",
+            }
+        )
 
         mock_completion = MagicMock()
-        mock_completion.choices = [
-            MagicMock(message=MagicMock(content=valid_json))
-        ]
+        mock_completion.choices = [MagicMock(message=MagicMock(content=valid_json))]
         mock_client = MagicMock()
         mock_client.chat.completions.create.return_value = mock_completion
 
@@ -309,8 +302,10 @@ class TestMalformedApiResponse:
             fut.set_result(None)
             return fut
 
-        with patch("core.routes.get_openai_client", return_value=mock_client), \
-             patch("asyncio.create_task", side_effect=_intercept_create_task):
+        with (
+            patch("core.routes.get_openai_client", return_value=mock_client),
+            patch("asyncio.create_task", side_effect=_intercept_create_task),
+        ):
             resp = client.post(
                 f"/forms/{form_id}/rounds/{round_id}/generate_synthesis",
                 json={"model": "test-model", "strategy": "simple"},
@@ -321,8 +316,10 @@ class TestMalformedApiResponse:
 
         # Run the captured background task synchronously against the test DB
         assert captured_coro is not None
-        with patch("core.routes.SessionLocal", TestingSessionLocal), \
-             patch("core.routes.get_openai_client", return_value=mock_client):
+        with (
+            patch("core.routes.SessionLocal", TestingSessionLocal),
+            patch("core.routes.get_openai_client", return_value=mock_client),
+        ):
             _loop = asyncio.new_event_loop()
             try:
                 _loop.run_until_complete(captured_coro)
@@ -463,9 +460,7 @@ class TestWebSocketErrorEvents:
 class TestSettingsModelPropagation:
     """Test that admin settings propagate to synthesis engine."""
 
-    def test_resolve_model_from_settings(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_resolve_model_from_settings(self, client: TestClient, admin_headers: dict):
         """When synthesis_model is set in admin settings, it's reflected in status."""
         # Set a custom model
         resp = client.patch(
@@ -476,9 +471,7 @@ class TestSettingsModelPropagation:
         assert resp.status_code == 200
 
         # Check it's reflected in synthesis status
-        status_resp = client.get(
-            "/synthesis/status", headers=admin_headers
-        )
+        status_resp = client.get("/synthesis/status", headers=admin_headers)
         assert status_resp.status_code == 200
         assert status_resp.json()["default_model"] == "anthropic/claude-opus-4-6"
 

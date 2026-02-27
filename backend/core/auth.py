@@ -10,7 +10,6 @@ from .models import User, UserRole
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
-from types import SimpleNamespace
 
 
 SECRET_KEY = os.environ.get("JWT_SECRET", "your-jwt-secret-CHANGE-ME")
@@ -30,13 +29,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", auto_error=False)
 # ── Join code generation ──
 
 _LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ"  # 23 chars, no I/O
-_DIGITS = "2345679"                     # 7 chars, no 0/1/8
+_DIGITS = "2345679"  # 7 chars, no 0/1/8
 
 
 def generate_join_code() -> str:
     """Generate a human-readable join code: SYM-XXXX-NNNN."""
-    letters = ''.join(secrets.choice(_LETTERS) for _ in range(4))
-    digits = ''.join(secrets.choice(_DIGITS) for _ in range(4))
+    letters = "".join(secrets.choice(_LETTERS) for _ in range(4))
+    digits = "".join(secrets.choice(_DIGITS) for _ in range(4))
     return f"SYM-{letters}-{digits}"
 
 
@@ -55,11 +54,14 @@ def get_db():
     finally:
         db.close()
 
+
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
 
+
 def get_password_hash(pw):
     return pwd_context.hash(pw)
+
 
 def authenticate_user(db: Session, username: str, password: str):
     user = db.query(User).filter(User.username == username).first()
@@ -67,9 +69,12 @@ def authenticate_user(db: Session, username: str, password: str):
         return user
     return None
 
+
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -130,6 +135,7 @@ async def get_current_user(
 
 # ── Role-based dependencies ──
 
+
 def require_role(*roles: UserRole):
     """FastAPI dependency — returns 403 if user's role not in allowed set."""
     allowed = {r.value for r in roles}
@@ -141,6 +147,7 @@ def require_role(*roles: UserRole):
                 detail=f"Requires one of: {', '.join(r.value for r in roles)}",
             )
         return user
+
     return _check
 
 
@@ -149,6 +156,7 @@ require_platform_admin = require_role(UserRole.PLATFORM_ADMIN)
 
 
 # ── Form-level access control ──
+
 
 def assert_form_owner_or_facilitator(form: object, user: User) -> None:
     """Raise 403 unless user owns the form or is a platform admin."""

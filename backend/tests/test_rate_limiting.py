@@ -6,12 +6,11 @@ Verifies:
 2. Rate limiting can be disabled via RATE_LIMIT_ENABLED env var
 3. When enabled, routes return 429 when limits are exceeded
 """
+
 from __future__ import annotations
 
 import os
-from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -24,11 +23,13 @@ class TestRateLimiterConfiguration:
     def test_limiter_attached_to_app(self, client: TestClient):
         """The app should have a limiter in its state."""
         from main import app
+
         assert hasattr(app.state, "limiter"), "Limiter not attached to app.state"
 
     def test_limiter_has_expected_attributes(self, client: TestClient):
         """The limiter should be a slowapi Limiter instance."""
         from main import app
+
         limiter = app.state.limiter
         assert hasattr(limiter, "limit"), "Limiter missing .limit() method"
         assert hasattr(limiter, "enabled"), "Limiter missing .enabled attribute"
@@ -37,6 +38,7 @@ class TestRateLimiterConfiguration:
         """Rate limiting should be disabled in the test environment."""
         assert os.environ.get("RATE_LIMIT_ENABLED") == "false"
         from core.rate_limiter import limiter
+
         assert not limiter.enabled, "Limiter should be disabled in test env"
 
     def test_rate_limit_constants_defined(self, client: TestClient):
@@ -49,6 +51,7 @@ class TestRateLimiterConfiguration:
             CRUD_LIMIT,
             READ_LIMIT,
         )
+
         assert AUTH_LIMIT == "10/minute"
         assert SYNTHESIS_LIMIT == "5/minute"
         assert AI_LIMIT == "10/minute"
@@ -99,6 +102,7 @@ class TestRateLimitEnabled:
 
         # Test the 429 error handler exists
         from slowapi.errors import RateLimitExceeded
+
         assert RateLimitExceeded in app.exception_handlers, (
             "RateLimitExceeded handler not registered"
         )
@@ -139,9 +143,7 @@ class TestRateLimitEnabled:
         exc = RateLimitExceeded(limit_obj)
 
         # Call the handler
-        response = asyncio.get_event_loop().run_until_complete(
-            handler(request, exc)
-        )
+        response = asyncio.get_event_loop().run_until_complete(handler(request, exc))
 
         assert response.status_code == 429
         body = json_mod.loads(response.body)

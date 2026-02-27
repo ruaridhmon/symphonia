@@ -10,33 +10,24 @@ These tests exercise:
   - AdapterContext protocol compliance
   - Async correctness
 """
+
 from __future__ import annotations
 
-import asyncio
-import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Sequence, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
 # Import the module under test
 from core.synthesis_worker_a import (
     AdapterContext,
-    Agreement,
     ConsensusLibraryAdapter,
-    Disagreement,
     FlowMode,
     MockSynthesis,
-    Nuance,
-    Probe,
     ProseResponse,
     SynthesisConfigError,
-    SynthesisError,
-    SynthesisLibraryError,
     SynthesisResult,
-    SynthesisTimeoutError,
     get_synthesiser,
 )
 
@@ -44,6 +35,7 @@ from core.synthesis_worker_a import (
 # ============================================================================
 # HELPERS: Fake library domain objects
 # ============================================================================
+
 
 @dataclass(frozen=True)
 class FakeSourceReference:
@@ -118,6 +110,7 @@ SAMPLE_RESPONSES: List[Dict[str, Any]] = [
 # TEST 1: MockSynthesis returns well-formed results
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_mock_synthesis_returns_valid_result():
     """MockSynthesis must return a SynthesisResult with correct structure."""
@@ -156,6 +149,7 @@ async def test_mock_synthesis_scales_experts_to_response_count():
 # TEST 2: MockSynthesis invokes progress callback
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_mock_synthesis_calls_progress_callback():
     """MockSynthesis should invoke progress_callback at least twice."""
@@ -180,6 +174,7 @@ async def test_mock_synthesis_calls_progress_callback():
 # TEST 3: SynthesisResult.to_dict() is JSON-serialisable
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_synthesis_result_to_dict_serialisable():
     """to_dict() should produce a plain dict with no dataclass remnants."""
@@ -202,6 +197,7 @@ async def test_synthesis_result_to_dict_serialisable():
 # TEST 4: ProseResponse satisfies library duck-typing contract
 # ============================================================================
 
+
 def test_prose_response_has_required_attributes():
     """ProseResponse must have 'expert_id' and 'response' attrs for duck typing."""
     pr = ProseResponse(expert_id="E1", response="My answer text")
@@ -221,6 +217,7 @@ def test_prose_response_is_frozen():
 # ============================================================================
 # TEST 5: AdapterContext satisfies protocol
 # ============================================================================
+
 
 def test_adapter_context_has_all_protocol_fields():
     """AdapterContext must expose all fields required by SynthesisContext protocol."""
@@ -242,6 +239,7 @@ def test_adapter_context_has_all_protocol_fields():
 # ============================================================================
 # TEST 6: ConsensusLibraryAdapter._map_to_app_format
 # ============================================================================
+
 
 def test_map_to_app_format_consensus_claims():
     """Claims with 'consensus' agreement_level should become Agreements."""
@@ -342,6 +340,7 @@ def test_map_to_app_format_deduplicates_areas():
 # TEST 7: Factory function — get_synthesiser
 # ============================================================================
 
+
 def test_get_synthesiser_mock_mode():
     """get_synthesiser(mode='mock') should return MockSynthesis."""
     s = get_synthesiser(mode="mock")
@@ -387,6 +386,7 @@ def test_get_synthesiser_reads_env_var(monkeypatch: pytest.MonkeyPatch):
 # TEST 8: ConsensusLibraryAdapter rejects invalid strategies at construction
 # ============================================================================
 
+
 def test_adapter_rejects_unknown_strategy():
     """Constructor should raise SynthesisConfigError for bogus strategy names."""
     with pytest.raises(SynthesisConfigError, match="Unknown strategy"):
@@ -396,6 +396,7 @@ def test_adapter_rejects_unknown_strategy():
 # ============================================================================
 # TEST 9: _build_prose_responses handles various input shapes
 # ============================================================================
+
 
 def test_build_prose_responses_from_dict_with_answers():
     """Responses with 'answers' sub-dict should be formatted as Q/A pairs."""
@@ -433,9 +434,13 @@ def test_build_prose_responses_empty_answers():
 # TEST 10: _extract_expert_ids handles various formats
 # ============================================================================
 
+
 def test_extract_expert_ids_normal():
     """Should extract integer IDs from 'E1', 'E2' format."""
-    sources = [FakeSourceReference(source_id="E1", quote=""), FakeSourceReference(source_id="E3", quote="")]
+    sources = [
+        FakeSourceReference(source_id="E1", quote=""),
+        FakeSourceReference(source_id="E3", quote=""),
+    ]
     ids = ConsensusLibraryAdapter._extract_expert_ids(sources)
     assert ids == [1, 3]
 
@@ -455,6 +460,7 @@ def test_extract_expert_ids_skips_malformed():
 # TEST 11: FlowMode enum
 # ============================================================================
 
+
 def test_flow_mode_values():
     """FlowMode should have the two expected values."""
     assert FlowMode.HUMAN_ONLY.value == "human_only"
@@ -466,8 +472,10 @@ def test_flow_mode_values():
 # TEST 12: Backwards-compat aliases
 # ============================================================================
 
+
 def test_backwards_compat_aliases():
     """CommitteeSynthesiser and OpenRouterSynthesis should alias the adapter."""
     from core.synthesis_worker_a import CommitteeSynthesiser, OpenRouterSynthesis
+
     assert CommitteeSynthesiser is ConsensusLibraryAdapter
     assert OpenRouterSynthesis is ConsensusLibraryAdapter

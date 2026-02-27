@@ -10,11 +10,12 @@ Already covered elsewhere (DO NOT DUPLICATE):
   - test_consensus_integration.py § 6: synthesis_on_form_with_no_active_round (400),
     synthesis_on_round_with_no_responses (404), synthesis_with_invalid_mode (400)
 """
+
 from __future__ import annotations
 
 import asyncio
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -30,34 +31,24 @@ from tests.conftest import create_form, register_and_login, submit_response
 class TestAuthErrors:
     """Test authentication and authorisation error paths."""
 
-    def test_register_duplicate_email(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_register_duplicate_email(self, client: TestClient, admin_headers: dict):
         """Registering with an already-registered email → 400."""
         email = "duplicate_test@error.com"
         # First registration succeeds
-        r1 = client.post(
-            "/register", data={"email": email, "password": "pass1234"}
-        )
+        r1 = client.post("/register", data={"email": email, "password": "pass1234"})
         assert r1.status_code == 200
 
         # Second registration with same email → 400
-        r2 = client.post(
-            "/register", data={"email": email, "password": "otherpass"}
-        )
+        r2 = client.post("/register", data={"email": email, "password": "otherpass"})
         assert r2.status_code == 400
         assert "already registered" in r2.json()["detail"].lower()
 
     def test_login_wrong_password(self, client: TestClient):
         """Login with incorrect password → 401."""
         email = "wrong_pw_user@error.com"
-        client.post(
-            "/register", data={"email": email, "password": "correct_pass"}
-        )
+        client.post("/register", data={"email": email, "password": "correct_pass"})
 
-        resp = client.post(
-            "/login", data={"username": email, "password": "wrong_pass"}
-        )
+        resp = client.post("/login", data={"username": email, "password": "wrong_pass"})
         assert resp.status_code == 401
         assert "invalid credentials" in resp.json()["detail"].lower()
 
@@ -99,9 +90,7 @@ class TestAuthErrors:
             "your‑jwt‑secret",
             algorithm="HS256",
         )
-        resp = client.get(
-            "/me", headers={"Authorization": f"Bearer {expired_token}"}
-        )
+        resp = client.get("/me", headers={"Authorization": f"Bearer {expired_token}"})
         assert resp.status_code == 401
 
     def test_admin_endpoint_with_non_admin_token(
@@ -135,17 +124,13 @@ class TestAuthErrors:
 class TestFormErrors:
     """Test form management error paths."""
 
-    def test_get_nonexistent_form(
-        self, client: TestClient, participant_headers: dict
-    ):
+    def test_get_nonexistent_form(self, client: TestClient, participant_headers: dict):
         """Fetching a form that doesn't exist → 404."""
         resp = client.get("/forms/999999", headers=participant_headers)
         assert resp.status_code == 404
         assert "not found" in resp.json()["detail"].lower()
 
-    def test_update_nonexistent_form(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_update_nonexistent_form(self, client: TestClient, admin_headers: dict):
         """Updating a non-existent form → 404."""
         resp = client.put(
             "/forms/999999",
@@ -154,9 +139,7 @@ class TestFormErrors:
         )
         assert resp.status_code == 404
 
-    def test_delete_nonexistent_form(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_delete_nonexistent_form(self, client: TestClient, admin_headers: dict):
         """Deleting a non-existent form → 404."""
         resp = client.delete("/forms/999999", headers=admin_headers)
         assert resp.status_code == 404
@@ -186,9 +169,7 @@ class TestFormErrors:
     ):
         """Submitting a response to a form with no active round → 400."""
         # Create a form (it gets an active round automatically)
-        form = create_form(
-            client, admin_headers, title="NoRoundForm"
-        )
+        form = create_form(client, admin_headers, title="NoRoundForm")
         form_id = form["id"]
 
         # Deactivate the round by advancing and then making none active
@@ -215,9 +196,7 @@ class TestFormErrors:
         self, client: TestClient, admin_headers: dict, participant_headers: dict
     ):
         """Getting my response on a form with no active round → 404."""
-        resp = client.get(
-            "/form/999999/my_response", headers=participant_headers
-        )
+        resp = client.get("/form/999999/my_response", headers=participant_headers)
         assert resp.status_code == 404
         assert "no active round" in resp.json()["detail"].lower()
 
@@ -225,9 +204,7 @@ class TestFormErrors:
         self, client: TestClient, participant_headers: dict
     ):
         """Getting expert labels for non-existent form → 404."""
-        resp = client.get(
-            "/forms/999999/expert_labels", headers=participant_headers
-        )
+        resp = client.get("/forms/999999/expert_labels", headers=participant_headers)
         assert resp.status_code == 404
 
     def test_put_expert_labels_nonexistent_form(
@@ -254,9 +231,7 @@ class TestRoundErrors:
         self, client: TestClient, participant_headers: dict
     ):
         """Getting the active round for a form that doesn't exist → 404."""
-        resp = client.get(
-            "/forms/999999/active_round", headers=participant_headers
-        )
+        resp = client.get("/forms/999999/active_round", headers=participant_headers)
         assert resp.status_code == 404
         assert "no active round" in resp.json()["detail"].lower()
 
@@ -264,9 +239,7 @@ class TestRoundErrors:
         self, client: TestClient, participant_headers: dict
     ):
         """Getting rounds for a form that doesn't exist returns empty list (no 404)."""
-        resp = client.get(
-            "/forms/999999/rounds", headers=participant_headers
-        )
+        resp = client.get("/forms/999999/rounds", headers=participant_headers)
         # The route just queries — no explicit 404 for the form itself
         assert resp.status_code == 200
         assert resp.json() == []
@@ -275,9 +248,7 @@ class TestRoundErrors:
         self, client: TestClient, participant_headers: dict
     ):
         """Getting follow-ups for a form with no active round → 404."""
-        resp = client.get(
-            "/forms/999999/follow_ups", headers=participant_headers
-        )
+        resp = client.get("/forms/999999/follow_ups", headers=participant_headers)
         assert resp.status_code == 404
 
     def test_create_follow_up_no_active_round(
@@ -368,9 +339,7 @@ class TestSynthesisAPIErrors:
         form_id = form["id"]
 
         # Get the round id
-        rounds_resp = client.get(
-            f"/forms/{form_id}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form_id}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         resp = client.post(
@@ -394,9 +363,7 @@ class TestSynthesisAPIErrors:
         )
 
         # Get round from form_a
-        rounds_resp = client.get(
-            f"/forms/{form_a['id']}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form_a['id']}/rounds", headers=admin_headers)
         round_a_id = rounds_resp.json()[0]["id"]
 
         # Try to generate synthesis using form_b's id with form_a's round
@@ -474,9 +441,7 @@ class TestCommentErrors:
             title="CommentErrForm",
             join_code="COMERR001",
         )
-        rounds_resp = client.get(
-            f"/forms/{form['id']}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form['id']}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         resp = client.post(
@@ -501,9 +466,7 @@ class TestCommentErrors:
             title="ReplyErrForm",
             join_code="REPLYERR1",
         )
-        rounds_resp = client.get(
-            f"/forms/{form['id']}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form['id']}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         resp = client.post(
@@ -519,9 +482,7 @@ class TestCommentErrors:
         assert resp.status_code == 404
         assert "parent comment not found" in resp.json()["detail"].lower()
 
-    def test_nested_reply_rejected(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_nested_reply_rejected(self, client: TestClient, admin_headers: dict):
         """Replying to a reply (depth > 1) → 400."""
         form = create_form(
             client,
@@ -529,9 +490,7 @@ class TestCommentErrors:
             title="NestedReplyForm",
             join_code="NESTED001",
         )
-        rounds_resp = client.get(
-            f"/forms/{form['id']}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form['id']}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         # Create top-level comment
@@ -587,9 +546,7 @@ class TestCommentErrors:
         self, client: TestClient, participant_headers: dict
     ):
         """Deleting a comment that doesn't exist → 404."""
-        resp = client.delete(
-            "/comments/999999", headers=participant_headers
-        )
+        resp = client.delete("/comments/999999", headers=participant_headers)
         assert resp.status_code == 404
 
     def test_edit_other_users_comment_forbidden(
@@ -603,9 +560,7 @@ class TestCommentErrors:
             title="EditForbidForm",
             join_code="EDITFORB1",
         )
-        rounds_resp = client.get(
-            f"/forms/{form['id']}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form['id']}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         comment = client.post(
@@ -637,9 +592,7 @@ class TestCommentErrors:
             title="DelForbidForm",
             join_code="DELFORBID",
         )
-        rounds_resp = client.get(
-            f"/forms/{form['id']}/rounds", headers=admin_headers
-        )
+        rounds_resp = client.get(f"/forms/{form['id']}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
         comment = client.post(
@@ -653,9 +606,7 @@ class TestCommentErrors:
         other_token = register_and_login(client, "del_other@error.com")
         other_headers = {"Authorization": f"Bearer {other_token}"}
 
-        resp = client.delete(
-            f"/comments/{comment_id}", headers=other_headers
-        )
+        resp = client.delete(f"/comments/{comment_id}", headers=other_headers)
         assert resp.status_code == 403
 
 
@@ -667,9 +618,7 @@ class TestCommentErrors:
 class TestResponseEditingErrors:
     """Test response editing error paths."""
 
-    def test_edit_nonexistent_response(
-        self, client: TestClient, admin_headers: dict
-    ):
+    def test_edit_nonexistent_response(self, client: TestClient, admin_headers: dict):
         """Editing a response that doesn't exist → 404."""
         resp = client.put(
             "/responses/999999",
@@ -706,14 +655,10 @@ class TestResponseEditingErrors:
         # Submit a response as a participant
         ptk = register_and_login(client, "conflict_user@error.com")
         ph = {"Authorization": f"Bearer {ptk}"}
-        submit_response(
-            client, ph, form_id, {"q1": "original answer", "q2": "stuff"}
-        )
+        submit_response(client, ph, form_id, {"q1": "original answer", "q2": "stuff"})
 
         # Get the response id
-        responses = client.get(
-            f"/form/{form_id}/responses", headers=admin_headers
-        )
+        responses = client.get(f"/form/{form_id}/responses", headers=admin_headers)
         resp_id = responses.json()[0]["id"]
         current_version = responses.json()[0]["version"]
 
@@ -766,7 +711,7 @@ class TestSynthesisLibraryErrors:
 
         # Create a response that will fail conversion by making
         # _build_prose_responses choke on a weird type
-        adapter = ConsensusLibraryAdapter.__new__(ConsensusLibraryAdapter)
+        ConsensusLibraryAdapter.__new__(ConsensusLibraryAdapter)
 
         # _build_prose_responses handles dicts, strings, etc. gracefully.
         # Let's test that a response whose `answers` property raises works:
@@ -965,18 +910,14 @@ class TestMiscErrors:
         self, client: TestClient, admin_headers: dict
     ):
         """Simple synthesis on a non-existent form → 400."""
-        resp = client.post(
-            "/form/999999/synthesise", headers=admin_headers
-        )
+        resp = client.post("/form/999999/synthesise", headers=admin_headers)
         assert resp.status_code == 400
 
     def test_form_responses_without_admin(
         self, client: TestClient, participant_headers: dict
     ):
         """Accessing form responses as non-admin → 403."""
-        resp = client.get(
-            "/form/1/responses", headers=participant_headers
-        )
+        resp = client.get("/form/1/responses", headers=participant_headers)
         assert resp.status_code == 403
 
     def test_all_feedback_without_admin(

@@ -15,6 +15,7 @@ Usage in routes:
     def example(request: Request):
         ...
 """
+
 from __future__ import annotations
 
 import os
@@ -40,6 +41,7 @@ def _get_rate_limit_key(request: Request) -> str:
     # just for rate-limit keying — the route handler does real auth)
     try:
         from jose import jwt
+
         token = None
 
         # Check Authorization header

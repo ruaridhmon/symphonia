@@ -19,10 +19,9 @@ SPDX-License-Identifier: CC-BY-4.0 (consensus library)
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, Coroutine, Dict, List, Optional, Sequence
@@ -250,7 +249,13 @@ class MockSynthesis:
             follow_up_probes=probes,
             provenance={"mode": "mock", "analysts": self.analysts},
             analyst_reports=[
-                {"index": i, "payload": {"mode": "mock", "summary": f"Mock analyst {i + 1} report"}}
+                {
+                    "index": i,
+                    "payload": {
+                        "mode": "mock",
+                        "summary": f"Mock analyst {i + 1} report",
+                    },
+                }
                 for i in range(self.analysts)
             ],
             meta_synthesis_reasoning="[MOCK MODE] Simulated synthesis data for UX testing.",
@@ -305,7 +310,9 @@ class ConsensusLibraryAdapter:
         candidates.append(pkg_parent / "prompts")
 
         # 2. Relative to this repo's backend/  (dev install)
-        candidates.append(Path(__file__).resolve().parent.parent.parent / "symphonia" / "prompts")
+        candidates.append(
+            Path(__file__).resolve().parent.parent.parent / "symphonia" / "prompts"
+        )
 
         # 3. Environment override
         env_prompts = os.getenv("CONSENSUS_PROMPTS_DIR")
@@ -318,7 +325,9 @@ class ConsensusLibraryAdapter:
                 return p
 
         searched = ", ".join(str(c) for c in candidates)
-        raise ConfigurationError(f"Could not find prompts directory. Searched: {searched}")
+        raise ConfigurationError(
+            f"Could not find prompts directory. Searched: {searched}"
+        )
 
     def _lazy_init(self) -> None:
         """Initialise strategy & LLM client on first use."""
@@ -327,7 +336,9 @@ class ConsensusLibraryAdapter:
 
         api_key = os.getenv("OPENROUTER_API_KEY")
         if not api_key:
-            raise ConfigurationError("OPENROUTER_API_KEY environment variable is required")
+            raise ConfigurationError(
+                "OPENROUTER_API_KEY environment variable is required"
+            )
 
         try:
             from consensus.config import LLMConfig
@@ -413,7 +424,9 @@ class ConsensusLibraryAdapter:
                 else:
                     text = str(resp)
 
-                prose_responses.append(ProseResponse(expert_id=expert_id, response=text))
+                prose_responses.append(
+                    ProseResponse(expert_id=expert_id, response=text)
+                )
             except Exception as exc:
                 raise ResponseMappingError(
                     f"Could not convert response at index {idx}: {exc}"
@@ -458,7 +471,8 @@ class ConsensusLibraryAdapter:
                 agreements.append(
                     Agreement(
                         claim=claim.text,
-                        supporting_experts=source_ids or list(range(1, num_responses + 1)),
+                        supporting_experts=source_ids
+                        or list(range(1, num_responses + 1)),
                         confidence=confidence,
                         evidence_summary="; ".join(
                             s.quote for s in claim.sources if s.quote
@@ -468,11 +482,19 @@ class ConsensusLibraryAdapter:
                 )
             else:
                 positions: List[Dict[str, Any]] = [
-                    {"position": claim.text, "experts": source_ids, "evidence": "From synthesis"},
+                    {
+                        "position": claim.text,
+                        "experts": source_ids,
+                        "evidence": "From synthesis",
+                    },
                 ]
                 for counter in claim.counterarguments:
                     positions.append(
-                        {"position": counter, "experts": [], "evidence": "Counterargument identified"}
+                        {
+                            "position": counter,
+                            "experts": [],
+                            "evidence": "Counterargument identified",
+                        }
                     )
                 topic = claim.text[:80] + "…" if len(claim.text) > 80 else claim.text
                 disagreements.append(
@@ -701,7 +723,9 @@ def get_synthesiser(
     Raises:
         ConfigurationError: On unknown mode.
     """
-    effective = (mode or strategy or os.getenv("SYNTHESIS_MODE", "simple")).lower().strip()
+    effective = (
+        (mode or strategy or os.getenv("SYNTHESIS_MODE", "simple")).lower().strip()
+    )
 
     # --- mock ---
     if effective == "mock":
@@ -718,7 +742,9 @@ def get_synthesiser(
 
     # --- simple / ttd ---
     if effective in ConsensusLibraryAdapter.SUPPORTED_STRATEGIES:
-        logger.info("🔬 Using %s synthesis strategy (model=%s)", effective.upper(), model)
+        logger.info(
+            "🔬 Using %s synthesis strategy (model=%s)", effective.upper(), model
+        )
         return ConsensusLibraryAdapter(
             strategy=effective,
             model=model,

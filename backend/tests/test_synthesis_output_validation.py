@@ -15,12 +15,13 @@ Coverage:
   7. Narrative validation — type, content
   8. Provenance validation — required keys, mode markers
 """
+
 from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field, fields
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import pytest
 
@@ -29,7 +30,6 @@ from core.synthesis import (
     ConsensusLibraryAdapter,
     Disagreement,
     EmergentInsight,
-    FlowMode,
     MinorityReport,
     MockSynthesis,
     Nuance,
@@ -65,9 +65,7 @@ class FakeSynthesis:
     study_id: str = "test"
     round_id: str = "1"
     question_id: str = "q1"
-    generated_at: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     model: str = "test-model"
     prompt_version: str = "v1"
     code_version: str = "test"
@@ -84,9 +82,7 @@ class FakeGraph:
     study_id: str = "test"
     round_id: str = "1"
     question_id: str = "q1"
-    generated_at: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     model: str = "test-model"
     prompt_version: str = "v1"
     code_version: str = "test"
@@ -356,7 +352,9 @@ class TestValueRangeValidation:
         for key, val in result.confidence_map.items():
             assert 0.0 <= val <= 1.0, f"confidence_map[{key}] = {val} out of range"
         for a in result.agreements:
-            assert 0.0 <= a.confidence <= 1.0, f"Agreement confidence {a.confidence} out of range"
+            assert 0.0 <= a.confidence <= 1.0, (
+                f"Agreement confidence {a.confidence} out of range"
+            )
 
     @pytest.mark.asyncio
     async def test_mock_severity_values_valid(self) -> None:
@@ -421,8 +419,12 @@ class TestValueRangeValidation:
         adapter = _make_adapter()
         pr = _make_pipeline_result(
             claims=(
-                FakeClaim("c1", "Claim A", (FakeSourceReference("E1", "q"),), "consensus"),
-                FakeClaim("c2", "Claim B", (FakeSourceReference("E2", "q"),), "divided"),
+                FakeClaim(
+                    "c1", "Claim A", (FakeSourceReference("E1", "q"),), "consensus"
+                ),
+                FakeClaim(
+                    "c2", "Claim B", (FakeSourceReference("E2", "q"),), "divided"
+                ),
             ),
         )
         result = adapter._map_to_app_format(pr, num_responses=3)
@@ -473,7 +475,8 @@ class TestCrossFieldConsistency:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Claim",
+                    "c1",
+                    "Claim",
                     (FakeSourceReference("E1", "q"), FakeSourceReference("E3", "q")),
                     "consensus",
                 ),
@@ -490,7 +493,8 @@ class TestCrossFieldConsistency:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Controversial",
+                    "c1",
+                    "Controversial",
                     (FakeSourceReference("E1", "q"),),
                     "divided",
                     counterarguments=("Counter A",),
@@ -520,7 +524,8 @@ class TestCrossFieldConsistency:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Cross-expert insight",
+                    "c1",
+                    "Cross-expert insight",
                     (FakeSourceReference("E1", "q"), FakeSourceReference("E2", "q")),
                     "consensus",
                 ),
@@ -537,7 +542,8 @@ class TestCrossFieldConsistency:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Minority view",
+                    "c1",
+                    "Minority view",
                     (FakeSourceReference("E1", "evidence"),),
                     "minority",
                     counterarguments=("Majority disagrees",),
@@ -567,7 +573,9 @@ class TestEdgeCases:
         We validate agreements/probes scale correctly (the fields that DO scale).
         """
         mock = MockSynthesis(analysts=1)
-        result = await mock.run(questions=[], responses=[{"answers": {"q1": "Solo answer"}}])
+        result = await mock.run(
+            questions=[], responses=[{"answers": {"q1": "Solo answer"}}]
+        )
         assert isinstance(result, SynthesisResult)
         # Agreements should scale to 1 response
         for a in result.agreements:
@@ -691,8 +699,12 @@ class TestMockSynthesisOutputValidation:
             for eid in p.target_experts:
                 assert eid <= 1, f"Probe expert ID {eid} exceeds 1 response"
         # Document that nuances/insights/minority DON'T scale
-        has_overflow = any(eid > 1 for n in result.nuances for eid in n.relevant_experts)
-        assert has_overflow, "Expected known hardcoded expert IDs > 1 in nuances (known limitation)"
+        has_overflow = any(
+            eid > 1 for n in result.nuances for eid in n.relevant_experts
+        )
+        assert has_overflow, (
+            "Expected known hardcoded expert IDs > 1 in nuances (known limitation)"
+        )
 
     @pytest.mark.asyncio
     async def test_mock_expert_ids_respect_two_responses(self) -> None:
@@ -729,8 +741,12 @@ class TestAdapterMapToAppFormat:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Everyone agrees",
-                    (FakeSourceReference("E1", "yes"), FakeSourceReference("E2", "yes")),
+                    "c1",
+                    "Everyone agrees",
+                    (
+                        FakeSourceReference("E1", "yes"),
+                        FakeSourceReference("E2", "yes"),
+                    ),
                     "consensus",
                 ),
             ),
@@ -747,7 +763,9 @@ class TestAdapterMapToAppFormat:
         adapter = _make_adapter()
         pr = _make_pipeline_result(
             claims=(
-                FakeClaim("c1", "Most agree", (FakeSourceReference("E1", "q"),), "majority"),
+                FakeClaim(
+                    "c1", "Most agree", (FakeSourceReference("E1", "q"),), "majority"
+                ),
             ),
         )
         result = adapter._map_to_app_format(pr, num_responses=3)
@@ -759,7 +777,8 @@ class TestAdapterMapToAppFormat:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Divided topic",
+                    "c1",
+                    "Divided topic",
                     (FakeSourceReference("E1", "quote"),),
                     "divided",
                     counterarguments=("Counter",),
@@ -777,7 +796,8 @@ class TestAdapterMapToAppFormat:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Minority view",
+                    "c1",
+                    "Minority view",
                     (FakeSourceReference("E1", "my evidence"),),
                     "minority",
                     counterarguments=("The majority disagrees",),
@@ -800,13 +820,15 @@ class TestAdapterMapToAppFormat:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Divisive topic",
+                    "c1",
+                    "Divisive topic",
                     (FakeSourceReference("E1", "position A"),),
                     "divided",
                     counterarguments=("Counter B",),
                 ),
                 FakeClaim(
-                    "c2", "Shared insight from opposing sides",
+                    "c2",
+                    "Shared insight from opposing sides",
                     (FakeSourceReference("E1", "q1"), FakeSourceReference("E2", "q2")),
                     "consensus",
                 ),
@@ -822,7 +844,9 @@ class TestAdapterMapToAppFormat:
         adapter = _make_adapter()
         pr = _make_pipeline_result(
             claims=(
-                FakeClaim("c1", "Point A", (FakeSourceReference("E1", "q"),), "consensus"),
+                FakeClaim(
+                    "c1", "Point A", (FakeSourceReference("E1", "q"),), "consensus"
+                ),
             ),
             agreement_areas=("Point A", "Point B"),
         )
@@ -835,9 +859,7 @@ class TestAdapterMapToAppFormat:
         """Areas of disagreement duplicate claims are deduplicated."""
         adapter = _make_adapter()
         pr = _make_pipeline_result(
-            claims=(
-                FakeClaim("c1", "Issue X", (), "divided"),
-            ),
+            claims=(FakeClaim("c1", "Issue X", (), "divided"),),
             disagreement_areas=("Issue X", "Issue Y"),
         )
         result = adapter._map_to_app_format(pr, num_responses=2)
@@ -874,7 +896,8 @@ class TestAdapterMapToAppFormat:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Raw claim",
+                    "c1",
+                    "Raw claim",
                     (FakeSourceReference("E1", "evidence"),),
                     "consensus",
                     counterarguments=("counter1",),
@@ -894,9 +917,7 @@ class TestAdapterMapToAppFormat:
         """Consensus claim with no source IDs falls back to all expert IDs."""
         adapter = _make_adapter()
         pr = _make_pipeline_result(
-            claims=(
-                FakeClaim("c1", "No sources claim", (), "consensus"),
-            ),
+            claims=(FakeClaim("c1", "No sources claim", (), "consensus"),),
         )
         result = adapter._map_to_app_format(pr, num_responses=4)
         assert result.agreements[0].supporting_experts == [1, 2, 3, 4]
@@ -1039,7 +1060,8 @@ class TestAdapterEdgeCases:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Solo divided view",
+                    "c1",
+                    "Solo divided view",
                     (FakeSourceReference("E1", "evidence"),),
                     "divided",
                     counterarguments=("Others disagree",),
@@ -1054,13 +1076,16 @@ class TestAdapterEdgeCases:
         assert len(mr) == 1
         assert mr[0].agreement_level == "divided"
 
-    def test_claim_with_counterarguments_and_few_supporters_becomes_minority(self) -> None:
+    def test_claim_with_counterarguments_and_few_supporters_becomes_minority(
+        self,
+    ) -> None:
         """Claim with counterarguments and few supporters becomes minority report."""
         adapter = _make_adapter()
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Claim with counter",
+                    "c1",
+                    "Claim with counter",
                     (FakeSourceReference("E1", "evidence"),),
                     "consensus",  # consensus but only 1 supporter out of 6
                     counterarguments=("Major counter",),
@@ -1078,9 +1103,13 @@ class TestAdapterEdgeCases:
         pr = _make_pipeline_result(
             claims=(
                 FakeClaim(
-                    "c1", "Combined understanding",
-                    (FakeSourceReference("E1", "q1"), FakeSourceReference("E2", "q2"),
-                     FakeSourceReference("E3", "q3")),
+                    "c1",
+                    "Combined understanding",
+                    (
+                        FakeSourceReference("E1", "q1"),
+                        FakeSourceReference("E2", "q2"),
+                        FakeSourceReference("E3", "q3"),
+                    ),
                     "consensus",
                 ),
             ),
@@ -1098,10 +1127,15 @@ class TestAdapterEdgeCases:
         adapter = _make_adapter()
         pr = _make_pipeline_result(
             claims=(
-                FakeClaim("c1", "Agree", (FakeSourceReference("E1", "q"),), "consensus"),
-                FakeClaim("c2", "Disagree", (FakeSourceReference("E2", "q"),), "divided"),
                 FakeClaim(
-                    "c3", "Minority",
+                    "c1", "Agree", (FakeSourceReference("E1", "q"),), "consensus"
+                ),
+                FakeClaim(
+                    "c2", "Disagree", (FakeSourceReference("E2", "q"),), "divided"
+                ),
+                FakeClaim(
+                    "c3",
+                    "Minority",
                     (FakeSourceReference("E3", "q"),),
                     "minority",
                     counterarguments=("counter",),

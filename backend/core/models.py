@@ -1,6 +1,17 @@
 from enum import Enum as PyEnum
 
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, String, Boolean, JSON, Float, UniqueConstraint
+from sqlalchemy import (
+    Column,
+    Integer,
+    Text,
+    DateTime,
+    ForeignKey,
+    String,
+    Boolean,
+    JSON,
+    Float,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime, timezone
 from .db import Base
@@ -18,30 +29,43 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-    role = Column(String(20), nullable=False, default=UserRole.EXPERT.value, server_default="expert")
+    role = Column(
+        String(20),
+        nullable=False,
+        default=UserRole.EXPERT.value,
+        server_default="expert",
+    )
     has_submitted_feedback = Column(Boolean, default=False)
     reset_token = Column(String, nullable=True)
     reset_token_expiry = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at = Column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
 
     responses = relationship("Response", back_populates="user")
     feedback_entries = relationship("Feedback", back_populates="user")
     archived_responses = relationship("ArchivedResponse", back_populates="user")
-    unlocked_forms = relationship("UserFormUnlock", back_populates="user", cascade="all, delete-orphan")
-    owned_forms = relationship("FormModel", foreign_keys="[FormModel.owner_id]", back_populates="owner")
+    unlocked_forms = relationship(
+        "UserFormUnlock", back_populates="user", cascade="all, delete-orphan"
+    )
+    owned_forms = relationship(
+        "FormModel", foreign_keys="[FormModel.owner_id]", back_populates="owner"
+    )
 
 
 class UserFormUnlock(Base):
     __tablename__ = "user_form_unlocks"
-    __table_args__ = (
-        UniqueConstraint("user_id", "form_id", name="uq_user_form"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "form_id", name="uq_user_form"),)
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     form_id = Column(Integer, ForeignKey("forms.id"), nullable=False)
-    form_role = Column(String(20), nullable=False, default="expert", server_default="expert")
-    joined_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    form_role = Column(
+        String(20), nullable=False, default="expert", server_default="expert"
+    )
+    joined_at = Column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
 
     user = relationship("User", back_populates="unlocked_forms")
     form = relationship("FormModel", back_populates="unlocked_by_users")
@@ -57,15 +81,24 @@ class FormModel(Base):
     allow_join = Column(Boolean, default=True)
     join_code = Column(String, unique=True, nullable=False)
 
-    expert_labels = Column(JSON, nullable=True)  # {"preset": "temporal"|"custom"|"default"|"methodological"|"stakeholder", "custom_labels": {1: "Label", ...}}
+    expert_labels = Column(
+        JSON, nullable=True
+    )  # {"preset": "temporal"|"custom"|"default"|"methodological"|"stakeholder", "custom_labels": {1: "Label", ...}}
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
-    rounds = relationship("RoundModel", back_populates="form", cascade="all, delete-orphan")
-    responses = relationship("Response", back_populates="form", cascade="all, delete-orphan")
-    archived_responses = relationship("ArchivedResponse", back_populates="form", cascade="all, delete-orphan")
-    unlocked_by_users = relationship("UserFormUnlock", back_populates="form", cascade="all, delete-orphan")
+    rounds = relationship(
+        "RoundModel", back_populates="form", cascade="all, delete-orphan"
+    )
+    responses = relationship(
+        "Response", back_populates="form", cascade="all, delete-orphan"
+    )
+    archived_responses = relationship(
+        "ArchivedResponse", back_populates="form", cascade="all, delete-orphan"
+    )
+    unlocked_by_users = relationship(
+        "UserFormUnlock", back_populates="form", cascade="all, delete-orphan"
+    )
     owner = relationship("User", foreign_keys=[owner_id], back_populates="owned_forms")
-
 
 
 class RoundModel(Base):
@@ -87,7 +120,9 @@ class RoundModel(Base):
     form = relationship("FormModel", back_populates="rounds")
     responses = relationship("Response", back_populates="round")
     archived_responses = relationship("ArchivedResponse", back_populates="round")
-    follow_ups = relationship("FollowUp", back_populates="round", cascade="all, delete-orphan")
+    follow_ups = relationship(
+        "FollowUp", back_populates="round", cascade="all, delete-orphan"
+    )
 
 
 class Response(Base):
@@ -99,7 +134,11 @@ class Response(Base):
     round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False)
     answers = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
     version = Column(Integer, default=1, nullable=False)
 
     user = relationship("User", back_populates="responses")
@@ -143,6 +182,7 @@ class FollowUp(Base):
 
     Can be authored by a human expert or by the AI synthesis engine.
     """
+
     __tablename__ = "follow_ups"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -153,11 +193,14 @@ class FollowUp(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     round = relationship("RoundModel", back_populates="follow_ups")
-    responses = relationship("FollowUpResponse", back_populates="follow_up", cascade="all, delete-orphan")
+    responses = relationship(
+        "FollowUpResponse", back_populates="follow_up", cascade="all, delete-orphan"
+    )
 
 
 class FollowUpResponse(Base):
     """A response to a follow-up question."""
+
     __tablename__ = "follow_up_responses"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -176,6 +219,7 @@ class SynthesisVersion(Base):
     Allows regeneration with version tracking, comparison, and rollback.
     The ``is_active`` flag marks which version is currently published to experts.
     """
+
     __tablename__ = "synthesis_versions"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -197,6 +241,7 @@ class Draft(Base):
     One draft per user per form (always for the active round).
     Replaced on every save, deleted on successful submit.
     """
+
     __tablename__ = "drafts"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -204,7 +249,11 @@ class Draft(Base):
     form_id = Column(Integer, ForeignKey("forms.id"), nullable=False)
     round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False)
     answers = Column(JSON, nullable=False)  # Same shape as Response.answers
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
     user = relationship("User")
     form = relationship("FormModel")
@@ -213,17 +262,28 @@ class Draft(Base):
 
 class SynthesisComment(Base):
     """A threaded comment on a specific section of a synthesis output."""
+
     __tablename__ = "synthesis_comments"
 
     id = Column(Integer, primary_key=True, index=True)
     round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False)
-    section_type = Column(String, nullable=False)  # "agreement", "disagreement", "nuance", "emergence", "general"
-    section_index = Column(Integer, nullable=True)  # index within that section type (e.g., agreement #2)
-    parent_id = Column(Integer, ForeignKey("synthesis_comments.id"), nullable=True)  # for threading
+    section_type = Column(
+        String, nullable=False
+    )  # "agreement", "disagreement", "nuance", "emergence", "general"
+    section_index = Column(
+        Integer, nullable=True
+    )  # index within that section type (e.g., agreement #2)
+    parent_id = Column(
+        Integer, ForeignKey("synthesis_comments.id"), nullable=True
+    )  # for threading
     author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     body = Column(Text, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
     round = relationship("RoundModel", backref="synthesis_comments")
     author = relationship("User")
@@ -240,14 +300,21 @@ class InviteCode(Base):
     Supports expiry, max uses, soft deactivation, and form_role assignment.
     Backfilled from FormModel.join_code in Phase 2 migration.
     """
+
     __tablename__ = "invite_codes"
 
     id = Column(Integer, primary_key=True, index=True)
-    form_id = Column(Integer, ForeignKey("forms.id", ondelete="CASCADE"), nullable=False)
+    form_id = Column(
+        Integer, ForeignKey("forms.id", ondelete="CASCADE"), nullable=False
+    )
     code = Column(String(20), unique=True, nullable=False, index=True)
-    form_role = Column(String(20), nullable=False, default="expert", server_default="expert")
+    form_role = Column(
+        String(20), nullable=False, default="expert", server_default="expert"
+    )
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at = Column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
     expires_at = Column(DateTime, nullable=True)
     max_uses = Column(Integer, nullable=True)
     use_count = Column(Integer, nullable=False, default=0, server_default="0")
@@ -265,13 +332,18 @@ class AuditLog(Base):
     resource, and when.  The ``detail`` JSON column captures action-specific
     context (e.g. old vs new values for edits).
     """
+
     __tablename__ = "audit_log"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True)
+    timestamp = Column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False, index=True
+    )
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     user_email = Column(String, nullable=False)  # denormalised for fast reads
-    action = Column(String, nullable=False, index=True)  # e.g. "create_form", "generate_synthesis", "send_email"
+    action = Column(
+        String, nullable=False, index=True
+    )  # e.g. "create_form", "generate_synthesis", "send_email"
     resource_type = Column(String, nullable=True)  # "form", "round", "user", "email"
     resource_id = Column(Integer, nullable=True)  # PK of affected resource
     detail = Column(JSON, nullable=True)  # action-specific context
@@ -283,8 +355,13 @@ class AuditLog(Base):
 
 class Setting(Base):
     """Global app settings stored as key-value pairs."""
+
     __tablename__ = "settings"
 
     key = Column(String, primary_key=True)
     value = Column(Text, nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )

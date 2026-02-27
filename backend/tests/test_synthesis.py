@@ -17,36 +17,30 @@ Covers:
 
 All tests are pure-unit: no network calls, no LLM invocations, no filesystem side-effects.
 """
+
 from __future__ import annotations
 
-import asyncio
 import json
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 # Import the module under test
 from core.synthesis import (
     AdapterSynthesisContext,
-    Agreement,
     ConsensusLibraryAdapter,
-    Disagreement,
     FlowMode,
     MockSynthesis,
-    Nuance,
-    Probe,
     ProseResponse,
     Synthesiser,
     SynthesisConfigError,
     SynthesisError,
-    SynthesisLibraryError,
     SynthesisResponseError,
     SynthesisResult,
-    SynthesisTimeoutError,
     _extract_expert_ids,
     get_synthesiser,
 )
@@ -79,9 +73,7 @@ class FakeSynthesis:
     study_id: str = "test"
     round_id: str = "1"
     question_id: str = "q1"
-    generated_at: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     model: str = "test-model"
     prompt_version: str = "v1"
     code_version: str = "test"
@@ -98,9 +90,7 @@ class FakeGraph:
     study_id: str = "test"
     round_id: str = "1"
     question_id: str = "q1"
-    generated_at: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     model: str = "test-model"
     prompt_version: str = "v1"
     code_version: str = "test"
@@ -235,7 +225,6 @@ class TestMockSynthesis:
 
 
 class TestSynthesisResultSerialisation:
-
     @pytest.mark.asyncio
     async def test_to_dict_is_json_serialisable(self) -> None:
         """to_dict() should produce a plain dict with no dataclass remnants."""
@@ -379,7 +368,6 @@ class TestBuildProseResponses:
 
 
 class TestBuildQuestionText:
-
     def test_dict_with_label(self) -> None:
         qs = [{"label": "What matters?", "id": "q1"}]
         text = ConsensusLibraryAdapter._build_question_text(qs)
@@ -425,9 +413,7 @@ class TestMapToAppFormat:
                 FakeClaim(
                     claim_id="c1",
                     text="Everyone agrees on X",
-                    sources=(
-                        FakeSourceReference(source_id="E1", quote="I agree"),
-                    ),
+                    sources=(FakeSourceReference(source_id="E1", quote="I agree"),),
                     agreement_level="consensus",
                 ),
             ),
@@ -579,7 +565,6 @@ class TestMapToAppFormat:
 
 
 class TestFactory:
-
     def test_mock_mode(self) -> None:
         s = get_synthesiser(mode="mock")
         assert isinstance(s, MockSynthesis)
@@ -639,7 +624,6 @@ class TestFactory:
 
 
 class TestErrorHandling:
-
     def test_adapter_rejects_unknown_strategy(self) -> None:
         with pytest.raises(SynthesisConfigError, match="Unknown strategy"):
             ConsensusLibraryAdapter(strategy="bogus")
@@ -647,9 +631,7 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_empty_responses_rejected(self) -> None:
         adapter = ConsensusLibraryAdapter(strategy="simple")
-        with pytest.raises(
-            SynthesisResponseError, match="zero responses"
-        ):
+        with pytest.raises(SynthesisResponseError, match="zero responses"):
             await adapter.run(questions=[], responses=[])
 
     @pytest.mark.asyncio
@@ -671,9 +653,7 @@ class TestErrorHandling:
         assert adapter.timeout_seconds == 600.0
 
     def test_custom_timeout(self) -> None:
-        adapter = ConsensusLibraryAdapter(
-            strategy="simple", timeout_seconds=30.0
-        )
+        adapter = ConsensusLibraryAdapter(strategy="simple", timeout_seconds=30.0)
         assert adapter.timeout_seconds == 30.0
 
 
@@ -683,7 +663,6 @@ class TestErrorHandling:
 
 
 class TestExtractExpertIds:
-
     def test_valid_ids(self) -> None:
         sources = [
             FakeSourceReference("E1", ""),
@@ -711,7 +690,6 @@ class TestExtractExpertIds:
 
 
 class TestFlowMode:
-
     def test_values(self) -> None:
         assert FlowMode.HUMAN_ONLY.value == "human_only"
         assert FlowMode.AI_ASSISTED.value == "ai_assisted"
@@ -724,7 +702,6 @@ class TestFlowMode:
 
 
 class TestBackwardsCompat:
-
     def test_committee_synthesiser_alias(self) -> None:
         from core.synthesis import CommitteeSynthesiser
 
@@ -742,7 +719,6 @@ class TestBackwardsCompat:
 
 
 class TestSynthesiserProtocol:
-
     def test_mock_satisfies_protocol(self) -> None:
         mock = MockSynthesis()
         assert isinstance(mock, Synthesiser)
@@ -852,6 +828,7 @@ class TestFormatCommentsAsContext:
 
     def test_empty_comments_returns_empty_string(self) -> None:
         from core.routes import _format_comments_as_context
+
         assert _format_comments_as_context([]) == ""
 
     def test_formats_comments_with_sections(self) -> None:
@@ -923,4 +900,6 @@ class TestFormatCommentsAsContext:
         result = _format_comments_as_context([c1, c2])
         assert "Agreement" in result
         assert "Nuance" in result
-        assert result.index("Agreement") < result.index("Nuance") or result.index("Nuance") < result.index("Agreement")
+        assert result.index("Agreement") < result.index("Nuance") or result.index(
+            "Nuance"
+        ) < result.index("Agreement")

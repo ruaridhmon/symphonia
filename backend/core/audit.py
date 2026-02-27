@@ -33,7 +33,9 @@ def audit_log(
     transaction handle that)."""
     ip = None
     if request:
-        ip = request.headers.get("x-forwarded-for", request.client.host if request.client else None)
+        ip = request.headers.get(
+            "x-forwarded-for", request.client.host if request.client else None
+        )
 
     # Auto-populate acting_role from user if not explicitly provided
     role = acting_role or getattr(user, "role", None)
