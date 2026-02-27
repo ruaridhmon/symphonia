@@ -66,74 +66,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // On mount, try to restore session from cookie by calling /me
   useEffect(() => {
     const restore = async () => {
-      // If we have a cookie-based session, validate it by calling /me
-      if (hasCookie('csrf_token') && !localStorage.getItem('access_token')) {
-        try {
-          const me = await getMe();
-          setUser({ email: me.email });
-          setIsAdmin(me.is_admin ?? false);
-          const meRole: UserRoleType = (me as any).role || (me.is_admin ? 'platform_admin' : 'expert');
-          setRole(meRole);
-          setToken('__cookie__');
-          // Sync localStorage for components that read it directly
-          localStorage.setItem('email', me.email);
-          localStorage.setItem('is_admin', me.is_admin ? 'true' : 'false');
-          localStorage.setItem('role', meRole);
-        } catch (err) {
-          // Cookie expired or invalid — clear and redirect if we had a session
-          const hadSession = hasCookie('csrf_token');
-          setToken(null);
-          setUser(null);
-          setIsAdmin(false);
-          setRole('expert');
-          if (hadSession) {
-            clearAuthAndRedirect();
+      try {
+        // If we have a cookie-based session, validate it by calling /me
+        if (hasCookie('csrf_token') && !localStorage.getItem('access_token')) {
+          try {
+            const me = await getMe();
+            setUser({ email: me.email });
+            setIsAdmin(me.is_admin ?? false);
+            const meRole: UserRoleType = (me as any).role || (me.is_admin ? 'platform_admin' : 'expert');
+            setRole(meRole);
+            setToken('__cookie__');
+            // Sync localStorage for components that read it directly
+            localStorage.setItem('email', me.email);
+            localStorage.setItem('is_admin', me.is_admin ? 'true' : 'false');
+            localStorage.setItem('role', meRole);
+          } catch (err) {
+            // Cookie expired or invalid — clear and redirect if we had a session
+            const hadSession = hasCookie('csrf_token');
+            setToken(null);
+            setUser(null);
+            setIsAdmin(false);
+            setRole('expert');
+            if (hadSession) {
+              clearAuthAndRedirect();
+            }
           }
-        }
-      } else if (token && token !== '__cookie__') {
-        // Legacy localStorage token path — validate with a manual redirect-detecting fetch
-        try {
-          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
-          const res = await fetch(`${API_BASE_URL}/me`, {
-            credentials: 'include',
-            redirect: 'manual',
-            headers: {
-              ...(localStorage.getItem('access_token')
-                ? { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
-                : {}),
-            },
-          });
-          // Opaque redirect or CF Access redirect = session expired
-          if (isCfAccessRedirect(res) || res.status === 401) {
-            clearAuthAndRedirect();
-            return;
-          }
-          // If ok, update state from response
-          if (res.ok) {
-            try {
-              const me = await res.json();
-              setUser({ email: me.email });
-              setIsAdmin(me.is_admin ?? false);
-              const meRole: UserRoleType = me.role || (me.is_admin ? 'platform_admin' : 'expert');
-              setRole(meRole);
-              localStorage.setItem('email', me.email);
-              localStorage.setItem('is_admin', me.is_admin ? 'true' : 'false');
-              localStorage.setItem('role', meRole);
-            } catch {
-              // Non-JSON response (possible CF page) — treat as expiry
+        } else if (token && token !== '__cookie__') {
+          // Legacy localStorage token path — validate with a manual redirect-detecting fetch
+          try {
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
+            const res = await fetch(`${API_BASE_URL}/me`, {
+              credentials: 'include',
+              redirect: 'manual',
+              headers: {
+                ...(localStorage.getItem('access_token')
+                  ? { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+                  : {}),
+              },
+            });
+            // Opaque redirect or CF Access redirect = session expired
+            if (isCfAccessRedirect(res) || res.status === 401) {
               clearAuthAndRedirect();
               return;
             }
+            // If ok, update state from response
+            if (res.ok) {
+              try {
+                const me = await res.json();
+                setUser({ email: me.email });
+                setIsAdmin(me.is_admin ?? false);
+                const meRole: UserRoleType = me.role || (me.is_admin ? 'platform_admin' : 'expert');
+                setRole(meRole);
+                localStorage.setItem('email', me.email);
+                localStorage.setItem('is_admin', me.is_admin ? 'true' : 'false');
+                localStorage.setItem('role', meRole);
+              } catch {
+                // Non-JSON response (possible CF page) — treat as expiry
+                clearAuthAndRedirect();
+                return;
+              }
+            }
+          } catch {
+            // Network error during restore — keep existing localStorage state
+            setIsAdmin(localStorage.getItem('is_admin') === 'true');
+            setRole(deriveRole());
+            const storedEmail = localStorage.getItem('email');
+            if (storedEmail) setUser({ email: storedEmail });
           }
-        } catch {
-          // Network error during restore — keep existing localStorage state
-          setIsAdmin(localStorage.getItem('is_admin') === 'true');
-          setRole(deriveRole());
-          const storedEmail = localStorage.getItem('email');
-          if (storedEmail) setUser({ email: storedEmail });
         }
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     restore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
