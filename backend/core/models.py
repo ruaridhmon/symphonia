@@ -98,6 +98,9 @@ class FormModel(Base):
     unlocked_by_users = relationship(
         "UserFormUnlock", back_populates="form", cascade="all, delete-orphan"
     )
+    invite_codes = relationship(
+        "InviteCode", back_populates="form", cascade="all, delete-orphan"
+    )
     owner = relationship("User", foreign_keys=[owner_id], back_populates="owned_forms")
 
 
@@ -321,7 +324,7 @@ class InviteCode(Base):
     is_active = Column(Boolean, nullable=False, default=True, server_default="1")
     label = Column(String(100), nullable=True)
 
-    form = relationship("FormModel", backref="invite_codes")
+    form = relationship("FormModel", back_populates="invite_codes")
     creator = relationship("User")
 
 
