@@ -185,7 +185,7 @@ export default function AdminSettings() {
         {/* Back */}
         <button
           type="button"
-          onClick={() => navigate('/admin')}
+          onClick={() => navigate('/')}
           className="inline-flex items-center gap-1.5 text-sm mb-6"
           style={{
             color: 'var(--muted-foreground)',

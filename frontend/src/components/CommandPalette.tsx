@@ -6,7 +6,6 @@ import {
   FileText,
   PenTool,
   LogOut,
-  Compass,
   Sun,
   Moon,
   Palette,
@@ -52,14 +51,6 @@ export default function CommandPalette() {
         icon: <LayoutDashboard size={16} />,
         action: () => { navigate('/'); close(); },
         keywords: ['home', 'main', 'forms'],
-      },
-      {
-        id: 'atlas',
-        label: 'Open Atlas',
-        description: 'UX exploration map',
-        icon: <Compass size={16} />,
-        action: () => { navigate('/atlas'); close(); },
-        keywords: ['map', 'explore', 'navigation'],
       },
     ];
 

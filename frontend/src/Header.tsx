@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { ThemeToggle } from './theme';
@@ -8,6 +9,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 export default function Header() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -56,8 +58,13 @@ export default function Header() {
       }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex justify-between items-center">
-        {/* Left: branding — converging waves */}
-        <div className="flex items-center gap-2.5">
+        {/* Left: branding — converging waves, clicks to home */}
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2.5"
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+          aria-label="Go to home"
+        >
           <img
             src="/logo-mark.png"
             alt="Symphonia"
@@ -80,7 +87,7 @@ export default function Header() {
               </p>
             )}
           </div>
-        </div>
+        </button>
 
         {/* Right: desktop layout */}
         <nav aria-label={t('header.primaryNavigation', 'Primary navigation')} className="hidden sm:flex items-center gap-2">

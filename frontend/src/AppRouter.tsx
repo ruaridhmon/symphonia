@@ -17,7 +17,6 @@ const Login        = lazy(() => import('./Login'));
 const Register       = lazy(() => import('./Register'));
 const ForgotPassword = lazy(() => import('./ForgotPassword'));
 const ResetPassword  = lazy(() => import('./ResetPassword'));
-const Atlas        = lazy(() => import('./Atlas'));
 const NotFoundPage  = lazy(() => import('./NotFoundPage'));
 const AdminFormNew   = lazy(() => import('./AdminFormNew'));
 const AdminSettings  = lazy(() => import('./AdminSettings'));
@@ -37,7 +36,7 @@ const JoinPage       = lazy(() => import('./JoinPage'));
  *
  * ┌─ PrivateRoute → PageLayout (Header+Footer) ─────┐
  * │  /               Dashboard (admin or user)       │
- * │  /atlas          UX Atlas                        │
+ * │  /join/:code     Magic join link                  │
  * │  /waiting        Post-submission waiting room    │
  * │  /result         Synthesis result + feedback     │
  * │  /thank-you      Thank-you confirmation          │
@@ -97,14 +96,6 @@ export default function Router() {
               element={
                 <ErrorBoundary fallbackTitle="Dashboard Error">
                   <Dashboard />
-                </ErrorBoundary>
-              }
-            />
-            <Route
-              path="/atlas"
-              element={
-                <ErrorBoundary fallbackTitle="Atlas Error">
-                  <Atlas />
                 </ErrorBoundary>
               }
             />
