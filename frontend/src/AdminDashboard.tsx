@@ -6,6 +6,7 @@ import { useAuth } from './AuthContext';
 import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
+import { unlockForm } from './api/forms';
 
 const AdminAnalytics = lazy(() => import('./components/AdminAnalytics'));
 
@@ -25,6 +26,9 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [joinCode, setJoinCode] = useState('');
+  const [joinError, setJoinError] = useState('');
+  const [joinSuccess, setJoinSuccess] = useState('');
   const [analyticsVisible, setAnalyticsVisible] = useState(() => {
     try { return localStorage.getItem(ANALYTICS_STORAGE_KEY) === 'true'; } catch { return false; }
   });
@@ -82,6 +86,19 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchForms();
   }, [token]);
+
+  const handleJoin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setJoinError('');
+    setJoinSuccess('');
+    try {
+      await unlockForm(joinCode.trim());
+      setJoinSuccess('Joined! You can now access this consultation as an expert.');
+      setJoinCode('');
+    } catch (err: any) {
+      setJoinError(err.status === 404 ? 'Invalid join code.' : `Could not join (HTTP ${err.status})`);
+    }
+  };
 
 
   function toggleAnalytics() {
@@ -640,6 +657,40 @@ export default function AdminDashboard() {
             )}
           </div>
         )}
+      </Container>
+
+      {/* ── Participate as Expert ── */}
+      <Container className="mt-6 pb-12">
+        <div
+          className="rounded-xl p-6"
+          style={{
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--card-shadow, none)',
+          }}
+        >
+          <h2 className="text-lg font-semibold mb-1" style={{ color: 'var(--foreground)' }}>
+            Join a consultation as expert
+          </h2>
+          <p className="text-sm mb-4" style={{ color: 'var(--muted-foreground)' }}>
+            Enter a join code to participate in another facilitator's consultation.
+          </p>
+          <form onSubmit={handleJoin} className="flex gap-3 items-start">
+            <input
+              type="text"
+              placeholder="SYM-ABCD-2345"
+              value={joinCode}
+              onChange={e => { setJoinCode(e.target.value); setJoinError(''); setJoinSuccess(''); }}
+              className="flex-1 px-4 py-2 rounded-lg text-sm"
+              style={{ border: '1px solid var(--input)', backgroundColor: 'var(--background)', color: 'var(--foreground)' }}
+            />
+            <LoadingButton type="submit" variant="accent" size="sm">
+              Join
+            </LoadingButton>
+          </form>
+          {joinError && <p className="mt-2 text-sm" style={{ color: 'var(--destructive)' }}>{joinError}</p>}
+          {joinSuccess && <p className="mt-2 text-sm" style={{ color: 'var(--accent)' }}>{joinSuccess}</p>}
+        </div>
       </Container>
     </section>
   );
