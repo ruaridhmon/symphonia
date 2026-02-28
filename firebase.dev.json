@@ -10,7 +10,7 @@
       {
         "source": "/api/**",
         "run": {
-          "serviceId": "symphonia-api",
+          "serviceId": "symphonia-dev",
           "region": "europe-west2"
         }
       },
