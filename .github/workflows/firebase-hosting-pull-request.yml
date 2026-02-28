@@ -51,5 +51,5 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SYMPHONIA_DEV }}
-          projectId: symphonia-dev
+          projectId: symphonia-dev-488613
           entryPoint: .
