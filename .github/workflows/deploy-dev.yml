@@ -1,0 +1,28 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: npm ci
+        working-directory: frontend
+
+      - run: npm run build -- --mode development
+        working-directory: frontend
+
+      - run: cp firebase.dev.json firebase.json
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SYMPHONIA_DEV }}
+          channelId: live
+          projectId: symphonia-dev-488613
+          entryPoint: .
