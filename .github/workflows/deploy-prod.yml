@@ -1,0 +1,28 @@
+name: Deploy Prod
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: npm ci
+        working-directory: frontend
+
+      - run: npm run build -- --mode production
+        working-directory: frontend
+
+      - run: cp firebase.prod.json firebase.json
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SYMPHONIA_488513 }}
+          channelId: live
+          projectId: symphonia-488513
+          entryPoint: .
