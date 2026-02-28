@@ -39,6 +39,7 @@ This is intentional. Never hardcode a model string in a new AI endpoint. Always 
 - **2026-02-27:** Added split Firebase Hosting configs by environment (`firebase.dev.json`, `firebase.prod.json`) so each branch can target a different Cloud Run `serviceId`. GitHub Actions copies the correct config to `firebase.json` before deploy.
 - **2026-02-28:** Updated dev Firebase project ID from legacy dev project to `symphonia-dev-488613` in `.firebaserc` alias and GitHub Actions deploy `projectId` fields.
 - **2026-02-28:** Replaced single conditional merge deploy workflow with two explicit branch workflows: `.github/workflows/deploy-dev.yml` (`develop`) and `.github/workflows/deploy-prod.yml` (`main`). PR previews remain in `firebase-hosting-pull-request.yml`.
+- **2026-02-28:** Dev Hosting rewrite now targets Cloud Run `serviceId: "symphonia-api"` (not `symphonia-dev`) to match current Cloud Build default `_SERVICE` in `cloudbuild.yaml` unless overridden in the dev trigger.
 
 ### Template for any new AI endpoint
 
