@@ -2,6 +2,8 @@
   "projects": {
     "default": "symphonia-488513",
     "prod": "symphonia-488513",
-    "dev": "symphonia-dev"
-  }
+    "dev": "symphonia-dev-db85f"
+  },
+  "targets": {},
+  "etags": {}
 }
