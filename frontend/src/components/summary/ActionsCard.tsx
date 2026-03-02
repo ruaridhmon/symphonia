@@ -35,62 +35,66 @@ export default function ActionsCard({
   }, [onDownloadResponses]);
 
   return (
-    <div className="card p-2">
-      {/* Icon row: responses · download · save · next */}
-      <div className="flex items-center gap-1 flex-wrap">
-        <button
-          type="button"
-          title={responsesOpen ? 'Hide Responses' : 'View Responses'}
-          aria-label={responsesOpen ? 'Hide Responses' : 'View Responses'}
-          aria-pressed={responsesOpen}
-          onClick={onToggleResponses}
-          className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10"
-          style={{ color: responsesOpen ? 'var(--accent)' : 'var(--muted-foreground)' }}
-        >
-          {responsesOpen ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
-        </button>
-
-        <button
-          type="button"
-          title={downloading ? 'Downloading…' : 'Download Responses'}
-          aria-label={downloading ? 'Downloading responses' : 'Download Responses'}
-          onClick={handleDownload}
-          disabled={downloading}
-          className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10 disabled:opacity-50"
+    <div className="card p-3">
+      <div className="mb-2">
+        <h3
+          className="text-[10px] font-semibold uppercase tracking-wider"
           style={{ color: 'var(--muted-foreground)' }}
         >
-          <FileDown size={15} aria-hidden="true" />
-        </button>
+          Workflow Actions
+        </h3>
+      </div>
 
-        <button
-          type="button"
-          title={saving ? 'Saving…' : 'Save Synthesis'}
-          aria-label={saving ? 'Saving synthesis' : 'Save Synthesis'}
+      <div className="space-y-2">
+        <LoadingButton
+          variant="secondary"
+          size="sm"
+          loading={saving}
+          loadingText="Saving synthesis…"
           onClick={handleSave}
-          disabled={saving}
-          className="inline-flex items-center justify-center rounded-md p-1.5 transition-colors hover:bg-accent/10 disabled:opacity-50"
-          style={{ color: 'var(--muted-foreground)' }}
+          className="w-full justify-start gap-2 font-medium"
+          icon={<Save size={14} aria-hidden="true" />}
         >
-          <Save size={15} aria-hidden="true" />
-        </button>
+          Save Synthesis
+        </LoadingButton>
+
+        <LoadingButton
+          variant="ghost"
+          size="sm"
+          onClick={onToggleResponses}
+          className="w-full justify-start gap-2"
+          icon={responsesOpen ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+          aria-pressed={responsesOpen}
+        >
+          {responsesOpen ? 'Hide Responses Panel' : 'View Responses Panel'}
+        </LoadingButton>
+
+        <LoadingButton
+          variant="ghost"
+          size="sm"
+          loading={downloading}
+          loadingText="Exporting responses…"
+          onClick={handleDownload}
+          className="w-full justify-start gap-2"
+          icon={<FileDown size={14} aria-hidden="true" />}
+        >
+          Export Responses (.docx)
+        </LoadingButton>
 
         <LoadingButton
           variant="accent"
           size="sm"
           onClick={onStartNextRound}
           loading={loading}
-          loadingText=""
-          title="Start Next Round"
-          aria-label="Start Next Round"
-          className="inline-flex items-center justify-center rounded-md p-1.5 font-semibold"
-          style={{ minWidth: 0, padding: '0.375rem' }}
+          loadingText="Starting next round…"
+          className="w-full justify-center gap-2 font-semibold"
+          icon={<ArrowRight size={15} aria-hidden="true" />}
         >
-          <ArrowRight size={15} aria-hidden="true" />
+          Start Next Round
         </LoadingButton>
       </div>
 
-      {/* Export panel — full width below icons */}
-      <div className="mt-1.5">
+      <div className="mt-3">
         <ExportPanel formId={formId} />
       </div>
     </div>

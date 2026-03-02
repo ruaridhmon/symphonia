@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileJson, FileDown } from 'lucide-react';
+import { FileDown } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import LoadingButton from './LoadingButton';
 import { exportSynthesisFromBackend } from '../api/synthesis';
@@ -939,86 +939,35 @@ function exportAsGovUkReport(
 export default function ExportPanel({
   formId,
 }: ExportPanelProps) {
-  const [openingJsonPreview, setOpeningJsonPreview] = useState(false);
-  const [openingPdfPreview, setOpeningPdfPreview] = useState(false);
+  const [downloadingReport, setDownloadingReport] = useState(false);
+  const [exportMessage, setExportMessage] = useState<string | null>(null);
 
-  function openBlobInNewTab(blob: Blob, filenameForFallback: string): boolean {
-    const url = URL.createObjectURL(blob);
-    const popup = window.open(url, '_blank', 'noopener,noreferrer');
-    if (!popup) {
-      URL.revokeObjectURL(url);
-      saveAs(blob, filenameForFallback);
-      return false;
-    }
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    return true;
-  }
-
-  async function handleOpenJsonPreview() {
-    setOpeningJsonPreview(true);
-    try {
-      const { blob, filename } = await exportSynthesisFromBackend(formId, 'json');
-      const raw = await blob.text();
-      let pretty = raw;
-      try {
-        pretty = `${JSON.stringify(JSON.parse(raw), null, 2)}\n`;
-      } catch {
-        // Keep raw text if backend response is already formatted/non-JSON.
-      }
-      const previewBlob = new Blob([pretty], { type: 'application/json;charset=utf-8' });
-      openBlobInNewTab(previewBlob, filename);
-    } catch (err) {
-      console.error('JSON export preview failed:', err);
-    } finally {
-      setOpeningJsonPreview(false);
-    }
-  }
-
-  async function handleOpenPdfPreview() {
-    setOpeningPdfPreview(true);
+  async function handleDownloadReport() {
+    setDownloadingReport(true);
+    setExportMessage(null);
     try {
       const { blob, filename } = await exportSynthesisFromBackend(formId, 'pdf');
       const isPdf = blob.type.includes('application/pdf') || filename.toLowerCase().endsWith('.pdf');
 
       if (isPdf) {
-        openBlobInNewTab(blob, filename);
+        saveAs(blob, filename);
+        setExportMessage('Report downloaded.');
         return;
       }
 
       // Backend can fall back to markdown when PDF dependencies are unavailable.
-      // Show a readable preview tab instead of downloading a .md unexpectedly.
-      const markdown = await blob.text();
-      const fallbackHtml = `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Synthesis Preview</title>
-  <style>
-    body { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 2rem; color: #111827; background: #ffffff; }
-    h1 { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin-top: 0; }
-    p { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #374151; }
-    pre { white-space: pre-wrap; word-wrap: break-word; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; line-height: 1.45; }
-  </style>
-</head>
-<body>
-  <h1>Synthesis Preview</h1>
-  <p>PDF rendering is unavailable on the server right now, so this is the markdown preview.</p>
-  <pre>${escHtml(markdown)}</pre>
-</body>
-</html>`;
-      const previewBlob = new Blob([fallbackHtml], { type: 'text/html;charset=utf-8' });
-      openBlobInNewTab(previewBlob, 'synthesis-preview.html');
+      saveAs(blob, filename.toLowerCase().endsWith('.md') ? filename : 'synthesis-report.md');
+      setExportMessage('PDF rendering is unavailable on the server. Downloaded Markdown report instead.');
     } catch (err) {
-      console.error('PDF export preview failed:', err);
+      console.error('Report export failed:', err);
+      setExportMessage('Failed to export report.');
     } finally {
-      setOpeningPdfPreview(false);
+      setDownloadingReport(false);
     }
   }
 
   return (
     <>
-      {/* ── Export Synthesis ─────────────────────────── */}
       <div style={{
         borderTop: '1px solid var(--border)',
         paddingTop: '0.75rem',
@@ -1026,31 +975,29 @@ export default function ExportPanel({
       }}>
         <p className="text-xs font-semibold uppercase tracking-wider mb-2"
           style={{ color: 'var(--muted-foreground)' }}>
-          Export Synthesis
+          Export
         </p>
         <div className="flex flex-col gap-1.5">
           <LoadingButton
             variant="secondary"
             size="sm"
-            onClick={handleOpenJsonPreview}
-            loading={openingJsonPreview}
-            loadingText="Opening…"
-            className="w-full text-left justify-start gap-2 whitespace-nowrap"
-          >
-            <FileJson size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
-            Open JSON in new tab
-          </LoadingButton>
-          <LoadingButton
-            variant="secondary"
-            size="sm"
-            onClick={handleOpenPdfPreview}
-            loading={openingPdfPreview}
-            loadingText="Opening…"
+            onClick={handleDownloadReport}
+            loading={downloadingReport}
+            loadingText="Downloading…"
             className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileDown size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
-            Open PDF in new tab
+            Download Professional Report (PDF)
           </LoadingButton>
+
+          <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+            Designed for sharing with stakeholders. Structured JSON export is hidden from the main UI.
+          </p>
+          {exportMessage && (
+            <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+              {exportMessage}
+            </p>
+          )}
         </div>
       </div>
     </>

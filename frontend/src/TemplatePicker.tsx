@@ -121,7 +121,7 @@ export default function TemplatePicker({ onSelectTemplate, onStartBlank }: Templ
           Choose a template
         </h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', margin: 0 }}>
-          Start with a pre-built template or create a blank consultation from scratch.
+          Start from scratch or use a pre-built template.
         </p>
       </div>
 

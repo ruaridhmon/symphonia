@@ -2236,6 +2236,7 @@ def export_synthesis(
     form = db.query(FormModel).filter(FormModel.id == form_id).first()
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(form, user)
 
     rounds_list = (
         db.query(RoundModel)
@@ -2254,6 +2255,11 @@ def export_synthesis(
         safe_title = f"form-{form_id}"
 
     if format == "json":
+        if user.role != UserRole.PLATFORM_ADMIN.value:
+            raise HTTPException(
+                status_code=403,
+                detail="Structured JSON export is restricted to platform admins",
+            )
         payload = {
             "form_id": form.id,
             "title": form.title,

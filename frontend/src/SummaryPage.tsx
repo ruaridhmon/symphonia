@@ -8,7 +8,7 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
-import { ChartNoAxesColumn, ChevronDown, ChevronRight, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { getMe } from './api/auth';
@@ -144,6 +144,25 @@ function extractQuestionText(q: unknown): string {
 	return '';
 }
 
+function buildStructuredSummaryText(data: Record<string, any> | null): string {
+	if (!data) return '';
+	const parts: string[] = [];
+	if (data.narrative) parts.push(data.narrative);
+	for (const a of data.agreements || []) {
+		parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
+	}
+	for (const d of data.disagreements || []) {
+		parts.push(`Disagreement: ${d.topic}`);
+		for (const p of d.positions || []) {
+			parts.push(`  - ${p.position}: ${p.evidence}`);
+		}
+	}
+	for (const n of data.nuances || []) {
+		parts.push(`Nuance: ${n.claim} — ${n.context}`);
+	}
+	return parts.join('\n');
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SummaryPage() {
@@ -179,6 +198,7 @@ export default function SummaryPage() {
 	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
 	const [synthesisViewMode, setSynthesisViewMode] = useState<'view' | 'edit'>('view');
 	const [structuredSectionOpen, setStructuredSectionOpen] = useState(true);
+	const [aiToolsOpen, setAiToolsOpen] = useState(false);
 	const [selectedModel, setSelectedModel] = useState('anthropic/claude-opus-4-6');
 	const [isGenerating, setIsGenerating] = useState(false);
 
@@ -257,6 +277,11 @@ export default function SummaryPage() {
 		() => synthesisVersions.find(v => v.id === selectedVersionId) || null,
 		[synthesisVersions, selectedVersionId]
 	);
+	const audienceSourceText = useMemo(() => {
+		if (selectedVersion?.synthesis?.trim()) return selectedVersion.synthesis;
+		if (displayRound?.synthesis?.trim()) return displayRound.synthesis;
+		return buildStructuredSummaryText(structuredSynthesisData as Record<string, any> | null);
+	}, [selectedVersion, displayRound, structuredSynthesisData]);
 
 	// ─── Data loading ────────────────────────────────────────────────────────
 
@@ -682,6 +707,33 @@ export default function SummaryPage() {
 							</div>
 						)}
 
+						{/* Audience translation should follow the current synthesis view */}
+						{displayRound && audienceSourceText && (
+							<SectionErrorBoundary fallbackTitle="Failed to render audience translation">
+								<div className="card p-4">
+									<h2 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
+										<Globe size={20} style={{ color: 'var(--accent)' }} /> Audience Lens
+									</h2>
+									<p className="text-sm mb-3" style={{ color: 'var(--muted-foreground)' }}>
+										Reframe the current synthesis for a specific audience.
+									</p>
+									<AudienceTranslation
+										formId={formId}
+										roundId={displayRound.id}
+										synthesisText={audienceSourceText}
+									/>
+								</div>
+							</SectionErrorBoundary>
+						)}
+
+						{/* Next round questions should stay close to synthesis actions */}
+						<NextRoundQuestionsCard
+							questions={nextRoundQuestions}
+							onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
+							onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
+							onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
+						/>
+
 						{/* Structured synthesis data */}
 							{structuredSynthesisData && (
 								<SectionErrorBoundary fallbackTitle="Failed to render structured analysis">
@@ -703,32 +755,6 @@ export default function SummaryPage() {
 										</div>
 										{structuredSectionOpen && (
 											<div id="summary-structured-section">
-												{/* Audience Translation toggle */}
-												{displayRound && (
-													<div className="mb-4">
-														<AudienceTranslation
-															formId={formId}
-															roundId={displayRound.id}
-															synthesisText={(() => {
-																const parts: string[] = [];
-																if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
-																for (const a of structuredSynthesisData.agreements || []) {
-																	parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
-																}
-																for (const d of structuredSynthesisData.disagreements || []) {
-																	parts.push(`Disagreement: ${d.topic}`);
-																	for (const p of d.positions || []) {
-																		parts.push(`  - ${p.position}: ${p.evidence}`);
-																	}
-																}
-																for (const n of structuredSynthesisData.nuances || []) {
-																	parts.push(`Nuance: ${n.claim} — ${n.context}`);
-																}
-																return parts.join('\n');
-															})()}
-														/>
-													</div>
-												)}
 												<StructuredSynthesis
 													data={structuredSynthesisData}
 													convergenceScore={displayRound?.convergence_score ?? undefined}
@@ -741,37 +767,43 @@ export default function SummaryPage() {
 											</div>
 										)}
 									</div>
-								</SectionErrorBoundary>
-							)}
+									</SectionErrorBoundary>
+								)}
 
-						{/* AI Devil's Advocate — after structured analysis */}
-						{displayRound && structuredSynthesisData && (
-							<SectionErrorBoundary fallbackTitle="Failed to render AI counterpoints">
-								<DevilsAdvocate formId={formId} roundId={displayRound.id} />
-							</SectionErrorBoundary>
-						)}
-
-						{/* AI Probing Questions — surfaces hidden assumptions and deepens enquiry */}
+						{/* AI deliberation tools (collapsed by default) */}
 						{displayRound && (
-							<SectionErrorBoundary fallbackTitle="Failed to render AI probing questions">
-								<ProbeQuestionsPanel
-									formId={formId}
-									roundId={displayRound.id}
-									synthesisText={structuredSynthesisData ? (() => {
-										const parts: string[] = [];
-										if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
-										for (const a of structuredSynthesisData.agreements || []) {
-											parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
-										}
-										for (const d of structuredSynthesisData.disagreements || []) {
-											parts.push(`Disagreement: ${d.topic}`);
-										}
-										for (const n of structuredSynthesisData.nuances || []) {
-											parts.push(`Nuance: ${n.claim}`);
-										}
-										return parts.join('\n');
-									})() : ''}
-								/>
+							<SectionErrorBoundary fallbackTitle="Failed to render AI deliberation tools">
+								<div className="card p-4">
+									<button
+										type="button"
+										onClick={() => setAiToolsOpen(v => !v)}
+										className="w-full flex items-center justify-between text-left"
+										style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+										aria-expanded={aiToolsOpen}
+										aria-controls="summary-ai-tools"
+									>
+										<h2 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+											<Sparkles size={20} style={{ color: 'var(--accent)' }} /> AI Deliberation Tools
+										</h2>
+										{aiToolsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+									</button>
+									{aiToolsOpen && (
+										<div id="summary-ai-tools" className="mt-4 space-y-4">
+											{structuredSynthesisData && (
+												<SectionErrorBoundary fallbackTitle="Failed to render AI counterpoints">
+													<DevilsAdvocate formId={formId} roundId={displayRound.id} />
+												</SectionErrorBoundary>
+											)}
+											<SectionErrorBoundary fallbackTitle="Failed to render AI probing questions">
+												<ProbeQuestionsPanel
+													formId={formId}
+													roundId={displayRound.id}
+													synthesisText={audienceSourceText}
+												/>
+											</SectionErrorBoundary>
+										</div>
+									)}
+								</div>
 							</SectionErrorBoundary>
 						)}
 
@@ -837,13 +869,6 @@ export default function SummaryPage() {
 							</SectionErrorBoundary>
 						)}
 
-						{/* Next round questions */}
-						<NextRoundQuestionsCard
-							questions={nextRoundQuestions}
-							onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
-							onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
-							onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
-						/>
 					</div>
 
 					{/* ── Mobile sidebar backdrop ── */}

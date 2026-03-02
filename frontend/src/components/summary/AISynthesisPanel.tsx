@@ -59,21 +59,21 @@ export default function AISynthesisPanel({
           >
             {models.map(model => (
               <option key={model} value={model}>
-                {model.split('/').pop()}
+                {model}
               </option>
             ))}
           </select>
         </div>
 
         <LoadingButton
-          variant="purple"
+          variant="accent"
           size="sm"
           loading={isGenerating}
           loadingText="Generating…"
           onClick={onGenerate}
           className="w-full font-semibold"
         >
-          Generate Summary
+          Generate AI Synthesis
         </LoadingButton>
       </div>
     </div>
