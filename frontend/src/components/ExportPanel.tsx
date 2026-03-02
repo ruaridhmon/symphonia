@@ -939,20 +939,82 @@ function exportAsGovUkReport(
 export default function ExportPanel({
   formId,
 }: ExportPanelProps) {
-  const [exportingBackendJson, setExportingBackendJson] = useState(false);
-  const [exportingBackendPdf, setExportingBackendPdf] = useState(false);
+  const [openingJsonPreview, setOpeningJsonPreview] = useState(false);
+  const [openingPdfPreview, setOpeningPdfPreview] = useState(false);
 
-  const handleBackendExport = async (format: 'json' | 'pdf', setLoading: (v: boolean) => void) => {
-    setLoading(true);
-    try {
-      const { blob, filename } = await exportSynthesisFromBackend(formId, format);
-      saveAs(blob, filename);
-    } catch (err) {
-      console.error('Backend export failed:', err);
-    } finally {
-      setLoading(false);
+  function openBlobInNewTab(blob: Blob, filenameForFallback: string): boolean {
+    const url = URL.createObjectURL(blob);
+    const popup = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!popup) {
+      URL.revokeObjectURL(url);
+      saveAs(blob, filenameForFallback);
+      return false;
     }
-  };
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    return true;
+  }
+
+  async function handleOpenJsonPreview() {
+    setOpeningJsonPreview(true);
+    try {
+      const { blob, filename } = await exportSynthesisFromBackend(formId, 'json');
+      const raw = await blob.text();
+      let pretty = raw;
+      try {
+        pretty = `${JSON.stringify(JSON.parse(raw), null, 2)}\n`;
+      } catch {
+        // Keep raw text if backend response is already formatted/non-JSON.
+      }
+      const previewBlob = new Blob([pretty], { type: 'application/json;charset=utf-8' });
+      openBlobInNewTab(previewBlob, filename);
+    } catch (err) {
+      console.error('JSON export preview failed:', err);
+    } finally {
+      setOpeningJsonPreview(false);
+    }
+  }
+
+  async function handleOpenPdfPreview() {
+    setOpeningPdfPreview(true);
+    try {
+      const { blob, filename } = await exportSynthesisFromBackend(formId, 'pdf');
+      const isPdf = blob.type.includes('application/pdf') || filename.toLowerCase().endsWith('.pdf');
+
+      if (isPdf) {
+        openBlobInNewTab(blob, filename);
+        return;
+      }
+
+      // Backend can fall back to markdown when PDF dependencies are unavailable.
+      // Show a readable preview tab instead of downloading a .md unexpectedly.
+      const markdown = await blob.text();
+      const fallbackHtml = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Synthesis Preview</title>
+  <style>
+    body { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 2rem; color: #111827; background: #ffffff; }
+    h1 { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin-top: 0; }
+    p { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: #374151; }
+    pre { white-space: pre-wrap; word-wrap: break-word; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <h1>Synthesis Preview</h1>
+  <p>PDF rendering is unavailable on the server right now, so this is the markdown preview.</p>
+  <pre>${escHtml(markdown)}</pre>
+</body>
+</html>`;
+      const previewBlob = new Blob([fallbackHtml], { type: 'text/html;charset=utf-8' });
+      openBlobInNewTab(previewBlob, 'synthesis-preview.html');
+    } catch (err) {
+      console.error('PDF export preview failed:', err);
+    } finally {
+      setOpeningPdfPreview(false);
+    }
+  }
 
   return (
     <>
@@ -970,24 +1032,24 @@ export default function ExportPanel({
           <LoadingButton
             variant="secondary"
             size="sm"
-            onClick={() => handleBackendExport('json', setExportingBackendJson)}
-            loading={exportingBackendJson}
-            loadingText="Downloading…"
+            onClick={handleOpenJsonPreview}
+            loading={openingJsonPreview}
+            loadingText="Opening…"
             className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileJson size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
-            Download as JSON
+            Open JSON in new tab
           </LoadingButton>
           <LoadingButton
             variant="secondary"
             size="sm"
-            onClick={() => handleBackendExport('pdf', setExportingBackendPdf)}
-            loading={exportingBackendPdf}
-            loadingText="Downloading…"
+            onClick={handleOpenPdfPreview}
+            loading={openingPdfPreview}
+            loadingText="Opening…"
             className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileDown size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
-            Download as PDF
+            Open PDF in new tab
           </LoadingButton>
         </div>
       </div>

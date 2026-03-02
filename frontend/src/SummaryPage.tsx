@@ -178,7 +178,6 @@ export default function SummaryPage() {
 	const [synthesisTotalSteps] = useState(5);
 	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
 	const [synthesisViewMode, setSynthesisViewMode] = useState<'view' | 'edit'>('view');
-	const [synthesisSectionOpen, setSynthesisSectionOpen] = useState(true);
 	const [structuredSectionOpen, setStructuredSectionOpen] = useState(true);
 	const [selectedModel, setSelectedModel] = useState('anthropic/claude-opus-4-6');
 	const [isGenerating, setIsGenerating] = useState(false);
@@ -666,42 +665,20 @@ export default function SummaryPage() {
 							/>
 						)}
 
-						{/* Synthesis */}
-						<div className="card p-3 sm:p-4">
-							<button
-								type="button"
-								onClick={() => setSynthesisSectionOpen(v => !v)}
-								className="w-full flex items-center justify-between text-left"
-								style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-								aria-expanded={synthesisSectionOpen}
-								aria-controls="summary-synthesis-section"
-							>
-								<h2 className="text-base font-semibold text-foreground m-0">
-									{selectedRound && !selectedRound.is_active
-										? t('rounds.synthesisRound', { number: selectedRound.round_number })
-										: `Synthesis for Round ${activeRound?.round_number || ''}`}
-								</h2>
-								{synthesisSectionOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-							</button>
-						</div>
-						{synthesisSectionOpen && (
-							<div id="summary-synthesis-section">
-								{/* Synthesis editor (active round only) */}
-								{(!selectedRound || selectedRound.is_active) && (
-									<SynthesisEditorCard
-										activeRound={activeRound}
-										synthesisViewMode={synthesisViewMode}
-										onSetViewMode={setSynthesisViewMode}
-										editor={editor}
-									/>
-								)}
+						{/* Synthesis editor (active round only) */}
+						{(!selectedRound || selectedRound.is_active) && (
+							<SynthesisEditorCard
+								activeRound={activeRound}
+								synthesisViewMode={synthesisViewMode}
+								onSetViewMode={setSynthesisViewMode}
+								editor={editor}
+							/>
+						)}
 
-								{/* Read-only synthesis for non-active rounds */}
-								{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
-									<div className="card p-4">
-										<MarkdownRenderer content={selectedRound.synthesis} />
-									</div>
-								)}
+						{/* Read-only synthesis for non-active rounds */}
+						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
+							<div className="card p-4">
+								<MarkdownRenderer content={selectedRound.synthesis} />
 							</div>
 						)}
 
