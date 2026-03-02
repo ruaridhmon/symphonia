@@ -299,7 +299,7 @@ export default function AdminDashboard() {
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
                     fill="currentColor"
-                    className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
                     style={{
                       width: '1rem',
                       height: '1rem',
@@ -317,7 +317,7 @@ export default function AdminDashboard() {
                     placeholder={t('adminDashboard.searchPlaceholder')}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    className="w-full text-sm pl-9 pr-3"
+                    className="w-full text-sm pl-11 pr-3"
                     aria-label={t('adminDashboard.searchLabel')}
                     style={{
                       height: '2.5rem',
