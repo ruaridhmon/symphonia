@@ -199,8 +199,8 @@ function getStoredTheme(): ThemeId {
   } catch {
     // localStorage may be unavailable (SSR, private browsing, etc.)
   }
-  // No stored preference — respect OS dark/light mode
-  return getSystemTheme();
+  // No stored preference — always default to light theme
+  return DEFAULT_THEME;
 }
 
 function applyTheme(themeId: ThemeId) {
