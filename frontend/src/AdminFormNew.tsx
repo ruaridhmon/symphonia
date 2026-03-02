@@ -857,7 +857,7 @@ export default function AdminFormNew() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/create_form`, {
+      const res = await fetch(`${API_BASE_URL}/forms/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
