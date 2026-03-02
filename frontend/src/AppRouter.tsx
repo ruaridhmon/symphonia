@@ -1,27 +1,28 @@
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { PageLayout, AuthLayout } from './layouts';
 import PrivateRoute from './PrivateRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import RouteLoadingFallback from './components/RouteLoadingFallback';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
 /* ─── Lazy-loaded route components ─────────────────────────────────── */
-const Dashboard    = lazy(() => import('./Dashboard'));
-const SummaryPage  = lazy(() => import('./SummaryPage'));
-const WaitingPage  = lazy(() => import('./WaitingPage'));
-const ResultPage   = lazy(() => import('./ResultPage'));
-const ThankYouPage = lazy(() => import('./ThankYouPage'));
-const FormEditor   = lazy(() => import('./FormEditor'));
-const FormPage     = lazy(() => import('./FormPage'));
-const Login        = lazy(() => import('./Login'));
-const Register       = lazy(() => import('./Register'));
-const ForgotPassword = lazy(() => import('./ForgotPassword'));
-const ResetPassword  = lazy(() => import('./ResetPassword'));
-const NotFoundPage  = lazy(() => import('./NotFoundPage'));
-const AdminFormNew   = lazy(() => import('./AdminFormNew'));
-const AdminSettings  = lazy(() => import('./AdminSettings'));
-const AdminUsers     = lazy(() => import('./AdminUsers'));
-const JoinPage       = lazy(() => import('./JoinPage'));
+const Dashboard = lazyWithRetry(() => import('./Dashboard'));
+const SummaryPage = lazyWithRetry(() => import('./SummaryPage'));
+const WaitingPage = lazyWithRetry(() => import('./WaitingPage'));
+const ResultPage = lazyWithRetry(() => import('./ResultPage'));
+const ThankYouPage = lazyWithRetry(() => import('./ThankYouPage'));
+const FormEditor = lazyWithRetry(() => import('./FormEditor'));
+const FormPage = lazyWithRetry(() => import('./FormPage'));
+const Login = lazyWithRetry(() => import('./Login'));
+const Register = lazyWithRetry(() => import('./Register'));
+const ForgotPassword = lazyWithRetry(() => import('./ForgotPassword'));
+const ResetPassword = lazyWithRetry(() => import('./ResetPassword'));
+const NotFoundPage = lazyWithRetry(() => import('./NotFoundPage'));
+const AdminFormNew = lazyWithRetry(() => import('./AdminFormNew'));
+const AdminSettings = lazyWithRetry(() => import('./AdminSettings'));
+const AdminUsers = lazyWithRetry(() => import('./AdminUsers'));
+const JoinPage = lazyWithRetry(() => import('./JoinPage'));
 
 /**
  * Application routes organised by layout shell.
