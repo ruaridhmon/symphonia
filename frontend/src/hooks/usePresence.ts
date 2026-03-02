@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { getWebSocketUrl } from '../api/ws';
 
 export interface Viewer {
   email: string;
@@ -34,9 +35,7 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
   const connect = useCallback(() => {
     if (!formId || !userEmail) return;
 
-    // Derive WebSocket URL from current page location
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const wsUrl = getWebSocketUrl('/ws');
 
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
