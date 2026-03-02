@@ -46,7 +46,6 @@ import {
 	SynthesisVersionPanel,
 	NextRoundQuestionsCard,
 	ActionsCard,
-	ResponsesModal,
 	ResponsesAccordion,
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
@@ -655,15 +654,17 @@ export default function SummaryPage() {
 							</SectionErrorBoundary>
 						)}
 
-						{/* Inline responses accordion — toggle per round */}
-						<ResponsesAccordion
-							structuredRounds={structuredRounds}
-							rounds={rounds}
-							formQuestions={form.questions || []}
-							formId={formId}
-							token={token}
-							onResponseUpdated={handleResponseUpdated}
-						/>
+						{/* Inline responses accordion — shown/hidden by controls toggle */}
+						{responsesOpen && (
+							<ResponsesAccordion
+								structuredRounds={structuredRounds}
+								rounds={rounds}
+								formQuestions={form.questions || []}
+								formId={formId}
+								token={token}
+								onResponseUpdated={handleResponseUpdated}
+							/>
+						)}
 
 						{/* Synthesis */}
 						<div className="card p-3 sm:p-4">
@@ -979,16 +980,6 @@ export default function SummaryPage() {
 					</aside>
 			</main>
 
-			{/* Responses modal */}
-			<ResponsesModal
-				open={responsesOpen}
-				onClose={() => setResponsesOpen(false)}
-				structuredRounds={structuredRounds}
-				rounds={rounds}
-				formQuestions={form.questions || []}
-				token={token}
-				onResponseUpdated={handleResponseUpdated}
-			/>
-		</div>
-	);
-}
+			</div>
+		);
+	}
