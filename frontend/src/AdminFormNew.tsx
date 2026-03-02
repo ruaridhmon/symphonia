@@ -1070,72 +1070,6 @@ export default function AdminFormNew() {
             />
           </div>
 
-          {/* ── Join Code (Worker A) ──────────────────────────────── */}
-          <div className="space-y-1.5 mb-6">
-            <label
-              htmlFor="form-join-code"
-              className="block text-sm font-medium"
-              style={{ color: 'var(--foreground)' }}
-            >
-              Join code
-            </label>
-            <div className="flex gap-2 items-center">
-              <input
-                id="form-join-code"
-                type="text"
-                value={joinCode}
-                onChange={e => setJoinCode(e.target.value)}
-                className="rounded-lg px-3 py-2 text-base font-mono tracking-widest"
-                style={{
-                  border: '1px solid var(--input)',
-                  backgroundColor: 'var(--background)',
-                  color: 'var(--foreground)',
-                  fontWeight: 600,
-                  outline: 'none',
-                  width: '8rem',
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.borderColor = 'var(--accent)';
-                  e.currentTarget.style.boxShadow =
-                    '0 0 0 2px rgba(37, 99, 235, 0.2)';
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.borderColor = 'var(--input)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setJoinCode(generateJoinCode())}
-                className="inline-flex items-center justify-center rounded-lg p-2 transition-colors"
-                style={{
-                  border: '1px solid var(--input)',
-                  backgroundColor: 'var(--background)',
-                  color: 'var(--muted-foreground)',
-                  cursor: 'pointer',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'var(--accent)';
-                  e.currentTarget.style.color = 'var(--accent)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'var(--input)';
-                  e.currentTarget.style.color = 'var(--muted-foreground)';
-                }}
-                title="Regenerate join code"
-                aria-label="Regenerate join code"
-              >
-                <RefreshCw size={16} aria-hidden="true" />
-              </button>
-            </div>
-            <p
-              className="text-xs mt-1"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              Share this code with participants so they can join.
-            </p>
-          </div>
-
           {/* ── Opening Questions (Workers A + B) ─────────────────── */}
           <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
             <legend
@@ -1333,6 +1267,7 @@ export default function AdminFormNew() {
                 fontWeight: 600,
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
+                marginTop: 6,
                 marginBottom: 4,
               }}
               onMouseEnter={e => {
@@ -1358,6 +1293,96 @@ export default function AdminFormNew() {
             onReplaceQuestion={handleReplaceQuestion}
             token={token}
           />
+
+          {/* ── Add questions (primary drafting action) ───────────────── */}
+          <div className="mt-4 mb-3">
+            <button
+              type="button"
+              onClick={() => setQuestions([...questions, ''])}
+              className="text-sm px-3 py-1.5 rounded-lg font-medium"
+              style={{
+                color: 'var(--accent)',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e =>
+                (e.currentTarget.style.backgroundColor =
+                  'color-mix(in srgb, var(--accent) 8%, transparent)')
+              }
+              onMouseLeave={e =>
+                (e.currentTarget.style.backgroundColor = 'transparent')
+              }
+            >
+              + Add question
+            </button>
+          </div>
+
+          {/* ── Join Code (moved lower for clearer flow) ─────────────── */}
+          <div className="space-y-1.5 mb-6">
+            <label
+              htmlFor="form-join-code"
+              className="block text-sm font-medium"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Join code
+            </label>
+            <div className="flex gap-2 items-center">
+              <input
+                id="form-join-code"
+                type="text"
+                value={joinCode}
+                onChange={e => setJoinCode(e.target.value)}
+                className="rounded-lg px-3 py-2 text-base font-mono tracking-widest"
+                style={{
+                  border: '1px solid var(--input)',
+                  backgroundColor: 'var(--background)',
+                  color: 'var(--foreground)',
+                  fontWeight: 600,
+                  outline: 'none',
+                  width: '8rem',
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = 'var(--accent)';
+                  e.currentTarget.style.boxShadow =
+                    '0 0 0 2px rgba(37, 99, 235, 0.2)';
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = 'var(--input)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setJoinCode(generateJoinCode())}
+                className="inline-flex items-center justify-center rounded-lg p-2 transition-colors"
+                style={{
+                  border: '1px solid var(--input)',
+                  backgroundColor: 'var(--background)',
+                  color: 'var(--muted-foreground)',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'var(--accent)';
+                  e.currentTarget.style.color = 'var(--accent)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'var(--input)';
+                  e.currentTarget.style.color = 'var(--muted-foreground)';
+                }}
+                title="Regenerate join code"
+                aria-label="Regenerate join code"
+              >
+                <RefreshCw size={16} aria-hidden="true" />
+              </button>
+            </div>
+            <p
+              className="text-xs mt-1"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              Share this code with participants so they can join.
+            </p>
+          </div>
 
           {/* ── Advanced Settings (Worker C) ───────────────────────── */}
           <div
@@ -1514,27 +1539,7 @@ export default function AdminFormNew() {
           {/* ── End Advanced Settings ─────────────────────────────── */}
 
           {/* ── Actions ───────────────────────────────────────────── */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 mt-6">
-            <button
-              type="button"
-              onClick={() => setQuestions([...questions, ''])}
-              className="text-sm px-3 py-1.5 rounded-lg font-medium"
-              style={{
-                color: 'var(--accent)',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={e =>
-                (e.currentTarget.style.backgroundColor =
-                  'color-mix(in srgb, var(--accent) 8%, transparent)')
-              }
-              onMouseLeave={e =>
-                (e.currentTarget.style.backgroundColor = 'transparent')
-              }
-            >
-              + Add question
-            </button>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-end gap-3 mt-6">
             <div className="flex gap-3 self-end sm:self-auto">
               <LoadingButton
                 variant="ghost"
