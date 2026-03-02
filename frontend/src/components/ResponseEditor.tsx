@@ -3,12 +3,13 @@ import { Pencil, Save, AlertTriangle } from 'lucide-react';
 import { ApiError } from '../api/client';
 import { updateResponse as apiUpdateResponse, forceUpdateResponse } from '../api/responses';
 import { extractQuestionText } from '../utils/questions';
+import { formatAnswerForDisplay, isStructuredAnswer } from '../utils/answers';
 
 // ─── Types ───────────────────────────────────────────────
 
 interface ResponseData {
   id: number;
-  answers: Record<string, string>;
+  answers: Record<string, unknown>;
   email: string | null;
   timestamp: string;
   version: number;
@@ -43,6 +44,7 @@ export default function ResponseEditor({
   const [currentVersion, setCurrentVersion] = useState(response.version);
   const [currentAnswers, setCurrentAnswers] = useState(response.answers);
   const textareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+  const hasStructuredAnswers = Object.values(currentAnswers).some(isStructuredAnswer);
 
   // Sync when prop changes
   useEffect(() => {
@@ -51,16 +53,17 @@ export default function ResponseEditor({
   }, [response.version, response.answers]);
 
   const startEditing = useCallback(() => {
+    if (hasStructuredAnswers) return;
     // Deep copy current answers as the editing baseline
     const copy: Record<string, string> = {};
     for (const [k, v] of Object.entries(currentAnswers)) {
-      copy[k] = String(v ?? '');
+      copy[k] = formatAnswerForDisplay(v);
     }
     setEditedAnswers(copy);
     setIsEditing(true);
     setError(null);
     setConflict(null);
-  }, [currentAnswers]);
+  }, [currentAnswers, hasStructuredAnswers]);
 
   const cancelEditing = useCallback(() => {
     setIsEditing(false);
@@ -82,13 +85,13 @@ export default function ResponseEditor({
         const apiFn = force ? forceUpdateResponse : apiUpdateResponse;
         const updated = await apiFn(response.id, editedAnswers, currentVersion);
         setCurrentVersion(updated.version);
-        setCurrentAnswers(updated.answers as Record<string, string>);
+        setCurrentAnswers(updated.answers as Record<string, unknown>);
         setIsEditing(false);
         setEditedAnswers({});
         setConflict(null);
         onUpdated?.({
           ...response,
-          answers: updated.answers as Record<string, string>,
+          answers: updated.answers as Record<string, unknown>,
           version: updated.version,
         });
       } catch (e: unknown) {
@@ -152,17 +155,19 @@ export default function ResponseEditor({
           >
             {response.email || 'Anonymous'}
           </span>
-          <button
-            onClick={startEditing}
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded"
-            style={{
-              backgroundColor: 'var(--accent)',
-              color: 'var(--accent-foreground)',
-            }}
-            title="Edit response"
-          >
-            <Pencil size={12} className="inline mr-1" /> Edit
-          </button>
+          {!hasStructuredAnswers && (
+            <button
+              onClick={startEditing}
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded"
+              style={{
+                backgroundColor: 'var(--accent)',
+                color: 'var(--accent-foreground)',
+              }}
+              title="Edit response"
+            >
+              <Pencil size={12} className="inline mr-1" /> Edit
+            </button>
+          )}
         </div>
 
         {questions.map((q, i) => {
@@ -179,9 +184,9 @@ export default function ResponseEditor({
               </div>
               <div
                 className="text-sm leading-relaxed"
-                style={{ color: 'var(--foreground)' }}
+                style={{ color: 'var(--foreground)', whiteSpace: 'pre-wrap' }}
               >
-                {String(answer)}
+                {formatAnswerForDisplay(answer)}
               </div>
             </div>
           );
@@ -334,7 +339,7 @@ export default function ResponseEditor({
               {questions.map((q, i) => {
                 const key = `q${i + 1}`;
                 const local = conflict.localAnswers[key] ?? '';
-                const original = String(currentAnswers[key] ?? '');
+                const original = formatAnswerForDisplay(currentAnswers[key]);
                 if (local === original) return null;
                 return (
                   <div key={key}>

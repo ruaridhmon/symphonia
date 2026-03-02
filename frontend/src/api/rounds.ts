@@ -52,7 +52,7 @@ export function nextRound(formId: number, config?: RoundConfig) {
 
 export interface ResponseDetail {
   id: number;
-  answers: Record<string, string>;
+  answers: Record<string, unknown>;
   email: string | null;
   timestamp: string;
   version: number;

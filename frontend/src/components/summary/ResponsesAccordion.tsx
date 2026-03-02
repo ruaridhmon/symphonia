@@ -14,7 +14,7 @@ type Props = {
   token: string;
   onResponseUpdated: (
     roundId: number,
-    updated: { id: number; answers: Record<string, string>; version: number },
+    updated: { id: number; answers: Record<string, unknown>; version: number },
   ) => void;
 };
 

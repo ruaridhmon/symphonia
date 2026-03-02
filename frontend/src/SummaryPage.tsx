@@ -538,7 +538,7 @@ export default function SummaryPage() {
 		}
 	}
 
-	function handleResponseUpdated(roundId: number, updated: { id: number; answers: Record<string, string>; version: number }) {
+	function handleResponseUpdated(roundId: number, updated: { id: number; answers: Record<string, unknown>; version: number }) {
 		setStructuredRounds(prev =>
 			prev.map(r =>
 				r.id === roundId

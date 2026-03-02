@@ -11,7 +11,7 @@ type Props = {
   rounds: Round[];
   formQuestions: (string | Record<string, unknown>)[];
   token: string;
-  onResponseUpdated: (roundId: number, updated: { id: number; answers: Record<string, string>; version: number }) => void;
+  onResponseUpdated: (roundId: number, updated: { id: number; answers: Record<string, unknown>; version: number }) => void;
 };
 
 export default function ResponsesModal({
