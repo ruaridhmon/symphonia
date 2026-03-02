@@ -256,9 +256,9 @@ export default function StructuredInput({
               aria-label={`Confidence level: ${value.confidence} out of 10`}
             />
             <div style={styles.sliderLabels}>
-              <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>1</span>
-              <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>5</span>
-              <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>10</span>
+              <span style={styles.sliderLabelStart}>1</span>
+              <span style={styles.sliderLabelCenter}>5</span>
+              <span style={styles.sliderLabelEnd}>10</span>
             </div>
           </div>
           <div style={styles.confidenceBadge}>
@@ -465,9 +465,29 @@ const styles: Record<string, React.CSSProperties> = {
     height: '6px',
   },
   sliderLabels: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '0 2px',
+    position: 'relative',
+    height: '0.875rem',
+    marginTop: '0.125rem',
+  },
+  sliderLabelStart: {
+    position: 'absolute',
+    left: 0,
+    fontSize: '0.6875rem',
+    color: 'var(--muted-foreground)',
+  },
+  sliderLabelCenter: {
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    fontSize: '0.6875rem',
+    color: 'var(--muted-foreground)',
+  },
+  sliderLabelEnd: {
+    position: 'absolute',
+    left: '100%',
+    transform: 'translateX(-100%)',
+    fontSize: '0.6875rem',
+    color: 'var(--muted-foreground)',
   },
   confidenceBadge: {
     display: 'flex',
