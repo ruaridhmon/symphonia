@@ -891,7 +891,7 @@ export default function AdminFormNew() {
         {/* Back button */}
         <button
           type="button"
-          onClick={() => showTemplatePicker ? navigate('/admin') : handleBackToTemplates()}
+          onClick={() => showTemplatePicker ? navigate('/') : handleBackToTemplates()}
           className="inline-flex items-center gap-1.5 text-sm mb-6 transition-colors"
           style={{
             color: 'var(--muted-foreground)',
@@ -1544,7 +1544,7 @@ export default function AdminFormNew() {
               <LoadingButton
                 variant="ghost"
                 size="md"
-                onClick={() => navigate('/admin')}
+                onClick={() => navigate('/')}
               >
                 Cancel
               </LoadingButton>
