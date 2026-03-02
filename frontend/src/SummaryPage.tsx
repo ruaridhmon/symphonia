@@ -8,7 +8,7 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
-import { ChartNoAxesColumn, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { getMe } from './api/auth';
@@ -44,7 +44,6 @@ import {
 	SynthesisEditorCard,
 	AISynthesisPanel,
 	SynthesisVersionPanel,
-	SelectedVersionContent,
 	NextRoundQuestionsCard,
 	ActionsCard,
 	ResponsesModal,
@@ -180,6 +179,8 @@ export default function SummaryPage() {
 	const [synthesisTotalSteps] = useState(5);
 	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
 	const [synthesisViewMode, setSynthesisViewMode] = useState<'view' | 'edit'>('view');
+	const [synthesisSectionOpen, setSynthesisSectionOpen] = useState(true);
+	const [structuredSectionOpen, setStructuredSectionOpen] = useState(true);
 	const [selectedModel, setSelectedModel] = useState('anthropic/claude-opus-4-6');
 	const [isGenerating, setIsGenerating] = useState(false);
 
@@ -664,73 +665,106 @@ export default function SummaryPage() {
 							onResponseUpdated={handleResponseUpdated}
 						/>
 
-						{/* Synthesis editor (active round only) */}
-						{(!selectedRound || selectedRound.is_active) && (
-							<SynthesisEditorCard
-								activeRound={activeRound}
-								synthesisViewMode={synthesisViewMode}
-								onSetViewMode={setSynthesisViewMode}
-								editor={editor}
-							/>
-						)}
-
-						{/* Read-only synthesis for non-active rounds */}
-						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
-							<div className="card p-4">
-								<h2 className="text-base font-semibold mb-2 text-foreground">
-									{t('rounds.synthesisRound', { number: selectedRound.round_number })}
+						{/* Synthesis */}
+						<div className="card p-3 sm:p-4">
+							<button
+								type="button"
+								onClick={() => setSynthesisSectionOpen(v => !v)}
+								className="w-full flex items-center justify-between text-left"
+								style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+								aria-expanded={synthesisSectionOpen}
+								aria-controls="summary-synthesis-section"
+							>
+								<h2 className="text-base font-semibold text-foreground m-0">
+									{selectedRound && !selectedRound.is_active
+										? t('rounds.synthesisRound', { number: selectedRound.round_number })
+										: `Synthesis for Round ${activeRound?.round_number || ''}`}
 								</h2>
-								<MarkdownRenderer content={selectedRound.synthesis} />
+								{synthesisSectionOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+							</button>
+						</div>
+						{synthesisSectionOpen && (
+							<div id="summary-synthesis-section">
+								{/* Synthesis editor (active round only) */}
+								{(!selectedRound || selectedRound.is_active) && (
+									<SynthesisEditorCard
+										activeRound={activeRound}
+										synthesisViewMode={synthesisViewMode}
+										onSetViewMode={setSynthesisViewMode}
+										editor={editor}
+									/>
+								)}
+
+								{/* Read-only synthesis for non-active rounds */}
+								{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
+									<div className="card p-4">
+										<MarkdownRenderer content={selectedRound.synthesis} />
+									</div>
+								)}
 							</div>
 						)}
 
 						{/* Structured synthesis data */}
-						{structuredSynthesisData && (
-							<SectionErrorBoundary fallbackTitle="Failed to render structured analysis">
-								<div className="card p-4">
-									<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
-										<h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-											<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> {t('summary.structuredAnalysis')}
-										</h2>
-									</div>
-									{/* Audience Translation toggle */}
-									{displayRound && (
-										<div className="mb-4">
-											<AudienceTranslation
-												formId={formId}
-												roundId={displayRound.id}
-												synthesisText={(() => {
-													const parts: string[] = [];
-													if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
-													for (const a of structuredSynthesisData.agreements || []) {
-														parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
-													}
-													for (const d of structuredSynthesisData.disagreements || []) {
-														parts.push(`Disagreement: ${d.topic}`);
-														for (const p of d.positions || []) {
-															parts.push(`  - ${p.position}: ${p.evidence}`);
-														}
-													}
-													for (const n of structuredSynthesisData.nuances || []) {
-														parts.push(`Nuance: ${n.claim} — ${n.context}`);
-													}
-													return parts.join('\n');
-												})()}
-											/>
+							{structuredSynthesisData && (
+								<SectionErrorBoundary fallbackTitle="Failed to render structured analysis">
+									<div className="card p-4">
+										<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
+											<button
+												type="button"
+												onClick={() => setStructuredSectionOpen(v => !v)}
+												className="w-full flex items-center justify-between text-left"
+												style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+												aria-expanded={structuredSectionOpen}
+												aria-controls="summary-structured-section"
+											>
+												<h2 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+													<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> {t('summary.structuredAnalysis')}
+												</h2>
+												{structuredSectionOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+											</button>
 										</div>
-									)}
-									<StructuredSynthesis
-										data={structuredSynthesisData}
-										convergenceScore={displayRound?.convergence_score ?? undefined}
-										expertLabels={resolvedExpertLabels}
-										formId={formId}
-										roundId={displayRound?.id}
-										token={token}
-										currentUserEmail={email}
-									/>
-								</div>
-							</SectionErrorBoundary>
-						)}
+										{structuredSectionOpen && (
+											<div id="summary-structured-section">
+												{/* Audience Translation toggle */}
+												{displayRound && (
+													<div className="mb-4">
+														<AudienceTranslation
+															formId={formId}
+															roundId={displayRound.id}
+															synthesisText={(() => {
+																const parts: string[] = [];
+																if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
+																for (const a of structuredSynthesisData.agreements || []) {
+																	parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
+																}
+																for (const d of structuredSynthesisData.disagreements || []) {
+																	parts.push(`Disagreement: ${d.topic}`);
+																	for (const p of d.positions || []) {
+																		parts.push(`  - ${p.position}: ${p.evidence}`);
+																	}
+																}
+																for (const n of structuredSynthesisData.nuances || []) {
+																	parts.push(`Nuance: ${n.claim} — ${n.context}`);
+																}
+																return parts.join('\n');
+															})()}
+														/>
+													</div>
+												)}
+												<StructuredSynthesis
+													data={structuredSynthesisData}
+													convergenceScore={displayRound?.convergence_score ?? undefined}
+													expertLabels={resolvedExpertLabels}
+													formId={formId}
+													roundId={displayRound?.id}
+													token={token}
+													currentUserEmail={email}
+												/>
+											</div>
+										)}
+									</div>
+								</SectionErrorBoundary>
+							)}
 
 						{/* AI Devil's Advocate — after structured analysis */}
 						{displayRound && structuredSynthesisData && (
@@ -794,18 +828,6 @@ export default function SummaryPage() {
 								</div>
 							</SectionErrorBoundary>
 						)}
-
-						{/* Selected version content */}
-						<SectionErrorBoundary fallbackTitle="Failed to render version content">
-							<SelectedVersionContent
-								selectedVersion={selectedVersion}
-								displayRound={displayRound}
-								resolvedExpertLabels={resolvedExpertLabels}
-								formId={formId}
-								token={token}
-								currentUserEmail={email}
-							/>
-						</SectionErrorBoundary>
 
 						{/* Version comparison (side-by-side) */}
 						{showVersionCompare && synthesisVersions.length >= 2 && (
@@ -905,19 +927,15 @@ export default function SummaryPage() {
 							</span>
 						</div>
 
-						<ActionsCard
-							responsesOpen={responsesOpen}
-							onToggleResponses={viewAllResponses}
-							onDownloadResponses={downloadResponses}
-							onSaveSynthesis={saveSynthesis}
-							onStartNextRound={startNextRound}
-							loading={loading}
-							formTitle={form.title}
-							formId={formId}
-							rounds={rounds}
-							structuredSynthesisData={structuredSynthesisData}
-							expertLabels={resolvedExpertLabels}
-						/>
+							<ActionsCard
+								responsesOpen={responsesOpen}
+								onToggleResponses={viewAllResponses}
+								onDownloadResponses={downloadResponses}
+								onSaveSynthesis={saveSynthesis}
+								onStartNextRound={startNextRound}
+								loading={loading}
+								formId={formId}
+							/>
 
 						<AISynthesisPanel
 							synthesisMode={synthesisMode}

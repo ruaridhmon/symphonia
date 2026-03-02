@@ -1,8 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Eye, EyeOff, FileDown, Save, ArrowRight } from 'lucide-react';
 import { LoadingButton, ExportPanel } from '../index';
-import type { Round } from '../../types/summary';
-import type { SynthesisData } from '../../types/synthesis';
 
 type Props = {
   responsesOpen: boolean;
@@ -11,11 +9,7 @@ type Props = {
   onSaveSynthesis: () => void;
   onStartNextRound: () => void;
   loading: boolean;
-  formTitle: string;
   formId: number;
-  rounds: Round[];
-  structuredSynthesisData: SynthesisData | null;
-  expertLabels: Record<number, string>;
 };
 
 export default function ActionsCard({
@@ -25,11 +19,7 @@ export default function ActionsCard({
   onSaveSynthesis,
   onStartNextRound,
   loading,
-  formTitle,
   formId,
-  rounds,
-  structuredSynthesisData,
-  expertLabels,
 }: Props) {
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -101,13 +91,7 @@ export default function ActionsCard({
 
       {/* Export panel — full width below icons */}
       <div className="mt-1.5">
-        <ExportPanel
-          formTitle={formTitle}
-          formId={formId}
-          rounds={rounds}
-          structuredSynthesisData={structuredSynthesisData}
-          expertLabels={expertLabels}
-        />
+        <ExportPanel formId={formId} />
       </div>
     </div>
   );
