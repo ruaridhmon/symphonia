@@ -741,16 +741,6 @@ export default function SummaryPage() {
 
 				{/* Main content — full width */}
 				<div className="space-y-4 sm:space-y-6">
-						{/* Non-active round card */}
-						{selectedRound && !selectedRound.is_active && (
-							<SectionErrorBoundary fallbackTitle="Failed to render round details">
-								<RoundCard
-									round={selectedRound}
-									isCurrentRound={false}
-								/>
-							</SectionErrorBoundary>
-						)}
-
 							{/* Inline responses accordion — shown/hidden by controls toggle */}
 							{responsesOpen && (
 								<ResponsesAccordion
@@ -761,6 +751,16 @@ export default function SummaryPage() {
 									token={token}
 									onResponseUpdated={handleResponseUpdated}
 								/>
+							)}
+
+							{/* Non-active round card */}
+							{selectedRound && !selectedRound.is_active && (
+								<SectionErrorBoundary fallbackTitle="Failed to render round details">
+									<RoundCard
+										round={selectedRound}
+										isCurrentRound={false}
+									/>
+								</SectionErrorBoundary>
 							)}
 
 							{/* Synthesis editor (active round only) */}
