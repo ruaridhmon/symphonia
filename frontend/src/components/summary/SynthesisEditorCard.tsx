@@ -4,16 +4,26 @@ import type { Round } from '../../types/summary';
 
 type Props = {
   activeRound: Round | null;
+  contextNote?: string | null;
   synthesisViewMode: 'view' | 'edit';
-  onSetViewMode: (mode: 'view' | 'edit') => void;
+  onSetViewMode: (mode: 'view' | 'edit') => void | Promise<void>;
   editor: Editor | null;
+  isDirty: boolean;
+  isSaving: boolean;
+  onSave: () => void | Promise<void>;
+  onRevert: () => void;
 };
 
 export default function SynthesisEditorCard({
   activeRound,
+  contextNote,
   synthesisViewMode,
   onSetViewMode,
   editor,
+  isDirty,
+  isSaving,
+  onSave,
+  onRevert,
 }: Props) {
   return (
     <div
@@ -21,9 +31,16 @@ export default function SynthesisEditorCard({
       style={{ borderTop: '3px solid var(--accent)' }}
     >
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
-        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2" style={{ margin: 0 }}>
-          <span>📝</span> Synthesis for Round {activeRound?.round_number || ''}
-        </h2>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2" style={{ margin: 0 }}>
+            <span>📝</span> Synthesis for Round {activeRound?.round_number || ''}
+          </h2>
+          {contextNote && (
+            <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
+              {contextNote}
+            </p>
+          )}
+        </div>
         <div
           role="tablist"
           aria-label="Synthesis view mode"
@@ -71,6 +88,45 @@ export default function SynthesisEditorCard({
           </button>
         </div>
       </div>
+      {synthesisViewMode === 'edit' && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div className="text-xs" style={{ color: isDirty ? 'var(--accent)' : 'var(--muted-foreground)' }}>
+            {isDirty ? 'Unsaved changes' : 'All changes saved'}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onRevert}
+              disabled={!isDirty || isSaving}
+              className="px-3 py-1.5 rounded-md text-xs font-medium"
+              style={{
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+                color: 'var(--muted-foreground)',
+                cursor: !isDirty || isSaving ? 'not-allowed' : 'pointer',
+                opacity: !isDirty || isSaving ? 0.6 : 1,
+              }}
+            >
+              Revert
+            </button>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={!isDirty || isSaving}
+              className="px-3 py-1.5 rounded-md text-xs font-semibold"
+              style={{
+                border: '1px solid var(--accent)',
+                background: 'var(--accent)',
+                color: 'white',
+                cursor: !isDirty || isSaving ? 'not-allowed' : 'pointer',
+                opacity: !isDirty || isSaving ? 0.6 : 1,
+              }}
+            >
+              {isSaving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+        </div>
+      )}
       {synthesisViewMode === 'edit' ? (
         <div className="prose max-w-none">
           <EditorContent editor={editor} />

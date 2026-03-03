@@ -18,6 +18,7 @@ import {
 	getSynthesisVersions as apiGetSynthesisVersions,
 	activateVersion as apiActivateVersion,
 	generateSynthesis as apiGenerateSynthesis,
+	pushSummary as apiPushSummary,
 } from './api/synthesis';
 
 import {
@@ -175,7 +176,7 @@ export default function SummaryPage() {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const formId = Number(id);
-	const { toastError, toastWarning, toastSuccess } = useToast();
+	const { toastError, toastWarning, toastSuccess, toastInfo } = useToast();
 
 	const { token: rawToken, logout: authLogout } = useAuth();
 	const token = rawToken ?? '';
@@ -205,6 +206,9 @@ export default function SummaryPage() {
 	const [aiToolsOpen, setAiToolsOpen] = useState(false);
 	const [selectedModel, setSelectedModel] = useState(MODELS[0]);
 	const [isGenerating, setIsGenerating] = useState(false);
+	const [isSavingSynthesis, setIsSavingSynthesis] = useState(false);
+	const [isSynthesisDirty, setIsSynthesisDirty] = useState(false);
+	const [lastSavedSynthesis, setLastSavedSynthesis] = useState('');
 
 	// ── Synthesis versioning ──
 	const [synthesisVersions, setSynthesisVersions] = useState<SynthesisVersion[]>([]);
@@ -290,6 +294,26 @@ export default function SummaryPage() {
 		return buildStructuredSummaryText(structuredSynthesisData as Record<string, any> | null);
 	}, [selectedVersion, displayRound, structuredSynthesisData]);
 
+	const synthesisContextNote = useMemo(() => {
+		if (!activeRound || activeRound.round_number <= 1) return null;
+		const previous = rounds.find(r => r.round_number === activeRound.round_number - 1);
+		const currentText = (activeRound.synthesis || '').trim();
+		const previousText = (previous?.synthesis || '').trim();
+		if (!currentText || !previousText) return null;
+		if (currentText !== previousText) return null;
+		return `This draft is carried forward from Round ${previous.round_number}. Update and save it as the Round ${activeRound.round_number} synthesis.`;
+	}, [activeRound, rounds]);
+
+	useEffect(() => {
+		if (!editor) return;
+		const onEditorUpdate = () => {
+			const current = editor.getHTML().trim();
+			setIsSynthesisDirty(current !== lastSavedSynthesis.trim());
+		};
+		editor.on('update', onEditorUpdate);
+		return () => editor.off('update', onEditorUpdate);
+	}, [editor, lastSavedSynthesis]);
+
 	// ─── Data loading ────────────────────────────────────────────────────────
 
 	useEffect(() => {
@@ -361,7 +385,7 @@ export default function SummaryPage() {
 			}
 
 				if (active && editor) {
-					editor.commands.setContent(active.synthesis || '');
+					resetEditorToSaved(active.synthesis || '');
 					const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
 					setNextRoundQuestions((qs || []).map(extractQuestionText));
 				} else if (f && Array.isArray((f as Form).questions)) {
@@ -428,6 +452,51 @@ export default function SummaryPage() {
 
 	function toggleAiDeliberationTools() {
 		setAiToolsOpen(v => !v);
+	}
+
+	function resetEditorToSaved(synthesis: string) {
+		if (!editor) return;
+		editor.commands.setContent(synthesis || '');
+		setLastSavedSynthesis((synthesis || '').trim());
+		setIsSynthesisDirty(false);
+	}
+
+	async function saveSynthesisEdits(): Promise<boolean> {
+		const targetRound = selectedRound || activeRound;
+		if (!targetRound?.is_active || !editor) return false;
+		const nextContent = editor.getHTML().trim();
+		if (nextContent === lastSavedSynthesis.trim()) return true;
+
+		setIsSavingSynthesis(true);
+		try {
+			await apiPushSummary(formId, nextContent);
+			const updatedRound = { ...targetRound, synthesis: nextContent };
+			setRounds(prev => prev.map(r => (r.id === targetRound.id ? updatedRound : r)));
+			if (activeRound?.id === targetRound.id) setActiveRound(updatedRound);
+			if (selectedRound?.id === targetRound.id) setSelectedRound(updatedRound);
+			setLastSavedSynthesis(nextContent);
+			setIsSynthesisDirty(false);
+			toastSuccess('Synthesis saved.');
+			return true;
+		} catch (error) {
+			toastError((error as Error).message || 'Failed to save synthesis');
+			return false;
+		} finally {
+			setIsSavingSynthesis(false);
+		}
+	}
+
+	function revertSynthesisEdits() {
+		resetEditorToSaved(lastSavedSynthesis);
+		toastInfo('Edits reverted.');
+	}
+
+	async function handleSetSynthesisViewMode(mode: 'view' | 'edit') {
+		if (mode === 'view' && synthesisViewMode === 'edit' && isSynthesisDirty) {
+			const saved = await saveSynthesisEdits();
+			if (!saved) return;
+		}
+		setSynthesisViewMode(mode);
 	}
 
 	async function startNextRound() {
@@ -516,7 +585,7 @@ export default function SummaryPage() {
 			setSynthesisStep(4);
 
 			const content = data.synthesis || data.summary || '';
-			if (content && editor) editor.commands.setContent(content);
+			if (editor) resetEditorToSaved(content || '');
 
 			// Optimistic update: immediately reflect synthesis in UI state
 			if (data.synthesis_json && targetRound) {
@@ -557,7 +626,7 @@ export default function SummaryPage() {
 	function handleSelectRound(round: Round) {
 		try {
 			setSelectedRound(round);
-			if (round.is_active && editor) editor.commands.setContent(round.synthesis || '');
+			if (round.is_active && editor) resetEditorToSaved(round.synthesis || '');
 			loadSynthesisVersions(round.id).catch((err) => {
 				console.error('[handleSelectRound] Failed to load synthesis versions:', err);
 				toastError('Failed to load synthesis versions for this round');
@@ -696,9 +765,14 @@ export default function SummaryPage() {
 						{(!selectedRound || selectedRound.is_active) && (
 							<SynthesisEditorCard
 								activeRound={activeRound}
+								contextNote={synthesisContextNote}
 								synthesisViewMode={synthesisViewMode}
-								onSetViewMode={setSynthesisViewMode}
+								onSetViewMode={handleSetSynthesisViewMode}
 								editor={editor}
+								isDirty={isSynthesisDirty}
+								isSaving={isSavingSynthesis}
+								onSave={saveSynthesisEdits}
+								onRevert={revertSynthesisEdits}
 							/>
 						)}
 

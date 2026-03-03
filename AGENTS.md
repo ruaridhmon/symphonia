@@ -44,6 +44,7 @@ This is intentional. Never hardcode a model string in a new AI endpoint. Always 
 - **2026-03-03:** Improved `export_synthesis?format=pdf` visual quality with a print-first A4 stylesheet (page numbering, typography, table/code styling, heading hierarchy) and hardened `export_responses?format=docx` generation with XML-control-character sanitization plus a fuller DOCX package (`docProps`, `styles`, document relationships) to prevent Word-open failures on downloaded files.
 - **2026-03-03:** Added AI deliberation visibility control to `Workflow Actions` on SummaryPage. The sidebar now has a `View/Hide AI Deliberation Tools` toggle, matching the existing Responses panel hide/show workflow instead of relying on only the in-panel collapsible header.
 - **2026-03-03:** Fixed login UX where invalid credentials could incorrectly surface as session expiry. `frontend/src/api/client.ts` no longer forces expiry redirect for `401` responses from `/login`; AuthContext now shows a clearer message: “Incorrect email or password. Please try again.”
+- **2026-03-03:** Summary UX updates: manual synthesis editing now supports explicit `Save`/`Revert` controls with unsaved-change tracking, and switching from `Edit` back to `View` auto-saves pending edits for the active round via `POST /forms/{form_id}/push_summary`. Round navigation in the sidebar now uses previous/next arrow controls (`Round X of N`) instead of relying on clicking a full round list.
 
 ### Template for any new AI endpoint
 
