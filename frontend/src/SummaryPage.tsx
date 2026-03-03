@@ -699,13 +699,6 @@ export default function SummaryPage() {
 							/>
 						)}
 
-						{/* Read-only synthesis for non-active rounds */}
-						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
-							<div className="card p-4">
-								<MarkdownRenderer content={selectedRound.synthesis} />
-							</div>
-						)}
-
 						{/* Audience translation should follow the current synthesis view */}
 						{displayRound && audienceSourceText && (
 							<SectionErrorBoundary fallbackTitle="Failed to render audience translation">

@@ -1,24 +1,18 @@
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Users, TrendingUp, ClipboardList, FileText, MessageSquare, ChartNoAxesColumn, HelpCircle } from 'lucide-react';
+import { FileText, MessageSquare, ChartNoAxesColumn, HelpCircle } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
-import StructuredSynthesis from './StructuredSynthesis';
 import type { Round } from './RoundTimeline';
 import { extractQuestionText } from '../utils/questions';
 
 interface RoundCardProps {
   round: Round;
   isCurrentRound: boolean;
-  expertLabels?: Record<number, string>;
-  formId?: number;
-  token?: string;
-  currentUserEmail?: string;
 }
 
-const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels, formId, token, currentUserEmail }: RoundCardProps) {
+const RoundCard = memo(function RoundCard({ round, isCurrentRound }: RoundCardProps) {
   const { t } = useTranslation();
   const hasSynthesis = !!(round.synthesis && round.synthesis.trim());
-  const hasStructured = !!(round.synthesis_json && typeof round.synthesis_json === 'object');
 
   return (
     <div
@@ -109,21 +103,9 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound, expertLabels,
       {hasSynthesis && (
         <div className="round-detail-synthesis">
           <h4 className="round-detail-synthesis-title">{t('rounds.synthesisRound', { number: round.round_number })}</h4>
-          {hasStructured ? (
-            <StructuredSynthesis
-              data={round.synthesis_json!}
-              convergenceScore={round.convergence_score ?? undefined}
-              expertLabels={expertLabels}
-              formId={formId}
-              roundId={round.id}
-              token={token}
-              currentUserEmail={currentUserEmail}
-            />
-          ) : (
-            <div className="round-detail-synthesis-body">
-              <MarkdownRenderer content={round.synthesis} />
-            </div>
-          )}
+          <div className="round-detail-synthesis-body">
+            <MarkdownRenderer content={round.synthesis} />
+          </div>
         </div>
       )}
 
