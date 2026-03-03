@@ -33,17 +33,14 @@ export default function ResponsesAccordion({
 }: Props) {
   const { t } = useTranslation();
   const [expandedRounds, setExpandedRounds] = useState<Set<number>>(new Set());
+  const roundsWithResponses = structuredRounds.filter(r => r.responses.length > 0);
+  const defaultExpandableRounds =
+    roundsWithResponses.length > 0 ? roundsWithResponses : structuredRounds;
+  const defaultExpandableIds = defaultExpandableRounds.map(r => r.id);
 
   useEffect(() => {
-    const withResponses = structuredRounds
-      .filter(r => r.responses.length > 0)
-      .map(r => r.id);
-    if (withResponses.length > 0) {
-      setExpandedRounds(new Set(withResponses));
-      return;
-    }
-    if (structuredRounds.length > 0) {
-      setExpandedRounds(new Set([structuredRounds[0].id]));
+    if (defaultExpandableIds.length > 0) {
+      setExpandedRounds(new Set(defaultExpandableIds));
       return;
     }
     setExpandedRounds(new Set());
@@ -62,7 +59,7 @@ export default function ResponsesAccordion({
   }
 
   function expandAll() {
-    setExpandedRounds(new Set(structuredRounds.map(r => r.id)));
+    setExpandedRounds(new Set(defaultExpandableIds));
   }
 
   function collapseAll() {
@@ -83,7 +80,7 @@ export default function ResponsesAccordion({
     );
   }
 
-  const allExpanded = expandedRounds.size === structuredRounds.length;
+  const allExpanded = defaultExpandableIds.every(id => expandedRounds.has(id));
 
   return (
     <div className="card flex flex-col" style={{ maxHeight: '70vh' }}>
