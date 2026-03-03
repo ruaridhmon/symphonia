@@ -939,30 +939,44 @@ function exportAsGovUkReport(
 export default function ExportPanel({
   formId,
 }: ExportPanelProps) {
-  const [downloadingReport, setDownloadingReport] = useState(false);
+  const [openingReport, setOpeningReport] = useState(false);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
 
-  async function handleDownloadReport() {
-    setDownloadingReport(true);
+  async function handleOpenReportInNewTab() {
+    const popup = window.open('', '_blank', 'noopener,noreferrer');
+    if (popup) {
+      popup.document.title = 'Preparing report';
+      popup.document.body.innerHTML =
+        '<p style="font-family: system-ui, sans-serif; padding: 16px;">Preparing PDF report…</p>';
+    }
+
+    setOpeningReport(true);
     setExportMessage(null);
     try {
       const { blob, filename } = await exportSynthesisFromBackend(formId, 'pdf');
       const isPdf = blob.type.includes('application/pdf') || filename.toLowerCase().endsWith('.pdf');
 
       if (isPdf) {
-        saveAs(blob, filename);
-        setExportMessage('Report downloaded.');
+        const url = URL.createObjectURL(blob);
+        if (popup) {
+          popup.location.href = url;
+        } else {
+          saveAs(blob, filename);
+        }
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
         return;
       }
 
-      // Backend can fall back to markdown when PDF dependencies are unavailable.
-      saveAs(blob, filename.toLowerCase().endsWith('.md') ? filename : 'synthesis-report.md');
-      setExportMessage('PDF rendering is unavailable on the server. Downloaded Markdown report instead.');
+      if (popup) popup.close();
+      setExportMessage(
+        'Report endpoint did not return a PDF. Please enable server-side PDF rendering.'
+      );
     } catch (err) {
+      if (popup) popup.close();
       console.error('Report export failed:', err);
-      setExportMessage('Failed to export report.');
+      setExportMessage('Failed to open PDF report.');
     } finally {
-      setDownloadingReport(false);
+      setOpeningReport(false);
     }
   }
 
@@ -981,13 +995,13 @@ export default function ExportPanel({
           <LoadingButton
             variant="secondary"
             size="sm"
-            onClick={handleDownloadReport}
-            loading={downloadingReport}
-            loadingText="Downloading…"
+            onClick={handleOpenReportInNewTab}
+            loading={openingReport}
+            loadingText="Opening…"
             className="w-full text-left justify-start gap-2 whitespace-nowrap"
           >
             <FileDown size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
-            Download Professional Report (PDF)
+            Open Professional Report (PDF)
           </LoadingButton>
 
           <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>

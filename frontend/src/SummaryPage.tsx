@@ -20,7 +20,6 @@ import {
 	getSynthesisVersions as apiGetSynthesisVersions,
 	activateVersion as apiActivateVersion,
 	generateSynthesis as apiGenerateSynthesis,
-	pushSummary as apiPushSummary,
 } from './api/synthesis';
 
 import {
@@ -209,7 +208,6 @@ export default function SummaryPage() {
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
-	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
 	// Default sidebar closed on mobile, open on desktop
 	const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
@@ -343,14 +341,13 @@ export default function SummaryPage() {
 				loadSynthesisVersions(active.id).catch(() => {});
 			}
 
-			if (active && editor) {
-				editor.commands.setContent(active.synthesis || '');
-				setHasSavedSynthesis(!!(active.synthesis && active.synthesis.trim().length > 0));
-				const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
-				setNextRoundQuestions((qs || []).map(extractQuestionText));
-			} else if (f && Array.isArray((f as Form).questions)) {
-				setNextRoundQuestions((f as Form).questions.map(extractQuestionText));
-			}
+				if (active && editor) {
+					editor.commands.setContent(active.synthesis || '');
+					const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
+					setNextRoundQuestions((qs || []).map(extractQuestionText));
+				} else if (f && Array.isArray((f as Form).questions)) {
+					setNextRoundQuestions((f as Form).questions.map(extractQuestionText));
+				}
 		} catch (err) {
 			setLoadError((err as Error).message || 'Failed to load consultation data');
 		} finally {
@@ -410,18 +407,6 @@ export default function SummaryPage() {
 		setResponsesOpen(true);
 	}
 
-	async function saveSynthesis() {
-		if (!activeRound || !formId) return;
-		const summary = editor?.getHTML() || '';
-		try {
-			await apiPushSummary(formId, summary);
-			setHasSavedSynthesis(true);
-			toastSuccess('Synthesis saved');
-		} catch (err) {
-			toastError((err as Error).message || 'Failed to save synthesis');
-		}
-	}
-
 	async function startNextRound() {
 		if (!formId) return;
 		const cleaned = nextRoundQuestions.map(q => q.trim()).filter(q => q.length > 0);
@@ -434,7 +419,6 @@ export default function SummaryPage() {
 			await apiNextRound(formId, { questions: cleaned });
 			await loadAll();
 			await loadResponses();
-			setHasSavedSynthesis(false);
 			setSelectedRound(null);
 		} catch (err) {
 			toastError((err as Error).message || 'Failed to start next round');
@@ -444,10 +428,18 @@ export default function SummaryPage() {
 	}
 
 	async function downloadResponses() {
+		const popup = window.open('', '_blank', 'noopener,noreferrer');
+		if (popup) {
+			popup.document.title = 'Preparing responses export';
+			popup.document.body.innerHTML =
+				'<p style="font-family: system-ui, sans-serif; padding: 16px;">Preparing responses export…</p>';
+		}
+
 		try {
 			const raw = await getResponses(formId, true);
 
 			if (!Array.isArray(raw) || raw.length === 0) {
+				if (popup) popup.close();
 				toastWarning('No responses to download');
 				return;
 			}
@@ -466,8 +458,15 @@ export default function SummaryPage() {
 
 			const doc = new Document({ sections: [{ children: paragraphs }] });
 			const blob = await Packer.toBlob(doc);
-			saveAs(blob, 'responses.docx');
+			const url = URL.createObjectURL(blob);
+			if (popup) {
+				popup.location.href = url;
+			} else {
+				saveAs(blob, 'responses.docx');
+			}
+			setTimeout(() => URL.revokeObjectURL(url), 60_000);
 		} catch (err) {
+			if (popup) popup.close();
 			toastError((err as Error).message || 'Failed to download responses');
 		}
 	}
@@ -934,7 +933,6 @@ export default function SummaryPage() {
 								responsesOpen={responsesOpen}
 								onToggleResponses={viewAllResponses}
 								onDownloadResponses={downloadResponses}
-								onSaveSynthesis={saveSynthesis}
 								onStartNextRound={startNextRound}
 								loading={loading}
 								formId={formId}

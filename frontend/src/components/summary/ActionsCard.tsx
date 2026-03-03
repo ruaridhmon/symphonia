@@ -1,12 +1,11 @@
 import { useState, useCallback } from 'react';
-import { Eye, EyeOff, FileDown, Save, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, FileDown, ArrowRight } from 'lucide-react';
 import { LoadingButton, ExportPanel } from '../index';
 
 type Props = {
   responsesOpen: boolean;
   onToggleResponses: () => void;
   onDownloadResponses: () => void;
-  onSaveSynthesis: () => void;
   onStartNextRound: () => void;
   loading: boolean;
   formId: number;
@@ -16,18 +15,11 @@ export default function ActionsCard({
   responsesOpen,
   onToggleResponses,
   onDownloadResponses,
-  onSaveSynthesis,
   onStartNextRound,
   loading,
   formId,
 }: Props) {
-  const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(false);
-
-  const handleSave = useCallback(async () => {
-    setSaving(true);
-    try { await onSaveSynthesis(); } finally { setSaving(false); }
-  }, [onSaveSynthesis]);
 
   const handleDownload = useCallback(async () => {
     setDownloading(true);
@@ -46,18 +38,6 @@ export default function ActionsCard({
       </div>
 
       <div className="space-y-2">
-        <LoadingButton
-          variant="secondary"
-          size="sm"
-          loading={saving}
-          loadingText="Saving synthesis…"
-          onClick={handleSave}
-          className="w-full justify-start gap-2 font-medium"
-          icon={<Save size={14} aria-hidden="true" />}
-        >
-          Save Synthesis
-        </LoadingButton>
-
         <LoadingButton
           variant="ghost"
           size="sm"
