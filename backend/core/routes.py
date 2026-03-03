@@ -330,29 +330,12 @@ async def _broadcast_synthesis_error(
 
 def _resolve_synthesis_model(db: Session, payload_model: str | None = None) -> str:
     """Resolve synthesis model: payload → DB settings → env var → default."""
-
-    def _sanitize_model(model: str | None) -> str | None:
-        if not model:
-            return None
-        clean = model.strip()
-        if not clean:
-            return None
-        # Anthropic models are intentionally disabled in this deployment.
-        if clean.startswith("anthropic/"):
-            return "openai/gpt-4o"
-        return clean
-
-    payload_resolved = _sanitize_model(payload_model)
-    if payload_resolved:
-        return payload_resolved
+    if payload_model and payload_model.strip():
+        return payload_model.strip()
     db_setting = db.query(Setting).filter(Setting.key == "synthesis_model").first()
-    db_resolved = _sanitize_model(db_setting.value if db_setting else None)
-    if db_resolved:
-        return db_resolved
-    return (
-        _sanitize_model(os.getenv("SYNTHESIS_MODEL", "openai/gpt-4o"))
-        or "openai/gpt-4o"
-    )
+    if db_setting and db_setting.value:
+        return db_setting.value
+    return os.getenv("SYNTHESIS_MODEL", "anthropic/claude-opus-4-6")
 
 
 # ---------------------------------------------------------
@@ -5455,7 +5438,7 @@ def _build_ai_suggest_user_prompt(
 # ── App Settings ─────────────────────────────────────────────────────────────
 
 DEFAULT_SETTINGS = {
-    "synthesis_model": "openai/gpt-4o",
+    "synthesis_model": "anthropic/claude-opus-4-6",
     "max_rounds": "3",
     "convergence_threshold": "70",
     "default_anonymous": "false",
@@ -5618,7 +5601,7 @@ def ai_suggest(
         model = (
             db_setting.value
             if db_setting
-            else os.getenv("SYNTHESIS_MODEL", "openai/gpt-4o")
+            else os.getenv("SYNTHESIS_MODEL", "anthropic/claude-opus-4-6")
         )
 
     try:
