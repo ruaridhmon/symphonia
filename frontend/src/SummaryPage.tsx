@@ -301,7 +301,7 @@ export default function SummaryPage() {
 		const previousText = (previous?.synthesis || '').trim();
 		if (!currentText || !previousText) return null;
 		if (currentText !== previousText) return null;
-		return `This draft is carried forward from Round ${previous.round_number}. Update and save it as the Round ${activeRound.round_number} synthesis.`;
+		return `This draft is carried forward from Round ${activeRound.round_number - 1}. Update and save it as the Round ${activeRound.round_number} synthesis.`;
 	}, [activeRound, rounds]);
 
 	useEffect(() => {
@@ -311,7 +311,9 @@ export default function SummaryPage() {
 			setIsSynthesisDirty(current !== lastSavedSynthesis.trim());
 		};
 		editor.on('update', onEditorUpdate);
-		return () => editor.off('update', onEditorUpdate);
+		return () => {
+			editor.off('update', onEditorUpdate);
+		};
 	}, [editor, lastSavedSynthesis]);
 
 	// ─── Data loading ────────────────────────────────────────────────────────

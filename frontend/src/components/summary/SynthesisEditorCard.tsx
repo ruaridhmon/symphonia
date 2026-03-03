@@ -10,7 +10,7 @@ type Props = {
   editor: Editor | null;
   isDirty: boolean;
   isSaving: boolean;
-  onSave: () => void | Promise<void>;
+  onSave: () => void | Promise<void | boolean>;
   onRevert: () => void;
 };
 
