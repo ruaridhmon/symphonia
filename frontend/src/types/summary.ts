@@ -23,7 +23,7 @@ export type Form = {
 
 export type StructuredResponse = {
   id: number;
-  answers: Record<string, string>;
+  answers: Record<string, unknown>;
   email: string | null;
   timestamp: string;
   version: number;

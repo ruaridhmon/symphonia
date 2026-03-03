@@ -46,7 +46,7 @@ export function getForm(formId: number) {
 
 /** Admin: create a new form */
 export function createForm(data: CreateFormPayload) {
-  return api.post<FormListItem>('/create_form', data);
+  return api.post<FormListItem>('/forms/create', data);
 }
 
 /** Admin: update a form */

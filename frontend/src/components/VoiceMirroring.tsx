@@ -3,6 +3,7 @@ import { Sparkles, ToggleLeft, ToggleRight, Loader2, AlertTriangle } from 'lucid
 import { voiceMirror } from '../api/synthesis';
 import type { ClarifiedResponse, VoiceMirrorInput } from '../api/synthesis';
 import { extractQuestionText } from '../utils/questions';
+import { formatAnswerForDisplay } from '../utils/answers';
 
 type Props = {
   formId: number;
@@ -10,7 +11,7 @@ type Props = {
   responses: {
     id: number;
     email: string | null;
-    answers: Record<string, string>;
+    answers: Record<string, unknown>;
   }[];
   questions: (string | Record<string, unknown>)[];
 };
@@ -57,7 +58,7 @@ export default function VoiceMirroring({
           inputs.push({
             expert: resp.email || `Expert ${resp.id}`,
             question: extractQuestionText(questions[i]),
-            answer: String(answer),
+            answer: formatAnswerForDisplay(answer),
           });
         }
       }
@@ -287,7 +288,7 @@ export default function VoiceMirroring({
                   const original = resp.answers[key];
                   if (!original) return null;
                   const clarified = getClarified(resp.email, i);
-                  const displayText = isActive && clarified ? clarified : String(original);
+                  const displayText = isActive && clarified ? clarified : formatAnswerForDisplay(original);
 
                   return (
                     <div key={key} className="mb-2 last:mb-0">
@@ -311,7 +312,7 @@ export default function VoiceMirroring({
                           className="text-xs mt-1"
                           style={{ color: 'var(--muted-foreground)', fontStyle: 'italic' }}
                         >
-                          Original: {String(original)}
+                          Original: {formatAnswerForDisplay(original)}
                         </div>
                       )}
                     </div>

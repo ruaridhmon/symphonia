@@ -100,7 +100,7 @@ class SymphoniaClient {
             join_code: string;
             participant_count: number;
             current_round: number;
-        }>('/create_form', {
+        }>('/forms/create', {
             method: 'POST',
             body: JSON.stringify(payload),
         });

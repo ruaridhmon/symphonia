@@ -5,6 +5,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { ApiError } from './api/client';
 import { register as apiRegister } from './api/auth';
 import { LoadingButton, PasswordInput } from './components';
+import RouteLoadingFallback from './components/RouteLoadingFallback';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Register() {
@@ -42,6 +43,10 @@ export default function Register() {
       setIsRegistering(false);
     }
   };
+
+  if (isLoading) {
+    return <RouteLoadingFallback />;
+  }
 
   if (token) {
     return <Navigate to="/" />;

@@ -52,13 +52,18 @@ export default function FormPage() {
   }, [])
 
   /** Convert legacy flat string answers to structured responses */
-  const legacyToStructured = useCallback((answers: Record<string, string | StructuredResponse>): Record<string, StructuredResponse> => {
+  const legacyToStructured = useCallback((answers: Record<string, unknown>): Record<string, StructuredResponse> => {
     const result: Record<string, StructuredResponse> = {}
     for (const [key, val] of Object.entries(answers)) {
       if (typeof val === 'string') {
         result[key] = { ...emptyStructuredResponse(), position: val }
-      } else if (val && typeof val === 'object' && 'position' in val) {
-        result[key] = val as StructuredResponse
+      } else if (
+        val &&
+        typeof val === 'object' &&
+        'position' in val &&
+        typeof (val as StructuredResponse).position === 'string'
+      ) {
+        result[key] = { ...emptyStructuredResponse(), ...(val as Partial<StructuredResponse>) }
       } else {
         result[key] = emptyStructuredResponse()
       }

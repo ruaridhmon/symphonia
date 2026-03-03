@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { getAdminUsers, updateUserRole, UserListItem } from './api/forms';
 import { ApiError } from './api/client';
@@ -15,6 +16,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function AdminUsers() {
   useDocumentTitle('User Management');
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +58,23 @@ export default function AdminUsers() {
   return (
     <section className="flex-1 py-6 sm:py-8">
       <Container size="lg">
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="inline-flex items-center gap-1.5 text-sm mb-6"
+          style={{
+            color: 'var(--muted-foreground)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
+        >
+          ← Back to Dashboard
+        </button>
+
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--foreground)' }}>User Management</h1>

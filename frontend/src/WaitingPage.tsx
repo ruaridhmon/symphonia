@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Lightbulb, Pencil } from 'lucide-react';
-import { API_BASE_URL } from './config';
+import { getWebSocketUrl } from './api/ws';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 interface WaitingState {
@@ -23,15 +23,7 @@ export default function WaitingPage() {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    // WebSocket setup for live synthesis notification.
-    // API_BASE_URL may be empty (same-origin SPA) — fall back to window.location.host.
-    let wsHost: string;
-    try {
-      wsHost = API_BASE_URL ? new URL(API_BASE_URL).host : window.location.host;
-    } catch {
-      wsHost = window.location.host;
-    }
-    const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${wsHost}/ws`;
+    const wsUrl = getWebSocketUrl('/ws');
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 

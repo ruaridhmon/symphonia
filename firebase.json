@@ -8,6 +8,13 @@
     ],
     "rewrites": [
       {
+        "source": "/ws",
+        "run": {
+          "serviceId": "symphonia-api",
+          "region": "europe-west2"
+        }
+      },
+      {
         "source": "/api/**",
         "run": {
           "serviceId": "symphonia-api",

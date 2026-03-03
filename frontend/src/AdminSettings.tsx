@@ -10,14 +10,16 @@ import { useDocumentTitle } from './hooks/useDocumentTitle';
 /* ── Constants ────────────────────────────────────────────────── */
 
 const AVAILABLE_MODELS = [
-  { id: 'anthropic/claude-opus-4-6', label: 'Claude Opus 4.6 (default — best quality)' },
-  { id: 'anthropic/claude-sonnet-4-5', label: 'Claude Sonnet 4.5 (faster, good quality)' },
-  { id: 'anthropic/claude-haiku-3-5', label: 'Claude Haiku 3.5 (fastest, cheapest)' },
+  { id: 'openai/gpt-4o', label: 'GPT-4o (OpenAI, best quality)' },
+  { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini (OpenAI, fast)' },
   { id: 'google/gemini-flash-1.5', label: 'Gemini Flash 1.5 (Google, fast)' },
   { id: 'google/gemini-pro-1.5', label: 'Gemini Pro 1.5 (Google, high quality)' },
-  { id: 'openai/gpt-4o', label: 'GPT-4o (OpenAI)' },
-  { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini (OpenAI, fast)' },
 ];
+
+function sanitizeModel(model: string): string {
+  if (model.startsWith('anthropic/')) return 'openai/gpt-4o';
+  return model;
+}
 
 const SYNTHESIS_STRATEGIES = [
   { id: 'single_prompt', label: 'Single Prompt (fastest, good for focused topics)' },
@@ -82,7 +84,7 @@ interface SettingsState {
 }
 
 const DEFAULTS: SettingsState = {
-  synthesis_model: 'anthropic/claude-opus-4-6',
+  synthesis_model: 'openai/gpt-4o',
   synthesis_strategy: 'single_prompt',
   ai_suggestions_count: '5',
   max_rounds: '3',
@@ -126,6 +128,7 @@ export default function AdminSettings() {
         for (const key of Object.keys(DEFAULTS) as (keyof SettingsState)[]) {
           if (data[key] !== undefined) merged[key] = data[key];
         }
+        merged.synthesis_model = sanitizeModel(merged.synthesis_model);
         setSettings(merged);
         setInitial(merged);
       })

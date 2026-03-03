@@ -20,6 +20,7 @@ import aiosmtplib
 import json
 import logging
 import os
+import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -1146,7 +1147,7 @@ The dimensional analysis reveals a **temporal paradox**: governance frameworks d
 
 
 class CommitteeSynthesisPayload(BaseModel):
-    model: str = "anthropic/claude-sonnet-4-5"
+    model: str = "openai/gpt-4o"
     mode: str = "human_only"  # "human_only" | "ai_assisted"
     n_analysts: int = 3
 
@@ -1791,7 +1792,7 @@ If expert discussion comments are included above, integrate those perspectives i
 
 
 class GenerateSynthesisVersionPayload(BaseModel):
-    model: str = "anthropic/claude-sonnet-4"
+    model: str = "openai/gpt-4o"
     strategy: str = "simple"  # "simple" | "committee" | "ttd"
     n_analysts: int = 3
     mode: str = "human_only"
@@ -2281,7 +2282,9 @@ def export_synthesis(
     md_content = _build_synthesis_markdown(form, rounds_list)
 
     if format == "pdf":
-        # Try weasyprint for PDF generation
+        weasy_error: Exception | None = None
+
+        # Try full-fidelity PDF generation first (requires markdown + weasyprint).
         try:
             import markdown as md_lib
             from weasyprint import HTML as WeasyHTML
@@ -2312,15 +2315,59 @@ em {{ color: #505a5f; }}
                     "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
                 },
             )
-        except ImportError:
-            # weasyprint or markdown not available — fall back to .md download
+        except Exception as exc:
+            weasy_error = exc
+
+        # Fallback: generate a simple PDF with fpdf2 (pure Python).
+        try:
+            from fpdf import FPDF
+
+            def _md_to_plain_text(md: str) -> list[str]:
+                lines: list[str] = []
+                for raw in md.splitlines():
+                    line = raw
+                    # Remove common markdown syntax for a readable plain-text PDF.
+                    line = re.sub(r"^#{1,6}\s*", "", line)
+                    line = re.sub(r"^\s*[-*+]\s+", "- ", line)
+                    line = re.sub(r"^\s*\d+\.\s+", "", line)
+                    line = re.sub(r"\*\*(.*?)\*\*", r"\1", line)
+                    line = re.sub(r"\*(.*?)\*", r"\1", line)
+                    line = re.sub(r"`(.*?)`", r"\1", line)
+                    lines.append(line)
+                return lines
+
+            pdf = FPDF()
+            pdf.set_auto_page_break(auto=True, margin=15)
+            pdf.add_page()
+            pdf.set_font("Helvetica", size=11)
+
+            writable_width = max(20, pdf.w - pdf.l_margin - pdf.r_margin)
+
+            for line in _md_to_plain_text(md_content):
+                if not line.strip():
+                    pdf.ln(4)
+                    continue
+                # Built-in fonts are latin-1; replace unsupported chars safely.
+                safe_line = line.encode("latin-1", "replace").decode("latin-1")
+                pdf.multi_cell(writable_width, 6, text=safe_line)
+
+            out = pdf.output()
+            pdf_bytes = bytes(
+                out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1")
+            )
             return FastAPIResponse(
-                content=md_content.encode("utf-8"),
-                media_type="text/markdown; charset=utf-8",
+                content=pdf_bytes,
+                media_type="application/pdf",
                 headers={
-                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.md"',
+                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
                 },
             )
+        except Exception as fpdf_error:
+            detail = "Failed to generate PDF export."
+            if weasy_error:
+                detail += f" WeasyPrint/Markdown error: {weasy_error}"
+            detail += f" FPDF fallback error: {fpdf_error}"
+            raise HTTPException(status_code=500, detail=detail)
 
     # Default: markdown
     return FastAPIResponse(
