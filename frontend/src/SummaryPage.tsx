@@ -751,32 +751,32 @@ export default function SummaryPage() {
 							</SectionErrorBoundary>
 						)}
 
-						{/* Inline responses accordion — shown/hidden by controls toggle */}
-						{responsesOpen && (
-							<ResponsesAccordion
-								structuredRounds={structuredRounds}
-								rounds={rounds}
-								formQuestions={form.questions || []}
-								formId={formId}
-								token={token}
-								onResponseUpdated={handleResponseUpdated}
-							/>
-						)}
+							{/* Inline responses accordion — shown/hidden by controls toggle */}
+							{responsesOpen && (
+								<ResponsesAccordion
+									structuredRounds={structuredRounds}
+									rounds={rounds}
+									formQuestions={form.questions || []}
+									formId={formId}
+									token={token}
+									onResponseUpdated={handleResponseUpdated}
+								/>
+							)}
 
-						{/* Synthesis editor (active round only) */}
-						{(!selectedRound || selectedRound.is_active) && (
-							<SynthesisEditorCard
-								activeRound={activeRound}
-								contextNote={synthesisContextNote}
-								synthesisViewMode={synthesisViewMode}
-								onSetViewMode={handleSetSynthesisViewMode}
-								editor={editor}
-								isDirty={isSynthesisDirty}
-								isSaving={isSavingSynthesis}
-								onSave={saveSynthesisEdits}
-								onRevert={revertSynthesisEdits}
-							/>
-						)}
+							{/* Synthesis editor (active round only) */}
+							{(!selectedRound || selectedRound.is_active) && (
+								<SynthesisEditorCard
+									activeRound={activeRound}
+									contextNote={synthesisContextNote}
+									synthesisViewMode={synthesisViewMode}
+									onSetViewMode={handleSetSynthesisViewMode}
+									editor={editor}
+									isDirty={isSynthesisDirty}
+									isSaving={isSavingSynthesis}
+									onSave={saveSynthesisEdits}
+									onRevert={revertSynthesisEdits}
+								/>
+							)}
 
 						{/* Audience translation should follow the current synthesis view */}
 						{displayRound && audienceSourceText && (
