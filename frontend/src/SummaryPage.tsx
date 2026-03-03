@@ -877,17 +877,6 @@ export default function SummaryPage() {
 							</SectionErrorBoundary>
 						)}
 
-						{/* Version comparison (side-by-side) */}
-						{showVersionCompare && synthesisVersions.length >= 2 && (
-							<SectionErrorBoundary fallbackTitle="Failed to render version comparison">
-								<VersionCompare
-									versions={synthesisVersions}
-									currentVersionId={selectedVersionId}
-									onClose={() => setShowVersionCompare(false)}
-								/>
-							</SectionErrorBoundary>
-						)}
-
 						{/* Emergence highlights */}
 						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
 							<SectionErrorBoundary fallbackTitle="Failed to render emergent insights">
@@ -916,6 +905,26 @@ export default function SummaryPage() {
 							onClick={() => setSidebarOpen(false)}
 							aria-hidden="true"
 						/>
+					)}
+
+					{/* ── Version compare modal ── */}
+					{showVersionCompare && synthesisVersions.length >= 2 && (
+						<div className="fixed inset-0 z-[70]">
+							<div
+								className="absolute inset-0 bg-black/40"
+								onClick={() => setShowVersionCompare(false)}
+								aria-hidden="true"
+							/>
+							<div className="relative mx-auto my-4 sm:my-6 w-[min(1200px,96vw)] max-h-[92vh] overflow-auto">
+								<SectionErrorBoundary fallbackTitle="Failed to render version comparison">
+									<VersionCompare
+										versions={synthesisVersions}
+										currentVersionId={selectedVersionId}
+										onClose={() => setShowVersionCompare(false)}
+									/>
+								</SectionErrorBoundary>
+							</div>
+						</div>
 					)}
 
 					{/* ── Floating Sidebar ── */}
