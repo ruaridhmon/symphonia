@@ -58,8 +58,10 @@ export default function ActionsCard({
           className="w-full justify-start gap-2"
           icon={<FileDown size={14} aria-hidden="true" />}
         >
-          Export Responses (.docx)
+          Open Responses (.docx)
         </LoadingButton>
+
+        <ExportPanel formId={formId} />
 
         <LoadingButton
           variant="accent"
@@ -72,10 +74,6 @@ export default function ActionsCard({
         >
           Start Next Round
         </LoadingButton>
-      </div>
-
-      <div className="mt-3">
-        <ExportPanel formId={formId} />
       </div>
     </div>
   );

@@ -20,6 +20,7 @@ import aiosmtplib
 import json
 import logging
 import os
+import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -2281,7 +2282,7 @@ def export_synthesis(
     md_content = _build_synthesis_markdown(form, rounds_list)
 
     if format == "pdf":
-        # Try weasyprint for PDF generation
+        # Try full-fidelity PDF generation first (requires markdown + weasyprint).
         try:
             import markdown as md_lib
             from weasyprint import HTML as WeasyHTML
@@ -2313,14 +2314,55 @@ em {{ color: #505a5f; }}
                 },
             )
         except ImportError:
-            # weasyprint or markdown not available — fall back to .md download
-            return FastAPIResponse(
-                content=md_content.encode("utf-8"),
-                media_type="text/markdown; charset=utf-8",
-                headers={
-                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.md"',
-                },
-            )
+            # Fallback: generate a simple PDF with fpdf2 (pure Python).
+            try:
+                from fpdf import FPDF
+
+                def _md_to_plain_text(md: str) -> list[str]:
+                    lines: list[str] = []
+                    for raw in md.splitlines():
+                        line = raw
+                        # Remove common markdown syntax for a readable plain-text PDF.
+                        line = re.sub(r"^#{1,6}\s*", "", line)
+                        line = re.sub(r"^\s*[-*+]\s+", "• ", line)
+                        line = re.sub(r"^\s*\d+\.\s+", "", line)
+                        line = re.sub(r"\*\*(.*?)\*\*", r"\1", line)
+                        line = re.sub(r"\*(.*?)\*", r"\1", line)
+                        line = re.sub(r"`(.*?)`", r"\1", line)
+                        lines.append(line)
+                    return lines
+
+                pdf = FPDF()
+                pdf.set_auto_page_break(auto=True, margin=15)
+                pdf.add_page()
+                pdf.set_font("Helvetica", size=11)
+
+                for line in _md_to_plain_text(md_content):
+                    if not line.strip():
+                        pdf.ln(4)
+                        continue
+                    # Built-in fonts are latin-1; replace unsupported chars safely.
+                    safe_line = line.encode("latin-1", "replace").decode("latin-1")
+                    pdf.multi_cell(0, 6, txt=safe_line)
+
+                out = pdf.output(dest="S")
+                pdf_bytes = bytes(out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1"))
+                return FastAPIResponse(
+                    content=pdf_bytes,
+                    media_type="application/pdf",
+                    headers={
+                        "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
+                    },
+                )
+            except Exception:
+                # Last-resort fallback if no PDF backend is available.
+                return FastAPIResponse(
+                    content=md_content.encode("utf-8"),
+                    media_type="text/markdown; charset=utf-8",
+                    headers={
+                        "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.md"',
+                    },
+                )
 
     # Default: markdown
     return FastAPIResponse(

@@ -463,6 +463,8 @@ const styles: Record<string, React.CSSProperties> = {
     accentColor: 'var(--accent)',
     cursor: 'pointer',
     height: '6px',
+    margin: 0,
+    display: 'block',
   },
   sliderLabels: {
     position: 'relative',
@@ -477,7 +479,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sliderLabelCenter: {
     position: 'absolute',
-    left: '50%',
+    // For a 1..10 discrete slider, value 5 sits at 4/9 of track width.
+    left: '44.4444%',
     transform: 'translateX(-50%)',
     fontSize: '0.6875rem',
     color: 'var(--muted-foreground)',

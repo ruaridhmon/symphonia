@@ -981,39 +981,24 @@ export default function ExportPanel({
   }
 
   return (
-    <>
-      <div style={{
-        borderTop: '1px solid var(--border)',
-        paddingTop: '0.75rem',
-        marginTop: '0.25rem',
-      }}>
-        <p className="text-xs font-semibold uppercase tracking-wider mb-2"
-          style={{ color: 'var(--muted-foreground)' }}>
-          Export
-        </p>
-        <div className="flex flex-col gap-1.5">
-          <LoadingButton
-            variant="secondary"
-            size="sm"
-            onClick={handleOpenReportInNewTab}
-            loading={openingReport}
-            loadingText="Opening…"
-            className="w-full text-left justify-start gap-2 whitespace-nowrap"
-          >
-            <FileDown size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
-            Open Professional Report (PDF)
-          </LoadingButton>
+    <div className="space-y-1.5">
+      <LoadingButton
+        variant="ghost"
+        size="sm"
+        onClick={handleOpenReportInNewTab}
+        loading={openingReport}
+        loadingText="Opening…"
+        className="w-full text-left justify-start gap-2 whitespace-nowrap"
+      >
+        <FileDown size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+        Open Professional Report (PDF)
+      </LoadingButton>
 
-          <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-            Designed for sharing with stakeholders. Structured JSON export is hidden from the main UI.
-          </p>
-          {exportMessage && (
-            <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-              {exportMessage}
-            </p>
-          )}
-        </div>
-      </div>
-    </>
+      {exportMessage && (
+        <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+          {exportMessage}
+        </p>
+      )}
+    </div>
   );
 }
