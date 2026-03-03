@@ -2345,7 +2345,7 @@ em {{ color: #505a5f; }}
                     line = raw
                     # Remove common markdown syntax for a readable plain-text PDF.
                     line = re.sub(r"^#{1,6}\s*", "", line)
-                    line = re.sub(r"^\s*[-*+]\s+", "• ", line)
+                    line = re.sub(r"^\s*[-*+]\s+", "- ", line)
                     line = re.sub(r"^\s*\d+\.\s+", "", line)
                     line = re.sub(r"\*\*(.*?)\*\*", r"\1", line)
                     line = re.sub(r"\*(.*?)\*", r"\1", line)
@@ -2358,15 +2358,17 @@ em {{ color: #505a5f; }}
             pdf.add_page()
             pdf.set_font("Helvetica", size=11)
 
+            writable_width = max(20, pdf.w - pdf.l_margin - pdf.r_margin)
+
             for line in _md_to_plain_text(md_content):
                 if not line.strip():
                     pdf.ln(4)
                     continue
                 # Built-in fonts are latin-1; replace unsupported chars safely.
                 safe_line = line.encode("latin-1", "replace").decode("latin-1")
-                pdf.multi_cell(0, 6, txt=safe_line)
+                pdf.multi_cell(writable_width, 6, text=safe_line)
 
-            out = pdf.output(dest="S")
+            out = pdf.output()
             pdf_bytes = bytes(
                 out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1")
             )
