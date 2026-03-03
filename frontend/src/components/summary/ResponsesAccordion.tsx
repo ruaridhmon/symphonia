@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, User, MessageSquare } from 'lucide-react';
 import { ResponseEditor } from '../index';
@@ -33,6 +33,21 @@ export default function ResponsesAccordion({
 }: Props) {
   const { t } = useTranslation();
   const [expandedRounds, setExpandedRounds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    const withResponses = structuredRounds
+      .filter(r => r.responses.length > 0)
+      .map(r => r.id);
+    if (withResponses.length > 0) {
+      setExpandedRounds(new Set(withResponses));
+      return;
+    }
+    if (structuredRounds.length > 0) {
+      setExpandedRounds(new Set([structuredRounds[0].id]));
+      return;
+    }
+    setExpandedRounds(new Set());
+  }, [structuredRounds]);
 
   function toggleRound(roundId: number) {
     setExpandedRounds(prev => {
@@ -93,6 +108,10 @@ export default function ResponsesAccordion({
         >
           {allExpanded ? t('responses.collapseAll') : t('responses.expandAll')}
         </button>
+      </div>
+
+      <div className="px-4 sm:px-6 py-2 text-xs" style={{ color: 'var(--muted-foreground)', borderBottom: '1px solid var(--border)' }}>
+        Responses are grouped by round and remain visible across all rounds.
       </div>
 
       {/* Scrollable rounds list */}
