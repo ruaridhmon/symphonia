@@ -330,12 +330,29 @@ async def _broadcast_synthesis_error(
 
 def _resolve_synthesis_model(db: Session, payload_model: str | None = None) -> str:
     """Resolve synthesis model: payload → DB settings → env var → default."""
-    if payload_model and payload_model.strip():
-        return payload_model.strip()
+
+    def _sanitize_model(model: str | None) -> str | None:
+        if not model:
+            return None
+        clean = model.strip()
+        if not clean:
+            return None
+        # Anthropic models are intentionally disabled in this deployment.
+        if clean.startswith("anthropic/"):
+            return "openai/gpt-4o"
+        return clean
+
+    payload_resolved = _sanitize_model(payload_model)
+    if payload_resolved:
+        return payload_resolved
     db_setting = db.query(Setting).filter(Setting.key == "synthesis_model").first()
-    if db_setting and db_setting.value:
-        return db_setting.value
-    return os.getenv("SYNTHESIS_MODEL", "anthropic/claude-opus-4-6")
+    db_resolved = _sanitize_model(db_setting.value if db_setting else None)
+    if db_resolved:
+        return db_resolved
+    return (
+        _sanitize_model(os.getenv("SYNTHESIS_MODEL", "openai/gpt-4o"))
+        or "openai/gpt-4o"
+    )
 
 
 # ---------------------------------------------------------
@@ -1147,7 +1164,7 @@ The dimensional analysis reveals a **temporal paradox**: governance frameworks d
 
 
 class CommitteeSynthesisPayload(BaseModel):
-    model: str = "anthropic/claude-sonnet-4-5"
+    model: str = "openai/gpt-4o"
     mode: str = "human_only"  # "human_only" | "ai_assisted"
     n_analysts: int = 3
 
@@ -1792,7 +1809,7 @@ If expert discussion comments are included above, integrate those perspectives i
 
 
 class GenerateSynthesisVersionPayload(BaseModel):
-    model: str = "anthropic/claude-sonnet-4"
+    model: str = "openai/gpt-4o"
     strategy: str = "simple"  # "simple" | "committee" | "ttd"
     n_analysts: int = 3
     mode: str = "human_only"
@@ -2282,6 +2299,8 @@ def export_synthesis(
     md_content = _build_synthesis_markdown(form, rounds_list)
 
     if format == "pdf":
+        weasy_error: Exception | None = None
+
         # Try full-fidelity PDF generation first (requires markdown + weasyprint).
         try:
             import markdown as md_lib
@@ -2313,60 +2332,57 @@ em {{ color: #505a5f; }}
                     "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
                 },
             )
-        except ImportError:
-            # Fallback: generate a simple PDF with fpdf2 (pure Python).
-            try:
-                from fpdf import FPDF
+        except Exception as exc:
+            weasy_error = exc
 
-                def _md_to_plain_text(md: str) -> list[str]:
-                    lines: list[str] = []
-                    for raw in md.splitlines():
-                        line = raw
-                        # Remove common markdown syntax for a readable plain-text PDF.
-                        line = re.sub(r"^#{1,6}\s*", "", line)
-                        line = re.sub(r"^\s*[-*+]\s+", "• ", line)
-                        line = re.sub(r"^\s*\d+\.\s+", "", line)
-                        line = re.sub(r"\*\*(.*?)\*\*", r"\1", line)
-                        line = re.sub(r"\*(.*?)\*", r"\1", line)
-                        line = re.sub(r"`(.*?)`", r"\1", line)
-                        lines.append(line)
-                    return lines
+        # Fallback: generate a simple PDF with fpdf2 (pure Python).
+        try:
+            from fpdf import FPDF
 
-                pdf = FPDF()
-                pdf.set_auto_page_break(auto=True, margin=15)
-                pdf.add_page()
-                pdf.set_font("Helvetica", size=11)
+            def _md_to_plain_text(md: str) -> list[str]:
+                lines: list[str] = []
+                for raw in md.splitlines():
+                    line = raw
+                    # Remove common markdown syntax for a readable plain-text PDF.
+                    line = re.sub(r"^#{1,6}\s*", "", line)
+                    line = re.sub(r"^\s*[-*+]\s+", "• ", line)
+                    line = re.sub(r"^\s*\d+\.\s+", "", line)
+                    line = re.sub(r"\*\*(.*?)\*\*", r"\1", line)
+                    line = re.sub(r"\*(.*?)\*", r"\1", line)
+                    line = re.sub(r"`(.*?)`", r"\1", line)
+                    lines.append(line)
+                return lines
 
-                for line in _md_to_plain_text(md_content):
-                    if not line.strip():
-                        pdf.ln(4)
-                        continue
-                    # Built-in fonts are latin-1; replace unsupported chars safely.
-                    safe_line = line.encode("latin-1", "replace").decode("latin-1")
-                    pdf.multi_cell(0, 6, txt=safe_line)
+            pdf = FPDF()
+            pdf.set_auto_page_break(auto=True, margin=15)
+            pdf.add_page()
+            pdf.set_font("Helvetica", size=11)
 
-                out = pdf.output(dest="S")
-                pdf_bytes = bytes(
-                    out
-                    if isinstance(out, (bytes, bytearray))
-                    else out.encode("latin-1")
-                )
-                return FastAPIResponse(
-                    content=pdf_bytes,
-                    media_type="application/pdf",
-                    headers={
-                        "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
-                    },
-                )
-            except Exception:
-                # Last-resort fallback if no PDF backend is available.
-                return FastAPIResponse(
-                    content=md_content.encode("utf-8"),
-                    media_type="text/markdown; charset=utf-8",
-                    headers={
-                        "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.md"',
-                    },
-                )
+            for line in _md_to_plain_text(md_content):
+                if not line.strip():
+                    pdf.ln(4)
+                    continue
+                # Built-in fonts are latin-1; replace unsupported chars safely.
+                safe_line = line.encode("latin-1", "replace").decode("latin-1")
+                pdf.multi_cell(0, 6, txt=safe_line)
+
+            out = pdf.output(dest="S")
+            pdf_bytes = bytes(
+                out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1")
+            )
+            return FastAPIResponse(
+                content=pdf_bytes,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
+                },
+            )
+        except Exception as fpdf_error:
+            detail = "Failed to generate PDF export."
+            if weasy_error:
+                detail += f" WeasyPrint/Markdown error: {weasy_error}"
+            detail += f" FPDF fallback error: {fpdf_error}"
+            raise HTTPException(status_code=500, detail=detail)
 
     # Default: markdown
     return FastAPIResponse(
@@ -5437,7 +5453,7 @@ def _build_ai_suggest_user_prompt(
 # ── App Settings ─────────────────────────────────────────────────────────────
 
 DEFAULT_SETTINGS = {
-    "synthesis_model": "anthropic/claude-opus-4-6",
+    "synthesis_model": "openai/gpt-4o",
     "max_rounds": "3",
     "convergence_threshold": "70",
     "default_anonymous": "false",
@@ -5600,7 +5616,7 @@ def ai_suggest(
         model = (
             db_setting.value
             if db_setting
-            else os.getenv("SYNTHESIS_MODEL", "anthropic/claude-opus-4-6")
+            else os.getenv("SYNTHESIS_MODEL", "openai/gpt-4o")
         )
 
     try:

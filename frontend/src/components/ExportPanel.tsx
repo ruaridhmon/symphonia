@@ -974,7 +974,8 @@ export default function ExportPanel({
     } catch (err) {
       if (popup) popup.close();
       console.error('Report export failed:', err);
-      setExportMessage('Failed to open PDF report.');
+      const message = err instanceof Error ? err.message : 'Failed to open PDF report.';
+      setExportMessage(message);
     } finally {
       setOpeningReport(false);
     }

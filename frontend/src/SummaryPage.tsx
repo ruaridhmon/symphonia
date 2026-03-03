@@ -127,10 +127,18 @@ class SectionErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const MODELS = [
-	'anthropic/claude-opus-4-6',
 	'openai/gpt-4o',
 	'openai/gpt-4o-mini',
 ];
+
+function isBlockedModel(model: string): boolean {
+	return model.startsWith('anthropic/');
+}
+
+function sanitizeModel(model: string | null | undefined): string {
+	if (!model || isBlockedModel(model)) return MODELS[0];
+	return model;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -198,7 +206,7 @@ export default function SummaryPage() {
 	const [synthesisViewMode, setSynthesisViewMode] = useState<'view' | 'edit'>('view');
 	const [structuredSectionOpen, setStructuredSectionOpen] = useState(true);
 	const [aiToolsOpen, setAiToolsOpen] = useState(false);
-	const [selectedModel, setSelectedModel] = useState('anthropic/claude-opus-4-6');
+	const [selectedModel, setSelectedModel] = useState(MODELS[0]);
 	const [isGenerating, setIsGenerating] = useState(false);
 
 	// ── Synthesis versioning ──
@@ -276,7 +284,7 @@ export default function SummaryPage() {
 		[synthesisVersions, selectedVersionId]
 	);
 	const availableModels = useMemo(
-		() => Array.from(new Set([selectedModel, ...MODELS].filter(Boolean))),
+		() => Array.from(new Set([sanitizeModel(selectedModel), ...MODELS].filter(Boolean))),
 		[selectedModel]
 	);
 	const audienceSourceText = useMemo(() => {
@@ -313,7 +321,7 @@ export default function SummaryPage() {
 	useEffect(() => {
 		api.get<Record<string, string>>('/admin/settings')
 			.then(data => {
-				if (data?.synthesis_model) setSelectedModel(data.synthesis_model);
+				if (data?.synthesis_model) setSelectedModel(sanitizeModel(data.synthesis_model));
 			})
 			.catch(() => {
 				// Keep local fallback list when settings load fails.
@@ -487,7 +495,9 @@ export default function SummaryPage() {
 
 	async function generateSummary() {
 		const targetRound = selectedRound || activeRound;
-		if (!formId || !selectedModel || !targetRound) return;
+		const modelToUse = sanitizeModel(selectedModel);
+		if (!formId || !modelToUse || !targetRound) return;
+		if (modelToUse !== selectedModel) setSelectedModel(modelToUse);
 		let baselineVersionCount = 0;
 		try {
 			const before = await apiGetSynthesisVersions(formId, targetRound.id);
@@ -504,7 +514,7 @@ export default function SummaryPage() {
 			setSynthesisStep(1);
 
 			const data = await apiGenerateSynthesis(formId, targetRound.id, {
-				model: selectedModel,
+				model: modelToUse,
 				strategy: synthesisMode,
 				n_analysts: 3,
 				mode: 'human_only',
@@ -569,7 +579,7 @@ export default function SummaryPage() {
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
 			} catch (error) {
 				const message = (error as Error).message || 'Failed to generate synthesis';
-				toastError(`Model "${selectedModel}" failed: ${message}`);
+				toastError(`Model "${modelToUse}" failed: ${message}`);
 				setSynthesisStage('preparing');
 				setSynthesisStep(0);
 			} finally {

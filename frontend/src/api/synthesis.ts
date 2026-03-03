@@ -100,7 +100,21 @@ export async function exportSynthesisFromBackend(
   );
 
   if (!response.ok) {
-    throw new Error(`Export failed: ${response.statusText}`);
+    let detail = response.statusText;
+    try {
+      const bodyText = await response.text();
+      if (bodyText) {
+        try {
+          const parsed = JSON.parse(bodyText) as { detail?: string };
+          detail = parsed.detail || bodyText;
+        } catch {
+          detail = bodyText;
+        }
+      }
+    } catch {
+      // Ignore body parse errors and keep status text fallback.
+    }
+    throw new Error(`Export failed (${response.status}): ${detail}`);
   }
 
   const blob = await response.blob();

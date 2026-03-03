@@ -346,7 +346,7 @@ export default function AdminFormNew() {
   const [joinCode, setJoinCode] = useState(() => generateJoinCode());
   const [questions, setQuestions] = useState(['']);
   const [saving, setSaving] = useState(false);
-  const [synthesisModel, setSynthesisModel] = useState('anthropic/claude-opus-4-6');
+  const [synthesisModel, setSynthesisModel] = useState('openai/gpt-4o');
   const [error, setError] = useState<string | null>(null);
 
   /* Question interaction state (Worker B) */
