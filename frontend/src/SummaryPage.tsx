@@ -709,10 +709,6 @@ export default function SummaryPage() {
 								<RoundCard
 									round={selectedRound}
 									isCurrentRound={false}
-									expertLabels={resolvedExpertLabels}
-									formId={formId}
-									token={token}
-									currentUserEmail={email}
 								/>
 							</SectionErrorBoundary>
 						)}
