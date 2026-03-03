@@ -2346,7 +2346,11 @@ em {{ color: #505a5f; }}
                     pdf.multi_cell(0, 6, txt=safe_line)
 
                 out = pdf.output(dest="S")
-                pdf_bytes = bytes(out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1"))
+                pdf_bytes = bytes(
+                    out
+                    if isinstance(out, (bytes, bytearray))
+                    else out.encode("latin-1")
+                )
                 return FastAPIResponse(
                     content=pdf_bytes,
                     media_type="application/pdf",
