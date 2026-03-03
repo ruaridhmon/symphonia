@@ -11,6 +11,7 @@ import { saveAs } from 'file-saver';
 import { ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
+import { api } from './api/client';
 import { getMe } from './api/auth';
 import { getForm as apiFetchForm } from './api/forms';
 import { getRounds, getRoundsWithResponses, nextRound as apiNextRound } from './api/rounds';
@@ -127,9 +128,8 @@ class SectionErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 const MODELS = [
 	'anthropic/claude-opus-4-6',
-	'anthropic/claude-sonnet-4',
 	'openai/gpt-4o',
-	'google/gemini-2.0-flash',
+	'openai/gpt-4o-mini',
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -275,6 +275,10 @@ export default function SummaryPage() {
 		() => synthesisVersions.find(v => v.id === selectedVersionId) || null,
 		[synthesisVersions, selectedVersionId]
 	);
+	const availableModels = useMemo(
+		() => Array.from(new Set([selectedModel, ...MODELS].filter(Boolean))),
+		[selectedModel]
+	);
 	const audienceSourceText = useMemo(() => {
 		if (selectedVersion?.synthesis?.trim()) return selectedVersion.synthesis;
 		if (displayRound?.synthesis?.trim()) return displayRound.synthesis;
@@ -305,6 +309,16 @@ export default function SummaryPage() {
 			});
 		return () => { cancelled = true; };
 	}, [token, formId, editor]);
+
+	useEffect(() => {
+		api.get<Record<string, string>>('/admin/settings')
+			.then(data => {
+				if (data?.synthesis_model) setSelectedModel(data.synthesis_model);
+			})
+			.catch(() => {
+				// Keep local fallback list when settings load fails.
+			});
+	}, []);
 
 	async function loadAll() {
 		setLoading(true);
@@ -474,6 +488,13 @@ export default function SummaryPage() {
 	async function generateSummary() {
 		const targetRound = selectedRound || activeRound;
 		if (!formId || !selectedModel || !targetRound) return;
+		let baselineVersionCount = 0;
+		try {
+			const before = await apiGetSynthesisVersions(formId, targetRound.id);
+			baselineVersionCount = before.length;
+		} catch {
+			// Non-fatal: polling can still check for synthesis text changes.
+		}
 
 		setIsGenerating(true);
 		setSynthesisStage('preparing');
@@ -490,17 +511,35 @@ export default function SummaryPage() {
 			});
 
 			// ── Async path: synthesis running in the background ──
-			if (data.status === 'started') {
-				toastSuccess(
-					data.message || 'Synthesis running in background — you\u2019ll be notified when complete'
-				);
-				// Reset UI immediately so the user can navigate away
-				setSynthesisStage('preparing');
-				setSynthesisStep(0);
-				setIsGenerating(false);
-				// The synthesis_complete WS event will auto-refresh via handleWsMessage
-				return;
-			}
+				if (data.status === 'started') {
+					toastSuccess(
+						data.message || 'Synthesis running in background — you\u2019ll be notified when complete'
+					);
+					// Reset UI immediately so the user can navigate away
+					setSynthesisStage('preparing');
+					setSynthesisStep(0);
+					setIsGenerating(false);
+					// Fallback polling in case WebSocket completion event is missed.
+					(async () => {
+						const maxAttempts = 30;
+						for (let i = 0; i < maxAttempts; i++) {
+							await new Promise(resolve => setTimeout(resolve, 3000));
+							try {
+								const latest = await apiGetSynthesisVersions(formId, targetRound.id);
+								if (latest.length > baselineVersionCount) {
+									await loadAll();
+									await loadSynthesisVersions(targetRound.id);
+									toastSuccess('Synthesis complete!');
+									return;
+								}
+							} catch {
+								// Keep polling; transient failures should not stop refresh recovery.
+							}
+						}
+						toastWarning('Synthesis may be complete. Please refresh if results do not appear automatically.');
+					})();
+					return;
+				}
 
 			// ── Sync path: immediate result (mock mode) ──
 			setSynthesisStage('synthesising');
@@ -528,13 +567,14 @@ export default function SummaryPage() {
 			setSynthesisStage('complete');
 			setSynthesisStep(5);
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
-		} catch (error) {
-			toastError((error as Error).message || 'Failed to generate synthesis');
-			setSynthesisStage('preparing');
-			setSynthesisStep(0);
-		} finally {
-			setIsGenerating(false);
-		}
+			} catch (error) {
+				const message = (error as Error).message || 'Failed to generate synthesis';
+				toastError(`Model "${selectedModel}" failed: ${message}`);
+				setSynthesisStage('preparing');
+				setSynthesisStep(0);
+			} finally {
+				setIsGenerating(false);
+			}
 	}
 
 	async function activateVersion(versionId: number) {
@@ -936,7 +976,7 @@ export default function SummaryPage() {
 							onModeChange={setSynthesisMode}
 							selectedModel={selectedModel}
 							onModelChange={setSelectedModel}
-							models={MODELS}
+							models={availableModels}
 							isGenerating={isGenerating}
 							onGenerate={generateSummary}
 						/>

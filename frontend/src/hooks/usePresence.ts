@@ -33,7 +33,15 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const connect = useCallback(() => {
-    if (!formId || !userEmail) return;
+    if (!formId) return;
+    const fallbackEmail = (() => {
+      try {
+        return localStorage.getItem('email') || '';
+      } catch {
+        return '';
+      }
+    })();
+    const effectiveEmail = userEmail || fallbackEmail || 'unknown@example.com';
 
     const wsUrl = getWebSocketUrl('/ws');
 
@@ -47,7 +55,7 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
         type: 'presence_join',
         form_id: formId,
         page,
-        user_email: userEmail,
+        user_email: effectiveEmail,
       }));
 
       // Start heartbeat every 15s
