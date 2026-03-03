@@ -6,8 +6,6 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
-import { saveAs } from 'file-saver';
 import { ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
@@ -16,7 +14,6 @@ import { getMe } from './api/auth';
 import { getForm as apiFetchForm } from './api/forms';
 import { getRounds, getRoundsWithResponses, nextRound as apiNextRound } from './api/rounds';
 import type { Round as ApiRound } from './api/rounds';
-import { getResponses } from './api/responses';
 import {
 	getSynthesisVersions as apiGetSynthesisVersions,
 	activateVersion as apiActivateVersion,
@@ -429,6 +426,10 @@ export default function SummaryPage() {
 		setResponsesOpen(true);
 	}
 
+	function toggleAiDeliberationTools() {
+		setAiToolsOpen(v => !v);
+	}
+
 	async function startNextRound() {
 		if (!formId) return;
 		const cleaned = nextRoundQuestions.map(q => q.trim()).filter(q => q.length > 0);
@@ -446,50 +447,6 @@ export default function SummaryPage() {
 			toastError((err as Error).message || 'Failed to start next round');
 		} finally {
 			setLoading(false);
-		}
-	}
-
-	async function downloadResponses() {
-		const popup = window.open('', '_blank', 'noopener,noreferrer');
-		if (popup) {
-			popup.document.title = 'Preparing responses export';
-			popup.document.body.innerHTML =
-				'<p style="font-family: system-ui, sans-serif; padding: 16px;">Preparing responses export…</p>';
-		}
-
-		try {
-			const raw = await getResponses(formId, true);
-
-			if (!Array.isArray(raw) || raw.length === 0) {
-				if (popup) popup.close();
-				toastWarning('No responses to download');
-				return;
-			}
-
-			const paragraphs = raw.flatMap((r, i: number) => {
-				const header = new Paragraph({
-					children: [new TextRun({ text: `Response ${i + 1}`, bold: true })],
-					spacing: { after: 200 },
-				});
-				const qa = Object.entries(r.answers).flatMap(([k, v]: [string, unknown]) => [
-					new Paragraph({ children: [new TextRun({ text: k, bold: true })], spacing: { after: 80 } }),
-					new Paragraph({ text: String(v ?? ''), spacing: { after: 160 } }),
-				]);
-				return [header, ...qa, new Paragraph('')];
-			});
-
-			const doc = new Document({ sections: [{ children: paragraphs }] });
-			const blob = await Packer.toBlob(doc);
-			const url = URL.createObjectURL(blob);
-			if (popup) {
-				popup.location.href = url;
-			} else {
-				saveAs(blob, 'responses.docx');
-			}
-			setTimeout(() => URL.revokeObjectURL(url), 60_000);
-		} catch (err) {
-			if (popup) popup.close();
-			toastError((err as Error).message || 'Failed to download responses');
 		}
 	}
 
@@ -808,39 +765,27 @@ export default function SummaryPage() {
 									</SectionErrorBoundary>
 								)}
 
-						{/* AI deliberation tools (collapsed by default) */}
-						{displayRound && (
+						{/* AI deliberation tools (shown/hidden via Workflow Actions) */}
+						{displayRound && aiToolsOpen && (
 							<SectionErrorBoundary fallbackTitle="Failed to render AI deliberation tools">
 								<div className="card p-4">
-									<button
-										type="button"
-										onClick={() => setAiToolsOpen(v => !v)}
-										className="w-full flex items-center justify-between text-left"
-										style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-										aria-expanded={aiToolsOpen}
-										aria-controls="summary-ai-tools"
-									>
-										<h2 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
-											<Sparkles size={20} style={{ color: 'var(--accent)' }} /> AI Deliberation Tools
-										</h2>
-										{aiToolsOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-									</button>
-									{aiToolsOpen && (
-										<div id="summary-ai-tools" className="mt-4 space-y-4">
-											{structuredSynthesisData && (
-												<SectionErrorBoundary fallbackTitle="Failed to render AI counterpoints">
-													<DevilsAdvocate formId={formId} roundId={displayRound.id} />
-												</SectionErrorBoundary>
-											)}
-											<SectionErrorBoundary fallbackTitle="Failed to render AI probing questions">
-												<ProbeQuestionsPanel
-													formId={formId}
-													roundId={displayRound.id}
-													synthesisText={audienceSourceText}
-												/>
+									<h2 className="text-base font-semibold text-foreground flex items-center gap-2 m-0 mb-4">
+										<Sparkles size={20} style={{ color: 'var(--accent)' }} /> AI Deliberation Tools
+									</h2>
+									<div id="summary-ai-tools" className="space-y-4">
+										{structuredSynthesisData && (
+											<SectionErrorBoundary fallbackTitle="Failed to render AI counterpoints">
+												<DevilsAdvocate formId={formId} roundId={displayRound.id} />
 											</SectionErrorBoundary>
-										</div>
-									)}
+										)}
+										<SectionErrorBoundary fallbackTitle="Failed to render AI probing questions">
+											<ProbeQuestionsPanel
+												formId={formId}
+												roundId={displayRound.id}
+												synthesisText={audienceSourceText}
+											/>
+										</SectionErrorBoundary>
+									</div>
 								</div>
 							</SectionErrorBoundary>
 						)}
@@ -979,11 +924,11 @@ export default function SummaryPage() {
 
 							<ActionsCard
 								responsesOpen={responsesOpen}
+								aiToolsOpen={aiToolsOpen}
 								onToggleResponses={viewAllResponses}
-								onDownloadResponses={downloadResponses}
+								onToggleAiTools={toggleAiDeliberationTools}
 								onStartNextRound={startNextRound}
 								loading={loading}
-								formId={formId}
 							/>
 
 						<AISynthesisPanel

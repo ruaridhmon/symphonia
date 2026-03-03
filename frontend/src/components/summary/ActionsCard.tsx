@@ -1,31 +1,23 @@
-import { useState, useCallback } from 'react';
-import { Eye, EyeOff, FileDown, ArrowRight } from 'lucide-react';
-import { LoadingButton, ExportPanel } from '../index';
+import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { LoadingButton } from '../index';
 
 type Props = {
   responsesOpen: boolean;
+  aiToolsOpen: boolean;
   onToggleResponses: () => void;
-  onDownloadResponses: () => void;
+  onToggleAiTools: () => void;
   onStartNextRound: () => void;
   loading: boolean;
-  formId: number;
 };
 
 export default function ActionsCard({
   responsesOpen,
+  aiToolsOpen,
   onToggleResponses,
-  onDownloadResponses,
+  onToggleAiTools,
   onStartNextRound,
   loading,
-  formId,
 }: Props) {
-  const [downloading, setDownloading] = useState(false);
-
-  const handleDownload = useCallback(async () => {
-    setDownloading(true);
-    try { await onDownloadResponses(); } finally { setDownloading(false); }
-  }, [onDownloadResponses]);
-
   return (
     <div className="card p-3">
       <div className="mb-2">
@@ -52,16 +44,13 @@ export default function ActionsCard({
         <LoadingButton
           variant="ghost"
           size="sm"
-          loading={downloading}
-          loadingText="Exporting responses…"
-          onClick={handleDownload}
+          onClick={onToggleAiTools}
           className="w-full justify-start gap-2"
-          icon={<FileDown size={14} aria-hidden="true" />}
+          icon={aiToolsOpen ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+          aria-pressed={aiToolsOpen}
         >
-          Open Responses (.docx)
+          {aiToolsOpen ? 'Hide AI Deliberation Tools' : 'View AI Deliberation Tools'}
         </LoadingButton>
-
-        <ExportPanel formId={formId} />
 
         <LoadingButton
           variant="accent"
