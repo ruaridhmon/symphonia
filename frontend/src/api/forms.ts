@@ -61,7 +61,7 @@ export function getMyForms() {
 
 /** User: unlock a form with a join code */
 export function unlockForm(joinCode: string) {
-  return api.post<{ message: string }>('/forms/unlock', { join_code: joinCode });
+  return api.post<{ message: string; form_id: number }>('/forms/unlock', { join_code: joinCode });
 }
 
 /* ── User-created forms ── */

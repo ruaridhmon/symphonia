@@ -10,7 +10,7 @@ import Skeleton, { SkeletonCard } from './components/Skeleton'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
-import { extractQuestionText } from './utils/questions'
+import { extractQuestionOptions, extractQuestionText } from './utils/questions'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 
 export default function FormPage() {
@@ -352,6 +352,7 @@ export default function FormPage() {
           <div>
             {roundQuestions.map((q, i) => {
               const key = `q${i + 1}`
+              const options = extractQuestionOptions(q)
               return (
                 <div key={key} className="mb-6">
                   <label className="block text-sm font-semibold text-foreground mb-2">{extractQuestionText(q)}</label>
@@ -361,6 +362,8 @@ export default function FormPage() {
                     value={structuredResponses[key] ?? emptyStructuredResponse()}
                     onChange={() => {}}
                     readOnly
+                    showEvidence={options.requireEvidence}
+                    showConfidence={options.requireConfidence}
                   />
                 </div>
               )
@@ -378,6 +381,7 @@ export default function FormPage() {
           <>
             {roundQuestions.map((q, i) => {
               const key = `q${i + 1}`
+              const options = extractQuestionOptions(q)
               return (
                 <div key={key} className="mb-6">
                   <label className="block text-sm font-medium mb-2 text-foreground">{extractQuestionText(q)}</label>
@@ -392,6 +396,8 @@ export default function FormPage() {
                         return next
                       })
                     }}
+                    showEvidence={options.requireEvidence}
+                    showConfidence={options.requireConfidence}
                   />
                 </div>
               )

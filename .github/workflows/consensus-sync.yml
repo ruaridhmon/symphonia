@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: axiotic/redesign
+          ref: develop
 
       - uses: actions/setup-python@v5
         with:
@@ -94,6 +94,6 @@ jobs:
 
             Backend tests passed with the updated library. ✅
           branch: deps/consensus-sync
-          base: axiotic/redesign
+          base: develop
           labels: dependencies,automated
           delete-branch: true

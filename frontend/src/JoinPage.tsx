@@ -63,8 +63,8 @@ export default function JoinPage() {
     setManualError('');
     setManualLoading(true);
     try {
-      await unlockForm(manualCode.trim());
-      navigate('/', { replace: true });
+      const result = await unlockForm(manualCode.trim());
+      navigate(`/form/${result.form_id}`, { replace: true });
     } catch (err: any) {
       setManualError(err.status === 404 ? 'Invalid join code. Please check and try again.' : `Could not join (HTTP ${err.status})`);
     } finally {

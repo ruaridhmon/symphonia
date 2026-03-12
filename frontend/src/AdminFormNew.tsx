@@ -6,13 +6,24 @@ import { api } from './api/client';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
+import StructuredInput from './components/StructuredInput';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import TemplatePicker, { type FormTemplate } from './TemplatePicker';
+import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
+import { normalizeQuestion, type ConfigurableQuestion } from './utils/questions';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
 function generateJoinCode(): string {
   return String(Math.floor(10000 + Math.random() * 90000));
+}
+
+function createBlankQuestion(): ConfigurableQuestion {
+  return {
+    label: '',
+    requireEvidence: true,
+    requireConfidence: true,
+  };
 }
 
 /* ── Toggle switch (pill-shaped) ──────────────────────────────── */
@@ -344,7 +355,8 @@ export default function AdminFormNew() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [joinCode, setJoinCode] = useState(() => generateJoinCode());
-  const [questions, setQuestions] = useState(['']);
+  const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
+  const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const [saving, setSaving] = useState(false);
   const [synthesisModel, setSynthesisModel] = useState('openai/gpt-4o');
   const [error, setError] = useState<string | null>(null);
@@ -371,7 +383,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(template);
     setTitle(template.name);
     setDescription(template.description);
-    setQuestions(template.default_questions);
+    setQuestions(template.default_questions.map(normalizeQuestion));
     setShowTemplatePicker(false);
   };
 
@@ -379,7 +391,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
     setTitle('');
     setDescription('');
-    setQuestions(['']);
+    setQuestions([createBlankQuestion()]);
     setShowTemplatePicker(false);
   };
 
@@ -396,6 +408,17 @@ export default function AdminFormNew() {
     [updated[a], updated[b]] = [updated[b], updated[a]];
     setQuestions(updated);
   };
+
+  useEffect(() => {
+    setPreviewResponses(prev => {
+      const next: Record<string, StructuredResponse> = {};
+      questions.forEach((_, index) => {
+        const key = `q${index + 1}`;
+        next[key] = prev[key] ?? emptyStructuredResponse();
+      });
+      return next;
+    });
+  }, [questions]);
 
   const createForm = async () => {
     if (!title.trim()) {
@@ -414,7 +437,7 @@ export default function AdminFormNew() {
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim() || undefined,
-          questions: questions.filter(q => q.trim() !== ''),
+          questions: questions.filter(q => q.label.trim() !== ''),
           allow_join: allowJoin,
           anonymous,
           deadline: deadline || null,
@@ -633,137 +656,200 @@ export default function AdminFormNew() {
 
             {questions.map((q, i) => {
               const isOnly = questions.length === 1;
-              const isEmpty = q.length === 0;
-              const showCounter = focusedIndex === i || q.length > 0;
+              const isEmpty = q.label.length === 0;
+              const showCounter = focusedIndex === i || q.label.length > 0;
 
               return (
                 <div
                   key={i}
-                  className="flex gap-2 items-center"
+                  className="rounded-xl p-3"
                   style={{ transition: 'opacity 0.15s ease' }}
                   onMouseEnter={() => setHoveredRow(i)}
                   onMouseLeave={() => setHoveredRow(null)}
                 >
-                  {/* Number badge */}
-                  <span
-                    className="flex-shrink-0 flex items-center justify-center rounded-full text-xs font-semibold"
-                    style={{
-                      width: 26,
-                      height: 26,
-                      minWidth: 26,
-                      backgroundColor: 'var(--foreground)',
-                      color: 'var(--background)',
-                      opacity: 0.75,
-                    }}
-                  >
-                    {i + 1}
-                  </span>
-
-                  {/* Reorder arrows */}
                   <div
-                    className="flex flex-col flex-shrink-0"
-                    style={{ width: 18, gap: 1 }}
+                    className="flex gap-2 items-start"
                   >
-                    {i > 0 ? (
-                      <button
-                        type="button"
-                        onClick={() => swapQuestions(i, i - 1)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 0,
-                          color: 'var(--muted-foreground)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          lineHeight: 1,
-                        }}
-                        title="Move up"
-                        aria-label={`Move question ${i + 1} up`}
-                      >
-                        <ChevronUp size={14} aria-hidden="true" />
-                      </button>
-                    ) : (
-                      <span style={{ height: 14 }} />
-                    )}
-                    {i < questions.length - 1 ? (
-                      <button
-                        type="button"
-                        onClick={() => swapQuestions(i, i + 1)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 0,
-                          color: 'var(--muted-foreground)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          lineHeight: 1,
-                        }}
-                        title="Move down"
-                        aria-label={`Move question ${i + 1} down`}
-                      >
-                        <ChevronDown size={14} aria-hidden="true" />
-                      </button>
-                    ) : (
-                      <span style={{ height: 14 }} />
-                    )}
-                  </div>
-
-                  {/* Input with character counter */}
-                  <div className="flex-1" style={{ position: 'relative' }}>
-                    <input
-                      type="text"
-                      aria-label={`Question ${i + 1}`}
-                      placeholder={
-                        isOnly && isEmpty
-                          ? 'e.g. What do you see as the biggest barrier to AI adoption in your sector?'
-                          : `Question ${i + 1}`
-                      }
-                      value={q}
-                      onChange={e => {
-                        const updated = [...questions];
-                        updated[i] = e.target.value;
-                        setQuestions(updated);
-                      }}
-                      className="w-full rounded-lg px-3 py-2"
+                    {/* Number badge */}
+                    <span
+                      className="flex-shrink-0 flex items-center justify-center rounded-full text-xs font-semibold"
                       style={{
-                        border: '1px solid var(--input)',
-                        backgroundColor: 'var(--background)',
-                        color: 'var(--foreground)',
-                        outline: 'none',
-                        paddingRight: showCounter ? 52 : 12,
+                        width: 26,
+                        height: 26,
+                        minWidth: 26,
+                        backgroundColor: 'var(--foreground)',
+                        color: 'var(--background)',
+                        opacity: 0.75,
+                        marginTop: 8,
                       }}
-                      onFocus={e => {
-                        setFocusedIndex(i);
-                        e.currentTarget.style.borderColor = 'var(--accent)';
-                        e.currentTarget.style.boxShadow =
-                          '0 0 0 2px rgba(37, 99, 235, 0.2)';
-                      }}
-                      onBlur={e => {
-                        setFocusedIndex(null);
-                        e.currentTarget.style.borderColor = 'var(--input)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    />
-                    {showCounter && (
-                      <span
+                    >
+                      {i + 1}
+                    </span>
+
+                    {/* Reorder arrows */}
+                    <div
+                      className="flex flex-col flex-shrink-0"
+                      style={{ width: 18, gap: 1, marginTop: 6 }}
+                    >
+                      {i > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => swapQuestions(i, i - 1)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            color: 'var(--muted-foreground)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1,
+                          }}
+                          title="Move up"
+                          aria-label={`Move question ${i + 1} up`}
+                        >
+                          <ChevronUp size={14} aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <span style={{ height: 14 }} />
+                      )}
+                      {i < questions.length - 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => swapQuestions(i, i + 1)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            color: 'var(--muted-foreground)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1,
+                          }}
+                          title="Move down"
+                          aria-label={`Move question ${i + 1} down`}
+                        >
+                          <ChevronDown size={14} aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <span style={{ height: 14 }} />
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      {/* Input with character counter */}
+                      <div className="flex-1" style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          aria-label={`Question ${i + 1}`}
+                          placeholder={
+                            isOnly && isEmpty
+                              ? 'e.g. What do you see as the biggest barrier to AI adoption in your sector?'
+                              : `Question ${i + 1}`
+                          }
+                          value={q.label}
+                          onChange={e => {
+                            const updated = [...questions];
+                            updated[i] = { ...updated[i], label: e.target.value };
+                            setQuestions(updated);
+                          }}
+                          className="w-full rounded-lg px-3 py-2"
+                          style={{
+                            border: '1px solid var(--input)',
+                            backgroundColor: 'var(--background)',
+                            color: 'var(--foreground)',
+                            outline: 'none',
+                            paddingRight: showCounter ? 52 : 12,
+                          }}
+                          onFocus={e => {
+                            setFocusedIndex(i);
+                            e.currentTarget.style.borderColor = 'var(--accent)';
+                            e.currentTarget.style.boxShadow =
+                              '0 0 0 2px rgba(37, 99, 235, 0.2)';
+                          }}
+                          onBlur={e => {
+                            setFocusedIndex(null);
+                            e.currentTarget.style.borderColor = 'var(--input)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        />
+                        {showCounter && (
+                          <span
+                            style={{
+                              position: 'absolute',
+                              bottom: 6,
+                              right: 8,
+                              fontSize: '0.65rem',
+                              color: 'var(--muted-foreground)',
+                              pointerEvents: 'none',
+                              userSelect: 'none',
+                              lineHeight: 1,
+                            }}
+                          >
+                            {q.label.length}/200
+                          </span>
+                        )}
+                      </div>
+
+                      <div
+                        className="mt-3 flex flex-wrap gap-4 rounded-lg px-3 py-2"
                         style={{
-                          position: 'absolute',
-                          bottom: 6,
-                          right: 8,
-                          fontSize: '0.65rem',
-                          color: 'var(--muted-foreground)',
-                          pointerEvents: 'none',
-                          userSelect: 'none',
-                          lineHeight: 1,
+                          backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                          border: '1px solid var(--border)',
                         }}
                       >
-                        {q.length}/200
-                      </span>
-                    )}
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <label
+                              htmlFor={`question-${i + 1}-evidence`}
+                              className="block text-sm font-medium"
+                              style={{ color: 'var(--foreground)' }}
+                            >
+                              Ask for evidence
+                            </label>
+                            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                              Show an evidence and reasoning field under this question.
+                            </p>
+                          </div>
+                          <ToggleSwitch
+                            id={`question-${i + 1}-evidence`}
+                            checked={q.requireEvidence}
+                            onChange={(checked) => {
+                              const updated = [...questions];
+                              updated[i] = { ...updated[i], requireEvidence: checked };
+                              setQuestions(updated);
+                            }}
+                          />
+                        </div>
+
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <label
+                              htmlFor={`question-${i + 1}-confidence`}
+                              className="block text-sm font-medium"
+                              style={{ color: 'var(--foreground)' }}
+                            >
+                              Ask for confidence
+                            </label>
+                            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                              Show the confidence slider and confidence explanation.
+                            </p>
+                          </div>
+                          <ToggleSwitch
+                            id={`question-${i + 1}-confidence`}
+                            checked={q.requireConfidence}
+                            onChange={(checked) => {
+                              const updated = [...questions];
+                              updated[i] = { ...updated[i], requireConfidence: checked };
+                              setQuestions(updated);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Remove button (Trash2, visible on hover) */}
@@ -801,7 +887,7 @@ export default function AdminFormNew() {
           <div className="mt-4 mb-3">
             <button
               type="button"
-              onClick={() => setQuestions([...questions, ''])}
+              onClick={() => setQuestions([...questions, createBlankQuestion()])}
               className="text-sm px-3 py-1.5 rounded-lg font-medium"
               style={{
                 color: 'var(--accent)',
@@ -819,6 +905,74 @@ export default function AdminFormNew() {
             >
               + Add question
             </button>
+          </div>
+
+          <div className="mb-6">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <h2 className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                  Expert Form Preview
+                </h2>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                  This is what participants will see. Your question toggles apply immediately here.
+                </p>
+              </div>
+            </div>
+            <div
+              className="rounded-xl p-4 sm:p-5"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <div className="mb-4">
+                <div className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
+                  {title.trim() || 'Untitled consultation'}
+                </div>
+                <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                  {description.trim() || 'Add a description to show experts what this consultation is about.'}
+                </p>
+              </div>
+
+              {questions.filter(question => question.label.trim()).length === 0 ? (
+                <div
+                  className="rounded-lg px-4 py-5 text-sm"
+                  style={{
+                    backgroundColor: 'var(--background)',
+                    border: '1px dashed var(--border)',
+                    color: 'var(--muted-foreground)',
+                  }}
+                >
+                  Add at least one question to preview the expert form.
+                </div>
+              ) : (
+                questions
+                  .map((question, index) => {
+                    if (!question.label.trim()) {
+                      return null;
+                    }
+                    const key = `q${index + 1}`;
+                    return (
+                      <div key={key} className="mb-5 last:mb-0">
+                        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
+                          {question.label}
+                        </label>
+                        <StructuredInput
+                          questionIndex={index}
+                          formId="preview"
+                          value={previewResponses[key] ?? emptyStructuredResponse()}
+                          onChange={(value) =>
+                            setPreviewResponses(prev => ({ ...prev, [key]: value }))
+                          }
+                          showEvidence={question.requireEvidence}
+                          showConfidence={question.requireConfidence}
+                          persistDraft={false}
+                        />
+                      </div>
+                    );
+                  })
+              )}
+            </div>
           </div>
 
           {/* ── Join Code (moved lower for clearer flow) ─────────────── */}

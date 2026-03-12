@@ -2898,14 +2898,14 @@ def unlock_form(
     )
 
     if existing_unlock:
-        return {"message": "Form already unlocked."}
+        return {"message": "Form already unlocked.", "form_id": form.id}
 
     # Create a new unlock record
     new_unlock = UserFormUnlock(user_id=user.id, form_id=form.id)
     db.add(new_unlock)
     db.commit()
 
-    return {"message": "Form unlocked successfully."}
+    return {"message": "Form unlocked successfully.", "form_id": form.id}
 
 
 @router.get(
