@@ -1,1 +1,0 @@
-import{j as l}from"./vendor-markdown-29e8e9b1.js";const a={sm:"max-w-2xl",md:"max-w-3xl",lg:"max-w-5xl",xl:"max-w-7xl"};function o({size:x="lg",children:s,className:m=""}){return l.jsx("div",{className:`${a[x]} mx-auto w-full px-4 sm:px-6 lg:px-8 ${m}`.trim(),children:s})}export{o as C};

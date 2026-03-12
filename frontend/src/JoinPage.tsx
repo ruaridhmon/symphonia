@@ -63,8 +63,8 @@ export default function JoinPage() {
     setManualError('');
     setManualLoading(true);
     try {
-      await unlockForm(manualCode.trim());
-      navigate('/', { replace: true });
+      const result = await unlockForm(manualCode.trim());
+      navigate(`/form/${result.form_id}`, { replace: true });
     } catch (err: any) {
       setManualError(err.status === 404 ? 'Invalid join code. Please check and try again.' : `Could not join (HTTP ${err.status})`);
     } finally {
@@ -77,6 +77,23 @@ export default function JoinPage() {
     return (
       <section className="flex-1 py-6 sm:py-8">
         <Container size="sm">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-1.5 text-sm mb-6 transition-colors"
+            style={{
+              color: 'var(--muted-foreground)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
+          >
+            ← Back to Dashboard
+          </button>
+
           <div
             className="rounded-xl p-6 sm:p-10"
             style={{
@@ -120,14 +137,6 @@ export default function JoinPage() {
               >
                 Join Consultation
               </LoadingButton>
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="w-full text-sm py-2"
-                style={{ color: 'var(--muted-foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                ← Back to dashboard
-              </button>
             </form>
           </div>
         </Container>

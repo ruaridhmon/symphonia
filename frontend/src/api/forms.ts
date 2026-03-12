@@ -46,7 +46,7 @@ export function getForm(formId: number) {
 
 /** Admin: create a new form */
 export function createForm(data: CreateFormPayload) {
-  return api.post<FormListItem>('/create_form', data);
+  return api.post<FormListItem>('/forms/create', data);
 }
 
 /** Admin: update a form */
@@ -61,7 +61,7 @@ export function getMyForms() {
 
 /** User: unlock a form with a join code */
 export function unlockForm(joinCode: string) {
-  return api.post<{ message: string }>('/forms/unlock', { join_code: joinCode });
+  return api.post<{ message: string; form_id: number }>('/forms/unlock', { join_code: joinCode });
 }
 
 /* ── User-created forms ── */

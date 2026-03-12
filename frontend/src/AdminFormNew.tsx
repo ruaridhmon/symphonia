@@ -1,18 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronUp, ChevronDown, Trash2, RefreshCw, Sparkles, BookOpen, X, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ChevronUp, ChevronDown, Trash2, RefreshCw, BookOpen, X } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { api } from './api/client';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
+import StructuredInput from './components/StructuredInput';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import TemplatePicker, { type FormTemplate } from './TemplatePicker';
+import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
+import { normalizeQuestion, type ConfigurableQuestion } from './utils/questions';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
 function generateJoinCode(): string {
   return String(Math.floor(10000 + Math.random() * 90000));
+}
+
+function createBlankQuestion(): ConfigurableQuestion {
+  return {
+    label: '',
+    requireEvidence: true,
+    requireConfidence: true,
+  };
 }
 
 /* ── Toggle switch (pill-shaped) ──────────────────────────────── */
@@ -321,440 +332,10 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
             <li>Use "What…", "How…", "In what ways…" — not "Do you agree…"</li>
             <li>Think: "Would 10 different experts give 10 meaningfully different answers?"</li>
             <li>Write a clear title — it helps experts calibrate their responses.</li>
-            <li>Use the AI assistant below to get suggestions, critique, or improvements.</li>
+            <li>Draft questions manually first, then refine after seeing round-one responses.</li>
           </ul>
         </section>
       </div>
-    </div>
-  );
-}
-
-/* ── AI Assistant Panel ───────────────────────────────────────── */
-
-type AiMode = 'suggest' | 'critique' | 'improve';
-
-interface CritiqueItem {
-  question: string;
-  issue: string;
-  severity: 'low' | 'medium' | 'high';
-}
-
-interface ImproveItem {
-  original: string;
-  improved: string;
-  reason: string;
-}
-
-function AiAssistantPanel({
-  open,
-  onClose,
-  title,
-  questions,
-  onAddQuestion,
-  onReplaceQuestion,
-  token,
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  questions: string[];
-  onAddQuestion: (q: string) => void;
-  onReplaceQuestion: (original: string, improved: string) => void;
-  token: string | null;
-}) {
-  const [mode, setMode] = useState<AiMode>('suggest');
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [addedQuestions, setAddedQuestions] = useState<Set<string>>(new Set());
-  const [replacedQuestions, setReplacedQuestions] = useState<Set<string>>(new Set());
-
-  const handleGenerate = async () => {
-    if (!title.trim()) {
-      setError('Please enter a form title first.');
-      return;
-    }
-
-    if ((mode === 'critique' || mode === 'improve') && !questions.some(q => q.trim())) {
-      setError(`Add at least one question before using "${mode}" mode.`);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    setAddedQuestions(new Set());
-    setReplacedQuestions(new Set());
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/ai/suggest`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          description: '',
-          questions: questions.filter(q => q.trim()),
-          mode,
-        }),
-      });
-
-      if (!res.ok) {
-        const detail = await res.json().catch(() => ({}));
-        throw new Error(detail.detail || `Request failed (HTTP ${res.status})`);
-      }
-
-      const data = await res.json();
-      setResult(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to get AI suggestions.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddSuggestion = (q: string) => {
-    onAddQuestion(q);
-    setAddedQuestions(prev => new Set(prev).add(q));
-  };
-
-  const handleUseImproved = (item: ImproveItem) => {
-    onReplaceQuestion(item.original, item.improved);
-    setReplacedQuestions(prev => new Set(prev).add(item.original));
-  };
-
-  if (!open) return null;
-
-  const severityStyles: Record<string, { bg: string; border: string; text: string }> = {
-    high: {
-      bg: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
-      border: 'color-mix(in srgb, var(--destructive) 25%, transparent)',
-      text: 'var(--destructive)',
-    },
-    medium: {
-      bg: 'color-mix(in srgb, orange 10%, transparent)',
-      border: 'color-mix(in srgb, orange 25%, transparent)',
-      text: 'orange',
-    },
-    low: {
-      bg: 'color-mix(in srgb, var(--muted-foreground) 8%, transparent)',
-      border: 'color-mix(in srgb, var(--muted-foreground) 15%, transparent)',
-      text: 'var(--muted-foreground)',
-    },
-  };
-
-  return (
-    <div
-      style={{
-        marginTop: '1rem',
-        borderRadius: 12,
-        border: '1px solid var(--border)',
-        backgroundColor: 'var(--card)',
-        overflow: 'hidden',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-      }}
-    >
-      {/* Panel header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 16px',
-          borderBottom: '1px solid var(--border)',
-          backgroundColor: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Sparkles size={16} style={{ color: 'var(--accent)' }} />
-          <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--foreground)' }}>
-            AI Assistant
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            color: 'var(--muted-foreground)',
-            padding: 4,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-          title="Close AI assistant"
-          aria-label="Close AI assistant"
-        >
-          <X size={16} aria-hidden="true" />
-        </button>
-      </div>
-
-      {/* Panel body */}
-      <div style={{ padding: '16px' }}>
-        {/* Mode selector */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
-          {([
-            { key: 'suggest' as AiMode, label: 'Suggest questions' },
-            { key: 'critique' as AiMode, label: 'Critique' },
-            { key: 'improve' as AiMode, label: 'Improve' },
-          ]).map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => { setMode(key); setResult(null); setError(null); }}
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: mode === key ? 600 : 400,
-                padding: '6px 14px',
-                borderRadius: 20,
-                border: `1px solid ${mode === key ? 'var(--accent)' : 'var(--border)'}`,
-                backgroundColor: mode === key ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'transparent',
-                color: mode === key ? 'var(--accent)' : 'var(--muted-foreground)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Generate button */}
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '10px 16px',
-            borderRadius: 8,
-            border: 'none',
-            backgroundColor: loading ? 'var(--input)' : 'var(--accent)',
-            color: loading ? 'var(--muted-foreground)' : '#fff',
-            fontSize: '0.85rem',
-            fontWeight: 600,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            transition: 'background-color 0.15s ease',
-            marginBottom: 12,
-          }}
-        >
-          {loading ? (
-            <>
-              <span
-                style={{
-                  width: 16,
-                  height: 16,
-                  border: '2px solid var(--muted-foreground)',
-                  borderTopColor: 'transparent',
-                  borderRadius: '50%',
-                  animation: 'spin 0.8s linear infinite',
-                  display: 'inline-block',
-                }}
-              />
-              Thinking…
-            </>
-          ) : (
-            <>
-              <Sparkles size={14} />
-              Generate
-            </>
-          )}
-        </button>
-
-        {/* Error */}
-        {error && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 8,
-              padding: '10px 12px',
-              borderRadius: 8,
-              backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
-              border: '1px solid color-mix(in srgb, var(--destructive) 20%, transparent)',
-              marginBottom: 12,
-            }}
-          >
-            <AlertCircle size={16} style={{ color: 'var(--destructive)', flexShrink: 0, marginTop: 1 }} />
-            <span style={{ fontSize: '0.82rem', color: 'var(--destructive)', lineHeight: 1.5 }}>
-              {error}
-            </span>
-          </div>
-        )}
-
-        {/* Results — Suggest mode */}
-        {result?.suggestions && mode === 'suggest' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p style={{ fontSize: '0.78rem', color: 'var(--muted-foreground)', margin: '0 0 4px 0' }}>
-              Click a suggestion to add it to your form:
-            </p>
-            {result.suggestions.map((q: string, i: number) => {
-              const added = addedQuestions.has(q);
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => !added && handleAddSuggestion(q)}
-                  disabled={added}
-                  style={{
-                    textAlign: 'left',
-                    fontSize: '0.83rem',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: `1px solid ${added ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--border)'}`,
-                    backgroundColor: added
-                      ? 'color-mix(in srgb, var(--accent) 8%, transparent)'
-                      : 'var(--background)',
-                    color: 'var(--foreground)',
-                    cursor: added ? 'default' : 'pointer',
-                    lineHeight: 1.5,
-                    transition: 'all 0.15s ease',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 10,
-                  }}
-                >
-                  {added ? (
-                    <CheckCircle2 size={16} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
-                  ) : (
-                    <span
-                      style={{
-                        fontSize: '0.75rem',
-                        color: 'var(--accent)',
-                        fontWeight: 600,
-                        flexShrink: 0,
-                        marginTop: 1,
-                      }}
-                    >
-                      +
-                    </span>
-                  )}
-                  <span>{q}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Results — Critique mode */}
-        {result?.critique && mode === 'critique' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {result.critique.map((item: CritiqueItem, i: number) => {
-              const severity = severityStyles[item.severity] || severityStyles.medium;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: `1px solid ${severity.border}`,
-                    backgroundColor: severity.bg,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <AlertCircle size={14} style={{ color: severity.text, flexShrink: 0 }} />
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        color: severity.text,
-                      }}
-                    >
-                      {item.severity}
-                    </span>
-                  </div>
-                  <p style={{ fontSize: '0.83rem', color: 'var(--foreground)', margin: '0 0 4px 0', fontStyle: 'italic' }}>
-                    "{item.question}"
-                  </p>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', margin: 0 }}>
-                    {item.issue}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Results — Improve mode */}
-        {result?.improved && mode === 'improve' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {result.improved.map((item: ImproveItem, i: number) => {
-              const replaced = replacedQuestions.has(item.original);
-              return (
-                <div
-                  key={i}
-                  style={{
-                    padding: '12px 14px',
-                    borderRadius: 8,
-                    border: `1px solid ${replaced ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--border)'}`,
-                    backgroundColor: replaced
-                      ? 'color-mix(in srgb, var(--accent) 5%, transparent)'
-                      : 'var(--background)',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: '0.78rem',
-                      color: 'var(--muted-foreground)',
-                      margin: '0 0 4px 0',
-                      textDecoration: replaced ? 'line-through' : 'none',
-                    }}
-                  >
-                    <strong>Original:</strong> {item.original}
-                  </p>
-                  <p style={{ fontSize: '0.83rem', color: 'var(--foreground)', margin: '0 0 6px 0' }}>
-                    <strong>Improved:</strong> {item.improved}
-                  </p>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--muted-foreground)', margin: '0 0 8px 0', fontStyle: 'italic' }}>
-                    {item.reason}
-                  </p>
-                  {!replaced ? (
-                    <button
-                      type="button"
-                      onClick={() => handleUseImproved(item)}
-                      style={{
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        padding: '4px 12px',
-                        borderRadius: 6,
-                        border: '1px solid var(--accent)',
-                        backgroundColor: 'transparent',
-                        color: 'var(--accent)',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      Use improved version
-                    </button>
-                  ) : (
-                    <span style={{ fontSize: '0.78rem', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <CheckCircle2 size={14} /> Applied
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Inline keyframes for spinner */}
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }
@@ -774,9 +355,10 @@ export default function AdminFormNew() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [joinCode, setJoinCode] = useState(() => generateJoinCode());
-  const [questions, setQuestions] = useState(['']);
+  const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
+  const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const [saving, setSaving] = useState(false);
-  const [synthesisModel, setSynthesisModel] = useState('anthropic/claude-opus-4-6');
+  const [synthesisModel, setSynthesisModel] = useState('openai/gpt-4o');
   const [error, setError] = useState<string | null>(null);
 
   /* Question interaction state (Worker B) */
@@ -801,7 +383,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(template);
     setTitle(template.name);
     setDescription(template.description);
-    setQuestions(template.default_questions);
+    setQuestions(template.default_questions.map(normalizeQuestion));
     setShowTemplatePicker(false);
   };
 
@@ -809,7 +391,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
     setTitle('');
     setDescription('');
-    setQuestions(['']);
+    setQuestions([createBlankQuestion()]);
     setShowTemplatePicker(false);
   };
 
@@ -818,9 +400,8 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
   };
 
-  /* Worker D state — Guide modal + AI panel */
+  /* Worker D state — Guide modal */
   const [guideOpen, setGuideOpen] = useState(false);
-  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   const swapQuestions = (a: number, b: number) => {
     const updated = [...questions];
@@ -828,26 +409,16 @@ export default function AdminFormNew() {
     setQuestions(updated);
   };
 
-  const handleAddQuestion = (q: string) => {
-    // Add to the first empty slot, or append
-    const emptyIdx = questions.findIndex(existing => existing.trim() === '');
-    if (emptyIdx !== -1) {
-      const updated = [...questions];
-      updated[emptyIdx] = q;
-      setQuestions(updated);
-    } else {
-      setQuestions([...questions, q]);
-    }
-  };
-
-  const handleReplaceQuestion = (original: string, improved: string) => {
-    const idx = questions.findIndex(q => q.trim() === original.trim());
-    if (idx !== -1) {
-      const updated = [...questions];
-      updated[idx] = improved;
-      setQuestions(updated);
-    }
-  };
+  useEffect(() => {
+    setPreviewResponses(prev => {
+      const next: Record<string, StructuredResponse> = {};
+      questions.forEach((_, index) => {
+        const key = `q${index + 1}`;
+        next[key] = prev[key] ?? emptyStructuredResponse();
+      });
+      return next;
+    });
+  }, [questions]);
 
   const createForm = async () => {
     if (!title.trim()) {
@@ -857,7 +428,7 @@ export default function AdminFormNew() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/create_form`, {
+      const res = await fetch(`${API_BASE_URL}/forms/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -866,7 +437,7 @@ export default function AdminFormNew() {
         body: JSON.stringify({
           title: title.trim(),
           description: description.trim() || undefined,
-          questions: questions.filter(q => q.trim() !== ''),
+          questions: questions.filter(q => q.label.trim() !== ''),
           allow_join: allowJoin,
           anonymous,
           deadline: deadline || null,
@@ -891,7 +462,7 @@ export default function AdminFormNew() {
         {/* Back button */}
         <button
           type="button"
-          onClick={() => showTemplatePicker ? navigate('/admin') : handleBackToTemplates()}
+          onClick={() => showTemplatePicker ? navigate('/') : handleBackToTemplates()}
           className="inline-flex items-center gap-1.5 text-sm mb-6 transition-colors"
           style={{
             color: 'var(--muted-foreground)',
@@ -937,11 +508,11 @@ export default function AdminFormNew() {
             >
               {selectedTemplate ? `New Form — ${selectedTemplate.icon} ${selectedTemplate.name}` : 'Create a New Form'}
             </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-              {selectedTemplate
-                ? 'Customise the template below, then create your consultation.'
-                : 'Set up a new Delphi consultation with title and opening questions.'}
-            </p>
+              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                {selectedTemplate
+                  ? 'Customise the template below, then create your consultation.'
+                  : 'Set up a new Delphi consultation with title and questions.'}
+              </p>
           </div>
 
           {/* Guide button — Worker D */}
@@ -1070,7 +641,341 @@ export default function AdminFormNew() {
             />
           </div>
 
-          {/* ── Join Code (Worker A) ──────────────────────────────── */}
+          {/* ── Questions (Workers A + B) ─────────────────────────── */}
+          <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
+            <legend
+              className="block text-sm font-medium"
+              style={{ color: 'var(--foreground)' }}
+            >
+              Questions
+            </legend>
+            <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              Good questions are open-ended, neutral, and invite diverse
+              perspectives.
+            </p>
+
+            {questions.map((q, i) => {
+              const isOnly = questions.length === 1;
+              const isEmpty = q.label.length === 0;
+              const showCounter = focusedIndex === i || q.label.length > 0;
+
+              return (
+                <div
+                  key={i}
+                  className="rounded-xl p-3"
+                  style={{ transition: 'opacity 0.15s ease' }}
+                  onMouseEnter={() => setHoveredRow(i)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                >
+                  <div
+                    className="flex gap-2 items-start"
+                  >
+                    {/* Number badge */}
+                    <span
+                      className="flex-shrink-0 flex items-center justify-center rounded-full text-xs font-semibold"
+                      style={{
+                        width: 26,
+                        height: 26,
+                        minWidth: 26,
+                        backgroundColor: 'var(--foreground)',
+                        color: 'var(--background)',
+                        opacity: 0.75,
+                        marginTop: 8,
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+
+                    {/* Reorder arrows */}
+                    <div
+                      className="flex flex-col flex-shrink-0"
+                      style={{ width: 18, gap: 1, marginTop: 6 }}
+                    >
+                      {i > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => swapQuestions(i, i - 1)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            color: 'var(--muted-foreground)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1,
+                          }}
+                          title="Move up"
+                          aria-label={`Move question ${i + 1} up`}
+                        >
+                          <ChevronUp size={14} aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <span style={{ height: 14 }} />
+                      )}
+                      {i < questions.length - 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => swapQuestions(i, i + 1)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            color: 'var(--muted-foreground)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1,
+                          }}
+                          title="Move down"
+                          aria-label={`Move question ${i + 1} down`}
+                        >
+                          <ChevronDown size={14} aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <span style={{ height: 14 }} />
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      {/* Input with character counter */}
+                      <div className="flex-1" style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          aria-label={`Question ${i + 1}`}
+                          placeholder={
+                            isOnly && isEmpty
+                              ? 'e.g. What do you see as the biggest barrier to AI adoption in your sector?'
+                              : `Question ${i + 1}`
+                          }
+                          value={q.label}
+                          onChange={e => {
+                            const updated = [...questions];
+                            updated[i] = { ...updated[i], label: e.target.value };
+                            setQuestions(updated);
+                          }}
+                          className="w-full rounded-lg px-3 py-2"
+                          style={{
+                            border: '1px solid var(--input)',
+                            backgroundColor: 'var(--background)',
+                            color: 'var(--foreground)',
+                            outline: 'none',
+                            paddingRight: showCounter ? 52 : 12,
+                          }}
+                          onFocus={e => {
+                            setFocusedIndex(i);
+                            e.currentTarget.style.borderColor = 'var(--accent)';
+                            e.currentTarget.style.boxShadow =
+                              '0 0 0 2px rgba(37, 99, 235, 0.2)';
+                          }}
+                          onBlur={e => {
+                            setFocusedIndex(null);
+                            e.currentTarget.style.borderColor = 'var(--input)';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        />
+                        {showCounter && (
+                          <span
+                            style={{
+                              position: 'absolute',
+                              bottom: 6,
+                              right: 8,
+                              fontSize: '0.65rem',
+                              color: 'var(--muted-foreground)',
+                              pointerEvents: 'none',
+                              userSelect: 'none',
+                              lineHeight: 1,
+                            }}
+                          >
+                            {q.label.length}/200
+                          </span>
+                        )}
+                      </div>
+
+                      <div
+                        className="mt-3 flex flex-wrap gap-4 rounded-lg px-3 py-2"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                          border: '1px solid var(--border)',
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <label
+                              htmlFor={`question-${i + 1}-evidence`}
+                              className="block text-sm font-medium"
+                              style={{ color: 'var(--foreground)' }}
+                            >
+                              Ask for evidence
+                            </label>
+                            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                              Show an evidence and reasoning field under this question.
+                            </p>
+                          </div>
+                          <ToggleSwitch
+                            id={`question-${i + 1}-evidence`}
+                            checked={q.requireEvidence}
+                            onChange={(checked) => {
+                              const updated = [...questions];
+                              updated[i] = { ...updated[i], requireEvidence: checked };
+                              setQuestions(updated);
+                            }}
+                          />
+                        </div>
+
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <label
+                              htmlFor={`question-${i + 1}-confidence`}
+                              className="block text-sm font-medium"
+                              style={{ color: 'var(--foreground)' }}
+                            >
+                              Ask for confidence
+                            </label>
+                            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                              Show the confidence slider and confidence explanation.
+                            </p>
+                          </div>
+                          <ToggleSwitch
+                            id={`question-${i + 1}-confidence`}
+                            checked={q.requireConfidence}
+                            onChange={(checked) => {
+                              const updated = [...questions];
+                              updated[i] = { ...updated[i], requireConfidence: checked };
+                              setQuestions(updated);
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Remove button (Trash2, visible on hover) */}
+                  {questions.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setQuestions(questions.filter((_, idx) => idx !== i))
+                      }
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 4,
+                        color: 'var(--muted-foreground)',
+                        opacity: hoveredRow === i ? 1 : 0,
+                        transition: 'opacity 0.15s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                      title="Remove question"
+                      aria-label={`Remove question ${i + 1}`}
+                    >
+                      <Trash2 size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </fieldset>
+
+          {/* ── Add questions (primary drafting action) ───────────────── */}
+          <div className="mt-4 mb-3">
+            <button
+              type="button"
+              onClick={() => setQuestions([...questions, createBlankQuestion()])}
+              className="text-sm px-3 py-1.5 rounded-lg font-medium"
+              style={{
+                color: 'var(--accent)',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e =>
+                (e.currentTarget.style.backgroundColor =
+                  'color-mix(in srgb, var(--accent) 8%, transparent)')
+              }
+              onMouseLeave={e =>
+                (e.currentTarget.style.backgroundColor = 'transparent')
+              }
+            >
+              + Add question
+            </button>
+          </div>
+
+          <div className="mb-6">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <h2 className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                  Expert Form Preview
+                </h2>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                  This is what participants will see. Your question toggles apply immediately here.
+                </p>
+              </div>
+            </div>
+            <div
+              className="rounded-xl p-4 sm:p-5"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <div className="mb-4">
+                <div className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
+                  {title.trim() || 'Untitled consultation'}
+                </div>
+                <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                  {description.trim() || 'Add a description to show experts what this consultation is about.'}
+                </p>
+              </div>
+
+              {questions.filter(question => question.label.trim()).length === 0 ? (
+                <div
+                  className="rounded-lg px-4 py-5 text-sm"
+                  style={{
+                    backgroundColor: 'var(--background)',
+                    border: '1px dashed var(--border)',
+                    color: 'var(--muted-foreground)',
+                  }}
+                >
+                  Add at least one question to preview the expert form.
+                </div>
+              ) : (
+                questions
+                  .map((question, index) => {
+                    if (!question.label.trim()) {
+                      return null;
+                    }
+                    const key = `q${index + 1}`;
+                    return (
+                      <div key={key} className="mb-5 last:mb-0">
+                        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
+                          {question.label}
+                        </label>
+                        <StructuredInput
+                          questionIndex={index}
+                          formId="preview"
+                          value={previewResponses[key] ?? emptyStructuredResponse()}
+                          onChange={(value) =>
+                            setPreviewResponses(prev => ({ ...prev, [key]: value }))
+                          }
+                          showEvidence={question.requireEvidence}
+                          showConfidence={question.requireConfidence}
+                          persistDraft={false}
+                        />
+                      </div>
+                    );
+                  })
+              )}
+            </div>
+          </div>
+
+          {/* ── Join Code (moved lower for clearer flow) ─────────────── */}
           <div className="space-y-1.5 mb-6">
             <label
               htmlFor="form-join-code"
@@ -1135,229 +1040,6 @@ export default function AdminFormNew() {
               Share this code with participants so they can join.
             </p>
           </div>
-
-          {/* ── Opening Questions (Workers A + B) ─────────────────── */}
-          <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
-            <legend
-              className="block text-sm font-medium"
-              style={{ color: 'var(--foreground)' }}
-            >
-              Opening questions
-            </legend>
-            <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-              Good questions are open-ended, neutral, and invite diverse
-              perspectives.
-            </p>
-
-            {questions.map((q, i) => {
-              const isOnly = questions.length === 1;
-              const isEmpty = q.length === 0;
-              const showCounter = focusedIndex === i || q.length > 0;
-
-              return (
-                <div
-                  key={i}
-                  className="flex gap-2 items-center"
-                  style={{ transition: 'opacity 0.15s ease' }}
-                  onMouseEnter={() => setHoveredRow(i)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  {/* Number badge */}
-                  <span
-                    className="flex-shrink-0 flex items-center justify-center rounded-full text-xs font-semibold"
-                    style={{
-                      width: 26,
-                      height: 26,
-                      minWidth: 26,
-                      backgroundColor: 'var(--foreground)',
-                      color: 'var(--background)',
-                      opacity: 0.75,
-                    }}
-                  >
-                    {i + 1}
-                  </span>
-
-                  {/* Reorder arrows */}
-                  <div
-                    className="flex flex-col flex-shrink-0"
-                    style={{ width: 18, gap: 1 }}
-                  >
-                    {i > 0 ? (
-                      <button
-                        type="button"
-                        onClick={() => swapQuestions(i, i - 1)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 0,
-                          color: 'var(--muted-foreground)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          lineHeight: 1,
-                        }}
-                        title="Move up"
-                        aria-label={`Move question ${i + 1} up`}
-                      >
-                        <ChevronUp size={14} aria-hidden="true" />
-                      </button>
-                    ) : (
-                      <span style={{ height: 14 }} />
-                    )}
-                    {i < questions.length - 1 ? (
-                      <button
-                        type="button"
-                        onClick={() => swapQuestions(i, i + 1)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 0,
-                          color: 'var(--muted-foreground)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          lineHeight: 1,
-                        }}
-                        title="Move down"
-                        aria-label={`Move question ${i + 1} down`}
-                      >
-                        <ChevronDown size={14} aria-hidden="true" />
-                      </button>
-                    ) : (
-                      <span style={{ height: 14 }} />
-                    )}
-                  </div>
-
-                  {/* Input with character counter */}
-                  <div className="flex-1" style={{ position: 'relative' }}>
-                    <input
-                      type="text"
-                      aria-label={`Question ${i + 1}`}
-                      placeholder={
-                        isOnly && isEmpty
-                          ? 'e.g. What do you see as the biggest barrier to AI adoption in your sector?'
-                          : `Question ${i + 1}`
-                      }
-                      value={q}
-                      onChange={e => {
-                        const updated = [...questions];
-                        updated[i] = e.target.value;
-                        setQuestions(updated);
-                      }}
-                      className="w-full rounded-lg px-3 py-2"
-                      style={{
-                        border: '1px solid var(--input)',
-                        backgroundColor: 'var(--background)',
-                        color: 'var(--foreground)',
-                        outline: 'none',
-                        paddingRight: showCounter ? 52 : 12,
-                      }}
-                      onFocus={e => {
-                        setFocusedIndex(i);
-                        e.currentTarget.style.borderColor = 'var(--accent)';
-                        e.currentTarget.style.boxShadow =
-                          '0 0 0 2px rgba(37, 99, 235, 0.2)';
-                      }}
-                      onBlur={e => {
-                        setFocusedIndex(null);
-                        e.currentTarget.style.borderColor = 'var(--input)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
-                    />
-                    {showCounter && (
-                      <span
-                        style={{
-                          position: 'absolute',
-                          bottom: 6,
-                          right: 8,
-                          fontSize: '0.65rem',
-                          color: 'var(--muted-foreground)',
-                          pointerEvents: 'none',
-                          userSelect: 'none',
-                          lineHeight: 1,
-                        }}
-                      >
-                        {q.length}/200
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Remove button (Trash2, visible on hover) */}
-                  {questions.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setQuestions(questions.filter((_, idx) => idx !== i))
-                      }
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 4,
-                        color: 'var(--muted-foreground)',
-                        opacity: hoveredRow === i ? 1 : 0,
-                        transition: 'opacity 0.15s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                      title="Remove question"
-                      aria-label={`Remove question ${i + 1}`}
-                    >
-                      <Trash2 size={16} aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </fieldset>
-
-          {/* ── AI Assist button + Panel (Worker D) ────────────────── */}
-          {!aiPanelOpen && (
-            <button
-              type="button"
-              onClick={() => setAiPanelOpen(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '8px 16px',
-                borderRadius: 8,
-                border: '1px solid color-mix(in srgb, var(--accent) 40%, transparent)',
-                backgroundColor: 'color-mix(in srgb, var(--accent) 6%, transparent)',
-                color: 'var(--accent)',
-                fontSize: '0.83rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                marginBottom: 4,
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 12%, transparent)';
-                e.currentTarget.style.borderColor = 'var(--accent)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, transparent)';
-                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--accent) 40%, transparent)';
-              }}
-            >
-              <Sparkles size={15} />
-              ✨ AI Assist
-            </button>
-          )}
-
-          <AiAssistantPanel
-            open={aiPanelOpen}
-            onClose={() => setAiPanelOpen(false)}
-            title={title}
-            questions={questions}
-            onAddQuestion={handleAddQuestion}
-            onReplaceQuestion={handleReplaceQuestion}
-            token={token}
-          />
 
           {/* ── Advanced Settings (Worker C) ───────────────────────── */}
           <div
@@ -1514,32 +1196,12 @@ export default function AdminFormNew() {
           {/* ── End Advanced Settings ─────────────────────────────── */}
 
           {/* ── Actions ───────────────────────────────────────────── */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 mt-6">
-            <button
-              type="button"
-              onClick={() => setQuestions([...questions, ''])}
-              className="text-sm px-3 py-1.5 rounded-lg font-medium"
-              style={{
-                color: 'var(--accent)',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={e =>
-                (e.currentTarget.style.backgroundColor =
-                  'color-mix(in srgb, var(--accent) 8%, transparent)')
-              }
-              onMouseLeave={e =>
-                (e.currentTarget.style.backgroundColor = 'transparent')
-              }
-            >
-              + Add question
-            </button>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-end gap-3 mt-6">
             <div className="flex gap-3 self-end sm:self-auto">
               <LoadingButton
                 variant="ghost"
                 size="md"
-                onClick={() => navigate('/admin')}
+                onClick={() => navigate('/')}
               >
                 Cancel
               </LoadingButton>

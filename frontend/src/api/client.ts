@@ -92,9 +92,13 @@ async function apiClient<T>(
 
   if (!response.ok) {
     if (response.status === 401) {
-      // Session expired — clear ALL local auth state and redirect
-      clearAuthAndRedirect();
-      throw new ApiError(401, 'Session expired. Please log in again.');
+      // Login endpoint also returns 401 for invalid credentials.
+      // Do not treat that as session expiry or force redirect.
+      if (endpoint !== '/login') {
+        // Session expired — clear ALL local auth state and redirect
+        clearAuthAndRedirect();
+        throw new ApiError(401, 'Session expired. Please log in again.');
+      }
     }
 
     // Safely read the error body — it might not be text

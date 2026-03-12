@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { getWebSocketUrl } from '../api/ws';
 
 export interface Viewer {
   email: string;
@@ -32,11 +33,17 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const connect = useCallback(() => {
-    if (!formId || !userEmail) return;
+    if (!formId) return;
+    const fallbackEmail = (() => {
+      try {
+        return localStorage.getItem('email') || '';
+      } catch {
+        return '';
+      }
+    })();
+    const effectiveEmail = userEmail || fallbackEmail || 'unknown@example.com';
 
-    // Derive WebSocket URL from current page location
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const wsUrl = getWebSocketUrl('/ws');
 
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
@@ -48,7 +55,7 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
         type: 'presence_join',
         form_id: formId,
         page,
-        user_email: userEmail,
+        user_email: effectiveEmail,
       }));
 
       // Start heartbeat every 15s

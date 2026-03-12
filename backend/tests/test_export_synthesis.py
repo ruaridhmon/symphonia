@@ -203,7 +203,7 @@ class TestExportSynthesisErrors:
 
 
 class TestExportSynthesisPdf:
-    """Test PDF export format (falls back to markdown if weasyprint unavailable)."""
+    """Test PDF export format."""
 
     def test_pdf_export_returns_200(self, client: TestClient, seeded_form):
         form_id, admin_headers, _ = seeded_form
@@ -221,5 +221,20 @@ class TestExportSynthesisPdf:
         )
         disposition = resp.headers.get("content-disposition", "")
         assert "attachment" in disposition
-        # Will be .pdf if weasyprint is available, .md otherwise
-        assert ".pdf" in disposition or ".md" in disposition
+        assert ".pdf" in disposition
+
+    def test_pdf_export_content_type(self, client: TestClient, seeded_form):
+        form_id, admin_headers, _ = seeded_form
+        resp = client.get(
+            f"/forms/{form_id}/export_synthesis?format=pdf",
+            headers=admin_headers,
+        )
+        assert "application/pdf" in resp.headers.get("content-type", "")
+
+    def test_pdf_export_returns_pdf_bytes(self, client: TestClient, seeded_form):
+        form_id, admin_headers, _ = seeded_form
+        resp = client.get(
+            f"/forms/{form_id}/export_synthesis?format=pdf",
+            headers=admin_headers,
+        )
+        assert resp.content.startswith(b"%PDF")

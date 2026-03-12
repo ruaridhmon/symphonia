@@ -76,7 +76,7 @@ export default function FormEditor() {
     try {
       if (isCreateMode) {
         // Create new form
-        await api.post('/create_form', {
+        await api.post('/forms/create', {
           title,
           questions: validQuestions.map(q => extractQuestionText(q)),
           allow_join: true,

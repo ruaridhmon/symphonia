@@ -1,13 +1,13 @@
 # Symphonia CI — backend tests + frontend build
-# Runs on pushes and PRs to main, develop, and axiotic/redesign
+# Runs on pushes and PRs to main and develop
 
 name: CI
 
 on:
   push:
-    branches: [main, develop, axiotic/redesign]
+    branches: [main, develop]
   pull_request:
-    branches: [main, develop, axiotic/redesign]
+    branches: [main, develop]
 
 concurrency:
   group: ci-${{ github.ref }}

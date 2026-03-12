@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { API_BASE_URL } from './config';
+import { getWebSocketUrl } from './api/ws';
 import { api } from './api/client';
 import { LoadingButton, SynthesisDisplay } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
@@ -58,9 +58,7 @@ export default function ResultPage() {
   }, [navigate]);
 
   useEffect(() => {
-    const ws = new WebSocket(
-      `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${new URL(API_BASE_URL).host}/ws`
-    );
+    const ws = new WebSocket(getWebSocketUrl('/ws'));
 
     ws.onmessage = (e) => {
       try {

@@ -244,6 +244,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
+        "http://localhost:4173",
         "https://symphonia.axiotic.ai",
     ],
     allow_credentials=True,
@@ -335,19 +336,25 @@ with SessionLocal() as db:
     else:
         sam.role = "platform_admin"
 
-    # Ruaridh
-    for extra_admin in ["ruaridh.mw@ed.ac.uk", "pscmmw@leeds.ac.uk"]:
+    # Additional platform admins
+    extra_admin_passwords = {
+        "ruaridh.mw@ed.ac.uk": "test",
+        "d.birks@leeds.ac.uk": "test",
+        "pscmmw@leeds.ac.uk": "changeme123",
+    }
+    for extra_admin, extra_password in extra_admin_passwords.items():
         u = db.query(User).filter(User.email == extra_admin).first()
         if not u:
             db.add(
                 User(
                     email=extra_admin,
-                    hashed_password=get_password_hash("changeme123"),
+                    hashed_password=get_password_hash(extra_password),
                     role="platform_admin",
                 )
             )
         else:
             u.role = "platform_admin"
+            u.hashed_password = get_password_hash(extra_password)
 
     db.commit()
 
@@ -391,6 +398,7 @@ with SessionLocal() as db:
     print("   • antreas@axiotic.ai")
     print("   • samuel@axiotic.ai")
     print("   • ruaridh.mw@ed.ac.uk")
+    print("   • d.birks@leeds.ac.uk")
     print("   • pscmmw@leeds.ac.uk")
     print("=" * 60)
 
@@ -401,6 +409,7 @@ with SessionLocal() as db:
 
 
 @app.websocket("/ws")
+@app.websocket("/api/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """Real-time event stream (WebSocket).
 

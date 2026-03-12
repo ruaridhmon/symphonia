@@ -4,7 +4,7 @@ import { api } from './client';
 
 export interface SubmitResponsePayload {
   form_id: number;
-  answers: Record<string, string>;
+  answers: Record<string, unknown>;
 }
 
 export interface ResponseItem {
@@ -12,7 +12,7 @@ export interface ResponseItem {
   form_id: number;
   user_id: number;
   round_id: number;
-  answers: Record<string, string>;
+  answers: Record<string, unknown>;
   version: number;
 }
 
@@ -21,7 +21,7 @@ export interface HasSubmittedResult {
 }
 
 export interface MyResponse {
-  answers: Record<string, string>;
+  answers: Record<string, unknown>;
 }
 
 /* ── API calls ── */
@@ -59,7 +59,7 @@ export function getResponses(formId: number, allRounds = false) {
 /** Admin: update a response's answers (with optimistic concurrency via version) */
 export function updateResponse(
   responseId: number,
-  answers: Record<string, string>,
+  answers: Record<string, unknown>,
   version: number
 ) {
   return api.put<ResponseItem>(`/responses/${responseId}`, {
@@ -71,7 +71,7 @@ export function updateResponse(
 /** Admin: force-update a response (overwrite regardless of version conflict) */
 export function forceUpdateResponse(
   responseId: number,
-  answers: Record<string, string>,
+  answers: Record<string, unknown>,
   version: number
 ) {
   return api.put<ResponseItem>(`/responses/${responseId}/force`, {

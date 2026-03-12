@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from './AuthContext';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { LoadingButton, PasswordInput } from './components';
+import RouteLoadingFallback from './components/RouteLoadingFallback';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Login() {
@@ -41,7 +42,7 @@ export default function Login() {
   // Wait for session restore to complete before deciding to redirect.
   // Without this guard, a stale csrf_token cookie causes an instant bounce
   // to "/" before the session is validated — triggering an infinite loop.
-  if (isLoading) return null;
+  if (isLoading) return <RouteLoadingFallback />;
 
   if (token) {
     return <Navigate to="/" />;

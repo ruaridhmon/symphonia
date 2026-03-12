@@ -14,6 +14,12 @@ interface StructuredInputProps {
   onChange: (value: StructuredResponse) => void;
   /** Whether the form is read-only (reviewing mode) */
   readOnly?: boolean;
+  /** Whether to show the evidence field for this question */
+  showEvidence?: boolean;
+  /** Whether to show the confidence controls for this question */
+  showConfidence?: boolean;
+  /** Whether to use localStorage autosave/restore */
+  persistDraft?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -57,6 +63,9 @@ export default function StructuredInput({
   value,
   onChange,
   readOnly = false,
+  showEvidence = true,
+  showConfidence = true,
+  persistDraft = true,
 }: StructuredInputProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [newCitation, setNewCitation] = useState('');
@@ -66,7 +75,7 @@ export default function StructuredInput({
 
   // ── Auto-save to localStorage (debounced 500ms) ──────────────────
   useEffect(() => {
-    if (readOnly) return;
+    if (readOnly || !persistDraft) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       try {
@@ -81,11 +90,11 @@ export default function StructuredInput({
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, [value, formId, questionIndex, readOnly]);
+  }, [value, formId, questionIndex, readOnly, persistDraft]);
 
   // ── Restore from localStorage on mount ───────────────────────────
   useEffect(() => {
-    if (readOnly) return;
+    if (readOnly || !persistDraft) return;
     try {
       const saved = localStorage.getItem(autoSaveKey(formId, questionIndex));
       if (saved) {
@@ -100,7 +109,7 @@ export default function StructuredInput({
     }
     // only on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [persistDraft, readOnly]);
 
   /* ── Helpers ───────────────────────────────────────── */
   function update(patch: Partial<StructuredResponse>) {
@@ -153,32 +162,36 @@ export default function StructuredInput({
         </Section>
 
         {/* Evidence */}
-        <Section icon={<BookOpen size={14} />} label="Evidence">
-          <div style={styles.readOnlyBlock}>
-            {value.evidence || <span style={{ color: 'var(--muted-foreground)' }}>No evidence provided</span>}
-          </div>
-        </Section>
+        {showEvidence && (
+          <Section icon={<BookOpen size={14} />} label="Evidence">
+            <div style={styles.readOnlyBlock}>
+              {value.evidence || <span style={{ color: 'var(--muted-foreground)' }}>No evidence provided</span>}
+            </div>
+          </Section>
+        )}
 
         {/* Confidence */}
-        <Section icon={<Scale size={14} />} label={`Confidence: ${value.confidence}/10`}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={styles.confidenceTrackReadOnly}>
-              <div
-                style={{
-                  ...styles.confidenceFill,
-                  width: `${(value.confidence / 10) * 100}%`,
-                  backgroundColor: conf.color,
-                }}
-              />
+        {showConfidence && (
+          <Section icon={<Scale size={14} />} label={`Confidence: ${value.confidence}/10`}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={styles.confidenceTrackReadOnly}>
+                <div
+                  style={{
+                    ...styles.confidenceFill,
+                    width: `${(value.confidence / 10) * 100}%`,
+                    backgroundColor: conf.color,
+                  }}
+                />
+              </div>
+              <span style={{ ...styles.confidenceLabel, color: conf.color }}>{conf.label}</span>
             </div>
-            <span style={{ ...styles.confidenceLabel, color: conf.color }}>{conf.label}</span>
-          </div>
-          {value.confidenceJustification && (
-            <div style={{ ...styles.readOnlyBlock, marginTop: '0.5rem' }}>
-              {value.confidenceJustification}
-            </div>
-          )}
-        </Section>
+            {value.confidenceJustification && (
+              <div style={{ ...styles.readOnlyBlock, marginTop: '0.5rem' }}>
+                {value.confidenceJustification}
+              </div>
+            )}
+          </Section>
+        )}
 
         {/* Counterarguments */}
         {value.counterarguments && (
@@ -229,56 +242,60 @@ export default function StructuredInput({
       </Section>
 
       {/* ── Evidence ── */}
-      <Section icon={<BookOpen size={14} />} label="Evidence & Reasoning">
-        <textarea
-          ref={autoResize}
-          rows={3}
-          placeholder="What data, research, or experience supports your position? Include references where possible…"
-          className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
-          value={value.evidence}
-          onChange={e => update({ evidence: e.target.value })}
-          onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-        />
-      </Section>
+      {showEvidence && (
+        <Section icon={<BookOpen size={14} />} label="Evidence & Reasoning">
+          <textarea
+            ref={autoResize}
+            rows={3}
+            placeholder="What data, research, or experience supports your position? Include references where possible…"
+            className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+            value={value.evidence}
+            onChange={e => update({ evidence: e.target.value })}
+            onInput={e => autoResize(e.target as HTMLTextAreaElement)}
+          />
+        </Section>
+      )}
 
       {/* ── Confidence slider ── */}
-      <Section icon={<Scale size={14} />} label="Confidence Level">
-        <div style={styles.confidenceRow}>
-          <div style={styles.sliderContainer}>
-            <input
-              type="range"
-              min={1}
-              max={10}
-              step={1}
-              value={value.confidence}
-              onChange={e => update({ confidence: Number(e.target.value) })}
-              style={styles.slider}
-              aria-label={`Confidence level: ${value.confidence} out of 10`}
-            />
-            <div style={styles.sliderLabels}>
-              <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>1</span>
-              <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>5</span>
-              <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)' }}>10</span>
+      {showConfidence && (
+        <Section icon={<Scale size={14} />} label="Confidence Level">
+          <div style={styles.confidenceRow}>
+            <div style={styles.sliderContainer}>
+              <input
+                type="range"
+                min={1}
+                max={10}
+                step={1}
+                value={value.confidence}
+                onChange={e => update({ confidence: Number(e.target.value) })}
+                style={styles.slider}
+                aria-label={`Confidence level: ${value.confidence} out of 10`}
+              />
+              <div style={styles.sliderLabels}>
+                <span style={styles.sliderLabelStart}>1</span>
+                <span style={styles.sliderLabelCenter}>5</span>
+                <span style={styles.sliderLabelEnd}>10</span>
+              </div>
+            </div>
+            <div style={styles.confidenceBadge}>
+              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: conf.color, fontVariantNumeric: 'tabular-nums' }}>
+                {value.confidence}
+              </span>
+              <span style={{ fontSize: '0.6875rem', color: conf.color, fontWeight: 500 }}>{conf.label}</span>
             </div>
           </div>
-          <div style={styles.confidenceBadge}>
-            <span style={{ fontSize: '1.25rem', fontWeight: 700, color: conf.color, fontVariantNumeric: 'tabular-nums' }}>
-              {value.confidence}
-            </span>
-            <span style={{ fontSize: '0.6875rem', color: conf.color, fontWeight: 500 }}>{conf.label}</span>
-          </div>
-        </div>
-        <textarea
-          ref={autoResize}
-          rows={1}
-          placeholder="Why this confidence level? What would change your mind?"
-          className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
-          style={{ marginTop: '0.5rem' }}
-          value={value.confidenceJustification}
-          onChange={e => update({ confidenceJustification: e.target.value })}
-          onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-        />
-      </Section>
+          <textarea
+            ref={autoResize}
+            rows={1}
+            placeholder="Why this confidence level? What would change your mind?"
+            className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+            style={{ marginTop: '0.5rem' }}
+            value={value.confidenceJustification}
+            onChange={e => update({ confidenceJustification: e.target.value })}
+            onInput={e => autoResize(e.target as HTMLTextAreaElement)}
+          />
+        </Section>
+      )}
 
       {/* ── Counterarguments ── */}
       <Section icon={<Shield size={14} />} label="Counterarguments">
@@ -463,11 +480,34 @@ const styles: Record<string, React.CSSProperties> = {
     accentColor: 'var(--accent)',
     cursor: 'pointer',
     height: '6px',
+    margin: 0,
+    display: 'block',
   },
   sliderLabels: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '0 2px',
+    position: 'relative',
+    height: '0.875rem',
+    marginTop: '0.125rem',
+  },
+  sliderLabelStart: {
+    position: 'absolute',
+    left: 0,
+    fontSize: '0.6875rem',
+    color: 'var(--muted-foreground)',
+  },
+  sliderLabelCenter: {
+    position: 'absolute',
+    // For a 1..10 discrete slider, value 5 sits at 4/9 of track width.
+    left: '44.4444%',
+    transform: 'translateX(-50%)',
+    fontSize: '0.6875rem',
+    color: 'var(--muted-foreground)',
+  },
+  sliderLabelEnd: {
+    position: 'absolute',
+    left: '100%',
+    transform: 'translateX(-100%)',
+    fontSize: '0.6875rem',
+    color: 'var(--muted-foreground)',
   },
   confidenceBadge: {
     display: 'flex',

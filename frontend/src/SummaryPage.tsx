@@ -6,16 +6,14 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
-import { saveAs } from 'file-saver';
-import { ChartNoAxesColumn, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
+import { api } from './api/client';
 import { getMe } from './api/auth';
 import { getForm as apiFetchForm } from './api/forms';
 import { getRounds, getRoundsWithResponses, nextRound as apiNextRound } from './api/rounds';
 import type { Round as ApiRound } from './api/rounds';
-import { getResponses } from './api/responses';
 import {
 	getSynthesisVersions as apiGetSynthesisVersions,
 	activateVersion as apiActivateVersion,
@@ -44,10 +42,8 @@ import {
 	SynthesisEditorCard,
 	AISynthesisPanel,
 	SynthesisVersionPanel,
-	SelectedVersionContent,
 	NextRoundQuestionsCard,
 	ActionsCard,
-	ResponsesModal,
 	ResponsesAccordion,
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
@@ -129,11 +125,18 @@ class SectionErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const MODELS = [
-	'anthropic/claude-opus-4-6',
-	'anthropic/claude-sonnet-4',
 	'openai/gpt-4o',
-	'google/gemini-2.0-flash',
+	'openai/gpt-4o-mini',
 ];
+
+function isBlockedModel(model: string): boolean {
+	return model.startsWith('anthropic/');
+}
+
+function sanitizeModel(model: string | null | undefined): string {
+	if (!model || isBlockedModel(model)) return MODELS[0];
+	return model;
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -146,6 +149,25 @@ function extractQuestionText(q: unknown): string {
 	return '';
 }
 
+function buildStructuredSummaryText(data: Record<string, any> | null): string {
+	if (!data) return '';
+	const parts: string[] = [];
+	if (data.narrative) parts.push(data.narrative);
+	for (const a of data.agreements || []) {
+		parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
+	}
+	for (const d of data.disagreements || []) {
+		parts.push(`Disagreement: ${d.topic}`);
+		for (const p of d.positions || []) {
+			parts.push(`  - ${p.position}: ${p.evidence}`);
+		}
+	}
+	for (const n of data.nuances || []) {
+		parts.push(`Nuance: ${n.claim} — ${n.context}`);
+	}
+	return parts.join('\n');
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SummaryPage() {
@@ -154,7 +176,7 @@ export default function SummaryPage() {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const formId = Number(id);
-	const { toastError, toastWarning, toastSuccess } = useToast();
+	const { toastError, toastWarning, toastSuccess, toastInfo } = useToast();
 
 	const { token: rawToken, logout: authLogout } = useAuth();
 	const token = rawToken ?? '';
@@ -180,8 +202,13 @@ export default function SummaryPage() {
 	const [synthesisTotalSteps] = useState(5);
 	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
 	const [synthesisViewMode, setSynthesisViewMode] = useState<'view' | 'edit'>('view');
-	const [selectedModel, setSelectedModel] = useState('anthropic/claude-opus-4-6');
+	const [structuredSectionOpen, setStructuredSectionOpen] = useState(true);
+	const [aiToolsOpen, setAiToolsOpen] = useState(false);
+	const [selectedModel, setSelectedModel] = useState(MODELS[0]);
 	const [isGenerating, setIsGenerating] = useState(false);
+	const [isSavingSynthesis, setIsSavingSynthesis] = useState(false);
+	const [isSynthesisDirty, setIsSynthesisDirty] = useState(false);
+	const [lastSavedSynthesis, setLastSavedSynthesis] = useState('');
 
 	// ── Synthesis versioning ──
 	const [synthesisVersions, setSynthesisVersions] = useState<SynthesisVersion[]>([]);
@@ -190,7 +217,6 @@ export default function SummaryPage() {
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
-	const [hasSavedSynthesis, setHasSavedSynthesis] = useState(false);
 	// Default sidebar closed on mobile, open on desktop
 	const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
@@ -258,6 +284,37 @@ export default function SummaryPage() {
 		() => synthesisVersions.find(v => v.id === selectedVersionId) || null,
 		[synthesisVersions, selectedVersionId]
 	);
+	const availableModels = useMemo(
+		() => Array.from(new Set([sanitizeModel(selectedModel), ...MODELS].filter(Boolean))),
+		[selectedModel]
+	);
+	const audienceSourceText = useMemo(() => {
+		if (selectedVersion?.synthesis?.trim()) return selectedVersion.synthesis;
+		if (displayRound?.synthesis?.trim()) return displayRound.synthesis;
+		return buildStructuredSummaryText(structuredSynthesisData as Record<string, any> | null);
+	}, [selectedVersion, displayRound, structuredSynthesisData]);
+
+	const synthesisContextNote = useMemo(() => {
+		if (!activeRound || activeRound.round_number <= 1) return null;
+		const previous = rounds.find(r => r.round_number === activeRound.round_number - 1);
+		const currentText = (activeRound.synthesis || '').trim();
+		const previousText = (previous?.synthesis || '').trim();
+		if (!currentText || !previousText) return null;
+		if (currentText !== previousText) return null;
+		return `This draft is carried forward from Round ${activeRound.round_number - 1}. Update and save it as the Round ${activeRound.round_number} synthesis.`;
+	}, [activeRound, rounds]);
+
+	useEffect(() => {
+		if (!editor) return;
+		const onEditorUpdate = () => {
+			const current = editor.getHTML().trim();
+			setIsSynthesisDirty(current !== lastSavedSynthesis.trim());
+		};
+		editor.on('update', onEditorUpdate);
+		return () => {
+			editor.off('update', onEditorUpdate);
+		};
+	}, [editor, lastSavedSynthesis]);
 
 	// ─── Data loading ────────────────────────────────────────────────────────
 
@@ -283,6 +340,16 @@ export default function SummaryPage() {
 			});
 		return () => { cancelled = true; };
 	}, [token, formId, editor]);
+
+	useEffect(() => {
+		api.get<Record<string, string>>('/admin/settings')
+			.then(data => {
+				if (data?.synthesis_model) setSelectedModel(sanitizeModel(data.synthesis_model));
+			})
+			.catch(() => {
+				// Keep local fallback list when settings load fails.
+			});
+	}, []);
 
 	async function loadAll() {
 		setLoading(true);
@@ -319,14 +386,13 @@ export default function SummaryPage() {
 				loadSynthesisVersions(active.id).catch(() => {});
 			}
 
-			if (active && editor) {
-				editor.commands.setContent(active.synthesis || '');
-				setHasSavedSynthesis(!!(active.synthesis && active.synthesis.trim().length > 0));
-				const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
-				setNextRoundQuestions((qs || []).map(extractQuestionText));
-			} else if (f && Array.isArray((f as Form).questions)) {
-				setNextRoundQuestions((f as Form).questions.map(extractQuestionText));
-			}
+				if (active && editor) {
+					resetEditorToSaved(active.synthesis || '');
+					const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
+					setNextRoundQuestions((qs || []).map(extractQuestionText));
+				} else if (f && Array.isArray((f as Form).questions)) {
+					setNextRoundQuestions((f as Form).questions.map(extractQuestionText));
+				}
 		} catch (err) {
 			setLoadError((err as Error).message || 'Failed to load consultation data');
 		} finally {
@@ -386,16 +452,53 @@ export default function SummaryPage() {
 		setResponsesOpen(true);
 	}
 
-	async function saveSynthesis() {
-		if (!activeRound || !formId) return;
-		const summary = editor?.getHTML() || '';
+	function toggleAiDeliberationTools() {
+		setAiToolsOpen(v => !v);
+	}
+
+	function resetEditorToSaved(synthesis: string) {
+		if (!editor) return;
+		editor.commands.setContent(synthesis || '');
+		setLastSavedSynthesis((synthesis || '').trim());
+		setIsSynthesisDirty(false);
+	}
+
+	async function saveSynthesisEdits(): Promise<boolean> {
+		const targetRound = selectedRound || activeRound;
+		if (!targetRound?.is_active || !editor) return false;
+		const nextContent = editor.getHTML().trim();
+		if (nextContent === lastSavedSynthesis.trim()) return true;
+
+		setIsSavingSynthesis(true);
 		try {
-			await apiPushSummary(formId, summary);
-			setHasSavedSynthesis(true);
-			toastSuccess('Synthesis saved');
-		} catch (err) {
-			toastError((err as Error).message || 'Failed to save synthesis');
+			await apiPushSummary(formId, nextContent);
+			const updatedRound = { ...targetRound, synthesis: nextContent };
+			setRounds(prev => prev.map(r => (r.id === targetRound.id ? updatedRound : r)));
+			if (activeRound?.id === targetRound.id) setActiveRound(updatedRound);
+			if (selectedRound?.id === targetRound.id) setSelectedRound(updatedRound);
+			setLastSavedSynthesis(nextContent);
+			setIsSynthesisDirty(false);
+			toastSuccess('Synthesis saved.');
+			return true;
+		} catch (error) {
+			toastError((error as Error).message || 'Failed to save synthesis');
+			return false;
+		} finally {
+			setIsSavingSynthesis(false);
 		}
+	}
+
+	function revertSynthesisEdits() {
+		resetEditorToSaved(lastSavedSynthesis);
+		toastInfo('Edits reverted.');
+	}
+
+	async function handleSetSynthesisViewMode(mode: 'view' | 'edit') {
+		if (mode === 'view' && synthesisViewMode === 'edit' && isSynthesisDirty) {
+			const saved = await saveSynthesisEdits();
+			if (!saved) return;
+		}
+		setSynthesisViewMode(mode);
 	}
 
 	async function startNextRound() {
@@ -410,7 +513,6 @@ export default function SummaryPage() {
 			await apiNextRound(formId, { questions: cleaned });
 			await loadAll();
 			await loadResponses();
-			setHasSavedSynthesis(false);
 			setSelectedRound(null);
 		} catch (err) {
 			toastError((err as Error).message || 'Failed to start next round');
@@ -419,38 +521,18 @@ export default function SummaryPage() {
 		}
 	}
 
-	async function downloadResponses() {
-		try {
-			const raw = await getResponses(formId, true);
-
-			if (!Array.isArray(raw) || raw.length === 0) {
-				toastWarning('No responses to download');
-				return;
-			}
-
-			const paragraphs = raw.flatMap((r, i: number) => {
-				const header = new Paragraph({
-					children: [new TextRun({ text: `Response ${i + 1}`, bold: true })],
-					spacing: { after: 200 },
-				});
-				const qa = Object.entries(r.answers).flatMap(([k, v]: [string, unknown]) => [
-					new Paragraph({ children: [new TextRun({ text: k, bold: true })], spacing: { after: 80 } }),
-					new Paragraph({ text: String(v ?? ''), spacing: { after: 160 } }),
-				]);
-				return [header, ...qa, new Paragraph('')];
-			});
-
-			const doc = new Document({ sections: [{ children: paragraphs }] });
-			const blob = await Packer.toBlob(doc);
-			saveAs(blob, 'responses.docx');
-		} catch (err) {
-			toastError((err as Error).message || 'Failed to download responses');
-		}
-	}
-
 	async function generateSummary() {
 		const targetRound = selectedRound || activeRound;
-		if (!formId || !selectedModel || !targetRound) return;
+		const modelToUse = sanitizeModel(selectedModel);
+		if (!formId || !modelToUse || !targetRound) return;
+		if (modelToUse !== selectedModel) setSelectedModel(modelToUse);
+		let baselineVersionCount = 0;
+		try {
+			const before = await apiGetSynthesisVersions(formId, targetRound.id);
+			baselineVersionCount = before.length;
+		} catch {
+			// Non-fatal: polling can still check for synthesis text changes.
+		}
 
 		setIsGenerating(true);
 		setSynthesisStage('preparing');
@@ -460,24 +542,42 @@ export default function SummaryPage() {
 			setSynthesisStep(1);
 
 			const data = await apiGenerateSynthesis(formId, targetRound.id, {
-				model: selectedModel,
+				model: modelToUse,
 				strategy: synthesisMode,
 				n_analysts: 3,
 				mode: 'human_only',
 			});
 
 			// ── Async path: synthesis running in the background ──
-			if (data.status === 'started') {
-				toastSuccess(
-					data.message || 'Synthesis running in background — you\u2019ll be notified when complete'
-				);
-				// Reset UI immediately so the user can navigate away
-				setSynthesisStage('preparing');
-				setSynthesisStep(0);
-				setIsGenerating(false);
-				// The synthesis_complete WS event will auto-refresh via handleWsMessage
-				return;
-			}
+				if (data.status === 'started') {
+					toastSuccess(
+						data.message || 'Synthesis running in background — you\u2019ll be notified when complete'
+					);
+					// Reset UI immediately so the user can navigate away
+					setSynthesisStage('preparing');
+					setSynthesisStep(0);
+					setIsGenerating(false);
+					// Fallback polling in case WebSocket completion event is missed.
+					(async () => {
+						const maxAttempts = 30;
+						for (let i = 0; i < maxAttempts; i++) {
+							await new Promise(resolve => setTimeout(resolve, 3000));
+							try {
+								const latest = await apiGetSynthesisVersions(formId, targetRound.id);
+								if (latest.length > baselineVersionCount) {
+									await loadAll();
+									await loadSynthesisVersions(targetRound.id);
+									toastSuccess('Synthesis complete!');
+									return;
+								}
+							} catch {
+								// Keep polling; transient failures should not stop refresh recovery.
+							}
+						}
+						toastWarning('Synthesis may be complete. Please refresh if results do not appear automatically.');
+					})();
+					return;
+				}
 
 			// ── Sync path: immediate result (mock mode) ──
 			setSynthesisStage('synthesising');
@@ -487,7 +587,7 @@ export default function SummaryPage() {
 			setSynthesisStep(4);
 
 			const content = data.synthesis || data.summary || '';
-			if (content && editor) editor.commands.setContent(content);
+			if (editor) resetEditorToSaved(content || '');
 
 			// Optimistic update: immediately reflect synthesis in UI state
 			if (data.synthesis_json && targetRound) {
@@ -505,13 +605,14 @@ export default function SummaryPage() {
 			setSynthesisStage('complete');
 			setSynthesisStep(5);
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
-		} catch (error) {
-			toastError((error as Error).message || 'Failed to generate synthesis');
-			setSynthesisStage('preparing');
-			setSynthesisStep(0);
-		} finally {
-			setIsGenerating(false);
-		}
+			} catch (error) {
+				const message = (error as Error).message || 'Failed to generate synthesis';
+				toastError(`Model "${modelToUse}" failed: ${message}`);
+				setSynthesisStage('preparing');
+				setSynthesisStep(0);
+			} finally {
+				setIsGenerating(false);
+			}
 	}
 
 	async function activateVersion(versionId: number) {
@@ -527,7 +628,7 @@ export default function SummaryPage() {
 	function handleSelectRound(round: Round) {
 		try {
 			setSelectedRound(round);
-			if (round.is_active && editor) editor.commands.setContent(round.synthesis || '');
+			if (round.is_active && editor) resetEditorToSaved(round.synthesis || '');
 			loadSynthesisVersions(round.id).catch((err) => {
 				console.error('[handleSelectRound] Failed to load synthesis versions:', err);
 				toastError('Failed to load synthesis versions for this round');
@@ -538,7 +639,7 @@ export default function SummaryPage() {
 		}
 	}
 
-	function handleResponseUpdated(roundId: number, updated: { id: number; answers: Record<string, string>; version: number }) {
+	function handleResponseUpdated(roundId: number, updated: { id: number; answers: Record<string, unknown>; version: number }) {
 		setStructuredRounds(prev =>
 			prev.map(r =>
 				r.id === roundId
@@ -640,126 +741,128 @@ export default function SummaryPage() {
 
 				{/* Main content — full width */}
 				<div className="space-y-4 sm:space-y-6">
-						{/* Non-active round card */}
-						{selectedRound && !selectedRound.is_active && (
-							<SectionErrorBoundary fallbackTitle="Failed to render round details">
-								<RoundCard
-									round={selectedRound}
-									isCurrentRound={false}
-									expertLabels={resolvedExpertLabels}
+							{/* Inline responses accordion — shown/hidden by controls toggle */}
+							{responsesOpen && (
+								<ResponsesAccordion
+									structuredRounds={structuredRounds}
+									rounds={rounds}
+									formQuestions={form.questions || []}
 									formId={formId}
 									token={token}
-									currentUserEmail={email}
+									onResponseUpdated={handleResponseUpdated}
 								/>
-							</SectionErrorBoundary>
-						)}
+							)}
 
-						{/* Inline responses accordion — toggle per round */}
-						<ResponsesAccordion
-							structuredRounds={structuredRounds}
-							rounds={rounds}
-							formQuestions={form.questions || []}
-							formId={formId}
-							token={token}
-							onResponseUpdated={handleResponseUpdated}
-						/>
+							{/* Non-active round card */}
+							{selectedRound && !selectedRound.is_active && (
+								<SectionErrorBoundary fallbackTitle="Failed to render round details">
+									<RoundCard
+										round={selectedRound}
+										isCurrentRound={false}
+									/>
+								</SectionErrorBoundary>
+							)}
 
-						{/* Synthesis editor (active round only) */}
-						{(!selectedRound || selectedRound.is_active) && (
-							<SynthesisEditorCard
-								activeRound={activeRound}
-								synthesisViewMode={synthesisViewMode}
-								onSetViewMode={setSynthesisViewMode}
-								editor={editor}
-							/>
-						)}
+							{/* Synthesis editor (active round only) */}
+							{(!selectedRound || selectedRound.is_active) && (
+								<SynthesisEditorCard
+									activeRound={activeRound}
+									contextNote={synthesisContextNote}
+									synthesisViewMode={synthesisViewMode}
+									onSetViewMode={handleSetSynthesisViewMode}
+									editor={editor}
+									isDirty={isSynthesisDirty}
+									isSaving={isSavingSynthesis}
+									onSave={saveSynthesisEdits}
+									onRevert={revertSynthesisEdits}
+								/>
+							)}
 
-						{/* Read-only synthesis for non-active rounds */}
-						{selectedRound && !selectedRound.is_active && selectedRound.synthesis && (
-							<div className="card p-4">
-								<h2 className="text-base font-semibold mb-2 text-foreground">
-									{t('rounds.synthesisRound', { number: selectedRound.round_number })}
-								</h2>
-								<MarkdownRenderer content={selectedRound.synthesis} />
-							</div>
-						)}
-
-						{/* Structured synthesis data */}
-						{structuredSynthesisData && (
-							<SectionErrorBoundary fallbackTitle="Failed to render structured analysis">
+						{/* Audience translation should follow the current synthesis view */}
+						{displayRound && audienceSourceText && (
+							<SectionErrorBoundary fallbackTitle="Failed to render audience translation">
 								<div className="card p-4">
-									<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
-										<h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-											<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> {t('summary.structuredAnalysis')}
-										</h2>
-									</div>
-									{/* Audience Translation toggle */}
-									{displayRound && (
-										<div className="mb-4">
-											<AudienceTranslation
-												formId={formId}
-												roundId={displayRound.id}
-												synthesisText={(() => {
-													const parts: string[] = [];
-													if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
-													for (const a of structuredSynthesisData.agreements || []) {
-														parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
-													}
-													for (const d of structuredSynthesisData.disagreements || []) {
-														parts.push(`Disagreement: ${d.topic}`);
-														for (const p of d.positions || []) {
-															parts.push(`  - ${p.position}: ${p.evidence}`);
-														}
-													}
-													for (const n of structuredSynthesisData.nuances || []) {
-														parts.push(`Nuance: ${n.claim} — ${n.context}`);
-													}
-													return parts.join('\n');
-												})()}
-											/>
-										</div>
-									)}
-									<StructuredSynthesis
-										data={structuredSynthesisData}
-										convergenceScore={displayRound?.convergence_score ?? undefined}
-										expertLabels={resolvedExpertLabels}
+									<h2 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
+										<Globe size={20} style={{ color: 'var(--accent)' }} /> Audience Lens
+									</h2>
+									<p className="text-sm mb-3" style={{ color: 'var(--muted-foreground)' }}>
+										Reframe the current synthesis for a specific audience.
+									</p>
+									<AudienceTranslation
 										formId={formId}
-										roundId={displayRound?.id}
-										token={token}
-										currentUserEmail={email}
+										roundId={displayRound.id}
+										synthesisText={audienceSourceText}
 									/>
 								</div>
 							</SectionErrorBoundary>
 						)}
 
-						{/* AI Devil's Advocate — after structured analysis */}
-						{displayRound && structuredSynthesisData && (
-							<SectionErrorBoundary fallbackTitle="Failed to render AI counterpoints">
-								<DevilsAdvocate formId={formId} roundId={displayRound.id} />
-							</SectionErrorBoundary>
-						)}
+						{/* Next round questions should stay close to synthesis actions */}
+						<NextRoundQuestionsCard
+							questions={nextRoundQuestions}
+							onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
+							onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
+							onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
+						/>
 
-						{/* AI Probing Questions — surfaces hidden assumptions and deepens enquiry */}
-						{displayRound && (
-							<SectionErrorBoundary fallbackTitle="Failed to render AI probing questions">
-								<ProbeQuestionsPanel
-									formId={formId}
-									roundId={displayRound.id}
-									synthesisText={structuredSynthesisData ? (() => {
-										const parts: string[] = [];
-										if (structuredSynthesisData.narrative) parts.push(structuredSynthesisData.narrative);
-										for (const a of structuredSynthesisData.agreements || []) {
-											parts.push(`Agreement: ${a.claim} — ${a.evidence_summary}`);
-										}
-										for (const d of structuredSynthesisData.disagreements || []) {
-											parts.push(`Disagreement: ${d.topic}`);
-										}
-										for (const n of structuredSynthesisData.nuances || []) {
-											parts.push(`Nuance: ${n.claim}`);
-										}
-										return parts.join('\n');
-									})() : ''}
-								/>
+						{/* Structured synthesis data */}
+							{structuredSynthesisData && (
+								<SectionErrorBoundary fallbackTitle="Failed to render structured analysis">
+									<div className="card p-4">
+										<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
+											<button
+												type="button"
+												onClick={() => setStructuredSectionOpen(v => !v)}
+												className="w-full flex items-center justify-between text-left"
+												style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+												aria-expanded={structuredSectionOpen}
+												aria-controls="summary-structured-section"
+											>
+												<h2 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+													<ChartNoAxesColumn size={20} style={{ color: 'var(--accent)' }} /> {t('summary.structuredAnalysis')}
+												</h2>
+												{structuredSectionOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+											</button>
+										</div>
+										{structuredSectionOpen && (
+											<div id="summary-structured-section">
+												<StructuredSynthesis
+													data={structuredSynthesisData}
+													convergenceScore={displayRound?.convergence_score ?? undefined}
+													expertLabels={resolvedExpertLabels}
+													formId={formId}
+													roundId={displayRound?.id}
+													token={token}
+													currentUserEmail={email}
+												/>
+											</div>
+										)}
+									</div>
+									</SectionErrorBoundary>
+								)}
+
+						{/* AI deliberation tools (shown/hidden via Workflow Actions) */}
+						{displayRound && aiToolsOpen && (
+							<SectionErrorBoundary fallbackTitle="Failed to render AI deliberation tools">
+								<div className="card p-4">
+									<h2 className="text-base font-semibold text-foreground flex items-center gap-2 m-0 mb-4">
+										<Sparkles size={20} style={{ color: 'var(--accent)' }} /> AI Deliberation Tools
+									</h2>
+									<div id="summary-ai-tools" className="space-y-4">
+										{structuredSynthesisData && (
+											<SectionErrorBoundary fallbackTitle="Failed to render AI counterpoints">
+												<DevilsAdvocate formId={formId} roundId={displayRound.id} />
+											</SectionErrorBoundary>
+										)}
+										<SectionErrorBoundary fallbackTitle="Failed to render AI probing questions">
+											<ProbeQuestionsPanel
+												formId={formId}
+												roundId={displayRound.id}
+												synthesisText={audienceSourceText}
+											/>
+										</SectionErrorBoundary>
+									</div>
+								</div>
 							</SectionErrorBoundary>
 						)}
 
@@ -795,29 +898,6 @@ export default function SummaryPage() {
 							</SectionErrorBoundary>
 						)}
 
-						{/* Selected version content */}
-						<SectionErrorBoundary fallbackTitle="Failed to render version content">
-							<SelectedVersionContent
-								selectedVersion={selectedVersion}
-								displayRound={displayRound}
-								resolvedExpertLabels={resolvedExpertLabels}
-								formId={formId}
-								token={token}
-								currentUserEmail={email}
-							/>
-						</SectionErrorBoundary>
-
-						{/* Version comparison (side-by-side) */}
-						{showVersionCompare && synthesisVersions.length >= 2 && (
-							<SectionErrorBoundary fallbackTitle="Failed to render version comparison">
-								<VersionCompare
-									versions={synthesisVersions}
-									currentVersionId={selectedVersionId}
-									onClose={() => setShowVersionCompare(false)}
-								/>
-							</SectionErrorBoundary>
-						)}
-
 						{/* Emergence highlights */}
 						{structuredSynthesisData?.emergent_insights && structuredSynthesisData.emergent_insights.length > 0 && (
 							<SectionErrorBoundary fallbackTitle="Failed to render emergent insights">
@@ -837,13 +917,6 @@ export default function SummaryPage() {
 							</SectionErrorBoundary>
 						)}
 
-						{/* Next round questions */}
-						<NextRoundQuestionsCard
-							questions={nextRoundQuestions}
-							onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
-							onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
-							onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
-						/>
 					</div>
 
 					{/* ── Mobile sidebar backdrop ── */}
@@ -853,6 +926,26 @@ export default function SummaryPage() {
 							onClick={() => setSidebarOpen(false)}
 							aria-hidden="true"
 						/>
+					)}
+
+					{/* ── Version compare modal ── */}
+					{showVersionCompare && synthesisVersions.length >= 2 && (
+						<div className="fixed inset-0 z-[70]">
+							<div
+								className="absolute inset-0 bg-black/40"
+								onClick={() => setShowVersionCompare(false)}
+								aria-hidden="true"
+							/>
+							<div className="relative mx-auto my-4 sm:my-6 w-[min(1200px,96vw)] max-h-[92vh] overflow-auto">
+								<SectionErrorBoundary fallbackTitle="Failed to render version comparison">
+									<VersionCompare
+										versions={synthesisVersions}
+										currentVersionId={selectedVersionId}
+										onClose={() => setShowVersionCompare(false)}
+									/>
+								</SectionErrorBoundary>
+							</div>
+						</div>
 					)}
 
 					{/* ── Floating Sidebar ── */}
@@ -905,26 +998,21 @@ export default function SummaryPage() {
 							</span>
 						</div>
 
-						<ActionsCard
-							responsesOpen={responsesOpen}
-							onToggleResponses={viewAllResponses}
-							onDownloadResponses={downloadResponses}
-							onSaveSynthesis={saveSynthesis}
-							onStartNextRound={startNextRound}
-							loading={loading}
-							formTitle={form.title}
-							formId={formId}
-							rounds={rounds}
-							structuredSynthesisData={structuredSynthesisData}
-							expertLabels={resolvedExpertLabels}
-						/>
+							<ActionsCard
+								responsesOpen={responsesOpen}
+								aiToolsOpen={aiToolsOpen}
+								onToggleResponses={viewAllResponses}
+								onToggleAiTools={toggleAiDeliberationTools}
+								onStartNextRound={startNextRound}
+								loading={loading}
+							/>
 
 						<AISynthesisPanel
 							synthesisMode={synthesisMode}
 							onModeChange={setSynthesisMode}
 							selectedModel={selectedModel}
 							onModelChange={setSelectedModel}
-							models={MODELS}
+							models={availableModels}
 							isGenerating={isGenerating}
 							onGenerate={generateSummary}
 						/>
@@ -961,16 +1049,6 @@ export default function SummaryPage() {
 					</aside>
 			</main>
 
-			{/* Responses modal */}
-			<ResponsesModal
-				open={responsesOpen}
-				onClose={() => setResponsesOpen(false)}
-				structuredRounds={structuredRounds}
-				rounds={rounds}
-				formQuestions={form.questions || []}
-				token={token}
-				onResponseUpdated={handleResponseUpdated}
-			/>
-		</div>
-	);
-}
+			</div>
+		);
+	}

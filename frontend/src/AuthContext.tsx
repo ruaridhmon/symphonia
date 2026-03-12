@@ -203,7 +203,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data = await apiLogin(email, password);
     } catch (e) {
       if (e instanceof ApiError) {
-        if (e.status === 401 || e.status === 403) throw new Error('Invalid email or password.');
+        if (e.status === 401 || e.status === 403) {
+          throw new Error('Incorrect email or password. Please try again.');
+        }
         if (e.status >= 500) throw new Error('Server error — please try again later.');
         throw new Error('Login failed. Please try again.');
       }
