@@ -149,15 +149,24 @@ export default function StructuredInput({
   }
 
   const conf = getConfidenceInfo(value.confidence);
+  const isSimpleResponseMode = !showEvidence && !showConfidence;
+  const primaryLabel = isSimpleResponseMode ? 'Your Response' : 'Your Position';
+  const primaryPlaceholder = isSimpleResponseMode
+    ? 'Write your response here…'
+    : 'State your core position or answer clearly…';
 
   /* ── Read-only view ────────────────────────────────── */
   if (readOnly) {
     return (
       <div style={styles.container}>
         {/* Position */}
-        <Section icon={<Lightbulb size={14} />} label="Position">
+        <Section icon={<Lightbulb size={14} />} label={isSimpleResponseMode ? 'Response' : 'Position'}>
           <div style={styles.readOnlyBlock}>
-            {value.position || <span style={{ color: 'var(--muted-foreground)' }}>No position provided</span>}
+            {value.position || (
+              <span style={{ color: 'var(--muted-foreground)' }}>
+                {isSimpleResponseMode ? 'No response provided' : 'No position provided'}
+              </span>
+            )}
           </div>
         </Section>
 
@@ -229,11 +238,11 @@ export default function StructuredInput({
   return (
     <div style={styles.container}>
       {/* ── Position (required) ── */}
-      <Section icon={<Lightbulb size={14} />} label="Your Position" required>
+      <Section icon={<Lightbulb size={14} />} label={primaryLabel} required>
         <textarea
           ref={autoResize}
           rows={2}
-          placeholder="State your core position or answer clearly…"
+          placeholder={primaryPlaceholder}
           className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
           value={value.position}
           onChange={e => update({ position: e.target.value })}
@@ -297,103 +306,105 @@ export default function StructuredInput({
         </Section>
       )}
 
-      {/* ── Counterarguments ── */}
-      <Section icon={<Shield size={14} />} label="Counterarguments">
-        <textarea
-          ref={autoResize}
-          rows={2}
-          placeholder="What are the strongest arguments against your position?"
-          className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
-          value={value.counterarguments}
-          onChange={e => update({ counterarguments: e.target.value })}
-          onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-        />
-      </Section>
+      {!isSimpleResponseMode && (
+        <>
+          {/* ── Counterarguments ── */}
+          <Section icon={<Shield size={14} />} label="Counterarguments">
+            <textarea
+              ref={autoResize}
+              rows={2}
+              placeholder="What are the strongest arguments against your position?"
+              className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+              value={value.counterarguments}
+              onChange={e => update({ counterarguments: e.target.value })}
+              onInput={e => autoResize(e.target as HTMLTextAreaElement)}
+            />
+          </Section>
 
-      {/* ── Advanced (collapsible) ── */}
-      <button
-        type="button"
-        onClick={() => setAdvancedOpen(!advancedOpen)}
-        style={styles.advancedToggle}
-        aria-expanded={advancedOpen}
-        aria-label="Advanced options: Citations, Expert Nominations"
-      >
-        {advancedOpen ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
-        <span>Advanced</span>
-        <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)', fontWeight: 400 }}>
-          Citations, Expert Nominations
-        </span>
-      </button>
+          {/* ── Advanced (collapsible) ── */}
+          <button
+            type="button"
+            onClick={() => setAdvancedOpen(!advancedOpen)}
+            style={styles.advancedToggle}
+            aria-expanded={advancedOpen}
+            aria-label="Advanced options: Citations, Expert Nominations"
+          >
+            {advancedOpen ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
+            <span>Advanced</span>
+            <span style={{ fontSize: '0.6875rem', color: 'var(--muted-foreground)', fontWeight: 400 }}>
+              Citations, Expert Nominations
+            </span>
+          </button>
 
-      {advancedOpen && (
-        <div style={styles.advancedPanel} className="slide-down">
-          {/* Citations */}
-          <div style={styles.advancedSection}>
-            <label style={styles.fieldLabel}>
-              <BookOpen size={12} /> Citations
-            </label>
-            <div style={styles.chipList}>
-              {(value.citations ?? []).map((c, i) => (
-                <span key={i} style={styles.chip}>
-                  {c}
-                  <button type="button" onClick={() => removeCitation(i)} style={styles.chipRemove}>
-                    <X size={10} />
+          {advancedOpen && (
+            <div style={styles.advancedPanel} className="slide-down">
+              <div style={styles.advancedSection}>
+                <label style={styles.fieldLabel}>
+                  <BookOpen size={12} /> Citations
+                </label>
+                <div style={styles.chipList}>
+                  {(value.citations ?? []).map((c, i) => (
+                    <span key={i} style={styles.chip}>
+                      {c}
+                      <button type="button" onClick={() => removeCitation(i)} style={styles.chipRemove}>
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div style={styles.addRow}>
+                  <input
+                    type="text"
+                    placeholder="Add a citation (URL, DOI, or reference)…"
+                    className="rounded-lg px-3 py-2 bg-muted"
+                    style={{ flex: 1, fontSize: '0.8125rem' }}
+                    value={newCitation}
+                    onChange={e => setNewCitation(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCitation(); } }}
+                    aria-label="Add a citation"
+                  />
+                  <button type="button" onClick={addCitation} style={styles.addButton}>
+                    <Plus size={14} />
                   </button>
-                </span>
-              ))}
-            </div>
-            <div style={styles.addRow}>
-              <input
-                type="text"
-                placeholder="Add a citation (URL, DOI, or reference)…"
-                className="rounded-lg px-3 py-2 bg-muted"
-                style={{ flex: 1, fontSize: '0.8125rem' }}
-                value={newCitation}
-                onChange={e => setNewCitation(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCitation(); } }}
-                aria-label="Add a citation"
-              />
-              <button type="button" onClick={addCitation} style={styles.addButton}>
-                <Plus size={14} />
-              </button>
-            </div>
-          </div>
+                </div>
+              </div>
 
-          {/* Expert Nominations */}
-          <div style={styles.advancedSection}>
-            <label style={styles.fieldLabel}>
-              <Users size={12} /> Nominate Experts
-            </label>
-            <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', margin: '0 0 0.5rem 0' }}>
-              Who else should contribute to this question?
-            </p>
-            <div style={styles.chipList}>
-              {(value.expertNominations ?? []).map((n, i) => (
-                <span key={i} style={styles.chip}>
-                  {n}
-                  <button type="button" onClick={() => removeNomination(i)} style={styles.chipRemove}>
-                    <X size={10} />
+              <div style={styles.advancedSection}>
+                <label style={styles.fieldLabel}>
+                  <Users size={12} /> Nominate Experts
+                </label>
+                <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', margin: '0 0 0.5rem 0' }}>
+                  Who else should contribute to this question?
+                </p>
+                <div style={styles.chipList}>
+                  {(value.expertNominations ?? []).map((n, i) => (
+                    <span key={i} style={styles.chip}>
+                      {n}
+                      <button type="button" onClick={() => removeNomination(i)} style={styles.chipRemove}>
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div style={styles.addRow}>
+                  <input
+                    type="text"
+                    placeholder="Name or email of expert…"
+                    className="rounded-lg px-3 py-2 bg-muted"
+                    style={{ flex: 1, fontSize: '0.8125rem' }}
+                    value={newNomination}
+                    onChange={e => setNewNomination(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNomination(); } }}
+                    aria-label="Nominate an expert"
+                  />
+                  <button type="button" onClick={addNomination} style={styles.addButton}>
+                    <Plus size={14} />
                   </button>
-                </span>
-              ))}
+                </div>
+              </div>
             </div>
-            <div style={styles.addRow}>
-              <input
-                type="text"
-                placeholder="Name or email of expert…"
-                className="rounded-lg px-3 py-2 bg-muted"
-                style={{ flex: 1, fontSize: '0.8125rem' }}
-                value={newNomination}
-                onChange={e => setNewNomination(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addNomination(); } }}
-                aria-label="Nominate an expert"
-              />
-              <button type="button" onClick={addNomination} style={styles.addButton}>
-                <Plus size={14} />
-              </button>
-            </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
     </div>
   );

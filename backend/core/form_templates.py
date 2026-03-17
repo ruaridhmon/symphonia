@@ -7,7 +7,7 @@ default questions, expert label presets, and suggested panel size.
 from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
-from typing import List
+from typing import Any, List
 
 
 @dataclass
@@ -20,7 +20,7 @@ class FormTemplate:
     icon: str  # emoji
     category: str
     suggested_panel_size: int
-    default_questions: List[str]
+    default_questions: List[Any]
     expert_label_preset: dict  # {"preset": "custom", "custom_labels": {...}}
     tags: List[str] = field(default_factory=list)
 
@@ -41,6 +41,48 @@ def _register(t: FormTemplate) -> FormTemplate:
 
 
 # ── 1. Policy Delphi ─────────────────────────────────────────────────────────
+
+_register(
+    FormTemplate(
+        id="information_gathering",
+        name="Information Gathering",
+        description="Collect open-ended participant input without structured evidence, confidence, or counterargument fields.",
+        icon="📝",
+        category="Research",
+        suggested_panel_size=8,
+        default_questions=[
+            {
+                "label": "What are the main issues, needs, or concerns you think we should understand first?",
+                "requireEvidence": False,
+                "requireConfidence": False,
+            },
+            {
+                "label": "What experiences or observations have shaped your view of this topic?",
+                "requireEvidence": False,
+                "requireConfidence": False,
+            },
+            {
+                "label": "What information do you think is missing from the current discussion?",
+                "requireEvidence": False,
+                "requireConfidence": False,
+            },
+            {
+                "label": "What practical suggestions or ideas would you like to contribute at this stage?",
+                "requireEvidence": False,
+                "requireConfidence": False,
+            },
+        ],
+        expert_label_preset={
+            "preset": "custom",
+            "custom_labels": {
+                "1": "Participant 1",
+                "2": "Participant 2",
+                "3": "Participant 3",
+            },
+        },
+        tags=["research", "information gathering", "survey", "qualitative"],
+    )
+)
 
 _register(
     FormTemplate(

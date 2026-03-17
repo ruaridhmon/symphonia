@@ -11,7 +11,7 @@ export interface FormTemplate {
   icon: string;
   category: string;
   suggested_panel_size: number;
-  default_questions: string[];
+  default_questions: Array<string | Record<string, unknown>>;
   expert_label_preset: Record<string, unknown>;
   tags: string[];
 }
@@ -178,7 +178,7 @@ export default function TemplatePicker({ onSelectTemplate, onStartBlank }: Templ
             color: 'var(--foreground)',
             marginBottom: 2,
           }}>
-            Start from scratch
+            Start consensus form from scratch
           </div>
           <div style={{ fontSize: '0.82rem', color: 'var(--muted-foreground)' }}>
             Create a blank form with your own title, questions, and settings.
@@ -197,9 +197,16 @@ export default function TemplatePicker({ onSelectTemplate, onStartBlank }: Templ
 
       {/* Template cards grouped by category */}
       <div style={{ marginBottom: '0.75rem' }}>
-        <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', margin: 0 }}>
-          Pre-made form templates, grouped by category:
-        </p>
+        <h2
+          style={{
+            fontSize: '1.15rem',
+            fontWeight: 700,
+            color: 'var(--foreground)',
+            margin: 0,
+          }}
+        >
+          Examples of completed templates
+        </h2>
       </div>
 
       {categoryOrder.map(category => (
