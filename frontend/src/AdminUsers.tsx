@@ -61,16 +61,28 @@ export default function AdminUsers() {
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-1.5 text-sm mb-6"
+          className="inline-flex items-center gap-2 mb-6 transition-colors"
           style={{
             color: 'var(--muted-foreground)',
-            background: 'none',
-            border: 'none',
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: 10,
             cursor: 'pointer',
-            padding: 0,
+            padding: '10px 14px',
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            lineHeight: 1,
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
+          onMouseEnter={e => {
+            e.currentTarget.style.color = 'var(--foreground)';
+            e.currentTarget.style.borderColor = 'var(--accent)';
+            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.color = 'var(--muted-foreground)';
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.backgroundColor = 'var(--card)';
+          }}
         >
           ← Back to Dashboard
         </button>

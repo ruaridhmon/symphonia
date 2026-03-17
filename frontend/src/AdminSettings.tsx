@@ -74,7 +74,6 @@ function ToggleSwitch({
 interface SettingsState {
   synthesis_model: string;
   synthesis_strategy: string;
-  ai_suggestions_count: string;
   max_rounds: string;
   convergence_threshold: string;
   default_anonymous: string;
@@ -86,7 +85,6 @@ interface SettingsState {
 const DEFAULTS: SettingsState = {
   synthesis_model: 'openai/gpt-4o',
   synthesis_strategy: 'single_prompt',
-  ai_suggestions_count: '5',
   max_rounds: '3',
   convergence_threshold: '70',
   default_anonymous: 'false',
@@ -189,16 +187,28 @@ export default function AdminSettings() {
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-1.5 text-sm mb-6"
+          className="inline-flex items-center gap-2 mb-6 transition-colors"
           style={{
             color: 'var(--muted-foreground)',
-            background: 'none',
-            border: 'none',
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: 10,
             cursor: 'pointer',
-            padding: 0,
+            padding: '10px 14px',
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            lineHeight: 1,
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
+          onMouseEnter={e => {
+            e.currentTarget.style.color = 'var(--foreground)';
+            e.currentTarget.style.borderColor = 'var(--accent)';
+            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.color = 'var(--muted-foreground)';
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.backgroundColor = 'var(--card)';
+          }}
         >
           <ArrowLeft size={16} />
           Back to Dashboard
@@ -315,37 +325,6 @@ export default function AdminSettings() {
                       <option key={s.id} value={s.id}>{s.label}</option>
                     ))}
                   </select>
-                </div>
-
-                {/* AI Suggestions Count */}
-                <div>
-                  <label
-                    className="block text-sm font-medium mb-1.5"
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    AI Suggestions Count
-                  </label>
-                  <p
-                    className="text-xs mb-2"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    How many question suggestions the AI assistant returns.
-                  </p>
-                  <input
-                    type="number"
-                    min={3}
-                    max={10}
-                    step={1}
-                    value={settings.ai_suggestions_count}
-                    onChange={e => {
-                      const v = Math.max(3, Math.min(10, Number(e.target.value) || 3));
-                      update('ai_suggestions_count', String(v));
-                    }}
-                    className="w-full sm:w-32 rounded-lg px-3 py-2.5 text-sm"
-                    style={inputStyle}
-                    onFocus={focusStyle}
-                    onBlur={blurStyle}
-                  />
                 </div>
               </div>
             </div>

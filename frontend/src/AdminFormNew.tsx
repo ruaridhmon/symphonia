@@ -378,6 +378,11 @@ export default function AdminFormNew() {
   const [allowJoin, setAllowJoin] = useState(true);
   const [anonymous, setAnonymous] = useState(false);
   const [deadline, setDeadline] = useState('');
+  const isInformationGatheringMode =
+    questions.length > 0 &&
+    questions.every(
+      question => !question.requireEvidence && !question.requireConfidence,
+    );
 
   // Load synthesis model from settings
   useEffect(() => {
@@ -422,6 +427,16 @@ export default function AdminFormNew() {
     const updated = [...questions];
     [updated[a], updated[b]] = [updated[b], updated[a]];
     setQuestions(updated);
+  };
+
+  const setResponseStyle = (mode: 'consensus' | 'information') => {
+    setQuestions(prev =>
+      prev.map(question => ({
+        ...question,
+        requireEvidence: mode === 'consensus',
+        requireConfidence: mode === 'consensus',
+      })),
+    );
   };
 
   useEffect(() => {
@@ -669,6 +684,54 @@ export default function AdminFormNew() {
             />
           </div>
 
+          <div className="space-y-2 mb-6">
+            <div>
+              <label
+                className="block text-sm font-medium"
+                style={{ color: 'var(--foreground)' }}
+              >
+                Response Style
+              </label>
+              <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                Choose whether participants give structured Delphi responses or a single plain text response.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setResponseStyle('consensus')}
+                className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
+                style={{
+                  border: '1px solid',
+                  borderColor: isInformationGatheringMode ? 'var(--border)' : 'var(--accent)',
+                  backgroundColor: isInformationGatheringMode
+                    ? 'var(--card)'
+                    : 'color-mix(in srgb, var(--accent) 10%, var(--card))',
+                  color: isInformationGatheringMode ? 'var(--muted-foreground)' : 'var(--foreground)',
+                  cursor: 'pointer',
+                }}
+              >
+                Consensus
+              </button>
+              <button
+                type="button"
+                onClick={() => setResponseStyle('information')}
+                className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
+                style={{
+                  border: '1px solid',
+                  borderColor: isInformationGatheringMode ? 'var(--accent)' : 'var(--border)',
+                  backgroundColor: isInformationGatheringMode
+                    ? 'color-mix(in srgb, var(--accent) 10%, var(--card))'
+                    : 'var(--card)',
+                  color: isInformationGatheringMode ? 'var(--foreground)' : 'var(--muted-foreground)',
+                  cursor: 'pointer',
+                }}
+              >
+                Information Gathering
+              </button>
+            </div>
+          </div>
+
           {/* ── Questions (Workers A + B) ─────────────────────────── */}
           <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
             <legend
@@ -822,61 +885,74 @@ export default function AdminFormNew() {
                         )}
                       </div>
 
-                      <div
-                        className="mt-3 flex flex-wrap gap-4 rounded-lg px-3 py-2"
-                        style={{
-                          backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
-                          border: '1px solid var(--border)',
-                        }}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <label
-                              htmlFor={`question-${i + 1}-evidence`}
-                              className="block text-sm font-medium"
-                              style={{ color: 'var(--foreground)' }}
-                            >
-                              Ask for evidence
-                            </label>
-                            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                              Show an evidence and reasoning field under this question.
-                            </p>
-                          </div>
-                          <ToggleSwitch
-                            id={`question-${i + 1}-evidence`}
-                            checked={q.requireEvidence}
-                            onChange={(checked) => {
-                              const updated = [...questions];
-                              updated[i] = { ...updated[i], requireEvidence: checked };
-                              setQuestions(updated);
-                            }}
-                          />
+                      {isInformationGatheringMode ? (
+                        <div
+                          className="mt-3 rounded-lg px-3 py-2 text-xs"
+                          style={{
+                            backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                            border: '1px solid var(--border)',
+                            color: 'var(--muted-foreground)',
+                          }}
+                        >
+                          Participants will see this question with one plain response textbox below it.
                         </div>
+                      ) : (
+                        <div
+                          className="mt-3 flex flex-wrap gap-4 rounded-lg px-3 py-2"
+                          style={{
+                            backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                            border: '1px solid var(--border)',
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <label
+                                htmlFor={`question-${i + 1}-evidence`}
+                                className="block text-sm font-medium"
+                                style={{ color: 'var(--foreground)' }}
+                              >
+                                Ask for evidence
+                              </label>
+                              <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                                Show an evidence and reasoning field under this question.
+                              </p>
+                            </div>
+                            <ToggleSwitch
+                              id={`question-${i + 1}-evidence`}
+                              checked={q.requireEvidence}
+                              onChange={(checked) => {
+                                const updated = [...questions];
+                                updated[i] = { ...updated[i], requireEvidence: checked };
+                                setQuestions(updated);
+                              }}
+                            />
+                          </div>
 
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <label
-                              htmlFor={`question-${i + 1}-confidence`}
-                              className="block text-sm font-medium"
-                              style={{ color: 'var(--foreground)' }}
-                            >
-                              Ask for confidence
-                            </label>
-                            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                              Show the confidence slider and confidence explanation.
-                            </p>
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <label
+                                htmlFor={`question-${i + 1}-confidence`}
+                                className="block text-sm font-medium"
+                                style={{ color: 'var(--foreground)' }}
+                              >
+                                Ask for confidence
+                              </label>
+                              <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                                Show the confidence slider and confidence explanation.
+                              </p>
+                            </div>
+                            <ToggleSwitch
+                              id={`question-${i + 1}-confidence`}
+                              checked={q.requireConfidence}
+                              onChange={(checked) => {
+                                const updated = [...questions];
+                                updated[i] = { ...updated[i], requireConfidence: checked };
+                                setQuestions(updated);
+                              }}
+                            />
                           </div>
-                          <ToggleSwitch
-                            id={`question-${i + 1}-confidence`}
-                            checked={q.requireConfidence}
-                            onChange={(checked) => {
-                              const updated = [...questions];
-                              updated[i] = { ...updated[i], requireConfidence: checked };
-                              setQuestions(updated);
-                            }}
-                          />
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
 
@@ -915,7 +991,14 @@ export default function AdminFormNew() {
           <div className="mt-4 mb-3">
             <button
               type="button"
-              onClick={() => setQuestions([...questions, createBlankQuestion()])}
+              onClick={() =>
+                setQuestions([
+                  ...questions,
+                  isInformationGatheringMode
+                    ? createBlankInformationGatheringQuestion()
+                    : createBlankQuestion(),
+                ])
+              }
               className="text-sm px-3 py-1.5 rounded-lg font-medium"
               style={{
                 color: 'var(--accent)',
@@ -942,7 +1025,9 @@ export default function AdminFormNew() {
                   Expert Form Preview
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                  This is what participants will see. Your question toggles apply immediately here.
+                  {isInformationGatheringMode
+                    ? 'This is what participants will see. Each question shows only the question and one response textbox.'
+                    : 'This is what participants will see. Your question toggles apply immediately here.'}
                 </p>
               </div>
             </div>
