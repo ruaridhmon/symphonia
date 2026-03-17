@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronUp, ChevronDown, Trash2, RefreshCw, BookOpen, X } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { api } from './api/client';
@@ -346,10 +346,10 @@ export default function AdminFormNew() {
   useDocumentTitle('Create New Form');
   const { token } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  /* Template picker state */
-  const [showTemplatePicker, setShowTemplatePicker] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
+  const showTemplatePicker = searchParams.get('step') !== 'editor';
 
   /* Core state */
   const [title, setTitle] = useState('');
@@ -384,7 +384,7 @@ export default function AdminFormNew() {
     setTitle(template.name);
     setDescription(template.description);
     setQuestions(template.default_questions.map(normalizeQuestion));
-    setShowTemplatePicker(false);
+    setSearchParams({ step: 'editor' });
   };
 
   const handleStartBlank = () => {
@@ -392,12 +392,11 @@ export default function AdminFormNew() {
     setTitle('');
     setDescription('');
     setQuestions([createBlankQuestion()]);
-    setShowTemplatePicker(false);
+    setSearchParams({ step: 'editor' });
   };
 
   const handleBackToTemplates = () => {
-    setShowTemplatePicker(true);
-    setSelectedTemplate(null);
+    setSearchParams({ step: 'templates' });
   };
 
   /* Worker D state — Guide modal */
@@ -463,16 +462,28 @@ export default function AdminFormNew() {
         <button
           type="button"
           onClick={() => showTemplatePicker ? navigate('/') : handleBackToTemplates()}
-          className="inline-flex items-center gap-1.5 text-sm mb-6 transition-colors"
+          className="inline-flex items-center gap-2 mb-6 transition-colors"
           style={{
             color: 'var(--muted-foreground)',
-            background: 'none',
-            border: 'none',
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            borderRadius: 10,
             cursor: 'pointer',
-            padding: 0,
+            padding: '10px 14px',
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            lineHeight: 1,
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
+          onMouseEnter={e => {
+            e.currentTarget.style.color = 'var(--foreground)';
+            e.currentTarget.style.borderColor = 'var(--accent)';
+            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.color = 'var(--muted-foreground)';
+            e.currentTarget.style.borderColor = 'var(--border)';
+            e.currentTarget.style.backgroundColor = 'var(--card)';
+          }}
         >
           ← {showTemplatePicker ? 'Back to Dashboard' : 'Back to Templates'}
         </button>
@@ -488,7 +499,7 @@ export default function AdminFormNew() {
                 Create a New Form
               </h1>
               <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                Pick a template to get started quickly, or create a blank form from scratch.
+                Pick a pre-made form template to get started quickly, or create a blank form from scratch.
               </p>
             </div>
             <TemplatePicker

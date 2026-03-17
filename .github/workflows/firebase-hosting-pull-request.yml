@@ -15,7 +15,7 @@ jobs:
       TARGET_IS_PROD: ${{ github.event.pull_request.base.ref == 'main' }}
       TARGET_IS_DEV: ${{ github.event.pull_request.base.ref == 'develop' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: npm ci
         working-directory: frontend
       - name: Build frontend (production mode)

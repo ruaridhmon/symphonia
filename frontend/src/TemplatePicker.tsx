@@ -118,10 +118,10 @@ export default function TemplatePicker({ onSelectTemplate, onStartBlank }: Templ
             margin: '0 0 6px 0',
           }}
         >
-          Choose a template
+          Choose how to start
         </h2>
         <p style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)', margin: 0 }}>
-          Start from scratch or use a pre-built template.
+          Start from scratch, or pick one of the pre-made form templates below.
         </p>
       </div>
 
@@ -196,6 +196,12 @@ export default function TemplatePicker({ onSelectTemplate, onStartBlank }: Templ
       </button>
 
       {/* Template cards grouped by category */}
+      <div style={{ marginBottom: '0.75rem' }}>
+        <p style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', margin: 0 }}>
+          Pre-made form templates, grouped by category:
+        </p>
+      </div>
+
       {categoryOrder.map(category => (
         <div key={category} style={{ marginBottom: '1.5rem' }}>
           <h3
@@ -208,7 +214,7 @@ export default function TemplatePicker({ onSelectTemplate, onStartBlank }: Templ
               margin: '0 0 10px 4px',
             }}
           >
-            {category}
+            {category} Templates
           </h3>
           <div
             style={{
