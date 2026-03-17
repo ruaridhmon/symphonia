@@ -21,14 +21,20 @@ export interface FormTemplate {
 interface TemplatePickerProps {
   onSelectTemplate: (template: FormTemplate) => void;
   onStartBlank: () => void;
+  onStartInformationGathering: () => void;
 }
 
-export default function TemplatePicker({ onSelectTemplate, onStartBlank }: TemplatePickerProps) {
+export default function TemplatePicker({
+  onSelectTemplate,
+  onStartBlank,
+  onStartInformationGathering,
+}: TemplatePickerProps) {
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [hoveredBlank, setHoveredBlank] = useState(false);
+  const [hoveredInfoBlank, setHoveredInfoBlank] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/templates`)
@@ -86,22 +92,40 @@ export default function TemplatePicker({ onSelectTemplate, onStartBlank }: Templ
         <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)', marginBottom: 16 }}>
           Could not load templates. You can still create a form from scratch.
         </p>
-        <button
-          type="button"
-          onClick={onStartBlank}
-          style={{
-            padding: '12px 24px',
-            borderRadius: 10,
-            border: '2px solid var(--accent)',
-            backgroundColor: 'transparent',
-            color: 'var(--accent)',
-            fontSize: '0.9rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          Start from scratch →
-        </button>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={onStartBlank}
+            style={{
+              padding: '12px 24px',
+              borderRadius: 10,
+              border: '2px solid var(--accent)',
+              backgroundColor: 'transparent',
+              color: 'var(--accent)',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Start consensus form from scratch →
+          </button>
+          <button
+            type="button"
+            onClick={onStartInformationGathering}
+            style={{
+              padding: '12px 24px',
+              borderRadius: 10,
+              border: '2px solid var(--border)',
+              backgroundColor: 'transparent',
+              color: 'var(--foreground)',
+              fontSize: '0.9rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Start information gathering form from scratch →
+          </button>
+        </div>
       </div>
     );
   }
@@ -125,75 +149,150 @@ export default function TemplatePicker({ onSelectTemplate, onStartBlank }: Templ
         </p>
       </div>
 
-      {/* Start from scratch — always first */}
-      <button
-        type="button"
-        onClick={onStartBlank}
-        onMouseEnter={() => setHoveredBlank(true)}
-        onMouseLeave={() => setHoveredBlank(false)}
+      <div
         style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          padding: '16px 20px',
-          borderRadius: 12,
-          border: `2px dashed ${hoveredBlank ? 'var(--accent)' : 'var(--border)'}`,
-          backgroundColor: hoveredBlank
-            ? 'color-mix(in srgb, var(--accent) 5%, var(--card))'
-            : 'var(--card)',
-          cursor: 'pointer',
-          transition: 'all 0.15s ease',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 12,
           marginBottom: '1.5rem',
-          textAlign: 'left',
         }}
       >
-        <div
+        <button
+          type="button"
+          onClick={onStartBlank}
+          onMouseEnter={() => setHoveredBlank(true)}
+          onMouseLeave={() => setHoveredBlank(false)}
           style={{
-            width: 48,
-            height: 48,
-            borderRadius: 10,
-            backgroundColor: hoveredBlank
-              ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
-              : 'color-mix(in srgb, var(--foreground) 6%, transparent)',
+            width: '100%',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            transition: 'background-color 0.15s ease',
+            gap: 16,
+            padding: '16px 20px',
+            borderRadius: 12,
+            border: `2px dashed ${hoveredBlank ? 'var(--accent)' : 'var(--border)'}`,
+            backgroundColor: hoveredBlank
+              ? 'color-mix(in srgb, var(--accent) 5%, var(--card))'
+              : 'var(--card)',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            textAlign: 'left',
           }}
         >
-          <FileText
-            size={22}
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 10,
+              backgroundColor: hoveredBlank
+                ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
+                : 'color-mix(in srgb, var(--foreground) 6%, transparent)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              transition: 'background-color 0.15s ease',
+            }}
+          >
+            <FileText
+              size={22}
+              style={{
+                color: hoveredBlank ? 'var(--accent)' : 'var(--muted-foreground)',
+                transition: 'color 0.15s ease',
+              }}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: 'var(--foreground)',
+              marginBottom: 2,
+            }}>
+              Start consensus form from scratch
+            </div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--muted-foreground)' }}>
+              Create a blank form with your own title, questions, and structured Delphi settings.
+            </div>
+          </div>
+          <ArrowRight
+            size={18}
             style={{
               color: hoveredBlank ? 'var(--accent)' : 'var(--muted-foreground)',
-              transition: 'color 0.15s ease',
+              flexShrink: 0,
+              opacity: hoveredBlank ? 1 : 0.5,
+              transition: 'all 0.15s ease',
             }}
           />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: '0.95rem',
-            fontWeight: 600,
-            color: 'var(--foreground)',
-            marginBottom: 2,
-          }}>
-            Start consensus form from scratch
-          </div>
-          <div style={{ fontSize: '0.82rem', color: 'var(--muted-foreground)' }}>
-            Create a blank form with your own title, questions, and settings.
-          </div>
-        </div>
-        <ArrowRight
-          size={18}
+        </button>
+
+        <button
+          type="button"
+          onClick={onStartInformationGathering}
+          onMouseEnter={() => setHoveredInfoBlank(true)}
+          onMouseLeave={() => setHoveredInfoBlank(false)}
           style={{
-            color: hoveredBlank ? 'var(--accent)' : 'var(--muted-foreground)',
-            flexShrink: 0,
-            opacity: hoveredBlank ? 1 : 0.5,
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            padding: '16px 20px',
+            borderRadius: 12,
+            border: `2px dashed ${hoveredInfoBlank ? 'var(--accent)' : 'var(--border)'}`,
+            backgroundColor: hoveredInfoBlank
+              ? 'color-mix(in srgb, var(--accent) 5%, var(--card))'
+              : 'var(--card)',
+            cursor: 'pointer',
             transition: 'all 0.15s ease',
+            textAlign: 'left',
           }}
-        />
-      </button>
+        >
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 10,
+              backgroundColor: hoveredInfoBlank
+                ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
+                : 'color-mix(in srgb, var(--foreground) 6%, transparent)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              transition: 'background-color 0.15s ease',
+            }}
+          >
+            <FileText
+              size={22}
+              style={{
+                color: hoveredInfoBlank ? 'var(--accent)' : 'var(--muted-foreground)',
+                transition: 'color 0.15s ease',
+              }}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: 'var(--foreground)',
+              marginBottom: 2,
+            }}>
+              Start information gathering form from scratch
+            </div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--muted-foreground)' }}>
+              Create a blank form where each question collects a plain text response only.
+            </div>
+          </div>
+          <ArrowRight
+            size={18}
+            style={{
+              color: hoveredInfoBlank ? 'var(--accent)' : 'var(--muted-foreground)',
+              flexShrink: 0,
+              opacity: hoveredInfoBlank ? 1 : 0.5,
+              transition: 'all 0.15s ease',
+            }}
+          />
+        </button>
+      </div>
 
       {/* Template cards grouped by category */}
       <div style={{ marginBottom: '0.75rem' }}>

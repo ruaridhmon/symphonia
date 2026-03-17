@@ -26,6 +26,14 @@ function createBlankQuestion(): ConfigurableQuestion {
   };
 }
 
+function createBlankInformationGatheringQuestion(): ConfigurableQuestion {
+  return {
+    label: '',
+    requireEvidence: false,
+    requireConfidence: false,
+  };
+}
+
 /* ── Toggle switch (pill-shaped) ──────────────────────────────── */
 
 function ToggleSwitch({
@@ -395,6 +403,14 @@ export default function AdminFormNew() {
     setSearchParams({ step: 'editor' });
   };
 
+  const handleStartInformationGathering = () => {
+    setSelectedTemplate(null);
+    setTitle('');
+    setDescription('');
+    setQuestions([createBlankInformationGatheringQuestion()]);
+    setSearchParams({ step: 'editor' });
+  };
+
   const handleBackToTemplates = () => {
     setSearchParams({ step: 'templates' });
   };
@@ -505,6 +521,7 @@ export default function AdminFormNew() {
             <TemplatePicker
               onSelectTemplate={handleSelectTemplate}
               onStartBlank={handleStartBlank}
+              onStartInformationGathering={handleStartInformationGathering}
             />
           </div>
         ) : (
