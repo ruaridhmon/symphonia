@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { ArrowLeft, ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -709,7 +709,6 @@ export default function SummaryPage() {
 							e.currentTarget.style.backgroundColor = 'var(--card)';
 						}}
 					>
-						<ArrowLeft size={16} />
 						{t('common.backToDashboard')}
 					</button>
 					<h2 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
