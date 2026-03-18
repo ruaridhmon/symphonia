@@ -2557,14 +2557,32 @@ def respond_to_follow_up(
 
 class FormCreate(BaseModel):
     title: str
-    questions: list[str]
+    questions: list[str | "QuestionConfig"]
     allow_join: bool
     join_code: str
 
 
 class FormUpdate(BaseModel):
     title: str
-    questions: list
+    questions: list[str | "QuestionConfig"]
+
+
+class QuestionConfig(BaseModel):
+    label: str
+    requireEvidence: bool = True
+    requireConfidence: bool = True
+
+
+def normalize_form_questions(
+    questions: list[str | QuestionConfig],
+) -> list[str | dict[str, object]]:
+    normalized: list[str | dict[str, object]] = []
+    for question in questions:
+        if isinstance(question, QuestionConfig):
+            normalized.append(question.model_dump())
+        else:
+            normalized.append(question)
+    return normalized
 
 
 # ---------------------------------------------------------------------------
@@ -2575,7 +2593,7 @@ class FormUpdate(BaseModel):
 class UserFormCreate(BaseModel):
     title: str
     description: str | None = None
-    questions: list = []
+    questions: list[str | QuestionConfig] = []
     allow_join: bool = True
 
 
@@ -2596,6 +2614,7 @@ def user_create_form(
     title = payload.title.strip()
     if not title:
         raise HTTPException(status_code=400, detail="title is required")
+    normalized_questions = normalize_form_questions(payload.questions)
 
     for _ in range(10):
         code = generate_join_code()
@@ -2609,7 +2628,7 @@ def user_create_form(
     form = FormModel(
         title=title,
         description=payload.description,
-        questions=payload.questions,
+        questions=normalized_questions,
         allow_join=payload.allow_join,
         join_code=code,
         owner_id=user.id,
@@ -2617,7 +2636,7 @@ def user_create_form(
     db.add(form)
     db.flush()
     first_round = RoundModel(
-        form_id=form.id, round_number=1, is_active=True, questions=payload.questions
+        form_id=form.id, round_number=1, is_active=True, questions=normalized_questions
     )
     db.add(first_round)
     # Also create an InviteCode row for the default join code
@@ -2753,15 +2772,16 @@ def update_form(
     assert_form_owner_or_facilitator(f, user)
 
     old_title = f.title
+    normalized_questions = normalize_form_questions(payload.questions)
     f.title = payload.title
-    f.questions = payload.questions
+    f.questions = normalized_questions
     active_round = (
         db.query(RoundModel)
         .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
         .first()
     )
     if active_round:
-        active_round.questions = payload.questions
+        active_round.questions = normalized_questions
     audit_log(
         db,
         user=user,
