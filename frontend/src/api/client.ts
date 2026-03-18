@@ -135,6 +135,17 @@ export class ApiError extends Error {
   }
 }
 
+export function getApiErrorDetail(error: unknown): string | null {
+  if (!(error instanceof ApiError)) return null;
+  try {
+    const parsed = JSON.parse(error.message);
+    if (parsed && typeof parsed.detail === 'string') return parsed.detail;
+  } catch {
+    // Non-JSON error bodies fall back to the raw message below.
+  }
+  return error.message || null;
+}
+
 export { isCfAccessRedirect, clearAuthAndRedirect };
 
 export const api = {

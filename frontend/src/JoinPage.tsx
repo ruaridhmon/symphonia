@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { joinForm, magicJoin } from './api/forms';
-import { ApiError } from './api/client';
+import { ApiError, getApiErrorDetail } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
@@ -66,7 +66,8 @@ export default function JoinPage() {
       const result = await joinForm(manualCode.trim());
       navigate(`/form/${result.form_id}`, { replace: true });
     } catch (err: any) {
-      setManualError(err.status === 404 ? 'Invalid join code. Please check and try again.' : `Could not join (HTTP ${err.status})`);
+      const detail = getApiErrorDetail(err);
+      setManualError(detail || (err.status === 404 ? 'Invalid join code. Please check and try again.' : `Could not join (HTTP ${err.status})`));
     } finally {
       setManualLoading(false);
     }

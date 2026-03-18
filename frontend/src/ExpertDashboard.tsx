@@ -4,7 +4,7 @@ import { CheckCircle2, Clock, FileText } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { Form, getMyForms, joinForm } from './api/forms';
 import { api } from './api/client';
-import { ApiError } from './api/client';
+import { ApiError, getApiErrorDetail } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
 import Skeleton, { SkeletonCard } from './components/Skeleton';
@@ -84,7 +84,7 @@ export default function ExpertDashboard() {
       fetchMyForms();
     } catch (err) {
       if (err instanceof ApiError) {
-        setJoinError(err.status === 404 ? 'Invalid join code.' : `Could not join form (HTTP ${err.status})`);
+        setJoinError(getApiErrorDetail(err) || (err.status === 404 ? 'Invalid join code.' : `Could not join form (HTTP ${err.status})`));
       } else {
         setJoinError('Something went wrong. Please try again.');
       }

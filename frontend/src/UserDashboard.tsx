@@ -12,8 +12,7 @@ import {
   OwnedForm,
   regenerateJoinCode,
 } from './api/forms';
-import { api } from './api/client';
-import { ApiError } from './api/client';
+import { api, ApiError, getApiErrorDetail } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
 import Skeleton, { SkeletonCard } from './components/Skeleton';
@@ -163,9 +162,10 @@ export default function UserDashboard() {
     } catch (err) {
       if (err instanceof ApiError) {
         setJoinError(
-          err.status === 404
-            ? 'Invalid join code.'
-            : `Could not join form (HTTP ${err.status})`
+          getApiErrorDetail(err)
+            || (err.status === 404
+              ? 'Invalid join code.'
+              : `Could not join form (HTTP ${err.status})`)
         );
       } else {
         setJoinError('Something went wrong. Please try again.');
