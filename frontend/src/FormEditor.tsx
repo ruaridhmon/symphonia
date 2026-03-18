@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Trash2, Plus, Save, ArrowLeft } from 'lucide-react';
-import { api } from './api/client';
+import { Trash2, Plus, Save, ArrowLeft, ChevronUp, ChevronDown } from 'lucide-react';
+import { api, getApiErrorDetail } from './api/client';
 import LoadingButton from './components/LoadingButton';
 import StructuredInput from './components/StructuredInput';
 import { useToast } from './components/Toast';
@@ -158,9 +158,8 @@ export default function FormEditor() {
         join_code: joinCode,
       });
       toastSuccess('Consultation saved');
-      navigate('/');
-    } catch {
-      toastError('Failed to save edits');
+    } catch (error) {
+      toastError(getApiErrorDetail(error) || 'Failed to save edits');
     } finally {
       setSaving(false);
     }
@@ -200,6 +199,14 @@ export default function FormEditor() {
         ? createBlankInformationGatheringQuestion()
         : createBlankQuestion(),
     ]);
+  }
+
+  function swapQuestions(a: number, b: number) {
+    setQuestions((prev) => {
+      const updated = [...prev];
+      [updated[a], updated[b]] = [updated[b], updated[a]];
+      return updated;
+    });
   }
 
   function removeQuestion(i: number) {
@@ -310,6 +317,57 @@ export default function FormEditor() {
                 >
                   {i + 1}.
                 </span>
+                <div
+                  className="flex flex-col shrink-0"
+                  style={{ width: 18, gap: 2, marginTop: 8 }}
+                >
+                  {i > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => swapQuestions(i, i - 1)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        color: 'var(--muted-foreground)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                      }}
+                      title="Move up"
+                      aria-label={`Move question ${i + 1} up`}
+                    >
+                      <ChevronUp size={14} aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <span style={{ height: 14 }} />
+                  )}
+                  {i < questions.length - 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => swapQuestions(i, i + 1)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        color: 'var(--muted-foreground)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        lineHeight: 1,
+                      }}
+                      title="Move down"
+                      aria-label={`Move question ${i + 1} down`}
+                    >
+                      <ChevronDown size={14} aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <span style={{ height: 14 }} />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <input
                     value={q.label}
