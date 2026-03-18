@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -686,11 +686,30 @@ export default function SummaryPage() {
 				<nav aria-label={t('common.breadcrumb', 'Breadcrumb')} className="mb-4 flex items-center justify-between">
 					<button
 						onClick={() => navigate('/')}
-						className="text-sm font-medium transition-colors"
-						style={{ color: 'var(--muted-foreground)', background: 'none', border: 'none', cursor: 'pointer' }}
-						onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.color = 'var(--accent)'}
-						onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.color = 'var(--muted-foreground)'}
+						className="inline-flex items-center gap-2 transition-colors"
+						style={{
+							color: 'var(--muted-foreground)',
+							backgroundColor: 'var(--card)',
+							border: '1px solid var(--border)',
+							borderRadius: 10,
+							cursor: 'pointer',
+							padding: '10px 14px',
+							fontSize: '0.95rem',
+							fontWeight: 600,
+							lineHeight: 1,
+						}}
+						onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
+							e.currentTarget.style.color = 'var(--foreground)';
+							e.currentTarget.style.borderColor = 'var(--accent)';
+							e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
+						}}
+						onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
+							e.currentTarget.style.color = 'var(--muted-foreground)';
+							e.currentTarget.style.borderColor = 'var(--border)';
+							e.currentTarget.style.backgroundColor = 'var(--card)';
+						}}
 					>
+						<ArrowLeft size={16} />
 						{t('common.backToDashboard')}
 					</button>
 					<h2 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>

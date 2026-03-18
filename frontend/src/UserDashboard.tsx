@@ -3,8 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Clock, FileText, PlusCircle, ClipboardCopy, Trash2, RefreshCw } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import {
-  getMyForms, unlockForm, Form,
-  OwnedForm, createUserForm, getMyCreatedForms, deleteMyForm, regenerateJoinCode,
+  createUserForm,
+  deleteMyForm,
+  Form,
+  getMyCreatedForms,
+  getMyForms,
+  joinForm,
+  OwnedForm,
+  regenerateJoinCode,
 } from './api/forms';
 import { api } from './api/client';
 import { ApiError } from './api/client';
@@ -42,6 +48,7 @@ export default function UserDashboard() {
   const [newFormTitle, setNewFormTitle] = useState('');
   const [newFormAllowJoin, setNewFormAllowJoin] = useState(true);
   const [createdCode, setCreatedCode] = useState<string | null>(null);
+  const [createdFormId, setCreatedFormId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [regenLoading, setRegenLoading] = useState<Record<number, boolean>>({});
@@ -111,6 +118,7 @@ export default function UserDashboard() {
       const result = await createUserForm({ title: newFormTitle, allow_join: newFormAllowJoin });
       setOwnedForms(prev => [result, ...prev]);
       setCreatedCode(result.join_code);
+      setCreatedFormId(result.id);
       setNewFormTitle('');
       setShowCreateForm(false);
     } catch (e) {
@@ -148,7 +156,7 @@ export default function UserDashboard() {
     if (!joinCode) return;
 
     try {
-      await unlockForm(joinCode.trim());
+      await joinForm(joinCode.trim());
       setJoinCode('');
       setJoinError('');
       fetchMyForms();
@@ -203,7 +211,7 @@ export default function UserDashboard() {
               My Consultations
             </h2>
             <button
-              onClick={() => { setShowCreateForm(v => !v); setCreateError(null); setCreatedCode(null); }}
+              onClick={() => { setShowCreateForm(v => !v); setCreateError(null); setCreatedCode(null); setCreatedFormId(null); }}
               className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
@@ -290,14 +298,25 @@ export default function UserDashboard() {
                   {createdCode}
                 </p>
               </div>
-              <button
-                onClick={() => { navigator.clipboard.writeText(createdCode); }}
-                className="p-1.5 rounded"
-                title="Copy join code"
-                style={{ color: 'var(--success)' }}
-              >
-                <ClipboardCopy size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                {createdFormId && (
+                  <LoadingButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/form/${createdFormId}`)}
+                  >
+                    Preview
+                  </LoadingButton>
+                )}
+                <button
+                  onClick={() => { navigator.clipboard.writeText(createdCode); }}
+                  className="p-1.5 rounded"
+                  title="Copy join code"
+                  style={{ color: 'var(--success)' }}
+                >
+                  <ClipboardCopy size={16} />
+                </button>
+              </div>
             </div>
           )}
 
@@ -347,14 +366,23 @@ export default function UserDashboard() {
                       </button>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDeleteOwned(f.id)}
-                    className="p-1.5 rounded hover:opacity-80"
-                    title="Delete form"
-                    style={{ color: 'var(--destructive)' }}
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <LoadingButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/form/${f.id}`)}
+                    >
+                      Preview
+                    </LoadingButton>
+                    <button
+                      onClick={() => handleDeleteOwned(f.id)}
+                      className="p-1.5 rounded hover:opacity-80"
+                      title="Delete form"
+                      style={{ color: 'var(--destructive)' }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

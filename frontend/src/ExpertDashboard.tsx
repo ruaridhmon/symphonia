@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Clock, FileText } from 'lucide-react';
 import { useAuth } from './AuthContext';
-import { getMyForms, unlockForm, Form } from './api/forms';
+import { Form, getMyForms, joinForm } from './api/forms';
 import { api } from './api/client';
 import { ApiError } from './api/client';
 import Container from './layouts/Container';
@@ -78,7 +78,7 @@ export default function ExpertDashboard() {
     e.preventDefault();
     if (!joinCode) return;
     try {
-      await unlockForm(joinCode.trim());
+      await joinForm(joinCode.trim());
       setJoinCode('');
       setJoinError('');
       fetchMyForms();

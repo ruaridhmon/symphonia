@@ -37,6 +37,7 @@ export default function FacilitatorDashboard() {
   const [newFormTitle, setNewFormTitle] = useState('');
   const [newFormAllowJoin, setNewFormAllowJoin] = useState(true);
   const [createdCode, setCreatedCode] = useState<string | null>(null);
+  const [createdFormId, setCreatedFormId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [regenLoading, setRegenLoading] = useState<Record<number, boolean>>({});
@@ -97,6 +98,7 @@ export default function FacilitatorDashboard() {
       const result = await createUserForm({ title: newFormTitle, allow_join: newFormAllowJoin });
       setOwnedForms(prev => [result, ...prev]);
       setCreatedCode(result.join_code);
+      setCreatedFormId(result.id);
       setNewFormTitle('');
       setShowCreateForm(false);
     } catch (e) {
@@ -156,7 +158,7 @@ export default function FacilitatorDashboard() {
               My Consultations
             </h2>
             <button
-              onClick={() => { setShowCreateForm(v => !v); setCreateError(null); setCreatedCode(null); }}
+              onClick={() => { setShowCreateForm(v => !v); setCreateError(null); setCreatedCode(null); setCreatedFormId(null); }}
               className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
@@ -213,13 +215,24 @@ export default function FacilitatorDashboard() {
                 </p>
                 <p className="text-sm font-mono font-bold" style={{ color: 'var(--foreground)' }}>{createdCode}</p>
               </div>
-              <button
-                onClick={() => { navigator.clipboard.writeText(createdCode); }}
-                className="p-1.5 rounded" title="Copy join code"
-                style={{ color: 'var(--success)' }}
-              >
-                <ClipboardCopy size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                {createdFormId && (
+                  <LoadingButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/form/${createdFormId}`)}
+                  >
+                    Preview
+                  </LoadingButton>
+                )}
+                <button
+                  onClick={() => { navigator.clipboard.writeText(createdCode); }}
+                  className="p-1.5 rounded" title="Copy join code"
+                  style={{ color: 'var(--success)' }}
+                >
+                  <ClipboardCopy size={16} />
+                </button>
+              </div>
             </div>
           )}
 
@@ -262,13 +275,22 @@ export default function FacilitatorDashboard() {
                       </button>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDeleteOwned(f.id)}
-                    className="p-1.5 rounded hover:opacity-80" title="Delete form"
-                    style={{ color: 'var(--destructive)' }}
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <LoadingButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/form/${f.id}`)}
+                    >
+                      Preview
+                    </LoadingButton>
+                    <button
+                      onClick={() => handleDeleteOwned(f.id)}
+                      className="p-1.5 rounded hover:opacity-80" title="Delete form"
+                      style={{ color: 'var(--destructive)' }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
