@@ -39,14 +39,20 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Validate consensus access token
+        run: |
+          if [ -z "${{ secrets.GH_TOKEN }}" ]; then
+            echo "Missing required secret GH_TOKEN."
+            echo "This workflow installs private dependency axiotic-ai/consensus and needs a token with repo read access."
+            exit 1
+          fi
+
       - name: Install consensus (latest main)
         run: |
           pip install --upgrade pip
-          pip install "consensus @ git+https://github.com/axiotic-ai/consensus.git@main"
+          pip install "consensus @ git+https://x-access-token:${GIT_AUTH_TOKEN}@github.com/axiotic-ai/consensus.git@main"
         env:
-          # TODO: If axiotic-ai/consensus is private, add GH_TOKEN secret
-          # with repo read scope and uncomment:
-          # GIT_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GIT_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
           GIT_TERMINAL_PROMPT: "0"
 
       - name: Capture installed version
@@ -58,8 +64,11 @@ jobs:
 
       - name: Install all backend deps (compatibility check)
         run: |
-          pip install -r backend/requirements.txt
+          sed "s|git+https://github.com/axiotic-ai/consensus.git@main|git+https://x-access-token:${GIT_AUTH_TOKEN}@github.com/axiotic-ai/consensus.git@main|g" \
+            backend/requirements.txt > /tmp/backend-requirements.txt
+          pip install -r /tmp/backend-requirements.txt
         env:
+          GIT_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
           GIT_TERMINAL_PROMPT: "0"
 
       - name: Run backend tests with new consensus
