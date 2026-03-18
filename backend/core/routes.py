@@ -2564,7 +2564,7 @@ class FormCreate(BaseModel):
 
 class FormUpdate(BaseModel):
     title: str
-    questions: list[str]
+    questions: list
 
 
 # ---------------------------------------------------------------------------
@@ -2755,6 +2755,13 @@ def update_form(
     old_title = f.title
     f.title = payload.title
     f.questions = payload.questions
+    active_round = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
+        .first()
+    )
+    if active_round:
+        active_round.questions = payload.questions
     audit_log(
         db,
         user=user,
