@@ -2555,22 +2555,22 @@ def respond_to_follow_up(
 # ---------------------------------------------------------
 
 
+class QuestionConfig(BaseModel):
+    label: str
+    requireEvidence: bool = True
+    requireConfidence: bool = True
+
+
 class FormCreate(BaseModel):
     title: str
-    questions: list[str | "QuestionConfig"]
+    questions: list[str | QuestionConfig]
     allow_join: bool
     join_code: str
 
 
 class FormUpdate(BaseModel):
     title: str
-    questions: list[str | "QuestionConfig"]
-
-
-class QuestionConfig(BaseModel):
-    label: str
-    requireEvidence: bool = True
-    requireConfidence: bool = True
+    questions: list[str | QuestionConfig]
 
 
 def normalize_form_questions(
