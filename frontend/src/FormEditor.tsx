@@ -7,11 +7,11 @@ import StructuredInput from './components/StructuredInput';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
-import { normalizeQuestion, type ConfigurableQuestion } from './utils/questions';
+import { normalizeQuestion, type ConfigurableQuestion, type QuestionInput } from './utils/questions';
 
 interface FormData {
   title: string;
-  questions: unknown[];
+  questions: QuestionInput[];
   join_code: string;
 }
 
@@ -102,7 +102,7 @@ export default function FormEditor() {
         setTitle(form.title);
         setQuestions(
           Array.isArray(form.questions) && form.questions.length > 0
-            ? form.questions.map(normalizeQuestion)
+            ? form.questions.map((question) => normalizeQuestion(question))
             : [createBlankQuestion()],
         );
         setJoinCode(form.join_code);
@@ -154,8 +154,6 @@ export default function FormEditor() {
       await api.put(`/forms/${id}`, {
         title: title.trim(),
         questions: validQuestions,
-        allow_join: true,
-        join_code: joinCode,
       });
       toastSuccess('Consultation saved');
     } catch (error) {
