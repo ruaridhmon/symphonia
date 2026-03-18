@@ -73,7 +73,7 @@ jobs:
 
       - name: Run backend tests with new consensus
         run: |
-          pip install pytest pytest-asyncio
+          pip install pytest pytest-asyncio pytest-timeout
           cd backend && python -m pytest tests/ -v --tb=short -x --timeout=60
         env:
           SYNTHESIS_MODE: mock
