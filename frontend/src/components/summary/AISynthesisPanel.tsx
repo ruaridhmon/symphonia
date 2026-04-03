@@ -1,5 +1,5 @@
 import { LoadingButton, SynthesisModeSelector } from '../index';
-import { ArrowRight, Cpu, Eye, EyeOff } from 'lucide-react';
+import { Cpu } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -10,10 +10,6 @@ type Props = {
   estimateLabel: string | null;
   responseCount: number;
   isGenerating: boolean;
-  responsesActive: boolean;
-  onToggleResponses: () => void;
-  onStartNextRound: () => void;
-  loading: boolean;
   onGenerate: () => void;
 };
 
@@ -26,10 +22,6 @@ export default function AISynthesisPanel({
   estimateLabel,
   responseCount,
   isGenerating,
-  responsesActive,
-  onToggleResponses,
-  onStartNextRound,
-  loading,
   onGenerate,
 }: Props) {
   const canGenerate = responseCount > 0;
@@ -51,30 +43,6 @@ export default function AISynthesisPanel({
         Workflow
       </h3>
       <div className="space-y-2">
-        <div className="grid grid-cols-2 gap-2">
-          <LoadingButton
-            variant="ghost"
-            size="sm"
-            onClick={onToggleResponses}
-            className="w-full justify-center gap-2"
-            icon={responsesActive ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
-            aria-pressed={responsesActive}
-          >
-            {responsesActive ? 'Back to synthesis' : 'Review responses'}
-          </LoadingButton>
-          <LoadingButton
-            variant="secondary"
-            size="sm"
-            onClick={onStartNextRound}
-            loading={loading}
-            loadingText="Starting…"
-            className="w-full justify-center gap-2"
-            icon={<ArrowRight size={14} aria-hidden="true" />}
-          >
-            Next round
-          </LoadingButton>
-        </div>
-
         <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} />
 
         <div

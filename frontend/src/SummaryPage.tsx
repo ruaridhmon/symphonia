@@ -938,6 +938,8 @@ export default function SummaryPage() {
 										onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
 										onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
 										onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
+										onStartNextRound={startNextRound}
+										loading={loading}
 									/>
 								)}
 							</>
@@ -1173,10 +1175,6 @@ export default function SummaryPage() {
 							estimateLabel={synthesisEstimateLabel}
 							responseCount={responseCountForDisplay}
 							isGenerating={isGenerating}
-							responsesActive={activeWorkspaceTab === 'responses'}
-							onToggleResponses={viewAllResponses}
-							onStartNextRound={startNextRound}
-							loading={loading}
 							onGenerate={generateSummary}
 						/>
 

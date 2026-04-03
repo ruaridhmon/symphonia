@@ -6,6 +6,8 @@ type Props = {
   onUpdateQuestion: (index: number, value: string) => void;
   onAddQuestion: () => void;
   onRemoveQuestion: (index: number) => void;
+  onStartNextRound: () => void;
+  loading: boolean;
 };
 
 export default function NextRoundQuestionsCard({
@@ -13,7 +15,11 @@ export default function NextRoundQuestionsCard({
   onUpdateQuestion,
   onAddQuestion,
   onRemoveQuestion,
+  onStartNextRound,
+  loading,
 }: Props) {
+  const hasQuestions = questions.some(q => q.trim().length > 0);
+
   return (
     <div className="card p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -60,6 +66,22 @@ export default function NextRoundQuestionsCard({
       >
         Add Question
       </LoadingButton>
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
+          Finalise these prompts, then open the next round with them.
+        </p>
+        <LoadingButton
+          variant="accent"
+          size="sm"
+          onClick={onStartNextRound}
+          loading={loading}
+          loadingText="Starting next round…"
+          disabled={!hasQuestions}
+          className="sm:self-auto"
+        >
+          {hasQuestions ? 'Start next round' : 'Add a question first'}
+        </LoadingButton>
+      </div>
     </div>
   );
 }
