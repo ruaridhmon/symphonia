@@ -116,10 +116,9 @@ export default function Register() {
       >
         {t('auth.createAccount')}
       </LoadingButton>
-      <div className="text-sm text-center auth-footnote">
-        {t('auth.alreadyHaveAccount')}{' '}
-        <Link to="/login" className="auth-link font-medium">
-          {t('auth.signInLink')}
+      <div>
+        <Link to="/login" className="auth-secondary-cta">
+          {t('auth.signIn')}
         </Link>
       </div>
     </form>

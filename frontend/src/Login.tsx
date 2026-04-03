@@ -104,11 +104,6 @@ export default function Login() {
           {t('auth.passwordLabel')}
         </label>
       </div>
-      <div className="text-right">
-        <Link to="/forgot-password" className="auth-link text-sm font-medium">
-          Forgot password?
-        </Link>
-      </div>
       <LoadingButton
         type="submit"
         variant="accent"
@@ -120,10 +115,14 @@ export default function Login() {
       >
         {t('auth.signIn')}
       </LoadingButton>
-      <div className="text-sm text-center auth-footnote">
-        {t('auth.noAccount')}{' '}
-        <Link to="/register" className="auth-link font-medium">
-          {t('auth.createOne')}
+      <div className="text-center">
+        <Link to="/forgot-password" className="auth-text-link text-sm font-medium">
+          Forgot password?
+        </Link>
+      </div>
+      <div>
+        <Link to="/register" className="auth-secondary-cta">
+          {t('auth.createAccount')}
         </Link>
       </div>
     </form>

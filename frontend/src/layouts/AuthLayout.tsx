@@ -17,7 +17,7 @@ export default function AuthLayout() {
       }}
     >
       <main className="w-full max-w-md">
-        <div className="auth-brand mb-6" aria-label="Symphonia">
+        <div className="auth-brand mb-7" aria-label="Symphonia">
           <img
             src="/logo-mark.png"
             alt=""
