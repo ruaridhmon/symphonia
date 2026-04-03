@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Trash2, Plus, Save, ArrowLeft, ChevronUp, ChevronDown, Copy, Ticket } from 'lucide-react';
+import { Trash2, Plus, Save, ChevronUp, ChevronDown, Copy, Ticket } from 'lucide-react';
 import { api, getApiErrorDetail } from './api/client';
-import LoadingButton from './components/LoadingButton';
+import { BackLink, LoadingButton } from './components';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import StructuredInput from './components/StructuredInput';
 import { useToast } from './components/Toast';
@@ -235,34 +235,7 @@ export default function FormEditor() {
 
   return (
     <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-7xl mx-auto">
-      <button
-        onClick={() => navigate('/')}
-        className="inline-flex items-center gap-2 mb-6 transition-colors"
-        style={{
-          color: 'var(--muted-foreground)',
-          backgroundColor: 'var(--card)',
-          border: '1px solid var(--border)',
-          borderRadius: 10,
-          cursor: 'pointer',
-          padding: '10px 14px',
-          fontSize: '0.95rem',
-          fontWeight: 600,
-          lineHeight: 1,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--foreground)';
-          e.currentTarget.style.borderColor = 'var(--accent)';
-          e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--muted-foreground)';
-          e.currentTarget.style.borderColor = 'var(--border)';
-          e.currentTarget.style.backgroundColor = 'var(--card)';
-        }}
-      >
-        <ArrowLeft size={16} />
-        Back to Dashboard
-      </button>
+      <BackLink to="/" label="Dashboard" className="mb-6" />
 
       <section className="card-lg p-5 sm:p-6 mb-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

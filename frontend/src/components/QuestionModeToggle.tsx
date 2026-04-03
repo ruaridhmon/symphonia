@@ -15,18 +15,19 @@ export default function QuestionModeToggle({
     <div className="space-y-3">
       <div className="text-sm font-medium text-foreground">{label}</div>
       <div
-        className="grid items-center gap-3"
+        className="grid items-center justify-items-stretch gap-3"
         style={{
-          gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)',
-          maxWidth: '28rem',
+          gridTemplateColumns: '1fr auto 1fr',
+          width: 'min(100%, 28rem)',
         }}
       >
         <button
           type="button"
           onClick={onSelectSurvey}
-          className="w-full rounded-lg text-sm font-medium transition-colors"
+          className="flex w-full items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors"
           style={{
             minHeight: 42,
+            width: '100%',
             border: '1px solid',
             borderColor: isSurveyMode ? 'var(--accent)' : 'var(--border)',
             backgroundColor: isSurveyMode
@@ -47,9 +48,10 @@ export default function QuestionModeToggle({
         <button
           type="button"
           onClick={onSelectConsensus}
-          className="w-full rounded-lg text-sm font-medium transition-colors"
+          className="flex w-full items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors"
           style={{
             minHeight: 42,
+            width: '100%',
             border: '1px solid',
             borderColor: isSurveyMode ? 'var(--border)' : 'var(--accent)',
             backgroundColor: isSurveyMode

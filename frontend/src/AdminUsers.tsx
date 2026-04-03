@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { getAdminUsers, updateUserRole, UserListItem } from './api/forms';
 import { ApiError } from './api/client';
 import Container from './layouts/Container';
-import { LoadingButton } from './components';
+import { BackLink, LoadingButton } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 const ROLES = ['expert', 'facilitator', 'platform_admin'] as const;
@@ -16,7 +15,6 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function AdminUsers() {
   useDocumentTitle('User Management');
-  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,34 +56,7 @@ export default function AdminUsers() {
   return (
     <section className="flex-1 py-6 sm:py-8">
       <Container size="lg">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="inline-flex items-center gap-2 mb-6 transition-colors"
-          style={{
-            color: 'var(--muted-foreground)',
-            backgroundColor: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderRadius: 10,
-            cursor: 'pointer',
-            padding: '10px 14px',
-            fontSize: '0.95rem',
-            fontWeight: 600,
-            lineHeight: 1,
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.color = 'var(--foreground)';
-            e.currentTarget.style.borderColor = 'var(--accent)';
-            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.color = 'var(--muted-foreground)';
-            e.currentTarget.style.borderColor = 'var(--border)';
-            e.currentTarget.style.backgroundColor = 'var(--card)';
-          }}
-        >
-          ← Back to Dashboard
-        </button>
+        <BackLink to="/" label="Dashboard" className="mb-6" />
 
         <div className="flex items-center justify-between mb-6">
           <div>

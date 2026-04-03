@@ -14,7 +14,7 @@
     "settings": "Ρυθμίσεις",
     "theme": "Θέμα",
     "logOut": "Αποσύνδεση",
-    "backToDashboard": "← Πίσω στον Πίνακα",
+    "backToDashboard": "Πίνακας",
     "skipToMainContent": "Μετάβαση στο κύριο περιεχόμενο",
     "showingResults": "Εμφάνιση {{count}} από {{total}} φόρμα(-ες)",
     "noResults": "Δεν βρέθηκαν αποτελέσματα",

@@ -14,7 +14,7 @@
     "settings": "Settings",
     "theme": "Theme",
     "logOut": "Log out",
-    "backToDashboard": "← Back to Dashboard",
+    "backToDashboard": "Dashboard",
     "skipToMainContent": "Skip to main content",
     "showingResults": "Showing {{count}} of {{total}} form(s)",
     "noResults": "No results found",

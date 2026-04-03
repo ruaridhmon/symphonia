@@ -5,7 +5,7 @@ import { API_BASE_URL } from './config';
 import { api } from './api/client';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
-import { LoadingButton } from './components';
+import { BackLink, LoadingButton } from './components';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import StructuredInput from './components/StructuredInput';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
@@ -491,35 +491,11 @@ export default function AdminFormNew() {
         {/* Delphi Guide Modal */}
         <DelphiGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
 
-        {/* Back button */}
-        <button
-          type="button"
+        <BackLink
           onClick={() => showTemplatePicker ? navigate('/') : handleBackToTemplates()}
-          className="inline-flex items-center gap-2 mb-6 transition-colors"
-          style={{
-            color: 'var(--muted-foreground)',
-            backgroundColor: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderRadius: 10,
-            cursor: 'pointer',
-            padding: '10px 14px',
-            fontSize: '0.95rem',
-            fontWeight: 600,
-            lineHeight: 1,
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.color = 'var(--foreground)';
-            e.currentTarget.style.borderColor = 'var(--accent)';
-            e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.color = 'var(--muted-foreground)';
-            e.currentTarget.style.borderColor = 'var(--border)';
-            e.currentTarget.style.backgroundColor = 'var(--card)';
-          }}
-        >
-          ← {showTemplatePicker ? 'Back to Dashboard' : 'Back to Templates'}
-        </button>
+          label={showTemplatePicker ? 'Dashboard' : 'Templates'}
+          className="mb-6"
+        />
 
         {/* ── Template Picker View ────────────────────────────── */}
         {showTemplatePicker ? (

@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 import { joinForm, magicJoin } from './api/forms';
 import { ApiError, getApiErrorDetail } from './api/client';
 import Container from './layouts/Container';
-import { LoadingButton } from './components';
+import { BackLink, LoadingButton } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 /**
@@ -78,34 +78,7 @@ export default function JoinPage() {
     return (
       <section className="flex-1 py-6 sm:py-8">
         <Container size="sm">
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 mb-6 transition-colors"
-            style={{
-              color: 'var(--muted-foreground)',
-              backgroundColor: 'var(--card)',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              cursor: 'pointer',
-              padding: '10px 14px',
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              lineHeight: 1,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.color = 'var(--foreground)';
-              e.currentTarget.style.borderColor = 'var(--accent)';
-              e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.color = 'var(--muted-foreground)';
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.backgroundColor = 'var(--card)';
-            }}
-          >
-            ← Back to Dashboard
-          </button>
+          <BackLink to="/" label="Dashboard" className="mb-6" />
 
           <div
             className="rounded-xl p-6 sm:p-10"

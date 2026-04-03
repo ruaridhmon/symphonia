@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { ChartNoAxesColumn, ChevronDown, ChevronLeft, ChevronRight, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -33,6 +33,7 @@ import {
 	MarkdownRenderer,
 	DevilsAdvocate,
 	AudienceTranslation,
+	BackLink,
 	ProbeQuestionsPanel,
 	LoadingButton,
 	useToast,
@@ -344,7 +345,6 @@ export default function SummaryPage() {
 			: hasSynthesis
 				? 'Synthesis ready'
 				: 'Awaiting synthesis';
-	const backToDashboardLabel = t('common.backToDashboard').replace(/^←\s*/, '');
 	const workspaceTabs = [
 		{
 			id: 'synthesis' as const,
@@ -778,28 +778,7 @@ export default function SummaryPage() {
 				<section className="card mb-4 sm:mb-6 p-5 sm:p-6">
 					<div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 						<div className="min-w-0 max-w-3xl">
-							<button
-								type="button"
-								onClick={() => navigate('/')}
-								className="inline-flex items-center gap-1.5 mb-4 text-sm font-medium transition-colors"
-								style={{
-									background: 'none',
-									border: 'none',
-									padding: 0,
-									cursor: 'pointer',
-									color: 'var(--muted-foreground)',
-								}}
-								onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-									e.currentTarget.style.color = 'var(--foreground)';
-								}}
-								onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-									e.currentTarget.style.color = 'var(--muted-foreground)';
-								}}
-								aria-label={backToDashboardLabel}
-							>
-								<ChevronLeft size={16} />
-								<span>{backToDashboardLabel}</span>
-							</button>
+							<BackLink to="/" label={t('common.backToDashboard')} className="mb-4" />
 							<div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
 								Summary
 							</div>

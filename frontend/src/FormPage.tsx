@@ -5,7 +5,7 @@ import { getForm, Form } from './api/forms'
 import { getActiveRound, ActiveRound } from './api/rounds'
 import { submitResponse, hasSubmitted as checkSubmitted, getMyResponse, saveDraft, getDraft, deleteDraft } from './api/responses'
 import { ApiError } from './api/client'
-import { LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
+import { BackLink, LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
 import Skeleton, { SkeletonCard } from './components/Skeleton'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
@@ -296,33 +296,7 @@ export default function FormPage() {
       <div className="max-w-3xl mx-auto card-lg p-6 sm:p-8">
 
         <div className="mb-4">
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 transition-colors"
-            style={{
-              color: 'var(--muted-foreground)',
-              backgroundColor: 'var(--card)',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              cursor: 'pointer',
-              padding: '10px 14px',
-              fontSize: '0.95rem',
-              fontWeight: 600,
-              lineHeight: 1,
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.color = 'var(--foreground)';
-              e.currentTarget.style.borderColor = 'var(--accent)';
-              e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.color = 'var(--muted-foreground)';
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.backgroundColor = 'var(--card)';
-            }}
-          >
-            ← Back to Dashboard
-          </button>
+          <BackLink to="/" label="Dashboard" />
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1">
