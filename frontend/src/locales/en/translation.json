@@ -180,7 +180,7 @@
     "failedToLoadConnection": "Failed to load forms. Please check your connection."
   },
   "adminDashboard": {
-    "title": "Admin Dashboard",
+    "title": "Consultations",
     "subtitle": "Create and manage your Delphi consultation forms",
     "newForm": "+ New Form",
     "existingForms": "Existing Forms",

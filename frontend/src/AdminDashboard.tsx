@@ -140,21 +140,12 @@ export default function AdminDashboard() {
         {/* ── Create form CTA ── */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5 sm:mb-6">
           <div>
-            <div
-              className="text-[11px] font-semibold uppercase tracking-[0.18em] mb-1"
-              style={{ color: 'var(--accent)' }}
-            >
-              Dashboard
-            </div>
             <h1
               className="text-lg sm:text-xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
               {t('adminDashboard.title')}
             </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-              {t('adminDashboard.subtitle')}
-            </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
             <LoadingButton
