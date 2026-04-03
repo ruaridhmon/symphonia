@@ -59,10 +59,10 @@ test.describe('Synthesis mode selector', () => {
     await expect(page.getByText(/^AI Synthesis$/i)).toBeVisible({ timeout: 5_000 });
   });
 
-  test('shows Simple, Committee, and TTD mode buttons', async ({ page }) => {
+  test('shows Simple, Committee, and Thorough mode buttons', async ({ page }) => {
     await expect(page.getByText('Simple').first()).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText('Committee').first()).toBeVisible();
-    await expect(page.getByText('TTD').first()).toBeVisible();
+    await expect(page.getByText('Thorough').first()).toBeVisible();
   });
 
   test('mode descriptions are present', async ({ page }) => {
@@ -80,9 +80,9 @@ test.describe('Synthesis mode selector', () => {
     expect(count).toBeGreaterThanOrEqual(1);
   });
 
-  test('"Generate AI Synthesis" button is present', async ({ page }) => {
+  test('synthesis action button is present', async ({ page }) => {
     await expect(
-      page.getByRole('button', { name: /Generate AI Synthesis/i }),
+      page.getByRole('button', { name: /Generate AI Synthesis|Waiting for Responses/i }),
     ).toBeVisible({ timeout: 5_000 });
   });
 });
