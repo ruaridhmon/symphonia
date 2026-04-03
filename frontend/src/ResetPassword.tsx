@@ -13,6 +13,8 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,24 +43,19 @@ export default function ResetPassword() {
 
   if (success) {
     return (
-      <div className="card-lg p-8 sm:p-10 w-full space-y-5">
-        <h2 className="text-base font-medium text-center" style={{ color: 'var(--muted-foreground)' }}>
-          Password Reset
-        </h2>
+      <div className="auth-panel w-full space-y-5">
+        <div className="auth-header">
+          <h1 className="auth-title">Password reset</h1>
+        </div>
         <div
-          className="rounded-lg px-4 py-3 text-sm text-center"
+          className="auth-feedback auth-feedback-info"
           role="status"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-            color: 'var(--accent)',
-            border: '1px solid color-mix(in srgb, var(--accent) 25%, transparent)',
-          }}
         >
           Your password has been reset successfully. You can now sign in with your new password.
         </div>
-        <div className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
-          <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>
-            Sign In
+        <div>
+          <Link to="/login" className="auth-secondary-cta">
+            Sign in
           </Link>
         </div>
       </div>
@@ -68,51 +65,54 @@ export default function ResetPassword() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="card-lg p-8 sm:p-10 w-full space-y-5"
+      className="auth-panel w-full space-y-5"
     >
-      <h2 className="text-base font-medium text-center" style={{ color: 'var(--muted-foreground)' }}>
-        Reset Password
-      </h2>
+      <div className="auth-header">
+        <h1 className="auth-title">Set a new password</h1>
+      </div>
       <div aria-live="polite" aria-atomic="true">
         {error && (
           <div
-            className="rounded-lg px-4 py-3 text-sm text-center"
+            className="auth-feedback auth-feedback-error"
             role="alert"
-            style={{
-              backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
-              color: 'var(--destructive)',
-              border: '1px solid color-mix(in srgb, var(--destructive) 25%, transparent)',
-            }}
           >
             {error}
           </div>
         )}
       </div>
-      <div className="space-y-1.5">
-        <label htmlFor="reset-password" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          New password
-        </label>
+      <div className={`auth-floating-field ${passwordFocused || password ? 'is-active' : ''}`}>
         <PasswordInput
           id="reset-password"
-          placeholder="••••••••"
+          placeholder=" "
           required
           autoComplete="new-password"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          onFocus={() => setPasswordFocused(true)}
+          onBlur={() => setPasswordFocused(false)}
+          className="auth-floating-input auth-floating-input-password"
+          wrapperClassName="auth-floating-password"
         />
-      </div>
-      <div className="space-y-1.5">
-        <label htmlFor="reset-confirm-password" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          Confirm new password
+        <label htmlFor="reset-password" className="auth-floating-label">
+          New password
         </label>
+      </div>
+      <div className={`auth-floating-field ${confirmPasswordFocused || confirmPassword ? 'is-active' : ''}`}>
         <PasswordInput
           id="reset-confirm-password"
-          placeholder="••••••••"
+          placeholder=" "
           required
           autoComplete="new-password"
           value={confirmPassword}
           onChange={e => setConfirmPassword(e.target.value)}
+          onFocus={() => setConfirmPasswordFocused(true)}
+          onBlur={() => setConfirmPasswordFocused(false)}
+          className="auth-floating-input auth-floating-input-password"
+          wrapperClassName="auth-floating-password"
         />
+        <label htmlFor="reset-confirm-password" className="auth-floating-label">
+          Confirm new password
+        </label>
       </div>
       <LoadingButton
         type="submit"
@@ -120,13 +120,13 @@ export default function ResetPassword() {
         size="lg"
         loading={isSubmitting}
         loadingText="Resetting…"
-        className="w-full"
+        className="w-full auth-submit"
       >
         Reset Password
       </LoadingButton>
-      <div className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
-        <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>
-          Back to Sign In
+      <div>
+        <Link to="/login" className="auth-secondary-cta">
+          Back to sign in
         </Link>
       </div>
     </form>

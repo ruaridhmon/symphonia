@@ -10,7 +10,7 @@ import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Register() {
   const { t } = useTranslation();
-  useDocumentTitle(t('auth.createAccount'));
+  useDocumentTitle(t('auth.registerTitle'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -60,7 +60,7 @@ export default function Register() {
       className="auth-panel w-full space-y-5"
     >
       <div className="auth-header">
-        <h1 className="auth-title">{t('auth.createAccount')}</h1>
+        <h1 className="auth-title">{t('auth.registerTitle')}</h1>
       </div>
       <div aria-live="polite" aria-atomic="true">
         {error && (

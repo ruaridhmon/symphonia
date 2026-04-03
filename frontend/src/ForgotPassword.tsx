@@ -10,6 +10,7 @@ export default function ForgotPassword() {
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,24 +28,19 @@ export default function ForgotPassword() {
 
   if (submitted) {
     return (
-      <div className="card-lg p-8 sm:p-10 w-full space-y-5">
-        <h2 className="text-base font-medium text-center" style={{ color: 'var(--muted-foreground)' }}>
-          Check Your Email
-        </h2>
+      <div className="auth-panel w-full space-y-5">
+        <div className="auth-header">
+          <h1 className="auth-title">Check your email</h1>
+        </div>
         <div
-          className="rounded-lg px-4 py-3 text-sm text-center"
+          className="auth-feedback auth-feedback-info"
           role="status"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-            color: 'var(--accent)',
-            border: '1px solid color-mix(in srgb, var(--accent) 25%, transparent)',
-          }}
         >
           If that email is registered, a reset link has been sent. Check your inbox.
         </div>
-        <div className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
-          <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>
-            Back to Sign In
+        <div>
+          <Link to="/login" className="auth-secondary-cta">
+            Back to sign in
           </Link>
         </div>
       </div>
@@ -54,43 +50,40 @@ export default function ForgotPassword() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="card-lg p-8 sm:p-10 w-full space-y-5"
+      className="auth-panel w-full space-y-5"
     >
-      <h2 className="text-base font-medium text-center" style={{ color: 'var(--muted-foreground)' }}>
-        Forgot Password
-      </h2>
+      <div className="auth-header">
+        <h1 className="auth-title">Forgot your password?</h1>
+      </div>
       <p className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
-        Enter your email address and we'll send you a link to reset your password.
+        Enter your email and we&apos;ll send you a reset link.
       </p>
       <div aria-live="polite" aria-atomic="true">
         {error && (
           <div
-            className="rounded-lg px-4 py-3 text-sm text-center"
+            className="auth-feedback auth-feedback-error"
             role="alert"
-            style={{
-              backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
-              color: 'var(--destructive)',
-              border: '1px solid color-mix(in srgb, var(--destructive) 25%, transparent)',
-            }}
           >
             {error}
           </div>
         )}
       </div>
-      <div className="space-y-1.5">
-        <label htmlFor="forgot-email" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          Email address
-        </label>
+      <div className={`auth-floating-field ${emailFocused || email ? 'is-active' : ''}`}>
         <input
           id="forgot-email"
           type="email"
-          placeholder="you@example.com"
+          placeholder=" "
           required
           autoComplete="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg"
+          onFocus={() => setEmailFocused(true)}
+          onBlur={() => setEmailFocused(false)}
+          className="w-full auth-floating-input"
         />
+        <label htmlFor="forgot-email" className="auth-floating-label">
+          Email address
+        </label>
       </div>
       <LoadingButton
         type="submit"
@@ -98,13 +91,13 @@ export default function ForgotPassword() {
         size="lg"
         loading={isSubmitting}
         loadingText="Sending…"
-        className="w-full"
+        className="w-full auth-submit"
       >
         Send Reset Link
       </LoadingButton>
-      <div className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
-        <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>
-          Back to Sign In
+      <div>
+        <Link to="/login" className="auth-secondary-cta">
+          Back to sign in
         </Link>
       </div>
     </form>

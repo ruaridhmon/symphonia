@@ -7,7 +7,7 @@ import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 export default function Login() {
   const { t } = useTranslation();
-  useDocumentTitle(t('auth.signIn'));
+  useDocumentTitle(t('auth.loginTitle'));
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -10,7 +10,7 @@ type Props = {
   estimateLabel: string | null;
   responseCount: number;
   isGenerating: boolean;
-  responsesOpen: boolean;
+  responsesActive: boolean;
   onToggleResponses: () => void;
   onStartNextRound: () => void;
   loading: boolean;
@@ -26,7 +26,7 @@ export default function AISynthesisPanel({
   estimateLabel,
   responseCount,
   isGenerating,
-  responsesOpen,
+  responsesActive,
   onToggleResponses,
   onStartNextRound,
   loading,
@@ -57,10 +57,10 @@ export default function AISynthesisPanel({
             size="sm"
             onClick={onToggleResponses}
             className="w-full justify-center gap-2"
-            icon={responsesOpen ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
-            aria-pressed={responsesOpen}
+            icon={responsesActive ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+            aria-pressed={responsesActive}
           >
-            {responsesOpen ? 'Hide responses' : 'Show responses'}
+            {responsesActive ? 'Back to synthesis' : 'Review responses'}
           </LoadingButton>
           <LoadingButton
             variant="secondary"
