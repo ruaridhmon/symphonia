@@ -66,6 +66,8 @@ describe('SynthesisProgress', () => {
       preparing: 'Preparing responses…',
       mock_init: 'Initialising…',
       synthesising: 'Synthesising insights…',
+      committee_deliberation: 'Running committee synthesis…',
+      thorough_synthesis: 'Running thorough synthesis…',
       analyzing: 'Analysing responses…',
       mapping_results: 'Mapping results…',
       formatting: 'Formatting output…',

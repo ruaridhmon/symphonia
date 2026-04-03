@@ -65,17 +65,48 @@ export function generateSynthesis(
 
 export function estimateSynthesisDurationSeconds(
   strategy: string,
-  responseCount: number
+  responseCount: number,
+  nAnalysts = 3,
+  model?: string | null,
 ) {
+  const latencyMultiplier = (() => {
+    const lowered = model?.toLowerCase() ?? '';
+    if (!lowered) return 1;
+    if (lowered.includes('mini') || lowered.includes('flash') || lowered.includes('haiku')) {
+      return 0.8;
+    }
+    if (
+      lowered.includes('opus')
+      || lowered.includes('pro')
+      || lowered.includes('o1')
+      || lowered.includes('o3')
+    ) {
+      return 1.25;
+    }
+    return 1;
+  })();
   const count = Math.max(1, responseCount);
+  const analysts = Math.max(1, nAnalysts);
+
   if (strategy === 'simple') {
-    return Math.min(90, Math.max(20, 15 + count * 4));
+    const windows = 3;
+    const secondsPerWindow = 9 + count * 3;
+    return Math.max(45, Math.min(180, Math.round(windows * secondsPerWindow * latencyMultiplier)));
   }
   if (strategy === 'committee') {
-    return Math.min(240, Math.max(45, 35 + count * 8));
+    const agents = analysts >= 5 ? 5 : 3;
+    const windows = 5;
+    const secondsPerWindow = 18 + count * 5 + Math.max(0, agents - 3) * 2;
+    return Math.max(120, Math.min(540, Math.round(windows * secondsPerWindow * latencyMultiplier)));
   }
   if (strategy === 'ttd') {
-    return Math.min(420, Math.max(75, 55 + count * 12));
+    const nSteps = 2;
+    const fitnessFinalOnly = true;
+    const windowsPerStep = fitnessFinalOnly ? 2 : 3;
+    const perStageWindows = 1 + (nSteps * windowsPerStep) + (analysts > 1 ? 1 : 0) + 1;
+    const pipelineWindows = perStageWindows * 3 + 2;
+    const secondsPerWindow = 8 + count * 2 + Math.max(0, analysts - 1) * 1.5;
+    return Math.max(240, Math.min(900, Math.round(pipelineWindows * secondsPerWindow * latencyMultiplier)));
   }
   return 60;
 }

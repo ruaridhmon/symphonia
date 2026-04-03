@@ -100,15 +100,65 @@ logger = logging.getLogger("symphonia.routes")
 # ---------------------------------------------------------
 
 
-def _estimate_synthesis_duration_seconds(strategy: str, response_count: int) -> int:
-    """Return a rough runtime estimate for synthesis UI feedback."""
+def _estimate_model_latency_multiplier(model: str | None) -> float:
+    """Return a coarse latency multiplier for slower/faster model families."""
+    if not model:
+        return 1.0
+
+    lowered = model.lower()
+    if any(token in lowered for token in ("mini", "flash", "haiku")):
+        return 0.8
+    if any(token in lowered for token in ("opus", "pro", "o1", "o3")):
+        return 1.25
+    return 1.0
+
+
+def _estimate_synthesis_duration_seconds(
+    strategy: str,
+    response_count: int,
+    *,
+    n_analysts: int = 3,
+    model: str | None = None,
+) -> int:
+    """Estimate synthesis wall-clock time from the real pipeline shape.
+
+    These estimates are intentionally conservative. The old numbers assumed
+    committee/TTD were close to single-pass generations, but the consensus
+    library runs multi-stage workflows with extra post-processing.
+    """
     count = max(1, response_count)
+    analysts = max(1, n_analysts)
+    latency = _estimate_model_latency_multiplier(model)
+
     if strategy == "simple":
-        return min(90, max(20, 15 + count * 4))
+        # Single-pass synthesis plus quote resolution and possible revision.
+        windows = 3
+        seconds_per_window = 9 + count * 3
+        return max(45, min(180, round(windows * seconds_per_window * latency)))
+
     if strategy == "committee":
-        return min(240, max(45, 35 + count * 8))
+        # Committee is roughly:
+        # R1 deliberation + R2 cross-review + aggregation + quote resolution
+        # + optional revision pass. Agents run in parallel, so wall-clock time
+        # tracks latency windows rather than raw call count.
+        agents = 5 if analysts >= 5 else 3
+        windows = 5
+        seconds_per_window = 18 + count * 5 + max(0, agents - 3) * 2
+        return max(120, min(540, round(windows * seconds_per_window * latency)))
+
     if strategy == "ttd":
-        return min(420, max(75, 55 + count * 12))
+        # Symphonia's TTD path runs graph extraction, synthesis generation, and
+        # narrative generation. Each stage does draft generation, denoising
+        # loops, final fitness, and merge. We use the same interactive profile
+        # as the adapter: 2 denoise steps with final-only fitness feedback.
+        n_steps = 2
+        fitness_final_only = True
+        windows_per_step = 2 if fitness_final_only else 3
+        per_stage_windows = 1 + (n_steps * windows_per_step) + (1 if analysts > 1 else 0) + 1
+        pipeline_windows = per_stage_windows * 3 + 2  # quote resolution + revision/finalisation
+        seconds_per_window = 8 + count * 2 + max(0, analysts - 1) * 1.5
+        return max(240, min(900, round(pipeline_windows * seconds_per_window * latency)))
+
     return 60
 
 
@@ -1494,6 +1544,22 @@ async def _synthesis_background(
     """
     db = SessionLocal()
     try:
+        async def progress_callback(stage: str, step: int, total: int):
+            for conn in ws_manager.active_connections.copy():
+                try:
+                    await conn.send_json(
+                        {
+                            "type": "synthesis_progress",
+                            "form_id": form_id,
+                            "round_id": round_id,
+                            "stage": stage,
+                            "step": step,
+                            "total_steps": total,
+                        }
+                    )
+                except Exception:
+                    ws_manager.disconnect(conn)
+
         synthesis_text = None
         synthesis_json_data = None
         try:
@@ -1516,6 +1582,7 @@ async def _synthesis_background(
                 responses=response_dicts,
                 model=resolved_model,
                 mode=flow_mode,
+                progress_callback=progress_callback,
                 comments_context=comments_context,
                 form_id=form_id,
                 round_id=round_id,
@@ -1715,7 +1782,12 @@ async def generate_synthesis_for_round(
 
     synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
     api_key = os.getenv("OPENROUTER_API_KEY", "")
-    estimated_seconds = _estimate_synthesis_duration_seconds(strategy, len(responses))
+    estimated_seconds = _estimate_synthesis_duration_seconds(
+        strategy,
+        len(responses),
+        n_analysts=payload.n_analysts,
+        model=payload.model,
+    )
     estimated_label = _format_duration_estimate(estimated_seconds)
 
     round_comments = _fetch_comments_for_round(db, round_id)

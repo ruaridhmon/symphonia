@@ -128,6 +128,7 @@ const MODELS = [
 	'openai/gpt-4o',
 	'openai/gpt-4o-mini',
 ];
+const SYNTHESIS_ANALYSTS = 3;
 
 function isBlockedModel(model: string): boolean {
 	return model.startsWith('anthropic/');
@@ -336,10 +337,12 @@ export default function SummaryPage() {
 		if (!targetRoundForGeneration?.response_count) return null;
 		const seconds = estimateSynthesisDurationSeconds(
 			synthesisMode,
-			targetRoundForGeneration.response_count
+			targetRoundForGeneration.response_count,
+			SYNTHESIS_ANALYSTS,
+			selectedModel,
 		);
 		return formatSynthesisDurationEstimate(seconds);
-	}, [synthesisMode, targetRoundForGeneration]);
+	}, [selectedModel, synthesisMode, targetRoundForGeneration]);
 	const audienceSourceText = useMemo(() => {
 		if (selectedVersion?.synthesis?.trim()) return selectedVersion.synthesis;
 		if (displayRound?.synthesis?.trim()) return displayRound.synthesis;
@@ -666,7 +669,7 @@ export default function SummaryPage() {
 			const data = await apiGenerateSynthesis(formId, targetRound.id, {
 				model: modelToUse,
 				strategy: synthesisMode,
-				n_analysts: 3,
+				n_analysts: SYNTHESIS_ANALYSTS,
 				mode: 'human_only',
 			});
 
@@ -677,7 +680,12 @@ export default function SummaryPage() {
 				setSynthesisStep(1);
 				setSynthesisEstimateSeconds(
 					data.estimate_seconds
-						?? estimateSynthesisDurationSeconds(synthesisMode, targetRound.response_count ?? 0)
+						?? estimateSynthesisDurationSeconds(
+							synthesisMode,
+							targetRound.response_count ?? 0,
+							SYNTHESIS_ANALYSTS,
+							modelToUse,
+						)
 				);
 				toastSuccess(
 					data.message || 'Synthesis running in background — you’ll be notified when complete'

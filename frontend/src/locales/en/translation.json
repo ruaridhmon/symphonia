@@ -80,6 +80,8 @@
       "preparing": "Preparing responses…",
       "mockInit": "Initialising…",
       "synthesising": "Synthesising insights…",
+      "committeeDeliberation": "Running committee synthesis…",
+      "thoroughSynthesis": "Running thorough synthesis…",
       "analyzing": "Analysing responses…",
       "mappingResults": "Mapping results…",
       "formatting": "Formatting output…",

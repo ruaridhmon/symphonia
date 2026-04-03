@@ -458,6 +458,7 @@ class ConsensusLibraryAdapter:
     """
 
     SUPPORTED_STRATEGIES = ("simple", "ttd", "committee")
+    INTERACTIVE_TTD_FITNESS_FINAL_ONLY = True
 
     def __init__(
         self,
@@ -539,6 +540,11 @@ class ConsensusLibraryAdapter:
             ttd_config = TTDConfig(
                 n_initial_drafts=self.n_drafts,
                 n_denoise_steps=self.n_denoise_steps,
+                # The full per-step fitness loop is expensive for an
+                # interactive admin UI. Keep the final fitness pass so
+                # trajectories are still ranked, but skip the repeated
+                # in-loop judge calls that make TTD feel hung.
+                fitness_final_only=self.INTERACTIVE_TTD_FITNESS_FINAL_ONLY,
             )
             artefacts_dir = Path(__file__).resolve().parent.parent / "artefacts"
             artefacts_dir.mkdir(parents=True, exist_ok=True)
@@ -791,8 +797,14 @@ class ConsensusLibraryAdapter:
             round_id=round_id,
         )
 
+        strategy_stage = "synthesising"
+        if self._effective_strategy == "committee":
+            strategy_stage = "committee_deliberation"
+        elif self._effective_strategy == "ttd":
+            strategy_stage = "thorough_synthesis"
+
         if progress_callback:
-            await progress_callback("synthesising", 2, 4)
+            await progress_callback(strategy_stage, 2, 4)
 
         # Run library strategy with timeout guard
         try:
