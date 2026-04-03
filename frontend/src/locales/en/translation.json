@@ -21,11 +21,11 @@
     "breadcrumb": "Breadcrumb"
   },
   "auth": {
-    "signIn": "Sign In",
+    "signIn": "Sign in",
     "signingIn": "Signing in…",
-    "loginTitle": "Log in to Symphonia",
+    "loginTitle": "Log in",
     "loginSubtitle": "Continue to your consultations",
-    "createAccount": "Create Account",
+    "createAccount": "Create account",
     "creatingAccount": "Creating account…",
     "emailLabel": "Email address",
     "emailPlaceholder": "you@example.com",

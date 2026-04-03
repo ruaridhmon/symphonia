@@ -23,9 +23,9 @@
   "auth": {
     "signIn": "Σύνδεση",
     "signingIn": "Γίνεται σύνδεση…",
-    "loginTitle": "Συνδεθείτε στο Symphonia",
+    "loginTitle": "Σύνδεση",
     "loginSubtitle": "Συνεχίστε στις διαβουλεύσεις σας",
-    "createAccount": "Δημιουργία Λογαριασμού",
+    "createAccount": "Δημιουργία λογαριασμού",
     "creatingAccount": "Δημιουργία λογαριασμού…",
     "emailLabel": "Διεύθυνση email",
     "emailPlaceholder": "you@example.com",
