@@ -5,10 +5,11 @@ import { Menu, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
 import { ThemeToggle } from './theme';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import AccountMenu from './components/AccountMenu';
 
 export default function Header() {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -77,15 +78,6 @@ export default function Header() {
             >
               Symphonia
             </h1>
-            {/* Show email inline on desktop only */}
-            {user && (
-              <p
-                className="text-xs leading-tight hidden sm:block"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                {user.email}
-              </p>
-            )}
           </div>
         </button>
 
@@ -105,13 +97,11 @@ export default function Header() {
           <LanguageSwitcher />
           <ThemeToggle />
           {user && (
-            <button
-              onClick={logout}
-              className="header-logout-btn text-sm px-3 py-1.5 rounded-lg"
-              aria-label={t('common.logOut')}
-            >
-              {t('common.logOut')}
-            </button>
+            <AccountMenu
+              email={user.email}
+              onLogout={logout}
+              settingsPath={isAdmin ? '/admin/settings' : null}
+            />
           )}
         </nav>
 
@@ -149,12 +139,43 @@ export default function Header() {
       >
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-3">
           {user && (
-            <p
-              className="text-xs"
-              style={{ color: 'var(--muted-foreground)' }}
+            <div
+              className="rounded-2xl px-3 py-3"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--muted) 64%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--border) 58%, transparent)',
+              }}
             >
-              {user.email}
-            </p>
+              <p className="text-xs truncate" style={{ color: 'var(--muted-foreground)' }} title={user.email}>
+                {user.email}
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate('/admin/settings');
+                    }}
+                    className="text-sm px-3 py-2 rounded-lg"
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: 'var(--foreground)',
+                      border: '1px solid color-mix(in srgb, var(--border) 65%, transparent)',
+                    }}
+                  >
+                    {t('common.settings')}
+                  </button>
+                )}
+                <button
+                  onClick={() => { setMenuOpen(false); logout(); }}
+                  className="header-logout-btn text-sm text-left px-3 py-2 rounded-lg"
+                  aria-label={t('common.logOut')}
+                >
+                  {t('common.logOut')}
+                </button>
+              </div>
+            </div>
           )}
           <div className="flex items-center justify-between">
             <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('language.label')}</span>
@@ -164,15 +185,6 @@ export default function Header() {
             <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>{t('common.theme')}</span>
             <ThemeToggle />
           </div>
-          {user && (
-            <button
-              onClick={() => { setMenuOpen(false); logout(); }}
-              className="header-logout-btn text-sm text-left px-3 py-2 rounded-lg"
-              aria-label={t('common.logOut')}
-            >
-              {t('common.logOut')}
-            </button>
-          )}
         </div>
       </nav>
     </header>

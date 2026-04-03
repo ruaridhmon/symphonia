@@ -48,6 +48,7 @@
   },
   "header": {
     "appName": "Symphonia",
+    "accountMenu": "Άνοιγμα μενού λογαριασμού",
     "openCommandPalette": "Άνοιγμα παλέτας εντολών",
     "openMenu": "Άνοιγμα μενού",
     "closeMenu": "Κλείσιμο μενού",

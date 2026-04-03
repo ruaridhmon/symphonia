@@ -1,7 +1,7 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PresenceIndicator } from '../index';
 import type { PresenceViewer } from '../PresenceIndicator';
+import AccountMenu from '../AccountMenu';
 
 type Props = {
   email: string;
@@ -41,32 +41,11 @@ export default function SummaryHeader({ email, viewers, onLogout }: Props) {
               <span className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-tight block">
                 Admin Workspace
               </span>
-              <span className="text-xs text-muted-foreground leading-tight truncate block">{email}</span>
             </div>
           </button>
           <PresenceIndicator viewers={viewers} currentUserEmail={email} />
         </div>
-        <button
-          onClick={onLogout}
-          className="text-sm px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
-          aria-label="Log out"
-          style={{
-            color: 'var(--muted-foreground)',
-            backgroundColor: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-          onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.currentTarget.style.backgroundColor = 'var(--muted)';
-            e.currentTarget.style.color = 'var(--destructive)';
-          }}
-          onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-            e.currentTarget.style.color = 'var(--muted-foreground)';
-          }}
-        >
-          Log out
-        </button>
+        <AccountMenu email={email} onLogout={onLogout} settingsPath="/admin/settings" />
       </div>
     </header>
   );
