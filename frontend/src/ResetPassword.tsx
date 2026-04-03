@@ -121,6 +121,7 @@ export default function ResetPassword() {
         loading={isSubmitting}
         loadingText="Resetting…"
         className="w-full auth-submit"
+        style={{ backgroundColor: 'var(--auth-accent)', color: 'var(--accent-foreground)' }}
       >
         Reset Password
       </LoadingButton>

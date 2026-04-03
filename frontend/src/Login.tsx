@@ -112,6 +112,7 @@ export default function Login() {
         disabled={isLoading}
         loadingText={t('auth.signingIn')}
         className="w-full auth-submit"
+        style={{ backgroundColor: 'var(--auth-accent)', color: 'var(--accent-foreground)' }}
       >
         {t('auth.signIn')}
       </LoadingButton>

@@ -113,6 +113,7 @@ export default function Register() {
         loading={isRegistering || isLoading}
         loadingText={t('auth.creatingAccount')}
         className="w-full auth-submit"
+        style={{ backgroundColor: 'var(--auth-accent)', color: 'var(--accent-foreground)' }}
       >
         {t('auth.createAccount')}
       </LoadingButton>
