@@ -790,7 +790,7 @@ export default function SummaryPage() {
 				</nav>
 
 				<section className="card mb-4 sm:mb-6 p-5 sm:p-6">
-					<div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+					<div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 						<div className="min-w-0 max-w-3xl">
 							<div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
 								Summary
@@ -840,19 +840,27 @@ export default function SummaryPage() {
 							</div>
 						</div>
 
-						<div
-							className="w-full max-w-xl rounded-2xl px-4 py-4 lg:max-w-sm"
-							style={{
-								backgroundColor: 'color-mix(in srgb, var(--muted) 72%, white)',
-								border: '1px solid var(--border)',
-							}}
-						>
-							<div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
-								Current focus
+						<div className="w-full max-w-xl space-y-3 lg:max-w-sm">
+							<div
+								className="rounded-2xl px-4 py-4"
+								style={{
+									backgroundColor: 'color-mix(in srgb, var(--muted) 72%, white)',
+									border: '1px solid var(--border)',
+								}}
+							>
+								<div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+									Current focus
+								</div>
+								<p className="mt-2 text-sm" style={{ color: 'var(--foreground)', lineHeight: 1.6, marginBottom: 0 }}>
+									{recommendedNextStep}
+								</p>
 							</div>
-							<p className="mt-2 text-sm" style={{ color: 'var(--foreground)', lineHeight: 1.6, marginBottom: 0 }}>
-								{recommendedNextStep}
-							</p>
+
+							<RoundHistoryCard
+								rounds={rounds}
+								selectedRoundId={selectedRound?.id || null}
+								onSelectRound={handleSelectRound}
+							/>
 						</div>
 					</div>
 				</section>
@@ -1175,11 +1183,6 @@ export default function SummaryPage() {
 							onToggleCompare={() => setShowVersionCompare(v => !v)}
 						/>
 
-						<RoundHistoryCard
-							rounds={rounds}
-							selectedRoundId={selectedRound?.id || null}
-							onSelectRound={handleSelectRound}
-						/>
 					</aside>
 				</div>
 				</div>
