@@ -1,8 +1,8 @@
 import { createPortal } from 'react-dom';
 import { LoadingButton, ResponseEditor } from '../index';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
-import type { Round, RoundWithResponses, StructuredResponse } from '../../types/summary';
-import { extractQuestionText } from '../../utils/questions';
+import { X } from 'lucide-react';
+import type { Round, RoundWithResponses } from '../../types/summary';
 
 type Props = {
   open: boolean;
@@ -29,91 +29,129 @@ export default function ResponsesModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.65)' }}
+      className="fixed inset-0 z-[70] flex items-stretch justify-end"
+      style={{ backgroundColor: 'rgba(15, 23, 42, 0.34)' }}
       onClick={e => {
         if (e.target === e.currentTarget) onClose();
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="All Responses"
+      aria-label="Responses"
     >
       <div
         ref={modalRef}
-        className="card max-w-full sm:max-w-3xl w-full max-h-screen sm:max-h-[90vh] rounded-none sm:rounded-lg overflow-y-auto p-4 sm:p-6 text-left"
-        style={{ boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+        className="card w-full sm:w-[min(42rem,92vw)] h-[100dvh] sm:h-[calc(100dvh-1.5rem)] sm:my-3 rounded-none sm:rounded-2xl overflow-hidden text-left flex flex-col"
+        style={{ boxShadow: '0 30px 70px rgba(15, 23, 42, 0.22)' }}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold text-foreground">All Responses</h3>
+        <div
+          className="flex items-center justify-between px-4 sm:px-6 py-4 flex-shrink-0"
+          style={{ borderBottom: '1px solid var(--border)' }}
+        >
+          <div>
+            <div
+              className="text-[10px] font-semibold uppercase tracking-[0.16em]"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              Responses
+            </div>
+            <h3 className="text-lg font-semibold text-foreground m-0">Expert responses</h3>
+          </div>
           <button
             onClick={onClose}
-            className="text-lg w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
             style={{
               color: 'var(--muted-foreground)',
-              backgroundColor: 'transparent',
+              backgroundColor: 'var(--muted)',
               border: 'none',
               cursor: 'pointer',
             }}
-            onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = 'var(--muted)'}
-            onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.backgroundColor = 'transparent'}
-            aria-label="Close responses modal"
+            onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.color = 'var(--foreground)'}
+            onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => e.currentTarget.style.color = 'var(--muted-foreground)'}
+            aria-label="Close responses"
           >
-            ✕
+            <X size={18} />
           </button>
         </div>
 
-        {structuredRounds.length === 0 ? (
-          <p style={{ color: 'var(--muted-foreground)' }}>
-            No responses yet for this form.
-          </p>
-        ) : (
-          structuredRounds.map(round => {
-            const roundQuestions =
-              rounds.find(r => r.id === round.id)?.questions ||
-              formQuestions ||
-              [];
-            return (
-              <div
-                key={round.id}
-                className="mb-6 p-3 sm:p-4 rounded-lg"
-                style={{
-                  backgroundColor: 'var(--muted)',
-                  border: '1px solid var(--border)',
-                }}
-              >
-                <h4 className="text-lg font-semibold mb-3 text-foreground">
-                  Round {round.round_number}
-                </h4>
-                {round.responses.length === 0 ? (
-                  <p style={{ color: 'var(--muted-foreground)' }}>
-                    No responses for this round.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {round.responses.map(resp => (
-                      <ResponseEditor
-                        key={resp.id}
-                        response={resp}
-                        questions={roundQuestions}
-                        token={token}
-                        onUpdated={updated => onResponseUpdated(round.id, updated)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
-
-        <LoadingButton
-          variant="secondary"
-          size="md"
-          onClick={onClose}
-          className="mt-6"
+        <div
+          className="px-4 sm:px-6 py-2 text-xs flex-shrink-0"
+          style={{ color: 'var(--muted-foreground)', borderBottom: '1px solid var(--border)' }}
         >
-          Close
-        </LoadingButton>
+          Review and edit responses without leaving the summary.
+        </div>
+
+        <div className="overflow-y-auto flex-1 px-4 sm:px-6 py-4 space-y-4">
+          {structuredRounds.length === 0 ? (
+            <div
+              className="rounded-xl px-4 py-5"
+              style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}
+            >
+              No responses yet for this form.
+            </div>
+          ) : (
+            structuredRounds.map(round => {
+              const roundQuestions =
+                rounds.find(r => r.id === round.id)?.questions ||
+                formQuestions ||
+                [];
+              return (
+                <div
+                  key={round.id}
+                  className="rounded-xl p-3 sm:p-4"
+                  style={{
+                    backgroundColor: 'var(--muted)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div>
+                      <h4 className="text-base font-semibold text-foreground m-0">
+                        Round {round.round_number}
+                      </h4>
+                      <div className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                        {round.responses.length === 0
+                          ? 'No responses'
+                          : `${round.responses.length} response${round.responses.length === 1 ? '' : 's'}`}
+                      </div>
+                    </div>
+                  </div>
+
+                  {round.responses.length === 0 ? (
+                    <p className="text-sm m-0" style={{ color: 'var(--muted-foreground)' }}>
+                      No responses for this round.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {round.responses.map(resp => (
+                        <ResponseEditor
+                          key={resp.id}
+                          response={resp}
+                          questions={roundQuestions}
+                          token={token}
+                          onUpdated={updated => onResponseUpdated(round.id, updated)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <div
+          className="px-4 sm:px-6 py-3 flex-shrink-0"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          <LoadingButton
+            variant="secondary"
+            size="md"
+            onClick={onClose}
+            className="w-full sm:w-auto"
+          >
+            Close
+          </LoadingButton>
+        </div>
       </div>
     </div>,
     document.body

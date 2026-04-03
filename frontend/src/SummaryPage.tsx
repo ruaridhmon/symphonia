@@ -44,7 +44,7 @@ import {
 	AISynthesisPanel,
 	SynthesisVersionPanel,
 	NextRoundQuestionsCard,
-	ResponsesAccordion,
+	ResponsesModal,
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
 	VersionCompare,
@@ -878,17 +878,6 @@ export default function SummaryPage() {
 
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_21rem]">
 					<div className="space-y-4 sm:space-y-6 min-w-0">
-							{/* Inline responses accordion — shown/hidden by controls toggle */}
-							{responsesOpen && (
-								<ResponsesAccordion
-									structuredRounds={structuredRounds}
-									rounds={rounds}
-									formQuestions={form.questions || []}
-									token={token}
-									onResponseUpdated={handleResponseUpdated}
-								/>
-							)}
-
 							{/* Non-active round card */}
 							{selectedRound && !selectedRound.is_active && (
 								<SectionErrorBoundary fallbackTitle="Failed to render round details">
@@ -1157,6 +1146,16 @@ export default function SummaryPage() {
 
 					</aside>
 				</div>
+
+				<ResponsesModal
+					open={responsesOpen}
+					onClose={() => setResponsesOpen(false)}
+					structuredRounds={structuredRounds}
+					rounds={rounds}
+					formQuestions={form.questions || []}
+					token={token}
+					onResponseUpdated={handleResponseUpdated}
+				/>
 				</div>
 			</main>
 
