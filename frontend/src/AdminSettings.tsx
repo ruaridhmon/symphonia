@@ -277,7 +277,7 @@ export default function AdminSettings() {
                     className="text-xs mb-2"
                     style={{ color: 'var(--muted-foreground)' }}
                   >
-                    Used for synthesis, AI suggestions, cross-analysis, and voice mirroring.
+                    Used for synthesis, AI suggestions, and cross-analysis.
                   </p>
                   <select
                     value={settings.synthesis_model}

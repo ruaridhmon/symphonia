@@ -2,15 +2,12 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, User, MessageSquare } from 'lucide-react';
 import { ResponseEditor } from '../index';
-import VoiceMirroring from '../VoiceMirroring';
 import type { Round, RoundWithResponses } from '../../types/summary';
-import { extractQuestionText } from '../../utils/questions';
 
 type Props = {
   structuredRounds: RoundWithResponses[];
   rounds: Round[];
   formQuestions: (string | Record<string, unknown>)[];
-  formId: number;
   token: string;
   onResponseUpdated: (
     roundId: number,
@@ -27,7 +24,6 @@ export default function ResponsesAccordion({
   structuredRounds,
   rounds,
   formQuestions,
-  formId,
   token,
   onResponseUpdated,
 }: Props) {
@@ -108,7 +104,7 @@ export default function ResponsesAccordion({
       </div>
 
       <div className="px-4 sm:px-6 py-2 text-xs" style={{ color: 'var(--muted-foreground)', borderBottom: '1px solid var(--border)' }}>
-        Responses are grouped by round and remain visible across all rounds.
+        Responses are grouped by round.
       </div>
 
       {/* Scrollable rounds list */}
@@ -199,29 +195,6 @@ export default function ResponsesAccordion({
                     overflowY: 'auto',
                   }}
                 >
-                  {/* Show questions for this round */}
-                  {roundQuestions.length > 0 && (
-                    <div className="pt-3 pb-1">
-                      <h4
-                        className="text-xs font-semibold uppercase tracking-wider mb-2"
-                        style={{ color: 'var(--muted-foreground)' }}
-                      >
-                        {t('responses.questions')}
-                      </h4>
-                      <ol className="list-decimal list-inside space-y-1">
-                        {roundQuestions.map((q, i) => (
-                          <li
-                            key={i}
-                            className="text-sm"
-                            style={{ color: 'var(--foreground)' }}
-                          >
-                            {extractQuestionText(q)}
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  )}
-
                   {responseCount === 0 ? (
                     <p
                       className="text-sm py-2"
@@ -243,20 +216,6 @@ export default function ResponsesAccordion({
                             }
                           />
                         ))}
-                      </div>
-
-                      {/* Voice Mirroring — AI clarifications */}
-                      <div className="pt-3">
-                        <VoiceMirroring
-                          formId={formId}
-                          roundId={round.id}
-                          responses={round.responses.map(r => ({
-                            id: r.id,
-                            email: r.email,
-                            answers: r.answers,
-                          }))}
-                          questions={roundQuestions}
-                        />
                       </div>
                     </>
                   )}
