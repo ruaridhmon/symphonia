@@ -59,7 +59,7 @@ export default function SynthesisProgress({
   const translationKey = stageTranslationKeys[stage];
   const label = translationKey ? t(translationKey) : stage;
   const isComplete = stage === 'complete' || stage === 'mock_complete';
-  const isTimedRun = stage === 'generating' && estimateSeconds != null && estimateSeconds > 0;
+  const isTimedRun = !isComplete && estimateSeconds != null && estimateSeconds > 0;
   const pct = isComplete
     ? 100
     : isTimedRun

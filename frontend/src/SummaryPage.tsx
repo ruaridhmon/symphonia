@@ -200,7 +200,7 @@ export default function SummaryPage() {
 	// ── Synthesis generation UI ──
 	const [synthesisStage, setSynthesisStage] = useState('preparing');
 	const [synthesisStep, setSynthesisStep] = useState(0);
-	const [synthesisTotalSteps] = useState(5);
+	const [synthesisTotalSteps, setSynthesisTotalSteps] = useState(4);
 	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
 	const [synthesisStartedAtMs, setSynthesisStartedAtMs] = useState<number | null>(null);
 	const [synthesisElapsedSeconds, setSynthesisElapsedSeconds] = useState(0);
@@ -243,6 +243,18 @@ export default function SummaryPage() {
 	}, [clearSynthesisRunState, synthesisTotalSteps, toastSuccess]);
 
 	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
+		if (data.type === 'synthesis_progress' && data.form_id === formId) {
+			if (typeof data.stage === 'string') {
+				setSynthesisStage(data.stage);
+			}
+			if (typeof data.step === 'number') {
+				setSynthesisStep(data.step);
+			}
+			if (typeof data.total_steps === 'number' && data.total_steps > 0) {
+				setSynthesisTotalSteps(data.total_steps);
+			}
+			return;
+		}
 		if (data.type === 'synthesis_complete' && data.form_id === formId) {
 			// Synthesis finished (possibly in background) — reload data
 			loadAll().then(() => {
@@ -646,13 +658,11 @@ export default function SummaryPage() {
 		setIsGenerating(true);
 		setSynthesisStage('preparing');
 		setSynthesisStep(0);
+		setSynthesisTotalSteps(4);
 		setSynthesisStartedAtMs(Date.now());
 		setSynthesisElapsedSeconds(0);
 		setSynthesisEstimateSeconds(null);
 		try {
-			setSynthesisStage('analyzing');
-			setSynthesisStep(1);
-
 			const data = await apiGenerateSynthesis(formId, targetRound.id, {
 				model: modelToUse,
 				strategy: synthesisMode,
@@ -663,8 +673,8 @@ export default function SummaryPage() {
 			// ── Async path: synthesis running in the background ──
 			if (data.status === 'started') {
 				backgroundStarted = true;
-				setSynthesisStage('generating');
-				setSynthesisStep(2);
+				setSynthesisStage('preparing');
+				setSynthesisStep(1);
 				setSynthesisEstimateSeconds(
 					data.estimate_seconds
 						?? estimateSynthesisDurationSeconds(synthesisMode, targetRound.response_count ?? 0)
@@ -696,10 +706,10 @@ export default function SummaryPage() {
 
 			// ── Sync path: immediate result (mock mode) ──
 			setSynthesisStage('synthesising');
-			setSynthesisStep(3);
+			setSynthesisStep(2);
 
 			setSynthesisStage('formatting');
-			setSynthesisStep(4);
+			setSynthesisStep(3);
 
 			const content = data.synthesis || data.summary || '';
 			if (editor) resetEditorToSaved(content || '');
@@ -718,7 +728,7 @@ export default function SummaryPage() {
 			if (targetRound) await loadSynthesisVersions(targetRound.id);
 
 			setSynthesisStage('complete');
-			setSynthesisStep(5);
+			setSynthesisStep(4);
 			clearSynthesisRunState();
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
 			} catch (error) {

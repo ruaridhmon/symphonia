@@ -99,9 +99,9 @@ describe('SynthesisProgress', () => {
   it('shows elapsed and remaining time during timed background synthesis', () => {
     render(
       <SynthesisProgress
-        stage="generating"
-        step={2}
-        totalSteps={5}
+        stage="preparing"
+        step={1}
+        totalSteps={4}
         visible={true}
         elapsedSeconds={75}
         estimateSeconds={120}
