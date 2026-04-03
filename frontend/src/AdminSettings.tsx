@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Brain, Settings2, User, Save, Check } from 'lucide-react';
+import { ArrowLeft, Brain, User, Save, Check } from 'lucide-react';
 import { api } from './api/client';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
@@ -21,74 +21,16 @@ function sanitizeModel(model: string): string {
   return model;
 }
 
-const SYNTHESIS_STRATEGIES = [
-  { id: 'single_prompt', label: 'Single Prompt (fastest, good for focused topics)' },
-  { id: 'committee', label: 'Committee (multiple perspectives, richer synthesis)' },
-  { id: 'diffusion', label: 'Diffusion / TTD (iterative denoising, best quality, slowest)' },
-];
-
-/* ── Toggle switch (pill-shaped) ──────────────────────────────── */
-
-function ToggleSwitch({
-  checked,
-  onChange,
-  id,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  id?: string;
-}) {
-  return (
-    <button
-      type="button"
-      id={id}
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className="relative inline-flex shrink-0 rounded-full transition-colors duration-200 focus-visible:outline-none"
-      style={{
-        width: 44,
-        height: 24,
-        backgroundColor: checked ? 'var(--accent)' : 'var(--input)',
-        cursor: 'pointer',
-        border: 'none',
-        padding: 0,
-      }}
-    >
-      <span
-        className="block rounded-full shadow-sm transition-transform duration-200"
-        style={{
-          width: 20,
-          height: 20,
-          marginTop: 2,
-          marginLeft: checked ? 22 : 2,
-          backgroundColor: '#fff',
-        }}
-      />
-    </button>
-  );
-}
-
 /* ── Settings interface ───────────────────────────────────────── */
 
 interface SettingsState {
   synthesis_model: string;
-  synthesis_strategy: string;
-  max_rounds: string;
-  convergence_threshold: string;
-  default_anonymous: string;
-  allow_late_join: string;
   registration_mode: string;
   allowed_domains: string;
 }
 
 const DEFAULTS: SettingsState = {
   synthesis_model: 'openai/gpt-4o',
-  synthesis_strategy: 'single_prompt',
-  max_rounds: '3',
-  convergence_threshold: '70',
-  default_anonymous: 'false',
-  allow_late_join: 'true',
   registration_mode: 'open',
   allowed_domains: '',
 };
@@ -222,7 +164,7 @@ export default function AdminSettings() {
             Settings
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-            Configure AI models, synthesis behaviour, and consultation defaults.
+            Platform-wide defaults only. Consultation-specific choices belong in each summary.
           </p>
         </div>
 
@@ -252,7 +194,7 @@ export default function AdminSettings() {
         ) : (
           <div className="space-y-6">
 
-            {/* ── Section 1: AI & Synthesis ──────────────────────── */}
+            {/* ── Section 1: AI Defaults ─────────────────────────── */}
             <div className="rounded-lg p-6 sm:p-8" style={cardStyle}>
               <div className="flex items-center gap-2 mb-5">
                 <Brain size={18} style={{ color: 'var(--accent)' }} />
@@ -260,24 +202,23 @@ export default function AdminSettings() {
                   className="text-base font-semibold"
                   style={{ color: 'var(--foreground)' }}
                 >
-                  AI & Synthesis
+                  AI Defaults
                 </h2>
               </div>
 
-              <div className="space-y-5">
-                {/* AI Model */}
+              <div className="space-y-4">
                 <div>
                   <label
                     className="block text-sm font-medium mb-1.5"
                     style={{ color: 'var(--foreground)' }}
                   >
-                    AI Model
+                    Default AI model
                   </label>
                   <p
                     className="text-xs mb-2"
                     style={{ color: 'var(--muted-foreground)' }}
                   >
-                    Used for synthesis, AI suggestions, and cross-analysis.
+                    Used as the starting model in the summary workspace and as a fallback for AI tools that do not choose one explicitly.
                   </p>
                   <select
                     value={settings.synthesis_model}
@@ -292,175 +233,11 @@ export default function AdminSettings() {
                     ))}
                   </select>
                   <p className="text-xs mt-1.5" style={{ color: 'var(--muted-foreground)' }}>
-                    Model ID:{' '}
+                    Selected default:{' '}
                     <code style={{ fontFamily: 'monospace', color: 'var(--accent)' }}>
                       {settings.synthesis_model}
                     </code>
                   </p>
-                </div>
-
-                {/* Synthesis Strategy */}
-                <div>
-                  <label
-                    className="block text-sm font-medium mb-1.5"
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    Synthesis Strategy
-                  </label>
-                  <p
-                    className="text-xs mb-2"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    How AI synthesises expert responses between rounds.
-                  </p>
-                  <select
-                    value={settings.synthesis_strategy}
-                    onChange={e => update('synthesis_strategy', e.target.value)}
-                    className="w-full rounded-lg px-3 py-2.5 text-sm"
-                    style={{ ...inputStyle, cursor: 'pointer' }}
-                    onFocus={focusStyle}
-                    onBlur={blurStyle}
-                  >
-                    {SYNTHESIS_STRATEGIES.map(s => (
-                      <option key={s.id} value={s.id}>{s.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* ── Section 2: Consultation Defaults ───────────────── */}
-            <div className="rounded-lg p-6 sm:p-8" style={cardStyle}>
-              <div className="flex items-center gap-2 mb-5">
-                <Settings2 size={18} style={{ color: 'var(--accent)' }} />
-                <h2
-                  className="text-base font-semibold"
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  Consultation Defaults
-                </h2>
-              </div>
-
-              <div className="space-y-6">
-                {/* Max Rounds */}
-                <div>
-                  <label
-                    className="block text-sm font-medium mb-1.5"
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    Max Rounds
-                  </label>
-                  <p
-                    className="text-xs mb-2"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    Hard ceiling on the number of rounds per consultation.
-                  </p>
-                  <input
-                    type="number"
-                    min={1}
-                    max={10}
-                    step={1}
-                    value={settings.max_rounds}
-                    onChange={e => {
-                      const v = Math.max(1, Math.min(10, Number(e.target.value) || 1));
-                      update('max_rounds', String(v));
-                    }}
-                    className="w-full sm:w-32 rounded-lg px-3 py-2.5 text-sm"
-                    style={inputStyle}
-                    onFocus={focusStyle}
-                    onBlur={blurStyle}
-                  />
-                </div>
-
-                {/* Convergence Threshold */}
-                <div>
-                  <label
-                    className="block text-sm font-medium mb-1.5"
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    Convergence Threshold
-                  </label>
-                  <p
-                    className="text-xs mb-2"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    Agreement percentage at which the system suggests closing a round.
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={5}
-                      value={settings.convergence_threshold}
-                      onChange={e => update('convergence_threshold', e.target.value)}
-                      className="flex-1"
-                      style={{
-                        accentColor: 'var(--accent)',
-                        cursor: 'pointer',
-                        height: 6,
-                      }}
-                    />
-                    <span
-                      className="text-sm font-semibold tabular-nums"
-                      style={{
-                        color: 'var(--accent)',
-                        minWidth: '4.5rem',
-                        textAlign: 'right',
-                      }}
-                    >
-                      {settings.convergence_threshold}% agreement
-                    </span>
-                  </div>
-                </div>
-
-                {/* Default Anonymous */}
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <label
-                      htmlFor="toggle-default-anonymous"
-                      className="block text-sm font-medium"
-                      style={{ color: 'var(--foreground)', cursor: 'pointer' }}
-                    >
-                      Default Anonymous
-                    </label>
-                    <p
-                      className="text-xs mt-0.5"
-                      style={{ color: 'var(--muted-foreground)' }}
-                    >
-                      New forms default to anonymous responses — participant names hidden in synthesis.
-                    </p>
-                  </div>
-                  <ToggleSwitch
-                    id="toggle-default-anonymous"
-                    checked={settings.default_anonymous === 'true'}
-                    onChange={v => update('default_anonymous', v ? 'true' : 'false')}
-                  />
-                </div>
-
-                {/* Allow Late Join */}
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <label
-                      htmlFor="toggle-allow-late-join"
-                      className="block text-sm font-medium"
-                      style={{ color: 'var(--foreground)', cursor: 'pointer' }}
-                    >
-                      Allow Late Join
-                    </label>
-                    <p
-                      className="text-xs mt-0.5"
-                      style={{ color: 'var(--muted-foreground)' }}
-                    >
-                      Participants can join a consultation after round 1 has started.
-                    </p>
-                  </div>
-                  <ToggleSwitch
-                    id="toggle-allow-late-join"
-                    checked={settings.allow_late_join === 'true'}
-                    onChange={v => update('allow_late_join', v ? 'true' : 'false')}
-                  />
                 </div>
               </div>
             </div>
@@ -473,7 +250,7 @@ export default function AdminSettings() {
                   className="text-base font-semibold"
                   style={{ color: 'var(--foreground)' }}
                 >
-                  Registration
+                  Access
                 </h2>
               </div>
 
@@ -632,7 +409,7 @@ export default function AdminSettings() {
                 >
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Save size={15} />
-                    Save settings
+                    Save changes
                   </span>
                 </LoadingButton>
                 {saved && (
