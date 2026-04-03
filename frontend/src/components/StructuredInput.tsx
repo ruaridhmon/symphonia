@@ -286,11 +286,13 @@ export default function StructuredInput({
                 <span style={styles.sliderLabelEnd}>10</span>
               </div>
             </div>
-            <div style={styles.confidenceBadge}>
-              <span style={{ fontSize: '1.25rem', fontWeight: 700, color: conf.color, fontVariantNumeric: 'tabular-nums' }}>
-                {value.confidence}
-              </span>
-              <span style={{ fontSize: '0.6875rem', color: conf.color, fontWeight: 500 }}>{conf.label}</span>
+            <div style={styles.confidenceMeta}>
+              <div style={styles.confidenceBadge}>
+                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: conf.color, fontVariantNumeric: 'tabular-nums' }}>
+                  {value.confidence}
+                </span>
+              </div>
+              <span style={{ ...styles.confidenceBadgeLabel, color: conf.color }}>{conf.label}</span>
             </div>
           </div>
           <textarea
@@ -522,13 +524,22 @@ const styles: Record<string, React.CSSProperties> = {
   },
   confidenceBadge: {
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    minWidth: '4rem',
-    padding: '0.375rem 0.5rem',
+    justifyContent: 'center',
+    width: '3rem',
+    height: '3rem',
     borderRadius: 'var(--radius)',
     backgroundColor: 'var(--muted)',
     border: '1px solid var(--border)',
+    flexShrink: 0,
+  },
+  confidenceMeta: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.375rem',
+    width: '7.5rem',
+    flexShrink: 0,
   },
   confidenceTrackReadOnly: {
     flex: 1,
@@ -546,6 +557,16 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '0.75rem',
     fontWeight: 600,
     whiteSpace: 'nowrap' as const,
+  },
+  confidenceBadgeLabel: {
+    fontSize: '0.6875rem',
+    fontWeight: 500,
+    textAlign: 'center' as const,
+    lineHeight: 1.3,
+    minHeight: '1.75rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   /* Advanced section */
