@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { ADMIN_EMAIL, ADMIN_PASSWORD } from './helpers';
 
 /**
@@ -12,6 +12,16 @@ import { ADMIN_EMAIL, ADMIN_PASSWORD } from './helpers';
  */
 
 const MOBILE_VIEWPORT = { width: 375, height: 812 };
+
+async function gotoFirstSummary(page: Page) {
+  await page.goto('/');
+  const summaryLink = page.getByRole('link', { name: /Summary/i }).first();
+  await expect(summaryLink).toBeVisible({ timeout: 12_000 });
+  await Promise.all([
+    page.waitForURL(/\/summary/, { timeout: 12_000 }),
+    summaryLink.click(),
+  ]);
+}
 
 test.describe('Mobile — Login page', () => {
   test.use({ viewport: MOBILE_VIEWPORT, storageState: { cookies: [], origins: [] } });
@@ -113,28 +123,27 @@ test.describe('Mobile — Summary page', () => {
   test.use({ viewport: MOBILE_VIEWPORT });
 
   test('summary page loads at 375px', async ({ page }) => {
-    await page.goto('/admin/form/1/summary');
+    await gotoFirstSummary(page);
 
-    await expect(page.getByText(/AI in Education/i).first()).toBeVisible({ timeout: 12_000 });
+    await expect(page.getByText(/Summary/i).first()).toBeVisible({ timeout: 12_000 });
   });
 
-  test('sidebar toggle visible on mobile', async ({ page }) => {
-    await page.goto('/admin/form/1/summary');
+  test('summary page renders without horizontal overflow', async ({ page }) => {
+    await gotoFirstSummary(page);
 
-    await expect(page.getByText(/AI in Education/i).first()).toBeVisible({ timeout: 12_000 });
+    await expect(page.getByText(/Summary/i).first()).toBeVisible({ timeout: 12_000 });
 
-    const toggleBtn = page.locator('.summary-sidebar-toggle');
-    await expect(toggleBtn).toBeVisible();
+    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 2);
   });
 
-  test('sidebar can be toggled open on mobile', async ({ page }) => {
-    await page.goto('/admin/form/1/summary');
+  test('side rail stacks under the main content on mobile', async ({ page }) => {
+    await gotoFirstSummary(page);
 
-    const toggleBtn = page.locator('.summary-sidebar-toggle');
-    await expect(toggleBtn).toBeVisible({ timeout: 12_000 });
-    await toggleBtn.click();
-
-    const sidebar = page.locator('[role="complementary"][aria-label="Synthesis controls"]');
-    await expect(sidebar).toBeVisible({ timeout: 3_000 });
+    await expect(
+      page.getByRole('complementary', { name: /Synthesis controls/i }),
+    ).toBeVisible({ timeout: 12_000 });
+    await expect(page.getByText('Actions')).toBeVisible();
   });
 });

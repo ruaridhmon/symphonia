@@ -1,6 +1,6 @@
 import { chromium, type FullConfig } from '@playwright/test';
-import { mkdirSync, writeFileSync } from 'fs';
-import { dirname } from 'path';
+import fs, { mkdirSync, writeFileSync } from 'fs';
+import path, { dirname } from 'path';
 
 /**
  * Global setup: logs in as admin and saves browser state

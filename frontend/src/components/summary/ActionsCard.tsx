@@ -3,18 +3,14 @@ import { LoadingButton } from '../index';
 
 type Props = {
   responsesOpen: boolean;
-  aiToolsOpen: boolean;
   onToggleResponses: () => void;
-  onToggleAiTools: () => void;
   onStartNextRound: () => void;
   loading: boolean;
 };
 
 export default function ActionsCard({
   responsesOpen,
-  aiToolsOpen,
   onToggleResponses,
-  onToggleAiTools,
   onStartNextRound,
   loading,
 }: Props) {
@@ -39,17 +35,6 @@ export default function ActionsCard({
           aria-pressed={responsesOpen}
         >
           {responsesOpen ? 'Hide responses' : 'Show responses'}
-        </LoadingButton>
-
-        <LoadingButton
-          variant="ghost"
-          size="sm"
-          onClick={onToggleAiTools}
-          className="w-full justify-start gap-2"
-          icon={aiToolsOpen ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
-          aria-pressed={aiToolsOpen}
-        >
-          {aiToolsOpen ? 'Hide AI tools' : 'Show AI tools'}
         </LoadingButton>
 
         <LoadingButton

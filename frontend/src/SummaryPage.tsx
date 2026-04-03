@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { ChartNoAxesColumn, ChevronDown, ChevronRight, Clock3, Globe, Link2, MapPin, MessageSquareText, PanelRight, Sparkles, X } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -24,7 +24,6 @@ import {
 } from './api/synthesis';
 
 import {
-	RoundTimeline,
 	RoundCard,
 	SynthesisProgress,
 	StructuredSynthesis,
@@ -50,7 +49,6 @@ import {
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
 	VersionCompare,
-	VersionTimeline,
 } from './components/summary';
 
 import { usePresence } from './hooks/usePresence';
@@ -223,8 +221,6 @@ export default function SummaryPage() {
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
-	// Default sidebar closed on mobile, open on desktop
-	const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
 	const clearSynthesisRunState = useCallback(() => {
@@ -761,7 +757,7 @@ export default function SummaryPage() {
 			<SummaryHeader email={email} viewers={viewers} onLogout={logout} />
 
 			<main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6" tabIndex={-1}>
-				<div className="summary-main-shell" data-sidebar-open={sidebarOpen ? 'true' : 'false'}>
+				<div>
 				{/* Navigation breadcrumb */}
 				<nav aria-label={t('common.breadcrumb', 'Breadcrumb')} className="mb-4 flex items-center justify-between">
 					<button
@@ -793,92 +789,73 @@ export default function SummaryPage() {
 					</button>
 				</nav>
 
-				<section
-					className="card mb-4 sm:mb-6 p-4 sm:p-5"
-					style={{
-						background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 5%, white), color-mix(in srgb, var(--accent) 2%, var(--card)))',
-						borderColor: 'color-mix(in srgb, var(--accent) 18%, var(--border))',
-					}}
-				>
-					<div className="flex flex-col gap-4">
-						<div className="max-w-3xl">
+				<section className="card mb-4 sm:mb-6 p-5 sm:p-6">
+					<div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+						<div className="min-w-0 max-w-3xl">
 							<div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
-								Consensus Workspace
+								Summary
 							</div>
-							<h2 className="mt-2 text-xl sm:text-2xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
+							<h2 className="mt-2 text-2xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
 								{form.title}
 							</h2>
-						</div>
-
-						<div
-							className="grid gap-3 sm:grid-cols-3"
-							style={{ width: '100%', maxWidth: '52rem' }}
-						>
-							<div className="card p-3" style={{ background: 'color-mix(in srgb, var(--card) 92%, white)' }}>
-								<div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
-									Round
-								</div>
-								<div className="mt-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+							<div className="mt-4 flex flex-wrap gap-2">
+								<span
+									className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+									style={{
+										backgroundColor: 'var(--muted)',
+										color: 'var(--foreground)',
+									}}
+								>
 									{displayRound ? `Round ${displayRound.round_number}` : 'No round selected'}
-								</div>
-								<div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+								</span>
+								<span
+									className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+									style={{
+										backgroundColor: 'var(--muted)',
+										color: 'var(--muted-foreground)',
+									}}
+								>
 									{roundStatusLabel}
-								</div>
-							</div>
-							<div className="card p-3" style={{ background: 'color-mix(in srgb, var(--card) 92%, white)' }}>
-								<div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
-									<MessageSquareText size={13} />
-									Responses
-								</div>
-								<div className="mt-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-									{responseCountForDisplay} expert response{responseCountForDisplay === 1 ? '' : 's'}
-								</div>
-								<div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-									Available for review
-								</div>
-							</div>
-							<div className="card p-3" style={{ background: 'color-mix(in srgb, var(--card) 92%, white)' }}>
-								<div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
-									<ChartNoAxesColumn size={13} />
-									Workspace
-								</div>
-								<div className="mt-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+								</span>
+								<span
+									className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+									style={{
+										backgroundColor: 'var(--muted)',
+										color: 'var(--foreground)',
+									}}
+								>
+									<MessageSquareText size={12} />
+									{responseCountForDisplay} response{responseCountForDisplay === 1 ? '' : 's'}
+								</span>
+								<span
+									className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+									style={{
+										backgroundColor: 'var(--muted)',
+										color: 'var(--muted-foreground)',
+									}}
+								>
+									<ChartNoAxesColumn size={12} />
 									{workspaceStatusLabel}
-								</div>
-								<div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-									{viewers.length > 1 ? `${viewers.length} people viewing now` : 'Single-editor workspace'}
-								</div>
+								</span>
 							</div>
 						</div>
 
 						<div
-							className="rounded-xl px-4 py-3"
+							className="w-full max-w-xl rounded-2xl px-4 py-4 lg:max-w-sm"
 							style={{
-								backgroundColor: 'color-mix(in srgb, var(--card) 92%, white)',
-								border: '1px solid color-mix(in srgb, var(--accent) 10%, var(--border))',
+								backgroundColor: 'color-mix(in srgb, var(--muted) 72%, white)',
+								border: '1px solid var(--border)',
 							}}
 						>
 							<div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
 								Current focus
 							</div>
-							<p className="mt-1 text-sm" style={{ color: 'var(--foreground)', lineHeight: 1.55, marginBottom: 0 }}>
+							<p className="mt-2 text-sm" style={{ color: 'var(--foreground)', lineHeight: 1.6, marginBottom: 0 }}>
 								{recommendedNextStep}
 							</p>
 						</div>
 					</div>
 				</section>
-
-				{/* Round timeline */}
-				{rounds.length > 0 && (
-					<div className="mb-4 sm:mb-6 overflow-x-auto">
-						<RoundTimeline
-							rounds={rounds}
-							activeRoundId={activeRound?.id || null}
-							selectedRoundId={selectedRound?.id || null}
-							onSelectRound={handleSelectRound}
-						/>
-					</div>
-				)}
 
 				{/* Synthesis progress bar */}
 				<div aria-live="polite">
@@ -892,27 +869,8 @@ export default function SummaryPage() {
 				/>
 				</div>
 
-				{/* Floating sidebar toggle */}
-				<button
-					onClick={() => setSidebarOpen(v => !v)}
-					className="summary-sidebar-toggle fixed z-50 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium shadow-lg transition-all min-h-[44px]"
-					data-open={sidebarOpen ? 'true' : 'false'}
-					aria-expanded={sidebarOpen}
-					aria-controls="summary-sidebar"
-					aria-label={sidebarOpen ? t('summary.hideSidebar', 'Hide synthesis controls panel') : t('summary.showSidebar', 'Show synthesis controls panel')}
-					style={{
-						top: '4.75rem',
-						background: 'var(--card)',
-						border: '1px solid var(--border)',
-						color: 'var(--foreground)',
-					}}
-				>
-					{sidebarOpen ? <X size={15} aria-hidden="true" /> : <PanelRight size={15} aria-hidden="true" />}
-					<span className="hidden sm:inline">{sidebarOpen ? t('summary.hide') : t('summary.controls')}</span>
-				</button>
-
-				{/* Main content — full width */}
-				<div className="space-y-4 sm:space-y-6">
+				<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_21rem]">
+					<div className="space-y-4 sm:space-y-6 min-w-0">
 							{/* Inline responses accordion — shown/hidden by controls toggle */}
 							{responsesOpen && (
 								<ResponsesAccordion
@@ -1008,10 +966,10 @@ export default function SummaryPage() {
 									>
 										<div>
 											<h2 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
-												<Globe size={18} style={{ color: 'var(--accent)' }} /> Advanced analysis
+												<Globe size={18} style={{ color: 'var(--accent)' }} /> Analysis tools
 											</h2>
 											<p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-												Translations, challenge tools, and analytical views.
+												Optional views for translation, challenge, and comparison.
 											</p>
 										</div>
 										{advancedAnalysisOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -1030,10 +988,42 @@ export default function SummaryPage() {
 												/>
 											</div>
 
+											<div
+												className="rounded-xl px-4 py-3"
+												style={{
+													backgroundColor: 'var(--muted)',
+													border: '1px solid var(--border)',
+												}}
+											>
+												<div className="flex items-center justify-between gap-3 flex-wrap">
+													<div>
+														<div className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+															Challenge tools
+														</div>
+														<p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
+															Test the synthesis with counterpoints and probing questions.
+														</p>
+													</div>
+													<button
+														type="button"
+														onClick={toggleAiDeliberationTools}
+														className="rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+														style={{
+															backgroundColor: aiToolsOpen ? 'color-mix(in srgb, var(--accent) 12%, var(--card))' : 'var(--card)',
+															color: aiToolsOpen ? 'var(--accent)' : 'var(--foreground)',
+															border: aiToolsOpen ? '1px solid var(--accent)' : '1px solid var(--border)',
+															cursor: 'pointer',
+														}}
+													>
+														{aiToolsOpen ? 'Hide challenge tools' : 'Show challenge tools'}
+													</button>
+												</div>
+											</div>
+
 											{aiToolsOpen && (
 												<div className="card p-4">
 													<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0 mb-4">
-														<Sparkles size={18} style={{ color: 'var(--accent)' }} /> AI Deliberation Tools
+														<Sparkles size={18} style={{ color: 'var(--accent)' }} /> Challenge tools
 													</h3>
 													<div id="summary-ai-tools" className="space-y-4">
 														{structuredSynthesisData && (
@@ -1101,15 +1091,6 @@ export default function SummaryPage() {
 
 					</div>
 
-					{/* ── Mobile sidebar backdrop ── */}
-					{sidebarOpen && (
-						<div
-							className="fixed inset-0 z-30 bg-black/30 md:hidden"
-							onClick={() => setSidebarOpen(false)}
-							aria-hidden="true"
-						/>
-					)}
-
 					{/* ── Version compare modal ── */}
 					{showVersionCompare && synthesisVersions.length >= 2 && (
 						<div className="fixed inset-0 z-[70]">
@@ -1130,33 +1111,14 @@ export default function SummaryPage() {
 						</div>
 					)}
 
-					{/* ── Floating Sidebar ── */}
 					<aside
-						id="summary-sidebar"
 						role="complementary"
 						aria-label={t('summary.synthesisControls')}
-						className="summary-sidebar"
-						style={{
-							position: 'fixed',
-							right: 0,
-							top: '4.5rem',
-							height: 'calc(100vh - 4.5rem)',
-							overflowY: 'auto',
-							zIndex: 40,
-							borderLeft: '1px solid var(--border)',
-							background: 'var(--background)',
-							transform: sidebarOpen ? 'translateX(0)' : 'translateX(100%)',
-							transition: 'transform 0.2s ease',
-							padding: '0.75rem',
-							display: 'flex',
-							flexDirection: 'column',
-							gap: '0.5rem',
-						}}
+						className="space-y-3 xl:sticky xl:top-24 self-start"
 					>
 						{/* Compact form title + round badge */}
 						<div
-							className="flex items-center justify-between px-1 py-1"
-							style={{ borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}
+							className="card px-3 py-3 flex items-center justify-between"
 						>
 							<span className="text-xs font-medium truncate" style={{ color: 'var(--foreground)', maxWidth: '18rem' }}>
 								{form.title}
@@ -1182,9 +1144,7 @@ export default function SummaryPage() {
 
 						<ActionsCard
 								responsesOpen={responsesOpen}
-								aiToolsOpen={aiToolsOpen}
 								onToggleResponses={viewAllResponses}
-								onToggleAiTools={toggleAiDeliberationTools}
 								onStartNextRound={startNextRound}
 								loading={loading}
 							/>
@@ -1216,21 +1176,13 @@ export default function SummaryPage() {
 							onToggleCompare={() => setShowVersionCompare(v => !v)}
 						/>
 
-						{/* Version History Timeline */}
-						{synthesisVersions.length > 1 && (
-							<VersionTimeline
-								versions={synthesisVersions}
-								selectedVersionId={selectedVersionId}
-								onSelectVersion={setSelectedVersionId}
-							/>
-						)}
-
 						<RoundHistoryCard
 							rounds={rounds}
 							selectedRoundId={selectedRound?.id || null}
 							onSelectRound={handleSelectRound}
 						/>
 					</aside>
+				</div>
 				</div>
 			</main>
 

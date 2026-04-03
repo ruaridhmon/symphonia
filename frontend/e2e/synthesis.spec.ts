@@ -1,23 +1,30 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * Synthesis workflow tests.
  *
  * All tests use the inherited admin storageState (logged in as admin).
- * Covers: summary page structure, synthesis mode selector, sidebar controls,
- * actions panel, and round navigation.
+ * Covers: summary page structure, synthesis controls, and the calmer layout.
  */
 
-const SUMMARY_URL = '/admin/form/1/summary';
+async function gotoFirstSummary(page: Page) {
+  await page.goto('/');
+  const summaryLink = page.getByRole('link', { name: /Summary/i }).first();
+  await expect(summaryLink).toBeVisible({ timeout: 12_000 });
+  await Promise.all([
+    page.waitForURL(/\/summary/, { timeout: 12_000 }),
+    summaryLink.click(),
+  ]);
+}
 
 test.describe('Summary page structure', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(SUMMARY_URL);
+    await gotoFirstSummary(page);
   });
 
   test('summary page loads with form title', async ({ page }) => {
     await expect(
-      page.getByText(/AI in Education/i).first(),
+      page.getByText(/Summary/i).first(),
     ).toBeVisible({ timeout: 12_000 });
   });
 
@@ -27,9 +34,9 @@ test.describe('Summary page structure', () => {
     ).toBeVisible({ timeout: 10_000 });
   });
 
-  test('shows Expert Responses section', async ({ page }) => {
+  test('shows the current focus panel', async ({ page }) => {
     await expect(
-      page.getByRole('heading', { name: /Expert Responses/i }),
+      page.getByText(/Current focus/i),
     ).toBeVisible({ timeout: 10_000 });
   });
 
@@ -40,52 +47,16 @@ test.describe('Summary page structure', () => {
   });
 });
 
-test.describe('Sidebar controls', () => {
-  test('sidebar toggle button is visible', async ({ page }) => {
-    await page.goto(SUMMARY_URL);
-
-    const toggleBtn = page.locator('.summary-sidebar-toggle');
-    await expect(toggleBtn).toBeVisible({ timeout: 12_000 });
-  });
-
-  test('sidebar is open by default on desktop', async ({ page }) => {
-    await page.goto(SUMMARY_URL);
-
-    await expect(
-      page.locator('.summary-sidebar-toggle'),
-    ).toBeVisible({ timeout: 12_000 });
-
-    const sidebar = page.locator('[role="complementary"][aria-label="Synthesis controls"]');
-    await expect(sidebar).toBeVisible({ timeout: 5_000 });
-  });
-
-  test('clicking toggle hides sidebar', async ({ page }) => {
-    await page.goto(SUMMARY_URL);
-
-    const toggleBtn = page.locator('.summary-sidebar-toggle');
-    await expect(toggleBtn).toBeVisible({ timeout: 12_000 });
-
-    // Click to hide
-    await toggleBtn.click();
-
-    // Give animation time, then sidebar should be hidden
-    await page.waitForTimeout(400);
-    const sidebar = page.locator('[role="complementary"][aria-label="Synthesis controls"]');
-    await expect(sidebar).toBeAttached();
-  });
-});
-
 test.describe('Synthesis mode selector', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(SUMMARY_URL);
-    // Wait for page to fully load
+    await gotoFirstSummary(page);
     await expect(
-      page.locator('.summary-sidebar-toggle'),
+      page.getByRole('complementary', { name: /Synthesis controls/i }),
     ).toBeVisible({ timeout: 12_000 });
   });
 
-  test('AI-Powered Synthesis heading is visible', async ({ page }) => {
-    await expect(page.getByText(/AI-Powered Synthesis/i)).toBeVisible({ timeout: 5_000 });
+  test('AI synthesis heading is visible', async ({ page }) => {
+    await expect(page.getByText(/^AI Synthesis$/i)).toBeVisible({ timeout: 5_000 });
   });
 
   test('shows Simple, Committee, and TTD mode buttons', async ({ page }) => {
@@ -109,37 +80,38 @@ test.describe('Synthesis mode selector', () => {
     expect(count).toBeGreaterThanOrEqual(1);
   });
 
-  test('"Generate Summary" button is present', async ({ page }) => {
+  test('"Generate AI Synthesis" button is present', async ({ page }) => {
     await expect(
-      page.getByRole('button', { name: /Generate Summary/i }),
+      page.getByRole('button', { name: /Generate AI Synthesis/i }),
     ).toBeVisible({ timeout: 5_000 });
   });
 });
 
 test.describe('Actions panel', () => {
-  test('shows Actions section in sidebar', async ({ page }) => {
-    await page.goto(SUMMARY_URL);
+  test('shows actions and round controls in the side rail', async ({ page }) => {
+    await gotoFirstSummary(page);
 
     await expect(
-      page.locator('.summary-sidebar-toggle'),
+      page.getByRole('complementary', { name: /Synthesis controls/i }),
     ).toBeVisible({ timeout: 12_000 });
 
     await expect(page.getByText('Actions')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Rounds')).toBeVisible({ timeout: 5_000 });
   });
 });
 
 test.describe('Round navigation', () => {
-  test('round stepper is visible', async ({ page }) => {
-    await page.goto(SUMMARY_URL);
+  test('round picker is visible in the side rail', async ({ page }) => {
+    await gotoFirstSummary(page);
 
     await expect(
-      page.getByRole('heading', { name: /Round Navigation/i }),
+      page.getByText('Rounds'),
     ).toBeVisible({ timeout: 12_000 });
   });
 
   test('round card shows active round info', async ({ page }) => {
-    await page.goto(SUMMARY_URL);
+    await gotoFirstSummary(page);
 
-    await expect(page.getByText('Round 1').first()).toBeVisible({ timeout: 12_000 });
+    await expect(page.getByText(/Round \d+ of \d+/).first()).toBeVisible({ timeout: 12_000 });
   });
 });
