@@ -14,6 +14,8 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const { login, token, isLoading } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -55,54 +57,54 @@ export default function Register() {
   return (
     <form
       onSubmit={handleRegister}
-      className="card-lg p-8 sm:p-10 w-full space-y-5"
+      className="auth-panel w-full space-y-5"
     >
-      <h1 className="sr-only">{t('auth.createAccount')}</h1>
-      <h2 className="text-base font-medium text-center" aria-hidden="true" style={{ color: 'var(--muted-foreground)' }}>
-        {t('auth.createAccount')}
-      </h2>
+      <div className="auth-header">
+        <h1 className="auth-title">{t('auth.createAccount')}</h1>
+      </div>
       <div aria-live="polite" aria-atomic="true">
         {error && (
           <div
-            className="rounded-lg px-4 py-3 text-sm text-center"
+            className="auth-feedback auth-feedback-error"
             role="alert"
-            style={{
-              backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
-              color: 'var(--destructive)',
-              border: '1px solid color-mix(in srgb, var(--destructive) 25%, transparent)',
-            }}
           >
             {error}
           </div>
         )}
       </div>
-      <div className="space-y-1.5">
-        <label htmlFor="register-email" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          {t('auth.emailLabel')}
-        </label>
+      <div className={`auth-floating-field ${emailFocused || email ? 'is-active' : ''}`}>
         <input
           id="register-email"
           type="email"
-          placeholder={t('auth.emailPlaceholder')}
+          placeholder=" "
           required
           autoComplete="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg"
+          onFocus={() => setEmailFocused(true)}
+          onBlur={() => setEmailFocused(false)}
+          className="w-full auth-floating-input"
         />
-      </div>
-      <div className="space-y-1.5">
-        <label htmlFor="register-password" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-          {t('auth.passwordLabel')}
+        <label htmlFor="register-email" className="auth-floating-label">
+          {t('auth.emailLabel')}
         </label>
+      </div>
+      <div className={`auth-floating-field ${passwordFocused || password ? 'is-active' : ''}`}>
         <PasswordInput
           id="register-password"
-          placeholder={t('auth.passwordPlaceholder')}
+          placeholder=" "
           required
           autoComplete="new-password"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          onFocus={() => setPasswordFocused(true)}
+          onBlur={() => setPasswordFocused(false)}
+          className="auth-floating-input auth-floating-input-password"
+          wrapperClassName="auth-floating-password"
         />
+        <label htmlFor="register-password" className="auth-floating-label">
+          {t('auth.passwordLabel')}
+        </label>
       </div>
       <LoadingButton
         type="submit"
@@ -110,13 +112,13 @@ export default function Register() {
         size="lg"
         loading={isRegistering || isLoading}
         loadingText={t('auth.creatingAccount')}
-        className="w-full"
+        className="w-full auth-submit"
       >
         {t('auth.createAccount')}
       </LoadingButton>
-      <div className="text-sm text-center" style={{ color: 'var(--muted-foreground)' }}>
+      <div className="text-sm text-center auth-footnote">
         {t('auth.alreadyHaveAccount')}{' '}
-        <Link to="/login" className="font-medium" style={{ color: 'var(--accent)' }}>
+        <Link to="/login" className="auth-link font-medium">
           {t('auth.signInLink')}
         </Link>
       </div>
