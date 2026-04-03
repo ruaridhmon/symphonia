@@ -582,27 +582,42 @@ class ConsensusLibraryAdapter:
         if env_prompts:
             candidates.append(Path(env_prompts))
 
+        # 1. Repo-local prompts shipped with Symphonia.
+        repo_prompts = Path(__file__).resolve().parent.parent / "prompts"
+        candidates.append(repo_prompts)
+
+        # 2. Nearby consensus checkout for editable/dev environments.
+        workspace_consensus_prompts = (
+            Path(__file__).resolve().parents[3] / "consensus" / "prompts"
+        )
+        candidates.append(workspace_consensus_prompts)
+
         try:
             import consensus
 
             package_dir = Path(consensus.__file__).resolve().parent
-            # 1. Packaged prompts inside the consensus module
+            # 3. Packaged prompts inside the consensus module
             candidates.append(package_dir / "prompts")
-            # 2. Source checkout layout: src/consensus -> repo_root/prompts
+            # 4. Source checkout layout: src/consensus -> repo_root/prompts
             candidates.append(package_dir.parent.parent / "prompts")
-            # 3. Editable/install quirks: src -> prompts
+            # 5. Editable/install quirks: src -> prompts
             candidates.append(package_dir.parent / "prompts")
         except (ImportError, AttributeError) as exc:
             raise SynthesisConfigError(
                 f"Cannot locate consensus package directory: {exc}"
             ) from exc
 
+        seen: set[Path] = set()
         for p in candidates:
-            if p.is_dir():
-                logger.debug("Resolved prompts_dir → %s", p)
-                return p
+            resolved = p.expanduser().resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            if resolved.is_dir():
+                logger.debug("Resolved prompts_dir → %s", resolved)
+                return resolved
 
-        searched = ", ".join(str(c) for c in candidates)
+        searched = ", ".join(str(c.expanduser().resolve()) for c in candidates)
         raise SynthesisConfigError(
             f"Could not find prompts directory. Searched: {searched}"
         )
