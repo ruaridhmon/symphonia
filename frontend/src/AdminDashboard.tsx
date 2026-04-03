@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Settings, Users, Ticket } from 'lucide-react';
+import { FileText, Pencil, Plus, Search, Settings, Ticket, Users } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
@@ -106,8 +106,6 @@ export default function AdminDashboard() {
   return (
     <section className="flex-1 py-6 sm:py-8">
       <Container size="lg">
-
-
         {/* ── Error banner ── */}
         {error && (
           <div
@@ -134,130 +132,134 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── Create form CTA ── */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5 sm:mb-6">
-          <div>
+        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
             <h1
-              className="text-lg sm:text-xl font-bold tracking-tight"
+              className="text-3xl sm:text-[2.1rem] font-semibold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
               {t('adminDashboard.title')}
             </h1>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <LoadingButton
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/join')}
+              aria-label={t('adminDashboard.joinCodeAction')}
+            >
+              <Ticket size={15} aria-hidden="true" /> {t('adminDashboard.joinCodeAction')}
+            </LoadingButton>
             <LoadingButton
               variant="ghost"
               size="sm"
               onClick={() => navigate('/admin/settings')}
               aria-label={t('adminDashboard.openSettings', 'Open settings')}
             >
-              <Settings size={15} aria-hidden="true" /> Settings
+              <Settings size={15} aria-hidden="true" /> {t('common.settings')}
             </LoadingButton>
             <LoadingButton
               variant="ghost"
               size="sm"
               onClick={() => navigate('/admin/users')}
-              aria-label="Manage users"
+              aria-label={t('adminDashboard.manageUsers')}
             >
-              <Users size={15} aria-hidden="true" /> Users
+              <Users size={15} aria-hidden="true" /> {t('adminDashboard.users')}
             </LoadingButton>
             <LoadingButton
               variant="accent"
               size="sm"
               onClick={() => navigate('/admin/forms/new')}
+              icon={<Plus size={15} aria-hidden="true" />}
             >
               {t('adminDashboard.newForm')}
             </LoadingButton>
           </div>
         </div>
 
-        {/* ── Join consultation banner ── */}
-        <div
-          className="mb-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3"
-          style={{
-            background: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
-            border: '1px solid color-mix(in srgb, var(--accent) 14%, var(--border))',
-          }}
-          >
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--accent)' }}>
-                Join code
-              </p>
-              <p className="text-sm mt-1" style={{ color: 'var(--foreground)' }}>
-                Enter a code to join as an expert.
-              </p>
-            </div>
-          <LoadingButton
-            variant="accent"
-            size="sm"
-            onClick={() => navigate('/join')}
-            style={{ flexShrink: 0 }}
-            icon={<Ticket size={15} aria-hidden="true" />}
-          >
-            Enter join code
-          </LoadingButton>
-        </div>
-
-        {/* ── Existing forms ── */}
-        {forms.length > 0 && (
+        {forms.length === 0 ? (
           <div
-            className="rounded-lg overflow-hidden"
+            className="rounded-2xl px-6 sm:px-8 py-12 sm:py-14 text-center"
             style={{
               backgroundColor: 'var(--card)',
-              border: '1px solid var(--border)',
-              boxShadow: 'var(--card-shadow, none)',
+              border: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
+              boxShadow: '0 20px 48px rgba(15, 23, 42, 0.05)',
             }}
           >
-            {/* Section header + search */}
-            <div
-              className="p-3 sm:p-4 pb-0 sm:pb-0"
+            <h2 className="text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
+              {t('adminDashboard.emptyTitle')}
+            </h2>
+            <p className="mt-2 text-sm max-w-md mx-auto" style={{ color: 'var(--muted-foreground)' }}>
+              {t('adminDashboard.emptyBody')}
+            </p>
+            <LoadingButton
+              variant="accent"
+              size="sm"
+              onClick={() => navigate('/admin/forms/new')}
+              className="mt-5"
+              icon={<Plus size={15} aria-hidden="true" />}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-                {/* Left: title + count badge */}
-                <div className="flex items-center gap-2">
-                  <h2
-                    className="text-base font-semibold"
-                    style={{ color: 'var(--foreground)' }}
-                  >
+              {t('adminDashboard.newForm')}
+            </LoadingButton>
+          </div>
+        ) : (
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{
+              backgroundColor: 'var(--card)',
+              border: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
+              boxShadow: '0 20px 48px rgba(15, 23, 42, 0.05)',
+            }}
+          >
+            <div className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
                     {t('adminDashboard.existingForms')}
                   </h2>
-                  <span
-                    className="inline-flex items-center justify-center text-xs font-bold px-2.5 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                      color: 'var(--accent)',
-                      minWidth: '1.75rem',
-                    }}
-                  >
-                    {forms.length}
-                  </span>
+                  <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                    {search
+                      ? t('common.showingResults', { count: visibleForms.length, total: forms.length })
+                      : `${forms.length} consultation${forms.length === 1 ? '' : 's'}`}
+                  </p>
                 </div>
 
-                {/* Right: search input */}
-                <div
-                  className="relative w-full sm:w-72"
-                >
+                <div className="relative w-full sm:w-80">
+                  <Search
+                    size={15}
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      left: 12,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: 'var(--muted-foreground)',
+                      pointerEvents: 'none',
+                    }}
+                  />
                   <input
                     type="text"
                     placeholder={t('adminDashboard.searchPlaceholder')}
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    className="w-full text-sm px-3"
+                    className="w-full text-sm"
                     aria-label={t('adminDashboard.searchLabel')}
                     style={{
-                      height: '2.5rem',
-                      borderRadius: 'var(--radius)',
-                      border: '1px solid var(--input)',
-                      backgroundColor: 'var(--card)',
+                      height: '2.75rem',
+                      borderRadius: '999px',
+                      border: '1px solid color-mix(in srgb, var(--border) 60%, transparent)',
+                      backgroundColor: 'color-mix(in srgb, var(--background) 70%, var(--card) 30%)',
                       color: 'var(--foreground)',
                       outline: 'none',
+                      paddingLeft: '2.25rem',
+                      paddingRight: '0.9rem',
                     }}
                     onFocus={e => {
                       e.currentTarget.style.borderColor = 'var(--accent)';
-                      e.currentTarget.style.boxShadow = '0 0 0 2px rgba(37, 99, 235, 0.25)';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.12)';
                     }}
                     onBlur={e => {
-                      e.currentTarget.style.borderColor = 'var(--input)';
+                      e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--border) 60%, transparent)';
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
@@ -300,14 +302,17 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ── Desktop table ── */}
             {visibleForms.length > 0 && (
-              <div className="hidden sm:block overflow-x-auto">
-                <table className="w-full text-sm text-left" aria-label={t('adminDashboard.existingForms')} style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+              <div className="hidden sm:block overflow-x-auto px-3 sm:px-4 pb-3">
+                <table
+                  className="w-full text-sm text-left"
+                  aria-label={t('adminDashboard.existingForms')}
+                  style={{ borderCollapse: 'separate', borderSpacing: 0 }}
+                >
                   <thead>
                     <tr
                       style={{
-                        backgroundColor: 'var(--muted)',
+                        backgroundColor: 'transparent',
                       }}
                     >
                       {[t('adminDashboard.formTitle'), t('adminDashboard.joinCode'), t('adminDashboard.participants'), t('adminDashboard.round')].map(label => (
@@ -317,11 +322,9 @@ export default function AdminDashboard() {
                           className="px-4 py-2.5 text-left"
                           style={{
                             color: 'var(--muted-foreground)',
-                            fontSize: '0.6875rem',
+                            fontSize: '0.75rem',
                             fontWeight: 600,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
-                            borderBottom: '1px solid var(--border)',
+                            borderBottom: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
                           }}
                         >
                           {label}
@@ -332,11 +335,9 @@ export default function AdminDashboard() {
                         className="px-4 py-2.5 text-right"
                         style={{
                           color: 'var(--muted-foreground)',
-                          fontSize: '0.6875rem',
+                          fontSize: '0.75rem',
                           fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          borderBottom: '1px solid var(--border)',
+                          borderBottom: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
                         }}
                       >
                         {t('adminDashboard.actions')}
@@ -350,115 +351,100 @@ export default function AdminDashboard() {
                         className="transition-colors duration-150"
                         style={{
                           borderBottom:
-                            idx < filteredForms.length - 1
-                              ? '1px solid var(--border)'
+                            idx < visibleForms.length - 1
+                              ? '1px solid color-mix(in srgb, var(--border) 40%, transparent)'
                               : 'none',
                         }}
                         onMouseEnter={e => {
-                          e.currentTarget.style.backgroundColor = 'var(--muted)';
+                          e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 4%, var(--card))';
                         }}
                         onMouseLeave={e => {
                           e.currentTarget.style.backgroundColor = 'transparent';
                         }}
                       >
                         <td
-                          className="px-4 py-2.5 font-medium text-sm"
+                          className="px-4 py-4 font-medium text-sm"
                           style={{
                             color: 'var(--foreground)',
-                            maxWidth: '20rem',
+                            maxWidth: '26rem',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
                           }}
                         >
                           {f.title}
-                          {(f.participant_count ?? 0) > 0 && (
-                            <span
-                              className="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold align-middle"
-                              style={{
-                                backgroundColor: 'color-mix(in srgb, var(--accent) 9%, transparent)',
-                                color: 'var(--accent)',
-                              }}
-                            >
-                              Live
-                            </span>
-                          )}
                         </td>
-                        <td className="px-4 py-2.5">
-                          <code
-                            className="inline-block px-2 py-0.5 rounded-md text-xs font-mono font-semibold"
+                        <td className="px-4 py-4">
+                          <span
+                            className="inline-block text-[13px] font-mono font-medium"
                             style={{
-                              backgroundColor: 'var(--muted)',
-                              color: 'var(--foreground)',
-                              border: '1px solid var(--border)',
+                              color: 'var(--muted-foreground)',
                               letterSpacing: '0.04em',
                             }}
                           >
                             {f.join_code}
-                          </code>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span
-                            className="inline-flex items-center justify-center min-w-[1.75rem] h-5 px-1.5 rounded-full text-xs font-bold"
-                            style={{
-                              backgroundColor:
-                                f.participant_count > 0
-                                  ? 'rgba(37, 99, 235, 0.1)'
-                                  : 'var(--muted)',
-                              color:
-                                f.participant_count > 0
-                                  ? 'var(--accent)'
-                                  : 'var(--muted-foreground)',
-                            }}
-                          >
-                            {f.participant_count}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-4 py-4">
                           <span
-                            className="inline-flex items-center justify-center min-w-[2rem] h-5 px-1.5 rounded-full text-xs font-medium"
+                            className="inline-flex items-center justify-center min-w-[2rem] h-7 px-2.5 rounded-full text-xs font-semibold"
                             style={{
-                              backgroundColor: 'var(--muted)',
-                              color: 'var(--foreground)',
+                              backgroundColor: 'color-mix(in srgb, var(--muted) 75%, var(--card) 25%)',
+                              color: (f.participant_count ?? 0) > 0 ? 'var(--foreground)' : 'var(--muted-foreground)',
                             }}
                           >
-                            R{f.current_round}
+                            {f.participant_count ?? 0}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5 text-right">
-                          <div className="inline-flex items-center gap-1">
+                        <td className="px-4 py-4">
+                          <span
+                            className="text-sm font-medium"
+                            style={{
+                              color: 'var(--muted-foreground)',
+                            }}
+                          >
+                            Round {f.current_round ?? 1}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <div className="inline-flex items-center gap-1.5">
                             <a
                               href={`/admin/form/${f.id}`}
-                              className="inline-flex items-center px-2 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+                              aria-label={`${t('adminDashboard.edit')} ${f.title}`}
+                              title={t('adminDashboard.edit')}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
                               style={{
                                 color: 'var(--muted-foreground)',
                               }}
                               onMouseEnter={e => {
                                 e.currentTarget.style.color = 'var(--foreground)';
-                                e.currentTarget.style.backgroundColor = 'var(--muted)';
+                                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--foreground) 6%, transparent)';
                               }}
                               onMouseLeave={e => {
                                 e.currentTarget.style.color = 'var(--muted-foreground)';
                                 e.currentTarget.style.backgroundColor = 'transparent';
                               }}
                             >
-                              {t('adminDashboard.edit')}
+                              <Pencil size={15} aria-hidden="true" />
                             </a>
                             <a
                               href={`/admin/form/${f.id}/summary`}
-                              className="inline-flex items-center px-2 py-1 rounded-md text-sm font-medium transition-colors duration-150"
+                              aria-label={`${t('adminDashboard.summary')} ${f.title}`}
+                              title={t('adminDashboard.summary')}
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
                               style={{
-                                color: 'var(--accent)',
+                                color: 'var(--muted-foreground)',
                               }}
                               onMouseEnter={e => {
-                                e.currentTarget.style.backgroundColor = 'rgba(37, 99, 235, 0.08)';
+                                e.currentTarget.style.color = 'var(--foreground)';
+                                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 7%, transparent)';
                               }}
                               onMouseLeave={e => {
+                                e.currentTarget.style.color = 'var(--muted-foreground)';
                                 e.currentTarget.style.backgroundColor = 'transparent';
                               }}
                             >
-                              {t('adminDashboard.summary')}
-                              <ArrowUpRight size={13} style={{ marginLeft: '0.25rem' }} />
+                              <FileText size={15} aria-hidden="true" />
                             </a>
                           </div>
                         </td>
@@ -469,141 +455,90 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ── Mobile card list ── */}
             {visibleForms.length > 0 && (
               <div className="sm:hidden px-4 pb-4 space-y-3">
-                {visibleForms.map((f: any) => (
-                  <div
-                    key={f.id}
-                    className="rounded-lg overflow-hidden transition-colors duration-150"
-                    style={{
-                      backgroundColor: 'var(--background)',
-                      border: '1px solid var(--border)',
-                    }}
-                  >
-                    {/* Card header */}
+                {visibleForms.map((f: any) => {
+                  const participantCount = f.participant_count ?? 0;
+                  const participantLabel = `${participantCount} participant${participantCount === 1 ? '' : 's'}`;
+                  return (
                     <div
-                      className="px-4 py-3"
+                      key={f.id}
+                      className="rounded-2xl px-4 py-4 transition-colors duration-150"
                       style={{
-                        borderBottom: '1px solid var(--border)',
+                        backgroundColor: 'color-mix(in srgb, var(--card) 96%, var(--background) 4%)',
+                        border: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
                       }}
                     >
-                      <div
-                        className="font-semibold text-sm leading-snug"
-                        style={{ color: 'var(--foreground)' }}
-                      >
-                        {f.title}
-                      </div>
-                      {(f.participant_count ?? 0) > 0 && (
-                        <div
-                          className="mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                          style={{
-                            backgroundColor: 'color-mix(in srgb, var(--accent) 9%, transparent)',
-                            color: 'var(--accent)',
-                          }}
-                        >
-                          Live consultation
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div
+                            className="font-semibold text-sm leading-snug"
+                            style={{ color: 'var(--foreground)' }}
+                          >
+                            {f.title}
+                          </div>
+                          <div
+                            className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm"
+                            style={{ color: 'var(--muted-foreground)' }}
+                          >
+                            <span
+                              className="font-mono text-[13px]"
+                              style={{ letterSpacing: '0.04em' }}
+                            >
+                              {f.join_code}
+                            </span>
+                            <span>{participantLabel}</span>
+                            <span>Round {f.current_round ?? 1}</span>
+                          </div>
                         </div>
-                      )}
+                        <div className="flex items-center gap-1">
+                          <a
+                            href={`/admin/form/${f.id}`}
+                            aria-label={`${t('adminDashboard.edit')} ${f.title}`}
+                            title={t('adminDashboard.edit')}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                            style={{ color: 'var(--muted-foreground)' }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.color = 'var(--foreground)';
+                              e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--foreground) 6%, transparent)';
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.color = 'var(--muted-foreground)';
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
+                          >
+                            <Pencil size={15} aria-hidden="true" />
+                          </a>
+                          <a
+                            href={`/admin/form/${f.id}/summary`}
+                            aria-label={`${t('adminDashboard.summary')} ${f.title}`}
+                            title={t('adminDashboard.summary')}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                            style={{ color: 'var(--muted-foreground)' }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.color = 'var(--foreground)';
+                              e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 7%, transparent)';
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.color = 'var(--muted-foreground)';
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
+                          >
+                            <FileText size={15} aria-hidden="true" />
+                          </a>
+                        </div>
+                      </div>
                     </div>
-
-                    {/* Card body: metadata row */}
-                    <div className="px-4 py-3 flex items-center gap-3 flex-wrap">
-                      {/* Join code pill */}
-                      <code
-                        className="inline-block px-2 py-0.5 rounded text-xs font-mono font-semibold"
-                        style={{
-                          backgroundColor: 'var(--muted)',
-                          color: 'var(--foreground)',
-                          border: '1px solid var(--border)',
-                          letterSpacing: '0.04em',
-                        }}
-                      >
-                        {f.join_code}
-                      </code>
-
-                      {/* Participants pill */}
-                      <span
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
-                        style={{
-                          backgroundColor:
-                            f.participant_count > 0
-                              ? 'rgba(37, 99, 235, 0.1)'
-                              : 'var(--muted)',
-                          color:
-                            f.participant_count > 0
-                              ? 'var(--accent)'
-                              : 'var(--muted-foreground)',
-                        }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 16 16"
-                          fill="currentColor"
-                          style={{ width: '0.75rem', height: '0.75rem' }}
-                        >
-                          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
-                        </svg>
-                        {f.participant_count}
-                      </span>
-
-                      {/* Round pill */}
-                      <span
-                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                        style={{
-                          backgroundColor: 'var(--muted)',
-                          color: 'var(--foreground)',
-                        }}
-                      >
-                        R{f.current_round}
-                      </span>
-                    </div>
-
-                    {/* Card actions */}
-                    <div
-                      className="px-4 py-2.5 flex items-center gap-2"
-                      style={{
-                        borderTop: '1px solid var(--border)',
-                        backgroundColor: 'var(--muted)',
-                      }}
-                    >
-                      <a
-                        href={`/admin/form/${f.id}`}
-                        className="flex-1 text-center py-1.5 rounded-md text-sm font-medium transition-colors duration-150"
-                        style={{
-                          color: 'var(--muted-foreground)',
-                        }}
-                      >
-                        {t('adminDashboard.edit')}
-                      </a>
-                      <div
-                        style={{
-                          width: '1px',
-                          height: '1.25rem',
-                          backgroundColor: 'var(--border)',
-                        }}
-                      />
-                      <a
-                        href={`/admin/form/${f.id}/summary`}
-                        className="flex-1 text-center py-1.5 rounded-md text-sm font-medium transition-colors duration-150"
-                        style={{
-                          color: 'var(--accent)',
-                        }}
-                      >
-                        {t('adminDashboard.summary')} →
-                      </a>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
-            {/* ── Footer with result count ── */}
             {search && visibleForms.length > 0 && (
               <div
-                className="px-3 sm:px-4 py-2.5 text-xs"
+                className="px-5 sm:px-6 py-3 text-xs"
                 style={{
-                  borderTop: '1px solid var(--border)',
+                  borderTop: '1px solid color-mix(in srgb, var(--border) 45%, transparent)',
                   color: 'var(--muted-foreground)',
                 }}
               >
@@ -613,7 +548,6 @@ export default function AdminDashboard() {
           </div>
         )}
       </Container>
-
     </section>
   );
 }
