@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 interface SynthesisModeSelectorProps {
   mode: 'simple' | 'committee' | 'ttd';
   onModeChange: (mode: 'simple' | 'committee' | 'ttd') => void;
+  compact?: boolean;
 }
 
 const modeIcons: Record<string, ReactNode> = {
@@ -16,7 +17,11 @@ const modeIcons: Record<string, ReactNode> = {
 
 const modeIds: ('simple' | 'committee' | 'ttd')[] = ['simple', 'committee', 'ttd'];
 
-export default function SynthesisModeSelector({ mode, onModeChange }: SynthesisModeSelectorProps) {
+export default function SynthesisModeSelector({
+  mode,
+  onModeChange,
+  compact = false,
+}: SynthesisModeSelectorProps) {
   const { t } = useTranslation();
   const [expandedTooltip, setExpandedTooltip] = useState<string | null>(null);
 
@@ -53,7 +58,11 @@ export default function SynthesisModeSelector({ mode, onModeChange }: SynthesisM
   );
 
   return (
-    <div className="synthesis-mode-selector" role="radiogroup" aria-label={t('synthesis.modes.modeLabel')}>
+    <div
+      className={`synthesis-mode-selector ${compact ? 'compact' : ''}`}
+      role="radiogroup"
+      aria-label={t('synthesis.modes.modeLabel')}
+    >
       {modes.map(m => (
         <div key={m.id} style={{ position: 'relative' }}>
           <button
@@ -68,10 +77,10 @@ export default function SynthesisModeSelector({ mode, onModeChange }: SynthesisM
             <span className="synthesis-mode-emoji">{m.icon}</span>
             <div className="synthesis-mode-text">
               <span className="synthesis-mode-name">{m.name}</span>
-              <span className="synthesis-mode-desc">{m.description}</span>
+              {!compact && <span className="synthesis-mode-desc">{m.description}</span>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-              <span className="synthesis-mode-speed">{m.speed}</span>
+              {!compact && <span className="synthesis-mode-speed">{m.speed}</span>}
               <button
                 type="button"
                 onClick={(e) => {
