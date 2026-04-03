@@ -26,9 +26,12 @@ export default function SynthesisEditorCard({
   onSave,
   onRevert,
 }: Props) {
+  const synthesisText = activeRound?.synthesis || '';
+  const hasSynthesis = synthesisText.trim().length > 0;
+
   return (
     <div
-      className="card p-4 sm:p-6 min-h-[200px] lg:min-h-[300px]"
+      className={`card p-4 sm:p-6 ${hasSynthesis || synthesisViewMode === 'edit' ? 'min-h-[200px] lg:min-h-[300px]' : 'min-h-[180px]'}`}
       style={{ borderTop: '3px solid var(--accent)' }}
     >
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
@@ -134,8 +137,8 @@ export default function SynthesisEditorCard({
         </div>
       ) : (
         <div>
-          {activeRound?.synthesis ? (
-            <MarkdownRenderer content={activeRound.synthesis} />
+          {hasSynthesis ? (
+            <MarkdownRenderer content={synthesisText} />
           ) : (
             <div
               className="rounded-lg p-6 text-center"
@@ -163,7 +166,7 @@ export default function SynthesisEditorCard({
                 No synthesis yet
               </p>
               <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                Generate one from the right-hand panel, or switch to Edit to write manually.
+                Generate one from the workflow panel, or switch to Edit to write manually.
               </p>
             </div>
           )}
