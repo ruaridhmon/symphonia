@@ -93,15 +93,13 @@ export default function SynthesisProgress({
           style={{ width: `${pct}%` }}
         />
       </div>
-      {!isComplete && (
+      {!isComplete && isTimedRun && (
         <div className="synthesis-progress-steps">
-          {isTimedRun
-            ? `Elapsed ${formatDuration(elapsedSeconds)} · ${
-              remainingSeconds && remainingSeconds > 0
-                ? `Est. remaining ${formatDuration(remainingSeconds)}`
-                : 'Finalising…'
-            }`
-            : t('synthesis.progress.stepOf', { step, total: totalSteps })}
+          {`Elapsed ${formatDuration(elapsedSeconds)} · ${
+            remainingSeconds && remainingSeconds > 0
+              ? `Est. remaining ${formatDuration(remainingSeconds)}`
+              : 'Finalising…'
+          }`}
         </div>
       )}
     </div>

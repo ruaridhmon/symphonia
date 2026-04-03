@@ -31,11 +31,11 @@ describe('SynthesisProgress', () => {
     expect(screen.getByText('0%')).toBeInTheDocument();
   });
 
-  it('displays step count when not complete', () => {
+  it('does not display step count for standard synthesis stages', () => {
     render(
       <SynthesisProgress stage="analyzing" step={2} totalSteps={6} visible={true} />,
     );
-    expect(screen.getByText('Step 2 of 6')).toBeInTheDocument();
+    expect(screen.queryByText(/Step/)).not.toBeInTheDocument();
   });
 
   it('hides step count when stage is "complete"', () => {
