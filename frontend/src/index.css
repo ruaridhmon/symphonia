@@ -3838,8 +3838,12 @@ html[data-theme="axiotic-dark"] img[alt="Symphonia"] {
 /* Summary Page — Responsive Sidebar                                  */
 /* ------------------------------------------------------------------ */
 
+.summary-main-shell {
+  transition: padding-right 0.2s ease;
+}
+
 .summary-sidebar {
-  width: 26rem;
+  width: 23rem;
 }
 
 /* Sidebar toggle button positioning */
@@ -3848,7 +3852,13 @@ html[data-theme="axiotic-dark"] img[alt="Symphonia"] {
 }
 
 .summary-sidebar-toggle[data-open="true"] {
-  right: calc(26rem + 12px);
+  right: calc(23rem + 12px);
+}
+
+@media (min-width: 1024px) {
+  .summary-main-shell[data-sidebar-open="true"] {
+    padding-right: 24rem;
+  }
 }
 
 @media (max-width: 767px) {

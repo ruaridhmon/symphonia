@@ -290,6 +290,17 @@ export default function SummaryPage() {
 	const displayRound = selectedRound || activeRound;
 	const targetRoundForGeneration = selectedRound || activeRound;
 	const structuredSynthesisData = displayRound?.synthesis_json || null;
+	const responseCountForDisplay = targetRoundForGeneration?.response_count ?? 0;
+	const recommendedNextStep = useMemo(() => {
+		if (!displayRound) return 'Select a round to review the consultation.';
+		if (responseCountForDisplay === 0) {
+			return 'Wait for expert input before generating synthesis or advancing to the next round.';
+		}
+		if (!displayRound.synthesis?.trim()) {
+			return 'Generate synthesis now so you can review this round while the expert input is still fresh.';
+		}
+		return 'Review the synthesis carefully, then refine the next-round question before advancing.';
+	}, [displayRound, responseCountForDisplay]);
 
 	const resolvedExpertLabels: Record<number, string> = useMemo(() => {
 		if (!structuredSynthesisData) return {};
@@ -740,6 +751,7 @@ export default function SummaryPage() {
 			<SummaryHeader email={email} viewers={viewers} onLogout={logout} />
 
 			<main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6" tabIndex={-1}>
+				<div className="summary-main-shell" data-sidebar-open={sidebarOpen ? 'true' : 'false'}>
 				{/* Navigation breadcrumb */}
 				<nav aria-label={t('common.breadcrumb', 'Breadcrumb')} className="mb-4 flex items-center justify-between">
 					<button
@@ -789,6 +801,26 @@ export default function SummaryPage() {
 							<p className="mt-2 text-sm sm:text-[0.95rem]" style={{ color: 'var(--muted-foreground)', lineHeight: 1.65 }}>
 								Review the current round, generate synthesis, and shape the next set of expert prompts from one place.
 							</p>
+							<div
+								className="mt-4 inline-flex max-w-2xl items-start gap-3 rounded-xl px-4 py-3"
+								style={{
+									backgroundColor: 'color-mix(in srgb, var(--card) 92%, white)',
+									border: '1px solid color-mix(in srgb, var(--accent) 10%, var(--border))',
+								}}
+							>
+								<div
+									className="mt-0.5 h-2.5 w-2.5 rounded-full flex-shrink-0"
+									style={{ backgroundColor: responseCountForDisplay > 0 ? 'var(--accent)' : 'var(--muted-foreground)' }}
+								/>
+								<div>
+									<div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+										Recommended next step
+									</div>
+									<p className="mt-1 text-sm" style={{ color: 'var(--foreground)', lineHeight: 1.55 }}>
+										{recommendedNextStep}
+									</p>
+								</div>
+							</div>
 						</div>
 
 						<div
@@ -812,7 +844,7 @@ export default function SummaryPage() {
 									Responses
 								</div>
 								<div className="mt-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-									{targetRoundForGeneration?.response_count ?? 0} expert response{(targetRoundForGeneration?.response_count ?? 0) === 1 ? '' : 's'}
+									{responseCountForDisplay} expert response{responseCountForDisplay === 1 ? '' : 's'}
 								</div>
 								<div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
 									Input volume for this synthesis pass
@@ -1159,6 +1191,7 @@ export default function SummaryPage() {
 								onToggleAiTools={toggleAiDeliberationTools}
 								onStartNextRound={startNextRound}
 								loading={loading}
+								helperText={recommendedNextStep}
 							/>
 
 						<AISynthesisPanel
@@ -1168,7 +1201,7 @@ export default function SummaryPage() {
 							onModelChange={setSelectedModel}
 							models={availableModels}
 							estimateLabel={synthesisEstimateLabel}
-							responseCount={targetRoundForGeneration?.response_count ?? 0}
+							responseCount={responseCountForDisplay}
 							isGenerating={isGenerating}
 							onGenerate={generateSummary}
 						/>
@@ -1203,6 +1236,7 @@ export default function SummaryPage() {
 							onSelectRound={handleSelectRound}
 						/>
 					</aside>
+				</div>
 			</main>
 
 			</div>

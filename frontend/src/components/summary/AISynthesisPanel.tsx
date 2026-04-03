@@ -24,12 +24,14 @@ export default function AISynthesisPanel({
   isGenerating,
   onGenerate,
 }: Props) {
+  const canGenerate = responseCount > 0;
+
   return (
     <div
       className="card p-3"
       style={{
         background:
-          'linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, var(--card)), var(--card))',
+          'linear-gradient(180deg, color-mix(in srgb, var(--accent) 3%, var(--card)), var(--card))',
         borderColor: 'color-mix(in srgb, var(--accent) 20%, var(--border))',
       }}
     >
@@ -41,16 +43,29 @@ export default function AISynthesisPanel({
         AI Synthesis
       </h3>
       <div className="space-y-2">
+        <p className="text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.55 }}>
+          Use AI only when the round has enough expert input to synthesise. Keep the model choice secondary; the mode is the main decision.
+        </p>
         <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} />
 
-        {estimateLabel && responseCount > 0 && (
+        <div
+          className="rounded-lg px-3 py-2"
+          style={{
+            backgroundColor: canGenerate
+              ? 'color-mix(in srgb, var(--accent) 7%, transparent)'
+              : 'var(--muted)',
+            border: '1px solid color-mix(in srgb, var(--accent) 12%, var(--border))',
+          }}
+        >
           <p
             className="text-[11px]"
-            style={{ color: 'var(--muted-foreground)', lineHeight: 1.45 }}
+            style={{ color: 'var(--foreground)', lineHeight: 1.45, margin: 0 }}
           >
-            Expected runtime: {estimateLabel} for {responseCount} response{responseCount === 1 ? '' : 's'}.
+            {canGenerate
+              ? `Expected runtime: ${estimateLabel} for ${responseCount} response${responseCount === 1 ? '' : 's'}.`
+              : 'Waiting for responses before synthesis can begin.'}
           </p>
-        )}
+        </div>
 
         <div>
           <label
@@ -85,8 +100,9 @@ export default function AISynthesisPanel({
           loadingText="Generating…"
           onClick={onGenerate}
           className="w-full font-semibold"
+          disabled={!canGenerate}
         >
-          Generate AI Synthesis
+          {canGenerate ? 'Generate AI Synthesis' : 'Waiting for Responses'}
         </LoadingButton>
       </div>
     </div>

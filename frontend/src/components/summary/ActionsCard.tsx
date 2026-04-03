@@ -8,6 +8,7 @@ type Props = {
   onToggleAiTools: () => void;
   onStartNextRound: () => void;
   loading: boolean;
+  helperText?: string;
 };
 
 export default function ActionsCard({
@@ -17,16 +18,22 @@ export default function ActionsCard({
   onToggleAiTools,
   onStartNextRound,
   loading,
+  helperText,
 }: Props) {
   return (
-    <div className="card p-3">
-      <div className="mb-2">
+    <div className="card p-3" style={{ backgroundColor: 'color-mix(in srgb, var(--card) 96%, white)' }}>
+      <div className="mb-3">
         <h3
           className="text-[10px] font-semibold uppercase tracking-wider"
           style={{ color: 'var(--muted-foreground)' }}
         >
-          Workflow Actions
+          Workspace
         </h3>
+        {helperText && (
+          <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.5 }}>
+            {helperText}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -58,7 +65,7 @@ export default function ActionsCard({
           onClick={onStartNextRound}
           loading={loading}
           loadingText="Starting next round…"
-          className="w-full justify-center gap-2 font-semibold"
+          className="w-full justify-center gap-2 font-semibold mt-3"
           icon={<ArrowRight size={15} aria-hidden="true" />}
         >
           Start Next Round

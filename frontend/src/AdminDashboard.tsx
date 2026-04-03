@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, Settings, Users, Ticket } from 'lucide-react';
+import { ArrowUpRight, BarChart3, Settings, Users, Ticket } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
@@ -104,6 +104,16 @@ export default function AdminDashboard() {
       (f.join_code && String(f.join_code).toLowerCase().includes(q))
     );
   });
+  const visibleForms = [...filteredForms].sort((a, b) => {
+    const participantDelta = (b.participant_count ?? 0) - (a.participant_count ?? 0);
+    if (participantDelta !== 0) return participantDelta;
+    const roundDelta = (b.current_round ?? 0) - (a.current_round ?? 0);
+    if (roundDelta !== 0) return roundDelta;
+    return String(a.title || '').localeCompare(String(b.title || ''));
+  });
+  const activeConsultations = forms.filter(f => (f.current_round ?? 0) > 1 || (f.participant_count ?? 0) > 0).length;
+  const consultationsWithExperts = forms.filter(f => (f.participant_count ?? 0) > 0).length;
+  const totalExpertsJoined = forms.reduce((sum, f) => sum + Number(f.participant_count ?? 0), 0);
 
   if (loading) {
     return (
@@ -149,6 +159,12 @@ export default function AdminDashboard() {
         {/* ── Create form CTA ── */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6">
           <div>
+            <div
+              className="text-[11px] font-semibold uppercase tracking-[0.18em] mb-1"
+              style={{ color: 'var(--accent)' }}
+            >
+              Control Centre
+            </div>
             <h1
               className="text-lg sm:text-xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
@@ -158,8 +174,11 @@ export default function AdminDashboard() {
             <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
               {t('adminDashboard.subtitle')}
             </p>
+            <p className="text-sm mt-2 max-w-2xl" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
+              Start a new consultation, reopen one already in motion, or jump directly back into the rounds that need your attention.
+            </p>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
             <LoadingButton
               variant="ghost"
               size="sm"
@@ -199,6 +218,42 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        <div className="grid gap-3 mb-4 sm:mb-5 sm:grid-cols-3">
+          {[
+            {
+              label: 'Active consultations',
+              value: activeConsultations,
+              detail: 'Consultations with live rounds or active expert participation',
+            },
+            {
+              label: 'With expert input',
+              value: consultationsWithExperts,
+              detail: 'Forms that already have at least one participating expert',
+            },
+            {
+              label: 'Experts joined',
+              value: totalExpertsJoined,
+              detail: 'Total experts currently attached across all consultations',
+            },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="card p-4"
+              style={{ backgroundColor: 'color-mix(in srgb, var(--card) 96%, white)' }}
+            >
+              <div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+                {item.label}
+              </div>
+              <div className="mt-2 text-2xl font-semibold tracking-tight" style={{ color: 'var(--foreground)' }}>
+                {item.value}
+              </div>
+              <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.55 }}>
+                {item.detail}
+              </p>
+            </div>
+          ))}
+        </div>
+
         {/* ── Join consultation banner ── */}
         <div
           className="mb-4 rounded-xl flex items-center justify-between gap-4 px-5 py-4"
@@ -206,15 +261,18 @@ export default function AdminDashboard() {
             background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), color-mix(in srgb, var(--accent) 3%, transparent))',
             border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
           }}
-        >
-          <div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-              Joining a consultation as an expert?
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-              Enter the join code you received from the facilitator
-            </p>
-          </div>
+          >
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--accent)' }}>
+                Quick entry
+              </p>
+              <p className="text-sm font-semibold mt-1" style={{ color: 'var(--foreground)' }}>
+                Joining a consultation as an expert?
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                Use a join code to move straight into the active consultation without browsing the dashboard.
+              </p>
+            </div>
           <LoadingButton
             variant="accent"
             size="sm"
@@ -291,6 +349,9 @@ export default function AdminDashboard() {
                     {forms.length}
                   </span>
                 </div>
+                <p className="hidden lg:block text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  Most engaged consultations appear first so you can pick up live work faster.
+                </p>
 
                 {/* Right: search input */}
                 <div
@@ -325,7 +386,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* ── Empty search state ── */}
-            {filteredForms.length === 0 && search && (
+            {visibleForms.length === 0 && search && (
               <div className="px-3 sm:px-4 py-10 text-center">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -360,7 +421,7 @@ export default function AdminDashboard() {
             )}
 
             {/* ── Desktop table ── */}
-            {filteredForms.length > 0 && (
+            {visibleForms.length > 0 && (
               <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm text-left" aria-label={t('adminDashboard.existingForms')} style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
                   <thead>
@@ -403,7 +464,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredForms.map((f: any, idx: number) => (
+                    {visibleForms.map((f: any, idx: number) => (
                       <tr
                         key={f.id}
                         className="transition-colors duration-150"
@@ -431,6 +492,17 @@ export default function AdminDashboard() {
                           }}
                         >
                           {f.title}
+                          {(f.participant_count ?? 0) > 0 && (
+                            <span
+                              className="ml-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold align-middle"
+                              style={{
+                                backgroundColor: 'color-mix(in srgb, var(--accent) 9%, transparent)',
+                                color: 'var(--accent)',
+                              }}
+                            >
+                              Live
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-2.5">
                           <code
@@ -506,18 +578,7 @@ export default function AdminDashboard() {
                               }}
                             >
                               {t('adminDashboard.summary')}
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 16 16"
-                                fill="currentColor"
-                                style={{ width: '0.875rem', height: '0.875rem', marginLeft: '0.25rem' }}
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
+                              <ArrowUpRight size={13} style={{ marginLeft: '0.25rem' }} />
                             </a>
                           </div>
                         </td>
@@ -529,9 +590,9 @@ export default function AdminDashboard() {
             )}
 
             {/* ── Mobile card list ── */}
-            {filteredForms.length > 0 && (
+            {visibleForms.length > 0 && (
               <div className="sm:hidden px-4 pb-4 space-y-3">
-                {filteredForms.map((f: any) => (
+                {visibleForms.map((f: any) => (
                   <div
                     key={f.id}
                     className="rounded-lg overflow-hidden transition-colors duration-150"
@@ -553,6 +614,17 @@ export default function AdminDashboard() {
                       >
                         {f.title}
                       </div>
+                      {(f.participant_count ?? 0) > 0 && (
+                        <div
+                          className="mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                          style={{
+                            backgroundColor: 'color-mix(in srgb, var(--accent) 9%, transparent)',
+                            color: 'var(--accent)',
+                          }}
+                        >
+                          Live consultation
+                        </div>
+                      )}
                     </div>
 
                     {/* Card body: metadata row */}
@@ -647,7 +719,7 @@ export default function AdminDashboard() {
             )}
 
             {/* ── Footer with result count ── */}
-            {search && filteredForms.length > 0 && (
+            {search && visibleForms.length > 0 && (
               <div
                 className="px-3 sm:px-4 py-2.5 text-xs"
                 style={{
@@ -655,7 +727,7 @@ export default function AdminDashboard() {
                   color: 'var(--muted-foreground)',
                 }}
               >
-                {t('common.showingResults', { count: filteredForms.length, total: forms.length })}
+                {t('common.showingResults', { count: visibleForms.length, total: forms.length })}
               </div>
             )}
           </div>
