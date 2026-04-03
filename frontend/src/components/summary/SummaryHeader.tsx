@@ -45,7 +45,7 @@ export default function SummaryHeader({ email, viewers, onLogout }: Props) {
           </button>
           <PresenceIndicator viewers={viewers} currentUserEmail={email} />
         </div>
-        <AccountMenu email={email} onLogout={onLogout} settingsPath="/admin/settings" />
+        <AccountMenu email={email} onLogout={onLogout} />
       </div>
     </header>
   );

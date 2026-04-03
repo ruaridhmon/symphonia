@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import { ChevronDown, LogOut, Settings } from 'lucide-react';
+import { ChevronDown, LogOut } from 'lucide-react';
 
 type Props = {
   email: string;
   onLogout: () => void;
-  settingsPath?: string | null;
 };
 
 function getInitials(email: string): string {
@@ -27,9 +25,8 @@ function getInitials(email: string): string {
   return (localPart.slice(0, 2) || '?').toUpperCase();
 }
 
-export default function AccountMenu({ email, onLogout, settingsPath = '/admin/settings' }: Props) {
+export default function AccountMenu({ email, onLogout }: Props) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -118,29 +115,6 @@ export default function AccountMenu({ email, onLogout, settingsPath = '/admin/se
           >
             {email}
           </div>
-
-          {settingsPath && (
-            <button
-              type="button"
-              role="menuitem"
-              className="flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors"
-              style={{ color: 'var(--foreground)' }}
-              onClick={() => {
-                setOpen(false);
-                navigate(settingsPath);
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--muted) 72%, transparent)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-              }}
-            >
-              <Settings size={16} aria-hidden="true" style={{ color: 'var(--muted-foreground)' }} />
-              {t('common.settings')}
-            </button>
-          )}
-
           <button
             type="button"
             role="menuitem"

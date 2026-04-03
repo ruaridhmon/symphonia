@@ -132,16 +132,58 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0">
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 flex-1">
             <h1
               className="text-3xl sm:text-[2.1rem] font-semibold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
               {t('adminDashboard.title')}
             </h1>
+            {forms.length > 0 && (
+              <div className="relative mt-4 w-full sm:max-w-sm">
+                <Search
+                  size={15}
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--muted-foreground)',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <input
+                  type="text"
+                  placeholder={t('adminDashboard.searchPlaceholder')}
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full text-sm"
+                  aria-label={t('adminDashboard.searchLabel')}
+                  style={{
+                    height: '2.75rem',
+                    borderRadius: '999px',
+                    border: '1px solid color-mix(in srgb, var(--border) 60%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--background) 70%, var(--card) 30%)',
+                    color: 'var(--foreground)',
+                    outline: 'none',
+                    paddingLeft: '2.25rem',
+                    paddingRight: '0.9rem',
+                  }}
+                  onFocus={e => {
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.12)';
+                  }}
+                  onBlur={e => {
+                    e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--border) 60%, transparent)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap lg:justify-end">
             <LoadingButton
               variant="ghost"
               size="sm"
@@ -211,62 +253,6 @@ export default function AdminDashboard() {
               boxShadow: '0 20px 48px rgba(15, 23, 42, 0.05)',
             }}
           >
-            <div className="px-5 sm:px-6 pt-5 sm:pt-6 pb-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
-                    {t('adminDashboard.existingForms')}
-                  </h2>
-                  <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                    {search
-                      ? t('common.showingResults', { count: visibleForms.length, total: forms.length })
-                      : `${forms.length} consultation${forms.length === 1 ? '' : 's'}`}
-                  </p>
-                </div>
-
-                <div className="relative w-full sm:w-80">
-                  <Search
-                    size={15}
-                    aria-hidden="true"
-                    style={{
-                      position: 'absolute',
-                      left: 12,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      color: 'var(--muted-foreground)',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder={t('adminDashboard.searchPlaceholder')}
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="w-full text-sm"
-                    aria-label={t('adminDashboard.searchLabel')}
-                    style={{
-                      height: '2.75rem',
-                      borderRadius: '999px',
-                      border: '1px solid color-mix(in srgb, var(--border) 60%, transparent)',
-                      backgroundColor: 'color-mix(in srgb, var(--background) 70%, var(--card) 30%)',
-                      color: 'var(--foreground)',
-                      outline: 'none',
-                      paddingLeft: '2.25rem',
-                      paddingRight: '0.9rem',
-                    }}
-                    onFocus={e => {
-                      e.currentTarget.style.borderColor = 'var(--accent)';
-                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.12)';
-                    }}
-                    onBlur={e => {
-                      e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--border) 60%, transparent)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* ── Empty search state ── */}
             {visibleForms.length === 0 && search && (
               <div className="px-3 sm:px-4 py-10 text-center">
@@ -303,7 +289,7 @@ export default function AdminDashboard() {
             )}
 
             {visibleForms.length > 0 && (
-              <div className="hidden sm:block overflow-x-auto px-3 sm:px-4 pb-3">
+              <div className="hidden sm:block overflow-x-auto px-3 sm:px-4 pt-3 pb-3">
                 <table
                   className="w-full text-sm text-left"
                   aria-label={t('adminDashboard.existingForms')}
@@ -456,7 +442,7 @@ export default function AdminDashboard() {
             )}
 
             {visibleForms.length > 0 && (
-              <div className="sm:hidden px-4 pb-4 space-y-3">
+              <div className="sm:hidden px-4 pt-4 pb-4 space-y-3">
                 {visibleForms.map((f: any) => {
                   const participantCount = f.participant_count ?? 0;
                   const participantLabel = `${participantCount} participant${participantCount === 1 ? '' : 's'}`;

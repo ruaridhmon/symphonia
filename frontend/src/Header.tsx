@@ -9,7 +9,7 @@ import AccountMenu from './components/AccountMenu';
 
 export default function Header() {
   const { t } = useTranslation();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -97,11 +97,7 @@ export default function Header() {
           <LanguageSwitcher />
           <ThemeToggle />
           {user && (
-            <AccountMenu
-              email={user.email}
-              onLogout={logout}
-              settingsPath={isAdmin ? '/admin/settings' : null}
-            />
+            <AccountMenu email={user.email} onLogout={logout} />
           )}
         </nav>
 
@@ -150,23 +146,6 @@ export default function Header() {
                 {user.email}
               </p>
               <div className="mt-3 flex items-center gap-2">
-                {isAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      navigate('/admin/settings');
-                    }}
-                    className="text-sm px-3 py-2 rounded-lg"
-                    style={{
-                      backgroundColor: 'transparent',
-                      color: 'var(--foreground)',
-                      border: '1px solid color-mix(in srgb, var(--border) 65%, transparent)',
-                    }}
-                  >
-                    {t('common.settings')}
-                  </button>
-                )}
                 <button
                   onClick={() => { setMenuOpen(false); logout(); }}
                   className="header-logout-btn text-sm text-left px-3 py-2 rounded-lg"
