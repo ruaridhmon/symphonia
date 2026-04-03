@@ -238,12 +238,31 @@ export default function FormEditor() {
       <BackLink to="/" label="Dashboard" className="mb-6" />
 
       <section className="card-lg p-5 sm:p-6 mb-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0 max-w-3xl">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
-              Edit Consultation
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 flex-1 max-w-4xl">
+            <div
+              className="rounded-2xl px-4 py-3 sm:px-5 sm:py-4"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
+                border: '1px solid color-mix(in srgb, var(--border) 60%, transparent)',
+              }}
+            >
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Untitled Consultation"
+                aria-label="Consultation title"
+                className="w-full bg-transparent border-none p-0"
+                style={{
+                  color: 'var(--foreground)',
+                  fontSize: 'clamp(1.75rem, 3vw, 2.35rem)',
+                  fontWeight: 650,
+                  letterSpacing: '-0.045em',
+                  lineHeight: 1.08,
+                  outline: 'none',
+                }}
+              />
             </div>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">{consultationHeading}</h1>
             <div className="mt-4 flex flex-wrap gap-2">
               <span
                 className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
@@ -274,7 +293,7 @@ export default function FormEditor() {
               className="px-4 py-2.5"
             >
               <Copy size={16} className="mr-2" />
-              Copy Join Code
+              Copy code
             </LoadingButton>
             <LoadingButton
               variant="accent"
@@ -283,209 +302,203 @@ export default function FormEditor() {
               className="px-5 py-2.5"
             >
               <Save size={16} className="mr-2" />
-              Save Edits
+              Save changes
             </LoadingButton>
           </div>
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]">
         <div className="space-y-6 min-w-0">
           <div className="card-lg p-6">
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Consultation Details</h2>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. AI in Education: Risks & Opportunities"
-              className="w-full rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
-            />
-          </div>
-
-          <div className="card-lg p-6">
-            <div className="mb-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between mb-6">
+              <h2 className="text-lg font-semibold text-foreground">Questions</h2>
               <QuestionModeToggle
                 isSurveyMode={isSurveyMode}
                 onSelectSurvey={() => setResponseStyle('information')}
                 onSelectConsensus={() => setResponseStyle('consensus')}
               />
             </div>
-
-            <div className="mb-5">
-              <h2 className="text-lg font-semibold text-foreground">Questions</h2>
-            </div>
             <div className="space-y-4">
-          {questions.map((q, i) => (
-            <div key={i} className="rounded-xl border border-border bg-card p-4">
-              <div className="flex items-start gap-3">
-                <span
-                  className="text-xs font-medium shrink-0 mt-3"
+              {questions.map((q, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl p-4 sm:p-5"
                   style={{
-                    color: 'var(--muted-foreground)',
-                    width: '1.5rem',
-                    textAlign: 'right',
+                    backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
+                    border: '1px solid color-mix(in srgb, var(--border) 62%, transparent)',
                   }}
                 >
-                  {i + 1}.
-                </span>
-                <div
-                  className="flex flex-col shrink-0"
-                  style={{ width: 18, gap: 2, marginTop: 8 }}
-                >
-                  {i > 0 ? (
-                    <button
-                      type="button"
-                      onClick={() => swapQuestions(i, i - 1)}
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="inline-flex h-8 items-center justify-center rounded-full px-2 text-xs font-semibold shrink-0"
                       style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0,
+                        minWidth: '2rem',
+                        backgroundColor: 'var(--muted)',
                         color: 'var(--muted-foreground)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        lineHeight: 1,
                       }}
-                      title="Move up"
-                      aria-label={`Move question ${i + 1} up`}
                     >
-                      <ChevronUp size={14} aria-hidden="true" />
-                    </button>
-                  ) : (
-                    <span style={{ height: 14 }} />
-                  )}
-                  {i < questions.length - 1 ? (
-                    <button
-                      type="button"
-                      onClick={() => swapQuestions(i, i + 1)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0,
-                        color: 'var(--muted-foreground)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        lineHeight: 1,
-                      }}
-                      title="Move down"
-                      aria-label={`Move question ${i + 1} down`}
-                    >
-                      <ChevronDown size={14} aria-hidden="true" />
-                    </button>
-                  ) : (
-                    <span style={{ height: 14 }} />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <input
-                    value={q.label}
-                    onChange={(e) => updateQuestion(i, e.target.value)}
-                    className="w-full min-w-0 rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
-                    placeholder={`Question ${i + 1}`}
-                  />
-                  {isSurveyMode ? (
+                      {i + 1}
+                    </span>
                     <div
-                      className="mt-3 rounded-lg px-3 py-2 text-xs"
-                      style={{
-                        backgroundColor:
-                          'color-mix(in srgb, var(--foreground) 3%, transparent)',
-                        border: '1px solid var(--border)',
-                        color: 'var(--muted-foreground)',
-                      }}
+                      className="flex flex-col shrink-0"
+                      style={{ width: 18, gap: 2, marginTop: 8 }}
                     >
-                      Single response box only.
+                      {i > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => swapQuestions(i, i - 1)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            color: 'var(--muted-foreground)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1,
+                          }}
+                          title="Move up"
+                          aria-label={`Move question ${i + 1} up`}
+                        >
+                          <ChevronUp size={14} aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <span style={{ height: 14 }} />
+                      )}
+                      {i < questions.length - 1 ? (
+                        <button
+                          type="button"
+                          onClick={() => swapQuestions(i, i + 1)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0,
+                            color: 'var(--muted-foreground)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1,
+                          }}
+                          title="Move down"
+                          aria-label={`Move question ${i + 1} down`}
+                        >
+                          <ChevronDown size={14} aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <span style={{ height: 14 }} />
+                      )}
                     </div>
-                  ) : (
-                    <div
-                      className="mt-3 grid gap-3 rounded-lg px-3 py-3 sm:grid-cols-3"
-                      style={{
-                        backgroundColor:
-                          'color-mix(in srgb, var(--foreground) 3%, transparent)',
-                        border: '1px solid var(--border)',
-                      }}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <label
-                            htmlFor={`question-${i + 1}-evidence`}
-                            className="block text-sm font-medium"
-                            style={{ color: 'var(--foreground)' }}
-                          >
-                            Evidence
-                          </label>
-                        </div>
-                        <ToggleSwitch
-                          id={`question-${i + 1}-evidence`}
-                          checked={q.requireEvidence}
-                          onChange={(checked) => {
-                            const updated = [...questions];
-                            updated[i] = { ...updated[i], requireEvidence: checked };
-                            setQuestions(updated);
+                    <div className="flex-1 min-w-0">
+                      <input
+                        value={q.label}
+                        onChange={(e) => updateQuestion(i, e.target.value)}
+                        className="w-full min-w-0 rounded-xl px-3.5 py-3 border border-border bg-card text-foreground"
+                        placeholder={`Question ${i + 1}`}
+                      />
+                      {isSurveyMode ? (
+                        <div
+                          className="mt-3 rounded-xl px-3 py-2.5 text-xs"
+                          style={{
+                            backgroundColor:
+                              'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                            border: '1px solid var(--border)',
+                            color: 'var(--muted-foreground)',
                           }}
-                        />
-                      </div>
+                        >
+                          Single response box only.
+                        </div>
+                      ) : (
+                        <div
+                          className="mt-3 grid gap-3 rounded-xl px-3 py-3 sm:grid-cols-3"
+                          style={{
+                            backgroundColor:
+                              'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                            border: '1px solid var(--border)',
+                          }}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <label
+                                htmlFor={`question-${i + 1}-evidence`}
+                                className="block text-sm font-medium"
+                                style={{ color: 'var(--foreground)' }}
+                              >
+                                Evidence
+                              </label>
+                            </div>
+                            <ToggleSwitch
+                              id={`question-${i + 1}-evidence`}
+                              checked={q.requireEvidence}
+                              onChange={(checked) => {
+                                const updated = [...questions];
+                                updated[i] = { ...updated[i], requireEvidence: checked };
+                                setQuestions(updated);
+                              }}
+                            />
+                          </div>
 
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <label
-                            htmlFor={`question-${i + 1}-counterarguments`}
-                            className="block text-sm font-medium"
-                            style={{ color: 'var(--foreground)' }}
-                          >
-                            Counterarguments
-                          </label>
-                        </div>
-                        <ToggleSwitch
-                          id={`question-${i + 1}-counterarguments`}
-                          checked={q.requireCounterarguments}
-                          onChange={(checked) => {
-                            const updated = [...questions];
-                            updated[i] = { ...updated[i], requireCounterarguments: checked };
-                            setQuestions(updated);
-                          }}
-                        />
-                      </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <label
+                                htmlFor={`question-${i + 1}-counterarguments`}
+                                className="block text-sm font-medium"
+                                style={{ color: 'var(--foreground)' }}
+                              >
+                                Counterarguments
+                              </label>
+                            </div>
+                            <ToggleSwitch
+                              id={`question-${i + 1}-counterarguments`}
+                              checked={q.requireCounterarguments}
+                              onChange={(checked) => {
+                                const updated = [...questions];
+                                updated[i] = { ...updated[i], requireCounterarguments: checked };
+                                setQuestions(updated);
+                              }}
+                            />
+                          </div>
 
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <label
-                            htmlFor={`question-${i + 1}-confidence`}
-                            className="block text-sm font-medium"
-                            style={{ color: 'var(--foreground)' }}
-                          >
-                            Confidence
-                          </label>
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <label
+                                htmlFor={`question-${i + 1}-confidence`}
+                                className="block text-sm font-medium"
+                                style={{ color: 'var(--foreground)' }}
+                              >
+                                Confidence
+                              </label>
+                            </div>
+                            <ToggleSwitch
+                              id={`question-${i + 1}-confidence`}
+                              checked={q.requireConfidence}
+                              onChange={(checked) => {
+                                const updated = [...questions];
+                                updated[i] = { ...updated[i], requireConfidence: checked };
+                                setQuestions(updated);
+                              }}
+                            />
+                          </div>
                         </div>
-                        <ToggleSwitch
-                          id={`question-${i + 1}-confidence`}
-                          checked={q.requireConfidence}
-                          onChange={(checked) => {
-                            const updated = [...questions];
-                            updated[i] = { ...updated[i], requireConfidence: checked };
-                            setQuestions(updated);
-                          }}
-                        />
-                      </div>
+                      )}
                     </div>
-                  )}
+                    {questions.length > 1 && (
+                      <button
+                        className="shrink-0 p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        style={{ color: 'var(--destructive)' }}
+                        type="button"
+                        onClick={() => removeQuestion(i)}
+                        title="Remove question"
+                        aria-label={`Remove question ${i + 1}`}
+                      >
+                        <Trash2 size={16} aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                {questions.length > 1 && (
-                  <button
-                    className="shrink-0 p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                    style={{ color: 'var(--destructive)' }}
-                    type="button"
-                    onClick={() => removeQuestion(i)}
-                    title="Remove question"
-                    aria-label={`Remove question ${i + 1}`}
-                  >
-                    <Trash2 size={16} aria-hidden="true" />
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+              ))}
             </div>
             <button
               onClick={addQuestion}
@@ -498,70 +511,43 @@ export default function FormEditor() {
             </button>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
-            <div className="card-lg p-5">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--accent)' }}>
-                Join code
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                <code
-                  className="inline-flex items-center rounded-lg px-3 py-2 text-base font-semibold"
-                  style={{
-                    backgroundColor: 'var(--muted)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--foreground)',
-                    letterSpacing: '0.04em',
-                  }}
-                >
-                  {joinCode}
-                </code>
-                <LoadingButton variant="ghost" size="sm" onClick={copyJoinCode}>
-                  <Copy size={14} className="mr-1.5" />
-                  Copy
-                </LoadingButton>
-              </div>
-            </div>
-
-            <div
-              className="card-lg p-5"
-              style={{
-                borderColor: 'color-mix(in srgb, var(--destructive) 22%, var(--border))',
-              }}
-            >
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--destructive)' }}>
-                Danger
-              </div>
-              <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                Delete this consultation permanently.
-              </p>
-              <LoadingButton
-                variant="destructive"
-                loading={deleting}
-                onClick={deleteForm}
-                className="mt-4 w-full justify-center px-5 py-2.5"
-              >
-                <Trash2 size={16} className="mr-2" />
-                Delete Consultation
-              </LoadingButton>
-            </div>
-          </div>
         </div>
 
-        <aside className="xl:sticky xl:top-24 self-start">
+        <aside className="xl:sticky xl:top-24 self-start space-y-6">
           <div className="card-lg p-5 sm:p-6">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--accent)' }}>
-              Preview
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-foreground">Preview</h2>
+              {validQuestions.length > 0 && (
+                <span
+                  className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+                  style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}
+                >
+                  Expert view
+                </span>
+              )}
             </div>
             <div
-              className="rounded-xl p-4 sm:p-5 mt-3"
+              className="rounded-2xl p-4 sm:p-5 mt-4"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
-                border: '1px solid var(--border)',
+                border: '1px solid color-mix(in srgb, var(--border) 60%, transparent)',
               }}
             >
+              <div
+                className="rounded-xl px-4 py-3 mb-4"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
+                }}
+              >
+                <div className="text-sm font-semibold text-foreground">{consultationHeading}</div>
+                <div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  {validQuestions.length} question{validQuestions.length === 1 ? '' : 's'}
+                </div>
+              </div>
               {validQuestions.length === 0 ? (
                 <div
-                  className="rounded-lg px-4 py-5 text-sm"
+                  className="rounded-xl px-4 py-5 text-sm"
                   style={{
                     backgroundColor: 'var(--background)',
                     border: '1px dashed var(--border)',
@@ -601,6 +587,27 @@ export default function FormEditor() {
                 })
               )}
             </div>
+          </div>
+
+          <div
+            className="card-lg p-5"
+            style={{
+              borderColor: 'color-mix(in srgb, var(--destructive) 22%, var(--border))',
+            }}
+          >
+            <h2 className="text-sm font-semibold text-foreground">Delete consultation</h2>
+            <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+              This permanently removes the consultation and its responses.
+            </p>
+            <LoadingButton
+              variant="destructive"
+              loading={deleting}
+              onClick={deleteForm}
+              className="mt-4 w-full justify-center px-5 py-2.5"
+            >
+              <Trash2 size={16} className="mr-2" />
+              Delete consultation
+            </LoadingButton>
           </div>
         </aside>
       </div>
