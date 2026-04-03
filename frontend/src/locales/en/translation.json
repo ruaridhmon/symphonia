@@ -23,6 +23,8 @@
   "auth": {
     "signIn": "Sign In",
     "signingIn": "Signing in…",
+    "loginTitle": "Log in to Symphonia",
+    "loginSubtitle": "Continue to your consultations",
     "createAccount": "Create Account",
     "creatingAccount": "Creating account…",
     "emailLabel": "Email address",

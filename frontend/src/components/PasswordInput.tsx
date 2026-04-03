@@ -1,7 +1,9 @@
 import { useState, forwardRef, type InputHTMLAttributes } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
-type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>;
+type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
+  wrapperClassName?: string;
+};
 
 /**
  * Password input with visibility toggle button.
@@ -10,17 +12,17 @@ type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'>;
  * between masked (password) and visible (text) modes.
  */
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  (props, ref) => {
+  ({ wrapperClassName, className, style, ...props }, ref) => {
     const [visible, setVisible] = useState(false);
 
     return (
-      <div className="relative">
+      <div className={`relative ${wrapperClassName ?? ''}`}>
         <input
           ref={ref}
           {...props}
           type={visible ? 'text' : 'password'}
-          className={`w-full px-4 py-2.5 pr-11 rounded-lg ${props.className ?? ''}`}
-          style={props.style}
+          className={`w-full px-4 py-2.5 pr-11 rounded-lg ${className ?? ''}`}
+          style={style}
         />
         <button
           type="button"
