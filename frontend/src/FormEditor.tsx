@@ -552,14 +552,8 @@ export default function FormEditor() {
             <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--accent)' }}>
               Preview
             </div>
-            <h2 className="mt-2 text-lg font-semibold text-foreground">What experts will see</h2>
-            <p className="text-sm mt-2" style={{ color: 'var(--muted-foreground)' }}>
-              {isSurveyMode
-                ? 'Each question shows one response box.'
-                : 'Structured fields appear in the same Evidence, Counterarguments, Confidence order as the live form.'}
-            </p>
             <div
-              className="rounded-xl p-4 sm:p-5 mt-4"
+              className="rounded-xl p-4 sm:p-5 mt-3"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
                 border: '1px solid var(--border)',
