@@ -121,11 +121,11 @@ class TestFactoryIntegration:
         assert isinstance(s, ConsensusLibraryAdapter)
         assert s._effective_strategy == "simple"
 
-    def test_committee_falls_back_to_ttd(self):
+    def test_committee_mode_returns_adapter(self):
         s = get_synthesiser(mode="committee")
         assert isinstance(s, ConsensusLibraryAdapter)
         assert s.strategy_name == "committee"
-        assert s._effective_strategy == "ttd"
+        assert s._effective_strategy == "committee"
 
     def test_factory_respects_synthesis_mode_env_var(self, monkeypatch):
         monkeypatch.setenv("SYNTHESIS_MODE", "mock")

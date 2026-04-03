@@ -8,7 +8,7 @@ Covers:
   - Response mapping (_build_prose_responses: various input shapes, None filtering)
   - Question text flattening (_build_question_text: label, text, plain string)
   - Result mapping (_map_to_app_format: consensus, majority, divided, dedup, narrative, claims_raw, empty)
-  - Factory function (mock / simple / ttd / committee fallback / env var / strategy alias / unknown)
+  - Factory function (mock / simple / ttd / committee / env var / strategy alias / unknown)
   - Error handling (bad strategy, empty responses, timeout, missing API key)
   - Helper (_extract_expert_ids: valid IDs, malformed IDs, empty)
   - FlowMode enum values
@@ -532,11 +532,11 @@ class TestMapToAppFormat:
         assert result.disagreements == []
 
     def test_provenance_includes_effective_strategy(self) -> None:
-        adapter = self._make_adapter("committee", "ttd")
+        adapter = self._make_adapter("committee", "committee")
         pr = _make_pipeline_result()
         result = adapter._map_to_app_format(pr, num_responses=1)
         assert result.provenance["strategy"] == "committee"
-        assert result.provenance["effective_strategy"] == "ttd"
+        assert result.provenance["effective_strategy"] == "committee"
         assert "adapter_version" in result.provenance
 
     def test_long_claim_text_truncated_in_topic(self) -> None:
@@ -579,11 +579,11 @@ class TestFactory:
         assert isinstance(s, ConsensusLibraryAdapter)
         assert s._effective_strategy == "ttd"
 
-    def test_committee_falls_back_to_ttd(self) -> None:
+    def test_committee_mode(self) -> None:
         s = get_synthesiser(mode="committee")
         assert isinstance(s, ConsensusLibraryAdapter)
         assert s.strategy_name == "committee"
-        assert s._effective_strategy == "ttd"
+        assert s._effective_strategy == "committee"
 
     def test_unknown_mode_raises(self) -> None:
         with pytest.raises(SynthesisConfigError, match="Unknown synthesis mode"):
@@ -821,6 +821,42 @@ class TestCommentsContextIntegration:
         assert isinstance(result, SynthesisResult)
         # Should NOT contain comment markers
         assert "Discussion Comments" not in captured_context["question_text"]
+
+    def test_runtime_context_uses_real_form_and_round_ids(self) -> None:
+        """Runtime context should be scoped to the actual form/round and restart cleanly."""
+        adapter = ConsensusLibraryAdapter(strategy="ttd")
+        context = adapter._build_runtime_context(
+            question_text="1. What matters most?",
+            questions=[{"label": "What matters most?"}],
+            responses=[{"answers": {"q1": "Answer A"}}],
+            form_id=42,
+            round_id=7,
+        )
+
+        assert context.study_id == "form-42"
+        assert context.round_id == "round-7"
+        assert context.question_id.startswith("ttd-")
+        assert context.force_restart is True
+
+    def test_runtime_context_fingerprint_changes_with_payload(self) -> None:
+        """Different questionnaires must not share the same checkpoint key."""
+        adapter = ConsensusLibraryAdapter(strategy="ttd")
+        first = adapter._build_runtime_context(
+            question_text="1. Climate policy question",
+            questions=[{"label": "Climate policy question"}],
+            responses=[{"answers": {"q1": "Flood barriers are overdue"}}],
+            form_id=9,
+            round_id=3,
+        )
+        second = adapter._build_runtime_context(
+            question_text="1. SEN funding question",
+            questions=[{"label": "SEN funding question"}],
+            responses=[{"answers": {"q1": "Special educational needs budgets are stretched"}}],
+            form_id=9,
+            round_id=3,
+        )
+
+        assert first.question_id != second.question_id
 
 
 class TestFormatCommentsAsContext:

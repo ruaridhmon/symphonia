@@ -1327,6 +1327,8 @@ async def synthesise_committee(
             mode=flow_mode,
             progress_callback=progress_callback,
             comments_context=comments_context,
+            form_id=form_id,
+            round_id=active_round.id,
         )
     except SynthesisConfigError as exc:
         logger.warning("Synthesis config error on form %d: %s", form_id, exc)
@@ -1515,6 +1517,8 @@ async def _synthesis_background(
                 model=resolved_model,
                 mode=flow_mode,
                 comments_context=comments_context,
+                form_id=form_id,
+                round_id=round_id,
             )
         except (SynthesisConfigError, SynthesisTimeoutError, SynthesisError) as exc:
             logger.error(

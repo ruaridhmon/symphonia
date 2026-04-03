@@ -889,13 +889,13 @@ class TestSynthesisLibraryErrors:
         assert "q3" in text
         assert "Plain string question" in text
 
-    def test_committee_strategy_falls_back_to_ttd(self):
-        """Committee strategy logs warning and uses TTD internally."""
+    def test_committee_strategy_uses_real_committee_mode(self):
+        """Committee strategy preserves the real committee adapter mode."""
         from core.synthesis import ConsensusLibraryAdapter
 
         adapter = ConsensusLibraryAdapter(strategy="committee")
         assert adapter.strategy_name == "committee"
-        assert adapter._effective_strategy == "ttd"
+        assert adapter._effective_strategy == "committee"
 
 
 # =====================================================================

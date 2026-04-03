@@ -22,6 +22,8 @@ Byzantine-integrated from two independent implementations.
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 import logging
 import os
 from dataclasses import asdict, dataclass, field
@@ -204,6 +206,8 @@ class Synthesiser(Protocol):
         mode: FlowMode = FlowMode.HUMAN_ONLY,
         progress_callback: ProgressCallback = None,
         comments_context: str = "",
+        form_id: Optional[int] = None,
+        round_id: Optional[int] = None,
     ) -> SynthesisResult: ...
 
 
@@ -268,6 +272,8 @@ class MockSynthesis:
         mode: FlowMode = FlowMode.HUMAN_ONLY,
         progress_callback: ProgressCallback = None,
         comments_context: str = "",
+        form_id: Optional[int] = None,
+        round_id: Optional[int] = None,
     ) -> SynthesisResult:
         num_responses = len(responses)
 
@@ -666,6 +672,49 @@ class ConsensusLibraryAdapter:
             parts.append(f"{i}. {text}")
         return "\n".join(parts)
 
+    def _build_runtime_context(
+        self,
+        *,
+        question_text: str,
+        questions: List[Dict[str, Any]],
+        responses: List[Dict[str, Any]],
+        form_id: Optional[int],
+        round_id: Optional[int],
+    ) -> AdapterSynthesisContext:
+        """Build a unique synthesis context to avoid cross-run checkpoint reuse."""
+        fingerprint_payload = {
+            "strategy": self._effective_strategy,
+            "model": self.model,
+            "questions": questions,
+            "responses": responses,
+        }
+        fingerprint = hashlib.sha1(
+            json.dumps(
+                fingerprint_payload,
+                sort_keys=True,
+                ensure_ascii=False,
+                default=str,
+            ).encode("utf-8")
+        ).hexdigest()[:16]
+
+        study_label = f"form-{form_id}" if form_id is not None else f"adhoc-{fingerprint[:8]}"
+        round_label = (
+            f"round-{round_id}" if round_id is not None else f"round-{fingerprint[8:12]}"
+        )
+        question_label = f"{self._effective_strategy}-{fingerprint[12:]}"
+
+        return AdapterSynthesisContext(
+            study_id=study_label,
+            round_id=round_label,
+            question_id=question_label,
+            question_text=question_text,
+            code_version="adapter-v3",
+            # Always start fresh. Reusing checkpoints across admin-triggered runs
+            # is what allows one questionnaire's intermediate artefacts to leak
+            # into another if context keys collide.
+            force_restart=True,
+        )
+
     # ----------------------------------------------------------- main entry
 
     async def run(
@@ -676,6 +725,8 @@ class ConsensusLibraryAdapter:
         mode: FlowMode = FlowMode.HUMAN_ONLY,
         progress_callback: ProgressCallback = None,
         comments_context: str = "",
+        form_id: Optional[int] = None,
+        round_id: Optional[int] = None,
     ) -> SynthesisResult:
         """
         Run synthesis using the consensus library.
@@ -717,12 +768,12 @@ class ConsensusLibraryAdapter:
                 "where relevant, noting them as points raised during expert deliberation."
             )
 
-        context = AdapterSynthesisContext(
-            study_id="runtime",
-            round_id="1",
-            question_id="q1",
+        context = self._build_runtime_context(
             question_text=question_text,
-            code_version="adapter-v2",
+            questions=questions,
+            responses=responses,
+            form_id=form_id,
+            round_id=round_id,
         )
 
         if progress_callback:
