@@ -129,6 +129,20 @@ const MODELS = [
 	'openai/gpt-4o-mini',
 ];
 const SYNTHESIS_ANALYSTS = 3;
+const SYNTHESIS_RUN_TTL_MS = 30 * 60 * 1000;
+
+interface StoredSynthesisRun {
+	formId: number;
+	roundId: number;
+	mode: 'simple' | 'committee' | 'ttd';
+	model: string;
+	stage: string;
+	step: number;
+	totalSteps: number;
+	startedAtMs: number;
+	estimateSeconds: number | null;
+	baselineVersionCount: number;
+}
 
 function isBlockedModel(model: string): boolean {
 	return model.startsWith('anthropic/');
@@ -212,6 +226,7 @@ export default function SummaryPage() {
 	const [aiToolsOpen, setAiToolsOpen] = useState(false);
 	const [selectedModel, setSelectedModel] = useState(MODELS[0]);
 	const [isGenerating, setIsGenerating] = useState(false);
+	const [generationRun, setGenerationRun] = useState<StoredSynthesisRun | null>(null);
 	const [isSavingSynthesis, setIsSavingSynthesis] = useState(false);
 	const [isSynthesisDirty, setIsSynthesisDirty] = useState(false);
 	const [lastSavedSynthesis, setLastSavedSynthesis] = useState('');
@@ -223,14 +238,24 @@ export default function SummaryPage() {
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
+	const synthesisRunStorageKey = useMemo(
+		() => `summary:synthesis-run:${formId}`,
+		[formId]
+	);
 
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
 	const clearSynthesisRunState = useCallback(() => {
 		setIsGenerating(false);
+		setGenerationRun(null);
 		setSynthesisStartedAtMs(null);
 		setSynthesisElapsedSeconds(0);
 		setSynthesisEstimateSeconds(null);
-	}, []);
+		try {
+			sessionStorage.removeItem(synthesisRunStorageKey);
+		} catch {
+			// Ignore storage failures.
+		}
+	}, [synthesisRunStorageKey]);
 
 	const markSynthesisComplete = useCallback((showToast = true) => {
 		setSynthesisStage('complete');
@@ -245,6 +270,13 @@ export default function SummaryPage() {
 
 	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
 		if (data.type === 'synthesis_progress' && data.form_id === formId) {
+			setIsGenerating(true);
+			const progressRoundId = typeof data.round_id === 'number'
+				? data.round_id
+				: targetRoundForGeneration?.id;
+			if (synthesisStartedAtMs == null) {
+				setSynthesisStartedAtMs(Date.now());
+			}
 			if (typeof data.stage === 'string') {
 				setSynthesisStage(data.stage);
 			}
@@ -254,6 +286,33 @@ export default function SummaryPage() {
 			if (typeof data.total_steps === 'number' && data.total_steps > 0) {
 				setSynthesisTotalSteps(data.total_steps);
 			}
+			setGenerationRun(prev => {
+				if (!progressRoundId) return prev;
+				if (!prev) {
+					return {
+						formId,
+						roundId: progressRoundId,
+						mode: synthesisMode,
+						model: selectedModel,
+						stage: typeof data.stage === 'string' ? data.stage : 'preparing',
+						step: typeof data.step === 'number' ? data.step : 1,
+						totalSteps: typeof data.total_steps === 'number' && data.total_steps > 0
+							? data.total_steps
+							: 4,
+						startedAtMs: synthesisStartedAtMs ?? Date.now(),
+						estimateSeconds: synthesisEstimateSeconds,
+						baselineVersionCount: synthesisVersions.length,
+					};
+				}
+				return {
+					...prev,
+					stage: typeof data.stage === 'string' ? data.stage : prev.stage,
+					step: typeof data.step === 'number' ? data.step : prev.step,
+					totalSteps: typeof data.total_steps === 'number' && data.total_steps > 0
+						? data.total_steps
+						: prev.totalSteps,
+				};
+			});
 			return;
 		}
 		if (data.type === 'synthesis_complete' && data.form_id === formId) {
@@ -276,7 +335,20 @@ export default function SummaryPage() {
 					: 'Synthesis failed in background'
 			);
 		}
-	}, [clearSynthesisRunState, formId, loadAll, loadSynthesisVersions, markSynthesisComplete, toastError]);
+	}, [
+		clearSynthesisRunState,
+		formId,
+		loadAll,
+		loadSynthesisVersions,
+		markSynthesisComplete,
+		selectedModel,
+		synthesisEstimateSeconds,
+		synthesisMode,
+		synthesisStartedAtMs,
+		synthesisVersions.length,
+		targetRoundForGeneration?.id,
+		toastError,
+	]);
 
 	// ── Presence ──
 	const { viewers } = usePresence({
@@ -411,6 +483,80 @@ export default function SummaryPage() {
 		const intervalId = window.setInterval(tick, 1000);
 		return () => window.clearInterval(intervalId);
 	}, [isGenerating, synthesisStartedAtMs]);
+
+	useEffect(() => {
+		if (!generationRun) return;
+		try {
+			sessionStorage.setItem(synthesisRunStorageKey, JSON.stringify(generationRun));
+		} catch {
+			// Ignore storage failures.
+		}
+	}, [generationRun, synthesisRunStorageKey]);
+
+	useEffect(() => {
+		if (!formId || generationRun || rounds.length === 0) return;
+		let restored: StoredSynthesisRun | null = null;
+		try {
+			const raw = sessionStorage.getItem(synthesisRunStorageKey);
+			if (!raw) return;
+			const parsed = JSON.parse(raw) as Partial<StoredSynthesisRun>;
+			if (
+				parsed.formId !== formId
+				|| typeof parsed.roundId !== 'number'
+				|| typeof parsed.startedAtMs !== 'number'
+				|| Date.now() - parsed.startedAtMs > SYNTHESIS_RUN_TTL_MS
+			) {
+				sessionStorage.removeItem(synthesisRunStorageKey);
+				return;
+			}
+			restored = {
+				formId,
+				roundId: parsed.roundId,
+				mode: (parsed.mode as StoredSynthesisRun['mode']) || 'simple',
+				model: typeof parsed.model === 'string' ? parsed.model : MODELS[0],
+				stage: typeof parsed.stage === 'string' ? parsed.stage : 'preparing',
+				step: typeof parsed.step === 'number' ? parsed.step : 1,
+				totalSteps: typeof parsed.totalSteps === 'number' ? parsed.totalSteps : 4,
+				startedAtMs: parsed.startedAtMs,
+				estimateSeconds: typeof parsed.estimateSeconds === 'number' ? parsed.estimateSeconds : null,
+				baselineVersionCount: typeof parsed.baselineVersionCount === 'number' ? parsed.baselineVersionCount : 0,
+			};
+		} catch {
+			return;
+		}
+
+		if (!restored) return;
+		const matchingRound = rounds.find(r => r.id === restored?.roundId);
+		if (!matchingRound) {
+			clearSynthesisRunState();
+			return;
+		}
+
+		setGenerationRun(restored);
+		setIsGenerating(true);
+		setSynthesisMode(restored.mode);
+		setSelectedModel(sanitizeModel(restored.model));
+		setSynthesisStage(restored.stage);
+		setSynthesisStep(restored.step);
+		setSynthesisTotalSteps(restored.totalSteps);
+		setSynthesisStartedAtMs(restored.startedAtMs);
+		setSynthesisEstimateSeconds(restored.estimateSeconds);
+		setSynthesisElapsedSeconds(Math.max(0, Math.floor((Date.now() - restored.startedAtMs) / 1000)));
+		setSelectedRound(matchingRound);
+		setSearchParams(prev => {
+			const next = new URLSearchParams(prev);
+			next.set('round', String(restored!.roundId));
+			return next;
+		}, { replace: true });
+		loadSynthesisVersions(restored.roundId).catch(() => {});
+	}, [
+		clearSynthesisRunState,
+		formId,
+		generationRun,
+		rounds,
+		setSearchParams,
+		synthesisRunStorageKey,
+	]);
 
 	// ─── Data loading ────────────────────────────────────────────────────────
 
@@ -547,6 +693,34 @@ export default function SummaryPage() {
 		}
 	}
 
+	useEffect(() => {
+		if (!formId || !generationRun || !isGenerating) return;
+		let cancelled = false;
+
+		const poll = async () => {
+			try {
+				const latest = await apiGetSynthesisVersions(formId, generationRun.roundId);
+				if (cancelled) return;
+				const baseline = generationRun.baselineVersionCount;
+				const hasNewVersion = latest.length > baseline;
+				if (hasNewVersion) {
+					await loadAll();
+					await loadSynthesisVersions(generationRun.roundId);
+					markSynthesisComplete(false);
+				}
+			} catch {
+				// Keep polling; transient failures should not stop recovery.
+			}
+		};
+
+		poll();
+		const intervalId = window.setInterval(poll, 3000);
+		return () => {
+			cancelled = true;
+			window.clearInterval(intervalId);
+		};
+	}, [formId, generationRun, isGenerating, loadAll, markSynthesisComplete]);
+
 	// ─── Actions ─────────────────────────────────────────────────────────────
 
 	function logout() {
@@ -676,39 +850,31 @@ export default function SummaryPage() {
 			// ── Async path: synthesis running in the background ──
 			if (data.status === 'started') {
 				backgroundStarted = true;
+				const estimateSeconds = data.estimate_seconds
+					?? estimateSynthesisDurationSeconds(
+						synthesisMode,
+						targetRound.response_count ?? 0,
+						SYNTHESIS_ANALYSTS,
+						modelToUse,
+					);
 				setSynthesisStage('preparing');
 				setSynthesisStep(1);
-				setSynthesisEstimateSeconds(
-					data.estimate_seconds
-						?? estimateSynthesisDurationSeconds(
-							synthesisMode,
-							targetRound.response_count ?? 0,
-							SYNTHESIS_ANALYSTS,
-							modelToUse,
-						)
-				);
+				setSynthesisEstimateSeconds(estimateSeconds);
+				setGenerationRun({
+					formId,
+					roundId: targetRound.id,
+					mode: synthesisMode,
+					model: modelToUse,
+					stage: 'preparing',
+					step: 1,
+					totalSteps: 4,
+					startedAtMs: Date.now(),
+					estimateSeconds,
+					baselineVersionCount,
+				});
 				toastSuccess(
 					data.message || 'Synthesis running in background — you’ll be notified when complete'
 				);
-				// Fallback polling in case WebSocket completion event is missed.
-				(async () => {
-					const maxAttempts = 120;
-					for (let i = 0; i < maxAttempts; i++) {
-						await new Promise(resolve => setTimeout(resolve, 3000));
-						try {
-							const latest = await apiGetSynthesisVersions(formId, targetRound.id);
-							if (latest.length > baselineVersionCount) {
-								await loadAll();
-								await loadSynthesisVersions(targetRound.id);
-								markSynthesisComplete(false);
-								return;
-							}
-						} catch {
-							// Keep polling; transient failures should not stop refresh recovery.
-						}
-					}
-					toastWarning('Synthesis is still running or took longer than expected. The timer will keep updating until it completes.');
-				})();
 				return;
 			}
 
