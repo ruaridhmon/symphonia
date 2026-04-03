@@ -17,26 +17,13 @@ export default function AuthLayout() {
       }}
     >
       <main className="w-full max-w-md">
-        <div className="auth-brand text-center mb-8">
-          <div
-            className="inline-flex items-center justify-center gap-3"
-            aria-label="Symphonia"
-          >
-            <img
-              src="/logo-mark.png"
-              alt=""
-              className="h-12 w-12 sm:h-14 sm:w-14"
-              decoding="async"
-            />
-            <div className="text-left auth-brand-copy">
-              <div
-                className="text-3xl sm:text-[2.2rem] font-semibold tracking-tight"
-                style={{ color: 'var(--foreground)' }}
-              >
-                Symphonia
-              </div>
-            </div>
-          </div>
+        <div className="auth-brand mb-6" aria-label="Symphonia">
+          <img
+            src="/logo-mark.png"
+            alt=""
+            className="auth-logo-mark"
+            decoding="async"
+          />
         </div>
         <Outlet />
       </main>

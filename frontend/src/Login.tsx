@@ -13,6 +13,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const { login, token, isLoading } = useAuth();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -47,7 +49,7 @@ export default function Login() {
       onSubmit={handleLogin}
       className="auth-panel w-full space-y-5"
     >
-      <div className="text-center">
+      <div className="auth-header">
         <h1 className="auth-title">{t('auth.loginTitle')}</h1>
       </div>
       <div aria-live="polite" aria-atomic="true" className="space-y-3">
@@ -68,7 +70,7 @@ export default function Login() {
           </div>
         )}
       </div>
-      <div className="auth-floating-field">
+      <div className={`auth-floating-field ${emailFocused || email ? 'is-active' : ''}`}>
         <input
           id="login-email"
           type="email"
@@ -77,13 +79,15 @@ export default function Login() {
           autoComplete="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          onFocus={() => setEmailFocused(true)}
+          onBlur={() => setEmailFocused(false)}
           className="w-full auth-floating-input"
         />
         <label htmlFor="login-email" className="auth-floating-label">
           {t('auth.emailLabel')}
         </label>
       </div>
-      <div className="auth-floating-field">
+      <div className={`auth-floating-field ${passwordFocused || password ? 'is-active' : ''}`}>
         <PasswordInput
           id="login-password"
           placeholder=" "
@@ -91,6 +95,8 @@ export default function Login() {
           autoComplete="current-password"
           value={password}
           onChange={e => setPassword(e.target.value)}
+          onFocus={() => setPasswordFocused(true)}
+          onBlur={() => setPasswordFocused(false)}
           className="auth-floating-input auth-floating-input-password"
           wrapperClassName="auth-floating-password"
         />
