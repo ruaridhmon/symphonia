@@ -293,11 +293,10 @@ export default function FormPage() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:py-8">
-      <div className="max-w-3xl mx-auto card-lg p-6 sm:p-8">
+      <div className="max-w-3xl mx-auto">
+        <BackLink to="/" label="Dashboard" className="mb-4" />
 
-        <div className="mb-4">
-          <BackLink to="/" label="Dashboard" />
-        </div>
+        <div className="card-lg p-6 sm:p-8">
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{form.title}</h1>
@@ -455,11 +454,11 @@ export default function FormPage() {
           </>
         )}
 
-        {/* Previous round synthesis — collapsible, secondary to questions */}
-        {previousSynthesis && (
-          <PreviousSynthesisToggle content={previousSynthesis} />
-        )}
-
+          {/* Previous round synthesis — collapsible, secondary to questions */}
+          {previousSynthesis && (
+            <PreviousSynthesisToggle content={previousSynthesis} />
+          )}
+        </div>
       </div>
     </div>
   )

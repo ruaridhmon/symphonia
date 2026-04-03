@@ -773,10 +773,10 @@ export default function SummaryPage() {
 
 			<main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6" tabIndex={-1}>
 				<div>
+				<BackLink to="/" label={t('common.backToDashboard')} className="mb-4 sm:mb-5" />
 				<section className="card mb-4 sm:mb-6 p-5 sm:p-6">
 					<div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 						<div className="min-w-0 max-w-3xl">
-							<BackLink to="/" label={t('common.backToDashboard')} className="mb-4" />
 							<div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
 								Summary
 							</div>
