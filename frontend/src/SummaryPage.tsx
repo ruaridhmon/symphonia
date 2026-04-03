@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { ChartNoAxesColumn, ChevronDown, ChevronRight, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronLeft, ChevronRight, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -344,6 +344,7 @@ export default function SummaryPage() {
 			: hasSynthesis
 				? 'Synthesis ready'
 				: 'Awaiting synthesis';
+	const backToDashboardLabel = t('common.backToDashboard').replace(/^←\s*/, '');
 	const workspaceTabs = [
 		{
 			id: 'synthesis' as const,
@@ -765,7 +766,7 @@ export default function SummaryPage() {
 	);
 	if (!form) return <SummaryLoadingSkeleton />;
 
-	return (
+		return (
 		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
 			<a href="#main-content" className="skip-to-main">
 				{t('common.skipToMainContent')}
@@ -774,40 +775,31 @@ export default function SummaryPage() {
 
 			<main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6" tabIndex={-1}>
 				<div>
-				{/* Navigation breadcrumb */}
-				<nav aria-label={t('common.breadcrumb', 'Breadcrumb')} className="mb-4 flex items-center justify-between">
-					<button
-						onClick={() => navigate('/')}
-						className="inline-flex items-center gap-2 transition-colors"
-						style={{
-							color: 'var(--muted-foreground)',
-							backgroundColor: 'var(--card)',
-							border: '1px solid var(--border)',
-							borderRadius: 10,
-							cursor: 'pointer',
-							padding: '10px 14px',
-							fontSize: '0.95rem',
-							fontWeight: 600,
-							lineHeight: 1,
-						}}
-						onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-							e.currentTarget.style.color = 'var(--foreground)';
-							e.currentTarget.style.borderColor = 'var(--accent)';
-							e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 6%, var(--card))';
-						}}
-						onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-							e.currentTarget.style.color = 'var(--muted-foreground)';
-							e.currentTarget.style.borderColor = 'var(--border)';
-							e.currentTarget.style.backgroundColor = 'var(--card)';
-						}}
-					>
-						{t('common.backToDashboard')}
-					</button>
-				</nav>
-
 				<section className="card mb-4 sm:mb-6 p-5 sm:p-6">
 					<div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 						<div className="min-w-0 max-w-3xl">
+							<button
+								type="button"
+								onClick={() => navigate('/')}
+								className="inline-flex items-center gap-1.5 mb-4 text-sm font-medium transition-colors"
+								style={{
+									background: 'none',
+									border: 'none',
+									padding: 0,
+									cursor: 'pointer',
+									color: 'var(--muted-foreground)',
+								}}
+								onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
+									e.currentTarget.style.color = 'var(--foreground)';
+								}}
+								onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
+									e.currentTarget.style.color = 'var(--muted-foreground)';
+								}}
+								aria-label={backToDashboardLabel}
+							>
+								<ChevronLeft size={16} />
+								<span>{backToDashboardLabel}</span>
+							</button>
 							<div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
 								Summary
 							</div>

@@ -7,7 +7,7 @@ import StructuredInput from './components/StructuredInput';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
-import { normalizeQuestion, type ConfigurableQuestion, type QuestionInput } from './utils/questions';
+import { isSurveyQuestion, normalizeQuestion, type ConfigurableQuestion, type QuestionInput } from './utils/questions';
 
 interface FormData {
   title: string;
@@ -19,14 +19,16 @@ function createBlankQuestion(): ConfigurableQuestion {
   return {
     label: '',
     requireEvidence: true,
+    requireCounterarguments: true,
     requireConfidence: true,
   };
 }
 
-function createBlankInformationGatheringQuestion(): ConfigurableQuestion {
+function createBlankSurveyQuestion(): ConfigurableQuestion {
   return {
     label: '',
     requireEvidence: false,
+    requireCounterarguments: false,
     requireConfidence: false,
   };
 }
@@ -85,12 +87,11 @@ export default function FormEditor() {
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const validQuestions = questions.filter((question) => question.label.trim() !== '');
-  const isInformationGatheringMode =
+  const isSurveyMode =
     questions.length > 0 &&
-    questions.every(
-      question => !question.requireEvidence && !question.requireConfidence,
-    );
-  const questionModeLabel = isInformationGatheringMode ? 'Information gathering' : 'Consensus';
+    questions.every((question) => isSurveyQuestion(question));
+  const questionModeLabel = isSurveyMode ? 'Survey' : 'Consensus';
+  const consultationHeading = title.trim() || 'Untitled Consultation';
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -132,6 +133,7 @@ export default function FormEditor() {
       prev.map((question) => ({
         ...question,
         requireEvidence: mode === 'consensus',
+        requireCounterarguments: mode === 'consensus',
         requireConfidence: mode === 'consensus',
       })),
     );
@@ -195,8 +197,8 @@ export default function FormEditor() {
   function addQuestion() {
     setQuestions((prev) => [
       ...prev,
-      isInformationGatheringMode
-        ? createBlankInformationGatheringQuestion()
+      isSurveyMode
+        ? createBlankSurveyQuestion()
         : createBlankQuestion(),
     ]);
   }
@@ -265,12 +267,9 @@ export default function FormEditor() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 max-w-3xl">
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
-              Consultation
+              Edit Consultation
             </div>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">Edit Consultation</h1>
-            <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              Update the questions, then check the live preview on the right.
-            </p>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">{consultationHeading}</h1>
             <div className="mt-4 flex flex-wrap gap-2">
               <span
                 className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
@@ -319,7 +318,7 @@ export default function FormEditor() {
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <div className="space-y-6 min-w-0">
           <div className="card-lg p-6">
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Title</h2>
+            <h2 className="text-lg font-semibold mb-4 text-foreground">Consultation Details</h2>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -332,9 +331,6 @@ export default function FormEditor() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-5">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Questions</h2>
-                <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                  Keep the wording tight and check the preview as you edit.
-                </p>
               </div>
               <div className="flex flex-wrap gap-2">
           <button
@@ -343,11 +339,11 @@ export default function FormEditor() {
             className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
             style={{
               border: '1px solid',
-              borderColor: isInformationGatheringMode ? 'var(--border)' : 'var(--accent)',
-              backgroundColor: isInformationGatheringMode
+              borderColor: isSurveyMode ? 'var(--border)' : 'var(--accent)',
+              backgroundColor: isSurveyMode
                 ? 'var(--card)'
                 : 'color-mix(in srgb, var(--accent) 10%, var(--card))',
-              color: isInformationGatheringMode ? 'var(--muted-foreground)' : 'var(--foreground)',
+              color: isSurveyMode ? 'var(--muted-foreground)' : 'var(--foreground)',
               cursor: 'pointer',
             }}
           >
@@ -359,15 +355,15 @@ export default function FormEditor() {
             className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
             style={{
               border: '1px solid',
-              borderColor: isInformationGatheringMode ? 'var(--accent)' : 'var(--border)',
-              backgroundColor: isInformationGatheringMode
+              borderColor: isSurveyMode ? 'var(--accent)' : 'var(--border)',
+              backgroundColor: isSurveyMode
                 ? 'color-mix(in srgb, var(--accent) 10%, var(--card))'
                 : 'var(--card)',
-              color: isInformationGatheringMode ? 'var(--foreground)' : 'var(--muted-foreground)',
+              color: isSurveyMode ? 'var(--foreground)' : 'var(--muted-foreground)',
               cursor: 'pointer',
             }}
           >
-            Information Gathering
+            Survey
           </button>
               </div>
             </div>
@@ -443,7 +439,7 @@ export default function FormEditor() {
                     className="w-full min-w-0 rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
                     placeholder={`Question ${i + 1}`}
                   />
-                  {isInformationGatheringMode ? (
+                  {isSurveyMode ? (
                     <div
                       className="mt-3 rounded-lg px-3 py-2 text-xs"
                       style={{
@@ -457,7 +453,7 @@ export default function FormEditor() {
                     </div>
                   ) : (
                     <div
-                      className="mt-3 grid gap-3 rounded-lg px-3 py-3 sm:grid-cols-2"
+                      className="mt-3 grid gap-3 rounded-lg px-3 py-3 sm:grid-cols-3"
                       style={{
                         backgroundColor:
                           'color-mix(in srgb, var(--foreground) 3%, transparent)',
@@ -480,6 +476,27 @@ export default function FormEditor() {
                           onChange={(checked) => {
                             const updated = [...questions];
                             updated[i] = { ...updated[i], requireEvidence: checked };
+                            setQuestions(updated);
+                          }}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <label
+                            htmlFor={`question-${i + 1}-counterarguments`}
+                            className="block text-sm font-medium"
+                            style={{ color: 'var(--foreground)' }}
+                          >
+                            Counterarguments
+                          </label>
+                        </div>
+                        <ToggleSwitch
+                          id={`question-${i + 1}-counterarguments`}
+                          checked={q.requireCounterarguments}
+                          onChange={(checked) => {
+                            const updated = [...questions];
+                            updated[i] = { ...updated[i], requireCounterarguments: checked };
                             setQuestions(updated);
                           }}
                         />
@@ -591,9 +608,9 @@ export default function FormEditor() {
             </div>
             <h2 className="mt-2 text-lg font-semibold text-foreground">What experts will see</h2>
             <p className="text-sm mt-2" style={{ color: 'var(--muted-foreground)' }}>
-              {isInformationGatheringMode
+              {isSurveyMode
                 ? 'Each question shows one response box.'
-                : 'Evidence and confidence appear when enabled.'}
+                : 'Structured fields appear in the same Evidence, Counterarguments, Confidence order as the live form.'}
             </p>
             <div
               className="rounded-xl p-4 sm:p-5 mt-4"
@@ -635,6 +652,7 @@ export default function FormEditor() {
                           setPreviewResponses((prev) => ({ ...prev, [key]: value }))
                         }
                         showEvidence={question.requireEvidence}
+                        showCounterarguments={question.requireCounterarguments}
                         showConfidence={question.requireConfidence}
                         persistDraft={false}
                       />

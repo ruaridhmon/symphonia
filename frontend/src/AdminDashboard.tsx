@@ -92,9 +92,6 @@ export default function AdminDashboard() {
     if (roundDelta !== 0) return roundDelta;
     return String(a.title || '').localeCompare(String(b.title || ''));
   });
-  const activeConsultations = forms.filter(f => (f.current_round ?? 0) > 1 || (f.participant_count ?? 0) > 0).length;
-  const consultationsWithExperts = forms.filter(f => (f.participant_count ?? 0) > 0).length;
-  const totalExpertsJoined = forms.reduce((sum, f) => sum + Number(f.participant_count ?? 0), 0);
 
   if (loading) {
     return (
@@ -172,44 +169,6 @@ export default function AdminDashboard() {
               {t('adminDashboard.newForm')}
             </LoadingButton>
           </div>
-        </div>
-
-        <div className="grid gap-2.5 mb-4 sm:mb-5 sm:grid-cols-3">
-          {[
-            {
-              label: 'Active',
-              value: activeConsultations,
-            },
-            {
-              label: 'With experts',
-              value: consultationsWithExperts,
-            },
-            {
-              label: 'Experts joined',
-              value: totalExpertsJoined,
-            },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="card px-4 py-3"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--card) 98%, white)',
-              }}
-            >
-              <div
-                className="text-[10px] font-semibold uppercase tracking-[0.16em]"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                {item.label}
-              </div>
-              <div
-                className="mt-1.5 text-xl font-semibold tracking-tight"
-                style={{ color: 'var(--foreground)' }}
-              >
-                {item.value}
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* ── Join consultation banner ── */}

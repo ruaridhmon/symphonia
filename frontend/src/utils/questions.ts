@@ -1,5 +1,6 @@
 export interface QuestionOptions {
   requireEvidence: boolean;
+  requireCounterarguments: boolean;
   requireConfidence: boolean;
 }
 
@@ -12,6 +13,7 @@ export type QuestionInput = string | Record<string, unknown>;
 
 const DEFAULT_QUESTION_OPTIONS: QuestionOptions = {
   requireEvidence: true,
+  requireCounterarguments: true,
   requireConfidence: true,
 };
 
@@ -38,16 +40,23 @@ export function extractQuestionOptions(q: unknown): QuestionOptions {
   }
 
   const obj = q as Record<string, unknown>;
+  const requireEvidence =
+    typeof obj.requireEvidence === 'boolean'
+      ? obj.requireEvidence
+      : DEFAULT_QUESTION_OPTIONS.requireEvidence;
+  const requireConfidence =
+    typeof obj.requireConfidence === 'boolean'
+      ? obj.requireConfidence
+      : DEFAULT_QUESTION_OPTIONS.requireConfidence;
+  const requireCounterarguments =
+    typeof obj.requireCounterarguments === 'boolean'
+      ? obj.requireCounterarguments
+      : !(!requireEvidence && !requireConfidence);
 
   return {
-    requireEvidence:
-      typeof obj.requireEvidence === 'boolean'
-        ? obj.requireEvidence
-        : DEFAULT_QUESTION_OPTIONS.requireEvidence,
-    requireConfidence:
-      typeof obj.requireConfidence === 'boolean'
-        ? obj.requireConfidence
-        : DEFAULT_QUESTION_OPTIONS.requireConfidence,
+    requireEvidence,
+    requireCounterarguments,
+    requireConfidence,
   };
 }
 
@@ -56,4 +65,12 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
     label: extractQuestionText(q),
     ...extractQuestionOptions(q),
   };
+}
+
+export function isSurveyQuestion(question: QuestionOptions): boolean {
+  return (
+    !question.requireEvidence &&
+    !question.requireCounterarguments &&
+    !question.requireConfidence
+  );
 }

@@ -10,7 +10,7 @@ import StructuredInput from './components/StructuredInput';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import TemplatePicker, { type FormTemplate } from './TemplatePicker';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
-import { normalizeQuestion, type ConfigurableQuestion } from './utils/questions';
+import { isSurveyQuestion, normalizeQuestion, type ConfigurableQuestion } from './utils/questions';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
@@ -22,14 +22,16 @@ function createBlankQuestion(): ConfigurableQuestion {
   return {
     label: '',
     requireEvidence: true,
+    requireCounterarguments: true,
     requireConfidence: true,
   };
 }
 
-function createBlankInformationGatheringQuestion(): ConfigurableQuestion {
+function createBlankSurveyQuestion(): ConfigurableQuestion {
   return {
     label: '',
     requireEvidence: false,
+    requireCounterarguments: false,
     requireConfidence: false,
   };
 }
@@ -378,11 +380,9 @@ export default function AdminFormNew() {
   const [allowJoin, setAllowJoin] = useState(true);
   const [anonymous, setAnonymous] = useState(false);
   const [deadline, setDeadline] = useState('');
-  const isInformationGatheringMode =
+  const isSurveyMode =
     questions.length > 0 &&
-    questions.every(
-      question => !question.requireEvidence && !question.requireConfidence,
-    );
+    questions.every((question) => isSurveyQuestion(question));
 
   // Load synthesis model from settings
   useEffect(() => {
@@ -412,7 +412,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
     setTitle('');
     setDescription('');
-    setQuestions([createBlankInformationGatheringQuestion()]);
+    setQuestions([createBlankSurveyQuestion()]);
     setSearchParams({ step: 'editor' });
   };
 
@@ -434,6 +434,7 @@ export default function AdminFormNew() {
       prev.map(question => ({
         ...question,
         requireEvidence: mode === 'consensus',
+        requireCounterarguments: mode === 'consensus',
         requireConfidence: mode === 'consensus',
       })),
     );
@@ -527,11 +528,8 @@ export default function AdminFormNew() {
                 className="text-2xl font-bold tracking-tight"
                 style={{ color: 'var(--foreground)' }}
               >
-                Create a New Form
+                New Consultation
               </h1>
-              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                Pick a pre-made form template to get started quickly, or create a blank form from scratch.
-              </p>
             </div>
             <TemplatePicker
               onSelectTemplate={handleSelectTemplate}
@@ -545,17 +543,15 @@ export default function AdminFormNew() {
         {/* ── Form Editor View ────────────────────────────────── */}
         <div className="mb-6" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
           <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
+              New Consultation
+            </div>
             <h1
-              className="text-2xl font-bold tracking-tight"
+              className="mt-2 text-2xl font-bold tracking-tight"
               style={{ color: 'var(--foreground)' }}
             >
-              {selectedTemplate ? `New Form — ${selectedTemplate.icon} ${selectedTemplate.name}` : 'Create a New Form'}
+              {title.trim() || (selectedTemplate ? `${selectedTemplate.icon} ${selectedTemplate.name}` : 'Untitled Consultation')}
             </h1>
-              <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                {selectedTemplate
-                  ? 'Customise the template below, then create your consultation.'
-                  : 'Set up a new Delphi consultation with title and questions.'}
-              </p>
           </div>
 
           {/* Guide button — Worker D */}
@@ -621,7 +617,7 @@ export default function AdminFormNew() {
               className="block text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
-              Form title
+              Title
             </label>
             <input
               id="form-title"
@@ -690,10 +686,10 @@ export default function AdminFormNew() {
                 className="block text-sm font-medium"
                 style={{ color: 'var(--foreground)' }}
               >
-                Response Style
+                Question Type
               </label>
               <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                Choose whether participants give structured Delphi responses or a single plain text response.
+                Choose whether experts complete a survey or a structured consensus response.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -703,11 +699,11 @@ export default function AdminFormNew() {
                 className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
                 style={{
                   border: '1px solid',
-                  borderColor: isInformationGatheringMode ? 'var(--border)' : 'var(--accent)',
-                  backgroundColor: isInformationGatheringMode
+                  borderColor: isSurveyMode ? 'var(--border)' : 'var(--accent)',
+                  backgroundColor: isSurveyMode
                     ? 'var(--card)'
                     : 'color-mix(in srgb, var(--accent) 10%, var(--card))',
-                  color: isInformationGatheringMode ? 'var(--muted-foreground)' : 'var(--foreground)',
+                  color: isSurveyMode ? 'var(--muted-foreground)' : 'var(--foreground)',
                   cursor: 'pointer',
                 }}
               >
@@ -719,15 +715,15 @@ export default function AdminFormNew() {
                 className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
                 style={{
                   border: '1px solid',
-                  borderColor: isInformationGatheringMode ? 'var(--accent)' : 'var(--border)',
-                  backgroundColor: isInformationGatheringMode
+                  borderColor: isSurveyMode ? 'var(--accent)' : 'var(--border)',
+                  backgroundColor: isSurveyMode
                     ? 'color-mix(in srgb, var(--accent) 10%, var(--card))'
                     : 'var(--card)',
-                  color: isInformationGatheringMode ? 'var(--foreground)' : 'var(--muted-foreground)',
+                  color: isSurveyMode ? 'var(--foreground)' : 'var(--muted-foreground)',
                   cursor: 'pointer',
                 }}
               >
-                Information Gathering
+                Survey
               </button>
             </div>
           </div>
@@ -740,10 +736,6 @@ export default function AdminFormNew() {
             >
               Questions
             </legend>
-            <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-              Good questions are open-ended, neutral, and invite diverse
-              perspectives.
-            </p>
 
             {questions.map((q, i) => {
               const isOnly = questions.length === 1;
@@ -885,7 +877,7 @@ export default function AdminFormNew() {
                         )}
                       </div>
 
-                      {isInformationGatheringMode ? (
+                      {isSurveyMode ? (
                         <div
                           className="mt-3 rounded-lg px-3 py-2 text-xs"
                           style={{
@@ -898,7 +890,7 @@ export default function AdminFormNew() {
                         </div>
                       ) : (
                         <div
-                          className="mt-3 flex flex-wrap gap-4 rounded-lg px-3 py-2"
+                          className="mt-3 grid gap-4 rounded-lg px-3 py-3 sm:grid-cols-3"
                           style={{
                             backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
                             border: '1px solid var(--border)',
@@ -923,6 +915,30 @@ export default function AdminFormNew() {
                               onChange={(checked) => {
                                 const updated = [...questions];
                                 updated[i] = { ...updated[i], requireEvidence: checked };
+                                setQuestions(updated);
+                              }}
+                            />
+                          </div>
+
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <label
+                                htmlFor={`question-${i + 1}-counterarguments`}
+                                className="block text-sm font-medium"
+                                style={{ color: 'var(--foreground)' }}
+                              >
+                                Ask for counterarguments
+                              </label>
+                              <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                                Show a field for the strongest objections or alternative views.
+                              </p>
+                            </div>
+                            <ToggleSwitch
+                              id={`question-${i + 1}-counterarguments`}
+                              checked={q.requireCounterarguments}
+                              onChange={(checked) => {
+                                const updated = [...questions];
+                                updated[i] = { ...updated[i], requireCounterarguments: checked };
                                 setQuestions(updated);
                               }}
                             />
@@ -994,8 +1010,8 @@ export default function AdminFormNew() {
               onClick={() =>
                 setQuestions([
                   ...questions,
-                  isInformationGatheringMode
-                    ? createBlankInformationGatheringQuestion()
+                  isSurveyMode
+                    ? createBlankSurveyQuestion()
                     : createBlankQuestion(),
                 ])
               }
@@ -1025,9 +1041,9 @@ export default function AdminFormNew() {
                   Expert Form Preview
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                  {isInformationGatheringMode
+                  {isSurveyMode
                     ? 'This is what participants will see. Each question shows only the question and one response textbox.'
-                    : 'This is what participants will see. Your question toggles apply immediately here.'}
+                    : 'This is what participants will see. Structured fields appear in the same order as the live form.'}
                 </p>
               </div>
             </div>
@@ -1078,6 +1094,7 @@ export default function AdminFormNew() {
                             setPreviewResponses(prev => ({ ...prev, [key]: value }))
                           }
                           showEvidence={question.requireEvidence}
+                          showCounterarguments={question.requireCounterarguments}
                           showConfidence={question.requireConfidence}
                           persistDraft={false}
                         />

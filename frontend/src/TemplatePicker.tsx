@@ -256,7 +256,7 @@ export default function TemplatePicker({
               cursor: 'pointer',
             }}
           >
-            Start information gathering form from scratch →
+            Start survey form from scratch →
           </button>
         </div>
       </div>
@@ -307,7 +307,7 @@ export default function TemplatePicker({
             }}
           >
             <FeaturePill icon={<LayoutTemplate size={18} />} label="Templates" value={`${templateCount} ready to adapt`} />
-            <FeaturePill icon={<MessagesSquare size={18} />} label="Question style" value="Consensus or open-text" />
+            <FeaturePill icon={<MessagesSquare size={18} />} label="Question style" value="Consensus or survey" />
             <FeaturePill icon={<Clock3 size={18} />} label="Admin effort" value="Minutes, not hours" />
             <FeaturePill icon={<Sparkles size={18} />} label="Best for" value="Clear, structured starts" />
           </div>
@@ -333,8 +333,8 @@ export default function TemplatePicker({
         />
 
         <StarterOptionCard
-          title="Start information gathering form from scratch"
-          description="Best when you want fast qualitative inputs first and do not need structured evidence or confidence scoring."
+          title="Start survey form from scratch"
+          description="Best when you want fast qualitative inputs first and do not need structured evidence, counterarguments, or confidence scoring."
           eyebrow="Open response"
           icon={<MessagesSquare size={22} />}
           active={hoveredInfoBlank}

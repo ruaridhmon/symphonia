@@ -45,8 +45,8 @@ def _register(t: FormTemplate) -> FormTemplate:
 _register(
     FormTemplate(
         id="information_gathering",
-        name="Information Gathering",
-        description="Collect open-ended participant input without structured evidence, confidence, or counterargument fields.",
+        name="Survey",
+        description="Collect open-ended participant input without structured evidence, counterarguments, or confidence fields.",
         icon="📝",
         category="Research",
         suggested_panel_size=8,
@@ -54,21 +54,25 @@ _register(
             {
                 "label": "What are the main issues, needs, or concerns you think we should understand first?",
                 "requireEvidence": False,
+                "requireCounterarguments": False,
                 "requireConfidence": False,
             },
             {
                 "label": "What experiences or observations have shaped your view of this topic?",
                 "requireEvidence": False,
+                "requireCounterarguments": False,
                 "requireConfidence": False,
             },
             {
                 "label": "What information do you think is missing from the current discussion?",
                 "requireEvidence": False,
+                "requireCounterarguments": False,
                 "requireConfidence": False,
             },
             {
                 "label": "What practical suggestions or ideas would you like to contribute at this stage?",
                 "requireEvidence": False,
+                "requireCounterarguments": False,
                 "requireConfidence": False,
             },
         ],

@@ -384,6 +384,7 @@ export default function FormPage() {
                     onChange={() => {}}
                     readOnly
                     showEvidence={options.requireEvidence}
+                    showCounterarguments={options.requireCounterarguments}
                     showConfidence={options.requireConfidence}
                   />
                 </div>
@@ -418,6 +419,7 @@ export default function FormPage() {
                       })
                     }}
                     showEvidence={options.requireEvidence}
+                    showCounterarguments={options.requireCounterarguments}
                     showConfidence={options.requireConfidence}
                   />
                 </div>

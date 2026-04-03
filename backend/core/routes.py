@@ -2409,6 +2409,7 @@ def respond_to_follow_up(
 class QuestionConfig(BaseModel):
     label: str
     requireEvidence: bool = True
+    requireCounterarguments: bool = True
     requireConfidence: bool = True
 
 

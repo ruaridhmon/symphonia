@@ -18,6 +18,8 @@ interface StructuredInputProps {
   showEvidence?: boolean;
   /** Whether to show the confidence controls for this question */
   showConfidence?: boolean;
+  /** Whether to show the counterarguments field for this question */
+  showCounterarguments?: boolean;
   /** Whether to use localStorage autosave/restore */
   persistDraft?: boolean;
 }
@@ -65,6 +67,7 @@ export default function StructuredInput({
   readOnly = false,
   showEvidence = true,
   showConfidence = true,
+  showCounterarguments = true,
   persistDraft = true,
 }: StructuredInputProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
@@ -149,7 +152,7 @@ export default function StructuredInput({
   }
 
   const conf = getConfidenceInfo(value.confidence);
-  const isSimpleResponseMode = !showEvidence && !showConfidence;
+  const isSimpleResponseMode = !showEvidence && !showCounterarguments && !showConfidence;
   const primaryLabel = isSimpleResponseMode ? 'Your Response' : 'Your Position';
   const primaryPlaceholder = isSimpleResponseMode
     ? 'Write your response here…'
@@ -179,6 +182,17 @@ export default function StructuredInput({
           </Section>
         )}
 
+        {/* Counterarguments */}
+        {showCounterarguments && (
+          <Section icon={<Shield size={14} />} label="Counterarguments">
+            <div style={styles.readOnlyBlock}>
+              {value.counterarguments || (
+                <span style={{ color: 'var(--muted-foreground)' }}>No counterarguments provided</span>
+              )}
+            </div>
+          </Section>
+        )}
+
         {/* Confidence */}
         {showConfidence && (
           <Section icon={<Scale size={14} />} label={`Confidence: ${value.confidence}/10`}>
@@ -194,18 +208,15 @@ export default function StructuredInput({
               </div>
               <span style={{ ...styles.confidenceLabel, color: conf.color }}>{conf.label}</span>
             </div>
-            {value.confidenceJustification && (
+            {value.confidenceJustification ? (
               <div style={{ ...styles.readOnlyBlock, marginTop: '0.5rem' }}>
                 {value.confidenceJustification}
               </div>
+            ) : (
+              <div style={{ ...styles.readOnlyBlock, marginTop: '0.5rem' }}>
+                <span style={{ color: 'var(--muted-foreground)' }}>No confidence explanation provided</span>
+              </div>
             )}
-          </Section>
-        )}
-
-        {/* Counterarguments */}
-        {value.counterarguments && (
-          <Section icon={<Shield size={14} />} label="Counterarguments">
-            <div style={styles.readOnlyBlock}>{value.counterarguments}</div>
           </Section>
         )}
 
@@ -265,63 +276,65 @@ export default function StructuredInput({
         </Section>
       )}
 
-      {/* ── Confidence slider ── */}
-      {showConfidence && (
-        <Section icon={<Scale size={14} />} label="Confidence Level">
-          <div style={styles.confidenceRow}>
-            <div style={styles.sliderContainer}>
-              <input
-                type="range"
-                min={1}
-                max={10}
-                step={1}
-                value={value.confidence}
-                onChange={e => update({ confidence: Number(e.target.value) })}
-                style={styles.slider}
-                aria-label={`Confidence level: ${value.confidence} out of 10`}
-              />
-              <div style={styles.sliderLabels}>
-                <span style={styles.sliderLabelStart}>1</span>
-                <span style={styles.sliderLabelCenter}>5</span>
-                <span style={styles.sliderLabelEnd}>10</span>
-              </div>
-            </div>
-            <div style={styles.confidenceMeta}>
-              <div style={styles.confidenceBadge}>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: conf.color, fontVariantNumeric: 'tabular-nums' }}>
-                  {value.confidence}
-                </span>
-              </div>
-              <span style={{ ...styles.confidenceBadgeLabel, color: conf.color }}>{conf.label}</span>
-            </div>
-          </div>
-          <textarea
-            ref={autoResize}
-            rows={1}
-            placeholder="Why this confidence level? What would change your mind?"
-            className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
-            style={{ marginTop: '0.5rem' }}
-            value={value.confidenceJustification}
-            onChange={e => update({ confidenceJustification: e.target.value })}
-            onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-          />
-        </Section>
-      )}
-
       {!isSimpleResponseMode && (
         <>
           {/* ── Counterarguments ── */}
-          <Section icon={<Shield size={14} />} label="Counterarguments">
-            <textarea
-              ref={autoResize}
-              rows={2}
-              placeholder="What are the strongest arguments against your position?"
-              className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
-              value={value.counterarguments}
-              onChange={e => update({ counterarguments: e.target.value })}
-              onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-            />
-          </Section>
+          {showCounterarguments && (
+            <Section icon={<Shield size={14} />} label="Counterarguments">
+              <textarea
+                ref={autoResize}
+                rows={2}
+                placeholder="What are the strongest arguments against your position?"
+                className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+                value={value.counterarguments}
+                onChange={e => update({ counterarguments: e.target.value })}
+                onInput={e => autoResize(e.target as HTMLTextAreaElement)}
+              />
+            </Section>
+          )}
+
+          {/* ── Confidence slider ── */}
+          {showConfidence && (
+            <Section icon={<Scale size={14} />} label="Confidence Level">
+              <div style={styles.confidenceRow}>
+                <div style={styles.sliderContainer}>
+                  <input
+                    type="range"
+                    min={1}
+                    max={10}
+                    step={1}
+                    value={value.confidence}
+                    onChange={e => update({ confidence: Number(e.target.value) })}
+                    style={styles.slider}
+                    aria-label={`Confidence level: ${value.confidence} out of 10`}
+                  />
+                  <div style={styles.sliderLabels}>
+                    <span style={styles.sliderLabelStart}>1</span>
+                    <span style={styles.sliderLabelCenter}>5</span>
+                    <span style={styles.sliderLabelEnd}>10</span>
+                  </div>
+                </div>
+                <div style={styles.confidenceMeta}>
+                  <div style={styles.confidenceBadge}>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 700, color: conf.color, fontVariantNumeric: 'tabular-nums' }}>
+                      {value.confidence}
+                    </span>
+                  </div>
+                  <span style={{ ...styles.confidenceBadgeLabel, color: conf.color }}>{conf.label}</span>
+                </div>
+              </div>
+              <textarea
+                ref={autoResize}
+                rows={1}
+                placeholder="Why this confidence level? What would change your mind?"
+                className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+                style={{ marginTop: '0.5rem' }}
+                value={value.confidenceJustification}
+                onChange={e => update({ confidenceJustification: e.target.value })}
+                onInput={e => autoResize(e.target as HTMLTextAreaElement)}
+              />
+            </Section>
+          )}
 
           {/* ── Advanced (collapsible) ── */}
           <button
