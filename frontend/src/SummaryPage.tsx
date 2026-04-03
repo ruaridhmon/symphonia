@@ -757,9 +757,7 @@ export default function SummaryPage() {
 					<LoadingButton variant="accent" size="md" onClick={() => { loadAll(); loadResponses(); }}>
 						{t('common.retry')}
 					</LoadingButton>
-					<LoadingButton variant="secondary" size="md" onClick={() => navigate('/')}>
-						{t('common.backToDashboard')}
-					</LoadingButton>
+					<BackLink to="/" label={t('common.backToDashboard')} />
 				</div>
 			</div>
 		</div>

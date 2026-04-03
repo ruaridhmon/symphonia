@@ -153,13 +153,7 @@ export default function JoinPage() {
           {error && (
             <>
               <p className="text-sm font-medium mb-3" style={{ color: 'var(--destructive)' }}>{error}</p>
-              <button
-                onClick={() => navigate('/')}
-                className="text-sm px-4 py-2 rounded-lg"
-                style={{ backgroundColor: 'var(--accent)', color: 'white' }}
-              >
-                Go to Dashboard
-              </button>
+              <BackLink to="/" label="Dashboard" />
             </>
           )}
         </div>
