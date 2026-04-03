@@ -44,7 +44,7 @@ export default function AISynthesisPanel({
       </h3>
       <div className="space-y-2">
         <p className="text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.55 }}>
-          Use AI only when the round has enough expert input to synthesise. Keep the model choice secondary; the mode is the main decision.
+          Choose the synthesis mode, then generate when the round is ready.
         </p>
         <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} />
 
@@ -62,7 +62,7 @@ export default function AISynthesisPanel({
             style={{ color: 'var(--foreground)', lineHeight: 1.45, margin: 0 }}
           >
             {canGenerate
-              ? `Expected runtime: ${estimateLabel} for ${responseCount} response${responseCount === 1 ? '' : 's'}.`
+              ? `${estimateLabel} for ${responseCount} response${responseCount === 1 ? '' : 's'}.`
               : 'Waiting for responses before synthesis can begin.'}
           </p>
         </div>

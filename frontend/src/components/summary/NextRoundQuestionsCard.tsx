@@ -20,7 +20,7 @@ export default function NextRoundQuestionsCard({
         <CircleHelp size={18} style={{ color: 'var(--accent)' }} /> Next Round Questions
       </h2>
       <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-        Refine the follow-up prompts while the current round is still fresh. Clear, specific questions make the next synthesis faster and stronger.
+        Draft the questions for the next round.
       </p>
       <div className="space-y-2 mt-3">
         {questions.map((q, index) => (

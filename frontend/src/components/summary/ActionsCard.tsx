@@ -8,7 +8,6 @@ type Props = {
   onToggleAiTools: () => void;
   onStartNextRound: () => void;
   loading: boolean;
-  helperText?: string;
 };
 
 export default function ActionsCard({
@@ -18,7 +17,6 @@ export default function ActionsCard({
   onToggleAiTools,
   onStartNextRound,
   loading,
-  helperText,
 }: Props) {
   return (
     <div className="card p-3" style={{ backgroundColor: 'color-mix(in srgb, var(--card) 96%, white)' }}>
@@ -27,13 +25,8 @@ export default function ActionsCard({
           className="text-[10px] font-semibold uppercase tracking-wider"
           style={{ color: 'var(--muted-foreground)' }}
         >
-          Workspace
+          Actions
         </h3>
-        {helperText && (
-          <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.5 }}>
-            {helperText}
-          </p>
-        )}
       </div>
 
       <div className="space-y-2">
@@ -45,7 +38,7 @@ export default function ActionsCard({
           icon={responsesOpen ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
           aria-pressed={responsesOpen}
         >
-          {responsesOpen ? 'Hide Responses Panel' : 'View Responses Panel'}
+          {responsesOpen ? 'Hide responses' : 'Show responses'}
         </LoadingButton>
 
         <LoadingButton
@@ -56,7 +49,7 @@ export default function ActionsCard({
           icon={aiToolsOpen ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
           aria-pressed={aiToolsOpen}
         >
-          {aiToolsOpen ? 'Hide AI Deliberation Tools' : 'View AI Deliberation Tools'}
+          {aiToolsOpen ? 'Hide AI tools' : 'Show AI tools'}
         </LoadingButton>
 
         <LoadingButton

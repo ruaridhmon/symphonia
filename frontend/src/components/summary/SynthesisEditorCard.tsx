@@ -163,7 +163,7 @@ export default function SynthesisEditorCard({
                 No synthesis yet
               </p>
               <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                Generate one using the AI panel on the right, or switch to Edit mode to write manually.
+                Generate one from the right-hand panel, or switch to Edit to write manually.
               </p>
             </div>
           )}
