@@ -6,6 +6,7 @@ import { api } from './api/client';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { LoadingButton } from './components';
+import QuestionModeToggle from './components/QuestionModeToggle';
 import StructuredInput from './components/StructuredInput';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import TemplatePicker, { type FormTemplate } from './TemplatePicker';
@@ -680,52 +681,12 @@ export default function AdminFormNew() {
             />
           </div>
 
-          <div className="space-y-2 mb-6">
-            <div>
-              <label
-                className="block text-sm font-medium"
-                style={{ color: 'var(--foreground)' }}
-              >
-                Question Type
-              </label>
-              <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                Choose whether experts complete a survey or a structured consensus response.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setResponseStyle('consensus')}
-                className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
-                style={{
-                  border: '1px solid',
-                  borderColor: isSurveyMode ? 'var(--border)' : 'var(--accent)',
-                  backgroundColor: isSurveyMode
-                    ? 'var(--card)'
-                    : 'color-mix(in srgb, var(--accent) 10%, var(--card))',
-                  color: isSurveyMode ? 'var(--muted-foreground)' : 'var(--foreground)',
-                  cursor: 'pointer',
-                }}
-              >
-                Consensus
-              </button>
-              <button
-                type="button"
-                onClick={() => setResponseStyle('information')}
-                className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
-                style={{
-                  border: '1px solid',
-                  borderColor: isSurveyMode ? 'var(--accent)' : 'var(--border)',
-                  backgroundColor: isSurveyMode
-                    ? 'color-mix(in srgb, var(--accent) 10%, var(--card))'
-                    : 'var(--card)',
-                  color: isSurveyMode ? 'var(--foreground)' : 'var(--muted-foreground)',
-                  cursor: 'pointer',
-                }}
-              >
-                Survey
-              </button>
-            </div>
+          <div className="mb-6">
+            <QuestionModeToggle
+              isSurveyMode={isSurveyMode}
+              onSelectSurvey={() => setResponseStyle('information')}
+              onSelectConsensus={() => setResponseStyle('consensus')}
+            />
           </div>
 
           {/* ── Questions (Workers A + B) ─────────────────────────── */}

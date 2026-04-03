@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Trash2, Plus, Save, ArrowLeft, ChevronUp, ChevronDown, Copy, Ticket } from 'lucide-react';
 import { api, getApiErrorDetail } from './api/client';
 import LoadingButton from './components/LoadingButton';
+import QuestionModeToggle from './components/QuestionModeToggle';
 import StructuredInput from './components/StructuredInput';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
@@ -328,44 +329,16 @@ export default function FormEditor() {
           </div>
 
           <div className="card-lg p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-5">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Questions</h2>
-              </div>
-              <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setResponseStyle('consensus')}
-            className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
-            style={{
-              border: '1px solid',
-              borderColor: isSurveyMode ? 'var(--border)' : 'var(--accent)',
-              backgroundColor: isSurveyMode
-                ? 'var(--card)'
-                : 'color-mix(in srgb, var(--accent) 10%, var(--card))',
-              color: isSurveyMode ? 'var(--muted-foreground)' : 'var(--foreground)',
-              cursor: 'pointer',
-            }}
-          >
-            Consensus
-          </button>
-          <button
-            type="button"
-            onClick={() => setResponseStyle('information')}
-            className="text-sm px-3 py-2 rounded-lg font-medium transition-colors"
-            style={{
-              border: '1px solid',
-              borderColor: isSurveyMode ? 'var(--accent)' : 'var(--border)',
-              backgroundColor: isSurveyMode
-                ? 'color-mix(in srgb, var(--accent) 10%, var(--card))'
-                : 'var(--card)',
-              color: isSurveyMode ? 'var(--foreground)' : 'var(--muted-foreground)',
-              cursor: 'pointer',
-            }}
-          >
-            Survey
-          </button>
-              </div>
+            <div className="mb-6">
+              <QuestionModeToggle
+                isSurveyMode={isSurveyMode}
+                onSelectSurvey={() => setResponseStyle('information')}
+                onSelectConsensus={() => setResponseStyle('consensus')}
+              />
+            </div>
+
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold text-foreground">Questions</h2>
             </div>
             <div className="space-y-4">
           {questions.map((q, i) => (
