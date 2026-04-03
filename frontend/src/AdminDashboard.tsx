@@ -218,38 +218,40 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid gap-3 mb-4 sm:mb-5 sm:grid-cols-3">
+        <div className="grid gap-2.5 mb-4 sm:mb-5 sm:grid-cols-3">
           {[
             {
-              label: 'Active consultations',
+              label: 'Active',
               value: activeConsultations,
-              detail: 'Consultations with live rounds or active expert participation',
             },
             {
-              label: 'With expert input',
+              label: 'With experts',
               value: consultationsWithExperts,
-              detail: 'Forms that already have at least one participating expert',
             },
             {
               label: 'Experts joined',
               value: totalExpertsJoined,
-              detail: 'Total experts currently attached across all consultations',
             },
           ].map((item) => (
             <div
               key={item.label}
-              className="card p-4"
-              style={{ backgroundColor: 'color-mix(in srgb, var(--card) 96%, white)' }}
+              className="card px-4 py-3"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--card) 98%, white)',
+              }}
             >
-              <div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+              <div
+                className="text-[10px] font-semibold uppercase tracking-[0.16em]"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
                 {item.label}
               </div>
-              <div className="mt-2 text-2xl font-semibold tracking-tight" style={{ color: 'var(--foreground)' }}>
+              <div
+                className="mt-1.5 text-xl font-semibold tracking-tight"
+                style={{ color: 'var(--foreground)' }}
+              >
                 {item.value}
               </div>
-              <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.55 }}>
-                {item.detail}
-              </p>
             </div>
           ))}
         </div>
