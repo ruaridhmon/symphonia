@@ -1,16 +1,12 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, BarChart3, Settings, Users, Ticket } from 'lucide-react';
+import { ArrowUpRight, Settings, Users, Ticket } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
-
-const AdminAnalytics = lazy(() => import('./components/AdminAnalytics'));
-
-const ANALYTICS_STORAGE_KEY = 'symphonia-admin-analytics-visible';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -26,10 +22,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [analyticsVisible, setAnalyticsVisible] = useState(() => {
-    try { return localStorage.getItem(ANALYTICS_STORAGE_KEY) === 'true'; } catch { return false; }
-  });
-  const analyticsRef = useRef<HTMLDivElement>(null);
 
   const fetchForms = () => {
     if (!token) {
@@ -83,17 +75,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchForms();
   }, [token]);
-
-
-
-
-  function toggleAnalytics() {
-    setAnalyticsVisible(prev => {
-      const next = !prev;
-      try { localStorage.setItem(ANALYTICS_STORAGE_KEY, String(next)); } catch {}
-      return next;
-    });
-  }
 
   /* ── Filtered forms for search ── */
   const filteredForms = forms.filter(f => {
@@ -176,19 +157,6 @@ export default function AdminDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
-            <LoadingButton
-              variant="ghost"
-              size="sm"
-              onClick={toggleAnalytics}
-              aria-expanded={analyticsVisible}
-              aria-label={analyticsVisible ? t('adminDashboard.hideAnalytics', 'Hide analytics') : t('adminDashboard.showAnalytics', 'Show analytics')}
-              style={analyticsVisible ? {
-                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                color: 'var(--accent)',
-              } : undefined}
-            >
-              <BarChart3 size={15} aria-hidden="true" /> Analytics
-            </LoadingButton>
             <LoadingButton
               variant="ghost"
               size="sm"
@@ -278,37 +246,6 @@ export default function AdminDashboard() {
           >
             Enter join code
           </LoadingButton>
-        </div>
-
-        {/* ── Analytics section (toggleable) ── */}
-        <div
-          ref={analyticsRef}
-          style={{
-            display: 'grid',
-            gridTemplateRows: analyticsVisible ? '1fr' : '0fr',
-            transition: 'grid-template-rows 0.3s ease, opacity 0.3s ease',
-            opacity: analyticsVisible ? 1 : 0,
-          }}
-        >
-          <div style={{ overflow: 'hidden' }}>
-            {analyticsVisible && (
-              <Suspense
-                fallback={
-                  <div className="mb-6 animate-pulse">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                      {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="rounded-lg h-20" style={{ backgroundColor: 'var(--muted)' }} />
-                      ))}
-                    </div>
-                  </div>
-                }
-              >
-                <div className="mb-6">
-                  <AdminAnalytics />
-                </div>
-              </Suspense>
-            )}
-          </div>
         </div>
 
         {/* ── Existing forms ── */}
