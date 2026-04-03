@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Trash2, Plus, Save, ArrowLeft, ChevronUp, ChevronDown } from 'lucide-react';
+import { Trash2, Plus, Save, ArrowLeft, ChevronUp, ChevronDown, Copy, Ticket } from 'lucide-react';
 import { api, getApiErrorDetail } from './api/client';
 import LoadingButton from './components/LoadingButton';
 import StructuredInput from './components/StructuredInput';
@@ -84,11 +84,13 @@ export default function FormEditor() {
   const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
+  const validQuestions = questions.filter((question) => question.label.trim() !== '');
   const isInformationGatheringMode =
     questions.length > 0 &&
     questions.every(
       question => !question.requireEvidence && !question.requireConfidence,
     );
+  const questionModeLabel = isInformationGatheringMode ? 'Information gathering' : 'Consensus';
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -211,6 +213,15 @@ export default function FormEditor() {
     setQuestions((prev) => prev.filter((_, idx) => idx !== i));
   }
 
+  async function copyJoinCode() {
+    try {
+      await navigator.clipboard.writeText(joinCode);
+      toastSuccess('Join code copied');
+    } catch {
+      toastError('Failed to copy join code');
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center" style={{ minHeight: '60vh' }}>
@@ -220,7 +231,7 @@ export default function FormEditor() {
   }
 
   return (
-    <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-5xl mx-auto">
+    <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-7xl mx-auto">
       <button
         onClick={() => navigate('/')}
         className="inline-flex items-center gap-2 mb-6 transition-colors"
@@ -250,24 +261,82 @@ export default function FormEditor() {
         Back to Dashboard
       </button>
 
-      <h1 className="text-2xl font-bold mb-6 text-foreground">Edit Consultation</h1>
+      <section className="card-lg p-5 sm:p-6 mb-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0 max-w-3xl">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
+              Consultation
+            </div>
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground">Edit Consultation</h1>
+            <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+              Update the questions, then check the live preview on the right.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span
+                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+                style={{ backgroundColor: 'var(--muted)', color: 'var(--foreground)' }}
+              >
+                {validQuestions.length} question{validQuestions.length === 1 ? '' : 's'}
+              </span>
+              <span
+                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+                style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}
+              >
+                {questionModeLabel}
+              </span>
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+                style={{ backgroundColor: 'var(--muted)', color: 'var(--foreground)' }}
+              >
+                <Ticket size={12} />
+                {joinCode}
+              </span>
+            </div>
+          </div>
 
-      <div className="card-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4 text-foreground">Consultation Title</h2>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. AI in Education: Risks & Opportunities"
-          className="w-full rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
-        />
-      </div>
+          <div className="flex flex-wrap gap-2">
+            <LoadingButton
+              variant="ghost"
+              onClick={copyJoinCode}
+              className="px-4 py-2.5"
+            >
+              <Copy size={16} className="mr-2" />
+              Copy Join Code
+            </LoadingButton>
+            <LoadingButton
+              variant="accent"
+              loading={saving}
+              onClick={saveForm}
+              className="px-5 py-2.5"
+            >
+              <Save size={16} className="mr-2" />
+              Save Edits
+            </LoadingButton>
+          </div>
+        </div>
+      </section>
 
-      <div className="card-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4 text-foreground">Questions</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Edit each question and choose whether experts must provide evidence and confidence.
-        </p>
-        <div className="flex flex-wrap gap-2 mb-4">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="space-y-6 min-w-0">
+          <div className="card-lg p-6">
+            <h2 className="text-lg font-semibold mb-4 text-foreground">Title</h2>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. AI in Education: Risks & Opportunities"
+              className="w-full rounded-lg px-3 py-2.5 border border-border bg-card text-foreground"
+            />
+          </div>
+
+          <div className="card-lg p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-5">
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Questions</h2>
+                <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
+                  Keep the wording tight and check the preview as you edit.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setResponseStyle('consensus')}
@@ -300,8 +369,9 @@ export default function FormEditor() {
           >
             Information Gathering
           </button>
-        </div>
-        <div className="space-y-4">
+              </div>
+            </div>
+            <div className="space-y-4">
           {questions.map((q, i) => (
             <div key={i} className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-start gap-3">
@@ -383,32 +453,26 @@ export default function FormEditor() {
                         color: 'var(--muted-foreground)',
                       }}
                     >
-                      Participants will see this question with one plain response textbox below it.
+                      Single response box only.
                     </div>
                   ) : (
                     <div
-                      className="mt-3 flex flex-wrap gap-4 rounded-lg px-3 py-2"
+                      className="mt-3 grid gap-3 rounded-lg px-3 py-3 sm:grid-cols-2"
                       style={{
                         backgroundColor:
                           'color-mix(in srgb, var(--foreground) 3%, transparent)',
                         border: '1px solid var(--border)',
                       }}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center justify-between gap-3">
                         <div>
                           <label
                             htmlFor={`question-${i + 1}-evidence`}
                             className="block text-sm font-medium"
                             style={{ color: 'var(--foreground)' }}
                           >
-                            Ask for evidence
+                            Evidence
                           </label>
-                          <p
-                            className="text-xs mt-0.5"
-                            style={{ color: 'var(--muted-foreground)' }}
-                          >
-                            Show an evidence and reasoning field for this question.
-                          </p>
                         </div>
                         <ToggleSwitch
                           id={`question-${i + 1}-evidence`}
@@ -421,21 +485,15 @@ export default function FormEditor() {
                         />
                       </div>
 
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center justify-between gap-3">
                         <div>
                           <label
                             htmlFor={`question-${i + 1}-confidence`}
                             className="block text-sm font-medium"
                             style={{ color: 'var(--foreground)' }}
                           >
-                            Ask for confidence
+                            Confidence
                           </label>
-                          <p
-                            className="text-xs mt-0.5"
-                            style={{ color: 'var(--muted-foreground)' }}
-                          >
-                            Show the confidence slider and confidence explanation.
-                          </p>
                         </div>
                         <ToggleSwitch
                           id={`question-${i + 1}-confidence`}
@@ -465,105 +523,128 @@ export default function FormEditor() {
               </div>
             </div>
           ))}
-        </div>
-        <button
-          onClick={addQuestion}
-          type="button"
-          className="inline-flex items-center gap-1.5 mt-4 text-sm font-medium"
-          style={{ color: 'var(--accent)' }}
-        >
-          <Plus size={16} />
-          Add question
-        </button>
-      </div>
+            </div>
+            <button
+              onClick={addQuestion}
+              type="button"
+              className="inline-flex items-center gap-1.5 mt-4 text-sm font-medium"
+              style={{ color: 'var(--accent)' }}
+            >
+              <Plus size={16} />
+              Add question
+            </button>
+          </div>
 
-      <div className="card-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-2 text-foreground">Expert Form Preview</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          {isInformationGatheringMode
-            ? 'This preview updates immediately so you can verify each question uses a single response textbox.'
-            : 'This preview updates immediately so you can verify each question’s evidence and confidence settings.'}
-        </p>
-        <div
-          className="rounded-xl p-4 sm:p-5"
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
-            border: '1px solid var(--border)',
-          }}
-        >
-          {questions.filter((question) => question.label.trim()).length === 0 ? (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+            <div className="card-lg p-5">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--accent)' }}>
+                Join code
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <code
+                  className="inline-flex items-center rounded-lg px-3 py-2 text-base font-semibold"
+                  style={{
+                    backgroundColor: 'var(--muted)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--foreground)',
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  {joinCode}
+                </code>
+                <LoadingButton variant="ghost" size="sm" onClick={copyJoinCode}>
+                  <Copy size={14} className="mr-1.5" />
+                  Copy
+                </LoadingButton>
+              </div>
+            </div>
+
             <div
-              className="rounded-lg px-4 py-5 text-sm"
+              className="card-lg p-5"
               style={{
-                backgroundColor: 'var(--background)',
-                border: '1px dashed var(--border)',
-                color: 'var(--muted-foreground)',
+                borderColor: 'color-mix(in srgb, var(--destructive) 22%, var(--border))',
               }}
             >
-              Add at least one question to preview the expert form.
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--destructive)' }}>
+                Danger
+              </div>
+              <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                Delete this consultation permanently.
+              </p>
+              <LoadingButton
+                variant="destructive"
+                loading={deleting}
+                onClick={deleteForm}
+                className="mt-4 w-full justify-center px-5 py-2.5"
+              >
+                <Trash2 size={16} className="mr-2" />
+                Delete Consultation
+              </LoadingButton>
             </div>
-          ) : (
-            questions.map((question, index) => {
-              if (!question.label.trim()) {
-                return null;
-              }
-              const key = `q${index + 1}`;
-              return (
-                <div key={key} className="mb-5 last:mb-0">
-                  <label
-                    className="block text-sm font-medium mb-2"
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    {question.label}
-                  </label>
-                  <StructuredInput
-                    questionIndex={index}
-                    formId={`edit-preview-${id ?? 'form'}`}
-                    value={previewResponses[key] ?? emptyStructuredResponse()}
-                    onChange={(value) =>
-                      setPreviewResponses((prev) => ({ ...prev, [key]: value }))
-                    }
-                    showEvidence={question.requireEvidence}
-                    showConfidence={question.requireConfidence}
-                    persistDraft={false}
-                  />
+          </div>
+        </div>
+
+        <aside className="xl:sticky xl:top-24 self-start">
+          <div className="card-lg p-5 sm:p-6">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--accent)' }}>
+              Preview
+            </div>
+            <h2 className="mt-2 text-lg font-semibold text-foreground">What experts will see</h2>
+            <p className="text-sm mt-2" style={{ color: 'var(--muted-foreground)' }}>
+              {isInformationGatheringMode
+                ? 'Each question shows one response box.'
+                : 'Evidence and confidence appear when enabled.'}
+            </p>
+            <div
+              className="rounded-xl p-4 sm:p-5 mt-4"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
+                border: '1px solid var(--border)',
+              }}
+            >
+              {validQuestions.length === 0 ? (
+                <div
+                  className="rounded-lg px-4 py-5 text-sm"
+                  style={{
+                    backgroundColor: 'var(--background)',
+                    border: '1px dashed var(--border)',
+                    color: 'var(--muted-foreground)',
+                  }}
+                >
+                  Add at least one question to preview the expert form.
                 </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      <div className="card-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-2 text-foreground">Join Code</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Share this code with experts so they can access the consultation.
-        </p>
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-muted">
-          <span className="font-mono text-lg font-semibold text-foreground">{joinCode}</span>
-        </div>
-      </div>
-
-      <div className="card-lg p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-        <LoadingButton
-          variant="accent"
-          loading={saving}
-          onClick={saveForm}
-          className="px-6 py-2.5"
-        >
-          <Save size={16} className="mr-2" />
-          Save Edits
-        </LoadingButton>
-
-        <LoadingButton
-          variant="destructive"
-          loading={deleting}
-          onClick={deleteForm}
-          className="sm:ml-auto px-5 py-2.5"
-        >
-          <Trash2 size={16} className="mr-2" />
-          Delete Consultation
-        </LoadingButton>
+              ) : (
+                questions.map((question, index) => {
+                  if (!question.label.trim()) {
+                    return null;
+                  }
+                  const key = `q${index + 1}`;
+                  return (
+                    <div key={key} className="mb-5 last:mb-0">
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        {question.label}
+                      </label>
+                      <StructuredInput
+                        questionIndex={index}
+                        formId={`edit-preview-${id ?? 'form'}`}
+                        value={previewResponses[key] ?? emptyStructuredResponse()}
+                        onChange={(value) =>
+                          setPreviewResponses((prev) => ({ ...prev, [key]: value }))
+                        }
+                        showEvidence={question.requireEvidence}
+                        showConfidence={question.requireConfidence}
+                        persistDraft={false}
+                      />
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );
