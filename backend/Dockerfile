@@ -8,9 +8,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends git tini curl \
 ARG GITHUB_TOKEN
 
 COPY requirements.txt .
-RUN set -eux; \
+RUN set -eu; \
     if [ -n "${GITHUB_TOKEN:-}" ]; then \
-      git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"; \
+      CLEAN_TOKEN="$(printf '%s' "${GITHUB_TOKEN}" | tr -d '\r\n')"; \
+      git config --global url."https://${CLEAN_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"; \
     fi; \
     pip install --no-cache-dir -r requirements.txt gunicorn "uvicorn[standard]"; \
     rm -f /root/.gitconfig

@@ -7,6 +7,8 @@ type Props = {
   selectedModel: string;
   onModelChange: (model: string) => void;
   models: string[];
+  estimateLabel: string | null;
+  responseCount: number;
   isGenerating: boolean;
   onGenerate: () => void;
 };
@@ -17,6 +19,8 @@ export default function AISynthesisPanel({
   selectedModel,
   onModelChange,
   models,
+  estimateLabel,
+  responseCount,
   isGenerating,
   onGenerate,
 }: Props) {
@@ -38,6 +42,15 @@ export default function AISynthesisPanel({
       </h3>
       <div className="space-y-2">
         <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} />
+
+        {estimateLabel && responseCount > 0 && (
+          <p
+            className="text-[11px]"
+            style={{ color: 'var(--muted-foreground)', lineHeight: 1.45 }}
+          >
+            Expected runtime: {estimateLabel} for {responseCount} response{responseCount === 1 ? '' : 's'}.
+          </p>
+        )}
 
         <div>
           <label

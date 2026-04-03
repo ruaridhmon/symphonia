@@ -95,4 +95,19 @@ describe('SynthesisProgress', () => {
     const fill = container.querySelector('.synthesis-progress-fill') as HTMLElement;
     expect(fill.style.width).toBe('70%');
   });
+
+  it('shows elapsed and remaining time during timed background synthesis', () => {
+    render(
+      <SynthesisProgress
+        stage="generating"
+        step={2}
+        totalSteps={5}
+        visible={true}
+        elapsedSeconds={75}
+        estimateSeconds={120}
+      />,
+    );
+    expect(screen.getByText('63%')).toBeInTheDocument();
+    expect(screen.getByText('Elapsed 1:15 · Est. remaining 0:45')).toBeInTheDocument();
+  });
 });

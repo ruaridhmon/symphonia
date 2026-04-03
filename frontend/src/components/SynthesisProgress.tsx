@@ -7,6 +7,8 @@ interface SynthesisProgressProps {
   step: number;
   totalSteps: number;
   visible: boolean;
+  elapsedSeconds?: number;
+  estimateSeconds?: number | null;
 }
 
 const stageIcons: Record<string, ReactNode> = {
@@ -35,7 +37,20 @@ const stageTranslationKeys: Record<string, string> = {
 
 const defaultIcon = <Clock size={16} style={{ color: 'var(--muted-foreground)' }} />;
 
-export default function SynthesisProgress({ stage, step, totalSteps, visible }: SynthesisProgressProps) {
+function formatDuration(totalSeconds: number) {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+export default function SynthesisProgress({
+  stage,
+  step,
+  totalSteps,
+  visible,
+  elapsedSeconds = 0,
+  estimateSeconds = null,
+}: SynthesisProgressProps) {
   const { t } = useTranslation();
 
   if (!visible) return null;
@@ -43,8 +58,16 @@ export default function SynthesisProgress({ stage, step, totalSteps, visible }: 
   const icon = stageIcons[stage] || defaultIcon;
   const translationKey = stageTranslationKeys[stage];
   const label = translationKey ? t(translationKey) : stage;
-  const pct = totalSteps > 0 ? Math.round((step / totalSteps) * 100) : 0;
   const isComplete = stage === 'complete' || stage === 'mock_complete';
+  const isTimedRun = stage === 'generating' && estimateSeconds != null && estimateSeconds > 0;
+  const pct = isComplete
+    ? 100
+    : isTimedRun
+      ? Math.min(99, Math.round((elapsedSeconds / estimateSeconds) * 100))
+      : totalSteps > 0
+        ? Math.round((step / totalSteps) * 100)
+        : 0;
+  const remainingSeconds = isTimedRun ? Math.max(estimateSeconds - elapsedSeconds, 0) : null;
 
   return (
     <div
@@ -72,7 +95,13 @@ export default function SynthesisProgress({ stage, step, totalSteps, visible }: 
       </div>
       {!isComplete && (
         <div className="synthesis-progress-steps">
-          {t('synthesis.progress.stepOf', { step, total: totalSteps })}
+          {isTimedRun
+            ? `Elapsed ${formatDuration(elapsedSeconds)} · ${
+              remainingSeconds && remainingSeconds > 0
+                ? `Est. remaining ${formatDuration(remainingSeconds)}`
+                : 'Finalising…'
+            }`
+            : t('synthesis.progress.stepOf', { step, total: totalSteps })}
         </div>
       )}
     </div>

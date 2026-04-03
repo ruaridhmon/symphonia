@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { ChartNoAxesColumn, ChevronDown, ChevronRight, Globe, Link2, MapPin, PanelRight, Sparkles, X } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, Clock3, Globe, Link2, MapPin, MessageSquareText, PanelRight, Sparkles, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -17,6 +17,8 @@ import type { Round as ApiRound } from './api/rounds';
 import {
 	getSynthesisVersions as apiGetSynthesisVersions,
 	activateVersion as apiActivateVersion,
+	estimateSynthesisDurationSeconds,
+	formatSynthesisDurationEstimate,
 	generateSynthesis as apiGenerateSynthesis,
 	pushSummary as apiPushSummary,
 } from './api/synthesis';
@@ -201,6 +203,9 @@ export default function SummaryPage() {
 	const [synthesisStep, setSynthesisStep] = useState(0);
 	const [synthesisTotalSteps] = useState(5);
 	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
+	const [synthesisStartedAtMs, setSynthesisStartedAtMs] = useState<number | null>(null);
+	const [synthesisElapsedSeconds, setSynthesisElapsedSeconds] = useState(0);
+	const [synthesisEstimateSeconds, setSynthesisEstimateSeconds] = useState<number | null>(null);
 	const [synthesisViewMode, setSynthesisViewMode] = useState<'view' | 'edit'>('view');
 	const [structuredSectionOpen, setStructuredSectionOpen] = useState(true);
 	const [aiToolsOpen, setAiToolsOpen] = useState(false);
@@ -221,6 +226,24 @@ export default function SummaryPage() {
 	const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
+	const clearSynthesisRunState = useCallback(() => {
+		setIsGenerating(false);
+		setSynthesisStartedAtMs(null);
+		setSynthesisElapsedSeconds(0);
+		setSynthesisEstimateSeconds(null);
+	}, []);
+
+	const markSynthesisComplete = useCallback((showToast = true) => {
+		setSynthesisStage('complete');
+		setSynthesisStep(synthesisTotalSteps);
+		clearSynthesisRunState();
+		if (showToast) toastSuccess('Synthesis complete!');
+		window.setTimeout(() => {
+			setSynthesisStage('preparing');
+			setSynthesisStep(0);
+		}, 2000);
+	}, [clearSynthesisRunState, synthesisTotalSteps, toastSuccess]);
+
 	const handleWsMessage = useCallback((data: Record<string, unknown>) => {
 		if (data.type === 'synthesis_complete' && data.form_id === formId) {
 			// Synthesis finished (possibly in background) — reload data
@@ -229,17 +252,20 @@ export default function SummaryPage() {
 					loadSynthesisVersions(data.round_id);
 				}
 			});
-			toastSuccess('Synthesis complete!');
+			markSynthesisComplete();
 		}
 		if (data.type === 'synthesis_error' && data.form_id === formId) {
 			// Background synthesis failed — show error to user
+			clearSynthesisRunState();
+			setSynthesisStage('preparing');
+			setSynthesisStep(0);
 			toastError(
 				typeof data.error === 'string'
 					? data.error
 					: 'Synthesis failed in background'
 			);
 		}
-	}, [formId]);
+	}, [clearSynthesisRunState, formId, loadAll, loadSynthesisVersions, markSynthesisComplete, toastError]);
 
 	// ── Presence ──
 	const { viewers } = usePresence({
@@ -262,6 +288,7 @@ export default function SummaryPage() {
 
 	// ── Derived values ──
 	const displayRound = selectedRound || activeRound;
+	const targetRoundForGeneration = selectedRound || activeRound;
 	const structuredSynthesisData = displayRound?.synthesis_json || null;
 
 	const resolvedExpertLabels: Record<number, string> = useMemo(() => {
@@ -288,6 +315,14 @@ export default function SummaryPage() {
 		() => Array.from(new Set([sanitizeModel(selectedModel), ...MODELS].filter(Boolean))),
 		[selectedModel]
 	);
+	const synthesisEstimateLabel = useMemo(() => {
+		if (!targetRoundForGeneration?.response_count) return null;
+		const seconds = estimateSynthesisDurationSeconds(
+			synthesisMode,
+			targetRoundForGeneration.response_count
+		);
+		return formatSynthesisDurationEstimate(seconds);
+	}, [synthesisMode, targetRoundForGeneration]);
 	const audienceSourceText = useMemo(() => {
 		if (selectedVersion?.synthesis?.trim()) return selectedVersion.synthesis;
 		if (displayRound?.synthesis?.trim()) return displayRound.synthesis;
@@ -315,6 +350,18 @@ export default function SummaryPage() {
 			editor.off('update', onEditorUpdate);
 		};
 	}, [editor, lastSavedSynthesis]);
+
+	useEffect(() => {
+		if (!isGenerating || synthesisStartedAtMs == null) return;
+		const tick = () => {
+			setSynthesisElapsedSeconds(
+				Math.max(0, Math.floor((Date.now() - synthesisStartedAtMs) / 1000))
+			);
+		};
+		tick();
+		const intervalId = window.setInterval(tick, 1000);
+		return () => window.clearInterval(intervalId);
+	}, [isGenerating, synthesisStartedAtMs]);
 
 	// ─── Data loading ────────────────────────────────────────────────────────
 
@@ -522,10 +569,11 @@ export default function SummaryPage() {
 	}
 
 	async function generateSummary() {
-		const targetRound = selectedRound || activeRound;
+		const targetRound = targetRoundForGeneration;
 		const modelToUse = sanitizeModel(selectedModel);
 		if (!formId || !modelToUse || !targetRound) return;
 		if (modelToUse !== selectedModel) setSelectedModel(modelToUse);
+		let backgroundStarted = false;
 		let baselineVersionCount = 0;
 		try {
 			const before = await apiGetSynthesisVersions(formId, targetRound.id);
@@ -537,6 +585,9 @@ export default function SummaryPage() {
 		setIsGenerating(true);
 		setSynthesisStage('preparing');
 		setSynthesisStep(0);
+		setSynthesisStartedAtMs(Date.now());
+		setSynthesisElapsedSeconds(0);
+		setSynthesisEstimateSeconds(null);
 		try {
 			setSynthesisStage('analyzing');
 			setSynthesisStep(1);
@@ -549,35 +600,38 @@ export default function SummaryPage() {
 			});
 
 			// ── Async path: synthesis running in the background ──
-				if (data.status === 'started') {
-					toastSuccess(
-						data.message || 'Synthesis running in background — you\u2019ll be notified when complete'
-					);
-					// Reset UI immediately so the user can navigate away
-					setSynthesisStage('preparing');
-					setSynthesisStep(0);
-					setIsGenerating(false);
-					// Fallback polling in case WebSocket completion event is missed.
-					(async () => {
-						const maxAttempts = 30;
-						for (let i = 0; i < maxAttempts; i++) {
-							await new Promise(resolve => setTimeout(resolve, 3000));
-							try {
-								const latest = await apiGetSynthesisVersions(formId, targetRound.id);
-								if (latest.length > baselineVersionCount) {
-									await loadAll();
-									await loadSynthesisVersions(targetRound.id);
-									toastSuccess('Synthesis complete!');
-									return;
-								}
-							} catch {
-								// Keep polling; transient failures should not stop refresh recovery.
+			if (data.status === 'started') {
+				backgroundStarted = true;
+				setSynthesisStage('generating');
+				setSynthesisStep(2);
+				setSynthesisEstimateSeconds(
+					data.estimate_seconds
+						?? estimateSynthesisDurationSeconds(synthesisMode, targetRound.response_count ?? 0)
+				);
+				toastSuccess(
+					data.message || 'Synthesis running in background — you’ll be notified when complete'
+				);
+				// Fallback polling in case WebSocket completion event is missed.
+				(async () => {
+					const maxAttempts = 120;
+					for (let i = 0; i < maxAttempts; i++) {
+						await new Promise(resolve => setTimeout(resolve, 3000));
+						try {
+							const latest = await apiGetSynthesisVersions(formId, targetRound.id);
+							if (latest.length > baselineVersionCount) {
+								await loadAll();
+								await loadSynthesisVersions(targetRound.id);
+								markSynthesisComplete(false);
+								return;
 							}
+						} catch {
+							// Keep polling; transient failures should not stop refresh recovery.
 						}
-						toastWarning('Synthesis may be complete. Please refresh if results do not appear automatically.');
-					})();
-					return;
-				}
+					}
+					toastWarning('Synthesis is still running or took longer than expected. The timer will keep updating until it completes.');
+				})();
+				return;
+			}
 
 			// ── Sync path: immediate result (mock mode) ──
 			setSynthesisStage('synthesising');
@@ -604,14 +658,18 @@ export default function SummaryPage() {
 
 			setSynthesisStage('complete');
 			setSynthesisStep(5);
+			clearSynthesisRunState();
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
 			} catch (error) {
 				const message = (error as Error).message || 'Failed to generate synthesis';
 				toastError(`Model "${modelToUse}" failed: ${message}`);
+				clearSynthesisRunState();
 				setSynthesisStage('preparing');
 				setSynthesisStep(0);
 			} finally {
-				setIsGenerating(false);
+				if (!backgroundStarted) {
+					setIsGenerating(false);
+				}
 			}
 	}
 
@@ -711,10 +769,86 @@ export default function SummaryPage() {
 					>
 						{t('common.backToDashboard')}
 					</button>
-					<h2 className="text-sm font-medium truncate max-w-[50vw] sm:max-w-none" style={{ color: 'var(--muted-foreground)' }}>
-						{form.title}
-					</h2>
 				</nav>
+
+				<section
+					className="card mb-4 sm:mb-6 p-4 sm:p-5"
+					style={{
+						background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 5%, white), color-mix(in srgb, var(--accent) 2%, var(--card)))',
+						borderColor: 'color-mix(in srgb, var(--accent) 18%, var(--border))',
+					}}
+				>
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+						<div className="max-w-3xl">
+							<div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
+								Consensus Workspace
+							</div>
+							<h2 className="mt-2 text-xl sm:text-2xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
+								{form.title}
+							</h2>
+							<p className="mt-2 text-sm sm:text-[0.95rem]" style={{ color: 'var(--muted-foreground)', lineHeight: 1.65 }}>
+								Review the current round, generate synthesis, and shape the next set of expert prompts from one place.
+							</p>
+						</div>
+
+						<div
+							className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+							style={{ width: '100%', maxWidth: '48rem' }}
+						>
+							<div className="card p-3" style={{ background: 'color-mix(in srgb, var(--card) 92%, white)' }}>
+								<div className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+									Active Round
+								</div>
+								<div className="mt-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+									{displayRound ? `Round ${displayRound.round_number}` : 'No round selected'}
+								</div>
+								<div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+									{displayRound?.is_active ? 'Live editing and synthesis state' : 'Historic round review'}
+								</div>
+							</div>
+							<div className="card p-3" style={{ background: 'color-mix(in srgb, var(--card) 92%, white)' }}>
+								<div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+									<MessageSquareText size={13} />
+									Responses
+								</div>
+								<div className="mt-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+									{targetRoundForGeneration?.response_count ?? 0} expert response{(targetRoundForGeneration?.response_count ?? 0) === 1 ? '' : 's'}
+								</div>
+								<div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+									Input volume for this synthesis pass
+								</div>
+							</div>
+							<div className="card p-3" style={{ background: 'color-mix(in srgb, var(--card) 92%, white)' }}>
+								<div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+									<Clock3 size={13} />
+									Runtime
+								</div>
+								<div className="mt-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+									{synthesisEstimateLabel || 'Waiting for responses'}
+								</div>
+								<div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+									Estimated for {synthesisMode} synthesis
+								</div>
+							</div>
+							<div className="card p-3" style={{ background: 'color-mix(in srgb, var(--card) 92%, white)' }}>
+								<div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+									<ChartNoAxesColumn size={13} />
+									Status
+								</div>
+								<div className="mt-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+									{displayRound?.convergence_score != null
+										? `${Math.round(displayRound.convergence_score * 100)}% convergence`
+										: structuredSynthesisData
+											? 'Synthesis available'
+											: 'Awaiting synthesis'}
+								</div>
+								<div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+									{viewers.length > 1 ? `${viewers.length} people viewing now` : 'Single-editor workspace'}
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
 
 				{/* Round timeline */}
 				{rounds.length > 0 && (
@@ -734,7 +868,9 @@ export default function SummaryPage() {
 					stage={synthesisStage}
 					step={synthesisStep}
 					totalSteps={synthesisTotalSteps}
-					visible={isGenerating}
+					visible={isGenerating || synthesisStage === 'complete'}
+					elapsedSeconds={synthesisElapsedSeconds}
+					estimateSeconds={synthesisEstimateSeconds}
 				/>
 				</div>
 
@@ -1031,6 +1167,8 @@ export default function SummaryPage() {
 							selectedModel={selectedModel}
 							onModelChange={setSelectedModel}
 							models={availableModels}
+							estimateLabel={synthesisEstimateLabel}
+							responseCount={targetRoundForGeneration?.response_count ?? 0}
 							isGenerating={isGenerating}
 							onGenerate={generateSummary}
 						/>

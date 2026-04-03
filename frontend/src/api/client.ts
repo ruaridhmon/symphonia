@@ -47,6 +47,7 @@ function clearAuthAndRedirect(): void {
   // doesn't see it and bounce straight back to "/" before auth is confirmed.
   // (The httpOnly session_token cookie is cleared server-side via /logout or expiry.)
   document.cookie = 'csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax';
+  document.cookie = `csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}; SameSite=Lax`;
   if (!_redirecting) {
     _redirecting = true;
     window.location.href = '/login?expired=1';

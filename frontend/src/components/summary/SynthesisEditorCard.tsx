@@ -1,4 +1,5 @@
 import { EditorContent, Editor } from '@tiptap/react';
+import { Bot, SquarePen } from 'lucide-react';
 import { MarkdownRenderer } from '../index';
 import type { Round } from '../../types/summary';
 
@@ -33,7 +34,7 @@ export default function SynthesisEditorCard({
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
         <div>
           <h2 className="text-lg font-semibold text-foreground flex items-center gap-2" style={{ margin: 0 }}>
-            <span>📝</span> Synthesis for Round {activeRound?.round_number || ''}
+            <SquarePen size={18} style={{ color: 'var(--accent)' }} /> Synthesis for Round {activeRound?.round_number || ''}
           </h2>
           {contextNote && (
             <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
@@ -143,7 +144,21 @@ export default function SynthesisEditorCard({
                 border: '1px dashed var(--border)',
               }}
             >
-              <div className="text-3xl mb-3">🤖</div>
+              <div className="mb-3 flex justify-center">
+                <span
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 16,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                  }}
+                >
+                  <Bot size={24} style={{ color: 'var(--accent)' }} />
+                </span>
+              </div>
               <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
                 No synthesis yet
               </p>

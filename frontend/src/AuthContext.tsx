@@ -35,6 +35,18 @@ function hasCookie(name: string): boolean {
   return document.cookie.split('; ').some((c) => c.startsWith(`${name}=`));
 }
 
+function getStoredAccessToken(): string | null {
+  try {
+    return localStorage.getItem('access_token');
+  } catch {
+    return null;
+  }
+}
+
+function hasSessionHint(): boolean {
+  return Boolean(getStoredAccessToken() || hasCookie('csrf_token'));
+}
+
 /** Derive role from stored data, handling backward compat with old tokens. */
 function deriveRole(): UserRoleType {
   const stored = localStorage.getItem('role');
@@ -52,14 +64,13 @@ function deriveRole(): UserRoleType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Derive initial "logged in" from either legacy localStorage token OR csrf cookie presence
-  const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem('access_token') || (hasCookie('csrf_token') ? '__cookie__' : null),
-  );
+  // Treat cookie-backed session restore as background work; don't pre-mark the
+  // user as authenticated until /me confirms it.
+  const [token, setToken] = useState<string | null>(() => getStoredAccessToken());
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => localStorage.getItem('is_admin') === 'true');
   const [role, setRole] = useState<UserRoleType>(deriveRole);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(() => hasSessionHint());
 
   const isFacilitator = role === 'facilitator' || role === 'platform_admin';
 

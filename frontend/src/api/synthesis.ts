@@ -30,6 +30,8 @@ export interface GenerateSynthesisResult {
   status?: string;
   /** Human-readable message when status is present */
   message?: string;
+  estimate_seconds?: number;
+  estimate_label?: string;
 }
 
 /* ── API calls ── */
@@ -59,6 +61,31 @@ export function generateSynthesis(
     `/forms/${formId}/rounds/${roundId}/generate_synthesis`,
     payload
   );
+}
+
+export function estimateSynthesisDurationSeconds(
+  strategy: string,
+  responseCount: number
+) {
+  const count = Math.max(1, responseCount);
+  if (strategy === 'simple') {
+    return Math.min(90, Math.max(20, 15 + count * 4));
+  }
+  if (strategy === 'committee') {
+    return Math.min(240, Math.max(45, 35 + count * 8));
+  }
+  if (strategy === 'ttd') {
+    return Math.min(420, Math.max(75, 55 + count * 12));
+  }
+  return 60;
+}
+
+export function formatSynthesisDurationEstimate(seconds: number) {
+  if (seconds < 60) {
+    return `about ${seconds} seconds`;
+  }
+  const minutes = Math.round(seconds / 60);
+  return minutes === 1 ? 'about 1 minute' : `about ${minutes} minutes`;
 }
 
 /** Save/push the editor synthesis content */

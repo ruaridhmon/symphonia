@@ -20,6 +20,10 @@ interface UsePresenceReturn {
   isConnected: boolean;
 }
 
+const INITIAL_RECONNECT_DELAY_MS = 1_500;
+const MAX_RECONNECT_DELAY_MS = 15_000;
+const MAX_CONSECUTIVE_FAILURES = 4;
+
 /**
  * Hook for real-time presence tracking via WebSocket.
  * Connects to /ws, sends presence_join on mount, heartbeats every 15s,
@@ -31,9 +35,15 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
   const wsRef = useRef<WebSocket | null>(null);
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const hasConnectedRef = useRef(false);
+  const stoppedRef = useRef(false);
 
   const connect = useCallback(() => {
-    if (!formId) return;
+    if (!formId || stoppedRef.current) return;
+    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
     const fallbackEmail = (() => {
       try {
         return localStorage.getItem('email') || '';
@@ -50,6 +60,8 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
 
     ws.onopen = () => {
       setIsConnected(true);
+      reconnectAttemptsRef.current = 0;
+      hasConnectedRef.current = true;
       // Send join message
       ws.send(JSON.stringify({
         type: 'presence_join',
@@ -86,14 +98,30 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
 
     ws.onclose = () => {
       setIsConnected(false);
+      wsRef.current = null;
       if (heartbeatRef.current) {
         clearInterval(heartbeatRef.current);
         heartbeatRef.current = null;
       }
-      // Attempt reconnect after 3s
+
+      if (stoppedRef.current) return;
+
+      reconnectAttemptsRef.current += 1;
+
+      // If the endpoint never came up at all, stop after a few failures so a
+      // missing proxy/WebSocket deployment does not spam the browser forever.
+      if (!hasConnectedRef.current && reconnectAttemptsRef.current >= MAX_CONSECUTIVE_FAILURES) {
+        return;
+      }
+
+      const delay = Math.min(
+        INITIAL_RECONNECT_DELAY_MS * (2 ** Math.max(reconnectAttemptsRef.current - 1, 0)),
+        MAX_RECONNECT_DELAY_MS,
+      );
+
       reconnectRef.current = setTimeout(() => {
         connect();
-      }, 3_000);
+      }, delay);
     };
 
     ws.onerror = () => {
@@ -102,9 +130,11 @@ export function usePresence({ formId, page, userEmail, onMessage }: UsePresenceO
   }, [formId, page, userEmail, onMessage]);
 
   useEffect(() => {
+    stoppedRef.current = false;
     connect();
 
     return () => {
+      stoppedRef.current = true;
       // Send leave message before closing
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN && formId) {
         wsRef.current.send(JSON.stringify({

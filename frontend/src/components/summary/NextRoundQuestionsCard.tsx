@@ -1,3 +1,4 @@
+import { CircleHelp, Plus, X } from 'lucide-react';
 import { LoadingButton } from '../index';
 
 type Props = {
@@ -16,8 +17,11 @@ export default function NextRoundQuestionsCard({
   return (
     <div className="card p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <span>❓</span> Next Round Questions
+        <CircleHelp size={18} style={{ color: 'var(--accent)' }} /> Next Round Questions
       </h2>
+      <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+        Refine the follow-up prompts while the current round is still fresh. Clear, specific questions make the next synthesis faster and stronger.
+      </p>
       <div className="space-y-2 mt-3">
         {questions.map((q, index) => (
           <div key={index} className="flex gap-2 items-center group">
@@ -43,8 +47,9 @@ export default function NextRoundQuestionsCard({
               onClick={() => onRemoveQuestion(index)}
               style={{ opacity: 0.4, transition: 'opacity 0.15s ease' }}
               className="group-hover:!opacity-100"
+              icon={<X size={14} aria-hidden="true" />}
             >
-              ✕
+              Remove
             </LoadingButton>
           </div>
         ))}
@@ -54,8 +59,9 @@ export default function NextRoundQuestionsCard({
         size="sm"
         onClick={onAddQuestion}
         className="mt-3"
+        icon={<Plus size={14} aria-hidden="true" />}
       >
-        + Add Question
+        Add Question
       </LoadingButton>
     </div>
   );

@@ -17,4 +17,5 @@ slowapi
 fpdf2>=2.7.9
 
 # Axiotic consensus library (CC-BY-4.0)
-consensus @ git+https://github.com/axiotic-ai/consensus.git@main
+# Symphonia tracks the dedicated integration branch in the consensus repo.
+consensus @ git+https://github.com/axiotic-ai/consensus.git@symphonia-integration

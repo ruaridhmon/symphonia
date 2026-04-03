@@ -67,7 +67,9 @@ from .auth import (
     generate_join_code,
     normalize_join_code,
     AUTH_COOKIE_NAME,
+    AUTH_COOKIE_DOMAIN,
     CSRF_COOKIE_NAME,
+    CSRF_COOKIE_DOMAIN,
     COOKIE_MAX_AGE,
     COOKIE_SECURE,
     COOKIE_SAMESITE,
@@ -91,6 +93,65 @@ if _root_env.exists():
 load_dotenv()  # backend/.env takes precedence
 
 logger = logging.getLogger("symphonia.routes")
+
+
+# ---------------------------------------------------------
+# SYNTHESIS HELPERS
+# ---------------------------------------------------------
+
+
+def _estimate_synthesis_duration_seconds(strategy: str, response_count: int) -> int:
+    """Return a rough runtime estimate for synthesis UI feedback."""
+    count = max(1, response_count)
+    if strategy == "simple":
+        return min(90, max(20, 15 + count * 4))
+    if strategy == "committee":
+        return min(240, max(45, 35 + count * 8))
+    if strategy == "ttd":
+        return min(420, max(75, 55 + count * 12))
+    return 60
+
+
+def _format_duration_estimate(seconds: int) -> str:
+    """Render a short human-readable ETA."""
+    if seconds < 60:
+        return f"about {seconds} seconds"
+    minutes = round(seconds / 60)
+    if minutes == 1:
+        return "about 1 minute"
+    return f"about {minutes} minutes"
+
+
+def _render_synthesis_text(result) -> str:
+    """Build the HTML synthesis summary used by round pages and exports."""
+    text_parts: list[str] = []
+    if getattr(result, "narrative", ""):
+        text_parts.append(f"<p>{result.narrative}</p>")
+    if result.agreements:
+        text_parts.append("<h3>Agreements</h3>")
+        for agreement in result.agreements:
+            text_parts.append(
+                f"<p><strong>{agreement.claim}</strong> "
+                f"(confidence: {agreement.confidence:.0%}) — {agreement.evidence_summary}</p>"
+            )
+    if result.disagreements:
+        text_parts.append("<h3>Disagreements</h3>")
+        for disagreement in result.disagreements:
+            text_parts.append(
+                f"<p><strong>{disagreement.topic}</strong> ({disagreement.severity})</p><ul>"
+            )
+            for position in disagreement.positions:
+                text_parts.append(
+                    f"<li>{position.get('position', '')} — {position.get('evidence', '')}</li>"
+                )
+            text_parts.append("</ul>")
+    if result.nuances:
+        text_parts.append("<h3>Nuances</h3>")
+        for nuance in result.nuances:
+            text_parts.append(
+                f"<p><strong>{nuance.claim}</strong> — {nuance.context}</p>"
+            )
+    return "".join(text_parts) if text_parts else "Synthesis complete."
 
 
 # ---------------------------------------------------------
@@ -473,6 +534,7 @@ def login(
         secure=COOKIE_SECURE,
         samesite=COOKIE_SAMESITE,
         path="/",
+        domain=AUTH_COOKIE_DOMAIN,
     )
     # Set CSRF token as readable cookie (JS reads it, sends as header)
     response.set_cookie(
@@ -483,6 +545,7 @@ def login(
         secure=COOKIE_SECURE,
         samesite=COOKIE_SAMESITE,
         path="/",
+        domain=CSRF_COOKIE_DOMAIN,
     )
 
     # Still return token in body for backward compatibility during migration
@@ -509,8 +572,8 @@ def logout(
     response: FastAPIResponse,
 ):
     """Clear auth cookies."""
-    response.delete_cookie(key=AUTH_COOKIE_NAME, path="/")
-    response.delete_cookie(key=CSRF_COOKIE_NAME, path="/")
+    response.delete_cookie(key=AUTH_COOKIE_NAME, path="/", domain=AUTH_COOKIE_DOMAIN)
+    response.delete_cookie(key=CSRF_COOKIE_NAME, path="/", domain=CSRF_COOKIE_DOMAIN)
     return {"message": "Logged out"}
 
 
@@ -1302,31 +1365,7 @@ async def synthesise_committee(
         active_round.convergence_score = sum(confidences) / len(confidences)
 
     # Also store a text synthesis for backwards compatibility
-    text_parts = []
-    if result.agreements:
-        text_parts.append("<h3>Agreements</h3>")
-        for a in result.agreements:
-            text_parts.append(
-                f"<p><strong>{a.claim}</strong> "
-                f"(confidence: {a.confidence:.0%}) — {a.evidence_summary}</p>"
-            )
-    if result.disagreements:
-        text_parts.append("<h3>Disagreements</h3>")
-        for d in result.disagreements:
-            text_parts.append(f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>")
-            for pos in d.positions:
-                text_parts.append(
-                    f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
-                )
-            text_parts.append("</ul>")
-    if result.nuances:
-        text_parts.append("<h3>Nuances</h3>")
-        for n in result.nuances:
-            text_parts.append(f"<p><strong>{n.claim}</strong> — {n.context}</p>")
-
-    active_round.synthesis = (
-        "".join(text_parts) if text_parts else "Synthesis complete."
-    )
+    active_round.synthesis = _render_synthesis_text(result)
 
     # If AI-assisted, store generated probes as FollowUp records
     if flow_mode == FlowMode.AI_ASSISTED and result.follow_up_probes:
@@ -1455,254 +1494,51 @@ async def _synthesis_background(
     try:
         synthesis_text = None
         synthesis_json_data = None
+        try:
+            flow_mode = FlowMode(mode_str)
+        except ValueError:
+            flow_mode = FlowMode.HUMAN_ONLY
 
-        if strategy in ("committee", "ttd"):
-            # ── Committee / TTD synthesis ──
-            try:
-                flow_mode = FlowMode(mode_str)
-            except ValueError:
-                flow_mode = FlowMode.HUMAN_ONLY
+        resolved_model = _resolve_synthesis_model(db, model)
 
-            resolved_model = _resolve_synthesis_model(db, model)
-
-            try:
-                synthesiser = get_synthesiser(
-                    api_key=os.getenv("OPENROUTER_API_KEY", ""),
-                    n_analysts=n_analysts,
-                    strategy=strategy,
-                    model=resolved_model,
-                )
-
-                result = await synthesiser.run(
-                    questions=questions,
-                    responses=response_dicts,
-                    model=resolved_model,
-                    mode=flow_mode,
-                    comments_context=comments_context,
-                )
-            except (SynthesisConfigError, SynthesisTimeoutError, SynthesisError) as exc:
-                logger.error(
-                    "Background synthesis error (round %d): %s",
-                    round_id,
-                    exc,
-                    exc_info=True,
-                )
-                await _broadcast_synthesis_error(form_id, round_id, str(exc))
-                return
-            except Exception as exc:
-                logger.error(
-                    "Unexpected background synthesis error (round %d): %s",
-                    round_id,
-                    exc,
-                    exc_info=True,
-                )
-                await _broadcast_synthesis_error(
-                    form_id, round_id, "An unexpected error occurred"
-                )
-                return
-
-            synthesis_json_data = result.to_dict()
-
-            # Build text representation for backwards compat
-            text_parts = []
-            if result.agreements:
-                text_parts.append("<h3>Agreements</h3>")
-                for a in result.agreements:
-                    text_parts.append(
-                        f"<p><strong>{a.claim}</strong> "
-                        f"(confidence: {a.confidence:.0%}) — {a.evidence_summary}</p>"
-                    )
-            if result.disagreements:
-                text_parts.append("<h3>Disagreements</h3>")
-                for d in result.disagreements:
-                    text_parts.append(
-                        f"<p><strong>{d.topic}</strong> ({d.severity})</p><ul>"
-                    )
-                    for pos in d.positions:
-                        text_parts.append(
-                            f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
-                        )
-                    text_parts.append("</ul>")
-            if result.nuances:
-                text_parts.append("<h3>Nuances</h3>")
-                for n in result.nuances:
-                    text_parts.append(
-                        f"<p><strong>{n.claim}</strong> — {n.context}</p>"
-                    )
-
-            synthesis_text = (
-                "".join(text_parts) if text_parts else "Synthesis complete."
+        try:
+            synthesiser = get_synthesiser(
+                api_key=os.getenv("OPENROUTER_API_KEY", ""),
+                n_analysts=n_analysts,
+                strategy=strategy,
+                model=resolved_model,
             )
 
-        else:
-            # ── Simple single-prompt synthesis ──
-            prompt_content = "Synthesize the following expert responses.\n\n"
-            prompt_content += "Questions:\n"
-            for i, q in enumerate(questions, 1):
-                prompt_content += f"{i}. {q}\n"
+            result = await synthesiser.run(
+                questions=questions,
+                responses=response_dicts,
+                model=resolved_model,
+                mode=flow_mode,
+                comments_context=comments_context,
+            )
+        except (SynthesisConfigError, SynthesisTimeoutError, SynthesisError) as exc:
+            logger.error(
+                "Background synthesis error (round %d): %s",
+                round_id,
+                exc,
+                exc_info=True,
+            )
+            await _broadcast_synthesis_error(form_id, round_id, str(exc))
+            return
+        except Exception as exc:
+            logger.error(
+                "Unexpected background synthesis error (round %d): %s",
+                round_id,
+                exc,
+                exc_info=True,
+            )
+            await _broadcast_synthesis_error(
+                form_id, round_id, "An unexpected error occurred"
+            )
+            return
 
-            prompt_content += "\n--- Responses ---\n"
-            for i, rd in enumerate(response_dicts, 1):
-                prompt_content += f"\nResponse {i}:\n"
-                answers = rd.get("answers", {})
-                if isinstance(answers, str):
-                    answers = json.loads(answers) if answers else {}
-                for q_idx, q_text in enumerate(questions, 1):
-                    answer = answers.get(f"q{q_idx}", "No answer")
-                    prompt_content += f"  - Q: {q_text}\n"
-                    prompt_content += f"    A: {answer}\n"
-
-            prompt_content += "\n--- End of Responses ---\n"
-
-            if comments_context:
-                prompt_content += comments_context + "\n"
-
-            prompt_content += """
-Return your synthesis as a JSON object with the following structure (and ONLY the JSON, no markdown fences, no extra text):
-{
-  "narrative": "A 2-3 paragraph narrative summary of the overall synthesis",
-  "agreements": [
-    {
-      "claim": "What the experts agree on",
-      "supporting_experts": [1, 2],
-      "confidence": 0.85,
-      "evidence_summary": "Key evidence supporting this agreement",
-      "evidence_excerpts": [
-        {"expert_id": 1, "expert_label": "Response 1", "quote": "Direct quote or close paraphrase from this expert's response that supports the claim"},
-        {"expert_id": 2, "expert_label": "Response 2", "quote": "Direct quote or close paraphrase from this expert's response"}
-      ]
-    }
-  ],
-  "disagreements": [
-    {
-      "topic": "Topic of disagreement",
-      "positions": [
-        {"position": "Position A", "experts": [1], "evidence": "Evidence for A"},
-        {"position": "Position B", "experts": [2], "evidence": "Evidence for B"}
-      ],
-      "severity": "low|moderate|high"
-    }
-  ],
-  "nuances": [
-    {
-      "claim": "A nuanced point or uncertainty",
-      "context": "Why this matters",
-      "relevant_experts": [1]
-    }
-  ],
-  "confidence_map": {"overall": 0.75},
-  "follow_up_probes": [
-    {
-      "question": "A follow-up question to deepen understanding",
-      "target_experts": [1, 2],
-      "rationale": "Why this question would help"
-    }
-  ],
-  "meta_synthesis_reasoning": "Brief explanation of how the synthesis was constructed"
-}
-
-Expert numbers correspond to the Response numbers above. Include ALL relevant agreements, disagreements, and nuances. Be thorough.
-IMPORTANT: For each agreement, include "evidence_excerpts" with direct quotes from each supporting expert's actual response. This allows users to trace each agreement back to the original expert input.
-
-If expert discussion comments are included above, integrate those perspectives into the synthesis naturally. Comments represent additional qualitative input raised during deliberation — they may reinforce, challenge, or add nuance to the structured responses.
-"""
-
-            try:
-                openai_client = get_openai_client()
-                if not openai_client:
-                    await _broadcast_synthesis_error(
-                        form_id,
-                        round_id,
-                        "Synthesis is not configured. Please add an OpenRouter API key in Settings.",
-                    )
-                    return
-
-                completion = openai_client.chat.completions.create(
-                    model=model,
-                    max_tokens=8192,  # Cap to prevent OpenRouter 402 pre-flight failures
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": (
-                                "You are an expert Delphi method facilitator. You synthesize expert responses "
-                                "into structured analyses identifying agreements, disagreements, nuances, and "
-                                "follow-up questions. Always return valid JSON matching the requested schema."
-                            ),
-                        },
-                        {"role": "user", "content": prompt_content},
-                    ],
-                )
-                raw_output = completion.choices[0].message.content or ""
-
-                try:
-                    cleaned = raw_output.strip()
-                    if cleaned.startswith("```"):
-                        lines = cleaned.split("\n")
-                        lines = [
-                            line for line in lines if not line.strip().startswith("```")
-                        ]
-                        cleaned = "\n".join(lines)
-                    parsed = json.loads(cleaned)
-
-                    synthesis_json_data = {
-                        "narrative": parsed.get("narrative", ""),
-                        "agreements": parsed.get("agreements", []),
-                        "disagreements": parsed.get("disagreements", []),
-                        "nuances": parsed.get("nuances", []),
-                        "confidence_map": parsed.get(
-                            "confidence_map", {"overall": 0.5}
-                        ),
-                        "follow_up_probes": parsed.get("follow_up_probes", []),
-                        "meta_synthesis_reasoning": parsed.get(
-                            "meta_synthesis_reasoning", ""
-                        ),
-                    }
-
-                    text_parts = []
-                    if synthesis_json_data.get("narrative"):
-                        text_parts.append(f"<p>{synthesis_json_data['narrative']}</p>")
-                    if synthesis_json_data["agreements"]:
-                        text_parts.append("<h3>Agreements</h3>")
-                        for a in synthesis_json_data["agreements"]:
-                            conf = a.get("confidence", 0)
-                            text_parts.append(
-                                f"<p><strong>{a.get('claim', '')}</strong> "
-                                f"(confidence: {conf:.0%}) — {a.get('evidence_summary', '')}</p>"
-                            )
-                    if synthesis_json_data["disagreements"]:
-                        text_parts.append("<h3>Disagreements</h3>")
-                        for d in synthesis_json_data["disagreements"]:
-                            text_parts.append(
-                                f"<p><strong>{d.get('topic', '')}</strong> ({d.get('severity', 'moderate')})</p><ul>"
-                            )
-                            for pos in d.get("positions", []):
-                                text_parts.append(
-                                    f"<li>{pos.get('position', '')} — {pos.get('evidence', '')}</li>"
-                                )
-                            text_parts.append("</ul>")
-                    if synthesis_json_data["nuances"]:
-                        text_parts.append("<h3>Nuances</h3>")
-                        for n in synthesis_json_data["nuances"]:
-                            text_parts.append(
-                                f"<p><strong>{n.get('claim', '')}</strong> — {n.get('context', '')}</p>"
-                            )
-                    synthesis_text = "".join(text_parts) if text_parts else raw_output
-
-                except (json.JSONDecodeError, KeyError, TypeError):
-                    synthesis_text = raw_output
-                    synthesis_json_data = None
-
-            except Exception as exc:
-                logger.error(
-                    "Background simple synthesis error (round %d): %s",
-                    round_id,
-                    exc,
-                    exc_info=True,
-                )
-                await _broadcast_synthesis_error(
-                    form_id, round_id, f"Synthesis failed: {exc}"
-                )
-                return
+        synthesis_json_data = result.to_dict()
+        synthesis_text = _render_synthesis_text(result)
 
         # ── Save to DB ──
         round_obj = db.query(RoundModel).filter(RoundModel.id == round_id).first()
@@ -1867,8 +1703,16 @@ async def generate_synthesis_for_round(
     next_version = (max_version[0] + 1) if max_version else 1
 
     strategy = payload.strategy.lower()
+    if strategy not in {"simple", "committee", "ttd"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid synthesis strategy. Use 'simple', 'committee', or 'ttd'.",
+        )
+
     synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
     api_key = os.getenv("OPENROUTER_API_KEY", "")
+    estimated_seconds = _estimate_synthesis_duration_seconds(strategy, len(responses))
+    estimated_label = _format_duration_estimate(estimated_seconds)
 
     round_comments = _fetch_comments_for_round(db, round_id)
     round_comments_context = _format_comments_as_context(round_comments)
@@ -1964,8 +1808,11 @@ async def generate_synthesis_for_round(
         "status": "started",
         "message": (
             "Synthesis running in background. "
-            "You will be notified via WebSocket when complete."
+            f"Expected time: {estimated_label}. "
+            "You will be notified when complete."
         ),
+        "estimate_seconds": estimated_seconds,
+        "estimate_label": estimated_label,
     }
 
 

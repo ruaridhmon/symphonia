@@ -8,7 +8,7 @@ progress callbacks for WebSocket streaming.
 Strategies:
   - simple:    SinglePromptStrategy (fast, one-shot)
   - ttd:       DiffusionStrategy (iterative refinement with fitness evaluation)
-  - committee: CommitteeStrategy (multi-agent; falls back to TTD with warning)
+  - committee: CommitteeStrategy (multi-agent deliberation)
   - mock:      MockSynthesis (no API calls, for UX testing)
 
 The adapter maps between the app's data structures and the library's domain
@@ -441,8 +441,10 @@ class ConsensusLibraryAdapter:
     Key features:
       1. Uses ``ProseResponse`` bridge type instead of the domain ``ExpertResponse``
          which expects structured claims/evidence tuples.
-      2. Uses the correct ``TTDConfig`` field name (``n_initial_drafts``).
-      3. Properly implements committee fallback with logging.
+      2. Uses the correct strategy-specific prompt roots for the current
+         consensus branch.
+      3. Maps Symphonia's three synthesis modes onto the real library
+         strategies instead of maintaining a stale fallback.
       4. Wraps library calls in try/except with typed exceptions.
       5. Supports progress callbacks for WebSocket updates.
       6. Configurable timeout to prevent runaway synthesis.
@@ -461,7 +463,7 @@ class ConsensusLibraryAdapter:
     ) -> None:
         """
         Args:
-            strategy: "simple", "ttd", or "committee" (committee → TTD fallback).
+            strategy: "simple", "ttd", or "committee".
             model: OpenRouter model identifier.
             n_drafts: Number of parallel drafts for TTD.
             n_denoise_steps: Number of denoising iterations for TTD.
@@ -473,17 +475,8 @@ class ConsensusLibraryAdapter:
                 f"Must be one of {self.SUPPORTED_STRATEGIES}."
             )
 
-        # If committee requested, log and degrade to TTD
-        if strategy == "committee":
-            logger.warning(
-                "CommitteeStrategy is not yet implemented in the consensus library. "
-                "Falling back to TTD (DiffusionStrategy)."
-            )
-            self._effective_strategy = "ttd"
-        else:
-            self._effective_strategy = strategy
-
-        self.strategy_name = strategy  # preserve original for provenance
+        self._effective_strategy = strategy
+        self.strategy_name = strategy
         self.model = model
         self.n_drafts = n_drafts
         self.n_denoise_steps = n_denoise_steps
@@ -504,10 +497,12 @@ class ConsensusLibraryAdapter:
             from consensus.config import LLMConfig
             from consensus.llm.openrouter import OpenRouterClient
             from consensus.summarise.strategies import (
-                SinglePromptStrategy,
+                CommitteeStrategy,
                 DiffusionStrategy,
+                SinglePromptStrategy,
             )
             from consensus.diffusion.runner import TTDConfig
+            from consensus.llm.cost_tracker import CostTracker
         except ImportError as exc:
             raise SynthesisConfigError(
                 f"Failed to import consensus library. Is it installed? {exc}"
@@ -527,14 +522,14 @@ class ConsensusLibraryAdapter:
         )
         self._llm_client = OpenRouterClient(config)
 
-        prompts_dir = self._resolve_prompts_dir()
-
         if self._effective_strategy == "simple":
+            prompts_dir = self._resolve_prompt_base()
             self._strategy_instance = SinglePromptStrategy(
                 llm_client=self._llm_client,
                 prompts_dir=prompts_dir,
             )
         elif self._effective_strategy == "ttd":
+            prompts_dir = self._resolve_prompt_base()
             ttd_config = TTDConfig(
                 n_initial_drafts=self.n_drafts,
                 n_denoise_steps=self.n_denoise_steps,
@@ -548,6 +543,21 @@ class ConsensusLibraryAdapter:
                 ttd_config=ttd_config,
                 artefacts_dir=artefacts_dir,
             )
+        elif self._effective_strategy == "committee":
+            prompts_dir = self._resolve_prompt_base()
+            artefacts_dir = Path(__file__).resolve().parent.parent / "artefacts"
+            artefacts_dir.mkdir(parents=True, exist_ok=True)
+            committee_agents = 5 if self.n_drafts >= 5 else 3
+            self._strategy_instance = CommitteeStrategy(
+                llm_client=self._llm_client,
+                prompts_dir=prompts_dir,
+                artefacts_dir=artefacts_dir,
+                num_agents=committee_agents,
+                n_runs=1,
+                merge_best=False,
+                extract_graph=False,
+                cost_tracker=CostTracker(model_name=self.model),
+            )
 
         logger.info(
             "Initialised %s strategy (model=%s, drafts=%d)",
@@ -557,8 +567,8 @@ class ConsensusLibraryAdapter:
         )
 
     @staticmethod
-    def _resolve_prompts_dir() -> Path:
-        """Locate the consensus library's prompts directory."""
+    def _resolve_prompts_root() -> Path:
+        """Locate the consensus library's root prompts directory."""
         candidates: list[Path] = []
 
         # 0. Environment override (highest priority)
@@ -570,19 +580,16 @@ class ConsensusLibraryAdapter:
             import consensus
 
             package_dir = Path(consensus.__file__).resolve().parent
-            # 1. Sibling to the package's src directory
+            # 1. Packaged prompts inside the consensus module
+            candidates.append(package_dir / "prompts")
+            # 2. Source checkout layout: src/consensus -> repo_root/prompts
+            candidates.append(package_dir.parent.parent / "prompts")
+            # 3. Editable/install quirks: src -> prompts
             candidates.append(package_dir.parent / "prompts")
         except (ImportError, AttributeError) as exc:
             raise SynthesisConfigError(
                 f"Cannot locate consensus package directory: {exc}"
             ) from exc
-
-        # 2. Fallback: adjacent symphonia repo (dev-mode install)
-        candidates.append(
-            Path(__file__).resolve().parent.parent.parent.parent
-            / "symphonia"
-            / "prompts"
-        )
 
         for p in candidates:
             if p.is_dir():
@@ -593,6 +600,18 @@ class ConsensusLibraryAdapter:
         raise SynthesisConfigError(
             f"Could not find prompts directory. Searched: {searched}"
         )
+
+    def _resolve_prompt_base(self) -> Path:
+        """Resolve the prompt base expected by the active strategy."""
+        prompts_root = self._resolve_prompts_root()
+        if self._effective_strategy == "ttd":
+            diffusion_prompts = prompts_root / "diffusion" / "v1"
+            if not diffusion_prompts.is_dir():
+                raise SynthesisConfigError(
+                    f"Could not find diffusion prompts directory: {diffusion_prompts}"
+                )
+            return diffusion_prompts
+        return prompts_root
 
     # --------------------------------------------------------- response prep
 
@@ -1145,8 +1164,7 @@ def get_synthesiser(
         mock:      No API calls — fake results for UX testing.
         simple:    SinglePromptStrategy — fast one-shot synthesis.
         ttd:       DiffusionStrategy — iterative refinement (recommended).
-        committee: Logs warning and falls back to TTD (not yet implemented
-                   in the consensus library).
+        committee: Real committee strategy using the consensus integration branch.
     """
     effective_mode = (
         mode or strategy or os.getenv("SYNTHESIS_MODE", "simple").strip().lower()

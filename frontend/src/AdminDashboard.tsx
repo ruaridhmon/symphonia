@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { BarChart3, Settings, Users, Ticket } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
@@ -170,7 +171,7 @@ export default function AdminDashboard() {
                 color: 'var(--accent)',
               } : undefined}
             >
-              <span aria-hidden="true">📊</span> Analytics
+              <BarChart3 size={15} aria-hidden="true" /> Analytics
             </LoadingButton>
             <LoadingButton
               variant="ghost"
@@ -178,7 +179,7 @@ export default function AdminDashboard() {
               onClick={() => navigate('/admin/settings')}
               aria-label={t('adminDashboard.openSettings', 'Open settings')}
             >
-              <span aria-hidden="true">⚙</span> Settings
+              <Settings size={15} aria-hidden="true" /> Settings
             </LoadingButton>
             <LoadingButton
               variant="ghost"
@@ -186,7 +187,7 @@ export default function AdminDashboard() {
               onClick={() => navigate('/admin/users')}
               aria-label="Manage users"
             >
-              <span aria-hidden="true">👥</span> Users
+              <Users size={15} aria-hidden="true" /> Users
             </LoadingButton>
             <LoadingButton
               variant="accent"
@@ -219,8 +220,9 @@ export default function AdminDashboard() {
             size="sm"
             onClick={() => navigate('/join')}
             style={{ flexShrink: 0 }}
+            icon={<Ticket size={15} aria-hidden="true" />}
           >
-            🎟️ Enter join code
+            Enter join code
           </LoadingButton>
         </div>
 

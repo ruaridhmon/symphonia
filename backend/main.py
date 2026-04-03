@@ -36,6 +36,19 @@ logger = logging.getLogger("symphonia")
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 
 
+def _parse_cors_origins() -> list[str]:
+    raw = os.environ.get("CORS_ALLOW_ORIGINS")
+    if raw:
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:4173",
+        "https://symphonia.axiotic.ai",
+        "https://symphonia.caer.org.uk",
+    ]
+
+
 # =============================================================================
 # LIFECYCLE (modern lifespan replaces deprecated on_event)
 # =============================================================================
@@ -241,12 +254,7 @@ async def csrf_protection(request: Request, call_next):
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:4173",
-        "https://symphonia.axiotic.ai",
-    ],
+    allow_origins=_parse_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
