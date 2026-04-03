@@ -1,5 +1,5 @@
 import { LoadingButton, SynthesisModeSelector } from '../index';
-import { Cpu } from 'lucide-react';
+import { ArrowRight, Cpu, Eye, EyeOff } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -10,6 +10,10 @@ type Props = {
   estimateLabel: string | null;
   responseCount: number;
   isGenerating: boolean;
+  responsesOpen: boolean;
+  onToggleResponses: () => void;
+  onStartNextRound: () => void;
+  loading: boolean;
   onGenerate: () => void;
 };
 
@@ -22,6 +26,10 @@ export default function AISynthesisPanel({
   estimateLabel,
   responseCount,
   isGenerating,
+  responsesOpen,
+  onToggleResponses,
+  onStartNextRound,
+  loading,
   onGenerate,
 }: Props) {
   const canGenerate = responseCount > 0;
@@ -40,12 +48,33 @@ export default function AISynthesisPanel({
         style={{ color: 'var(--accent)' }}
       >
         <Cpu size={10} aria-hidden="true" />
-        AI Synthesis
+        Workflow
       </h3>
       <div className="space-y-2">
-        <p className="text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.55 }}>
-          Choose the synthesis mode, then generate when the round is ready.
-        </p>
+        <div className="grid grid-cols-2 gap-2">
+          <LoadingButton
+            variant="ghost"
+            size="sm"
+            onClick={onToggleResponses}
+            className="w-full justify-center gap-2"
+            icon={responsesOpen ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}
+            aria-pressed={responsesOpen}
+          >
+            {responsesOpen ? 'Hide responses' : 'Show responses'}
+          </LoadingButton>
+          <LoadingButton
+            variant="secondary"
+            size="sm"
+            onClick={onStartNextRound}
+            loading={loading}
+            loadingText="Starting…"
+            className="w-full justify-center gap-2"
+            icon={<ArrowRight size={14} aria-hidden="true" />}
+          >
+            Next round
+          </LoadingButton>
+        </div>
+
         <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} />
 
         <div
@@ -63,7 +92,7 @@ export default function AISynthesisPanel({
           >
             {canGenerate
               ? `${estimateLabel} for ${responseCount} response${responseCount === 1 ? '' : 's'}.`
-              : 'Waiting for responses before synthesis can begin.'}
+              : 'Waiting for responses.'}
           </p>
         </div>
 
@@ -102,7 +131,7 @@ export default function AISynthesisPanel({
           className="w-full font-semibold"
           disabled={!canGenerate}
         >
-          {canGenerate ? 'Generate AI Synthesis' : 'Waiting for Responses'}
+          {canGenerate ? 'Generate synthesis' : 'Waiting for responses'}
         </LoadingButton>
       </div>
     </div>

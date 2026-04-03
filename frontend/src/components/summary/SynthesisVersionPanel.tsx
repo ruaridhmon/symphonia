@@ -37,7 +37,7 @@ export default function SynthesisVersionPanel({
   showCompare,
   onToggleCompare,
 }: Props) {
-  if (!displayRound) return null;
+  if (!displayRound || synthesisVersions.length === 0) return null;
 
   return (
     <div className="card p-3">
@@ -50,13 +50,7 @@ export default function SynthesisVersionPanel({
           · R{displayRound.round_number}
         </span>
       </h3>
-
-      {synthesisVersions.length === 0 ? (
-        <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          No versions yet. Use <strong>Generate Summary</strong> above to create one.
-        </p>
-      ) : (
-        <div className="space-y-3">
+      <div className="space-y-3">
           {/* Version pills */}
           <div className="flex flex-wrap gap-2">
             {synthesisVersions.map(v => {
@@ -167,7 +161,6 @@ export default function SynthesisVersionPanel({
             </button>
           )}
         </div>
-      )}
     </div>
   );
 }

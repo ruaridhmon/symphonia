@@ -44,7 +44,6 @@ import {
 	AISynthesisPanel,
 	SynthesisVersionPanel,
 	NextRoundQuestionsCard,
-	ActionsCard,
 	ResponsesAccordion,
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
@@ -1123,39 +1122,6 @@ export default function SummaryPage() {
 						aria-label={t('summary.synthesisControls')}
 						className="space-y-3 xl:sticky xl:top-24 self-start"
 					>
-						{/* Compact form title + round badge */}
-						<div
-							className="card px-3 py-3 flex items-center justify-between"
-						>
-							<span className="text-xs font-medium truncate" style={{ color: 'var(--foreground)', maxWidth: '18rem' }}>
-								{form.title}
-							</span>
-							<span
-								className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold flex-shrink-0"
-								style={{
-									backgroundColor: activeRound
-										? 'color-mix(in srgb, var(--accent) 12%, transparent)'
-										: 'var(--muted)',
-									color: activeRound ? 'var(--accent)' : 'var(--muted-foreground)',
-								}}
-							>
-								{activeRound && (
-									<span
-										className="w-1 h-1 rounded-full"
-										style={{ backgroundColor: 'var(--accent)' }}
-									/>
-								)}
-								{activeRound ? `R${activeRound.round_number}` : 'No round'}
-							</span>
-						</div>
-
-						<ActionsCard
-								responsesOpen={responsesOpen}
-								onToggleResponses={viewAllResponses}
-								onStartNextRound={startNextRound}
-								loading={loading}
-							/>
-
 						<AISynthesisPanel
 							synthesisMode={synthesisMode}
 							onModeChange={setSynthesisMode}
@@ -1165,23 +1131,29 @@ export default function SummaryPage() {
 							estimateLabel={synthesisEstimateLabel}
 							responseCount={responseCountForDisplay}
 							isGenerating={isGenerating}
+							responsesOpen={responsesOpen}
+							onToggleResponses={viewAllResponses}
+							onStartNextRound={startNextRound}
+							loading={loading}
 							onGenerate={generateSummary}
 						/>
 
-						<SynthesisVersionPanel
-							displayRound={displayRound}
-							synthesisVersions={synthesisVersions}
-							selectedVersionId={selectedVersionId}
-							onSelectVersion={setSelectedVersionId}
-							selectedVersion={selectedVersion}
-							onActivateVersion={activateVersion}
-							resolvedExpertLabels={resolvedExpertLabels}
-							formId={formId}
-							token={token}
-							currentUserEmail={email}
-							showCompare={showVersionCompare}
-							onToggleCompare={() => setShowVersionCompare(v => !v)}
-						/>
+						{synthesisVersions.length > 0 && (
+							<SynthesisVersionPanel
+								displayRound={displayRound}
+								synthesisVersions={synthesisVersions}
+								selectedVersionId={selectedVersionId}
+								onSelectVersion={setSelectedVersionId}
+								selectedVersion={selectedVersion}
+								onActivateVersion={activateVersion}
+								resolvedExpertLabels={resolvedExpertLabels}
+								formId={formId}
+								token={token}
+								currentUserEmail={email}
+								showCompare={showVersionCompare}
+								onToggleCompare={() => setShowVersionCompare(v => !v)}
+							/>
+						)}
 
 					</aside>
 				</div>

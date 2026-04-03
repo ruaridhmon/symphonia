@@ -17,11 +17,8 @@ export default function NextRoundQuestionsCard({
   return (
     <div className="card p-4 sm:p-6">
       <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <CircleHelp size={18} style={{ color: 'var(--accent)' }} /> Next Round Questions
+        <CircleHelp size={18} style={{ color: 'var(--accent)' }} /> Next round
       </h2>
-      <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-        Draft the questions for the next round.
-      </p>
       <div className="space-y-2 mt-3">
         {questions.map((q, index) => (
           <div key={index} className="flex gap-2 items-center group">
@@ -45,11 +42,11 @@ export default function NextRoundQuestionsCard({
               variant="secondary"
               size="sm"
               onClick={() => onRemoveQuestion(index)}
-              style={{ opacity: 0.4, transition: 'opacity 0.15s ease' }}
+              aria-label={`Remove question ${index + 1}`}
+              style={{ opacity: 0.55, transition: 'opacity 0.15s ease', minWidth: 0, paddingInline: '0.65rem' }}
               className="group-hover:!opacity-100"
               icon={<X size={14} aria-hidden="true" />}
             >
-              Remove
             </LoadingButton>
           </div>
         ))}
