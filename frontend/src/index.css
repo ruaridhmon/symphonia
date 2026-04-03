@@ -303,8 +303,8 @@
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at top center, color-mix(in srgb, var(--auth-accent) 5%, transparent), transparent 40%),
-      linear-gradient(180deg, color-mix(in srgb, var(--card) 22%, transparent), transparent 36%);
+      radial-gradient(circle at top center, color-mix(in srgb, var(--foreground) 2.5%, transparent), transparent 38%),
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 18%, transparent), transparent 34%);
   }
 
   .auth-brand {
@@ -326,7 +326,7 @@
     border-radius: 24px;
     background: color-mix(in srgb, var(--card) 97%, white 3%);
     box-shadow:
-      0 20px 48px color-mix(in srgb, var(--foreground) 5%, transparent),
+      0 16px 38px color-mix(in srgb, var(--foreground) 4%, transparent),
       inset 0 1px 0 color-mix(in srgb, white 75%, transparent);
     backdrop-filter: blur(14px);
     border: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
