@@ -1,7 +1,7 @@
 import { Component, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -175,6 +175,7 @@ export default function SummaryPage() {
 	useDocumentTitle(t('summary.pageTitle'));
 	const navigate = useNavigate();
 	const { id } = useParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const formId = Number(id);
 	const { toastError, toastWarning, toastSuccess, toastInfo } = useToast();
 
@@ -284,6 +285,12 @@ export default function SummaryPage() {
 	});
 
 	// ── Derived values ──
+	const requestedRoundId = useMemo(() => {
+		const raw = searchParams.get('round');
+		if (!raw) return null;
+		const parsed = Number(raw);
+		return Number.isFinite(parsed) ? parsed : null;
+	}, [searchParams]);
 	const displayRound = selectedRound || activeRound;
 	const targetRoundForGeneration = selectedRound || activeRound;
 	const structuredSynthesisData = displayRound?.synthesis_json || null;
@@ -454,19 +461,34 @@ export default function SummaryPage() {
 
 			const active = mapped.find(x => x.is_active) || null;
 			setActiveRound(active);
+			const persistedRound = requestedRoundId != null
+				? mapped.find(x => x.id === requestedRoundId) || null
+				: null;
+			const currentSelection = selectedRound
+				? mapped.find(x => x.id === selectedRound.id) || null
+				: null;
+			const resolvedSelection = persistedRound || currentSelection || active;
 
-			if (active && !selectedRound) {
-				setSelectedRound(active);
-				loadSynthesisVersions(active.id).catch(() => {});
+			if (requestedRoundId != null && !persistedRound) {
+				setSearchParams(prev => {
+					const next = new URLSearchParams(prev);
+					next.delete('round');
+					return next;
+				}, { replace: true });
 			}
 
-				if (active && editor) {
-					resetEditorToSaved(active.synthesis || '');
-					const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
-					setNextRoundQuestions((qs || []).map(extractQuestionText));
-				} else if (f && Array.isArray((f as Form).questions)) {
-					setNextRoundQuestions((f as Form).questions.map(extractQuestionText));
-				}
+			setSelectedRound(resolvedSelection || null);
+			if (resolvedSelection) {
+				loadSynthesisVersions(resolvedSelection.id).catch(() => {});
+			}
+
+			if (active && editor) {
+				resetEditorToSaved(active.synthesis || '');
+				const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
+				setNextRoundQuestions((qs || []).map(extractQuestionText));
+			} else if (f && Array.isArray((f as Form).questions)) {
+				setNextRoundQuestions((f as Form).questions.map(extractQuestionText));
+			}
 		} catch (err) {
 			setLoadError((err as Error).message || 'Failed to load consultation data');
 		} finally {
@@ -595,6 +617,11 @@ export default function SummaryPage() {
 			await loadAll();
 			await loadResponses();
 			setSelectedRound(null);
+			setSearchParams(prev => {
+				const next = new URLSearchParams(prev);
+				next.delete('round');
+				return next;
+			}, { replace: true });
 		} catch (err) {
 			toastError((err as Error).message || 'Failed to start next round');
 		} finally {
@@ -720,6 +747,11 @@ export default function SummaryPage() {
 	function handleSelectRound(round: Round) {
 		try {
 			setSelectedRound(round);
+			setSearchParams(prev => {
+				const next = new URLSearchParams(prev);
+				next.set('round', String(round.id));
+				return next;
+			}, { replace: true });
 			if (round.is_active && editor) resetEditorToSaved(round.synthesis || '');
 			loadSynthesisVersions(round.id).catch((err) => {
 				console.error('[handleSelectRound] Failed to load synthesis versions:', err);
