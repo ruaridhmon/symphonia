@@ -157,13 +157,13 @@ export default function AdminDashboard() {
         )}
 
         {/* ── Create form CTA ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5 sm:mb-6">
           <div>
             <div
               className="text-[11px] font-semibold uppercase tracking-[0.18em] mb-1"
               style={{ color: 'var(--accent)' }}
             >
-              Control Centre
+              Dashboard
             </div>
             <h1
               className="text-lg sm:text-xl font-bold tracking-tight"
@@ -171,11 +171,8 @@ export default function AdminDashboard() {
             >
               {t('adminDashboard.title')}
             </h1>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+            <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
               {t('adminDashboard.subtitle')}
-            </p>
-            <p className="text-sm mt-2 max-w-2xl" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
-              Start a new consultation, reopen one already in motion, or jump directly back into the rounds that need your attention.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
@@ -258,21 +255,18 @@ export default function AdminDashboard() {
 
         {/* ── Join consultation banner ── */}
         <div
-          className="mb-4 rounded-xl flex items-center justify-between gap-4 px-5 py-4"
+          className="mb-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3"
           style={{
-            background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), color-mix(in srgb, var(--accent) 3%, transparent))',
-            border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
+            background: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
+            border: '1px solid color-mix(in srgb, var(--accent) 14%, var(--border))',
           }}
           >
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--accent)' }}>
-                Quick entry
+                Join code
               </p>
-              <p className="text-sm font-semibold mt-1" style={{ color: 'var(--foreground)' }}>
-                Joining a consultation as an expert?
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                Use a join code to move straight into the active consultation without browsing the dashboard.
+              <p className="text-sm mt-1" style={{ color: 'var(--foreground)' }}>
+                Enter a code to join as an expert.
               </p>
             </div>
           <LoadingButton
@@ -351,9 +345,6 @@ export default function AdminDashboard() {
                     {forms.length}
                   </span>
                 </div>
-                <p className="hidden lg:block text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  Most engaged consultations appear first so you can pick up live work faster.
-                </p>
 
                 {/* Right: search input */}
                 <div
