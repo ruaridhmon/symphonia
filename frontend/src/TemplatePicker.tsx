@@ -130,13 +130,11 @@ export default function TemplatePicker({
       });
   }, []);
 
-  // Group templates by category
-  const grouped = templates.reduce<Record<string, FormTemplate[]>>((acc, t) => {
-    (acc[t.category] ??= []).push(t);
-    return acc;
-  }, {});
-
-  const categoryOrder = Object.keys(grouped).sort();
+  const sortedTemplates = [...templates].sort((a, b) => {
+    const categoryCompare = a.category.localeCompare(b.category);
+    if (categoryCompare !== 0) return categoryCompare;
+    return a.name.localeCompare(b.name);
+  });
 
   if (loading) {
     return (
@@ -252,131 +250,123 @@ export default function TemplatePicker({
         </h2>
       </div>
 
-      {categoryOrder.map(category => (
-        <div key={category} style={{ marginBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 10px 2px' }}>
-            <h3
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: 12,
+        }}
+      >
+        {sortedTemplates.map(template => {
+          const isHovered = hoveredId === template.id;
+          return (
+            <button
+              key={template.id}
+              type="button"
+              onClick={() => onSelectTemplate(template)}
+              onMouseEnter={() => setHoveredId(template.id)}
+              onMouseLeave={() => setHoveredId(null)}
               style={{
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: 'var(--muted-foreground)',
-                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                textAlign: 'left',
+                padding: '15px 16px',
+                borderRadius: 12,
+                border: `1px solid ${isHovered ? 'color-mix(in srgb, var(--accent) 55%, var(--border))' : 'color-mix(in srgb, var(--border) 70%, transparent)'}`,
+                backgroundColor: isHovered
+                  ? 'color-mix(in srgb, var(--accent) 4%, var(--card))'
+                  : 'var(--card)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                boxShadow: isHovered
+                  ? '0 10px 24px rgba(15, 23, 42, 0.08)'
+                  : '0 3px 8px rgba(15, 23, 42, 0.03)',
+                transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
               }}
             >
-              {category}
-            </h3>
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: 12,
-            }}
-          >
-            {grouped[category].map(template => {
-              const isHovered = hoveredId === template.id;
-              return (
-                <button
-                  key={template.id}
-                  type="button"
-                  onClick={() => onSelectTemplate(template)}
-                  onMouseEnter={() => setHoveredId(template.id)}
-                  onMouseLeave={() => setHoveredId(null)}
+              <span
+                style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: 'var(--muted-foreground)',
+                  marginBottom: 8,
+                }}
+              >
+                {template.category}
+              </span>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <span
                   style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    textAlign: 'left',
-                    padding: '15px 16px',
-                    borderRadius: 12,
-                    border: `1px solid ${isHovered ? 'color-mix(in srgb, var(--accent) 55%, var(--border))' : 'color-mix(in srgb, var(--border) 70%, transparent)'}`,
+                    fontSize: '1.2rem',
+                    lineHeight: 1,
+                    width: 34,
+                    height: 34,
+                    borderRadius: 8,
                     backgroundColor: isHovered
-                      ? 'color-mix(in srgb, var(--accent) 4%, var(--card))'
-                      : 'var(--card)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    boxShadow: isHovered
-                      ? '0 10px 24px rgba(15, 23, 42, 0.08)'
-                      : '0 3px 8px rgba(15, 23, 42, 0.03)',
-                    transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
+                      ? 'color-mix(in srgb, var(--accent) 10%, transparent)'
+                      : 'color-mix(in srgb, var(--foreground) 6%, transparent)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'background-color 0.15s ease',
                   }}
                 >
-                  {/* Icon + Name row */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                    <span
-                      style={{
-                        fontSize: '1.2rem',
-                        lineHeight: 1,
-                        width: 34,
-                        height: 34,
-                        borderRadius: 8,
-                        backgroundColor: isHovered
-                          ? 'color-mix(in srgb, var(--accent) 10%, transparent)'
-                          : 'color-mix(in srgb, var(--foreground) 6%, transparent)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        transition: 'background-color 0.15s ease',
-                      }}
-                    >
-                      {template.icon}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '0.92rem',
-                        fontWeight: 600,
-                        color: 'var(--foreground)',
-                      }}
-                    >
-                      {template.name}
-                    </span>
-                  </div>
+                  {template.icon}
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.92rem',
+                    fontWeight: 600,
+                    color: 'var(--foreground)',
+                  }}
+                >
+                  {template.name}
+                </span>
+              </div>
 
-                  {/* Description */}
-                  <p
-                    style={{
-                      fontSize: '0.79rem',
-                      color: 'var(--muted-foreground)',
-                      lineHeight: 1.5,
-                      margin: '0 0 10px 0',
-                      flex: 1,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {template.description}
-                  </p>
+              <p
+                style={{
+                  fontSize: '0.79rem',
+                  color: 'var(--muted-foreground)',
+                  lineHeight: 1.5,
+                  margin: '0 0 10px 0',
+                  flex: 1,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                {template.description}
+              </p>
 
-                  {/* Meta row */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      fontSize: '0.71rem',
-                      color: 'var(--muted-foreground)',
-                    }}
-                  >
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <FileText size={12} />
-                      {template.default_questions.length} questions
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Users size={12} />
-                      {template.suggested_panel_size} experts
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  fontSize: '0.71rem',
+                  color: 'var(--muted-foreground)',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <FileText size={12} />
+                  {template.default_questions.length} questions
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Users size={12} />
+                  {template.suggested_panel_size} experts
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
