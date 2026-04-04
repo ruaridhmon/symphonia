@@ -36,7 +36,7 @@ export default function ResponsesAccordion({
 
   useEffect(() => {
     if (defaultExpandableIds.length > 0) {
-      setExpandedRounds(new Set(defaultExpandableIds));
+      setExpandedRounds(new Set([defaultExpandableIds[0]]));
       return;
     }
     setExpandedRounds(new Set());
@@ -54,14 +54,6 @@ export default function ResponsesAccordion({
     });
   }
 
-  function expandAll() {
-    setExpandedRounds(new Set(defaultExpandableIds));
-  }
-
-  function collapseAll() {
-    setExpandedRounds(new Set());
-  }
-
   if (structuredRounds.length === 0) {
     return (
       <div className="card p-4 sm:p-6">
@@ -76,39 +68,26 @@ export default function ResponsesAccordion({
     );
   }
 
-  const allExpanded = defaultExpandableIds.every(id => expandedRounds.has(id));
-
   return (
-    <div className="card flex flex-col" style={{ maxHeight: '70vh' }}>
-      {/* Header — always visible, outside scroll area */}
+    <div
+      className="card flex flex-col"
+      style={{
+        maxHeight: '70vh',
+        backgroundColor: 'color-mix(in srgb, var(--muted) 12%, var(--card))',
+      }}
+    >
       <div
-        className="flex items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 flex-shrink-0"
+        className="p-4 sm:p-5 pb-3 flex-shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <MessageSquare size={18} />
           {t('responses.title')}
         </h2>
-        <button
-          onClick={allExpanded ? collapseAll : expandAll}
-          className="text-xs font-medium px-3 py-1.5 rounded-md transition-colors"
-          style={{
-            color: 'var(--accent)',
-            backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-            border: 'none',
-            cursor: 'pointer',
-          }}
-        >
-          {allExpanded ? t('responses.collapseAll') : t('responses.expandAll')}
-        </button>
-      </div>
-
-      <div className="px-4 sm:px-6 py-2 text-xs" style={{ color: 'var(--muted-foreground)', borderBottom: '1px solid var(--border)' }}>
-        Responses are grouped by round.
       </div>
 
       {/* Scrollable rounds list */}
-      <div className="overflow-y-auto flex-1 min-h-0 p-4 sm:p-6 pt-3 sm:pt-4 space-y-2">
+      <div className="overflow-y-auto flex-1 min-h-0 p-4 sm:p-5 pt-3 space-y-2.5">
         {structuredRounds.map(round => {
           const isExpanded = expandedRounds.has(round.id);
           const roundQuestions =
@@ -122,10 +101,10 @@ export default function ResponsesAccordion({
               key={round.id}
               className="rounded-lg overflow-hidden transition-all"
               style={{
-                border: '1px solid var(--border)',
+                border: '1px solid color-mix(in srgb, var(--border) 58%, transparent)',
                 backgroundColor: isExpanded
                   ? 'var(--card)'
-                  : 'var(--muted)',
+                  : 'color-mix(in srgb, var(--muted) 46%, transparent)',
               }}
             >
               {/* Round header — always visible, clickable */}
