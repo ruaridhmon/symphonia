@@ -51,9 +51,9 @@ function StarterOptionCard({
         width: '100%',
         display: 'flex',
         alignItems: 'center',
-        gap: 16,
-        padding: '18px 20px',
-        borderRadius: 16,
+        gap: 14,
+        padding: '16px 18px',
+        borderRadius: 14,
         border: `1px solid ${active ? 'color-mix(in srgb, var(--accent) 30%, var(--border))' : 'var(--border)'}`,
         background: active
           ? 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--card)), var(--card))'
@@ -61,15 +61,15 @@ function StarterOptionCard({
         cursor: 'pointer',
         transition: 'all 0.15s ease',
         textAlign: 'left',
-        minHeight: 124,
-        boxShadow: active ? '0 14px 30px rgba(37, 99, 235, 0.12)' : '0 4px 10px rgba(15, 23, 42, 0.04)',
+        minHeight: 102,
+        boxShadow: active ? '0 10px 24px rgba(37, 99, 235, 0.08)' : '0 2px 6px rgba(15, 23, 42, 0.03)',
       }}
     >
       <div
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: 12,
+          width: 40,
+          height: 40,
+          borderRadius: 10,
           backgroundColor: active
             ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
             : 'color-mix(in srgb, var(--foreground) 6%, transparent)',
@@ -83,19 +83,19 @@ function StarterOptionCard({
         {icon}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--foreground)', marginBottom: 4 }}>
+        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--foreground)', marginBottom: 3 }}>
           {title}
         </div>
-        <div style={{ fontSize: '0.84rem', color: 'var(--muted-foreground)', lineHeight: 1.55 }}>
+        <div style={{ fontSize: '0.8rem', color: 'var(--muted-foreground)', lineHeight: 1.45 }}>
           {description}
         </div>
       </div>
       <ArrowRight
-        size={18}
+        size={16}
         style={{
           color: active ? 'var(--accent)' : 'var(--muted-foreground)',
           flexShrink: 0,
-          opacity: active ? 1 : 0.55,
+          opacity: active ? 1 : 0.35,
         }}
       />
     </button>
@@ -217,7 +217,7 @@ export default function TemplatePicker({
       >
         <StarterOptionCard
           title="Blank consensus"
-          description="Start empty with evidence, counterarguments, and confidence enabled by default."
+          description="Evidence, counterarguments, and confidence enabled."
           icon={<Sparkles size={22} />}
           active={hoveredBlank}
           onClick={onStartBlank}
@@ -227,7 +227,7 @@ export default function TemplatePicker({
 
         <StarterOptionCard
           title="Blank survey"
-          description="Start empty with plain open-text responses only."
+          description="Open-text responses only."
           icon={<MessagesSquare size={22} />}
           active={hoveredInfoBlank}
           onClick={onStartInformationGathering}
@@ -254,7 +254,7 @@ export default function TemplatePicker({
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: 12,
+          gap: 10,
         }}
       >
         {sortedTemplates.map(template => {
@@ -271,7 +271,7 @@ export default function TemplatePicker({
                 flexDirection: 'column',
                 alignItems: 'flex-start',
                 textAlign: 'left',
-                padding: '15px 16px',
+                padding: '14px 15px',
                 borderRadius: 12,
                 border: `1px solid ${isHovered ? 'color-mix(in srgb, var(--accent) 55%, var(--border))' : 'color-mix(in srgb, var(--border) 70%, transparent)'}`,
                 backgroundColor: isHovered
@@ -280,31 +280,33 @@ export default function TemplatePicker({
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
                 boxShadow: isHovered
-                  ? '0 10px 24px rgba(15, 23, 42, 0.08)'
-                  : '0 3px 8px rgba(15, 23, 42, 0.03)',
+                  ? '0 8px 18px rgba(15, 23, 42, 0.06)'
+                  : '0 1px 4px rgba(15, 23, 42, 0.02)',
                 transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
+                minHeight: 168,
+                justifyContent: 'space-between',
               }}
             >
               <span
                 style={{
-                  fontSize: '0.65rem',
+                  fontSize: '0.62rem',
                   fontWeight: 700,
                   textTransform: 'uppercase',
                   letterSpacing: '0.06em',
                   color: 'var(--muted-foreground)',
-                  marginBottom: 8,
+                  marginBottom: 6,
                 }}
               >
                 {template.category}
               </span>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 7 }}>
                 <span
                   style={{
-                    fontSize: '1.2rem',
+                    fontSize: '1.05rem',
                     lineHeight: 1,
-                    width: 34,
-                    height: 34,
+                    width: 30,
+                    height: 30,
                     borderRadius: 8,
                     backgroundColor: isHovered
                       ? 'color-mix(in srgb, var(--accent) 10%, transparent)'
@@ -320,7 +322,7 @@ export default function TemplatePicker({
                 </span>
                 <span
                   style={{
-                    fontSize: '0.92rem',
+                    fontSize: '0.88rem',
                     fontWeight: 600,
                     color: 'var(--foreground)',
                   }}
@@ -331,13 +333,13 @@ export default function TemplatePicker({
 
               <p
                 style={{
-                  fontSize: '0.79rem',
+                  fontSize: '0.76rem',
                   color: 'var(--muted-foreground)',
-                  lineHeight: 1.5,
-                  margin: '0 0 10px 0',
+                  lineHeight: 1.45,
+                  margin: '0 0 9px 0',
                   flex: 1,
                   display: '-webkit-box',
-                  WebkitLineClamp: 3,
+                  WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
                 }}
@@ -350,7 +352,7 @@ export default function TemplatePicker({
                   display: 'flex',
                   alignItems: 'center',
                   gap: 12,
-                  fontSize: '0.71rem',
+                  fontSize: '0.69rem',
                   color: 'var(--muted-foreground)',
                 }}
               >
