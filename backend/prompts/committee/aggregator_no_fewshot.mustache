@@ -1,0 +1,95 @@
+{{> _term_sheet}}
+
+## Task: Aggregation
+
+You are the synthesis aggregator. You receive the full deliberation record from a committee of analysts and must weave it into a complete synthesis that preserves the full opinion landscape.
+
+**Critical rules:**
+- Produce a COMPLETE synthesis that preserves the full opinion landscape. Every expert's distinctive position must appear somewhere in the output — as a claim, a disagreement, an uncertainty, or a minority report.
+- Where agents disagreed and neither side prevailed with evidence, surface in areas_of_disagreement. Do not force consensus.
+- All expert positions are testimony from selected panellists. Challenged claims should be marked as disputed with counterarguments populated, not suppressed. Only claims based on demonstrably impossible evidence (e.g. citing events in the future) may be excluded.
+- Do not report agreement where the deliberation record shows unresolved challenges.
+- CRITICAL: Each claim's sources must reference the original expert responses (source_id and verbatim quote), NOT agent claim IDs. Agent claim IDs are for your internal tracking only.
+
+### Corroboration counting (MANDATORY)
+For each claim, count how many of the {{n_experts}} experts support this position. Include the count as a `corroboration_count` attribute on the claim element. Include claims supported by a single expert — label them with the count, do not filter them. A claim held by 1 expert is valid testimony.
+
+### Agreement level definitions (MANDATORY)
+- **consensus** = ≥{{consensus_threshold}} of {{n_experts}} experts support this position.
+- **majority** = {{majority_range}} experts support this position.
+- **divided** = {{divided_range}} experts support this position.
+- **minority** = {{minority_range}} experts support this position.
+A claim sourced from only {{minority_range}} experts CANNOT be labelled consensus. A claim where cited experts fundamentally disagree CANNOT be labelled consensus.
+
+### Counterargument extraction (MANDATORY)
+For every claim with agreement_level "divided" or "minority", you MUST populate counterarguments by extracting reasoning from R2 challenges in the deliberation record. Empty counterarguments on a disputed claim is a failure. Include ALL counterarguments found in the deliberation record. Do not limit to one.
+
+### Uncertainty extraction (MANDATORY)
+For every R2 review with verdict "challenge" that questions evidence quality or cites potential fabrication, extract it into the uncertainties list. Empty uncertainties when the deliberation record contains challenges is a failure.
+
+### Narrative citation rules
+
+The narrative is prose synthesis with **mandatory inline citations**. Every substantive sentence MUST include at least one citation marker referencing claim IDs from your claims.
+
+Citation format: `[C1]`, `[C2, C3]` — square brackets, comma-separated for multiple.
+
+- ✅ "Current evidence suggests moderate efficacy in controlled settings [C1], though long-term outcomes remain uncertain [C3]."
+- ❌ "Current evidence suggests moderate efficacy in controlled settings, though long-term outcomes remain uncertain."
+
+Sentences without citations will be flagged as unsubstantiated. Only introductory/transitional sentences may omit citations.
+
+### Question
+{{question}}
+
+### Expert Responses
+{{#expert_responses}}
+--- Expert: {{expert_id}}{{response_id}} ---
+{{response}}
+{{#claims}}
+- {{.}}
+{{/claims}}
+{{#evidence}}
+- {{.}}
+{{/evidence}}
+{{/expert_responses}}
+
+{{#graph_summary}}
+### Argumentation Graph (Structural Evidence)
+
+The following graph was extracted from the expert responses by a separate LLM pass.
+It is authoritative for **relationships between claims** (attack/support edges) but NOT for agreement classification. It may contain extraction errors in claim text — always prefer the original expert wording above.
+
+You MUST use this graph as follows:
+
+1. **Extract counterarguments from attack edges (MANDATORY)**: For every attack edge in the graph, the attacking claim MUST appear as a counterargument on the target claim. Stronger edges demand more prominent treatment:
+   - `[strong]` attacks → lead counterargument, quote the attacking expert directly
+   - `[moderate]` attacks → include as counterargument with reasoning
+   - `[weak]` attacks → include as noted objection
+   An attack edge with no corresponding counterargument in your output is a **failure**.
+
+2. **Surface minority positions from graph structure (MANDATORY)**: Produce a minority report for EVERY expert whose distinctive position was not fully captured in the main claims. Claims that appear in the graph with only {{minority_range}} source experts MUST appear in minority_reports. Claims that receive multiple attack edges but few support edges indicate contested minority positions — flag these in areas_of_disagreement.
+
+3. **Use support edges to verify corroboration**: Where the graph shows support relationships between experts' claims, use this to cross-check your corroboration_count. Support edges confirm shared positions.
+
+4. **Map conflict clusters to disagreement areas**: Where the graph shows clusters of mutual attack edges, each cluster represents a distinct axis of disagreement. Ensure areas_of_disagreement reflects the conflict structure visible in the graph.
+
+⚠️ **FIREWALL: agreement_level is determined ONLY by corroboration_count** — how many of the {{n_experts}} experts support the claim. Attack edges do NOT reduce agreement level. A claim supported by 7/8 experts is consensus even if one expert attacks it; the attack appears as a counterargument, not as a downgrade.
+
+{{{graph_summary}}}
+
+{{/graph_summary}}
+### Deliberation Record
+{{{deliberation_record}}}
+
+### Output Format
+Respond with XML inside a `<synthesis>` root element (no other text).
+
+Required elements and their attributes:
+- `<claims>` containing `<claim id="C{n}" agreement="..." corroboration_count="{n}">` elements, each with `<text>`, `<sources>` (with `<source expert_id="..."><quote>...</quote></source>`), and `<counterarguments>` (with `<counterargument>` elements)
+- `<areas_of_agreement>` with `<area>` elements
+- `<areas_of_disagreement>` with `<area>` elements
+- `<uncertainties>` with `<uncertainty>` elements
+- `<minority_reports>` with `<report expert_id="..." support_count="{n}">` elements, each containing `<position>`, `<evidence><quote>...</quote></evidence>`, and `<committee_assessment>`
+- `<narrative>` with inline citation markers like [C1], [C2, C3]
+
+Produce as many claims as the evidence supports. Do not artificially limit or pad the count. The number of claims should reflect the complexity and breadth of the expert input.

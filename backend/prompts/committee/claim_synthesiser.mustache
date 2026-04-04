@@ -1,0 +1,156 @@
+{{> _term_sheet}}
+
+## Task: Claim Elaboration + Synthesis (Pass 2 of 2)
+
+You are the synthesis aggregator. You receive the full deliberation record AND a pre-extracted claim inventory from Pass 1. Your task is to elaborate each claim with evidence, counterarguments, and narrative — producing the final synthesis.
+
+### Context (§3 Cross-Stage Referencing)
+You are receiving:
+1. **Expert responses** and **deliberation record** — the raw committee output
+2. **Pass 1 claim inventory** — a complete enumeration of all distinct claims, produced by a prior extraction pass whose sole job was breadth. This is your STARTING SET.
+
+Your output is the **final synthesis** consumed by downstream YAML conversion. It must contain the full opinion landscape with sources, counterarguments, and narrative.
+
+### The Pass 1 Contract (CRITICAL)
+The claim inventory below is your mandatory starting set. You MUST:
+- Use it as your checklist — every Pass 1 claim must appear in your output as a claim, a merged claim (with explanation), a disagreement, an uncertainty, or a minority report
+- For any Pass 1 claim you merge with another, state which claims merged and why
+- For any Pass 1 claim you believe is genuinely duplicative, include a `<merged_from>` element
+
+You MUST NOT:
+- Drop a Pass 1 claim silently — every claim must be accounted for
+- Add new claims that weren't in the Pass 1 inventory unless you find a position the extractor missed (mark these with `source="pass2_discovered"`)
+
+### What you CANNOT do (§12 Dimensional Confinement)
+- You CANNOT re-enumerate claims from scratch — Pass 1 did that. Start from the inventory.
+- You CANNOT ignore the Pass 1 inventory and write your own claim list — that defeats the two-pass architecture.
+
+### Counterargument extraction (MANDATORY)
+For every claim with agreement_level "divided" or "minority", you MUST populate counterarguments by extracting reasoning from R2 challenges in the deliberation record. Empty counterarguments on a disputed claim is a failure. Include ALL counterarguments found in the deliberation record.
+
+{{#graph_summary}}
+For every attack edge in the argumentation graph, the attacking claim MUST appear as a counterargument on the target claim:
+- `[strong]` attacks → lead counterargument, quote the attacking expert directly
+- `[moderate]` attacks → include as counterargument with reasoning
+- `[weak]` attacks → include as noted objection
+{{/graph_summary}}
+
+### Uncertainty extraction (MANDATORY)
+For every R2 review with verdict "challenge" that questions evidence quality or cites potential fabrication, extract it into the uncertainties list.
+
+### Source attribution (MANDATORY)
+Each claim's sources must reference the original expert responses (source_id and verbatim quote), NOT agent claim IDs. Agent claim IDs are for your internal tracking only.
+
+### Minority reports
+Produce a minority report for EVERY expert whose distinctive position was not fully captured in the main claims. Minority reports are a CLASSIFICATION of claims — positions held by 1-2 experts that represent genuinely distinct perspectives. They are not a dumping ground for claims you couldn't fit elsewhere.
+
+### Narrative citation rules
+The narrative is prose synthesis with **mandatory inline citations**. Every substantive sentence MUST include at least one citation marker referencing claim IDs.
+
+Citation format: `[C1]`, `[C2, C3]` — square brackets, comma-separated.
+
+### Anti-degeneration guards (§7)
+- **Anti-drop**: If your final claim count is less than 70% of the Pass 1 count (after accounting for documented merges), you are compressing too aggressively.
+- **Anti-hedge**: Take positions on agreement levels. Do not hedge with "some experts may..."
+- **Anti-formulaic**: Ban "it is important to note", "it should be noted", "interestingly". Write direct prose.
+- **Anti-false-consensus**: Do not report agreement where the deliberation record shows unresolved challenges.
+- **Anti-lazy-agent**: Do not accept the Pass 1 claim text as final — read the original expert responses for quotes and nuance. Pass 1 gave you the map; you must walk the territory.
+
+### Conflict handling (§8)
+If expert inputs contain irreconcilable contradictions:
+1. State the contradiction explicitly with evidence from each source
+2. Do NOT manufacture a bridging narrative
+3. Report both positions and the evidence supporting each
+
+### Question
+{{question}}
+
+### Expert Responses
+{{#expert_responses}}
+--- Expert: {{expert_id}}{{response_id}} ---
+{{response}}
+{{#claims}}
+- {{.}}
+{{/claims}}
+{{#evidence}}
+- {{.}}
+{{/evidence}}
+{{/expert_responses}}
+
+{{#graph_summary}}
+### Argumentation Graph (Structural Evidence)
+
+The graph is authoritative for **relationships between claims** (attack/support edges) but NOT for agreement classification. Always prefer original expert wording.
+
+Use support edges to verify corroboration. Map conflict clusters to disagreement areas.
+
+⚠️ **FIREWALL: agreement_level is determined ONLY by corroboration_count** — how many of the {{n_experts}} experts support the claim. Attack edges do NOT reduce agreement level.
+
+{{{graph_summary}}}
+
+{{/graph_summary}}
+
+### Deliberation Record
+{{{deliberation_record}}}
+
+### Pass 1 Claim Inventory (YOUR STARTING SET)
+{{{pass_1_claims}}}
+
+### Output Format
+Respond with XML inside a `<synthesis>` root element (no other text):
+
+```xml
+<synthesis pass1_claim_count="{n}" final_claim_count="{n}" merges="{n}" discoveries="{n}">
+  <claims>
+    <claim id="C1" agreement="consensus" corroboration_count="7" pass1_ref="C1">
+      <text>Synthesised claim text</text>
+      <sources>
+        <source expert_id="expert_01">
+          <quote>verbatim quote supporting this claim</quote>
+        </source>
+      </sources>
+      <counterarguments>
+        <counterargument>Challenge or rebuttal from R2 deliberation</counterargument>
+      </counterarguments>
+    </claim>
+    <claim id="C5" agreement="divided" corroboration_count="3" pass1_ref="C5,C8" merge_reason="Same mechanism (surveillance risk) from different framing">
+      <text>Merged claim text</text>
+      <sources>...</sources>
+      <counterarguments>...</counterarguments>
+    </claim>
+  </claims>
+  <claim_accounting>
+    <merged>
+      <merge target="C5" from="C5,C8" reason="Same mechanism from different framing"/>
+    </merged>
+    <discovered>
+      <discovery id="C22" reason="Position found in R2 rebuttal not captured by Pass 1"/>
+    </discovered>
+  </claim_accounting>
+  <areas_of_agreement>
+    <area>Area 1</area>
+  </areas_of_agreement>
+  <areas_of_disagreement>
+    <area>Tension 1</area>
+  </areas_of_disagreement>
+  <uncertainties>
+    <uncertainty>Uncertainty 1</uncertainty>
+  </uncertainties>
+  <minority_reports>
+    <report expert_id="expert_03" support_count="1">
+      <position>Distinctive minority position</position>
+      <evidence><quote>supporting quote</quote></evidence>
+      <committee_assessment>Why this wasn't adopted by majority</committee_assessment>
+    </report>
+  </minority_reports>
+  <narrative>Complete narrative with [C1] inline citations [C2, C3].</narrative>
+</synthesis>
+```
+
+### Emergence space (§6)
+If you notice structural patterns, implicit assumptions shared across experts, or tensions between the claim inventory and the deliberation record, surface them in an `<emergence>` element after the narrative.
+
+### Self-check before outputting
+1. Count your final claims + documented merges. Does it account for every Pass 1 claim?
+2. Are counterarguments populated for every divided/minority claim?
+3. Does every substantive narrative sentence have a citation?

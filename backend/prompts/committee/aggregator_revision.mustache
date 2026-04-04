@@ -1,0 +1,97 @@
+{{> _term_sheet}}
+
+## Task: Revision — Incorporate Missing Expert Voices
+
+You are revising a committee synthesis. The original synthesis FAILED to represent all experts. Your job is to revise it so that every expert's distinctive position appears — as a claim, a counterargument, or a minority report.
+
+**Missing experts:** {{#missing_expert_ids}}{{.}}, {{/missing_expert_ids}}
+
+These experts' positions do not appear anywhere in the current synthesis. Read their responses below and revise the synthesis to include them.
+
+### Rules
+- Keep ALL existing claims — do not remove or weaken them.
+- Add new claims or expand existing claims to incorporate the missing experts' positions.
+- If a missing expert's position contradicts an existing claim, add it as a counterargument on that claim, or as a new minority-agreement claim.
+- If a missing expert's position is truly unique, add it as a minority report.
+- Every missing expert MUST appear in at least one claim source, counterargument, or minority report.
+- Preserve the same XML format as the original synthesis.
+
+### Question
+{{question}}
+
+### Expert Responses (ALL — focus on the missing experts listed above)
+{{#expert_responses}}
+--- Expert: {{expert_id}}{{response_id}} ---
+{{response}}
+{{#claims}}
+- {{.}}
+{{/claims}}
+{{#evidence}}
+- {{.}}
+{{/evidence}}
+{{/expert_responses}}
+
+{{#graph_context}}
+### Graph-Derived Positions for Missing Experts
+
+The following positions were extracted from the argumentation graph for the missing experts. Use these as structured evidence — they represent specific claims each expert contributed:
+
+{{{graph_context}}}
+{{/graph_context}}
+
+### Current Synthesis (to revise)
+
+**Claims:**
+{{{original_claims}}}
+
+**Minority Reports:**
+{{{original_minority_reports}}}
+
+**Uncertainties:**
+{{{original_uncertainties}}}
+
+### Output Format
+Respond with the COMPLETE revised synthesis in the same XML format (inside a `<synthesis>` root element). Include ALL claims (existing + new/revised), areas, uncertainties, minority reports, and narrative.
+
+For each claim, include `corroboration_count` attribute indicating how many of the {{n_experts}} experts support it.
+
+```xml
+<synthesis>
+  <claims>
+    <claim id="C1" agreement="consensus" corroboration_count="7">
+      <text>Claim text</text>
+      <sources>
+        <source expert_id="expert_01">
+          <quote>verbatim quote</quote>
+        </source>
+      </sources>
+      <counterarguments>
+        <counterargument>First challenge or rebuttal from deliberation</counterargument>
+        <counterargument>Second challenge or alternative perspective</counterargument>
+      </counterarguments>
+    </claim>
+  </claims>
+  <areas_of_agreement>
+    <area>Area 1</area>
+  </areas_of_agreement>
+  <areas_of_disagreement>
+    <area>Tension 1</area>
+  </areas_of_disagreement>
+  <uncertainties>
+    <uncertainty>Uncertainty 1</uncertainty>
+  </uncertainties>
+  <minority_reports>
+    <report expert_id="expert_03" support_count="1">
+      <position>First distinctive minority position</position>
+      <evidence><quote>supporting quote</quote></evidence>
+      <committee_assessment>Why this wasn't adopted by majority</committee_assessment>
+    </report>
+    <report expert_id="expert_07" support_count="2">
+      <position>Second distinctive minority position</position>
+      <evidence><quote>supporting quote</quote></evidence>
+      <committee_assessment>Why this wasn't adopted by majority</committee_assessment>
+    </report>
+  </minority_reports>
+  <narrative>Revised narrative with inline citations [C1]. Every substantive sentence must cite its source claims [C2, C3].</narrative>
+</synthesis>
+```
