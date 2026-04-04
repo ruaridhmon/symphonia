@@ -657,7 +657,7 @@ export default function AdminFormNew() {
             />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4">
             <QuestionModeToggle
               isSurveyMode={isSurveyMode}
               onSelectSurvey={() => setResponseStyle('information')}
@@ -667,12 +667,13 @@ export default function AdminFormNew() {
 
           {/* ── Questions (Workers A + B) ─────────────────────────── */}
           <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
-            <legend
-              className="block text-sm font-medium"
+            <div
+              className="mb-3 text-sm font-medium"
               style={{ color: 'var(--foreground)' }}
             >
               Questions
-            </legend>
+            </div>
+            <legend className="sr-only">Questions</legend>
 
             {questions.map((q, i) => {
               const isOnly = questions.length === 1;

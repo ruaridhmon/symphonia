@@ -2,61 +2,67 @@ interface QuestionModeToggleProps {
   isSurveyMode: boolean;
   onSelectSurvey: () => void;
   onSelectConsensus: () => void;
-  label?: string;
 }
 
 export default function QuestionModeToggle({
   isSurveyMode,
   onSelectSurvey,
   onSelectConsensus,
-  label = 'Survey or Consensus',
 }: QuestionModeToggleProps) {
   return (
-    <div className="space-y-3">
-      <div className="text-sm font-medium text-foreground">{label}</div>
+    <div
+      className="grid gap-1"
+      style={{
+        width: '100%',
+        maxWidth: '20rem',
+      }}
+    >
       <div
-        className="grid items-center justify-items-stretch gap-3"
+        className="grid items-center gap-1 rounded-xl p-1"
         style={{
-          gridTemplateColumns: '1fr auto 1fr',
-          width: 'min(100%, 28rem)',
+          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+          backgroundColor: 'color-mix(in srgb, var(--foreground) 4%, var(--card))',
+          border: '1px solid color-mix(in srgb, var(--border) 70%, transparent)',
         }}
       >
         <button
           type="button"
           onClick={onSelectSurvey}
-          className="flex w-full items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors"
+          aria-pressed={isSurveyMode}
+          className="flex w-full items-center justify-center rounded-[10px] px-4 text-sm font-medium transition-colors"
           style={{
-            minHeight: 42,
+            minHeight: 40,
             width: '100%',
-            border: '1px solid',
-            borderColor: isSurveyMode ? 'var(--accent)' : 'var(--border)',
+            border: '1px solid transparent',
+            boxShadow: 'none',
             backgroundColor: isSurveyMode
-              ? 'color-mix(in srgb, var(--accent) 10%, var(--card))'
-              : 'var(--card)',
+              ? 'var(--card)'
+              : 'transparent',
+            borderColor: isSurveyMode
+              ? 'color-mix(in srgb, var(--accent) 40%, var(--border))'
+              : 'transparent',
             color: isSurveyMode ? 'var(--foreground)' : 'var(--muted-foreground)',
             cursor: 'pointer',
           }}
         >
           Survey
         </button>
-        <span
-          className="text-[11px] font-semibold uppercase tracking-[0.12em]"
-          style={{ color: 'var(--muted-foreground)' }}
-        >
-          or
-        </span>
         <button
           type="button"
           onClick={onSelectConsensus}
-          className="flex w-full items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors"
+          aria-pressed={!isSurveyMode}
+          className="flex w-full items-center justify-center rounded-[10px] px-4 text-sm font-medium transition-colors"
           style={{
-            minHeight: 42,
+            minHeight: 40,
             width: '100%',
-            border: '1px solid',
-            borderColor: isSurveyMode ? 'var(--border)' : 'var(--accent)',
+            border: '1px solid transparent',
+            boxShadow: 'none',
             backgroundColor: isSurveyMode
-              ? 'var(--card)'
-              : 'color-mix(in srgb, var(--accent) 10%, var(--card))',
+              ? 'transparent'
+              : 'var(--card)',
+            borderColor: isSurveyMode
+              ? 'transparent'
+              : 'color-mix(in srgb, var(--accent) 40%, var(--border))',
             color: isSurveyMode ? 'var(--muted-foreground)' : 'var(--foreground)',
             cursor: 'pointer',
           }}

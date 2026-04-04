@@ -311,13 +311,15 @@ export default function FormEditor() {
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]">
         <div className="space-y-6 min-w-0">
           <div className="card-lg p-6">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between mb-6">
-              <h2 className="text-lg font-semibold text-foreground">Questions</h2>
+            <div className="mb-6 space-y-4">
               <QuestionModeToggle
                 isSurveyMode={isSurveyMode}
                 onSelectSurvey={() => setResponseStyle('information')}
                 onSelectConsensus={() => setResponseStyle('consensus')}
               />
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold text-foreground">Questions</h2>
+              </div>
             </div>
             <div className="space-y-4">
               {questions.map((q, i) => (
