@@ -21,7 +21,7 @@ export default function ActionsCard({
           className="text-[10px] font-semibold uppercase tracking-wider"
           style={{ color: 'var(--muted-foreground)' }}
         >
-          Actions
+          Summary
         </h3>
       </div>
 

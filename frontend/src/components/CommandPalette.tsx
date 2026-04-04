@@ -208,9 +208,9 @@ export default function CommandPalette() {
   if (!isOpen) return null;
 
   const shortcuts = [
-    { keys: ['⌘', 'K'], description: 'Open command palette' },
+    { keys: ['Ctrl/Cmd', 'K'], description: 'Open command palette' },
     { keys: ['?'], description: 'Keyboard shortcuts help' },
-    { keys: ['⌘', 'Enter'], description: 'Submit form response' },
+    { keys: ['Ctrl/Cmd', 'Enter'], description: 'Submit form response' },
     { keys: ['↑', '↓'], description: 'Navigate lists' },
     { keys: ['Enter'], description: 'Select / confirm' },
     { keys: ['Esc'], description: 'Close dialog / cancel' },
@@ -344,9 +344,6 @@ export default function CommandPalette() {
                 <kbd className="command-palette-kbd">↑↓</kbd> navigate
                 <kbd className="command-palette-kbd" style={{ marginLeft: 8 }}>↵</kbd> select
                 <kbd className="command-palette-kbd" style={{ marginLeft: 8 }}>esc</kbd> close
-              </div>
-              <div>
-                <kbd className="command-palette-kbd">⌘K</kbd>
               </div>
             </div>
           </>

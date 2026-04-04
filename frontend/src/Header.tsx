@@ -83,17 +83,6 @@ export default function Header() {
 
         {/* Right: desktop layout */}
         <nav aria-label={t('header.primaryNavigation', 'Primary navigation')} className="hidden sm:flex items-center gap-2">
-          {/* Cmd+K shortcut hint */}
-          <button
-            type="button"
-            onClick={() => {
-              document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
-            }}
-            className="header-cmd-k-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs"
-            aria-label={t('header.openCommandPalette')}
-          >
-            <span aria-hidden="true" style={{ opacity: 0.7 }}>⌘K</span>
-          </button>
           {user && (
             <AccountMenu
               email={user.email}

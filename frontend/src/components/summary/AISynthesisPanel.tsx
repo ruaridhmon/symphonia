@@ -98,7 +98,13 @@ export default function AISynthesisPanel({
           )}
         </div>
 
-        <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} compact />
+        <div className="space-y-2">
+          <p className="text-xs" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
+            Choose the synthesis method. More thorough modes usually produce deeper analysis,
+            but they take longer and use more compute.
+          </p>
+          <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} compact />
+        </div>
 
         <LoadingButton
           variant={canGenerate ? 'accent' : 'secondary'}
