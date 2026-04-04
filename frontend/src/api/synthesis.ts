@@ -28,10 +28,31 @@ export interface GenerateSynthesisResult {
   synthesis_json?: SynthesisData;
   /** Present when synthesis runs in the background (non-mock mode) */
   status?: string;
+  job_id?: string;
   /** Human-readable message when status is present */
   message?: string;
   estimate_seconds?: number;
   estimate_label?: string;
+}
+
+export interface SynthesisJobStatus {
+  job_id?: string;
+  form_id?: number;
+  round_id?: number;
+  strategy?: string;
+  model?: string;
+  status: 'idle' | 'queued' | 'running' | 'completed' | 'failed' | 'started';
+  stage?: string | null;
+  step?: number | null;
+  total_steps?: number | null;
+  estimate_seconds?: number | null;
+  estimate_label?: string | null;
+  started_at?: string | null;
+  updated_at?: string | null;
+  completed_at?: string | null;
+  version_id?: number | null;
+  error?: string | null;
+  message?: string | null;
 }
 
 /* ── API calls ── */
@@ -60,6 +81,12 @@ export function generateSynthesis(
   return api.post<GenerateSynthesisResult>(
     `/forms/${formId}/rounds/${roundId}/generate_synthesis`,
     payload
+  );
+}
+
+export function getSynthesisJobStatus(formId: number, roundId: number) {
+  return api.get<SynthesisJobStatus>(
+    `/forms/${formId}/rounds/${roundId}/synthesis_job`
   );
 }
 

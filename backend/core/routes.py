@@ -11,6 +11,7 @@ from fastapi import (
     Query,
     Response as FastAPIResponse,
 )
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
@@ -25,6 +26,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import asyncio
+from typing import Any
 
 from .rate_limiter import (
     limiter,
@@ -93,6 +95,12 @@ if _root_env.exists():
 load_dotenv()  # backend/.env takes precedence
 
 logger = logging.getLogger("symphonia.routes")
+
+
+SYNTHESIS_JOB_TTL_SECONDS = 30 * 60
+_synthesis_jobs: dict[str, dict[str, Any]] = {}
+_synthesis_jobs_by_round: dict[tuple[int, int], str] = {}
+_synthesis_job_lock = asyncio.Lock()
 
 
 # ---------------------------------------------------------
@@ -198,6 +206,146 @@ def _format_duration_estimate(seconds: int) -> str:
     if minutes == 1:
         return "about 1 minute"
     return f"about {minutes} minutes"
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _serialize_timestamp(value: datetime | None) -> str | None:
+    return value.isoformat() if value else None
+
+
+def _build_synthesis_job_message(job: dict[str, Any]) -> str:
+    status = job.get("status")
+    strategy = str(job.get("strategy") or "synthesis")
+    estimate_label = job.get("estimate_label")
+    strategy_label = (
+        "committee synthesis"
+        if strategy == "committee"
+        else "thorough synthesis"
+        if strategy == "ttd"
+        else "synthesis"
+    )
+    if status in {"queued", "running"}:
+        if estimate_label:
+            return f"{strategy_label.capitalize()} is running in the background. Expected time: {estimate_label}."
+        return f"{strategy_label.capitalize()} is running in the background."
+    if status == "completed":
+        return f"{strategy_label.capitalize()} completed."
+    if status == "failed":
+        return str(job.get("error") or "Synthesis failed.")
+    return "No synthesis job is currently running."
+
+
+def _serialize_synthesis_job(job: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "job_id": job["job_id"],
+        "form_id": job["form_id"],
+        "round_id": job["round_id"],
+        "strategy": job["strategy"],
+        "model": job["model"],
+        "status": job["status"],
+        "stage": job.get("stage"),
+        "step": job.get("step"),
+        "total_steps": job.get("total_steps"),
+        "estimate_seconds": job.get("estimate_seconds"),
+        "estimate_label": job.get("estimate_label"),
+        "started_at": _serialize_timestamp(job.get("started_at")),
+        "updated_at": _serialize_timestamp(job.get("updated_at")),
+        "completed_at": _serialize_timestamp(job.get("completed_at")),
+        "version_id": job.get("version_id"),
+        "error": job.get("error"),
+        "message": _build_synthesis_job_message(job),
+    }
+
+
+async def _prune_synthesis_jobs() -> None:
+    now = _utcnow()
+    expired_job_ids: list[str] = []
+    for job_id, job in _synthesis_jobs.items():
+        status = str(job.get("status") or "")
+        if status not in {"completed", "failed"}:
+            continue
+        completed_at = job.get("completed_at") or job.get("updated_at") or now
+        if isinstance(completed_at, datetime) and (now - completed_at).total_seconds() > SYNTHESIS_JOB_TTL_SECONDS:
+            expired_job_ids.append(job_id)
+
+    for job_id in expired_job_ids:
+        job = _synthesis_jobs.pop(job_id, None)
+        if not job:
+            continue
+        round_key = (int(job["form_id"]), int(job["round_id"]))
+        if _synthesis_jobs_by_round.get(round_key) == job_id:
+            _synthesis_jobs_by_round.pop(round_key, None)
+
+
+async def _get_synthesis_job_for_round(
+    form_id: int,
+    round_id: int,
+) -> dict[str, Any] | None:
+    async with _synthesis_job_lock:
+        await _prune_synthesis_jobs()
+        job_id = _synthesis_jobs_by_round.get((form_id, round_id))
+        if not job_id:
+            return None
+        return _synthesis_jobs.get(job_id)
+
+
+async def _create_synthesis_job(
+    *,
+    form_id: int,
+    round_id: int,
+    strategy: str,
+    model: str,
+    estimate_seconds: int,
+    estimate_label: str,
+) -> dict[str, Any]:
+    async with _synthesis_job_lock:
+        await _prune_synthesis_jobs()
+        existing_job_id = _synthesis_jobs_by_round.get((form_id, round_id))
+        if existing_job_id:
+            existing = _synthesis_jobs.get(existing_job_id)
+            if existing and existing.get("status") in {"queued", "running"}:
+                return existing
+
+        now = _utcnow()
+        job_id = secrets.token_urlsafe(12)
+        job = {
+            "job_id": job_id,
+            "form_id": form_id,
+            "round_id": round_id,
+            "strategy": strategy,
+            "model": model,
+            "status": "queued",
+            "stage": "preparing",
+            "step": 1,
+            "total_steps": 4,
+            "estimate_seconds": estimate_seconds,
+            "estimate_label": estimate_label,
+            "started_at": now,
+            "updated_at": now,
+            "completed_at": None,
+            "version_id": None,
+            "error": None,
+            "task": None,
+        }
+        _synthesis_jobs[job_id] = job
+        _synthesis_jobs_by_round[(form_id, round_id)] = job_id
+        return job
+
+
+async def _update_synthesis_job(
+    job_id: str,
+    **updates: Any,
+) -> dict[str, Any] | None:
+    async with _synthesis_job_lock:
+        job = _synthesis_jobs.get(job_id)
+        if not job:
+            return None
+        job.update(updates)
+        job["updated_at"] = _utcnow()
+        return job
 
 
 def _render_synthesis_text(result) -> str:
@@ -1544,6 +1692,40 @@ def list_synthesis_versions(
     ]
 
 
+@router.get(
+    "/forms/{form_id}/rounds/{round_id}/synthesis_job",
+    tags=["Synthesis"],
+    summary="Get synthesis job status",
+    description=(
+        "Return the current or most recent background synthesis job for a round. "
+        "Used by the summary page to recover progress after refreshes and detect failures "
+        "when WebSocket events are unavailable."
+    ),
+    response_description="Background synthesis job status",
+)
+@limiter.limit(READ_LIMIT)
+async def get_synthesis_job_status(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    job = await _get_synthesis_job_for_round(form_id, round_id)
+    if not job:
+        return {"status": "idle", "message": "No synthesis job is currently running."}
+
+    return _serialize_synthesis_job(job)
+
+
 # ---------------------------------------------------------
 # SYNTHESIS EXECUTION
 # ---------------------------------------------------------
@@ -1563,6 +1745,7 @@ async def _run_synthesis_job(
     n_analysts: int,
     mode_str: str,
     admin_email: str | None,
+    job_id: str | None = None,
 ):
     """Run a synthesis job and persist the resulting version.
 
@@ -1572,6 +1755,15 @@ async def _run_synthesis_job(
     db = SessionLocal()
     try:
         async def progress_callback(stage: str, step: int, total: int):
+            if job_id:
+                await _update_synthesis_job(
+                    job_id,
+                    status="running",
+                    stage=stage,
+                    step=step,
+                    total_steps=total,
+                    error=None,
+                )
             for conn in ws_manager.active_connections.copy():
                 try:
                     await conn.send_json(
@@ -1631,7 +1823,17 @@ async def _run_synthesis_job(
                 exc,
                 exc_info=True,
             )
-            await _broadcast_synthesis_error(form_id, round_id, str(exc))
+            safe_error = _sanitize_error_message(str(exc))
+            if job_id:
+                await _update_synthesis_job(
+                    job_id,
+                    status="failed",
+                    stage="preparing",
+                    error=safe_error,
+                    completed_at=_utcnow(),
+                    task=None,
+                )
+            await _broadcast_synthesis_error(form_id, round_id, safe_error)
             return None
         except Exception as exc:
             logger.error(
@@ -1640,9 +1842,17 @@ async def _run_synthesis_job(
                 exc,
                 exc_info=True,
             )
-            await _broadcast_synthesis_error(
-                form_id, round_id, "An unexpected error occurred"
-            )
+            safe_error = _sanitize_error_message("An unexpected error occurred")
+            if job_id:
+                await _update_synthesis_job(
+                    job_id,
+                    status="failed",
+                    stage="preparing",
+                    error=safe_error,
+                    completed_at=_utcnow(),
+                    task=None,
+                )
+            await _broadcast_synthesis_error(form_id, round_id, safe_error)
             return None
 
         synthesis_json_data = result.to_dict()
@@ -1652,6 +1862,14 @@ async def _run_synthesis_job(
         round_obj = db.query(RoundModel).filter(RoundModel.id == round_id).first()
         if not round_obj:
             logger.error("Synthesis round %d disappeared before save", round_id)
+            if job_id:
+                await _update_synthesis_job(
+                    job_id,
+                    status="failed",
+                    error="Round not found after synthesis completed",
+                    completed_at=_utcnow(),
+                    task=None,
+                )
             await _broadcast_synthesis_error(
                 form_id, round_id, "Round not found after synthesis completed"
             )
@@ -1678,6 +1896,18 @@ async def _run_synthesis_job(
 
         db.commit()
         db.refresh(new_version)
+        if job_id:
+            await _update_synthesis_job(
+                job_id,
+                status="completed",
+                stage="complete",
+                step=4,
+                total_steps=4,
+                version_id=new_version.id,
+                completed_at=_utcnow(),
+                error=None,
+                task=None,
+            )
 
         # ── Broadcast completion via WebSocket ──
         if synthesis_text:
@@ -1739,6 +1969,14 @@ async def _run_synthesis_job(
             exc_info=True,
         )
         try:
+            if job_id:
+                await _update_synthesis_job(
+                    job_id,
+                    status="failed",
+                    error=_sanitize_error_message(f"Synthesis failed unexpectedly: {exc}"),
+                    completed_at=_utcnow(),
+                    task=None,
+                )
             await _broadcast_synthesis_error(
                 form_id, round_id, f"Synthesis failed unexpectedly: {exc}"
             )
@@ -1747,6 +1985,21 @@ async def _run_synthesis_job(
         return None
     finally:
         db.close()
+
+
+async def _launch_synthesis_job(task_job_id: str, **job_kwargs: Any) -> None:
+    try:
+        await _update_synthesis_job(
+            task_job_id,
+            status="running",
+            stage="preparing",
+            step=1,
+            total_steps=4,
+            error=None,
+        )
+        await _run_synthesis_job(job_id=task_job_id, **job_kwargs)
+    finally:
+        await _update_synthesis_job(task_job_id, task=None)
 
 
 class GenerateSynthesisVersionPayload(BaseModel):
@@ -1762,9 +2015,10 @@ class GenerateSynthesisVersionPayload(BaseModel):
     summary="Generate synthesis for any round",
     description=(
         "Generate a new synthesis version for ANY round (not just active). Supports "
-        "'simple', 'committee', and 'ttd' strategies. Real synthesis runs inside "
-        "the request so it completes reliably on the production deployment. "
-        "Progress is still broadcast via WebSocket. Admin only."
+        "'simple', 'committee', and 'ttd' strategies. Long-running strategies are "
+        "queued as background jobs so the website does not time out while they run. "
+        "Progress is broadcast via WebSocket and can also be polled via the synthesis "
+        "job status endpoint. Admin only."
     ),
     response_description="New synthesis version object",
 )
@@ -1781,8 +2035,9 @@ async def generate_synthesis_for_round(
     """Generate a NEW synthesis version for ANY round (not just active).
 
     Mock mode returns the result synchronously (instant, no LLM).
-    Real synthesis now also runs inside the request so the deployed
-    backend does not lose long-running tasks after returning a response.
+    Simple synthesis also returns synchronously. Committee and TTD are
+    launched as background jobs so the website can stay responsive and
+    avoid upstream request timeouts.
     """
     # ── 1. Validate (fast, synchronous) ──
     round_obj = (
@@ -1910,9 +2165,42 @@ async def generate_synthesis_for_round(
             "is_active": new_version.is_active,
         }
 
-    # ── 3b. Real synthesis → run inside the request ──
-    # Cloud Run style deployments are not a safe place for fire-and-forget
-    # asyncio tasks after the response has already been returned.
+    if strategy in {"committee", "ttd"}:
+        job = await _create_synthesis_job(
+            form_id=form_id,
+            round_id=round_id,
+            strategy=strategy,
+            model=payload.model,
+            estimate_seconds=estimated_seconds,
+            estimate_label=estimated_label,
+        )
+        if job.get("task") is None and job.get("status") not in {"running", "completed"}:
+            task = asyncio.create_task(
+                _launch_synthesis_job(
+                    job["job_id"],
+                    form_id=form_id,
+                    round_id=round_id,
+                    round_number=round_number,
+                    questions=list(questions),
+                    response_dicts=response_dicts,
+                    comments_context=round_comments_context,
+                    next_version=next_version,
+                    strategy=strategy,
+                    model=payload.model,
+                    n_analysts=payload.n_analysts,
+                    mode_str=payload.mode,
+                    admin_email=user.email,
+                )
+            )
+            task.add_done_callback(lambda _task: None)
+            await _update_synthesis_job(job["job_id"], task=task)
+
+        started_job = await _get_synthesis_job_for_round(form_id, round_id)
+        payload_data = _serialize_synthesis_job(started_job or job)
+        payload_data["status"] = "started"
+        return JSONResponse(status_code=202, content=payload_data)
+
+    # ── 3b. Real simple synthesis → run inside the request ──
     result = await _run_synthesis_job(
         form_id=form_id,
         round_id=round_id,
@@ -1926,6 +2214,7 @@ async def generate_synthesis_for_round(
         n_analysts=payload.n_analysts,
         mode_str=payload.mode,
         admin_email=user.email,
+        job_id=None,
     )
     if result is None:
         raise HTTPException(

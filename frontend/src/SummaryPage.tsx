@@ -20,6 +20,7 @@ import {
 	estimateSynthesisDurationSeconds,
 	formatSynthesisDurationEstimate,
 	generateSynthesis as apiGenerateSynthesis,
+	getSynthesisJobStatus as apiGetSynthesisJobStatus,
 	pushSummary as apiPushSummary,
 } from './api/synthesis';
 
@@ -134,6 +135,7 @@ const SYNTHESIS_RUN_TTL_MS = 30 * 60 * 1000;
 interface StoredSynthesisRun {
 	formId: number;
 	roundId: number;
+	jobId: string | null;
 	mode: 'simple' | 'committee' | 'ttd';
 	model: string;
 	stage: string;
@@ -292,6 +294,7 @@ export default function SummaryPage() {
 					return {
 						formId,
 						roundId: progressRoundId,
+						jobId: prev?.jobId ?? null,
 						mode: synthesisMode,
 						model: selectedModel,
 						stage: typeof data.stage === 'string' ? data.stage : 'preparing',
@@ -504,6 +507,7 @@ export default function SummaryPage() {
 				formId,
 				roundId: parsed.roundId,
 				mode: (parsed.mode as StoredSynthesisRun['mode']) || 'simple',
+				jobId: typeof parsed.jobId === 'string' ? parsed.jobId : null,
 				model: typeof parsed.model === 'string' ? parsed.model : MODELS[0],
 				stage: typeof parsed.stage === 'string' ? parsed.stage : 'preparing',
 				step: typeof parsed.step === 'number' ? parsed.step : 1,
@@ -690,6 +694,49 @@ export default function SummaryPage() {
 
 		const poll = async () => {
 			try {
+				if (generationRun.jobId) {
+					const job = await apiGetSynthesisJobStatus(formId, generationRun.roundId);
+					if (cancelled) return;
+					if (job.status === 'running' || job.status === 'queued' || job.status === 'started') {
+						if (typeof job.stage === 'string') {
+							setSynthesisStage(job.stage);
+						}
+						if (typeof job.step === 'number') {
+							setSynthesisStep(job.step);
+						}
+						if (typeof job.total_steps === 'number' && job.total_steps > 0) {
+							setSynthesisTotalSteps(job.total_steps);
+						}
+						if (typeof job.estimate_seconds === 'number') {
+							setSynthesisEstimateSeconds(job.estimate_seconds);
+						}
+						setGenerationRun(prev => prev ? ({
+							...prev,
+							stage: typeof job.stage === 'string' ? job.stage : prev.stage,
+							step: typeof job.step === 'number' ? job.step : prev.step,
+							totalSteps: typeof job.total_steps === 'number' && job.total_steps > 0
+								? job.total_steps
+								: prev.totalSteps,
+							estimateSeconds: typeof job.estimate_seconds === 'number'
+								? job.estimate_seconds
+								: prev.estimateSeconds,
+						}) : prev);
+					}
+					if (job.status === 'completed') {
+						await loadAll();
+						await loadSynthesisVersions(generationRun.roundId);
+						markSynthesisComplete(false);
+						return;
+					}
+					if (job.status === 'failed') {
+						clearSynthesisRunState();
+						setSynthesisStage('preparing');
+						setSynthesisStep(0);
+						toastError(job.error || job.message || 'Synthesis failed in background');
+						return;
+					}
+				}
+
 				const latest = await apiGetSynthesisVersions(formId, generationRun.roundId);
 				if (cancelled) return;
 				const baseline = generationRun.baselineVersionCount;
@@ -710,7 +757,16 @@ export default function SummaryPage() {
 			cancelled = true;
 			window.clearInterval(intervalId);
 		};
-	}, [formId, generationRun, isGenerating, loadAll, markSynthesisComplete]);
+	}, [
+		clearSynthesisRunState,
+		formId,
+		generationRun,
+		isGenerating,
+		loadAll,
+		loadSynthesisVersions,
+		markSynthesisComplete,
+		toastError,
+	]);
 
 	// ─── Actions ─────────────────────────────────────────────────────────────
 
@@ -855,6 +911,7 @@ export default function SummaryPage() {
 					formId,
 					roundId: targetRound.id,
 					mode: synthesisMode,
+					jobId: data.job_id ?? null,
 					model: modelToUse,
 					stage: 'preparing',
 					step: 1,
