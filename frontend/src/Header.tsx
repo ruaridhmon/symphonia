@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
+import { ThemeToggle } from './theme';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import AccountMenu from './components/AccountMenu';
 
 export default function Header() {
