@@ -275,7 +275,7 @@ export default function SummaryPage() {
 			setIsGenerating(true);
 			const progressRoundId = typeof data.round_id === 'number'
 				? data.round_id
-				: targetRoundForGeneration?.id;
+				: selectedRound?.id ?? activeRound?.id;
 			if (synthesisStartedAtMs == null) {
 				setSynthesisStartedAtMs(Date.now());
 			}
@@ -349,7 +349,8 @@ export default function SummaryPage() {
 		synthesisMode,
 		synthesisStartedAtMs,
 		synthesisVersions.length,
-		targetRoundForGeneration?.id,
+		selectedRound?.id,
+		activeRound?.id,
 		toastError,
 	]);
 
