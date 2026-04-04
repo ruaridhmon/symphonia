@@ -21,7 +21,13 @@ export default function NextRoundQuestionsCard({
   const hasQuestions = questions.some(q => q.trim().length > 0);
 
   return (
-    <div className="card p-4 sm:p-6">
+    <div
+      className="card p-4 sm:p-5"
+      style={{
+        backgroundColor: 'color-mix(in srgb, var(--muted) 18%, var(--card))',
+        borderColor: 'color-mix(in srgb, var(--border) 56%, transparent)',
+      }}
+    >
       <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
         <CircleHelp size={18} style={{ color: 'var(--accent)' }} /> Next round
       </h2>
@@ -68,7 +74,7 @@ export default function NextRoundQuestionsCard({
       </LoadingButton>
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
-          Finalise these prompts, then open the next round with them.
+          Finalise the prompts, then open the next round.
         </p>
         <LoadingButton
           variant="accent"

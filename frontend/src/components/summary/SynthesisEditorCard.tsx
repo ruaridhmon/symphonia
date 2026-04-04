@@ -8,6 +8,8 @@ type Props = {
   contextNote?: string | null;
   synthesisViewMode: 'view' | 'edit';
   onSetViewMode: (mode: 'view' | 'edit') => void | Promise<void>;
+  canGenerate?: boolean;
+  onGenerate?: () => void;
   editor: Editor | null;
   isDirty: boolean;
   isSaving: boolean;
@@ -20,6 +22,8 @@ export default function SynthesisEditorCard({
   contextNote,
   synthesisViewMode,
   onSetViewMode,
+  canGenerate = false,
+  onGenerate,
   editor,
   isDirty,
   isSaving,
@@ -32,7 +36,7 @@ export default function SynthesisEditorCard({
   return (
     <div
       className={`card p-4 sm:p-6 ${hasSynthesis || synthesisViewMode === 'edit' ? 'min-h-[200px] lg:min-h-[300px]' : 'min-h-[180px]'}`}
-      style={{ borderTop: '3px solid var(--accent)' }}
+      style={{ borderTop: '2px solid color-mix(in srgb, var(--accent) 72%, transparent)' }}
     >
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
         <div>
@@ -166,8 +170,22 @@ export default function SynthesisEditorCard({
                 No synthesis yet
               </p>
               <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>
-                Generate one from the workflow panel, or switch to Edit to write manually.
+                Generate a first draft for this round or switch to Edit to write one manually.
               </p>
+              {canGenerate && onGenerate && (
+                <button
+                  type="button"
+                  onClick={onGenerate}
+                  className="mt-4 inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-sm font-semibold"
+                  style={{
+                    backgroundColor: 'var(--accent)',
+                    color: 'white',
+                    border: '1px solid var(--accent)',
+                  }}
+                >
+                  Generate draft
+                </button>
+              )}
             </div>
           )}
         </div>

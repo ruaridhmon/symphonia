@@ -24,7 +24,7 @@ export default function SummaryHeader({ email, viewers, onLogout, showAdminLinks
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-        <h1 className="sr-only">Admin Workspace — Summary</h1>
+        <h1 className="sr-only">Symphonia — Summary</h1>
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button
             type="button"
@@ -39,8 +39,8 @@ export default function SummaryHeader({ email, viewers, onLogout, showAdminLinks
               className="h-7 w-auto flex-shrink-0"
             />
             <div className="min-w-0">
-              <span className="text-base sm:text-lg font-bold tracking-tight text-foreground leading-tight block">
-                Admin Workspace
+              <span className="text-base sm:text-lg font-semibold tracking-tight text-foreground leading-tight block">
+                Symphonia
               </span>
             </div>
           </button>

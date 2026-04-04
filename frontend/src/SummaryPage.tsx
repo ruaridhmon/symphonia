@@ -996,15 +996,15 @@ export default function SummaryPage() {
 				<div>
 				<BackLink to="/" label={t('common.backToDashboard')} className="mb-4 sm:mb-5" />
 				<section className="card mb-4 sm:mb-6 p-5 sm:p-6">
-					<div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 						<div className="min-w-0 max-w-3xl">
-							<div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
+							<div className="text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>
 								Summary
 							</div>
-							<h2 className="mt-2 text-2xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
+							<h2 className="mt-1.5 text-2xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
 								{form.title}
 							</h2>
-							<div className="mt-4 flex flex-wrap gap-2">
+							<div className="mt-3 flex flex-wrap gap-2">
 								<span
 									className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
 									style={{
@@ -1057,7 +1057,13 @@ export default function SummaryPage() {
 				</section>
 
 				<section className="mb-4 sm:mb-6">
-					<div className="grid gap-3 md:grid-cols-3">
+					<div
+						className="flex flex-wrap gap-2 rounded-2xl p-1.5"
+						style={{
+							backgroundColor: 'color-mix(in srgb, var(--muted) 34%, transparent)',
+							border: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
+						}}
+					>
 						{workspaceTabs.map(tab => {
 							const Icon = tab.icon;
 							const isActive = activeWorkspaceTab === tab.id;
@@ -1066,25 +1072,26 @@ export default function SummaryPage() {
 									key={tab.id}
 									type="button"
 									onClick={() => { void handleWorkspaceTabChange(tab.id); }}
-									className="card p-4 text-left transition-colors"
+									className="flex min-w-[9rem] flex-1 items-center gap-2 rounded-xl px-3 py-2 text-left transition-colors"
 									style={{
-										borderColor: isActive ? 'var(--accent)' : 'var(--border)',
 										backgroundColor: isActive
-											? 'color-mix(in srgb, var(--accent) 7%, var(--card))'
-											: 'var(--card)',
+											? 'var(--card)'
+											: 'transparent',
+										border: isActive
+											? '1px solid color-mix(in srgb, var(--border) 62%, transparent)'
+											: '1px solid transparent',
+										boxShadow: isActive ? '0 6px 18px rgba(15, 23, 42, 0.06)' : 'none',
 										cursor: 'pointer',
 									}}
 									aria-pressed={isActive}
 								>
-									<div className="flex items-center gap-2">
-										<Icon size={18} style={{ color: isActive ? 'var(--accent)' : 'var(--muted-foreground)' }} />
-										<span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-											{tab.label}
-										</span>
-									</div>
-									<p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-										{tab.description}
-									</p>
+									<Icon size={16} style={{ color: isActive ? 'var(--accent)' : 'var(--muted-foreground)' }} />
+									<span
+										className="text-sm font-semibold"
+										style={{ color: isActive ? 'var(--foreground)' : 'var(--muted-foreground)' }}
+									>
+										{tab.label}
+									</span>
 								</button>
 							);
 						})}
@@ -1122,6 +1129,8 @@ export default function SummaryPage() {
 										contextNote={synthesisContextNote}
 										synthesisViewMode={synthesisViewMode}
 										onSetViewMode={handleSetSynthesisViewMode}
+										canGenerate={responseCountForDisplay > 0}
+										onGenerate={generateSynthesis}
 										editor={editor}
 										isDirty={isSynthesisDirty}
 										isSaving={isSavingSynthesis}
