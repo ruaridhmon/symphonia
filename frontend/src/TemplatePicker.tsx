@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactNode } from 'react';
-import { FileText, Users, ArrowRight, Loader2, Sparkles, Clock3, LayoutTemplate, MessagesSquare } from 'lucide-react';
+import { FileText, Users, ArrowRight, Loader2, Sparkles, MessagesSquare } from 'lucide-react';
 import { API_BASE_URL } from './config';
 
 /* ── Types ──────────────────────────────────────────────────── */
@@ -24,59 +24,9 @@ interface TemplatePickerProps {
   onStartInformationGathering: () => void;
 }
 
-function FeaturePill({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div
-      style={{
-        borderRadius: 14,
-        padding: '14px 16px',
-        background: 'color-mix(in srgb, var(--card) 88%, white)',
-        border: '1px solid color-mix(in srgb, var(--accent) 12%, var(--border))',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 12,
-        minHeight: 72,
-      }}
-    >
-      <div
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 10,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-          color: 'var(--accent)',
-          flexShrink: 0,
-        }}
-      >
-        {icon}
-      </div>
-      <div>
-        <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--muted-foreground)' }}>
-          {label}
-        </div>
-        <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--foreground)', marginTop: 4 }}>
-          {value}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function StarterOptionCard({
   title,
   description,
-  eyebrow,
   icon,
   active,
   onClick,
@@ -85,7 +35,6 @@ function StarterOptionCard({
 }: {
   title: string;
   description: string;
-  eyebrow: string;
   icon: ReactNode;
   active: boolean;
   onClick: () => void;
@@ -118,11 +67,11 @@ function StarterOptionCard({
     >
       <div
         style={{
-          width: 52,
-          height: 52,
-          borderRadius: 14,
+          width: 44,
+          height: 44,
+          borderRadius: 12,
           backgroundColor: active
-            ? 'color-mix(in srgb, var(--accent) 14%, transparent)'
+            ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
             : 'color-mix(in srgb, var(--foreground) 6%, transparent)',
           display: 'flex',
           alignItems: 'center',
@@ -134,9 +83,6 @@ function StarterOptionCard({
         {icon}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: active ? 'var(--accent)' : 'var(--muted-foreground)', marginBottom: 6 }}>
-          {eyebrow}
-        </div>
         <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--foreground)', marginBottom: 4 }}>
           {title}
         </div>
@@ -191,7 +137,6 @@ export default function TemplatePicker({
   }, {});
 
   const categoryOrder = Object.keys(grouped).sort();
-  const templateCount = templates.length;
 
   if (loading) {
     return (
@@ -264,56 +209,7 @@ export default function TemplatePicker({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <section
-        className="card"
-        style={{
-          padding: '1.5rem',
-          background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 7%, white), color-mix(in srgb, var(--accent) 2%, var(--card)))',
-          borderColor: 'color-mix(in srgb, var(--accent) 18%, var(--border))',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.7fr) minmax(280px, 1fr)',
-            gap: '1rem',
-          }}
-        >
-          <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 10 }}>
-              Consultation Setup
-            </div>
-            <h2
-              style={{
-                fontSize: '1.45rem',
-                fontWeight: 800,
-                color: 'var(--foreground)',
-                margin: '0 0 8px 0',
-              }}
-            >
-              Choose the fastest clean starting point
-            </h2>
-            <p style={{ fontSize: '0.95rem', color: 'var(--muted-foreground)', margin: 0, lineHeight: 1.7, maxWidth: 720 }}>
-              Start with a blank consultation when you already know the structure, or pick a proven template when you want sharper questions and a faster setup path for your panel.
-            </p>
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-              gap: 10,
-              alignSelf: 'start',
-            }}
-          >
-            <FeaturePill icon={<LayoutTemplate size={18} />} label="Templates" value={`${templateCount} ready to adapt`} />
-            <FeaturePill icon={<MessagesSquare size={18} />} label="Question style" value="Consensus or survey" />
-            <FeaturePill icon={<Clock3 size={18} />} label="Admin effort" value="Minutes, not hours" />
-            <FeaturePill icon={<Sparkles size={18} />} label="Best for" value="Clear, structured starts" />
-          </div>
-        </div>
-      </section>
-
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <div
         style={{
           display: 'grid',
@@ -322,9 +218,8 @@ export default function TemplatePicker({
         }}
       >
         <StarterOptionCard
-          title="Start consensus form from scratch"
-          description="Best when you already know the consultation structure and want evidence and confidence fields enabled by default."
-          eyebrow="Delphi workflow"
+          title="Blank consensus"
+          description="Start empty with evidence, counterarguments, and confidence enabled by default."
           icon={<Sparkles size={22} />}
           active={hoveredBlank}
           onClick={onStartBlank}
@@ -333,9 +228,8 @@ export default function TemplatePicker({
         />
 
         <StarterOptionCard
-          title="Start survey form from scratch"
-          description="Best when you want fast qualitative inputs first and do not need structured evidence, counterarguments, or confidence scoring."
-          eyebrow="Open response"
+          title="Blank survey"
+          description="Start empty with plain open-text responses only."
           icon={<MessagesSquare size={22} />}
           active={hoveredInfoBlank}
           onClick={onStartInformationGathering}
@@ -345,28 +239,25 @@ export default function TemplatePicker({
       </div>
 
       {/* Template cards grouped by category */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <h2
           style={{
-            fontSize: '1.15rem',
+            fontSize: '1rem',
             fontWeight: 700,
             color: 'var(--foreground)',
             margin: 0,
           }}
         >
-          Examples of completed templates
+          Templates
         </h2>
-        <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--muted-foreground)' }}>
-          Use these when you want a credible starting structure and faster expert onboarding.
-        </p>
       </div>
 
       {categoryOrder.map(category => (
-        <div key={category} style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 10px 4px' }}>
+        <div key={category} style={{ marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0 0 10px 2px' }}>
             <h3
               style={{
-                fontSize: '0.75rem',
+                fontSize: '0.7rem',
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
@@ -374,20 +265,8 @@ export default function TemplatePicker({
                 margin: 0,
               }}
             >
-              {category} Templates
+              {category}
             </h3>
-            <span
-              style={{
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                color: 'var(--accent)',
-                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                borderRadius: 999,
-                padding: '2px 8px',
-              }}
-            >
-              {grouped[category].length}
-            </span>
           </div>
           <div
             style={{
@@ -410,17 +289,17 @@ export default function TemplatePicker({
                     flexDirection: 'column',
                     alignItems: 'flex-start',
                     textAlign: 'left',
-                    padding: '16px 18px',
+                    padding: '15px 16px',
                     borderRadius: 12,
-                    border: `1px solid ${isHovered ? 'var(--accent)' : 'var(--border)'}`,
+                    border: `1px solid ${isHovered ? 'color-mix(in srgb, var(--accent) 55%, var(--border))' : 'color-mix(in srgb, var(--border) 70%, transparent)'}`,
                     backgroundColor: isHovered
-                      ? 'color-mix(in srgb, var(--accent) 5%, var(--card))'
+                      ? 'color-mix(in srgb, var(--accent) 4%, var(--card))'
                       : 'var(--card)',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                     boxShadow: isHovered
-                      ? '0 14px 28px rgba(37, 99, 235, 0.12)'
-                      : '0 4px 10px rgba(15, 23, 42, 0.04)',
+                      ? '0 10px 24px rgba(15, 23, 42, 0.08)'
+                      : '0 3px 8px rgba(15, 23, 42, 0.03)',
                     transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
                   }}
                 >
@@ -428,13 +307,13 @@ export default function TemplatePicker({
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                     <span
                       style={{
-                        fontSize: '1.4rem',
+                        fontSize: '1.2rem',
                         lineHeight: 1,
-                        width: 36,
-                        height: 36,
+                        width: 34,
+                        height: 34,
                         borderRadius: 8,
                         backgroundColor: isHovered
-                          ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
+                          ? 'color-mix(in srgb, var(--accent) 10%, transparent)'
                           : 'color-mix(in srgb, var(--foreground) 6%, transparent)',
                         display: 'flex',
                         alignItems: 'center',
@@ -459,10 +338,10 @@ export default function TemplatePicker({
                   {/* Description */}
                   <p
                     style={{
-                      fontSize: '0.8rem',
+                      fontSize: '0.79rem',
                       color: 'var(--muted-foreground)',
                       lineHeight: 1.5,
-                      margin: '0 0 12px 0',
+                      margin: '0 0 10px 0',
                       flex: 1,
                       display: '-webkit-box',
                       WebkitLineClamp: 3,
@@ -479,7 +358,7 @@ export default function TemplatePicker({
                       display: 'flex',
                       alignItems: 'center',
                       gap: 12,
-                      fontSize: '0.72rem',
+                      fontSize: '0.71rem',
                       color: 'var(--muted-foreground)',
                     }}
                   >
