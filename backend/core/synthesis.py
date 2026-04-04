@@ -581,6 +581,7 @@ class ConsensusLibraryAdapter:
     @staticmethod
     def _resolve_prompts_root() -> Path:
         """Locate the consensus library's root prompts directory."""
+        synthesis_path = Path(__file__).resolve()
         candidates: list[Path] = []
 
         # 0. Environment override (highest priority)
@@ -589,14 +590,14 @@ class ConsensusLibraryAdapter:
             candidates.append(Path(env_prompts))
 
         # 1. Repo-local prompts shipped with Symphonia.
-        repo_prompts = Path(__file__).resolve().parent.parent / "prompts"
+        repo_prompts = synthesis_path.parent.parent / "prompts"
         candidates.append(repo_prompts)
 
         # 2. Nearby consensus checkout for editable/dev environments.
-        workspace_consensus_prompts = (
-            Path(__file__).resolve().parents[3] / "consensus" / "prompts"
-        )
-        candidates.append(workspace_consensus_prompts)
+        # Walk ancestors instead of assuming a fixed depth so this works both
+        # in local checkouts and in Cloud Run's /app layout.
+        for ancestor in synthesis_path.parents:
+            candidates.append(ancestor / "consensus" / "prompts")
 
         try:
             import consensus
