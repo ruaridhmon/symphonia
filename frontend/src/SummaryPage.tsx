@@ -430,15 +430,6 @@ export default function SummaryPage() {
 		if (currentText !== previousText) return null;
 		return `This draft is carried forward from Round ${activeRound.round_number - 1}. Update and save it as the Round ${activeRound.round_number} synthesis.`;
 	}, [activeRound, rounds]);
-	const hasSynthesis = Boolean(displayRound?.synthesis?.trim() || structuredSynthesisData);
-	const roundStatusLabel = displayRound?.is_active ? 'Live round' : 'Previous round';
-	const workspaceStatusLabel = !displayRound
-		? 'No round selected'
-		: displayRound?.convergence_score != null
-			? `${Math.round(displayRound.convergence_score * 100)}% convergence`
-			: hasSynthesis
-				? 'Synthesis ready'
-				: 'Awaiting synthesis';
 	const workspaceTabs = [
 		{
 			id: 'synthesis' as const,
@@ -1014,35 +1005,17 @@ export default function SummaryPage() {
 								>
 									{displayRound ? `Round ${displayRound.round_number}` : 'No round selected'}
 								</span>
-								<span
-									className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-									style={{
-										backgroundColor: 'var(--muted)',
-										color: 'var(--muted-foreground)',
-									}}
-								>
-									{roundStatusLabel}
-								</span>
-								<span
-									className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
-									style={{
-										backgroundColor: 'var(--muted)',
-										color: 'var(--foreground)',
-									}}
-								>
-									<MessageSquareText size={12} />
-									{responseCountForDisplay} response{responseCountForDisplay === 1 ? '' : 's'}
-								</span>
-								<span
-									className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
-									style={{
-										backgroundColor: 'var(--muted)',
-										color: 'var(--muted-foreground)',
-									}}
-								>
-									<ChartNoAxesColumn size={12} />
-									{workspaceStatusLabel}
-								</span>
+								{displayRound?.is_active && (
+									<span
+										className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+										style={{
+											backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)',
+											color: 'var(--success)',
+										}}
+									>
+										Live
+									</span>
+								)}
 							</div>
 						</div>
 
