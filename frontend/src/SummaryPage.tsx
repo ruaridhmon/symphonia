@@ -1161,7 +1161,7 @@ export default function SummaryPage() {
 										synthesisViewMode={synthesisViewMode}
 										onSetViewMode={handleSetSynthesisViewMode}
 										canGenerate={responseCountForDisplay > 0}
-										onGenerate={generateSynthesis}
+										onGenerate={generateSummary}
 										editor={editor}
 										isDirty={isSynthesisDirty}
 										isSaving={isSavingSynthesis}
