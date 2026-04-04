@@ -87,26 +87,33 @@ export function estimateSynthesisDurationSeconds(
   })();
   const count = Math.max(1, responseCount);
   const analysts = Math.max(1, nAnalysts);
+  const effectiveAnalysts = strategy === 'simple'
+    ? 1
+    : strategy === 'committee'
+      ? Math.min(3, analysts)
+      : strategy === 'ttd'
+        ? Math.min(2, analysts)
+        : analysts;
 
   if (strategy === 'simple') {
-    const windows = 3;
-    const secondsPerWindow = 9 + count * 3;
-    return Math.max(45, Math.min(180, Math.round(windows * secondsPerWindow * latencyMultiplier)));
+    const timeout = Math.min(120, Math.max(45, 30 + count * 8));
+    return Math.round(timeout * 0.7 * latencyMultiplier);
   }
   if (strategy === 'committee') {
-    const agents = analysts >= 5 ? 5 : 3;
-    const windows = 5;
-    const secondsPerWindow = 18 + count * 5 + Math.max(0, agents - 3) * 2;
-    return Math.max(120, Math.min(540, Math.round(windows * secondsPerWindow * latencyMultiplier)));
+    const timeout = Math.min(210, Math.max(90, 60 + count * 20));
+    const base = 55 + count * 18 + Math.max(0, effectiveAnalysts - 1) * 8;
+    return Math.min(
+      Math.round(timeout * 0.85 * latencyMultiplier),
+      Math.round(base * latencyMultiplier),
+    );
   }
   if (strategy === 'ttd') {
-    const nSteps = 2;
-    const fitnessFinalOnly = true;
-    const windowsPerStep = fitnessFinalOnly ? 2 : 3;
-    const perStageWindows = 1 + (nSteps * windowsPerStep) + (analysts > 1 ? 1 : 0) + 1;
-    const pipelineWindows = perStageWindows * 3 + 2;
-    const secondsPerWindow = 8 + count * 2 + Math.max(0, analysts - 1) * 1.5;
-    return Math.max(240, Math.min(900, Math.round(pipelineWindows * secondsPerWindow * latencyMultiplier)));
+    const timeout = Math.min(300, Math.max(150, 90 + count * 30));
+    const base = 85 + count * 28 + Math.max(0, effectiveAnalysts - 1) * 10;
+    return Math.min(
+      Math.round(timeout * 0.8 * latencyMultiplier),
+      Math.round(base * latencyMultiplier),
+    );
   }
   return 60;
 }

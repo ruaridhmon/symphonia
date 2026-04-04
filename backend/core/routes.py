@@ -127,39 +127,67 @@ def _estimate_synthesis_duration_seconds(
     library runs multi-stage workflows with extra post-processing.
     """
     count = max(1, response_count)
-    analysts = max(1, n_analysts)
+    profile = _build_synthesis_runtime_profile(
+        strategy,
+        response_count=count,
+        requested_analysts=n_analysts,
+    )
+    analysts = int(profile["n_analysts"])
     latency = _estimate_model_latency_multiplier(model)
 
     if strategy == "simple":
-        # Single-pass synthesis plus quote resolution and possible revision.
-        windows = 3
-        seconds_per_window = 9 + count * 3
-        return max(45, min(180, round(windows * seconds_per_window * latency)))
+        return round(float(profile["timeout_seconds"]) * 0.7 * latency)
 
     if strategy == "committee":
-        # Committee is roughly:
-        # R1 deliberation + R2 cross-review + aggregation + quote resolution
-        # + optional revision pass. Agents run in parallel, so wall-clock time
-        # tracks latency windows rather than raw call count.
-        agents = 5 if analysts >= 5 else 3
-        windows = 5
-        seconds_per_window = 18 + count * 5 + max(0, agents - 3) * 2
-        return max(120, min(540, round(windows * seconds_per_window * latency)))
+        base = 55 + count * 18 + max(0, analysts - 1) * 8
+        return min(round(float(profile["timeout_seconds"]) * 0.85 * latency), round(base * latency))
 
     if strategy == "ttd":
-        # Symphonia's TTD path runs graph extraction, synthesis generation, and
-        # narrative generation. Each stage does draft generation, denoising
-        # loops, final fitness, and merge. We use the same interactive profile
-        # as the adapter: 2 denoise steps with final-only fitness feedback.
-        n_steps = 2
-        fitness_final_only = True
-        windows_per_step = 2 if fitness_final_only else 3
-        per_stage_windows = 1 + (n_steps * windows_per_step) + (1 if analysts > 1 else 0) + 1
-        pipeline_windows = per_stage_windows * 3 + 2  # quote resolution + revision/finalisation
-        seconds_per_window = 8 + count * 2 + max(0, analysts - 1) * 1.5
-        return max(240, min(900, round(pipeline_windows * seconds_per_window * latency)))
+        base = 85 + count * 28 + max(0, analysts - 1) * 10
+        return min(round(float(profile["timeout_seconds"]) * 0.8 * latency), round(base * latency))
 
     return 60
+
+
+def _build_synthesis_runtime_profile(
+    strategy: str,
+    *,
+    response_count: int,
+    requested_analysts: int,
+) -> dict[str, object]:
+    """Return interactive runtime limits for the selected strategy.
+
+    These profiles are tuned for an admin UI, not an overnight batch job.
+    """
+    responses = max(1, response_count)
+    analysts = max(1, requested_analysts)
+
+    if strategy == "simple":
+        return {
+            "n_analysts": 1,
+            "timeout_seconds": min(120.0, max(45.0, 30.0 + responses * 8.0)),
+            "n_denoise_steps": 1,
+        }
+
+    if strategy == "committee":
+        return {
+            "n_analysts": min(3, analysts),
+            "timeout_seconds": min(210.0, max(90.0, 60.0 + responses * 20.0)),
+            "n_denoise_steps": 1,
+        }
+
+    if strategy == "ttd":
+        return {
+            "n_analysts": min(2, analysts),
+            "timeout_seconds": min(300.0, max(150.0, 90.0 + responses * 30.0)),
+            "n_denoise_steps": 1,
+        }
+
+    return {
+        "n_analysts": analysts,
+        "timeout_seconds": 180.0,
+        "n_denoise_steps": 1,
+    }
 
 
 def _format_duration_estimate(seconds: int) -> str:
@@ -1517,11 +1545,11 @@ def list_synthesis_versions(
 
 
 # ---------------------------------------------------------
-# BACKGROUND SYNTHESIS TASK
+# SYNTHESIS EXECUTION
 # ---------------------------------------------------------
 
 
-async def _synthesis_background(
+async def _run_synthesis_job(
     *,
     form_id: int,
     round_id: int,
@@ -1536,9 +1564,8 @@ async def _synthesis_background(
     mode_str: str,
     admin_email: str | None,
 ):
-    """Run synthesis in the background (committee/ttd/simple).
+    """Run a synthesis job and persist the resulting version.
 
-    Launched via asyncio.create_task() from the HTTP handler.
     Creates its own DB session, runs synthesis, saves the result, and
     broadcasts completion (or error) via WebSocket.
     """
@@ -1568,13 +1595,23 @@ async def _synthesis_background(
             flow_mode = FlowMode.HUMAN_ONLY
 
         resolved_model = _resolve_synthesis_model(db, model)
+        runtime_profile = _build_synthesis_runtime_profile(
+            strategy,
+            response_count=len(response_dicts),
+            requested_analysts=n_analysts,
+        )
+        effective_analysts = int(runtime_profile["n_analysts"])
+        timeout_seconds = float(runtime_profile["timeout_seconds"])
+        n_denoise_steps = int(runtime_profile["n_denoise_steps"])
 
         try:
             synthesiser = get_synthesiser(
                 api_key=os.getenv("OPENROUTER_API_KEY", ""),
-                n_analysts=n_analysts,
+                n_analysts=effective_analysts,
                 strategy=strategy,
                 model=resolved_model,
+                timeout_seconds=timeout_seconds,
+                n_denoise_steps=n_denoise_steps,
             )
 
             result = await synthesiser.run(
@@ -1589,16 +1626,16 @@ async def _synthesis_background(
             )
         except (SynthesisConfigError, SynthesisTimeoutError, SynthesisError) as exc:
             logger.error(
-                "Background synthesis error (round %d): %s",
+                "Synthesis error (round %d): %s",
                 round_id,
                 exc,
                 exc_info=True,
             )
             await _broadcast_synthesis_error(form_id, round_id, str(exc))
-            return
+            return None
         except Exception as exc:
             logger.error(
-                "Unexpected background synthesis error (round %d): %s",
+                "Unexpected synthesis error (round %d): %s",
                 round_id,
                 exc,
                 exc_info=True,
@@ -1606,7 +1643,7 @@ async def _synthesis_background(
             await _broadcast_synthesis_error(
                 form_id, round_id, "An unexpected error occurred"
             )
-            return
+            return None
 
         synthesis_json_data = result.to_dict()
         synthesis_text = _render_synthesis_text(result)
@@ -1614,11 +1651,11 @@ async def _synthesis_background(
         # ── Save to DB ──
         round_obj = db.query(RoundModel).filter(RoundModel.id == round_id).first()
         if not round_obj:
-            logger.error("Background synthesis: round %d disappeared", round_id)
+            logger.error("Synthesis round %d disappeared before save", round_id)
             await _broadcast_synthesis_error(
                 form_id, round_id, "Round not found after synthesis completed"
             )
-            return
+            return None
 
         # Deactivate existing versions
         db.query(SynthesisVersion).filter(
@@ -1630,7 +1667,7 @@ async def _synthesis_background(
             version=next_version,
             synthesis=synthesis_text,
             synthesis_json=synthesis_json_data,
-            model_used=model,
+            model_used=resolved_model,
             strategy=strategy,
             is_active=True,
         )
@@ -1676,14 +1713,27 @@ async def _synthesis_background(
         )
 
         logger.info(
-            "Background synthesis complete for round %d (version %d)",
+            "Synthesis complete for round %d (version %d)",
             round_id,
             next_version,
         )
+        return {
+            "id": new_version.id,
+            "round_id": new_version.round_id,
+            "version": new_version.version,
+            "synthesis": new_version.synthesis,
+            "synthesis_json": new_version.synthesis_json,
+            "model_used": new_version.model_used,
+            "strategy": new_version.strategy,
+            "created_at": new_version.created_at.isoformat()
+            if new_version.created_at
+            else None,
+            "is_active": new_version.is_active,
+        }
 
     except Exception as exc:
         logger.error(
-            "Unhandled error in background synthesis (round %d): %s",
+            "Unhandled synthesis error (round %d): %s",
             round_id,
             exc,
             exc_info=True,
@@ -1694,6 +1744,7 @@ async def _synthesis_background(
             )
         except Exception:
             pass
+        return None
     finally:
         db.close()
 
@@ -1711,13 +1762,11 @@ class GenerateSynthesisVersionPayload(BaseModel):
     summary="Generate synthesis for any round",
     description=(
         "Generate a new synthesis version for ANY round (not just active). Supports "
-        "'simple', 'committee', and 'ttd' strategies. For real (non-mock) strategies, "
-        "synthesis runs asynchronously in the background — the endpoint returns "
-        "immediately and broadcasts completion via WebSocket. Admin only."
+        "'simple', 'committee', and 'ttd' strategies. Real synthesis runs inside "
+        "the request so it completes reliably on the production deployment. "
+        "Progress is still broadcast via WebSocket. Admin only."
     ),
-    response_description=(
-        "Immediate result for mock mode, or status='started' for real synthesis"
-    ),
+    response_description="New synthesis version object",
 )
 @limiter.limit(SYNTHESIS_LIMIT)
 async def generate_synthesis_for_round(
@@ -1732,9 +1781,8 @@ async def generate_synthesis_for_round(
     """Generate a NEW synthesis version for ANY round (not just active).
 
     Mock mode returns the result synchronously (instant, no LLM).
-    Real synthesis (committee/ttd/simple) is launched as a background
-    asyncio task — the HTTP response returns within milliseconds and
-    the client is notified via the ``synthesis_complete`` WebSocket event.
+    Real synthesis now also runs inside the request so the deployed
+    backend does not lose long-running tasks after returning a response.
     """
     # ── 1. Validate (fast, synchronous) ──
     round_obj = (
@@ -1862,34 +1910,32 @@ async def generate_synthesis_for_round(
             "is_active": new_version.is_active,
         }
 
-    # ── 3b. Real synthesis → launch background task, return immediately ──
-    asyncio.create_task(
-        _synthesis_background(
-            form_id=form_id,
-            round_id=round_id,
-            round_number=round_number,
-            questions=list(questions),
-            response_dicts=response_dicts,
-            comments_context=round_comments_context,
-            next_version=next_version,
-            strategy=strategy,
-            model=payload.model,
-            n_analysts=payload.n_analysts,
-            mode_str=payload.mode,
-            admin_email=user.email,
-        )
+    # ── 3b. Real synthesis → run inside the request ──
+    # Cloud Run style deployments are not a safe place for fire-and-forget
+    # asyncio tasks after the response has already been returned.
+    result = await _run_synthesis_job(
+        form_id=form_id,
+        round_id=round_id,
+        round_number=round_number,
+        questions=list(questions),
+        response_dicts=response_dicts,
+        comments_context=round_comments_context,
+        next_version=next_version,
+        strategy=strategy,
+        model=payload.model,
+        n_analysts=payload.n_analysts,
+        mode_str=payload.mode,
+        admin_email=user.email,
     )
-
-    return {
-        "status": "started",
-        "message": (
-            "Synthesis running in background. "
-            f"Expected time: {estimated_label}. "
-            "You will be notified when complete."
-        ),
-        "estimate_seconds": estimated_seconds,
-        "estimate_label": estimated_label,
-    }
+    if result is None:
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Synthesis failed before completion. "
+                f"Expected time was {estimated_label}."
+            ),
+        )
+    return result
 
 
 @router.put(
