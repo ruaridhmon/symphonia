@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, LogOut } from 'lucide-react';
+import { ChevronDown, LogOut, Settings, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import LanguageSwitcher from './LanguageSwitcher';
+import { ThemeToggle } from '../theme';
 
 type Props = {
   email: string;
   onLogout: () => void;
+  showAdminLinks?: boolean;
 };
 
 function getInitials(email: string): string {
@@ -25,8 +29,9 @@ function getInitials(email: string): string {
   return (localPart.slice(0, 2) || '?').toUpperCase();
 }
 
-export default function AccountMenu({ email, onLogout }: Props) {
+export default function AccountMenu({ email, onLogout, showAdminLinks = false }: Props) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -98,13 +103,13 @@ export default function AccountMenu({ email, onLogout }: Props) {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl"
+          className="absolute right-0 mt-2 w-72 overflow-hidden rounded-2xl"
           style={{
             backgroundColor: 'var(--card)',
             border: '1px solid color-mix(in srgb, var(--border) 62%, transparent)',
             boxShadow: '0 20px 48px rgba(15, 23, 42, 0.14)',
           }}
-        >
+          >
           <div
             className="px-4 py-3 text-sm truncate"
             style={{
@@ -114,6 +119,72 @@ export default function AccountMenu({ email, onLogout }: Props) {
             title={email}
           >
             {email}
+          </div>
+          {showAdminLinks && (
+            <div
+              className="px-2 py-2"
+              style={{
+                borderBottom: '1px solid color-mix(in srgb, var(--border) 52%, transparent)',
+              }}
+            >
+              <button
+                type="button"
+                role="menuitem"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors"
+                style={{ color: 'var(--foreground)' }}
+                onClick={() => {
+                  setOpen(false);
+                  navigate('/admin/settings');
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--muted) 74%, transparent)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <Settings size={16} aria-hidden="true" style={{ color: 'var(--muted-foreground)' }} />
+                {t('common.settings')}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors"
+                style={{ color: 'var(--foreground)' }}
+                onClick={() => {
+                  setOpen(false);
+                  navigate('/admin/users');
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--muted) 74%, transparent)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <Users size={16} aria-hidden="true" style={{ color: 'var(--muted-foreground)' }} />
+                {t('adminDashboard.users')}
+              </button>
+            </div>
+          )}
+          <div
+            className="px-4 py-3 space-y-3"
+            style={{
+              borderBottom: '1px solid color-mix(in srgb, var(--border) 52%, transparent)',
+            }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                {t('language.label')}
+              </span>
+              <LanguageSwitcher />
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                {t('common.theme')}
+              </span>
+              <ThemeToggle />
+            </div>
           </div>
           <button
             type="button"

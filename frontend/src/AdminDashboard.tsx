@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Pencil, Plus, Search, Settings, Ticket, Users } from 'lucide-react';
+import { FileText, Pencil, Plus, Search, Ticket } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="mb-8 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 flex-1">
             <h1
               className="text-3xl sm:text-[2.1rem] font-semibold tracking-tight"
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
               {t('adminDashboard.title')}
             </h1>
             {forms.length > 0 && (
-              <div className="relative mt-4 w-full sm:max-w-sm">
+              <div className="relative mt-3 w-full sm:max-w-md">
                 <Search
                   size={15}
                   aria-hidden="true"
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2 flex-wrap lg:justify-end">
+          <div className="flex items-center gap-2 flex-wrap lg:justify-end lg:pt-0.5">
             <LoadingButton
               variant="ghost"
               size="sm"
@@ -191,22 +191,6 @@ export default function AdminDashboard() {
               aria-label={t('adminDashboard.joinCodeAction')}
             >
               <Ticket size={15} aria-hidden="true" /> {t('adminDashboard.joinCodeAction')}
-            </LoadingButton>
-            <LoadingButton
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/admin/settings')}
-              aria-label={t('adminDashboard.openSettings', 'Open settings')}
-            >
-              <Settings size={15} aria-hidden="true" /> {t('common.settings')}
-            </LoadingButton>
-            <LoadingButton
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/admin/users')}
-              aria-label={t('adminDashboard.manageUsers')}
-            >
-              <Users size={15} aria-hidden="true" /> {t('adminDashboard.users')}
             </LoadingButton>
             <LoadingButton
               variant="accent"

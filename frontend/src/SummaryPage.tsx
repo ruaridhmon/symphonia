@@ -194,7 +194,7 @@ export default function SummaryPage() {
 	const formId = Number(id);
 	const { toastError, toastWarning, toastSuccess, toastInfo } = useToast();
 
-	const { token: rawToken, logout: authLogout } = useAuth();
+	const { token: rawToken, logout: authLogout, role } = useAuth();
 	const token = rawToken ?? '';
 
 	// ── Core state ──
@@ -985,7 +985,12 @@ export default function SummaryPage() {
 			<a href="#main-content" className="skip-to-main">
 				{t('common.skipToMainContent')}
 			</a>
-			<SummaryHeader email={email} viewers={viewers} onLogout={logout} />
+			<SummaryHeader
+				email={email}
+				viewers={viewers}
+				onLogout={logout}
+				showAdminLinks={role === 'platform_admin'}
+			/>
 
 			<main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6" tabIndex={-1}>
 				<div>

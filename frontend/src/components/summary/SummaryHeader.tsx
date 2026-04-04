@@ -7,9 +7,10 @@ type Props = {
   email: string;
   viewers: PresenceViewer[];
   onLogout: () => void;
+  showAdminLinks?: boolean;
 };
 
-export default function SummaryHeader({ email, viewers, onLogout }: Props) {
+export default function SummaryHeader({ email, viewers, onLogout, showAdminLinks = false }: Props) {
   const navigate = useNavigate();
 
   return (
@@ -45,7 +46,7 @@ export default function SummaryHeader({ email, viewers, onLogout }: Props) {
           </button>
           <PresenceIndicator viewers={viewers} currentUserEmail={email} />
         </div>
-        <AccountMenu email={email} onLogout={onLogout} />
+        <AccountMenu email={email} onLogout={onLogout} showAdminLinks={showAdminLinks} />
       </div>
     </header>
   );

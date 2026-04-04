@@ -3,13 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from './AuthContext';
-import { ThemeToggle } from './theme';
-import LanguageSwitcher from './components/LanguageSwitcher';
 import AccountMenu from './components/AccountMenu';
 
 export default function Header() {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user, logout, role } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -94,10 +92,12 @@ export default function Header() {
           >
             <span aria-hidden="true" style={{ opacity: 0.7 }}>⌘K</span>
           </button>
-          <LanguageSwitcher />
-          <ThemeToggle />
           {user && (
-            <AccountMenu email={user.email} onLogout={logout} />
+            <AccountMenu
+              email={user.email}
+              onLogout={logout}
+              showAdminLinks={role === 'platform_admin'}
+            />
           )}
         </nav>
 
