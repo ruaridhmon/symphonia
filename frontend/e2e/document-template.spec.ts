@@ -605,7 +605,7 @@ test.describe('Document template consultations', () => {
       await row.getByRole('button', { name: `Share Dashboard Actions ${timestamp}` }).click();
       await expect(page.getByRole('dialog', { name: /share consultation/i })).toBeVisible();
       await expect(page.getByText(`/join/${created.join_code}`)).toBeVisible();
-      await expect(page.getByRole('link', { name: /whatsapp share in whatsapp/i })).toBeVisible();
+      await expect(page.getByRole('link', { name: /whatsapp/i })).toBeVisible();
       await page.getByRole('button', { name: /close share sheet/i }).click();
       await expect(page.getByRole('dialog', { name: /share consultation/i })).toBeHidden();
 

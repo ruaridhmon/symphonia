@@ -1,4 +1,4 @@
-import { Check, Copy, Mail, MessageCircle, Share2, X } from 'lucide-react';
+import { Check, ChevronRight, Copy, Link2, Mail, MessageCircle, Share2, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface ConsultationShareSheetProps {
@@ -56,7 +56,7 @@ export default function ConsultationShareSheet({
       href: `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${joinLink}`)}`,
       iconBg: '#25D366',
       iconFg: '#ffffff',
-      hint: 'Share in WhatsApp',
+      hint: 'Send in chat',
     },
     {
       key: 'email',
@@ -65,7 +65,7 @@ export default function ConsultationShareSheet({
       href: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${shareText}\n\n${joinLink}\n\nJoin code: ${joinCode}`)}`,
       iconBg: '#2563eb',
       iconFg: '#ffffff',
-      hint: 'Compose email',
+      hint: 'Open compose',
     },
   ];
 
@@ -100,12 +100,12 @@ export default function ConsultationShareSheet({
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: 520,
+          maxWidth: 480,
           backgroundColor: 'var(--card)',
           border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-          borderRadius: 28,
-          padding: '1.1rem',
-          boxShadow: '0 28px 80px rgba(15, 23, 42, 0.22)',
+          borderRadius: 26,
+          padding: '1rem',
+          boxShadow: '0 24px 64px rgba(15, 23, 42, 0.18)',
         }}
       >
         <div className="flex items-start justify-between gap-3">
@@ -116,9 +116,9 @@ export default function ConsultationShareSheet({
             >
               Share
             </div>
-            <h2 className="mt-1 text-lg font-semibold text-foreground">{title}</h2>
+            <h2 className="mt-1 text-[1.05rem] font-semibold text-foreground">{title}</h2>
             <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-              Send a direct join link or share the code in the channel your participants already use.
+              Send a direct join link or use a familiar channel.
             </p>
           </div>
           <button
@@ -137,54 +137,55 @@ export default function ConsultationShareSheet({
         </div>
 
         <div
-          className="mt-4 rounded-3xl p-4"
+          className="mt-4 rounded-[1.35rem] p-4"
           style={{
-            backgroundColor: 'color-mix(in srgb, var(--background) 82%, var(--card) 18%)',
+            backgroundColor: 'color-mix(in srgb, var(--background) 84%, var(--card) 16%)',
             border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
           }}
         >
-          <div className="text-xs font-medium uppercase tracking-[0.16em]" style={{ color: 'var(--muted-foreground)' }}>
-            Join link
-          </div>
-          <div className="mt-2 break-all text-sm text-foreground">{joinLink}</div>
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <div>
-              <div className="text-xs font-medium uppercase tracking-[0.16em]" style={{ color: 'var(--muted-foreground)' }}>
-                Join code
-              </div>
-              <div className="mt-1 font-mono text-sm font-semibold text-foreground">{joinCode}</div>
-            </div>
-            <button
-              type="button"
-              onClick={() => copyValue('link', joinLink)}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
+          <div className="flex items-start gap-3">
+            <div
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
                 color: 'var(--accent)',
               }}
             >
-              {copied === 'link' ? <Check size={16} /> : <Copy size={16} />}
-              {copied === 'link' ? 'Copied' : 'Copy link'}
-            </button>
+              <Link2 size={18} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-medium uppercase tracking-[0.16em]" style={{ color: 'var(--muted-foreground)' }}>
+                Join link
+              </div>
+              <div className="mt-1 break-all text-sm text-foreground">{joinLink}</div>
+              <div className="mt-3 flex items-center gap-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                <span>Code</span>
+                <span className="font-mono font-semibold text-foreground">{joinCode}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="mt-4 space-y-2">
           {typeof navigator !== 'undefined' && typeof navigator.share === 'function' ? (
             <button
               type="button"
               onClick={nativeShare}
-              className="rounded-[1.5rem] px-4 py-4 text-left transition-colors"
+              aria-label="More use device share"
+              className="flex w-full items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left transition-colors"
               style={{
                 backgroundColor: 'var(--background)',
                 border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
               }}
             >
-              <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
                 <Share2 size={18} />
               </div>
-              <div className="text-sm font-semibold text-foreground">More</div>
-              <div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>Use device share</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-foreground">More</div>
+                <div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>Use device share</div>
+              </div>
+              <ChevronRight size={16} style={{ color: 'var(--muted-foreground)' }} />
             </button>
           ) : null}
 
@@ -194,7 +195,8 @@ export default function ConsultationShareSheet({
               href={option.href}
               target="_blank"
               rel="noreferrer"
-              className="rounded-[1.5rem] px-4 py-4 text-left transition-colors"
+              aria-label={`${option.label} ${option.hint}`}
+              className="flex items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left transition-colors"
               style={{
                 backgroundColor: 'var(--background)',
                 border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
@@ -203,35 +205,51 @@ export default function ConsultationShareSheet({
               }}
             >
               <div
-                className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
                 style={{ backgroundColor: option.iconBg, color: option.iconFg }}
               >
                 {option.icon}
               </div>
-              <div className="text-sm font-semibold text-foreground">{option.label}</div>
-              <div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.hint}</div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-foreground">{option.label}</div>
+                <div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.hint}</div>
+              </div>
+              <ChevronRight size={16} style={{ color: 'var(--muted-foreground)' }} />
             </a>
           ))}
         </div>
 
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => copyValue('link', joinLink)}
+            className="inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 text-sm font-medium"
+            style={{
+              backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+              color: 'var(--accent)',
+            }}
+          >
+            {copied === 'link' ? <Check size={16} /> : <Copy size={16} />}
+            {copied === 'link' ? 'Link copied' : 'Copy link'}
+          </button>
           <button
             type="button"
             onClick={() => copyValue('code', joinCode)}
-            className="flex-1 rounded-full px-4 py-3 text-sm font-medium"
+            className="inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 text-sm font-medium"
             style={{
               backgroundColor: 'var(--background)',
               border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
               color: 'var(--foreground)',
             }}
           >
+            {copied === 'code' ? <Check size={16} /> : <Copy size={16} />}
             {copied === 'code' ? 'Code copied' : 'Copy join code'}
           </button>
           <a
             href={joinLink}
             target="_blank"
             rel="noreferrer"
-            className="flex-1 rounded-full px-4 py-3 text-sm font-medium text-center"
+            className="inline-flex items-center rounded-full px-3.5 py-2.5 text-sm font-medium text-center"
             style={{
               backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
               color: 'var(--accent)',
