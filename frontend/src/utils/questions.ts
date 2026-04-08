@@ -4,8 +4,21 @@ export interface QuestionOptions {
   requireConfidence: boolean;
 }
 
+export type SurveyInputType = 'text' | 'textarea' | 'single_select' | 'multi_select' | 'slider';
+
 export interface ConfigurableQuestion extends QuestionOptions {
   label: string;
+  questionId?: string | null;
+  helpText?: string | null;
+  inputType?: SurveyInputType | null;
+  options?: string[] | null;
+  maxSelections?: number | null;
+  minValue?: number | null;
+  maxValue?: number | null;
+  minLabel?: string | null;
+  midLabel?: string | null;
+  maxLabel?: string | null;
+  importedFromQuestionnaire?: boolean | null;
   fieldType?: 'short' | 'long' | null;
   rows?: number | null;
   placeholder?: string | null;
@@ -68,6 +81,31 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
   return {
     label: extractQuestionText(q),
     ...extractQuestionOptions(q),
+    questionId: obj && typeof obj.questionId === 'string' ? obj.questionId : null,
+    helpText: obj && typeof obj.helpText === 'string' ? obj.helpText : null,
+    inputType:
+      obj &&
+      (obj.inputType === 'text' ||
+        obj.inputType === 'textarea' ||
+        obj.inputType === 'single_select' ||
+        obj.inputType === 'multi_select' ||
+        obj.inputType === 'slider')
+        ? obj.inputType
+        : null,
+    options:
+      obj && Array.isArray(obj.options)
+        ? obj.options.filter((option): option is string => typeof option === 'string')
+        : null,
+    maxSelections: obj && typeof obj.maxSelections === 'number' ? obj.maxSelections : null,
+    minValue: obj && typeof obj.minValue === 'number' ? obj.minValue : null,
+    maxValue: obj && typeof obj.maxValue === 'number' ? obj.maxValue : null,
+    minLabel: obj && typeof obj.minLabel === 'string' ? obj.minLabel : null,
+    midLabel: obj && typeof obj.midLabel === 'string' ? obj.midLabel : null,
+    maxLabel: obj && typeof obj.maxLabel === 'string' ? obj.maxLabel : null,
+    importedFromQuestionnaire:
+      obj && typeof obj.importedFromQuestionnaire === 'boolean'
+        ? obj.importedFromQuestionnaire
+        : null,
     fieldType:
       obj && (obj.fieldType === 'short' || obj.fieldType === 'long')
         ? obj.fieldType
@@ -83,4 +121,8 @@ export function isSurveyQuestion(question: QuestionOptions): boolean {
     !question.requireCounterarguments &&
     !question.requireConfidence
   );
+}
+
+export function isTypedSurveyQuestion(question: ConfigurableQuestion): boolean {
+  return isSurveyQuestion(question) && !!question.inputType;
 }

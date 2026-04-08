@@ -1,4 +1,8 @@
 import { test, expect, request as playwrightRequest } from '@playwright/test';
+import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const ADMIN_EMAIL = 'antreas@axiotic.ai';
 const ADMIN_PASSWORD = 'test123';
@@ -17,15 +21,27 @@ async function loginViaApi(
   email: string,
   password: string,
 ) {
-  const response = await request.post(`${baseURL}/login`, {
-    form: {
-      username: email,
-      password,
-    },
-  });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await request.post(`${baseURL}/login`, {
+      form: {
+        username: email,
+        password,
+      },
+    });
 
-  expect(response.ok(), `Login failed with ${response.status()}`).toBeTruthy();
-  return response.json() as Promise<LoginPayload>;
+    if (response.ok()) {
+      return response.json() as Promise<LoginPayload>;
+    }
+
+    if (response.status() === 429 && attempt < 2) {
+      await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)));
+      continue;
+    }
+
+    expect(response.ok(), `Login failed with ${response.status()}`).toBeTruthy();
+  }
+
+  throw new Error('Login retry loop exhausted');
 }
 
 function buildStorageState(baseURL: string, login: LoginPayload) {
@@ -79,6 +95,22 @@ async function getFormDetails(
 
   expect(response.ok(), `Fetching form ${formId} failed with ${response.status()}`).toBeTruthy();
   return response.json();
+}
+
+async function getMyResponseDetails(
+  request: import('@playwright/test').APIRequestContext,
+  baseURL: string,
+  token: string,
+  formId: number,
+) {
+  const response = await request.get(`${baseURL}/form/${formId}/my_response`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  expect(response.ok(), `Fetching my response for form ${formId} failed with ${response.status()}`).toBeTruthy();
+  return response.json() as Promise<{ answers: Record<string, { position: string }> }>;
 }
 
 async function createDocumentTemplateForm(
@@ -142,6 +174,55 @@ async function deleteForm(
   });
 }
 
+function escapeXml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+async function createQuestionnaireDocx(lines: string[]) {
+  const dir = await mkdtemp(path.join(tmpdir(), 'symphonia-questionnaire-'));
+  const relsDir = path.join(dir, '_rels');
+  const wordDir = path.join(dir, 'word');
+  await mkdir(relsDir, { recursive: true });
+  await mkdir(wordDir, { recursive: true });
+
+  const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+  const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+  const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    ${lines
+      .map((line) =>
+        line
+          ? `<w:p><w:r><w:t>${escapeXml(line)}</w:t></w:r></w:p>`
+          : '<w:p/>',
+      )
+      .join('\n    ')}
+    <w:sectPr/>
+  </w:body>
+</w:document>`;
+
+  await writeFile(path.join(dir, '[Content_Types].xml'), contentTypesXml);
+  await writeFile(path.join(relsDir, '.rels'), relsXml);
+  await writeFile(path.join(wordDir, 'document.xml'), documentXml);
+
+  const docxPath = path.join(dir, 'questionnaire.docx');
+  execFileSync('zip', ['-qr', docxPath, '[Content_Types].xml', '_rels', 'word'], { cwd: dir });
+  return { dir, docxPath };
+}
+
 test.describe('Document template consultations', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -200,6 +281,7 @@ test.describe('Document template consultations', () => {
       const participantEmail = `participant-${timestamp}@example.com`;
       await registerParticipant(participantApi, appBase, participantEmail, 'test123');
       const participantLogin = await loginViaApi(participantApi, appBase, participantEmail, 'test123');
+      const participantToken = participantLogin.access_token;
       participantContext = await browser.newContext({
         storageState: buildStorageState(appBase, participantLogin),
       });
@@ -362,6 +444,132 @@ test.describe('Document template consultations', () => {
       }
       await participantApi.dispose();
       await adminApi.dispose();
+    }
+  });
+
+  test('admin can import a questionnaire docx into survey questions', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let fixtureDir: string | null = null;
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    let participantContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const participantApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      const fixture = await createQuestionnaireDocx([
+        'Round 1: Initial prioritisation',
+        '',
+        'Section A. About you',
+        '',
+        'Q1. Which role best describes you?',
+        'Response type: Select one.',
+        'Leader',
+        'Teacher',
+        'Other',
+        '',
+        'Q2. Which priorities matter most?',
+        'Response type: Select up to 2.',
+        'Workload',
+        'Safeguarding',
+        'Equity',
+        '',
+        'Q3. How significant is each issue?',
+        'Response type: 0–10 slider for each item.',
+        'Anchor labels: 0 = Not significant, 5 = Moderate, 10 = Very significant',
+        'Workload burden',
+        'Safeguarding risk',
+        '',
+        'Q4. Optional comments',
+        'Response type: Free text, max 40 words.',
+        '',
+        'Round 2: Follow-up',
+        'Q5. Dynamic question',
+        'Response type: Select one.',
+        'A',
+        'B',
+      ]);
+      fixtureDir = fixture.dir;
+
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const adminPage = await adminContext.newPage();
+      await adminPage.goto(`${appBase}/admin/forms/new`);
+      await adminPage.getByRole('button', { name: /import questionnaire/i }).click();
+
+      await adminPage.locator('input[type="file"]').setInputFiles(fixture.docxPath);
+      await expect(adminPage.getByText(/Imported 5 questions from Round 1: Initial prioritisation/i)).toBeVisible();
+      await expect(adminPage.getByText(/Later rounds were not imported/i)).toBeVisible();
+      await expect(adminPage.getByText('Which role best describes you?')).toBeVisible();
+      await expect(adminPage.getByText('Workload burden')).toBeVisible();
+
+      await adminPage.locator('#form-title').fill(`Imported Questionnaire ${timestamp}`);
+      await adminPage.getByRole('button', { name: /create form/i }).click();
+      await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
+
+      const formIdMatch = adminPage.url().match(/\/admin\/form\/(\d+)$/);
+      expect(formIdMatch).not.toBeNull();
+      createdFormId = Number(formIdMatch?.[1]);
+
+      const form = await getFormDetails(adminApi, appBase, adminToken, createdFormId);
+      expect(Array.isArray(form.questions)).toBeTruthy();
+      expect(form.questions).toHaveLength(5);
+      expect(form.questions[0].inputType).toBe('single_select');
+      expect(form.questions[1].inputType).toBe('multi_select');
+      expect(form.questions[2].inputType).toBe('slider');
+
+      const participantEmail = `questionnaire-participant-${timestamp}@example.com`;
+      await registerParticipant(participantApi, appBase, participantEmail, 'test123');
+      const participantLogin = await loginViaApi(participantApi, appBase, participantEmail, 'test123');
+      const participantToken = participantLogin.access_token;
+      participantContext = await browser.newContext({
+        storageState: buildStorageState(appBase, participantLogin),
+      });
+      const participantPage = await participantContext.newPage();
+      await participantPage.goto(`${appBase}/join`);
+      await participantPage.getByPlaceholder(/SYM/i).fill(form.join_code);
+      await participantPage.getByRole('button', { name: /join consultation/i }).click();
+      await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
+
+      await participantPage.getByLabel('Teacher').check();
+      await participantPage.getByLabel('Workload').check();
+      await participantPage.getByLabel('Equity').check();
+
+      const sliders = participantPage.locator('input[type="range"]');
+      await sliders.nth(0).fill('8');
+      await sliders.nth(1).fill('6');
+      await participantPage.getByRole('textbox', { name: '' }).last().fill('Need clearer implementation guidance.');
+
+      await participantPage.getByRole('button', { name: /^submit$/i }).click();
+      await expect(participantPage.getByRole('heading', { name: /thank you for your submission/i })).toBeVisible();
+
+      const savedResponse = await getMyResponseDetails(participantApi, appBase, participantToken, createdFormId);
+      expect(savedResponse.answers.q1.position).toBe('Teacher');
+      expect(savedResponse.answers.q2.position).toContain('Workload');
+      expect(savedResponse.answers.q2.position).toContain('Equity');
+      expect(savedResponse.answers.q3.position).toBe('8');
+      expect(savedResponse.answers.q4.position).toBe('6');
+      expect(savedResponse.answers.q5.position).toContain('Need clearer implementation guidance.');
+    } finally {
+      if (createdFormId) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      if (participantContext) {
+        await participantContext.close();
+      }
+      if (adminContext) {
+        await adminContext.close();
+      }
+      await adminApi.dispose();
+      await participantApi.dispose();
+      if (fixtureDir) {
+        await rm(fixtureDir, { recursive: true, force: true });
+      }
     }
   });
 });

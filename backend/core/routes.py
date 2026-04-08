@@ -2823,6 +2823,17 @@ class QuestionConfig(BaseModel):
     requireEvidence: bool = True
     requireCounterarguments: bool = True
     requireConfidence: bool = True
+    questionId: str | None = None
+    helpText: str | None = None
+    inputType: str | None = None
+    options: list[str] | None = None
+    maxSelections: int | None = None
+    minValue: int | None = None
+    maxValue: int | None = None
+    minLabel: str | None = None
+    midLabel: str | None = None
+    maxLabel: str | None = None
+    importedFromQuestionnaire: bool | None = None
     fieldType: str | None = None
     rows: int | None = None
     placeholder: str | None = None

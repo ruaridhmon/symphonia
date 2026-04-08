@@ -9,12 +9,15 @@ import { BackLink, LoadingButton } from './components';
 import DocumentTemplateEditor from './components/DocumentTemplateEditor';
 import DocumentTemplateResponse from './components/DocumentTemplateResponse';
 import QuestionModeToggle from './components/QuestionModeToggle';
+import QuestionnaireImporter from './components/QuestionnaireImporter';
 import StructuredInput from './components/StructuredInput';
+import SurveyQuestionInput from './components/SurveyQuestionInput';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import TemplatePicker, { type FormTemplate } from './TemplatePicker';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
 import { isSurveyQuestion, normalizeQuestion, type ConfigurableQuestion } from './utils/questions';
 import { isDocumentTemplate, parseDocumentTemplateFields } from './utils/documentTemplate';
+import type { QuestionnaireImportResult } from './utils/questionnaireImport';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
@@ -374,6 +377,7 @@ export default function AdminFormNew() {
   const [joinCode, setJoinCode] = useState(() => generateJoinCode());
   const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
   const [documentTemplate, setDocumentTemplate] = useState('');
+  const [importSummary, setImportSummary] = useState<QuestionnaireImportResult | null>(null);
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const [saving, setSaving] = useState(false);
   const [synthesisModel, setSynthesisModel] = useState('openai/gpt-4o');
@@ -417,6 +421,7 @@ export default function AdminFormNew() {
     setTitle(template.name);
     setDescription(template.description);
     setDocumentTemplate('');
+    setImportSummary(null);
     setQuestions(template.default_questions.map(normalizeQuestion));
     setCurrentStep('editor');
     setSearchParams({ step: 'editor' });
@@ -427,6 +432,7 @@ export default function AdminFormNew() {
     setTitle('');
     setDescription('');
     setDocumentTemplate('');
+    setImportSummary(null);
     setQuestions([createBlankQuestion()]);
     setCurrentStep('editor');
     setSearchParams({ step: 'editor' });
@@ -437,6 +443,18 @@ export default function AdminFormNew() {
     setTitle('');
     setDescription('');
     setDocumentTemplate('');
+    setImportSummary(null);
+    setQuestions([createBlankSurveyQuestion()]);
+    setCurrentStep('editor');
+    setSearchParams({ step: 'editor' });
+  };
+
+  const handleStartQuestionnaireImport = () => {
+    setSelectedTemplate(null);
+    setTitle('');
+    setDescription('');
+    setDocumentTemplate('');
+    setImportSummary(null);
     setQuestions([createBlankSurveyQuestion()]);
     setCurrentStep('editor');
     setSearchParams({ step: 'editor' });
@@ -448,6 +466,7 @@ export default function AdminFormNew() {
     setDescription('');
     setQuestions([createBlankSurveyQuestion()]);
     setDocumentTemplate('Title\n{{long:Executive summary}}\n');
+    setImportSummary(null);
     setCurrentStep('editor');
     setSearchParams({ step: 'editor' });
   };
@@ -471,6 +490,7 @@ export default function AdminFormNew() {
   };
 
   const setResponseStyle = (mode: 'consensus' | 'information') => {
+    setImportSummary(null);
     setQuestions(prev =>
       prev.map(question => ({
         ...question,
@@ -576,6 +596,18 @@ export default function AdminFormNew() {
               onStartInformationGathering={handleStartInformationGathering}
             />
             <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleStartQuestionnaireImport}
+                className="rounded-lg px-4 py-2 text-sm font-medium mr-2"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--foreground) 4%, transparent)',
+                  color: 'var(--foreground)',
+                  border: '1px solid var(--border)',
+                }}
+              >
+                Import questionnaire
+              </button>
               <button
                 type="button"
                 onClick={handleStartDocumentTemplate}
@@ -770,6 +802,44 @@ export default function AdminFormNew() {
             </div>
           )}
 
+          {!isDocumentMode && isSurveyMode && (
+            <>
+              <QuestionnaireImporter
+                onQuestionsImported={(importedQuestions) => {
+                  setQuestions(importedQuestions);
+                  setDocumentTemplate('');
+                  setError(null);
+                }}
+                onImported={(result) => setImportSummary(result)}
+              />
+              {importSummary && (
+                <div
+                  className="mb-4 rounded-xl p-4"
+                  style={{
+                    backgroundColor: 'var(--background)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <div className="text-sm font-semibold text-foreground">
+                    Imported {importSummary.questions.length} question{importSummary.questions.length === 1 ? '' : 's'}
+                    {importSummary.importedRoundLabel ? ` from ${importSummary.importedRoundLabel}` : ''}
+                  </div>
+                  {importSummary.warnings.length > 0 ? (
+                    <div className="mt-2 space-y-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                      {importSummary.warnings.map((warning) => (
+                        <div key={warning}>{warning}</div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                      Question types, options, and slider scales were imported successfully.
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
           {isDocumentMode ? (
             <div className="mb-6">
               <DocumentTemplateEditor value={documentTemplate} onChange={setDocumentTemplate} />
@@ -929,7 +999,16 @@ export default function AdminFormNew() {
                                 color: 'var(--muted-foreground)',
                               }}
                             >
-                              Participants will see this question with one plain response textbox below it.
+                              {q.importedFromQuestionnaire ? (
+                                <>
+                                  Imported as <strong>{q.inputType?.replace('_', ' ') ?? 'survey field'}</strong>
+                                  {Array.isArray(q.options) && q.options.length > 0 ? ` with ${q.options.length} option${q.options.length === 1 ? '' : 's'}` : ''}
+                                  {q.maxSelections ? `, up to ${q.maxSelections} selections` : ''}.
+                                  {q.helpText ? ` ${q.helpText}` : ''}
+                                </>
+                              ) : (
+                                'Participants will see this question with one plain response textbox below it.'
+                              )}
                             </div>
                           ) : (
                             <div
@@ -1087,7 +1166,7 @@ export default function AdminFormNew() {
                   {isDocumentMode
                     ? 'This is what participants will see. The uploaded or pasted document template is rendered with fillable sections.'
                     : isSurveyMode
-                      ? 'This is what participants will see. Each question shows only the question and one response textbox.'
+                      ? 'This is what participants will see. Imported survey questions keep their control type, and plain survey questions use a single response field.'
                       : 'This is what participants will see. Structured fields appear in the same order as the live form.'}
                 </p>
               </div>
@@ -1142,18 +1221,28 @@ export default function AdminFormNew() {
                           <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
                             {question.label}
                           </label>
-                          <StructuredInput
-                            questionIndex={index}
-                            formId="preview"
-                            value={previewResponses[key] ?? emptyStructuredResponse()}
-                            onChange={(value) =>
-                              setPreviewResponses(prev => ({ ...prev, [key]: value }))
-                            }
-                            showEvidence={question.requireEvidence}
-                            showCounterarguments={question.requireCounterarguments}
-                            showConfidence={question.requireConfidence}
-                            persistDraft={false}
-                          />
+                          {isSurveyQuestion(question) ? (
+                            <SurveyQuestionInput
+                              question={question}
+                              value={previewResponses[key] ?? emptyStructuredResponse()}
+                              onChange={(value) =>
+                                setPreviewResponses(prev => ({ ...prev, [key]: value }))
+                              }
+                            />
+                          ) : (
+                            <StructuredInput
+                              questionIndex={index}
+                              formId="preview"
+                              value={previewResponses[key] ?? emptyStructuredResponse()}
+                              onChange={(value) =>
+                                setPreviewResponses(prev => ({ ...prev, [key]: value }))
+                              }
+                              showEvidence={question.requireEvidence}
+                              showCounterarguments={question.requireCounterarguments}
+                              showConfidence={question.requireConfidence}
+                              persistDraft={false}
+                            />
+                          )}
                         </div>
                       );
                     })

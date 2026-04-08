@@ -6,12 +6,15 @@ import { BackLink, LoadingButton } from './components';
 import DocumentTemplateEditor from './components/DocumentTemplateEditor';
 import DocumentTemplateResponse from './components/DocumentTemplateResponse';
 import QuestionModeToggle from './components/QuestionModeToggle';
+import QuestionnaireImporter from './components/QuestionnaireImporter';
 import StructuredInput from './components/StructuredInput';
+import SurveyQuestionInput from './components/SurveyQuestionInput';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
 import { isSurveyQuestion, normalizeQuestion, type ConfigurableQuestion, type QuestionInput } from './utils/questions';
 import { isDocumentTemplate, parseDocumentTemplateFields } from './utils/documentTemplate';
+import type { QuestionnaireImportResult } from './utils/questionnaireImport';
 
 interface FormData {
   title: string;
@@ -90,6 +93,7 @@ export default function FormEditor() {
   const [title, setTitle] = useState('');
   const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
   const [documentTemplate, setDocumentTemplate] = useState('');
+  const [importSummary, setImportSummary] = useState<QuestionnaireImportResult | null>(null);
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const validQuestions = questions.filter((question) => question.label.trim() !== '');
@@ -148,6 +152,7 @@ export default function FormEditor() {
   }, [previewQuestions]);
 
   function setResponseStyle(mode: 'consensus' | 'information') {
+    setImportSummary(null);
     setQuestions((prev) =>
       prev.map((question) => ({
         ...question,
@@ -236,6 +241,7 @@ export default function FormEditor() {
   }
 
   function switchToDocumentMode() {
+    setImportSummary(null);
     if (!documentTemplate.trim()) {
       setDocumentTemplate('Title\n{{long:Executive summary}}\n');
     }
@@ -376,11 +382,45 @@ export default function FormEditor() {
                 </button>
               </div>
               {!isDocumentMode && (
-                <QuestionModeToggle
-                  isSurveyMode={isSurveyMode}
-                  onSelectSurvey={() => setResponseStyle('information')}
-                  onSelectConsensus={() => setResponseStyle('consensus')}
-                />
+                <>
+                  <QuestionModeToggle
+                    isSurveyMode={isSurveyMode}
+                    onSelectSurvey={() => setResponseStyle('information')}
+                    onSelectConsensus={() => setResponseStyle('consensus')}
+                  />
+                  {isSurveyMode ? (
+                    <>
+                      <QuestionnaireImporter
+                        onQuestionsImported={(importedQuestions) => {
+                          setQuestions(importedQuestions);
+                          setDocumentTemplate('');
+                        }}
+                        onImported={(result) => setImportSummary(result)}
+                      />
+                      {importSummary ? (
+                        <div
+                          className="rounded-xl p-4"
+                          style={{
+                            backgroundColor: 'var(--background)',
+                            border: '1px solid var(--border)',
+                          }}
+                        >
+                          <div className="text-sm font-semibold text-foreground">
+                            Imported {importSummary.questions.length} question{importSummary.questions.length === 1 ? '' : 's'}
+                            {importSummary.importedRoundLabel ? ` from ${importSummary.importedRoundLabel}` : ''}
+                          </div>
+                          <div className="mt-2 space-y-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                            {importSummary.warnings.length > 0 ? (
+                              importSummary.warnings.map((warning) => <div key={warning}>{warning}</div>)
+                            ) : (
+                              <div>Question types, options, and slider scales were imported successfully.</div>
+                            )}
+                          </div>
+                        </div>
+                      ) : null}
+                    </>
+                  ) : null}
+                </>
               )}
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold text-foreground">
@@ -484,7 +524,16 @@ export default function FormEditor() {
                             color: 'var(--muted-foreground)',
                           }}
                         >
-                          Single response box only.
+                          {q.importedFromQuestionnaire ? (
+                            <>
+                              Imported as <strong>{q.inputType?.replace('_', ' ') ?? 'survey field'}</strong>
+                              {Array.isArray(q.options) && q.options.length > 0 ? ` with ${q.options.length} option${q.options.length === 1 ? '' : 's'}` : ''}
+                              {q.maxSelections ? `, up to ${q.maxSelections} selections` : ''}.
+                              {q.helpText ? ` ${q.helpText}` : ''}
+                            </>
+                          ) : (
+                            'Single response box only.'
+                          )}
                         </div>
                       ) : (
                         <div
@@ -659,18 +708,28 @@ export default function FormEditor() {
                         >
                           {question.label}
                         </label>
-                        <StructuredInput
-                          questionIndex={index}
-                          formId={`edit-preview-${id ?? 'form'}`}
-                          value={previewResponses[key] ?? emptyStructuredResponse()}
-                          onChange={(value) =>
-                            setPreviewResponses((prev) => ({ ...prev, [key]: value }))
-                          }
-                          showEvidence={question.requireEvidence}
-                          showCounterarguments={question.requireCounterarguments}
-                          showConfidence={question.requireConfidence}
-                          persistDraft={false}
-                        />
+                        {isSurveyQuestion(question) ? (
+                          <SurveyQuestionInput
+                            question={question}
+                            value={previewResponses[key] ?? emptyStructuredResponse()}
+                            onChange={(value) =>
+                              setPreviewResponses((prev) => ({ ...prev, [key]: value }))
+                            }
+                          />
+                        ) : (
+                          <StructuredInput
+                            questionIndex={index}
+                            formId={`edit-preview-${id ?? 'form'}`}
+                            value={previewResponses[key] ?? emptyStructuredResponse()}
+                            onChange={(value) =>
+                              setPreviewResponses((prev) => ({ ...prev, [key]: value }))
+                            }
+                            showEvidence={question.requireEvidence}
+                            showCounterarguments={question.requireCounterarguments}
+                            showConfidence={question.requireConfidence}
+                            persistDraft={false}
+                          />
+                        )}
                       </div>
                     );
                   })
