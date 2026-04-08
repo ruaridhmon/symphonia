@@ -605,12 +605,14 @@ test.describe('Document template consultations', () => {
       await row.getByRole('button', { name: `Share Dashboard Actions ${timestamp}` }).click();
       await expect(page.getByRole('dialog', { name: /share consultation/i })).toBeVisible();
       await expect(page.getByText(`/join/${created.join_code}`)).toBeVisible();
-      await expect(page.getByRole('link', { name: /whatsapp open whatsapp/i })).toBeVisible();
+      await expect(page.getByRole('link', { name: /whatsapp share in whatsapp/i })).toBeVisible();
       await page.getByRole('button', { name: /close share sheet/i }).click();
       await expect(page.getByRole('dialog', { name: /share consultation/i })).toBeHidden();
 
-      page.once('dialog', (dialog) => dialog.accept());
-      await row.getByRole('button', { name: `Delete Dashboard Actions ${timestamp}` }).click();
+      const refreshedRow = page.locator('tr').filter({ hasText: `Dashboard Actions ${timestamp}` }).first();
+      await refreshedRow.getByRole('button', { name: `Delete Dashboard Actions ${timestamp}` }).click();
+      await expect(page.getByRole('dialog', { name: /delete consultation/i })).toBeVisible();
+      await page.getByRole('button', { name: /delete consultation/i }).last().click();
       await expect(page.locator('tr').filter({ hasText: `Dashboard Actions ${timestamp}` })).toHaveCount(0);
     } finally {
       if (createdFormId) {

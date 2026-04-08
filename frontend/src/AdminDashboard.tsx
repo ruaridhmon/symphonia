@@ -8,6 +8,7 @@ import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
 import ConsultationShareSheet from './components/ConsultationShareSheet';
+import ConfirmDialog from './components/ConfirmDialog';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -25,6 +26,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState('');
   const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
   const [sharingForm, setSharingForm] = useState<{ title: string; joinCode: string } | null>(null);
+  const [pendingDeleteForm, setPendingDeleteForm] = useState<{ id: number; title: string } | null>(null);
 
   const fetchForms = () => {
     if (!token) {
@@ -107,13 +109,9 @@ export default function AdminDashboard() {
   }
 
   const handleDeleteForm = async (formId: number, title: string) => {
-    if (!window.confirm(`Delete "${title}" and all of its responses? This cannot be undone.`)) {
-      return;
-    }
-
     setDeletingFormId(formId);
     try {
-      const response = await fetch(`${API_BASE_URL}/forms/${formId}`, {
+      const response = await fetch(`${API_BASE_URL}/forms/${formId}/delete`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
         credentials: 'include',
@@ -124,6 +122,7 @@ export default function AdminDashboard() {
       }
 
       setForms((prev) => prev.filter((form) => form.id !== formId));
+      setPendingDeleteForm(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete consultation');
     } finally {
@@ -139,6 +138,26 @@ export default function AdminDashboard() {
           title={sharingForm?.title ?? ''}
           joinCode={sharingForm?.joinCode ?? ''}
           onClose={() => setSharingForm(null)}
+        />
+        <ConfirmDialog
+          open={!!pendingDeleteForm}
+          title="Delete consultation"
+          body={
+            pendingDeleteForm
+              ? `Delete "${pendingDeleteForm.title}" and all associated responses, rounds, and invite codes? This action cannot be undone.`
+              : ''
+          }
+          confirmLabel="Delete consultation"
+          cancelLabel="Keep consultation"
+          loading={pendingDeleteForm ? deletingFormId === pendingDeleteForm.id : false}
+          onCancel={() => {
+            if (!deletingFormId) setPendingDeleteForm(null);
+          }}
+          onConfirm={() => {
+            if (pendingDeleteForm) {
+              void handleDeleteForm(pendingDeleteForm.id, pendingDeleteForm.title);
+            }
+          }}
         />
         {/* ── Error banner ── */}
         {error && (
@@ -478,7 +497,7 @@ export default function AdminDashboard() {
                                 color: deletingFormId === f.id ? 'var(--muted-foreground)' : 'var(--destructive)',
                                 opacity: deletingFormId === f.id ? 0.65 : 1,
                               }}
-                              onClick={() => handleDeleteForm(f.id, f.title)}
+                              onClick={() => setPendingDeleteForm({ id: f.id, title: f.title })}
                               onMouseEnter={e => {
                                 e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--destructive) 10%, transparent)';
                               }}
@@ -588,7 +607,7 @@ export default function AdminDashboard() {
                               color: deletingFormId === f.id ? 'var(--muted-foreground)' : 'var(--destructive)',
                               opacity: deletingFormId === f.id ? 0.65 : 1,
                             }}
-                            onClick={() => handleDeleteForm(f.id, f.title)}
+                            onClick={() => setPendingDeleteForm({ id: f.id, title: f.title })}
                           >
                             <Trash2 size={15} aria-hidden="true" />
                           </button>

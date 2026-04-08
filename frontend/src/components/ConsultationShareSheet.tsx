@@ -1,4 +1,4 @@
-import { Check, Copy, Mail, MessageCircle, Send, Share2, X } from 'lucide-react';
+import { Check, Copy, Mail, MessageCircle, Share2, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface ConsultationShareSheetProps {
@@ -54,18 +54,18 @@ export default function ConsultationShareSheet({
       label: 'WhatsApp',
       icon: <MessageCircle size={18} />,
       href: `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${joinLink}`)}`,
+      iconBg: '#25D366',
+      iconFg: '#ffffff',
+      hint: 'Share in WhatsApp',
     },
     {
       key: 'email',
       label: 'Email',
       icon: <Mail size={18} />,
       href: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${shareText}\n\n${joinLink}\n\nJoin code: ${joinCode}`)}`,
-    },
-    {
-      key: 'telegram',
-      label: 'Telegram',
-      icon: <Send size={18} />,
-      href: `https://t.me/share/url?url=${encodeURIComponent(joinLink)}&text=${encodeURIComponent(shareText)}`,
+      iconBg: '#2563eb',
+      iconFg: '#ffffff',
+      hint: 'Compose email',
     },
   ];
 
@@ -169,18 +169,18 @@ export default function ConsultationShareSheet({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {typeof navigator !== 'undefined' && typeof navigator.share === 'function' ? (
             <button
               type="button"
               onClick={nativeShare}
-              className="rounded-3xl px-4 py-4 text-left"
+              className="rounded-[1.5rem] px-4 py-4 text-left transition-colors"
               style={{
                 backgroundColor: 'var(--background)',
                 border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
               }}
             >
-              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
+              <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
                 <Share2 size={18} />
               </div>
               <div className="text-sm font-semibold text-foreground">More</div>
@@ -194,7 +194,7 @@ export default function ConsultationShareSheet({
               href={option.href}
               target="_blank"
               rel="noreferrer"
-              className="rounded-3xl px-4 py-4 text-left"
+              className="rounded-[1.5rem] px-4 py-4 text-left transition-colors"
               style={{
                 backgroundColor: 'var(--background)',
                 border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
@@ -202,11 +202,14 @@ export default function ConsultationShareSheet({
                 textDecoration: 'none',
               }}
             >
-              <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-2xl" style={{ backgroundColor: 'color-mix(in srgb, var(--foreground) 5%, transparent)', color: 'var(--foreground)' }}>
+              <div
+                className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: option.iconBg, color: option.iconFg }}
+              >
                 {option.icon}
               </div>
               <div className="text-sm font-semibold text-foreground">{option.label}</div>
-              <div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>Open {option.label}</div>
+              <div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.hint}</div>
             </a>
           ))}
         </div>
