@@ -96,6 +96,7 @@ class FormModel(Base):
     archived_responses = relationship(
         "ArchivedResponse", back_populates="form", cascade="all, delete-orphan"
     )
+    drafts = relationship("Draft", back_populates="form", cascade="all, delete-orphan")
     unlocked_by_users = relationship(
         "UserFormUnlock", back_populates="form", cascade="all, delete-orphan"
     )
@@ -124,8 +125,15 @@ class RoundModel(Base):
     form = relationship("FormModel", back_populates="rounds")
     responses = relationship("Response", back_populates="round")
     archived_responses = relationship("ArchivedResponse", back_populates="round")
+    drafts = relationship("Draft", back_populates="round", cascade="all, delete-orphan")
     follow_ups = relationship(
         "FollowUp", back_populates="round", cascade="all, delete-orphan"
+    )
+    synthesis_versions = relationship(
+        "SynthesisVersion", back_populates="round", cascade="all, delete-orphan"
+    )
+    synthesis_comments = relationship(
+        "SynthesisComment", back_populates="round", cascade="all, delete-orphan"
     )
 
 
@@ -236,7 +244,7 @@ class SynthesisVersion(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     is_active = Column(Boolean, default=False)  # Which version is currently published
 
-    round = relationship("RoundModel", backref="synthesis_versions")
+    round = relationship("RoundModel", back_populates="synthesis_versions")
 
 
 class Draft(Base):
@@ -260,8 +268,8 @@ class Draft(Base):
     )
 
     user = relationship("User")
-    form = relationship("FormModel")
-    round = relationship("RoundModel")
+    form = relationship("FormModel", back_populates="drafts")
+    round = relationship("RoundModel", back_populates="drafts")
 
 
 class SynthesisComment(Base):
@@ -289,7 +297,7 @@ class SynthesisComment(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    round = relationship("RoundModel", backref="synthesis_comments")
+    round = relationship("RoundModel", back_populates="synthesis_comments")
     author = relationship("User")
     replies = relationship(
         "SynthesisComment",

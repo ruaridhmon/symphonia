@@ -54,11 +54,11 @@ export default function ConfirmDialog({
         style={{
           position: 'relative',
           width: '100%',
-          maxWidth: 460,
+          maxWidth: 420,
           backgroundColor: 'var(--card)',
           border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
           borderRadius: 28,
-          padding: '1.15rem',
+          padding: '1rem',
           boxShadow: '0 28px 80px rgba(15, 23, 42, 0.22)',
         }}
       >
@@ -80,25 +80,25 @@ export default function ConfirmDialog({
         </button>
 
         <div
-          className="inline-flex h-12 w-12 items-center justify-center rounded-2xl"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-2xl"
           style={{
-            backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+            backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
             color: 'var(--destructive)',
           }}
         >
-          <AlertTriangle size={20} />
+          <AlertTriangle size={18} />
         </div>
 
-        <h2 className="mt-4 text-lg font-semibold text-foreground">{title}</h2>
+        <h2 className="mt-3 text-base font-semibold text-foreground">{title}</h2>
         <p className="mt-2 text-sm leading-6" style={{ color: 'var(--muted-foreground)' }}>
           {body}
         </p>
 
-        <div className="mt-6 flex gap-3">
+        <div className="mt-5 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded-full px-4 py-3 text-sm font-medium"
+            className="rounded-full px-4 py-2.5 text-sm font-medium"
             style={{
               backgroundColor: 'var(--background)',
               border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
@@ -111,10 +111,11 @@ export default function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 rounded-full px-4 py-3 text-sm font-medium"
+            className="rounded-full px-3.5 py-2.5 text-sm font-medium"
             style={{
-              backgroundColor: 'var(--destructive)',
-              color: 'var(--destructive-foreground)',
+              backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--destructive) 18%, transparent)',
+              color: 'var(--destructive)',
               opacity: loading ? 0.7 : 1,
             }}
           >

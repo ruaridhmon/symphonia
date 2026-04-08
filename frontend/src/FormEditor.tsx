@@ -208,7 +208,7 @@ export default function FormEditor() {
 
     setDeleting(true);
     try {
-      await api.delete(`/forms/${id}`);
+      await api.delete(`/forms/${id}/delete`);
       toastSuccess('Consultation deleted');
       navigate('/');
     } catch {

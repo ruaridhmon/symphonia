@@ -611,8 +611,8 @@ test.describe('Document template consultations', () => {
 
       const refreshedRow = page.locator('tr').filter({ hasText: `Dashboard Actions ${timestamp}` }).first();
       await refreshedRow.getByRole('button', { name: `Delete Dashboard Actions ${timestamp}` }).click();
-      await expect(page.getByRole('dialog', { name: /delete consultation/i })).toBeVisible();
-      await page.getByRole('button', { name: /delete consultation/i }).last().click();
+      await expect(page.getByRole('dialog', { name: /delete this consultation/i })).toBeVisible();
+      await page.getByRole('button', { name: /^delete$/i }).click();
       await expect(page.locator('tr').filter({ hasText: `Dashboard Actions ${timestamp}` })).toHaveCount(0);
     } finally {
       if (createdFormId) {

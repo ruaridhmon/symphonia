@@ -141,14 +141,14 @@ export default function AdminDashboard() {
         />
         <ConfirmDialog
           open={!!pendingDeleteForm}
-          title="Delete consultation"
+          title="Delete this consultation?"
           body={
             pendingDeleteForm
               ? `Delete "${pendingDeleteForm.title}" and all associated responses, rounds, and invite codes? This action cannot be undone.`
               : ''
           }
-          confirmLabel="Delete consultation"
-          cancelLabel="Keep consultation"
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
           loading={pendingDeleteForm ? deletingFormId === pendingDeleteForm.id : false}
           onCancel={() => {
             if (!deletingFormId) setPendingDeleteForm(null);
