@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Pencil, Plus, Search, Ticket } from 'lucide-react';
+import { FileText, Pencil, Plus, Search, Share2, Ticket, Trash2 } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
 import Container from './layouts/Container';
 import { LoadingButton, SkeletonDashboard } from './components';
+import ConsultationShareSheet from './components/ConsultationShareSheet';
 
 /**
  * Admin dashboard — create forms, view/manage existing forms.
@@ -22,6 +23,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
+  const [sharingForm, setSharingForm] = useState<{ title: string; joinCode: string } | null>(null);
 
   const fetchForms = () => {
     if (!token) {
@@ -103,9 +106,40 @@ export default function AdminDashboard() {
     );
   }
 
+  const handleDeleteForm = async (formId: number, title: string) => {
+    if (!window.confirm(`Delete "${title}" and all of its responses? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingFormId(formId);
+    try {
+      const response = await fetch(`${API_BASE_URL}/forms/${formId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Delete failed (HTTP ${response.status})`);
+      }
+
+      setForms((prev) => prev.filter((form) => form.id !== formId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete consultation');
+    } finally {
+      setDeletingFormId(null);
+    }
+  };
+
   return (
     <section className="flex-1 py-6 sm:py-8">
       <Container size="lg">
+        <ConsultationShareSheet
+          open={!!sharingForm}
+          title={sharingForm?.title ?? ''}
+          joinCode={sharingForm?.joinCode ?? ''}
+          onClose={() => setSharingForm(null)}
+        />
         {/* ── Error banner ── */}
         {error && (
           <div
@@ -416,6 +450,44 @@ export default function AdminDashboard() {
                             >
                               <FileText size={15} aria-hidden="true" />
                             </a>
+                            <button
+                              type="button"
+                              aria-label={`Share ${f.title}`}
+                              title="Share"
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                              style={{ color: 'var(--muted-foreground)' }}
+                              onClick={() => setSharingForm({ title: f.title, joinCode: f.join_code })}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.color = 'var(--foreground)';
+                                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 7%, transparent)';
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.color = 'var(--muted-foreground)';
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                              }}
+                            >
+                              <Share2 size={15} aria-hidden="true" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={deletingFormId === f.id}
+                              aria-label={`Delete ${f.title}`}
+                              title="Delete"
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                              style={{
+                                color: deletingFormId === f.id ? 'var(--muted-foreground)' : 'var(--destructive)',
+                                opacity: deletingFormId === f.id ? 0.65 : 1,
+                              }}
+                              onClick={() => handleDeleteForm(f.id, f.title)}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--destructive) 10%, transparent)';
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                              }}
+                            >
+                              <Trash2 size={15} aria-hidden="true" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -496,6 +568,30 @@ export default function AdminDashboard() {
                           >
                             <FileText size={15} aria-hidden="true" />
                           </a>
+                          <button
+                            type="button"
+                            aria-label={`Share ${f.title}`}
+                            title="Share"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                            style={{ color: 'var(--muted-foreground)' }}
+                            onClick={() => setSharingForm({ title: f.title, joinCode: f.join_code })}
+                          >
+                            <Share2 size={15} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={deletingFormId === f.id}
+                            aria-label={`Delete ${f.title}`}
+                            title="Delete"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                            style={{
+                              color: deletingFormId === f.id ? 'var(--muted-foreground)' : 'var(--destructive)',
+                              opacity: deletingFormId === f.id ? 0.65 : 1,
+                            }}
+                            onClick={() => handleDeleteForm(f.id, f.title)}
+                          >
+                            <Trash2 size={15} aria-hidden="true" />
+                          </button>
                         </div>
                       </div>
                     </div>

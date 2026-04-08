@@ -8,6 +8,13 @@ interface SurveyQuestionInputProps {
   readOnly?: boolean;
 }
 
+const composerFieldStyle = {
+  border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+  backgroundColor: 'color-mix(in srgb, var(--background) 82%, var(--card) 18%)',
+  color: 'var(--foreground)',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)',
+} as const;
+
 function updatePosition(value: StructuredResponse, position: string): StructuredResponse {
   return {
     ...value,
@@ -93,12 +100,8 @@ export default function SurveyQuestionInput({
         {renderHelpText(question.helpText)}
         <input
           type="text"
-          className="w-full rounded-lg px-3 py-2.5 text-sm"
-          style={{
-            border: '1px solid var(--input)',
-            backgroundColor: 'var(--background)',
-            color: 'var(--foreground)',
-          }}
+          className="w-full rounded-2xl px-4 py-3 text-sm leading-6"
+          style={composerFieldStyle}
           placeholder={question.placeholder ?? 'Write a short response'}
           value={value.position}
           onChange={(event) => onChange(updatePosition(value, event.target.value))}
@@ -234,12 +237,11 @@ export default function SurveyQuestionInput({
       {renderHelpText(question.helpText)}
       <textarea
         rows={question.rows ?? 4}
-        className="w-full rounded-lg px-3 py-2.5 text-sm"
+        className="w-full rounded-3xl px-4 py-3.5 text-sm leading-6"
         style={{
-          border: '1px solid var(--input)',
-          backgroundColor: 'var(--background)',
-          color: 'var(--foreground)',
+          ...composerFieldStyle,
           resize: 'vertical',
+          minHeight: question.rows && question.rows <= 2 ? undefined : '7.5rem',
         }}
         placeholder={question.placeholder ?? 'Write your response here'}
         value={value.position}

@@ -21,7 +21,7 @@ async function loginViaApi(
   email: string,
   password: string,
 ) {
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
     const response = await request.post(`${baseURL}/login`, {
       form: {
         username: email,
@@ -33,8 +33,8 @@ async function loginViaApi(
       return response.json() as Promise<LoginPayload>;
     }
 
-    if (response.status() === 429 && attempt < 2) {
-      await new Promise((resolve) => setTimeout(resolve, 1200 * (attempt + 1)));
+    if (response.status() === 429 && attempt < 4) {
+      await new Promise((resolve) => setTimeout(resolve, 1800 * (attempt + 1)));
       continue;
     }
 
@@ -572,6 +572,54 @@ test.describe('Document template consultations', () => {
       if (fixtureDir) {
         await rm(fixtureDir, { recursive: true, force: true });
       }
+    }
+  });
+
+  test('admin dashboard supports share sheet and delete actions', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      const created = await createDocumentTemplateForm(adminApi, appBase, adminToken, {
+        title: `Dashboard Actions ${timestamp}`,
+        description: 'Admin dashboard action coverage.',
+        document_template: ['Title', '{{short:Organisation}}'].join('\n'),
+      });
+      createdFormId = created.id;
+
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const page = await adminContext.newPage();
+      await page.goto(`${appBase}/`);
+
+      const row = page.locator('tr').filter({ hasText: `Dashboard Actions ${timestamp}` }).first();
+      await expect(row).toBeVisible();
+
+      await row.getByRole('button', { name: `Share Dashboard Actions ${timestamp}` }).click();
+      await expect(page.getByRole('dialog', { name: /share consultation/i })).toBeVisible();
+      await expect(page.getByText(`/join/${created.join_code}`)).toBeVisible();
+      await expect(page.getByRole('link', { name: /whatsapp open whatsapp/i })).toBeVisible();
+      await page.getByRole('button', { name: /close share sheet/i }).click();
+      await expect(page.getByRole('dialog', { name: /share consultation/i })).toBeHidden();
+
+      page.once('dialog', (dialog) => dialog.accept());
+      await row.getByRole('button', { name: `Delete Dashboard Actions ${timestamp}` }).click();
+      await expect(page.locator('tr').filter({ hasText: `Dashboard Actions ${timestamp}` })).toHaveCount(0);
+    } finally {
+      if (createdFormId) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      if (adminContext) {
+        await adminContext.close();
+      }
+      await adminApi.dispose();
     }
   });
 });
