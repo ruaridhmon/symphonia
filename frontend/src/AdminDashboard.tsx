@@ -338,7 +338,7 @@ export default function AdminDashboard() {
                         backgroundColor: 'transparent',
                       }}
                     >
-                      {[t('adminDashboard.formTitle'), t('adminDashboard.joinCode'), t('adminDashboard.participants'), t('adminDashboard.round')].map(label => (
+                      {[t('adminDashboard.formTitle'), t('adminDashboard.participants'), t('adminDashboard.round')].map(label => (
                         <th
                           key={label}
                           scope="col"
@@ -396,17 +396,6 @@ export default function AdminDashboard() {
                           }}
                         >
                           {f.title}
-                        </td>
-                        <td className="px-4 py-4">
-                          <span
-                            className="inline-block text-[13px] font-mono font-medium"
-                            style={{
-                              color: 'var(--muted-foreground)',
-                              letterSpacing: '0.04em',
-                            }}
-                          >
-                            {f.join_code}
-                          </span>
                         </td>
                         <td className="px-4 py-4">
                           <span
@@ -542,12 +531,6 @@ export default function AdminDashboard() {
                             className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm"
                             style={{ color: 'var(--muted-foreground)' }}
                           >
-                            <span
-                              className="font-mono text-[13px]"
-                              style={{ letterSpacing: '0.04em' }}
-                            >
-                              {f.join_code}
-                            </span>
                             <span>{participantLabel}</span>
                             <span>Round {f.current_round ?? 1}</span>
                           </div>
