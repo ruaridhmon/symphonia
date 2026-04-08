@@ -5,11 +5,13 @@ from fastapi import (
     APIRouter,
     BackgroundTasks,
     Depends,
+    File,
     Form,
     HTTPException,
     Request,
     Query,
     Response as FastAPIResponse,
+    UploadFile,
 )
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
@@ -23,10 +25,13 @@ import logging
 import os
 import re
 import secrets
+import zipfile
 from datetime import datetime, timedelta, timezone
+from io import BytesIO
 from pathlib import Path
 import asyncio
 from typing import Any
+from xml.etree import ElementTree as ET
 
 from .rate_limiter import (
     limiter,
@@ -2818,6 +2823,9 @@ class QuestionConfig(BaseModel):
     requireEvidence: bool = True
     requireCounterarguments: bool = True
     requireConfidence: bool = True
+    fieldType: str | None = None
+    rows: int | None = None
+    placeholder: str | None = None
 
 
 class FormCreate(BaseModel):
@@ -2829,7 +2837,96 @@ class FormCreate(BaseModel):
 
 class FormUpdate(BaseModel):
     title: str
-    questions: list[str | QuestionConfig]
+    questions: list[str | QuestionConfig] = []
+    document_template: str | None = None
+
+
+DOCUMENT_PLACEHOLDER_PATTERN = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
+WORDPROCESSINGML_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+
+
+def _normalize_document_template(template: str | None) -> str | None:
+    if template is None:
+        return None
+    cleaned = template.replace("\r\n", "\n").replace("\r", "\n").strip()
+    return cleaned or None
+
+
+def _build_document_questions(template: str) -> list[dict[str, object]]:
+    seen: set[str] = set()
+    derived: list[dict[str, object]] = []
+    for match in DOCUMENT_PLACEHOLDER_PATTERN.finditer(template):
+        raw_token = match.group(1).strip()
+        token_lower = raw_token.lower()
+        field_type = "long"
+        rows = 4
+        label = raw_token
+        if ":" in raw_token:
+            prefix, remainder = raw_token.split(":", 1)
+            prefix = prefix.strip().lower()
+            if prefix in {"short", "long"}:
+                field_type = prefix
+                rows = 1 if prefix == "short" else 6
+                label = remainder.strip() or raw_token
+        normalized_key = label.casefold()
+        if normalized_key in seen:
+            continue
+        seen.add(normalized_key)
+        derived.append(
+            QuestionConfig(
+                label=label,
+                requireEvidence=False,
+                requireCounterarguments=False,
+                requireConfidence=False,
+                fieldType=field_type,
+                rows=rows,
+                placeholder=f"Enter {label.lower()}",
+            ).model_dump()
+        )
+    return derived
+
+
+def _extract_text_from_docx_bytes(blob: bytes) -> str:
+    try:
+        with zipfile.ZipFile(BytesIO(blob)) as archive:
+            document_xml = archive.read("word/document.xml")
+    except (KeyError, zipfile.BadZipFile) as exc:
+        raise HTTPException(status_code=400, detail="Invalid .docx file") from exc
+
+    root = ET.fromstring(document_xml)
+    body = root.find("w:body", WORDPROCESSINGML_NS)
+    if body is None:
+        return ""
+
+    lines: list[str] = []
+    for child in body:
+        tag = child.tag.rsplit("}", 1)[-1]
+        if tag == "p":
+            text = "".join(
+                node.text or "" for node in child.findall(".//w:t", WORDPROCESSINGML_NS)
+            ).strip()
+            lines.append(text)
+        elif tag == "tbl":
+            for row in child.findall(".//w:tr", WORDPROCESSINGML_NS):
+                cells = []
+                for cell in row.findall("./w:tc", WORDPROCESSINGML_NS):
+                    cell_text = "".join(
+                        node.text or ""
+                        for node in cell.findall(".//w:t", WORDPROCESSINGML_NS)
+                    ).strip()
+                    cells.append(cell_text)
+                if any(cells):
+                    lines.append(" | ".join(cells))
+
+    cleaned_lines: list[str] = []
+    previous_blank = False
+    for line in lines:
+        blank = not line
+        if blank and previous_blank:
+            continue
+        cleaned_lines.append(line)
+        previous_blank = blank
+    return "\n".join(cleaned_lines).strip()
 
 
 def normalize_form_questions(
@@ -2853,6 +2950,7 @@ class UserFormCreate(BaseModel):
     title: str
     description: str | None = None
     questions: list[str | QuestionConfig] = []
+    document_template: str | None = None
     allow_join: bool = True
 
 
@@ -2873,7 +2971,17 @@ def user_create_form(
     title = payload.title.strip()
     if not title:
         raise HTTPException(status_code=400, detail="title is required")
-    normalized_questions = normalize_form_questions(payload.questions)
+    document_template = _normalize_document_template(payload.document_template)
+    normalized_questions = (
+        _build_document_questions(document_template)
+        if document_template
+        else normalize_form_questions(payload.questions)
+    )
+    if document_template and not normalized_questions:
+        raise HTTPException(
+            status_code=400,
+            detail="Document templates must include at least one {{placeholder}}",
+        )
 
     for _ in range(10):
         code = generate_join_code()
@@ -2888,6 +2996,7 @@ def user_create_form(
         title=title,
         description=payload.description,
         questions=normalized_questions,
+        document_template=document_template,
         allow_join=payload.allow_join,
         join_code=code,
         owner_id=user.id,
@@ -3031,9 +3140,20 @@ def update_form(
     assert_form_owner_or_facilitator(f, user)
 
     old_title = f.title
-    normalized_questions = normalize_form_questions(payload.questions)
+    document_template = _normalize_document_template(payload.document_template)
+    normalized_questions = (
+        _build_document_questions(document_template)
+        if document_template
+        else normalize_form_questions(payload.questions)
+    )
+    if document_template and not normalized_questions:
+        raise HTTPException(
+            status_code=400,
+            detail="Document templates must include at least one {{placeholder}}",
+        )
     f.title = payload.title
     f.questions = normalized_questions
+    f.document_template = document_template
     active_round = (
         db.query(RoundModel)
         .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
@@ -3125,6 +3245,7 @@ def get_forms(
                 "id": f.id,
                 "title": f.title,
                 "questions": f.questions,
+                "document_template": f.document_template,
                 "allow_join": f.allow_join,
                 "join_code": f.join_code,
                 "participant_count": participant_count,
@@ -3241,9 +3362,37 @@ def get_form(
         "id": f.id,
         "title": f.title,
         "questions": f.questions,
+        "document_template": f.document_template,
         "allow_join": f.allow_join,
         "join_code": f.join_code,
         "expert_labels": f.expert_labels,
+    }
+
+
+@router.post(
+    "/forms/document-template/extract",
+    tags=["Forms"],
+    summary="Extract plain text from a Word template",
+    description=(
+        "Upload a .docx file and return a plain-text template that can be edited "
+        "into a Symphonia document template with {{placeholders}}."
+    ),
+)
+@limiter.limit(CRUD_LIMIT)
+async def extract_document_template(
+    request: Request,
+    file: UploadFile = File(...),
+    user: User = Depends(require_facilitator),
+):
+    filename = (file.filename or "").lower()
+    if not filename.endswith(".docx"):
+        raise HTTPException(status_code=400, detail="Please upload a .docx file")
+
+    blob = await file.read()
+    extracted = _extract_text_from_docx_bytes(blob)
+    return {
+        "template": extracted,
+        "placeholder_count": len(_build_document_questions(extracted)),
     }
 
 

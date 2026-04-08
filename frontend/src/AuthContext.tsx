@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { ApiError, isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
 import { login as apiLogin, logout as apiLogout, getMe } from './api/auth';
+import { API_BASE_URL } from './config';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -105,7 +106,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else if (token && token !== '__cookie__') {
           // Legacy localStorage token path — validate with a manual redirect-detecting fetch
           try {
-            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
             const res = await fetch(`${API_BASE_URL}/me`, {
               credentials: 'include',
               redirect: 'manual',
@@ -161,7 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const intervalId = setInterval(async () => {
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
         const bearerToken = localStorage.getItem('access_token');
         const res = await fetch(`${API_BASE_URL}/me`, {
           credentials: 'include',

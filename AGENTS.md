@@ -45,6 +45,10 @@ This is intentional. Never hardcode a model string in a new AI endpoint. Always 
 - **2026-03-03:** Added AI deliberation visibility control to `Workflow Actions` on SummaryPage. The sidebar now has a `View/Hide AI Deliberation Tools` toggle, matching the existing Responses panel hide/show workflow instead of relying on only the in-panel collapsible header.
 - **2026-03-03:** Fixed login UX where invalid credentials could incorrectly surface as session expiry. `frontend/src/api/client.ts` no longer forces expiry redirect for `401` responses from `/login`; AuthContext now shows a clearer message: “Incorrect email or password. Please try again.”
 - **2026-03-03:** Summary UX updates: manual synthesis editing now supports explicit `Save`/`Revert` controls with unsaved-change tracking, and switching from `Edit` back to `View` auto-saves pending edits for the active round via `POST /forms/{form_id}/push_summary`. Round navigation in the sidebar now uses previous/next arrow controls (`Round X of N`) instead of relying on clicking a full round list.
+- **2026-04-03:** Production hosting split finalized: Firebase Hosting now serves only the SPA, while production frontend builds target `https://api.symphonia.caer.org.uk` directly for REST/WebSocket traffic. Added backend support for configurable cross-origin cookie/CORS settings (`AUTH_COOKIE_DOMAIN`, `CSRF_COOKIE_DOMAIN`, `CORS_ALLOW_ORIGINS`) so split-domain cookie auth works without Firebase rewrites.
+- **2026-04-03:** Fixed a cross-questionnaire synthesis contamination risk in `backend/core/synthesis.py`. The consensus adapter was hardcoding all runs to the same checkpoint context (`runtime/1/q1`), which could let diffusion artefacts leak between consultations. Runtime synthesis now uses real `form_id`/`round_id`, content-derived context keys, and `force_restart=True` so each admin-triggered synthesis starts from a clean checkpoint scope.
+- **2026-04-08:** Document-template QA pass added browser coverage in `frontend/e2e/document-template.spec.ts` for create, edit, and participant draft-restore flows. Also fixed `frontend/src/AuthContext.tsx` to use the shared `API_BASE_URL` helper instead of reading `import.meta.env.VITE_API_BASE_URL` directly, so local `/api` builds and split-domain/prod builds resolve `/me` consistently.
+- **2026-04-08:** Added first-cut document-template consultations. `FormModel.document_template` stores a plain-text template (including placeholders like `{{long:Executive summary}}` / `{{short:Organisation}}`), while `questions` continues to store the derived fillable fields so drafts/submissions still persist in the existing JSON answer model. Admin create/edit flows now support document-template mode and can import `.docx` files into editable plain text via `POST /forms/document-template/extract`.
 
 ### Template for any new AI endpoint
 
@@ -107,6 +111,9 @@ frontend/src/
 | `SECRET_KEY` | JWT signing key | *(required in prod)* |
 | `ADMIN_EMAIL` | Admin account email | `admin@example.com` |
 | `ADMIN_PASSWORD` | Admin account password | `change-me-now` |
+| `AUTH_COOKIE_DOMAIN` | Optional domain attribute for the httpOnly session cookie | *(unset = host-only)* |
+| `CSRF_COOKIE_DOMAIN` | Domain attribute for the readable CSRF cookie in split-domain prod | *(unset = host-only)* |
+| `CORS_ALLOW_ORIGINS` | Comma-separated browser origins allowed to call the backend with credentials | `localhost` dev origins + `https://symphonia.caer.org.uk` |
 
 ---
 
@@ -127,3 +134,4 @@ Any build pulses for this repo should read this file first. Key rules:
 2. New AI endpoints → always use `_resolve_synthesis_model(db)`
 3. After backend changes → `kill <uvicorn_pid>` then restart from `backend/` directory
 4. Frontend changes → `npm run build` in `frontend/`, then restart backend (serves dist/)
+5. Split-domain prod (`symphonia.caer.org.uk` + `api.symphonia.caer.org.uk`) requires `CSRF_COOKIE_DOMAIN=symphonia.caer.org.uk` and matching `CORS_ALLOW_ORIGINS`

@@ -1,11 +1,14 @@
 import { api } from './client';
 
+import type { QuestionInput } from '../utils/questions';
+
 /* ── Types ── */
 
 export interface Form {
   id: number;
   title: string;
-  questions: string[];
+  questions: QuestionInput[];
+  document_template?: string | null;
   allow_join: boolean;
   join_code: string;
 }
@@ -21,14 +24,16 @@ export interface FormDetail extends Form {
 
 export interface CreateFormPayload {
   title: string;
-  questions: string[];
+  questions: QuestionInput[];
+  document_template?: string | null;
   allow_join?: boolean;
   join_code?: string;
 }
 
 export interface UpdateFormPayload {
   title?: string;
-  questions?: string[];
+  questions?: QuestionInput[];
+  document_template?: string | null;
   allow_join?: boolean;
 }
 

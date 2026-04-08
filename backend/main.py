@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
+from sqlalchemy import inspect, text
 
 load_dotenv()  # Load .env from the backend directory — must precede local imports
 
@@ -34,6 +35,15 @@ logger = logging.getLogger("symphonia")
 
 # Frontend dist directory (built with `npm run build`)
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
+
+
+def _ensure_schema_columns() -> None:
+    inspector = inspect(engine)
+    form_columns = {column["name"] for column in inspector.get_columns("forms")}
+    if "document_template" not in form_columns:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE forms ADD COLUMN document_template TEXT"))
+        logger.info("Added forms.document_template column")
 
 
 def _parse_cors_origins() -> list[str]:
@@ -314,6 +324,7 @@ app.include_router(core_routes.router, prefix="/api")
 # =============================================================================
 
 Base.metadata.create_all(bind=engine)
+_ensure_schema_columns()
 
 with SessionLocal() as db:
     admin_email = os.environ.get("ADMIN_EMAIL", "antreas@axiotic.ai")

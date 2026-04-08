@@ -3,16 +3,20 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Trash2, Plus, Save, ChevronUp, ChevronDown, Copy, Ticket } from 'lucide-react';
 import { api, getApiErrorDetail } from './api/client';
 import { BackLink, LoadingButton } from './components';
+import DocumentTemplateEditor from './components/DocumentTemplateEditor';
+import DocumentTemplateResponse from './components/DocumentTemplateResponse';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import StructuredInput from './components/StructuredInput';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
 import { isSurveyQuestion, normalizeQuestion, type ConfigurableQuestion, type QuestionInput } from './utils/questions';
+import { isDocumentTemplate, parseDocumentTemplateFields } from './utils/documentTemplate';
 
 interface FormData {
   title: string;
   questions: QuestionInput[];
+  document_template?: string | null;
   join_code: string;
 }
 
@@ -85,13 +89,26 @@ export default function FormEditor() {
   const [deleting, setDeleting] = useState(false);
   const [title, setTitle] = useState('');
   const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
+  const [documentTemplate, setDocumentTemplate] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const validQuestions = questions.filter((question) => question.label.trim() !== '');
+  const documentQuestions = parseDocumentTemplateFields(documentTemplate).map((field) => ({
+    label: field.label,
+    requireEvidence: false,
+    requireCounterarguments: false,
+    requireConfidence: false,
+    fieldType: field.fieldType,
+    rows: field.rows,
+    placeholder: field.placeholder,
+  }));
+  const isDocumentMode = isDocumentTemplate(documentTemplate);
+  const previewQuestions = isDocumentMode ? documentQuestions : questions;
+  const validPreviewQuestions = previewQuestions.filter((question) => question.label.trim() !== '');
   const isSurveyMode =
     questions.length > 0 &&
     questions.every((question) => isSurveyQuestion(question));
-  const questionModeLabel = isSurveyMode ? 'Survey' : 'Consensus';
+  const questionModeLabel = isDocumentMode ? 'Document template' : (isSurveyMode ? 'Survey' : 'Consensus');
   const consultationHeading = title.trim() || 'Untitled Consultation';
 
   useEffect(() => {
@@ -109,6 +126,7 @@ export default function FormEditor() {
             ? form.questions.map((question) => normalizeQuestion(question))
             : [createBlankQuestion()],
         );
+        setDocumentTemplate(form.document_template ?? '');
         setJoinCode(form.join_code);
         setLoading(false);
       })
@@ -121,13 +139,13 @@ export default function FormEditor() {
   useEffect(() => {
     setPreviewResponses((prev) => {
       const next: Record<string, StructuredResponse> = {};
-      questions.forEach((_, index) => {
+      previewQuestions.forEach((_, index) => {
         const key = `q${index + 1}`;
         next[key] = prev[key] ?? emptyStructuredResponse();
       });
       return next;
     });
-  }, [questions]);
+  }, [previewQuestions]);
 
   function setResponseStyle(mode: 'consensus' | 'information') {
     setQuestions((prev) =>
@@ -147,9 +165,14 @@ export default function FormEditor() {
     }
 
     const validQuestions = questions.filter((q) => q.label.trim() !== '');
+    const trimmedDocumentTemplate = documentTemplate.trim();
 
-    if (validQuestions.length === 0) {
+    if (!trimmedDocumentTemplate && validQuestions.length === 0) {
       toastError('Please add at least one question');
+      return;
+    }
+    if (trimmedDocumentTemplate && documentQuestions.length === 0) {
+      toastError('Add at least one {{placeholder}} to the document template');
       return;
     }
 
@@ -159,6 +182,7 @@ export default function FormEditor() {
       await api.put(`/forms/${id}`, {
         title: title.trim(),
         questions: validQuestions,
+        document_template: trimmedDocumentTemplate || null,
       });
       toastSuccess('Consultation saved');
     } catch (error) {
@@ -202,6 +226,19 @@ export default function FormEditor() {
         ? createBlankSurveyQuestion()
         : createBlankQuestion(),
     ]);
+  }
+
+  function switchToQuestionMode() {
+    setDocumentTemplate('');
+    if (questions.length === 0) {
+      setQuestions([createBlankQuestion()]);
+    }
+  }
+
+  function switchToDocumentMode() {
+    if (!documentTemplate.trim()) {
+      setDocumentTemplate('Title\n{{long:Executive summary}}\n');
+    }
   }
 
   function swapQuestions(a: number, b: number) {
@@ -268,7 +305,7 @@ export default function FormEditor() {
                 className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
                 style={{ backgroundColor: 'var(--muted)', color: 'var(--foreground)' }}
               >
-                {validQuestions.length} question{validQuestions.length === 1 ? '' : 's'}
+                {validPreviewQuestions.length} field{validPreviewQuestions.length === 1 ? '' : 's'}
               </span>
               <span
                 className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
@@ -312,15 +349,52 @@ export default function FormEditor() {
         <div className="space-y-6 min-w-0">
           <div className="card-lg p-6">
             <div className="mb-6 space-y-4">
-              <QuestionModeToggle
-                isSurveyMode={isSurveyMode}
-                onSelectSurvey={() => setResponseStyle('information')}
-                onSelectConsensus={() => setResponseStyle('consensus')}
-              />
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={switchToQuestionMode}
+                  className="rounded-lg px-3 py-2 text-sm font-medium"
+                  style={{
+                    backgroundColor: !isDocumentMode ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'var(--background)',
+                    color: !isDocumentMode ? 'var(--accent)' : 'var(--muted-foreground)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  Question form
+                </button>
+                <button
+                  type="button"
+                  onClick={switchToDocumentMode}
+                  className="rounded-lg px-3 py-2 text-sm font-medium"
+                  style={{
+                    backgroundColor: isDocumentMode ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'var(--background)',
+                    color: isDocumentMode ? 'var(--accent)' : 'var(--muted-foreground)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  Document template
+                </button>
+              </div>
+              {!isDocumentMode && (
+                <QuestionModeToggle
+                  isSurveyMode={isSurveyMode}
+                  onSelectSurvey={() => setResponseStyle('information')}
+                  onSelectConsensus={() => setResponseStyle('consensus')}
+                />
+              )}
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold text-foreground">Questions</h2>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {isDocumentMode ? 'Template' : 'Questions'}
+                </h2>
               </div>
             </div>
+            {isDocumentMode ? (
+              <DocumentTemplateEditor
+                value={documentTemplate}
+                onChange={setDocumentTemplate}
+              />
+            ) : (
+            <>
             <div className="space-y-4">
               {questions.map((q, i) => (
                 <div
@@ -511,15 +585,17 @@ export default function FormEditor() {
               <Plus size={16} />
               Add question
             </button>
-          </div>
+            </>
+            )}
 
+        </div>
         </div>
 
         <aside className="xl:sticky xl:top-24 self-start space-y-6">
           <div className="card-lg p-5 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <h2 className="text-lg font-semibold text-foreground">Preview</h2>
-              {validQuestions.length > 0 && (
+              {validPreviewQuestions.length > 0 && (
                 <span
                   className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
                   style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}
@@ -544,10 +620,10 @@ export default function FormEditor() {
               >
                 <div className="text-sm font-semibold text-foreground">{consultationHeading}</div>
                 <div className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  {validQuestions.length} question{validQuestions.length === 1 ? '' : 's'}
+                  {validPreviewQuestions.length} field{validPreviewQuestions.length === 1 ? '' : 's'}
                 </div>
               </div>
-              {validQuestions.length === 0 ? (
+              {validPreviewQuestions.length === 0 ? (
                 <div
                   className="rounded-xl px-4 py-5 text-sm"
                   style={{
@@ -556,37 +632,49 @@ export default function FormEditor() {
                     color: 'var(--muted-foreground)',
                   }}
                 >
-                  Add at least one question to preview the expert form.
+                  {isDocumentMode
+                    ? 'Add at least one {{placeholder}} to preview the document form.'
+                    : 'Add at least one question to preview the expert form.'}
                 </div>
               ) : (
-                questions.map((question, index) => {
-                  if (!question.label.trim()) {
-                    return null;
-                  }
-                  const key = `q${index + 1}`;
-                  return (
-                    <div key={key} className="mb-5 last:mb-0">
-                      <label
-                        className="block text-sm font-medium mb-2"
-                        style={{ color: 'var(--foreground)' }}
-                      >
-                        {question.label}
-                      </label>
-                      <StructuredInput
-                        questionIndex={index}
-                        formId={`edit-preview-${id ?? 'form'}`}
-                        value={previewResponses[key] ?? emptyStructuredResponse()}
-                        onChange={(value) =>
-                          setPreviewResponses((prev) => ({ ...prev, [key]: value }))
-                        }
-                        showEvidence={question.requireEvidence}
-                        showCounterarguments={question.requireCounterarguments}
-                        showConfidence={question.requireConfidence}
-                        persistDraft={false}
-                      />
-                    </div>
-                  );
-                })
+                isDocumentMode ? (
+                  <DocumentTemplateResponse
+                    template={documentTemplate}
+                    answers={previewResponses}
+                    onChange={(key, value) =>
+                      setPreviewResponses((prev) => ({ ...prev, [key]: value }))
+                    }
+                  />
+                ) : (
+                  questions.map((question, index) => {
+                    if (!question.label.trim()) {
+                      return null;
+                    }
+                    const key = `q${index + 1}`;
+                    return (
+                      <div key={key} className="mb-5 last:mb-0">
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          {question.label}
+                        </label>
+                        <StructuredInput
+                          questionIndex={index}
+                          formId={`edit-preview-${id ?? 'form'}`}
+                          value={previewResponses[key] ?? emptyStructuredResponse()}
+                          onChange={(value) =>
+                            setPreviewResponses((prev) => ({ ...prev, [key]: value }))
+                          }
+                          showEvidence={question.requireEvidence}
+                          showCounterarguments={question.requireCounterarguments}
+                          showConfidence={question.requireConfidence}
+                          persistDraft={false}
+                        />
+                      </div>
+                    );
+                  })
+                )
               )}
             </div>
           </div>

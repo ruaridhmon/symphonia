@@ -6,12 +6,15 @@ import { api } from './api/client';
 import { useAuth } from './AuthContext';
 import Container from './layouts/Container';
 import { BackLink, LoadingButton } from './components';
+import DocumentTemplateEditor from './components/DocumentTemplateEditor';
+import DocumentTemplateResponse from './components/DocumentTemplateResponse';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import StructuredInput from './components/StructuredInput';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import TemplatePicker, { type FormTemplate } from './TemplatePicker';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
 import { isSurveyQuestion, normalizeQuestion, type ConfigurableQuestion } from './utils/questions';
+import { isDocumentTemplate, parseDocumentTemplateFields } from './utils/documentTemplate';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
@@ -360,13 +363,17 @@ export default function AdminFormNew() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
-  const showTemplatePicker = searchParams.get('step') !== 'editor';
+  const [currentStep, setCurrentStep] = useState<'templates' | 'editor'>(
+    searchParams.get('step') === 'editor' ? 'editor' : 'templates',
+  );
+  const showTemplatePicker = currentStep !== 'editor';
 
   /* Core state */
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [joinCode, setJoinCode] = useState(() => generateJoinCode());
   const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
+  const [documentTemplate, setDocumentTemplate] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const [saving, setSaving] = useState(false);
   const [synthesisModel, setSynthesisModel] = useState('openai/gpt-4o');
@@ -381,6 +388,18 @@ export default function AdminFormNew() {
   const [allowJoin, setAllowJoin] = useState(true);
   const [anonymous, setAnonymous] = useState(false);
   const [deadline, setDeadline] = useState('');
+  const documentQuestions = parseDocumentTemplateFields(documentTemplate).map((field) => ({
+    label: field.label,
+    requireEvidence: false,
+    requireCounterarguments: false,
+    requireConfidence: false,
+    fieldType: field.fieldType,
+    rows: field.rows,
+    placeholder: field.placeholder,
+  }));
+  const isDocumentMode = isDocumentTemplate(documentTemplate);
+  const previewQuestions = isDocumentMode ? documentQuestions : questions;
+  const validPreviewQuestions = previewQuestions.filter((question) => question.label.trim() !== '');
   const isSurveyMode =
     questions.length > 0 &&
     questions.every((question) => isSurveyQuestion(question));
@@ -397,7 +416,9 @@ export default function AdminFormNew() {
     setSelectedTemplate(template);
     setTitle(template.name);
     setDescription(template.description);
+    setDocumentTemplate('');
     setQuestions(template.default_questions.map(normalizeQuestion));
+    setCurrentStep('editor');
     setSearchParams({ step: 'editor' });
   };
 
@@ -405,7 +426,9 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
     setTitle('');
     setDescription('');
+    setDocumentTemplate('');
     setQuestions([createBlankQuestion()]);
+    setCurrentStep('editor');
     setSearchParams({ step: 'editor' });
   };
 
@@ -413,16 +436,33 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
     setTitle('');
     setDescription('');
+    setDocumentTemplate('');
     setQuestions([createBlankSurveyQuestion()]);
+    setCurrentStep('editor');
+    setSearchParams({ step: 'editor' });
+  };
+
+  const handleStartDocumentTemplate = () => {
+    setSelectedTemplate(null);
+    setTitle('');
+    setDescription('');
+    setQuestions([createBlankSurveyQuestion()]);
+    setDocumentTemplate('Title\n{{long:Executive summary}}\n');
+    setCurrentStep('editor');
     setSearchParams({ step: 'editor' });
   };
 
   const handleBackToTemplates = () => {
+    setCurrentStep('templates');
     setSearchParams({ step: 'templates' });
   };
 
   /* Worker D state — Guide modal */
   const [guideOpen, setGuideOpen] = useState(false);
+
+  useEffect(() => {
+    setCurrentStep(searchParams.get('step') === 'editor' ? 'editor' : 'templates');
+  }, [searchParams]);
 
   const swapQuestions = (a: number, b: number) => {
     const updated = [...questions];
@@ -444,17 +484,25 @@ export default function AdminFormNew() {
   useEffect(() => {
     setPreviewResponses(prev => {
       const next: Record<string, StructuredResponse> = {};
-      questions.forEach((_, index) => {
+      previewQuestions.forEach((_, index) => {
         const key = `q${index + 1}`;
         next[key] = prev[key] ?? emptyStructuredResponse();
       });
       return next;
     });
-  }, [questions]);
+  }, [previewQuestions]);
 
   const createForm = async () => {
     if (!title.trim()) {
       setError('Please enter a form title.');
+      return;
+    }
+    if (!documentTemplate.trim() && questions.filter(q => q.label.trim() !== '').length === 0) {
+      setError('Please add at least one question.');
+      return;
+    }
+    if (documentTemplate.trim() && documentQuestions.length === 0) {
+      setError('Add at least one {{placeholder}} to the document template.');
       return;
     }
     setSaving(true);
@@ -470,6 +518,7 @@ export default function AdminFormNew() {
           title: title.trim(),
           description: description.trim() || undefined,
           questions: questions.filter(q => q.label.trim() !== ''),
+          document_template: documentTemplate.trim() || null,
           allow_join: allowJoin,
           anonymous,
           deadline: deadline || null,
@@ -482,6 +531,19 @@ export default function AdminFormNew() {
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
       setSaving(false);
+    }
+  };
+
+  const switchToQuestionMode = () => {
+    setDocumentTemplate('');
+    if (questions.length === 0) {
+      setQuestions([createBlankQuestion()]);
+    }
+  };
+
+  const switchToDocumentMode = () => {
+    if (!documentTemplate.trim()) {
+      setDocumentTemplate('Title\n{{long:Executive summary}}\n');
     }
   };
 
@@ -513,6 +575,20 @@ export default function AdminFormNew() {
               onStartBlank={handleStartBlank}
               onStartInformationGathering={handleStartInformationGathering}
             />
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleStartDocumentTemplate}
+                className="rounded-lg px-4 py-2 text-sm font-medium"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                  color: 'var(--accent)',
+                  border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+                }}
+              >
+                Start document template
+              </button>
+            </div>
           </div>
         ) : (
         <>
@@ -657,320 +733,349 @@ export default function AdminFormNew() {
             />
           </div>
 
-          <div className="mb-4">
-            <QuestionModeToggle
-              isSurveyMode={isSurveyMode}
-              onSelectSurvey={() => setResponseStyle('information')}
-              onSelectConsensus={() => setResponseStyle('consensus')}
-            />
-          </div>
-
-          {/* ── Questions (Workers A + B) ─────────────────────────── */}
-          <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
-            <div
-              className="mb-3 text-sm font-medium"
-              style={{ color: 'var(--foreground)' }}
-            >
-              Questions
-            </div>
-            <legend className="sr-only">Questions</legend>
-
-            {questions.map((q, i) => {
-              const isOnly = questions.length === 1;
-              const isEmpty = q.label.length === 0;
-              const showCounter = focusedIndex === i || q.label.length > 0;
-
-              return (
-                <div
-                  key={i}
-                  className="rounded-xl p-3"
-                  style={{ transition: 'opacity 0.15s ease' }}
-                  onMouseEnter={() => setHoveredRow(i)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  <div
-                    className="flex gap-2 items-start"
-                  >
-                    {/* Number badge */}
-                    <span
-                      className="flex-shrink-0 flex items-center justify-center rounded-full text-xs font-semibold"
-                      style={{
-                        width: 26,
-                        height: 26,
-                        minWidth: 26,
-                        backgroundColor: 'var(--foreground)',
-                        color: 'var(--background)',
-                        opacity: 0.75,
-                        marginTop: 8,
-                      }}
-                    >
-                      {i + 1}
-                    </span>
-
-                    {/* Reorder arrows */}
-                    <div
-                      className="flex flex-col flex-shrink-0"
-                      style={{ width: 18, gap: 1, marginTop: 6 }}
-                    >
-                      {i > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => swapQuestions(i, i - 1)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: 0,
-                            color: 'var(--muted-foreground)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            lineHeight: 1,
-                          }}
-                          title="Move up"
-                          aria-label={`Move question ${i + 1} up`}
-                        >
-                          <ChevronUp size={14} aria-hidden="true" />
-                        </button>
-                      ) : (
-                        <span style={{ height: 14 }} />
-                      )}
-                      {i < questions.length - 1 ? (
-                        <button
-                          type="button"
-                          onClick={() => swapQuestions(i, i + 1)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: 0,
-                            color: 'var(--muted-foreground)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            lineHeight: 1,
-                          }}
-                          title="Move down"
-                          aria-label={`Move question ${i + 1} down`}
-                        >
-                          <ChevronDown size={14} aria-hidden="true" />
-                        </button>
-                      ) : (
-                        <span style={{ height: 14 }} />
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      {/* Input with character counter */}
-                      <div className="flex-1" style={{ position: 'relative' }}>
-                        <input
-                          type="text"
-                          aria-label={`Question ${i + 1}`}
-                          placeholder={
-                            isOnly && isEmpty
-                              ? 'e.g. What do you see as the biggest barrier to AI adoption in your sector?'
-                              : `Question ${i + 1}`
-                          }
-                          value={q.label}
-                          onChange={e => {
-                            const updated = [...questions];
-                            updated[i] = { ...updated[i], label: e.target.value };
-                            setQuestions(updated);
-                          }}
-                          className="w-full rounded-lg px-3 py-2"
-                          style={{
-                            border: '1px solid var(--input)',
-                            backgroundColor: 'var(--background)',
-                            color: 'var(--foreground)',
-                            outline: 'none',
-                            paddingRight: showCounter ? 52 : 12,
-                          }}
-                          onFocus={e => {
-                            setFocusedIndex(i);
-                            e.currentTarget.style.borderColor = 'var(--accent)';
-                            e.currentTarget.style.boxShadow =
-                              '0 0 0 2px rgba(37, 99, 235, 0.2)';
-                          }}
-                          onBlur={e => {
-                            setFocusedIndex(null);
-                            e.currentTarget.style.borderColor = 'var(--input)';
-                            e.currentTarget.style.boxShadow = 'none';
-                          }}
-                        />
-                        {showCounter && (
-                          <span
-                            style={{
-                              position: 'absolute',
-                              bottom: 6,
-                              right: 8,
-                              fontSize: '0.65rem',
-                              color: 'var(--muted-foreground)',
-                              pointerEvents: 'none',
-                              userSelect: 'none',
-                              lineHeight: 1,
-                            }}
-                          >
-                            {q.label.length}/200
-                          </span>
-                        )}
-                      </div>
-
-                      {isSurveyMode ? (
-                        <div
-                          className="mt-3 rounded-lg px-3 py-2 text-xs"
-                          style={{
-                            backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
-                            border: '1px solid var(--border)',
-                            color: 'var(--muted-foreground)',
-                          }}
-                        >
-                          Participants will see this question with one plain response textbox below it.
-                        </div>
-                      ) : (
-                        <div
-                          className="mt-3 grid gap-4 rounded-lg px-3 py-3 sm:grid-cols-3"
-                          style={{
-                            backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
-                            border: '1px solid var(--border)',
-                          }}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <label
-                                htmlFor={`question-${i + 1}-evidence`}
-                                className="block text-sm font-medium"
-                                style={{ color: 'var(--foreground)' }}
-                              >
-                                Ask for evidence
-                              </label>
-                              <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                                Show an evidence and reasoning field under this question.
-                              </p>
-                            </div>
-                            <ToggleSwitch
-                              id={`question-${i + 1}-evidence`}
-                              checked={q.requireEvidence}
-                              onChange={(checked) => {
-                                const updated = [...questions];
-                                updated[i] = { ...updated[i], requireEvidence: checked };
-                                setQuestions(updated);
-                              }}
-                            />
-                          </div>
-
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <label
-                                htmlFor={`question-${i + 1}-counterarguments`}
-                                className="block text-sm font-medium"
-                                style={{ color: 'var(--foreground)' }}
-                              >
-                                Ask for counterarguments
-                              </label>
-                              <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                                Show a field for the strongest objections or alternative views.
-                              </p>
-                            </div>
-                            <ToggleSwitch
-                              id={`question-${i + 1}-counterarguments`}
-                              checked={q.requireCounterarguments}
-                              onChange={(checked) => {
-                                const updated = [...questions];
-                                updated[i] = { ...updated[i], requireCounterarguments: checked };
-                                setQuestions(updated);
-                              }}
-                            />
-                          </div>
-
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <label
-                                htmlFor={`question-${i + 1}-confidence`}
-                                className="block text-sm font-medium"
-                                style={{ color: 'var(--foreground)' }}
-                              >
-                                Ask for confidence
-                              </label>
-                              <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                                Show the confidence slider and confidence explanation.
-                              </p>
-                            </div>
-                            <ToggleSwitch
-                              id={`question-${i + 1}-confidence`}
-                              checked={q.requireConfidence}
-                              onChange={(checked) => {
-                                const updated = [...questions];
-                                updated[i] = { ...updated[i], requireConfidence: checked };
-                                setQuestions(updated);
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Remove button (Trash2, visible on hover) */}
-                  {questions.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setQuestions(questions.filter((_, idx) => idx !== i))
-                      }
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 4,
-                        color: 'var(--muted-foreground)',
-                        opacity: hoveredRow === i ? 1 : 0,
-                        transition: 'opacity 0.15s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                      title="Remove question"
-                      aria-label={`Remove question ${i + 1}`}
-                    >
-                      <Trash2 size={16} aria-hidden="true" />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </fieldset>
-
-          {/* ── Add questions (primary drafting action) ───────────────── */}
-          <div className="mt-4 mb-3">
+          <div className="mb-4 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() =>
-                setQuestions([
-                  ...questions,
-                  isSurveyMode
-                    ? createBlankSurveyQuestion()
-                    : createBlankQuestion(),
-                ])
-              }
-              className="text-sm px-3 py-1.5 rounded-lg font-medium"
+              onClick={switchToQuestionMode}
+              className="rounded-lg px-3 py-2 text-sm font-medium"
               style={{
-                color: 'var(--accent)',
-                backgroundColor: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
+                backgroundColor: !isDocumentMode ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'var(--background)',
+                color: !isDocumentMode ? 'var(--accent)' : 'var(--muted-foreground)',
+                border: '1px solid var(--border)',
               }}
-              onMouseEnter={e =>
-                (e.currentTarget.style.backgroundColor =
-                  'color-mix(in srgb, var(--accent) 8%, transparent)')
-              }
-              onMouseLeave={e =>
-                (e.currentTarget.style.backgroundColor = 'transparent')
-              }
             >
-              + Add question
+              Question form
+            </button>
+            <button
+              type="button"
+              onClick={switchToDocumentMode}
+              className="rounded-lg px-3 py-2 text-sm font-medium"
+              style={{
+                backgroundColor: isDocumentMode ? 'color-mix(in srgb, var(--accent) 12%, transparent)' : 'var(--background)',
+                color: isDocumentMode ? 'var(--accent)' : 'var(--muted-foreground)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              Document template
             </button>
           </div>
+
+          {!isDocumentMode && (
+            <div className="mb-4">
+              <QuestionModeToggle
+                isSurveyMode={isSurveyMode}
+                onSelectSurvey={() => setResponseStyle('information')}
+                onSelectConsensus={() => setResponseStyle('consensus')}
+              />
+            </div>
+          )}
+
+          {isDocumentMode ? (
+            <div className="mb-6">
+              <DocumentTemplateEditor value={documentTemplate} onChange={setDocumentTemplate} />
+            </div>
+          ) : (
+            <>
+              <fieldset className="space-y-2 mb-4" style={{ border: 'none', margin: 0, padding: 0 }}>
+                <div
+                  className="mb-3 text-sm font-medium"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  Questions
+                </div>
+                <legend className="sr-only">Questions</legend>
+
+                {questions.map((q, i) => {
+                  const isOnly = questions.length === 1;
+                  const isEmpty = q.label.length === 0;
+                  const showCounter = focusedIndex === i || q.label.length > 0;
+
+                  return (
+                    <div
+                      key={i}
+                      className="rounded-xl p-3"
+                      style={{ transition: 'opacity 0.15s ease' }}
+                      onMouseEnter={() => setHoveredRow(i)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                    >
+                      <div className="flex gap-2 items-start">
+                        <span
+                          className="flex-shrink-0 flex items-center justify-center rounded-full text-xs font-semibold"
+                          style={{
+                            width: 26,
+                            height: 26,
+                            minWidth: 26,
+                            backgroundColor: 'var(--foreground)',
+                            color: 'var(--background)',
+                            opacity: 0.75,
+                            marginTop: 8,
+                          }}
+                        >
+                          {i + 1}
+                        </span>
+
+                        <div
+                          className="flex flex-col flex-shrink-0"
+                          style={{ width: 18, gap: 1, marginTop: 6 }}
+                        >
+                          {i > 0 ? (
+                            <button
+                              type="button"
+                              onClick={() => swapQuestions(i, i - 1)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                                color: 'var(--muted-foreground)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                lineHeight: 1,
+                              }}
+                              title="Move up"
+                              aria-label={`Move question ${i + 1} up`}
+                            >
+                              <ChevronUp size={14} aria-hidden="true" />
+                            </button>
+                          ) : (
+                            <span style={{ height: 14 }} />
+                          )}
+                          {i < questions.length - 1 ? (
+                            <button
+                              type="button"
+                              onClick={() => swapQuestions(i, i + 1)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                                color: 'var(--muted-foreground)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                lineHeight: 1,
+                              }}
+                              title="Move down"
+                              aria-label={`Move question ${i + 1} down`}
+                            >
+                              <ChevronDown size={14} aria-hidden="true" />
+                            </button>
+                          ) : (
+                            <span style={{ height: 14 }} />
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex-1" style={{ position: 'relative' }}>
+                            <input
+                              type="text"
+                              aria-label={`Question ${i + 1}`}
+                              placeholder={
+                                isOnly && isEmpty
+                                  ? 'e.g. What do you see as the biggest barrier to AI adoption in your sector?'
+                                  : `Question ${i + 1}`
+                              }
+                              value={q.label}
+                              onChange={e => {
+                                const updated = [...questions];
+                                updated[i] = { ...updated[i], label: e.target.value };
+                                setQuestions(updated);
+                              }}
+                              className="w-full rounded-lg px-3 py-2"
+                              style={{
+                                border: '1px solid var(--input)',
+                                backgroundColor: 'var(--background)',
+                                color: 'var(--foreground)',
+                                outline: 'none',
+                                paddingRight: showCounter ? 52 : 12,
+                              }}
+                              onFocus={e => {
+                                setFocusedIndex(i);
+                                e.currentTarget.style.borderColor = 'var(--accent)';
+                                e.currentTarget.style.boxShadow =
+                                  '0 0 0 2px rgba(37, 99, 235, 0.2)';
+                              }}
+                              onBlur={e => {
+                                setFocusedIndex(null);
+                                e.currentTarget.style.borderColor = 'var(--input)';
+                                e.currentTarget.style.boxShadow = 'none';
+                              }}
+                            />
+                            {showCounter && (
+                              <span
+                                style={{
+                                  position: 'absolute',
+                                  bottom: 6,
+                                  right: 8,
+                                  fontSize: '0.65rem',
+                                  color: 'var(--muted-foreground)',
+                                  pointerEvents: 'none',
+                                  userSelect: 'none',
+                                  lineHeight: 1,
+                                }}
+                              >
+                                {q.label.length}/200
+                              </span>
+                            )}
+                          </div>
+
+                          {isSurveyMode ? (
+                            <div
+                              className="mt-3 rounded-lg px-3 py-2 text-xs"
+                              style={{
+                                backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                                border: '1px solid var(--border)',
+                                color: 'var(--muted-foreground)',
+                              }}
+                            >
+                              Participants will see this question with one plain response textbox below it.
+                            </div>
+                          ) : (
+                            <div
+                              className="mt-3 grid gap-4 rounded-lg px-3 py-3 sm:grid-cols-3"
+                              style={{
+                                backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                                border: '1px solid var(--border)',
+                              }}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <label
+                                    htmlFor={`question-${i + 1}-evidence`}
+                                    className="block text-sm font-medium"
+                                    style={{ color: 'var(--foreground)' }}
+                                  >
+                                    Ask for evidence
+                                  </label>
+                                  <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                                    Show an evidence and reasoning field under this question.
+                                  </p>
+                                </div>
+                                <ToggleSwitch
+                                  id={`question-${i + 1}-evidence`}
+                                  checked={q.requireEvidence}
+                                  onChange={(checked) => {
+                                    const updated = [...questions];
+                                    updated[i] = { ...updated[i], requireEvidence: checked };
+                                    setQuestions(updated);
+                                  }}
+                                />
+                              </div>
+
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <label
+                                    htmlFor={`question-${i + 1}-counterarguments`}
+                                    className="block text-sm font-medium"
+                                    style={{ color: 'var(--foreground)' }}
+                                  >
+                                    Ask for counterarguments
+                                  </label>
+                                  <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                                    Show a field for the strongest objections or alternative views.
+                                  </p>
+                                </div>
+                                <ToggleSwitch
+                                  id={`question-${i + 1}-counterarguments`}
+                                  checked={q.requireCounterarguments}
+                                  onChange={(checked) => {
+                                    const updated = [...questions];
+                                    updated[i] = { ...updated[i], requireCounterarguments: checked };
+                                    setQuestions(updated);
+                                  }}
+                                />
+                              </div>
+
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <label
+                                    htmlFor={`question-${i + 1}-confidence`}
+                                    className="block text-sm font-medium"
+                                    style={{ color: 'var(--foreground)' }}
+                                  >
+                                    Ask for confidence
+                                  </label>
+                                  <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                                    Show the confidence slider and confidence explanation.
+                                  </p>
+                                </div>
+                                <ToggleSwitch
+                                  id={`question-${i + 1}-confidence`}
+                                  checked={q.requireConfidence}
+                                  onChange={(checked) => {
+                                    const updated = [...questions];
+                                    updated[i] = { ...updated[i], requireConfidence: checked };
+                                    setQuestions(updated);
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {questions.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setQuestions(questions.filter((_, idx) => idx !== i))
+                          }
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 4,
+                            color: 'var(--muted-foreground)',
+                            opacity: hoveredRow === i ? 1 : 0,
+                            transition: 'opacity 0.15s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}
+                          title="Remove question"
+                          aria-label={`Remove question ${i + 1}`}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </fieldset>
+
+              <div className="mt-4 mb-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuestions([
+                      ...questions,
+                      isSurveyMode
+                        ? createBlankSurveyQuestion()
+                        : createBlankQuestion(),
+                    ])
+                  }
+                  className="text-sm px-3 py-1.5 rounded-lg font-medium"
+                  style={{
+                    color: 'var(--accent)',
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={e =>
+                    (e.currentTarget.style.backgroundColor =
+                      'color-mix(in srgb, var(--accent) 8%, transparent)')
+                  }
+                  onMouseLeave={e =>
+                    (e.currentTarget.style.backgroundColor = 'transparent')
+                  }
+                >
+                  + Add question
+                </button>
+              </div>
+            </>
+          )}
 
           <div className="mb-6">
             <div className="flex items-center justify-between gap-3 mb-3">
@@ -979,9 +1084,11 @@ export default function AdminFormNew() {
                   Expert Form Preview
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
-                  {isSurveyMode
-                    ? 'This is what participants will see. Each question shows only the question and one response textbox.'
-                    : 'This is what participants will see. Structured fields appear in the same order as the live form.'}
+                  {isDocumentMode
+                    ? 'This is what participants will see. The uploaded or pasted document template is rendered with fillable sections.'
+                    : isSurveyMode
+                      ? 'This is what participants will see. Each question shows only the question and one response textbox.'
+                      : 'This is what participants will see. Structured fields appear in the same order as the live form.'}
                 </p>
               </div>
             </div>
@@ -1001,7 +1108,7 @@ export default function AdminFormNew() {
                 </p>
               </div>
 
-              {questions.filter(question => question.label.trim()).length === 0 ? (
+              {validPreviewQuestions.length === 0 ? (
                 <div
                   className="rounded-lg px-4 py-5 text-sm"
                   style={{
@@ -1010,35 +1117,47 @@ export default function AdminFormNew() {
                     color: 'var(--muted-foreground)',
                   }}
                 >
-                  Add at least one question to preview the expert form.
+                  {isDocumentMode
+                    ? 'Add at least one {{placeholder}} to preview the document form.'
+                    : 'Add at least one question to preview the expert form.'}
                 </div>
               ) : (
-                questions
-                  .map((question, index) => {
-                    if (!question.label.trim()) {
-                      return null;
+                isDocumentMode ? (
+                  <DocumentTemplateResponse
+                    template={documentTemplate}
+                    answers={previewResponses}
+                    onChange={(key, value) =>
+                      setPreviewResponses(prev => ({ ...prev, [key]: value }))
                     }
-                    const key = `q${index + 1}`;
-                    return (
-                      <div key={key} className="mb-5 last:mb-0">
-                        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
-                          {question.label}
-                        </label>
-                        <StructuredInput
-                          questionIndex={index}
-                          formId="preview"
-                          value={previewResponses[key] ?? emptyStructuredResponse()}
-                          onChange={(value) =>
-                            setPreviewResponses(prev => ({ ...prev, [key]: value }))
-                          }
-                          showEvidence={question.requireEvidence}
-                          showCounterarguments={question.requireCounterarguments}
-                          showConfidence={question.requireConfidence}
-                          persistDraft={false}
-                        />
-                      </div>
-                    );
-                  })
+                  />
+                ) : (
+                  questions
+                    .map((question, index) => {
+                      if (!question.label.trim()) {
+                        return null;
+                      }
+                      const key = `q${index + 1}`;
+                      return (
+                        <div key={key} className="mb-5 last:mb-0">
+                          <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>
+                            {question.label}
+                          </label>
+                          <StructuredInput
+                            questionIndex={index}
+                            formId="preview"
+                            value={previewResponses[key] ?? emptyStructuredResponse()}
+                            onChange={(value) =>
+                              setPreviewResponses(prev => ({ ...prev, [key]: value }))
+                            }
+                            showEvidence={question.requireEvidence}
+                            showCounterarguments={question.requireCounterarguments}
+                            showConfidence={question.requireConfidence}
+                            persistDraft={false}
+                          />
+                        </div>
+                      );
+                    })
+                )
               )}
             </div>
           </div>

@@ -6,11 +6,13 @@ import { getActiveRound, ActiveRound } from './api/rounds'
 import { submitResponse, hasSubmitted as checkSubmitted, getMyResponse, saveDraft, getDraft, deleteDraft } from './api/responses'
 import { ApiError } from './api/client'
 import { BackLink, LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
+import DocumentTemplateResponse from './components/DocumentTemplateResponse'
 import Skeleton, { SkeletonCard } from './components/Skeleton'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
 import { extractQuestionOptions, extractQuestionText } from './utils/questions'
+import { isDocumentTemplate } from './utils/documentTemplate'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 
 export default function FormPage() {
@@ -291,6 +293,8 @@ export default function FormPage() {
     )
   }
 
+  const isDocumentMode = isDocumentTemplate(form.document_template)
+
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:py-8">
       <div className="max-w-3xl mx-auto">
@@ -333,36 +337,50 @@ export default function FormPage() {
         {/* Questions section header */}
         <div className="mb-2">
           <h2 className="text-lg font-semibold text-foreground">
-            {mode === 'reviewing' ? 'Your Submitted Answers' : 'Questions'}
+            {mode === 'reviewing'
+              ? (isDocumentMode ? 'Your Submitted Document' : 'Your Submitted Answers')
+              : (isDocumentMode ? 'Document Template' : 'Questions')}
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
             {mode === 'reviewing'
-              ? 'Review your submitted responses below.'
-              : 'Please provide your expert input for each question below.'}
+              ? (isDocumentMode
+                ? 'Review the completed template below.'
+                : 'Review your submitted responses below.')
+              : (isDocumentMode
+                ? 'Complete each marked section in the template below.'
+                : 'Please provide your expert input for each question below.')}
           </p>
         </div>
 
         {mode === 'reviewing' ? (
           <div>
-            {roundQuestions.map((q, i) => {
-              const key = `q${i + 1}`
-              const options = extractQuestionOptions(q)
-              return (
-                <div key={key} className="mb-6">
-                  <label className="block text-sm font-semibold text-foreground mb-2">{extractQuestionText(q)}</label>
-                  <StructuredInput
-                    questionIndex={i}
-                    formId={id!}
-                    value={structuredResponses[key] ?? emptyStructuredResponse()}
-                    onChange={() => {}}
-                    readOnly
-                    showEvidence={options.requireEvidence}
-                    showCounterarguments={options.requireCounterarguments}
-                    showConfidence={options.requireConfidence}
-                  />
-                </div>
-              )
-            })}
+            {isDocumentMode && form.document_template ? (
+              <DocumentTemplateResponse
+                template={form.document_template}
+                answers={structuredResponses}
+                readOnly
+              />
+            ) : (
+              roundQuestions.map((q, i) => {
+                const key = `q${i + 1}`
+                const options = extractQuestionOptions(q)
+                return (
+                  <div key={key} className="mb-6">
+                    <label className="block text-sm font-semibold text-foreground mb-2">{extractQuestionText(q)}</label>
+                    <StructuredInput
+                      questionIndex={i}
+                      formId={id!}
+                      value={structuredResponses[key] ?? emptyStructuredResponse()}
+                      onChange={() => {}}
+                      readOnly
+                      showEvidence={options.requireEvidence}
+                      showCounterarguments={options.requireCounterarguments}
+                      showConfidence={options.requireConfidence}
+                    />
+                  </div>
+                )
+              })
+            )}
             <LoadingButton
               variant="success"
               size="lg"
@@ -374,30 +392,44 @@ export default function FormPage() {
           </div>
         ) : (
           <>
-            {roundQuestions.map((q, i) => {
-              const key = `q${i + 1}`
-              const options = extractQuestionOptions(q)
-              return (
-                <div key={key} className="mb-6">
-                  <label className="block text-sm font-medium mb-2 text-foreground">{extractQuestionText(q)}</label>
-                  <StructuredInput
-                    questionIndex={i}
-                    formId={id!}
-                    value={structuredResponses[key] ?? emptyStructuredResponse()}
-                    onChange={(val) => {
-                      setStructuredResponses(prev => {
-                        const next = { ...prev, [key]: val }
-                        scheduleDraftSave(next)
-                        return next
-                      })
-                    }}
-                    showEvidence={options.requireEvidence}
-                    showCounterarguments={options.requireCounterarguments}
-                    showConfidence={options.requireConfidence}
-                  />
-                </div>
-              )
-            })}
+            {isDocumentMode && form.document_template ? (
+              <DocumentTemplateResponse
+                template={form.document_template}
+                answers={structuredResponses}
+                onChange={(key, val) => {
+                  setStructuredResponses(prev => {
+                    const next = { ...prev, [key]: val }
+                    scheduleDraftSave(next)
+                    return next
+                  })
+                }}
+              />
+            ) : (
+              roundQuestions.map((q, i) => {
+                const key = `q${i + 1}`
+                const options = extractQuestionOptions(q)
+                return (
+                  <div key={key} className="mb-6">
+                    <label className="block text-sm font-medium mb-2 text-foreground">{extractQuestionText(q)}</label>
+                    <StructuredInput
+                      questionIndex={i}
+                      formId={id!}
+                      value={structuredResponses[key] ?? emptyStructuredResponse()}
+                      onChange={(val) => {
+                        setStructuredResponses(prev => {
+                          const next = { ...prev, [key]: val }
+                          scheduleDraftSave(next)
+                          return next
+                        })
+                      }}
+                      showEvidence={options.requireEvidence}
+                      showCounterarguments={options.requireCounterarguments}
+                      showConfidence={options.requireConfidence}
+                    />
+                  </div>
+                )
+              })
+            )}
             <LoadingButton
               variant="accent"
               size="lg"

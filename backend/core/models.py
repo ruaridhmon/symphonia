@@ -78,6 +78,7 @@ class FormModel(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     questions = Column(JSON, nullable=False)
+    document_template = Column(Text, nullable=True)
     allow_join = Column(Boolean, default=True)
     join_code = Column(String, unique=True, nullable=False)
 

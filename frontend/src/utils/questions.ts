@@ -6,6 +6,9 @@ export interface QuestionOptions {
 
 export interface ConfigurableQuestion extends QuestionOptions {
   label: string;
+  fieldType?: 'short' | 'long' | null;
+  rows?: number | null;
+  placeholder?: string | null;
 }
 
 /** Question type that accepts both strings and structured objects */
@@ -61,9 +64,16 @@ export function extractQuestionOptions(q: unknown): QuestionOptions {
 }
 
 export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
+  const obj = q && typeof q === 'object' ? (q as Record<string, unknown>) : null;
   return {
     label: extractQuestionText(q),
     ...extractQuestionOptions(q),
+    fieldType:
+      obj && (obj.fieldType === 'short' || obj.fieldType === 'long')
+        ? obj.fieldType
+        : null,
+    rows: obj && typeof obj.rows === 'number' ? obj.rows : null,
+    placeholder: obj && typeof obj.placeholder === 'string' ? obj.placeholder : null,
   };
 }
 
