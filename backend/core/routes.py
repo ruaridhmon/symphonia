@@ -2824,6 +2824,7 @@ class QuestionConfig(BaseModel):
     requireCounterarguments: bool = True
     requireConfidence: bool = True
     questionId: str | None = None
+    sectionTitle: str | None = None
     helpText: str | None = None
     inputType: str | None = None
     options: list[str] | None = None

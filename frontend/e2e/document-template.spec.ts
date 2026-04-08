@@ -505,6 +505,7 @@ test.describe('Document template consultations', () => {
       await adminPage.locator('input[type="file"]').setInputFiles(fixture.docxPath);
       await expect(adminPage.getByText(/Imported 5 questions from Round 1: Initial prioritisation/i)).toBeVisible();
       await expect(adminPage.getByText(/Later rounds were not imported/i)).toBeVisible();
+      await expect(adminPage.getByRole('heading', { name: 'About you' })).toBeVisible();
       await expect(adminPage.getByText('Which role best describes you?')).toBeVisible();
       await expect(adminPage.getByText('Workload burden')).toBeVisible();
 
@@ -536,6 +537,7 @@ test.describe('Document template consultations', () => {
       await participantPage.getByRole('button', { name: /join consultation/i }).click();
       await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
 
+      await expect(participantPage.getByRole('heading', { name: 'About you' })).toBeVisible();
       await participantPage.getByLabel('Teacher').check();
       await participantPage.getByLabel('Workload').check();
       await participantPage.getByLabel('Equity').check();

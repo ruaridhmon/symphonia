@@ -8,7 +8,7 @@ import DocumentTemplateResponse from './components/DocumentTemplateResponse';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import QuestionnaireImporter from './components/QuestionnaireImporter';
 import StructuredInput from './components/StructuredInput';
-import SurveyQuestionInput from './components/SurveyQuestionInput';
+import SurveyQuestionList from './components/SurveyQuestionList';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
@@ -529,6 +529,7 @@ export default function FormEditor() {
                               Imported as <strong>{q.inputType?.replace('_', ' ') ?? 'survey field'}</strong>
                               {Array.isArray(q.options) && q.options.length > 0 ? ` with ${q.options.length} option${q.options.length === 1 ? '' : 's'}` : ''}
                               {q.maxSelections ? `, up to ${q.maxSelections} selections` : ''}.
+                              {q.sectionTitle ? ` Section: ${q.sectionTitle}.` : ''}
                               {q.helpText ? ` ${q.helpText}` : ''}
                             </>
                           ) : (
@@ -695,44 +696,15 @@ export default function FormEditor() {
                     }
                   />
                 ) : (
-                  questions.map((question, index) => {
-                    if (!question.label.trim()) {
-                      return null;
+                  <SurveyQuestionList
+                    questions={questions}
+                    formId={`edit-preview-${id ?? 'form'}`}
+                    responses={previewResponses}
+                    onChange={(key, value) =>
+                      setPreviewResponses((prev) => ({ ...prev, [key]: value }))
                     }
-                    const key = `q${index + 1}`;
-                    return (
-                      <div key={key} className="mb-5 last:mb-0">
-                        <label
-                          className="block text-sm font-medium mb-2"
-                          style={{ color: 'var(--foreground)' }}
-                        >
-                          {question.label}
-                        </label>
-                        {isSurveyQuestion(question) ? (
-                          <SurveyQuestionInput
-                            question={question}
-                            value={previewResponses[key] ?? emptyStructuredResponse()}
-                            onChange={(value) =>
-                              setPreviewResponses((prev) => ({ ...prev, [key]: value }))
-                            }
-                          />
-                        ) : (
-                          <StructuredInput
-                            questionIndex={index}
-                            formId={`edit-preview-${id ?? 'form'}`}
-                            value={previewResponses[key] ?? emptyStructuredResponse()}
-                            onChange={(value) =>
-                              setPreviewResponses((prev) => ({ ...prev, [key]: value }))
-                            }
-                            showEvidence={question.requireEvidence}
-                            showCounterarguments={question.requireCounterarguments}
-                            showConfidence={question.requireConfidence}
-                            persistDraft={false}
-                          />
-                        )}
-                      </div>
-                    );
-                  })
+                    persistDraft={false}
+                  />
                 )
               )}
             </div>

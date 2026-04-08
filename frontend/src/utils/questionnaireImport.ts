@@ -76,11 +76,10 @@ function isDynamicQuestion(text: string): boolean {
 }
 
 function buildHelpText(
-  sectionTitle: string | null,
   routing: string | null,
   extraNotes: string[],
 ): string | null {
-  const parts = [sectionTitle, routing ? `Routing: ${routing}` : null, ...extraNotes]
+  const parts = [routing ? `Routing: ${routing}` : null, ...extraNotes]
     .map((part) => part?.trim())
     .filter((part): part is string => !!part);
   return parts.length > 0 ? parts.join(' | ') : null;
@@ -96,6 +95,7 @@ function buildQuestionBase(
     requireCounterarguments: false,
     requireConfidence: false,
     questionId: block.questionId,
+    sectionTitle: block.sectionTitle,
     importedFromQuestionnaire: true,
     fieldType: null,
     rows: null,
@@ -140,7 +140,7 @@ function parseBlock(
     !responseType && optionLines.length >= 2 && detectedInputType === 'textarea'
       ? 'single_select'
       : detectedInputType;
-  const helpText = buildHelpText(block.sectionTitle, routing, extraNotes);
+  const helpText = buildHelpText(routing, extraNotes);
   const dynamicSource = [block.label, responseType, routing, ...contentLines].filter(Boolean).join(' ');
 
   if (isDynamicQuestion(dynamicSource)) {
@@ -154,7 +154,6 @@ function parseBlock(
         label: item,
         questionId: `${block.questionId}_${index + 1}`,
         helpText: buildHelpText(
-          block.sectionTitle,
           routing,
           [block.label, ...extraNotes].filter(Boolean),
         ),

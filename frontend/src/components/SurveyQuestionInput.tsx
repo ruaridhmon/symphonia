@@ -31,7 +31,7 @@ function decodeSelections(position: string): string[] {
 function renderHelpText(helpText: string | null | undefined) {
   if (!helpText) return null;
   return (
-    <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+    <p className="mb-2 text-xs leading-5" style={{ color: 'var(--muted-foreground)' }}>
       {helpText}
     </p>
   );
@@ -115,10 +115,10 @@ export default function SurveyQuestionInput({
           {options.map((option) => (
             <label
               key={option}
-              className="flex items-start gap-3 rounded-lg px-3 py-2 text-sm"
+              className="flex items-start gap-3 rounded-xl px-3.5 py-2.5 text-sm transition-colors"
               style={{
-                backgroundColor: 'var(--background)',
-                border: '1px solid var(--border)',
+                backgroundColor: value.position === option ? 'color-mix(in srgb, var(--accent) 7%, var(--background))' : 'var(--background)',
+                border: value.position === option ? '1px solid color-mix(in srgb, var(--accent) 35%, var(--border))' : '1px solid var(--border)',
                 color: 'var(--foreground)',
               }}
             >
@@ -156,10 +156,10 @@ export default function SurveyQuestionInput({
             return (
               <label
                 key={option}
-                className="flex items-start gap-3 rounded-lg px-3 py-2 text-sm"
+                className="flex items-start gap-3 rounded-xl px-3.5 py-2.5 text-sm transition-colors"
                 style={{
-                  backgroundColor: 'var(--background)',
-                  border: '1px solid var(--border)',
+                  backgroundColor: checked ? 'color-mix(in srgb, var(--accent) 7%, var(--background))' : 'var(--background)',
+                  border: checked ? '1px solid color-mix(in srgb, var(--accent) 35%, var(--border))' : '1px solid var(--border)',
                   color: disabled ? 'var(--muted-foreground)' : 'var(--foreground)',
                 }}
               >
@@ -188,28 +188,41 @@ export default function SurveyQuestionInput({
       <div>
         {renderHelpText(question.helpText)}
         <div
-          className="rounded-lg px-4 py-4"
+          className="rounded-xl px-4 py-3"
           style={{
             backgroundColor: 'var(--background)',
             border: '1px solid var(--border)',
           }}
         >
-          <div className="mb-2 text-2xl font-semibold text-foreground">
-            {sliderValue ?? 'Choose a value'}
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div className="text-xs font-medium uppercase tracking-[0.16em]" style={{ color: 'var(--muted-foreground)' }}>
+              Scale
+            </div>
+            <div
+              className="inline-flex min-w-[3.25rem] items-center justify-center rounded-full px-3 py-1 text-sm font-semibold"
+              style={{
+                backgroundColor: sliderValue === null ? 'var(--muted)' : 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                color: sliderValue === null ? 'var(--muted-foreground)' : 'var(--accent)',
+              }}
+            >
+              {sliderValue ?? 'Pick'}
+            </div>
           </div>
-          <input
-            type="range"
-            min={sliderMin}
-            max={sliderMax}
-            step={1}
-            value={sliderValue ?? Math.round((sliderMin + sliderMax) / 2)}
-            onChange={(event) => onChange(updatePosition(value, event.target.value))}
-            className="w-full"
-          />
-          <div className="mt-2 flex justify-between gap-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-            <span>{question.minLabel ?? sliderMin}</span>
-            <span>{question.midLabel ?? ''}</span>
-            <span>{question.maxLabel ?? sliderMax}</span>
+          <div className="px-1">
+            <input
+              type="range"
+              min={sliderMin}
+              max={sliderMax}
+              step={1}
+              value={sliderValue ?? Math.round((sliderMin + sliderMax) / 2)}
+              onChange={(event) => onChange(updatePosition(value, event.target.value))}
+              className="w-full"
+            />
+          </div>
+          <div className="mt-1.5 grid grid-cols-3 gap-3 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+            <span className="text-left">{question.minLabel ?? sliderMin}</span>
+            <span className="text-center">{question.midLabel ?? ''}</span>
+            <span className="text-right">{question.maxLabel ?? sliderMax}</span>
           </div>
         </div>
       </div>

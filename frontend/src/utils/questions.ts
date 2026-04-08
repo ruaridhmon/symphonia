@@ -9,6 +9,7 @@ export type SurveyInputType = 'text' | 'textarea' | 'single_select' | 'multi_sel
 export interface ConfigurableQuestion extends QuestionOptions {
   label: string;
   questionId?: string | null;
+  sectionTitle?: string | null;
   helpText?: string | null;
   inputType?: SurveyInputType | null;
   options?: string[] | null;
@@ -82,6 +83,7 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
     label: extractQuestionText(q),
     ...extractQuestionOptions(q),
     questionId: obj && typeof obj.questionId === 'string' ? obj.questionId : null,
+    sectionTitle: obj && typeof obj.sectionTitle === 'string' ? obj.sectionTitle : null,
     helpText: obj && typeof obj.helpText === 'string' ? obj.helpText : null,
     inputType:
       obj &&
@@ -125,4 +127,37 @@ export function isSurveyQuestion(question: QuestionOptions): boolean {
 
 export function isTypedSurveyQuestion(question: ConfigurableQuestion): boolean {
   return isSurveyQuestion(question) && !!question.inputType;
+}
+
+export interface QuestionWithIndex {
+  key: string;
+  index: number;
+  question: ConfigurableQuestion;
+}
+
+export interface QuestionSectionGroup {
+  id: string;
+  title: string | null;
+  items: QuestionWithIndex[];
+}
+
+export function groupQuestionsBySection(items: QuestionWithIndex[]): QuestionSectionGroup[] {
+  const groups: QuestionSectionGroup[] = [];
+
+  items.forEach((item) => {
+    const sectionTitle = item.question.sectionTitle?.trim() || null;
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup && lastGroup.title === sectionTitle) {
+      lastGroup.items.push(item);
+      return;
+    }
+
+    groups.push({
+      id: `${sectionTitle ?? 'ungrouped'}-${groups.length + 1}`,
+      title: sectionTitle,
+      items: [item],
+    });
+  });
+
+  return groups;
 }

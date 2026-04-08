@@ -7,12 +7,12 @@ import { submitResponse, hasSubmitted as checkSubmitted, getMyResponse, saveDraf
 import { ApiError } from './api/client'
 import { BackLink, LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
 import DocumentTemplateResponse from './components/DocumentTemplateResponse'
-import SurveyQuestionInput from './components/SurveyQuestionInput'
+import SurveyQuestionList from './components/SurveyQuestionList'
 import Skeleton, { SkeletonCard } from './components/Skeleton'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
-import { extractQuestionOptions, extractQuestionText, isSurveyQuestion, normalizeQuestion } from './utils/questions'
+import { extractQuestionText } from './utils/questions'
 import { isDocumentTemplate } from './utils/documentTemplate'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 
@@ -362,36 +362,14 @@ export default function FormPage() {
                 readOnly
               />
             ) : (
-              roundQuestions.map((q, i) => {
-                const key = `q${i + 1}`
-                const options = extractQuestionOptions(q)
-                const normalizedQuestion = normalizeQuestion(q)
-                const surveyQuestion = isSurveyQuestion(normalizedQuestion)
-                return (
-                  <div key={key} className="mb-6">
-                    <label className="block text-sm font-semibold text-foreground mb-2">{extractQuestionText(q)}</label>
-                    {surveyQuestion ? (
-                      <SurveyQuestionInput
-                        question={normalizedQuestion}
-                        value={structuredResponses[key] ?? emptyStructuredResponse()}
-                        onChange={() => {}}
-                        readOnly
-                      />
-                    ) : (
-                      <StructuredInput
-                        questionIndex={i}
-                        formId={id!}
-                        value={structuredResponses[key] ?? emptyStructuredResponse()}
-                        onChange={() => {}}
-                        readOnly
-                        showEvidence={options.requireEvidence}
-                        showCounterarguments={options.requireCounterarguments}
-                        showConfidence={options.requireConfidence}
-                      />
-                    )}
-                  </div>
-                )
-              })
+              <SurveyQuestionList
+                questions={roundQuestions}
+                formId={id!}
+                responses={structuredResponses}
+                onChange={() => {}}
+                readOnly
+                persistDraft={false}
+              />
             )}
             <LoadingButton
               variant="success"
@@ -417,46 +395,18 @@ export default function FormPage() {
                 }}
               />
             ) : (
-              roundQuestions.map((q, i) => {
-                const key = `q${i + 1}`
-                const options = extractQuestionOptions(q)
-                const normalizedQuestion = normalizeQuestion(q)
-                const surveyQuestion = isSurveyQuestion(normalizedQuestion)
-                return (
-                  <div key={key} className="mb-6">
-                    <label className="block text-sm font-medium mb-2 text-foreground">{extractQuestionText(q)}</label>
-                    {surveyQuestion ? (
-                      <SurveyQuestionInput
-                        question={normalizedQuestion}
-                        value={structuredResponses[key] ?? emptyStructuredResponse()}
-                        onChange={(val) => {
-                          setStructuredResponses(prev => {
-                            const next = { ...prev, [key]: val }
-                            scheduleDraftSave(next)
-                            return next
-                          })
-                        }}
-                      />
-                    ) : (
-                      <StructuredInput
-                        questionIndex={i}
-                        formId={id!}
-                        value={structuredResponses[key] ?? emptyStructuredResponse()}
-                        onChange={(val) => {
-                          setStructuredResponses(prev => {
-                            const next = { ...prev, [key]: val }
-                            scheduleDraftSave(next)
-                            return next
-                          })
-                        }}
-                        showEvidence={options.requireEvidence}
-                        showCounterarguments={options.requireCounterarguments}
-                        showConfidence={options.requireConfidence}
-                      />
-                    )}
-                  </div>
-                )
-              })
+              <SurveyQuestionList
+                questions={roundQuestions}
+                formId={id!}
+                responses={structuredResponses}
+                onChange={(key, val) => {
+                  setStructuredResponses(prev => {
+                    const next = { ...prev, [key]: val }
+                    scheduleDraftSave(next)
+                    return next
+                  })
+                }}
+              />
             )}
             <LoadingButton
               variant="accent"
