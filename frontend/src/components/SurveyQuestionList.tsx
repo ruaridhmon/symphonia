@@ -38,39 +38,52 @@ export default function SurveyQuestionList({
   const groups = groupQuestionsBySection(items);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {groups.map((group) => (
         <section
           key={group.id}
-          className={group.title ? 'rounded-2xl border px-4 py-4 sm:px-5' : ''}
+          className={group.title ? 'rounded-[1.4rem] border px-4 py-4 sm:px-5' : ''}
           style={
             group.title
               ? {
                   borderColor: 'color-mix(in srgb, var(--border) 78%, transparent)',
-                  backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
+                  backgroundColor: 'color-mix(in srgb, var(--background) 76%, var(--card) 24%)',
                 }
               : undefined
           }
         >
           {group.title ? (
             <div className="mb-4 border-b pb-3" style={{ borderColor: 'color-mix(in srgb, var(--border) 75%, transparent)' }}>
-              <div
-                className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+              <h3
+                className="text-sm font-semibold"
                 style={{ color: 'var(--accent)' }}
               >
-                Section
-              </div>
-              <h3 className="mt-1 text-lg font-semibold text-foreground">{group.title}</h3>
+                Section: {group.title}
+              </h3>
             </div>
           ) : null}
 
           <div className="space-y-5">
-            {group.items.map(({ key, index, question }) => {
+            {group.items.map(({ key, index, question }, itemIndex) => {
               const options = extractQuestionOptions(question);
               const surveyQuestion = isSurveyQuestion(question);
+              const previousQuestion =
+                itemIndex > 0 ? group.items[itemIndex - 1]?.question : null;
+              const showGroupPrompt =
+                !!question.groupPrompt &&
+                question.groupPrompt.trim() !== '' &&
+                previousQuestion?.groupPrompt !== question.groupPrompt;
 
               return (
                 <div key={key} className="last:mb-0">
+                  {showGroupPrompt ? (
+                    <p
+                      className="mb-2 text-sm leading-6"
+                      style={{ color: 'var(--muted-foreground)' }}
+                    >
+                      {question.groupPrompt}
+                    </p>
+                  ) : null}
                   <label className="mb-2 block text-sm font-medium text-foreground">
                     {question.label}
                   </label>

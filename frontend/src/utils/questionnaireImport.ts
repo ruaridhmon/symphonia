@@ -153,10 +153,8 @@ function parseBlock(
       buildQuestionBase(block, {
         label: item,
         questionId: `${block.questionId}_${index + 1}`,
-        helpText: buildHelpText(
-          routing,
-          [block.label, ...extraNotes].filter(Boolean),
-        ),
+        helpText: buildHelpText(routing, extraNotes),
+        groupPrompt: block.label,
         inputType: 'slider',
         minValue: 0,
         maxValue: 10,

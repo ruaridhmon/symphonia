@@ -11,6 +11,7 @@ export interface ConfigurableQuestion extends QuestionOptions {
   questionId?: string | null;
   sectionTitle?: string | null;
   helpText?: string | null;
+  groupPrompt?: string | null;
   inputType?: SurveyInputType | null;
   options?: string[] | null;
   maxSelections?: number | null;
@@ -85,6 +86,7 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
     questionId: obj && typeof obj.questionId === 'string' ? obj.questionId : null,
     sectionTitle: obj && typeof obj.sectionTitle === 'string' ? obj.sectionTitle : null,
     helpText: obj && typeof obj.helpText === 'string' ? obj.helpText : null,
+    groupPrompt: obj && typeof obj.groupPrompt === 'string' ? obj.groupPrompt : null,
     inputType:
       obj &&
       (obj.inputType === 'text' ||
