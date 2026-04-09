@@ -390,11 +390,12 @@ export default function SurveyQuestionInput({
     return (
       <div>
         {renderHelpText(question.helpText)}
-        {sliderValue === null ? (
-          <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-            No rating selected yet.
-          </p>
-        ) : null}
+        <p
+          className="mb-2 text-xs"
+          style={{ color: 'var(--muted-foreground)', minHeight: '1rem' }}
+        >
+          {sliderValue === null ? 'No rating selected yet.' : '\u00A0'}
+        </p>
         <div
           className="rounded-xl px-3.5 py-2.5"
           style={{
