@@ -328,6 +328,7 @@ export default function SurveyQuestionInput({
                 name={question.questionId ?? question.label}
                 checked={value.position === option}
                 onChange={() => onChange(updatePosition(value, option))}
+                style={{ accentColor: value.position === option ? 'var(--accent)' : 'var(--muted-foreground)' }}
               />
               <span>{option}</span>
             </label>
@@ -368,6 +369,7 @@ export default function SurveyQuestionInput({
                   type="checkbox"
                   checked={checked}
                   disabled={disabled}
+                  style={{ accentColor: checked ? 'var(--accent)' : 'var(--muted-foreground)' }}
                   onChange={(event) => {
                     const nextSelections = event.target.checked
                       ? [...selectedValues, option]
@@ -419,7 +421,10 @@ export default function SurveyQuestionInput({
             value={sliderValue ?? Math.round((sliderMin + sliderMax) / 2)}
             onChange={(event) => onChange(updatePosition(value, event.target.value))}
             className="w-full"
-            style={{ opacity: sliderValue === null ? 0.65 : 1 }}
+            style={{
+              opacity: sliderValue === null ? 0.65 : 1,
+              accentColor: sliderValue === null ? 'var(--muted-foreground)' : 'var(--accent)',
+            }}
           />
           <div
             className="mt-1.5 flex items-start justify-between gap-3 text-[11px] leading-4"
