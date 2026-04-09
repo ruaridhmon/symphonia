@@ -32,6 +32,7 @@ from pathlib import Path
 import asyncio
 from typing import Any
 from xml.etree import ElementTree as ET
+import textwrap
 
 from .rate_limiter import (
     limiter,
@@ -430,6 +431,28 @@ def _build_responses_markdown(
     form: FormModel,
     rounds_payload: list[dict[str, Any]],
 ) -> str:
+    def _format_value(value: Any) -> list[str]:
+        if isinstance(value, (dict, list)):
+            rendered = json.dumps(value, ensure_ascii=False, indent=2)
+        else:
+            rendered = str(value)
+
+        lines: list[str] = []
+        for raw_line in rendered.splitlines() or [""]:
+            wrapped = textwrap.wrap(
+                raw_line,
+                width=88,
+                break_long_words=True,
+                break_on_hyphens=False,
+                replace_whitespace=False,
+                drop_whitespace=False,
+            )
+            if wrapped:
+                lines.extend(wrapped)
+            else:
+                lines.append("")
+        return lines
+
     lines: list[str] = [f"# {form.title}", "", "## Responses", ""]
     for round_payload in rounds_payload:
         lines.append(f"### Round {round_payload['round_number']}")
@@ -448,8 +471,9 @@ def _build_responses_markdown(
             if timestamp:
                 lines.append(f"- Submitted: {timestamp}")
             for key, value in (response.get("answers") or {}).items():
-                rendered = json.dumps(value, ensure_ascii=False) if isinstance(value, (dict, list)) else str(value)
-                lines.append(f"- **{key}**: {rendered}")
+                lines.append(f"- **{key}**")
+                for wrapped_line in _format_value(value):
+                    lines.append(f"  {wrapped_line}" if wrapped_line else "  ")
             lines.append("")
     return "\n".join(lines).strip() + "\n"
 
@@ -522,6 +546,11 @@ h4 {{
 p, ul, ol, table, pre {{
   margin-top: 0;
   margin-bottom: 0.14in;
+}}
+p, li, td, th, blockquote {{
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 }}
 ul, ol {{
   padding-left: 1.2rem;

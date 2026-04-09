@@ -59,6 +59,29 @@ function serializeAnswer(value: unknown): string {
   }
 }
 
+function wrapExportText(value: string, lineLength = 88): string[] {
+  const lines: string[] = [];
+
+  for (const rawLine of value.split('\n')) {
+    if (!rawLine) {
+      lines.push('');
+      continue;
+    }
+
+    let remaining = rawLine;
+    while (remaining.length > lineLength) {
+      const slice = remaining.slice(0, lineLength + 1);
+      const breakAt = Math.max(slice.lastIndexOf(' '), slice.lastIndexOf('\t'));
+      const cut = breakAt > lineLength * 0.5 ? breakAt : lineLength;
+      lines.push(remaining.slice(0, cut).trimEnd());
+      remaining = remaining.slice(cut).trimStart();
+    }
+    lines.push(remaining);
+  }
+
+  return lines.length ? lines : [''];
+}
+
 async function exportWordDocument(
   scope: ExportScope,
   form: Pick<Form, 'id' | 'title'>,
@@ -99,15 +122,23 @@ async function exportWordDocument(
     );
   };
   const pushLabelValue = (label: string, value: string) => {
+    const wrapped = wrapExportText(value || ' ');
     children.push(
       new Paragraph({
-        spacing: { after: 80 },
-        children: [
-          new TextRun({ text: `${label}: `, bold: true, color: '0F2F67' }),
-          new TextRun(value || ' '),
-        ],
+        spacing: { after: 30 },
+        keepNext: true,
+        children: [new TextRun({ text: label, bold: true, color: '0F2F67' })],
       }),
     );
+    wrapped.forEach((line, index) => {
+      children.push(
+        new Paragraph({
+          spacing: { after: index === wrapped.length - 1 ? 100 : 30 },
+          indent: { left: 240 },
+          children: [new TextRun(line || ' ')],
+        }),
+      );
+    });
   };
 
   pushHeading(form.title, HeadingLevel.TITLE);
