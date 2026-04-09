@@ -170,28 +170,45 @@ function VoiceButton({
   isListening: boolean;
   onToggle: () => void;
 }) {
-  if (!isSupported) return null;
   return (
     <button
       type="button"
       onClick={onToggle}
       aria-pressed={isListening}
-      aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+      aria-label={
+        !isSupported
+          ? 'Voice input unavailable in this browser'
+          : isListening
+            ? 'Stop voice input'
+            : 'Start voice input'
+      }
+      disabled={!isSupported}
+      title={!isSupported ? 'Voice input unavailable in this browser' : undefined}
       className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium"
       style={{
-        backgroundColor: isListening
-          ? 'color-mix(in srgb, var(--accent) 14%, transparent)'
-          : 'color-mix(in srgb, var(--foreground) 4%, transparent)',
-        color: isListening ? 'var(--accent)' : 'var(--muted-foreground)',
+        backgroundColor: !isSupported
+          ? 'color-mix(in srgb, var(--foreground) 3%, transparent)'
+          : isListening
+            ? 'color-mix(in srgb, var(--accent) 14%, transparent)'
+            : 'color-mix(in srgb, var(--foreground) 4%, transparent)',
+        color: !isSupported
+          ? 'var(--muted-foreground)'
+          : isListening
+            ? 'var(--accent)'
+            : 'var(--muted-foreground)',
         border: `1px solid ${
-          isListening
-            ? 'color-mix(in srgb, var(--accent) 28%, transparent)'
-            : 'color-mix(in srgb, var(--border) 65%, transparent)'
+          !isSupported
+            ? 'color-mix(in srgb, var(--border) 75%, transparent)'
+            : isListening
+              ? 'color-mix(in srgb, var(--accent) 28%, transparent)'
+              : 'color-mix(in srgb, var(--border) 65%, transparent)'
         }`,
+        opacity: !isSupported ? 0.75 : 1,
+        cursor: !isSupported ? 'not-allowed' : 'pointer',
       }}
     >
       {isListening ? <MicOff size={14} /> : <Mic size={14} />}
-      {isListening ? 'Listening…' : 'Voice'}
+      {!isSupported ? 'Voice unavailable' : isListening ? 'Listening…' : 'Voice input'}
     </button>
   );
 }
@@ -277,6 +294,11 @@ export default function SurveyQuestionInput({
             <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
           </div>
         </div>
+        <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+          {voiceInput.isSupported
+            ? 'Use voice input to dictate this answer.'
+            : 'Voice input appears here on supported browsers.'}
+        </p>
       </div>
     );
   }
@@ -285,6 +307,11 @@ export default function SurveyQuestionInput({
     return (
       <div>
         {renderHelpText(question.helpText)}
+        {!value.position.trim() ? (
+          <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            No option selected yet.
+          </p>
+        ) : null}
         <div className="space-y-2">
           {options.map((option) => (
             <label
@@ -361,6 +388,11 @@ export default function SurveyQuestionInput({
     return (
       <div>
         {renderHelpText(question.helpText)}
+        {sliderValue === null ? (
+          <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            No rating selected yet.
+          </p>
+        ) : null}
         <div
           className="rounded-xl px-3.5 py-2.5"
           style={{
@@ -376,7 +408,7 @@ export default function SurveyQuestionInput({
                 color: sliderValue === null ? 'var(--muted-foreground)' : 'var(--accent)',
               }}
             >
-              {sliderValue ?? '0'}
+              {sliderValue ?? 'Not set'}
             </div>
           </div>
           <input
@@ -387,6 +419,7 @@ export default function SurveyQuestionInput({
             value={sliderValue ?? Math.round((sliderMin + sliderMax) / 2)}
             onChange={(event) => onChange(updatePosition(value, event.target.value))}
             className="w-full"
+            style={{ opacity: sliderValue === null ? 0.65 : 1 }}
           />
           <div
             className="mt-1.5 flex items-start justify-between gap-3 text-[11px] leading-4"
@@ -408,6 +441,11 @@ export default function SurveyQuestionInput({
     return (
       <div>
         {renderHelpText(question.helpText)}
+        {!value.position.trim() ? (
+          <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            No option selected yet.
+          </p>
+        ) : null}
         <div className="space-y-2.5">
           <div
             className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6"
@@ -484,6 +522,11 @@ export default function SurveyQuestionInput({
           <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
         </div>
       </div>
+      <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+        {voiceInput.isSupported
+          ? 'Use voice input to dictate this answer.'
+          : 'Voice input appears here on supported browsers.'}
+      </p>
     </div>
   );
 }
