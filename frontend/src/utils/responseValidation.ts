@@ -14,7 +14,7 @@ function getAnswerPosition(answer: unknown): string {
 export function validateDocumentTemplateResponses(
   template: string,
   answers: Record<string, StructuredResponse>,
-): { ok: true } | { ok: false; message: string } {
+): { ok: true } | { ok: false; key: string; message: string } {
   const fields = parseDocumentTemplateFields(template);
   const missingField = fields.find((field, index) => {
     if (field.optional) return false;
@@ -22,8 +22,10 @@ export function validateDocumentTemplateResponses(
   });
 
   if (!missingField) return { ok: true };
+  const key = `q${fields.indexOf(missingField) + 1}`;
   return {
     ok: false,
+    key,
     message: `Please complete "${missingField.label}" before submitting.`,
   };
 }
@@ -31,7 +33,7 @@ export function validateDocumentTemplateResponses(
 export function validateQuestionResponses(
   questions: QuestionInput[],
   answers: Record<string, StructuredResponse>,
-): { ok: true } | { ok: false; message: string } {
+): { ok: true } | { ok: false; key: string; message: string } {
   const normalized = questions.map((question, index) => ({
     key: `q${index + 1}`,
     question: normalizeQuestion(question),
@@ -57,6 +59,11 @@ export function validateQuestionResponses(
   if (!missingQuestion) return { ok: true };
   return {
     ok: false,
+    key: missingQuestion.key,
     message: `Please answer "${extractQuestionText(missingQuestion.question)}" before submitting.`,
   };
+}
+
+export function isResponseAnswered(answer: StructuredResponse | undefined | null): boolean {
+  return getAnswerPosition(answer ?? undefined).length > 0;
 }

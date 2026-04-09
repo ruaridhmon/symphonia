@@ -295,9 +295,11 @@ test.describe('Document template consultations', () => {
       await expect(participantPage.getByRole('heading', { name: 'Document Template', exact: true })).toBeVisible();
       await expect(participantPage.getByText('Primary concern')).toBeVisible();
       await expect(participantPage.getByText('Optional')).toBeVisible();
+      await expect(participantPage.getByText('Not answered').first()).toBeVisible();
 
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await expect(participantPage.getByText(/please complete "Organisation" before submitting/i)).toBeVisible();
+      await expect(participantPage.locator('[data-question-key="q1"]')).toBeVisible();
 
       const blockedSubmitResponse = await participantApi.post(`${appBase}/submit`, {
         headers: {
@@ -321,9 +323,11 @@ test.describe('Document template consultations', () => {
 
       const organisationBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Organisation' }).first();
       await organisationBlock.locator('input').fill('Northshore Council');
+      await expect(participantPage.locator('[data-question-key="q1"]')).toContainText('Answered');
 
       const summaryBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Executive summary' }).first();
       await summaryBlock.locator('textarea').fill('The proposal is viable if the implementation timeline is extended.');
+      await expect(participantPage.locator('[data-question-key="q2"]')).toContainText('Answered');
 
       await participantPage.getByRole('button', { name: /submit/i }).click();
       await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });

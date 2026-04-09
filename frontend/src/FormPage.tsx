@@ -37,6 +37,7 @@ export default function FormPage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [draftRestored, setDraftRestored] = useState(false)
+  const [highlightedQuestionKey, setHighlightedQuestionKey] = useState<string | null>(null)
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latestResponsesRef = useRef<Record<string, StructuredResponse>>({})
 
@@ -198,10 +199,16 @@ export default function FormPage() {
       : validateQuestionResponses(roundQuestions, structuredResponses)
 
     if (!result.ok) {
+      setHighlightedQuestionKey(result.key)
       setSubmitError(result.message)
+      requestAnimationFrame(() => {
+        const element = document.querySelector<HTMLElement>(`[data-question-key="${result.key}"]`)
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
       return false
     }
 
+    setHighlightedQuestionKey(null)
     return true
   }
 
@@ -375,6 +382,7 @@ export default function FormPage() {
               <DocumentTemplateResponse
                 template={form.document_template}
                 answers={structuredResponses}
+                highlightedQuestionKey={highlightedQuestionKey}
                 readOnly
               />
             ) : (
@@ -402,7 +410,9 @@ export default function FormPage() {
               <DocumentTemplateResponse
                 template={form.document_template}
                 answers={structuredResponses}
+                highlightedQuestionKey={highlightedQuestionKey}
                 onChange={(key, val) => {
+                  if (highlightedQuestionKey === key) setHighlightedQuestionKey(null)
                   setStructuredResponses(prev => {
                     const next = { ...prev, [key]: val }
                     scheduleDraftSave(next)
@@ -416,12 +426,14 @@ export default function FormPage() {
                 formId={id!}
                 responses={structuredResponses}
                 onChange={(key, val) => {
+                  if (highlightedQuestionKey === key) setHighlightedQuestionKey(null)
                   setStructuredResponses(prev => {
                     const next = { ...prev, [key]: val }
                     scheduleDraftSave(next)
                     return next
                   })
                 }}
+                highlightedQuestionKey={highlightedQuestionKey}
               />
             )}
             <LoadingButton
