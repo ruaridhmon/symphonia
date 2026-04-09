@@ -474,16 +474,113 @@ def _markdown_to_pdf_bytes(md_content: str) -> bytes:
         full_html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"/>
 <style>
-body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; font-size: 14px; line-height: 1.6; color: #333; }}
-h1 {{ font-size: 28px; border-bottom: 2px solid #1d70b8; padding-bottom: 8px; }}
-h2 {{ font-size: 22px; margin-top: 30px; color: #1d70b8; }}
-h3 {{ font-size: 18px; margin-top: 20px; }}
-h4 {{ font-size: 15px; margin-top: 18px; }}
-hr {{ border: none; border-top: 1px solid #ccc; margin: 20px 0; }}
-ul, ol {{ margin-left: 20px; }}
-li {{ margin-bottom: 4px; }}
-strong {{ color: #0b0c0c; }}
-em {{ color: #505a5f; }}
+@page {{
+  size: A4;
+  margin: 16mm 16mm 18mm 16mm;
+  @bottom-right {{
+    content: counter(page);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 9pt;
+    color: #667085;
+  }}
+}}
+html {{ font-size: 11pt; }}
+body {{
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  color: #172033;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}}
+h1, h2, h3, h4 {{
+  page-break-after: avoid;
+  break-after: avoid-page;
+  color: #0f2f67;
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
+}}
+h1 {{
+  font-size: 22pt;
+  border-bottom: 1.5pt solid #2563eb;
+  padding-bottom: 0.18in;
+  margin: 0 0 0.24in;
+}}
+h2 {{
+  font-size: 16pt;
+  margin-top: 0.28in;
+}}
+h3 {{
+  font-size: 13pt;
+  margin-top: 0.2in;
+}}
+h4 {{
+  font-size: 11pt;
+  margin-top: 0.16in;
+  color: #344054;
+}}
+p, ul, ol, table, pre {{
+  margin-top: 0;
+  margin-bottom: 0.14in;
+}}
+ul, ol {{
+  padding-left: 1.2rem;
+}}
+li {{
+  margin-bottom: 0.05in;
+}}
+hr {{
+  border: none;
+  border-top: 1px solid #d0d7e2;
+  margin: 0.26in 0;
+}}
+strong {{
+  color: #111827;
+}}
+em {{
+  color: #475467;
+}}
+code {{
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.92em;
+  background: #eef3fb;
+  border-radius: 4px;
+  padding: 0.08rem 0.24rem;
+}}
+pre {{
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f6f8fb;
+  border: 1px solid #d9e2f2;
+  border-radius: 10px;
+  padding: 0.14in;
+}}
+pre code {{
+  background: transparent;
+  padding: 0;
+}}
+table {{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 10pt;
+}}
+th, td {{
+  border: 1px solid #d9e2f2;
+  padding: 0.08in 0.09in;
+  vertical-align: top;
+  text-align: left;
+}}
+th {{
+  background: #f3f6fb;
+  color: #0f2f67;
+}}
+blockquote {{
+  border-left: 3px solid #bfd3f7;
+  margin: 0 0 0.14in;
+  padding: 0.02in 0 0.02in 0.14in;
+  color: #475467;
+}}
 </style>
 </head><body>{html_body}</body></html>"""
         return WeasyHTML(string=full_html).write_pdf()

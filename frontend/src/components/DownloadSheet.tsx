@@ -65,18 +65,66 @@ async function exportWordDocument(
   rounds: Round[],
   structuredRounds: RoundWithResponses[],
 ) {
-  const { Document, HeadingLevel, Packer, Paragraph, TextRun } = await import('docx');
+  const {
+    AlignmentType,
+    BorderStyle,
+    Document,
+    HeadingLevel,
+    Packer,
+    Paragraph,
+    TextRun,
+    convertInchesToTwip,
+  } = await import('docx');
 
   const children: InstanceType<typeof Paragraph>[] = [];
   const pushHeading = (text: string, level: (typeof HeadingLevel)[keyof typeof HeadingLevel]) => {
-    children.push(new Paragraph({ text, heading: level }));
+    children.push(
+      new Paragraph({
+        text,
+        heading: level,
+        spacing: {
+          before: level === HeadingLevel.TITLE ? 0 : 200,
+          after: 100,
+        },
+        keepNext: true,
+      }),
+    );
   };
   const pushText = (text: string) => {
-    children.push(new Paragraph({ children: [new TextRun(text || ' ')] }));
+    children.push(
+      new Paragraph({
+        children: [new TextRun(text || ' ')],
+        spacing: { after: 120 },
+      }),
+    );
+  };
+  const pushLabelValue = (label: string, value: string) => {
+    children.push(
+      new Paragraph({
+        spacing: { after: 80 },
+        children: [
+          new TextRun({ text: `${label}: `, bold: true, color: '0F2F67' }),
+          new TextRun(value || ' '),
+        ],
+      }),
+    );
   };
 
   pushHeading(form.title, HeadingLevel.TITLE);
-  pushText(`Exported ${new Date().toLocaleString('en-GB')}`);
+  children.push(
+    new Paragraph({
+      alignment: AlignmentType.LEFT,
+      spacing: { after: 240 },
+      border: {
+        bottom: {
+          color: 'D6DFEE',
+          style: BorderStyle.SINGLE,
+          size: 6,
+        },
+      },
+      children: [new TextRun({ text: `Exported ${new Date().toLocaleString('en-GB')}`, color: '667085' })],
+    }),
+  );
 
   if (scope === 'synthesis' || scope === 'consultation') {
     pushHeading('Summary', HeadingLevel.HEADING_1);
@@ -104,16 +152,48 @@ async function exportWordDocument(
           HeadingLevel.HEADING_3,
         );
         if (response.timestamp) {
-          pushText(`Submitted: ${formatDate(response.timestamp)}`);
+          pushLabelValue('Submitted', formatDate(response.timestamp));
         }
         Object.entries(response.answers || {}).forEach(([key, value]) => {
-          pushText(`${key}: ${serializeAnswer(value)}`);
+          pushLabelValue(key, serializeAnswer(value));
         });
       });
     });
   }
 
-  const doc = new Document({ sections: [{ children }] });
+  const doc = new Document({
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: {
+              top: convertInchesToTwip(0.7),
+              right: convertInchesToTwip(0.7),
+              bottom: convertInchesToTwip(0.8),
+              left: convertInchesToTwip(0.7),
+            },
+          },
+        },
+        children,
+      },
+    ],
+    styles: {
+      default: {
+        document: {
+          run: {
+            font: 'Aptos',
+            size: 22,
+            color: '172033',
+          },
+          paragraph: {
+            spacing: {
+              line: 320,
+            },
+          },
+        },
+      },
+    },
+  });
   const blob = await Packer.toBlob(doc);
   const base = form.title.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase() || `form-${form.id}`;
   const suffix = scope === 'consultation' ? 'consultation' : scope === 'responses' ? 'responses' : 'summary';
