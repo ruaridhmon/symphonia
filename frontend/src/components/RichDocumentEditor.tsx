@@ -106,6 +106,43 @@ export default function RichDocumentEditor({
           padding-left: 1rem;
           color: #42526b;
         }
+        .symphonia-rich-editor mark {
+          padding: 0.05rem 0.18rem;
+          border-radius: 0.2rem;
+        }
+        .symphonia-rich-editor mark.highlight-yellow {
+          background: #fff3a3;
+        }
+        .symphonia-rich-editor mark.highlight-green {
+          background: #cdeccf;
+        }
+        .symphonia-rich-editor mark.highlight-cyan {
+          background: #c7eef7;
+        }
+        .symphonia-rich-editor mark.highlight-magenta {
+          background: #f1d0e8;
+        }
+        .symphonia-rich-editor mark.highlight-blue {
+          background: #d6e4ff;
+        }
+        .symphonia-rich-editor mark.highlight-red {
+          background: #ffd6d1;
+        }
+        .symphonia-rich-editor mark.highlight-dark-blue {
+          background: #24406f;
+          color: #fff;
+        }
+        .symphonia-rich-editor mark.highlight-dark-red {
+          background: #7a2430;
+          color: #fff;
+        }
+        .symphonia-rich-editor mark.highlight-dark-yellow {
+          background: #7d6518;
+          color: #fff;
+        }
+        .symphonia-rich-editor mark.highlight-generic {
+          background: #eceff3;
+        }
       `}</style>
       {!readOnly ? (
         <div

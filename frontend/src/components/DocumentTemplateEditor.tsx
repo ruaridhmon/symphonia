@@ -28,7 +28,7 @@ function normalizeImportedDocumentHtml(sourceHtml: string): string {
   document.querySelectorAll('script, style').forEach((node) => node.remove());
 
   document.querySelectorAll('*').forEach((element) => {
-    const allowedAttributes = new Set(['href', 'colspan', 'rowspan']);
+    const allowedAttributes = new Set(['href', 'colspan', 'rowspan', 'class']);
     for (const attribute of Array.from(element.attributes)) {
       if (!allowedAttributes.has(attribute.name.toLowerCase())) {
         element.removeAttribute(attribute.name);
@@ -73,6 +73,17 @@ export default function DocumentTemplateEditor({
             styleMap: [
               "p[style-name='Title'] => h1:fresh",
               "p[style-name='Subtitle'] => h2:fresh",
+              "u => u",
+              "highlight[color='yellow'] => mark.highlight-yellow",
+              "highlight[color='green'] => mark.highlight-green",
+              "highlight[color='cyan'] => mark.highlight-cyan",
+              "highlight[color='magenta'] => mark.highlight-magenta",
+              "highlight[color='blue'] => mark.highlight-blue",
+              "highlight[color='red'] => mark.highlight-red",
+              "highlight[color='darkBlue'] => mark.highlight-dark-blue",
+              "highlight[color='darkRed'] => mark.highlight-dark-red",
+              "highlight[color='darkYellow'] => mark.highlight-dark-yellow",
+              "highlight => mark.highlight-generic",
             ],
           },
         );
