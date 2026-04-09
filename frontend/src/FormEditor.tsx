@@ -7,6 +7,7 @@ import DocumentTemplateEditor from './components/DocumentTemplateEditor';
 import DocumentTemplateResponse from './components/DocumentTemplateResponse';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import QuestionnaireImporter from './components/QuestionnaireImporter';
+import SurveyQuestionConfigurator from './components/SurveyQuestionConfigurator';
 import StructuredInput from './components/StructuredInput';
 import SurveyQuestionList from './components/SurveyQuestionList';
 import { useToast } from './components/Toast';
@@ -38,6 +39,9 @@ function createBlankSurveyQuestion(): ConfigurableQuestion {
     requireEvidence: false,
     requireCounterarguments: false,
     requireConfidence: false,
+    inputType: 'textarea',
+    rows: 4,
+    placeholder: 'Write your response here',
   };
 }
 
@@ -222,6 +226,10 @@ export default function FormEditor() {
     const updated = [...questions];
     updated[i] = { ...updated[i], label: value };
     setQuestions(updated);
+  }
+
+  function patchQuestion(i: number, nextQuestion: ConfigurableQuestion) {
+    setQuestions((prev) => prev.map((question, index) => (index === i ? nextQuestion : question)));
   }
 
   function addQuestion() {
@@ -515,27 +523,30 @@ export default function FormEditor() {
                         placeholder={`Question ${i + 1}`}
                       />
                       {isSurveyMode ? (
-                        <div
-                          className="mt-3 rounded-xl px-3 py-2.5 text-xs"
-                          style={{
-                            backgroundColor:
-                              'color-mix(in srgb, var(--foreground) 3%, transparent)',
-                            border: '1px solid var(--border)',
-                            color: 'var(--muted-foreground)',
-                          }}
-                        >
+                        <>
                           {q.importedFromQuestionnaire ? (
-                            <>
+                            <div
+                              className="mt-3 rounded-xl px-3 py-2.5 text-xs"
+                              style={{
+                                backgroundColor:
+                                  'color-mix(in srgb, var(--foreground) 3%, transparent)',
+                                border: '1px solid var(--border)',
+                                color: 'var(--muted-foreground)',
+                              }}
+                            >
                               Imported as <strong>{q.inputType?.replace('_', ' ') ?? 'survey field'}</strong>
                               {Array.isArray(q.options) && q.options.length > 0 ? ` with ${q.options.length} option${q.options.length === 1 ? '' : 's'}` : ''}
                               {q.maxSelections ? `, up to ${q.maxSelections} selections` : ''}.
                               {q.sectionTitle ? ` Section: ${q.sectionTitle}.` : ''}
                               {q.helpText ? ` ${q.helpText}` : ''}
-                            </>
-                          ) : (
-                            'Single response box only.'
-                          )}
-                        </div>
+                            </div>
+                          ) : null}
+                          <SurveyQuestionConfigurator
+                            question={q}
+                            index={i}
+                            onChange={(nextQuestion) => patchQuestion(i, nextQuestion)}
+                          />
+                        </>
                       ) : (
                         <div
                           className="mt-3 grid gap-3 rounded-xl px-3 py-3 sm:grid-cols-3"

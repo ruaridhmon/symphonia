@@ -1,4 +1,8 @@
-import type { ConfigurableQuestion, SurveyInputType } from './questions';
+import {
+  DEFAULT_LIKERT_OPTIONS,
+  type ConfigurableQuestion,
+  type SurveyInputType,
+} from './questions';
 
 export interface QuestionnaireImportResult {
   questions: ConfigurableQuestion[];
@@ -49,6 +53,9 @@ function parseAnchorLabels(line: string | null): Pick<ConfigurableQuestion, 'min
 function detectInputType(responseType: string | null, label: string): SurveyInputType {
   const source = `${responseType ?? ''} ${label}`.toLowerCase();
   if (source.includes('select up to')) return 'multi_select';
+  if (source.includes('likert') || source.includes('five-point') || source.includes('five point')) {
+    return 'likert';
+  }
   if (source.includes('select one') || source.includes('select 1')) return 'single_select';
   if (source.includes('slider')) return 'slider';
   if (/0\s*=\s*.+10\s*=\s*/i.test(label)) return 'slider';
@@ -57,6 +64,54 @@ function detectInputType(responseType: string | null, label: string): SurveyInpu
     return wordsMatch && Number(wordsMatch[1]) <= 25 ? 'text' : 'textarea';
   }
   return 'textarea';
+}
+
+function parseDelimitedLabels(source: string): string[] {
+  return source
+    .split(/\s*,\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => part.replace(/^['"]|['"]$/g, '').trim());
+}
+
+function extractLikertScale(
+  responseType: string | null,
+  optionLines: string[],
+): { options: string[]; allowUnsure: boolean } | null {
+  const explicitOptions = optionLines.filter(Boolean);
+  const normalizedExplicit = explicitOptions.map((option) => option.trim());
+  const explicitUnsure = normalizedExplicit.find((option) => /don't know|dont know|unsure/i.test(option));
+  const explicitScale = normalizedExplicit.filter((option) => !/don't know|dont know|unsure/i.test(option));
+  if (explicitScale.length >= 5) {
+    return {
+      options: explicitScale,
+      allowUnsure: !!explicitUnsure,
+    };
+  }
+
+  if (!responseType) {
+    return null;
+  }
+
+  const scaleMatch = responseType.match(/\(([^)]+)\)/);
+  const parsed = scaleMatch ? parseDelimitedLabels(scaleMatch[1]) : [];
+  const allowUnsure =
+    /don't know|dont know|unsure/i.test(responseType) ||
+    parsed.some((item) => /don't know|dont know|unsure/i.test(item));
+  const options = parsed.filter((item) => !/don't know|dont know|unsure/i.test(item));
+
+  if (options.length >= 5) {
+    return { options, allowUnsure };
+  }
+
+  if (/likert|five-point|five point/i.test(responseType)) {
+    return {
+      options: [...DEFAULT_LIKERT_OPTIONS],
+      allowUnsure,
+    };
+  }
+
+  return null;
 }
 
 function extractMaxSelections(responseType: string | null): number | null {
@@ -159,6 +214,7 @@ function parseBlock(
     !responseType && optionLines.length >= 2 && detectedInputType === 'textarea'
       ? 'single_select'
       : detectedInputType;
+  const likertScale = inputType === 'likert' ? extractLikertScale(responseType, resolvedOptions) : null;
   const helpText = buildHelpText(routing, extraNotes);
   const dynamicSource = [block.label, responseType, routing, ...contentLines].filter(Boolean).join(' ');
 
@@ -209,7 +265,13 @@ function parseBlock(
   const question = buildQuestionBase(block, {
     helpText,
     inputType,
-    options: inputType === 'single_select' || inputType === 'multi_select' ? resolvedOptions : null,
+    options:
+      inputType === 'single_select' || inputType === 'multi_select'
+        ? resolvedOptions
+        : inputType === 'likert'
+          ? (likertScale?.options ?? [...DEFAULT_LIKERT_OPTIONS])
+          : null,
+    allowUnsure: inputType === 'likert' ? (likertScale?.allowUnsure ?? false) : null,
     maxSelections: inputType === 'multi_select' ? extractMaxSelections(responseType) : null,
     minValue: inputType === 'slider' ? 0 : null,
     maxValue: inputType === 'slider' ? 10 : null,
@@ -249,6 +311,8 @@ function parseBlock(
     exportedOptions:
       inputType === 'single_select' || inputType === 'multi_select' || inputType === 'slider'
         ? resolvedOptions
+        : inputType === 'likert'
+          ? (likertScale?.options ?? [...DEFAULT_LIKERT_OPTIONS])
         : undefined,
   };
 }

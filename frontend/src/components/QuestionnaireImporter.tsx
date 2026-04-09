@@ -81,7 +81,7 @@ export default function QuestionnaireImporter({
           <h3 className="text-sm font-semibold text-foreground">Import Questionnaire</h3>
           <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
             Upload a `.docx` questionnaire spec and Symphonia will convert the first round into survey questions.
-            Selects, sliders, and text fields are imported where the format is explicit.
+            Selects, Likert scales, sliders, and text fields are imported where the format is explicit.
           </p>
         </div>
         <div>

@@ -4,7 +4,21 @@ export interface QuestionOptions {
   requireConfidence: boolean;
 }
 
-export type SurveyInputType = 'text' | 'textarea' | 'single_select' | 'multi_select' | 'slider';
+export type SurveyInputType =
+  | 'text'
+  | 'textarea'
+  | 'single_select'
+  | 'multi_select'
+  | 'slider'
+  | 'likert';
+
+export const DEFAULT_LIKERT_OPTIONS = [
+  'Unimportant',
+  'Somewhat important',
+  'Moderately important',
+  'Very important',
+  'Essential',
+] as const;
 
 export interface ConfigurableQuestion extends QuestionOptions {
   label: string;
@@ -17,6 +31,7 @@ export interface ConfigurableQuestion extends QuestionOptions {
   conditionalOnOption?: string | null;
   inputType?: SurveyInputType | null;
   options?: string[] | null;
+  allowUnsure?: boolean | null;
   maxSelections?: number | null;
   minValue?: number | null;
   maxValue?: number | null;
@@ -101,13 +116,15 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
         obj.inputType === 'textarea' ||
         obj.inputType === 'single_select' ||
         obj.inputType === 'multi_select' ||
-        obj.inputType === 'slider')
+        obj.inputType === 'slider' ||
+        obj.inputType === 'likert')
         ? obj.inputType
         : null,
     options:
       obj && Array.isArray(obj.options)
         ? obj.options.filter((option): option is string => typeof option === 'string')
         : null,
+    allowUnsure: obj && typeof obj.allowUnsure === 'boolean' ? obj.allowUnsure : null,
     maxSelections: obj && typeof obj.maxSelections === 'number' ? obj.maxSelections : null,
     minValue: obj && typeof obj.minValue === 'number' ? obj.minValue : null,
     maxValue: obj && typeof obj.maxValue === 'number' ? obj.maxValue : null,

@@ -585,6 +585,88 @@ test.describe('Document template consultations', () => {
     }
   });
 
+  test('admin can create and participants can answer Likert rating questions', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    let participantContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const participantApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const adminPage = await adminContext.newPage();
+      await adminPage.goto(`${appBase}/admin/forms/new`);
+      await adminPage.getByRole('button', { name: /Blank survey/i }).click();
+
+      await adminPage.locator('#form-title').fill(`Clinical Ratings ${timestamp}`);
+      await adminPage.getByLabel('Question 1').fill('The criterion has strong diagnostic validity.');
+      await adminPage.getByLabel('Response type').first().selectOption('likert');
+      await adminPage.getByLabel('Section heading').first().fill('Diagnostic validity');
+      await adminPage.getByLabel('Help text').first().fill('Rate the statement on the agreed five-point scale.');
+
+      const scaleLabels = adminPage.getByLabel('Scale labels').first();
+      await scaleLabels.fill(
+        [
+          'Unimportant',
+          'Somewhat important',
+          'Moderately important',
+          'Very important',
+          'Essential',
+        ].join('\n'),
+      );
+
+      await adminPage.getByRole('button', { name: /create form/i }).click();
+      await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
+
+      const formIdMatch = adminPage.url().match(/\/admin\/form\/(\d+)$/);
+      expect(formIdMatch).not.toBeNull();
+      createdFormId = Number(formIdMatch?.[1]);
+
+      const form = await getFormDetails(adminApi, appBase, adminToken, createdFormId);
+      expect(Array.isArray(form.questions)).toBeTruthy();
+      expect(form.questions[0].inputType).toBe('likert');
+      expect(form.questions[0].allowUnsure).toBe(true);
+
+      const participantEmail = `likert-participant-${timestamp}@example.com`;
+      await registerParticipant(participantApi, appBase, participantEmail, 'test123');
+      const participantLogin = await loginViaApi(participantApi, appBase, participantEmail, 'test123');
+      const participantToken = participantLogin.access_token;
+      participantContext = await browser.newContext({
+        storageState: buildStorageState(appBase, participantLogin),
+      });
+      const participantPage = await participantContext.newPage();
+      await participantPage.goto(`${appBase}/join`);
+      await participantPage.getByPlaceholder(/SYM/i).fill(form.join_code);
+      await participantPage.getByRole('button', { name: /join consultation/i }).click();
+      await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
+
+      await expect(participantPage.getByRole('heading', { name: 'Diagnostic validity' })).toBeVisible();
+      await expect(participantPage.getByText('The criterion has strong diagnostic validity.')).toBeVisible();
+      await participantPage.locator('label').filter({ hasText: 'Essential' }).first().click();
+      await participantPage.getByRole('button', { name: /^submit$/i }).click();
+      await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });
+      await expect(participantPage.getByText(/waiting/i)).toBeVisible();
+
+      const savedResponse = await getMyResponseDetails(participantApi, appBase, participantToken, createdFormId);
+      expect(savedResponse.answers.q1.position).toBe('Essential');
+    } finally {
+      if (createdFormId) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      await participantContext?.close();
+      await adminContext?.close();
+      await adminApi.dispose();
+      await participantApi.dispose();
+    }
+  });
+
   test('admin dashboard supports share sheet and delete actions', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';

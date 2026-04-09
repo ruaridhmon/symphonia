@@ -1,7 +1,7 @@
 import { Mic, MicOff } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { StructuredResponse } from '../types/structured-input';
-import type { ConfigurableQuestion } from '../utils/questions';
+import { DEFAULT_LIKERT_OPTIONS, type ConfigurableQuestion } from '../utils/questions';
 
 interface SurveyQuestionInputProps {
   question: ConfigurableQuestion;
@@ -65,6 +65,12 @@ function decodeSelections(position: string): string[] {
     .split('\n')
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function getLikertOptions(question: ConfigurableQuestion): string[] {
+  return question.options && question.options.length >= 2
+    ? question.options
+    : [...DEFAULT_LIKERT_OPTIONS];
 }
 
 function renderHelpText(helpText: string | null | undefined) {
@@ -198,6 +204,7 @@ export default function SurveyQuestionInput({
 }: SurveyQuestionInputProps) {
   const inputType = question.inputType ?? 'textarea';
   const options = question.options ?? [];
+  const likertOptions = getLikertOptions(question);
   const selectedValues = decodeSelections(value.position);
   const sliderMin = question.minValue ?? 0;
   const sliderMax = question.maxValue ?? 10;
@@ -233,6 +240,15 @@ export default function SurveyQuestionInput({
                 <span>{question.minLabel ?? sliderMin}</span>
                 <span>{question.maxLabel ?? sliderMax}</span>
               </div>
+            </div>
+          ) : inputType === 'likert' && value.position.trim() ? (
+            <div className="space-y-1">
+              <div className="text-sm font-semibold text-foreground">{value.position}</div>
+              {question.allowUnsure ? (
+                <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  Scale: {likertOptions.join(' | ')} | Don't know / unsure
+                </div>
+              ) : null}
             </div>
           ) : value.position.trim() ? (
             <div className="whitespace-pre-wrap text-sm text-foreground">{value.position}</div>
@@ -378,6 +394,70 @@ export default function SurveyQuestionInput({
           >
             <span className="max-w-[46%] text-left">{question.minLabel ?? sliderMin}</span>
             <span className="max-w-[46%] text-right">{question.maxLabel ?? sliderMax}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (inputType === 'likert') {
+    const scaleItems = question.allowUnsure
+      ? [...likertOptions, "Don't know / unsure"]
+      : likertOptions;
+
+    return (
+      <div>
+        {renderHelpText(question.helpText)}
+        <div className="space-y-2.5">
+          <div
+            className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6"
+            role="radiogroup"
+            aria-label={question.label}
+          >
+            {scaleItems.map((option, optionIndex) => {
+              const selected = value.position === option;
+              const isUnsure = option === "Don't know / unsure";
+              return (
+                <label
+                  key={option}
+                  className="flex min-h-[4.5rem] cursor-pointer flex-col justify-between rounded-2xl px-3 py-3 text-left transition-colors"
+                  style={{
+                    backgroundColor: selected
+                      ? 'color-mix(in srgb, var(--accent) 8%, var(--background))'
+                      : 'var(--background)',
+                    border: selected
+                      ? '1px solid color-mix(in srgb, var(--accent) 34%, var(--border))'
+                      : '1px solid var(--border)',
+                    color: 'var(--foreground)',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name={question.questionId ?? question.label}
+                    checked={selected}
+                    onChange={() => onChange(updatePosition(value, option))}
+                    className="sr-only"
+                    aria-label={option}
+                  />
+                  <span
+                    className="inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                    style={{
+                      backgroundColor: selected
+                        ? 'color-mix(in srgb, var(--accent) 14%, transparent)'
+                        : 'color-mix(in srgb, var(--foreground) 5%, transparent)',
+                      color: selected ? 'var(--accent)' : 'var(--muted-foreground)',
+                    }}
+                  >
+                    {isUnsure ? 'Unsure' : optionIndex + 1}
+                  </span>
+                  <span className="mt-2 text-sm leading-5">{option}</span>
+                </label>
+              );
+            })}
+          </div>
+          <div className="flex items-start justify-between gap-3 text-[11px] leading-4" style={{ color: 'var(--muted-foreground)' }}>
+            <span className="max-w-[46%]">{likertOptions[0]}</span>
+            <span className="max-w-[46%] text-right">{likertOptions[likertOptions.length - 1]}</span>
           </div>
         </div>
       </div>

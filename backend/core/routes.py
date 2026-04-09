@@ -3158,6 +3158,7 @@ class QuestionConfig(BaseModel):
     conditionalOnOption: str | None = None
     inputType: str | None = None
     options: list[str] | None = None
+    allowUnsure: bool | None = None
     maxSelections: int | None = None
     minValue: int | None = None
     maxValue: int | None = None
