@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Pencil, Plus, Search, Share2, Ticket, Trash2 } from 'lucide-react';
+import { Download, FileText, Pencil, Plus, Search, Share2, Ticket, Trash2 } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
 import { isCfAccessRedirect, clearAuthAndRedirect } from './api/client';
 import Container from './layouts/Container';
-import { LoadingButton, SkeletonDashboard } from './components';
+import { DownloadSheet, LoadingButton, SkeletonDashboard } from './components';
 import ConsultationShareSheet from './components/ConsultationShareSheet';
 import ConfirmDialog from './components/ConfirmDialog';
 
@@ -26,6 +26,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState('');
   const [deletingFormId, setDeletingFormId] = useState<number | null>(null);
   const [sharingForm, setSharingForm] = useState<{ title: string; joinCode: string } | null>(null);
+  const [downloadingForm, setDownloadingForm] = useState<{ id: number; title: string } | null>(null);
   const [pendingDeleteForm, setPendingDeleteForm] = useState<{ id: number; title: string } | null>(null);
 
   const fetchForms = () => {
@@ -138,6 +139,11 @@ export default function AdminDashboard() {
           title={sharingForm?.title ?? ''}
           joinCode={sharingForm?.joinCode ?? ''}
           onClose={() => setSharingForm(null)}
+        />
+        <DownloadSheet
+          open={!!downloadingForm}
+          form={downloadingForm}
+          onClose={() => setDownloadingForm(null)}
         />
         <ConfirmDialog
           open={!!pendingDeleteForm}
@@ -460,6 +466,24 @@ export default function AdminDashboard() {
                             </a>
                             <button
                               type="button"
+                              aria-label={`Download ${f.title}`}
+                              title="Download"
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                              style={{ color: 'var(--muted-foreground)' }}
+                              onClick={() => setDownloadingForm({ id: f.id, title: f.title })}
+                              onMouseEnter={e => {
+                                e.currentTarget.style.color = 'var(--foreground)';
+                                e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 7%, transparent)';
+                              }}
+                              onMouseLeave={e => {
+                                e.currentTarget.style.color = 'var(--muted-foreground)';
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                              }}
+                            >
+                              <Download size={15} aria-hidden="true" />
+                            </button>
+                            <button
+                              type="button"
                               aria-label={`Share ${f.title}`}
                               title="Share"
                               className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
@@ -570,6 +594,16 @@ export default function AdminDashboard() {
                           >
                             <FileText size={15} aria-hidden="true" />
                           </a>
+                          <button
+                            type="button"
+                            aria-label={`Download ${f.title}`}
+                            title="Download"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                            style={{ color: 'var(--muted-foreground)' }}
+                            onClick={() => setDownloadingForm({ id: f.id, title: f.title })}
+                          >
+                            <Download size={15} aria-hidden="true" />
+                          </button>
                           <button
                             type="button"
                             aria-label={`Share ${f.title}`}

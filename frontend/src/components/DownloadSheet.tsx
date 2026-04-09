@@ -1,18 +1,45 @@
 import { Download, FileSpreadsheet, FileText, Layers3, MessageSquareText, X } from 'lucide-react';
 import { saveAs } from 'file-saver';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { saveBackendExport } from '../api/exports';
+import { getRounds, getRoundsWithResponses } from '../api/rounds';
 import type { Form, Round, RoundWithResponses } from '../types/summary';
 
 interface DownloadSheetProps {
   open: boolean;
   onClose: () => void;
-  form: Form | null;
-  rounds: Round[];
-  structuredRounds: RoundWithResponses[];
+  form: Pick<Form, 'id' | 'title'> | null;
+  rounds?: Round[];
+  structuredRounds?: RoundWithResponses[];
 }
 
 type ExportScope = 'consultation' | 'synthesis' | 'responses';
+
+const SCOPE_OPTIONS: Array<{
+  id: ExportScope;
+  label: string;
+  description: string;
+  icon: typeof Layers3;
+}> = [
+  {
+    id: 'consultation',
+    label: 'Everything',
+    description: 'Summary and all responses together.',
+    icon: Layers3,
+  },
+  {
+    id: 'synthesis',
+    label: 'Summary only',
+    description: 'Consensus and round synthesis.',
+    icon: FileText,
+  },
+  {
+    id: 'responses',
+    label: 'Responses only',
+    description: 'All participant responses by round.',
+    icon: MessageSquareText,
+  },
+];
 
 function formatDate(value: string | null | undefined) {
   if (!value) return '';
@@ -34,7 +61,7 @@ function serializeAnswer(value: unknown): string {
 
 async function exportWordDocument(
   scope: ExportScope,
-  form: Form,
+  form: Pick<Form, 'id' | 'title'>,
   rounds: Round[],
   structuredRounds: RoundWithResponses[],
 ) {
@@ -86,9 +113,7 @@ async function exportWordDocument(
     });
   }
 
-  const doc = new Document({
-    sections: [{ children }],
-  });
+  const doc = new Document({ sections: [{ children }] });
   const blob = await Packer.toBlob(doc);
   const base = form.title.replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase() || `form-${form.id}`;
   const suffix = scope === 'consultation' ? 'consultation' : scope === 'responses' ? 'responses' : 'summary';
@@ -102,39 +127,71 @@ export default function DownloadSheet({
   rounds,
   structuredRounds,
 }: DownloadSheetProps) {
+  const providedRounds = rounds ?? [];
+  const providedStructuredRounds = structuredRounds ?? [];
   const [selectedScope, setSelectedScope] = useState<ExportScope>('consultation');
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [loadedRounds, setLoadedRounds] = useState<Round[]>(providedRounds);
+  const [loadedStructuredRounds, setLoadedStructuredRounds] = useState<RoundWithResponses[]>(providedStructuredRounds);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
-  if (!open || !form) return null;
+  useEffect(() => {
+    setLoadedRounds(providedRounds);
+  }, [providedRounds]);
 
-  const scopeOptions: Array<{
-    id: ExportScope;
-    label: string;
-    description: string;
-    icon: typeof Layers3;
-  }> = [
-    {
-      id: 'consultation',
-      label: 'Everything',
-      description: 'Summary and all responses together.',
-      icon: Layers3,
-    },
-    {
-      id: 'synthesis',
-      label: 'Summary only',
-      description: 'Consensus and round synthesis.',
-      icon: FileText,
-    },
-    {
-      id: 'responses',
-      label: 'Responses only',
-      description: 'All participant responses by round.',
-      icon: MessageSquareText,
-    },
-  ];
+  useEffect(() => {
+    setLoadedStructuredRounds(providedStructuredRounds);
+  }, [providedStructuredRounds]);
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedScope('consultation');
+      setBusyAction(null);
+      setMessage(null);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDetails() {
+      if (!open || !form) return;
+      if (providedRounds.length > 0 && providedStructuredRounds.length > 0) return;
+
+      setLoadingDetails(true);
+      setMessage(null);
+      try {
+        const [roundData, responseData] = await Promise.all([
+          getRounds(form.id),
+          getRoundsWithResponses(form.id),
+        ]);
+        if (!cancelled) {
+          setLoadedRounds(roundData as unknown as Round[]);
+          setLoadedStructuredRounds(responseData as unknown as RoundWithResponses[]);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setMessage(error instanceof Error ? error.message : 'Failed to load export data.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingDetails(false);
+        }
+      }
+    }
+
+    void loadDetails();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, form?.id, providedRounds.length, providedStructuredRounds.length]);
+
+  const visible = open && !!form;
+  const exportReady = loadedRounds.length > 0 || loadedStructuredRounds.length > 0;
 
   async function handlePdfDownload() {
+    if (!form) return;
     const actionKey = `${selectedScope}-pdf`;
     setBusyAction(actionKey);
     setMessage(null);
@@ -149,11 +206,12 @@ export default function DownloadSheet({
   }
 
   async function handleWordDownload() {
+    if (!form) return;
     const actionKey = `${selectedScope}-word`;
     setBusyAction(actionKey);
     setMessage(null);
     try {
-      await exportWordDocument(selectedScope, form, rounds, structuredRounds);
+      await exportWordDocument(selectedScope, form, loadedRounds, loadedStructuredRounds);
       setMessage('Word document downloaded.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Word export failed.');
@@ -167,11 +225,12 @@ export default function DownloadSheet({
       role="dialog"
       aria-modal="true"
       aria-label="Download consultation"
+      aria-hidden={!visible}
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        display: 'flex',
+        display: visible ? 'flex' : 'none',
         alignItems: 'flex-end',
         justifyContent: 'center',
         padding: '1rem',
@@ -206,7 +265,7 @@ export default function DownloadSheet({
             <div className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--accent)' }}>
               Download
             </div>
-            <h2 className="mt-1 text-[1.05rem] font-semibold text-foreground">{form.title}</h2>
+            <h2 className="mt-1 text-[1.05rem] font-semibold text-foreground">{form?.title ?? 'Consultation'}</h2>
             <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
               Choose what to export, then pick a format.
             </p>
@@ -227,7 +286,7 @@ export default function DownloadSheet({
         </div>
 
         <div className="mt-4 space-y-2">
-          {scopeOptions.map((option) => {
+          {SCOPE_OPTIONS.map((option) => {
             const Icon = option.icon;
             const active = selectedScope === option.id;
             return (
@@ -281,7 +340,7 @@ export default function DownloadSheet({
             <button
               type="button"
               onClick={() => void handlePdfDownload()}
-              disabled={busyAction !== null}
+              disabled={busyAction !== null || loadingDetails || !form}
               className="inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 text-sm font-medium"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
@@ -295,7 +354,7 @@ export default function DownloadSheet({
             <button
               type="button"
               onClick={() => void handleWordDownload()}
-              disabled={busyAction !== null}
+              disabled={busyAction !== null || loadingDetails || !exportReady || !form}
               className="inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 text-sm font-medium"
               style={{
                 backgroundColor: 'var(--background)',
@@ -311,6 +370,10 @@ export default function DownloadSheet({
           {message ? (
             <p className="mt-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>
               {message}
+            </p>
+          ) : loadingDetails ? (
+            <p className="mt-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              Loading consultation data…
             </p>
           ) : null}
         </div>

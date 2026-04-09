@@ -612,6 +612,12 @@ test.describe('Document template consultations', () => {
       const row = page.locator('tr').filter({ hasText: `Dashboard Actions ${timestamp}` }).first();
       await expect(row).toBeVisible();
 
+      await row.getByRole('button', { name: `Download Dashboard Actions ${timestamp}` }).click();
+      await expect(page.getByRole('dialog', { name: /download consultation/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /everything/i })).toBeVisible();
+      await page.getByRole('button', { name: /close download sheet/i }).click();
+      await expect(page.getByRole('dialog', { name: /download consultation/i })).toBeHidden();
+
       await row.getByRole('button', { name: `Share Dashboard Actions ${timestamp}` }).click();
       await expect(page.getByRole('dialog', { name: /share consultation/i })).toBeVisible();
       await expect(page.getByText(`/join/${created.join_code}`)).toBeVisible();
