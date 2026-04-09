@@ -469,11 +469,14 @@ def _build_responses_markdown(
             )
             timestamp = response.get("timestamp")
             if timestamp:
-                lines.append(f"- Submitted: {timestamp}")
+                lines.append(f"**Submitted:** {timestamp}")
+                lines.append("")
             for key, value in (response.get("answers") or {}).items():
-                lines.append(f"- **{key}**")
+                lines.append(f"**{key}**")
                 for wrapped_line in _format_value(value):
-                    lines.append(f"  {wrapped_line}" if wrapped_line else "  ")
+                    lines.append(wrapped_line if wrapped_line else "")
+                lines.append("")
+            lines.append("---")
             lines.append("")
     return "\n".join(lines).strip() + "\n"
 
@@ -565,6 +568,7 @@ hr {{
 }}
 strong {{
   color: #111827;
+  font-weight: 700;
 }}
 em {{
   color: #475467;

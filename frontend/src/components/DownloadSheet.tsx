@@ -125,16 +125,16 @@ async function exportWordDocument(
     const wrapped = wrapExportText(value || ' ');
     children.push(
       new Paragraph({
-        spacing: { after: 30 },
+        spacing: { before: 40, after: 24 },
         keepNext: true,
-        children: [new TextRun({ text: label, bold: true, color: '0F2F67' })],
+        children: [new TextRun({ text: label, bold: true, color: '0F2F67', size: 22 })],
       }),
     );
     wrapped.forEach((line, index) => {
       children.push(
         new Paragraph({
-          spacing: { after: index === wrapped.length - 1 ? 100 : 30 },
-          indent: { left: 240 },
+          spacing: { after: index === wrapped.length - 1 ? 110 : 24 },
+          indent: { left: 320 },
           children: [new TextRun(line || ' ')],
         }),
       );
@@ -188,6 +188,18 @@ async function exportWordDocument(
         Object.entries(response.answers || {}).forEach(([key, value]) => {
           pushLabelValue(key, serializeAnswer(value));
         });
+        children.push(
+          new Paragraph({
+            border: {
+              bottom: {
+                color: 'E2E8F0',
+                style: BorderStyle.SINGLE,
+                size: 4,
+              },
+            },
+            spacing: { before: 40, after: 120 },
+          }),
+        );
       });
     });
   }
