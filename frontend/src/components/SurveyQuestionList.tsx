@@ -9,7 +9,6 @@ import {
   normalizeQuestion,
   type QuestionInput,
 } from '../utils/questions';
-import { isResponseAnswered } from '../utils/responseValidation';
 
 interface SurveyQuestionListProps {
   questions: QuestionInput[];
@@ -87,7 +86,6 @@ export default function SurveyQuestionList({
               const surveyQuestion = isSurveyQuestion(question);
               const previousQuestion =
                 itemIndex > 0 ? group.items[itemIndex - 1]?.question : null;
-              const answered = isResponseAnswered(responses[key]);
               const highlighted = !readOnly && highlightedQuestionKey === key;
               const showGroupPrompt =
                 !!question.groupPrompt &&
@@ -102,14 +100,10 @@ export default function SurveyQuestionList({
                   style={{
                     border: highlighted
                       ? '1px solid color-mix(in srgb, var(--destructive) 42%, var(--border))'
-                      : answered
-                        ? '1px solid color-mix(in srgb, var(--accent) 18%, var(--border))'
-                        : '1px solid transparent',
+                      : '1px solid transparent',
                     backgroundColor: highlighted
                       ? 'color-mix(in srgb, var(--destructive) 5%, transparent)'
-                      : answered
-                        ? 'color-mix(in srgb, var(--accent) 3%, transparent)'
-                        : 'transparent',
+                      : 'transparent',
                     scrollMarginTop: '6rem',
                   }}
                 >
@@ -134,19 +128,6 @@ export default function SurveyQuestionList({
                     >
                       {question.optional ? 'Optional' : 'Required'}
                     </span>
-                    {!readOnly ? (
-                      <span
-                        className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
-                        style={{
-                          backgroundColor: answered
-                            ? 'color-mix(in srgb, #138a52 12%, transparent)'
-                            : 'color-mix(in srgb, var(--foreground) 5%, transparent)',
-                          color: answered ? '#138a52' : 'var(--muted-foreground)',
-                        }}
-                      >
-                        {answered ? 'Answered' : 'Not answered'}
-                      </span>
-                    ) : null}
                   </label>
                   {surveyQuestion ? (
                     <SurveyQuestionInput
