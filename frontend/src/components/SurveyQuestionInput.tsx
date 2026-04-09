@@ -346,18 +346,13 @@ export default function SurveyQuestionInput({
       <div>
         {renderHelpText(question.helpText)}
         <div
-          className="rounded-xl px-3.5 py-3"
+          className="rounded-xl px-3.5 py-2.5"
           style={{
             backgroundColor: 'var(--background)',
             border: '1px solid var(--border)',
           }}
         >
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-              <span className="truncate">{question.minLabel ?? sliderMin}</span>
-              <span>•</span>
-              <span className="truncate">{question.maxLabel ?? sliderMax}</span>
-            </div>
+          <div className="mb-1.5 flex items-center justify-end">
             <div
               className="inline-flex min-w-[2.5rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold"
               style={{
@@ -377,6 +372,13 @@ export default function SurveyQuestionInput({
             onChange={(event) => onChange(updatePosition(value, event.target.value))}
             className="w-full"
           />
+          <div
+            className="mt-1.5 flex items-start justify-between gap-3 text-[11px] leading-4"
+            style={{ color: 'var(--muted-foreground)' }}
+          >
+            <span className="max-w-[46%] text-left">{question.minLabel ?? sliderMin}</span>
+            <span className="max-w-[46%] text-right">{question.maxLabel ?? sliderMax}</span>
+          </div>
         </div>
       </div>
     );

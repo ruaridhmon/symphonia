@@ -470,7 +470,7 @@ test.describe('Document template consultations', () => {
         'Response type: Select one.',
         'Leader',
         'Teacher',
-        'Other',
+        'Other (please specify, max 20 words)',
         '',
         'Q2. Which priorities matter most?',
         'Response type: Select up to 2.',
@@ -503,7 +503,7 @@ test.describe('Document template consultations', () => {
       await adminPage.getByRole('button', { name: /import questionnaire/i }).click();
 
       await adminPage.locator('input[type="file"]').setInputFiles(fixture.docxPath);
-      await expect(adminPage.getByText(/Imported 5 questions from Round 1: Initial prioritisation/i)).toBeVisible();
+      await expect(adminPage.getByText(/Imported 6 questions from Round 1: Initial prioritisation/i)).toBeVisible();
       await expect(adminPage.getByText(/Later rounds were not imported/i)).toBeVisible();
       await expect(adminPage.getByRole('heading', { name: 'About you' })).toBeVisible();
       await expect(adminPage.getByText('Which role best describes you?')).toBeVisible();
@@ -519,10 +519,11 @@ test.describe('Document template consultations', () => {
 
       const form = await getFormDetails(adminApi, appBase, adminToken, createdFormId);
       expect(Array.isArray(form.questions)).toBeTruthy();
-      expect(form.questions).toHaveLength(5);
+      expect(form.questions).toHaveLength(6);
       expect(form.questions[0].inputType).toBe('single_select');
-      expect(form.questions[1].inputType).toBe('multi_select');
-      expect(form.questions[2].inputType).toBe('slider');
+      expect(form.questions[1].inputType).toBe('text');
+      expect(form.questions[2].inputType).toBe('multi_select');
+      expect(form.questions[3].inputType).toBe('slider');
 
       const participantEmail = `questionnaire-participant-${timestamp}@example.com`;
       await registerParticipant(participantApi, appBase, participantEmail, 'test123');
@@ -538,7 +539,15 @@ test.describe('Document template consultations', () => {
       await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
 
       await expect(participantPage.getByRole('heading', { name: 'About you' })).toBeVisible();
-      await participantPage.getByLabel('Teacher').check();
+      await participantPage.getByRole('button', { name: /^submit$/i }).click();
+      await expect(participantPage.getByText(/please answer/i)).toBeVisible();
+
+      await participantPage.getByLabel(/other/i).check();
+      await expect(participantPage.getByPlaceholder(/please specify, max 20 words/i)).toBeVisible();
+      await participantPage.getByRole('button', { name: /^submit$/i }).click();
+      await expect(participantPage.getByText(/please answer/i)).toBeVisible();
+
+      await participantPage.getByPlaceholder(/please specify, max 20 words/i).fill('Consultant');
       await participantPage.getByLabel('Workload').check();
       await participantPage.getByLabel('Equity').check();
 
@@ -551,12 +560,13 @@ test.describe('Document template consultations', () => {
       await expect(participantPage.getByRole('heading', { name: /thank you for your submission/i })).toBeVisible();
 
       const savedResponse = await getMyResponseDetails(participantApi, appBase, participantToken, createdFormId);
-      expect(savedResponse.answers.q1.position).toBe('Teacher');
-      expect(savedResponse.answers.q2.position).toContain('Workload');
-      expect(savedResponse.answers.q2.position).toContain('Equity');
-      expect(savedResponse.answers.q3.position).toBe('8');
-      expect(savedResponse.answers.q4.position).toBe('6');
-      expect(savedResponse.answers.q5.position).toContain('Need clearer implementation guidance.');
+      expect(savedResponse.answers.q1.position).toContain('Other');
+      expect(savedResponse.answers.q2.position).toBe('Consultant');
+      expect(savedResponse.answers.q3.position).toContain('Workload');
+      expect(savedResponse.answers.q3.position).toContain('Equity');
+      expect(savedResponse.answers.q4.position).toBe('8');
+      expect(savedResponse.answers.q5.position).toBe('6');
+      expect(savedResponse.answers.q6.position).toContain('Need clearer implementation guidance.');
     } finally {
       if (createdFormId) {
         await deleteForm(adminApi, appBase, adminToken, createdFormId);

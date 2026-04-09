@@ -37,6 +37,20 @@ export default function SurveyQuestionList({
 
   const groups = groupQuestionsBySection(items);
 
+  function isQuestionVisible(question: ReturnType<typeof normalizeQuestion>) {
+    if (!question.conditionalOnQuestionId || !question.conditionalOnOption) return true;
+    const controllingIndex = items.find(
+      (item) => item.question.questionId === question.conditionalOnQuestionId,
+    );
+    if (!controllingIndex) return false;
+    const controllingResponse = responses[controllingIndex.key] ?? emptyStructuredResponse();
+    const selected = (controllingResponse.position || '')
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return selected.includes(question.conditionalOnOption);
+  }
+
   return (
     <div className="space-y-5">
       {groups.map((group) => (
@@ -65,6 +79,7 @@ export default function SurveyQuestionList({
 
           <div className="space-y-5">
             {group.items.map(({ key, index, question }, itemIndex) => {
+              if (!isQuestionVisible(question)) return null;
               const options = extractQuestionOptions(question);
               const surveyQuestion = isSurveyQuestion(question);
               const previousQuestion =

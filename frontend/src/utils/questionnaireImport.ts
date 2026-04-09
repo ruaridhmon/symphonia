@@ -89,6 +89,8 @@ function buildQuestionBase(
   block: QuestionBlock,
   overrides: Partial<ConfigurableQuestion>,
 ): ConfigurableQuestion {
+  const normalizedLabel = block.label.trim();
+  const isOptional = /^optional[:\s]/i.test(normalizedLabel);
   return {
     label: block.label,
     requireEvidence: false,
@@ -100,7 +102,24 @@ function buildQuestionBase(
     fieldType: null,
     rows: null,
     placeholder: null,
+    optional: isOptional,
+    conditionalOnQuestionId: null,
+    conditionalOnOption: null,
     ...overrides,
+  };
+}
+
+function extractOtherSpecifyOption(option: string): { optionLabel: string; prompt: string | null; rows: number } | null {
+  const match = option.match(/^(other)(?:\s*\((.+)\))?$/i);
+  if (!match) return null;
+  const suffix = match[2]?.trim() ?? '';
+  const prompt = suffix
+    ? suffix.charAt(0).toUpperCase() + suffix.slice(1)
+    : 'Please specify';
+  return {
+    optionLabel: option.trim(),
+    prompt,
+    rows: /max\s+\d+\s+words?/i.test(suffix) && !/120|100|80|60|50|40|30/i.test(suffix) ? 2 : 3,
   };
 }
 
@@ -181,6 +200,12 @@ function parseBlock(
     };
   }
 
+  const otherSpecify = (inputType === 'single_select' || inputType === 'multi_select')
+    ? resolvedOptions
+        .map((option) => extractOtherSpecifyOption(option))
+        .find((item): item is { optionLabel: string; prompt: string | null; rows: number } => !!item) ?? null
+    : null;
+
   const question = buildQuestionBase(block, {
     helpText,
     inputType,
@@ -200,8 +225,26 @@ function parseBlock(
           : null,
   });
 
+  const questions: ConfigurableQuestion[] = [question];
+
+  if (otherSpecify) {
+    questions.push(
+      buildQuestionBase(block, {
+        label: `Other: ${otherSpecify.prompt ?? 'Please specify'}`,
+        questionId: `${block.questionId}_other`,
+        inputType: 'text',
+        rows: null,
+        placeholder: otherSpecify.prompt ?? 'Please specify',
+        helpText: null,
+        optional: false,
+        conditionalOnQuestionId: block.questionId,
+        conditionalOnOption: otherSpecify.optionLabel,
+      }),
+    );
+  }
+
   return {
-    questions: [question],
+    questions,
     warnings,
     exportedOptions:
       inputType === 'single_select' || inputType === 'multi_select' || inputType === 'slider'

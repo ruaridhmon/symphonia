@@ -12,7 +12,7 @@ import Skeleton, { SkeletonCard } from './components/Skeleton'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
-import { extractQuestionText } from './utils/questions'
+import { extractQuestionText, normalizeQuestion } from './utils/questions'
 import { isDocumentTemplate } from './utils/documentTemplate'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 
@@ -192,8 +192,50 @@ export default function FormPage() {
     loadForm()
   }, [loadForm])
 
+  function validateResponses() {
+    if (isDocumentMode) {
+      const missing = Object.entries(structuredResponses).find(([, answer]) => !answer.position.trim())
+      if (missing) {
+        setSubmitError('Please complete every box before submitting.')
+        return false
+      }
+      return true
+    }
+
+    const normalized = roundQuestions.map((question, index) => ({
+      key: `q${index + 1}`,
+      question: normalizeQuestion(question),
+    }))
+
+    const isVisible = (question: ReturnType<typeof normalizeQuestion>) => {
+      if (!question.conditionalOnQuestionId || !question.conditionalOnOption) return true
+      const controlling = normalized.find((item) => item.question.questionId === question.conditionalOnQuestionId)
+      if (!controlling) return false
+      const selected = (structuredResponses[controlling.key]?.position || '')
+        .split('\n')
+        .map((item) => item.trim())
+        .filter(Boolean)
+      return selected.includes(question.conditionalOnOption)
+    }
+
+    const missingQuestion = normalized.find(({ key, question }) => {
+      if (question.optional) return false
+      if (!isVisible(question)) return false
+      return !(structuredResponses[key]?.position || '').trim()
+    })
+
+    if (missingQuestion) {
+      setSubmitError(`Please answer "${extractQuestionText(missingQuestion.question)}" before submitting.`)
+      return false
+    }
+
+    return true
+  }
+
   async function handleSubmit() {
     if (!id) return
+
+    if (!validateResponses()) return
 
     setIsSubmitting(true)
     setSubmitError(null)

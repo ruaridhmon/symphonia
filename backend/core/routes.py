@@ -3020,6 +3020,10 @@ class QuestionConfig(BaseModel):
     questionId: str | None = None
     sectionTitle: str | None = None
     helpText: str | None = None
+    groupPrompt: str | None = None
+    optional: bool | None = None
+    conditionalOnQuestionId: str | None = None
+    conditionalOnOption: str | None = None
     inputType: str | None = None
     options: list[str] | None = None
     maxSelections: int | None = None
