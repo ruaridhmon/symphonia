@@ -52,8 +52,19 @@ export default function DocumentTemplateResponse({
 
           return (
             <div key={`field-${key}`} className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">
-                {block.value.label}
+              <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <span>{block.value.label}</span>
+                <span
+                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+                  style={{
+                    backgroundColor: block.value.optional
+                      ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+                      : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                    color: block.value.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+                  }}
+                >
+                  {block.value.optional ? 'Optional' : 'Required'}
+                </span>
               </label>
               {readOnly ? (
                 <div

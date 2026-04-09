@@ -106,6 +106,7 @@ export default function FormEditor() {
     requireEvidence: false,
     requireCounterarguments: false,
     requireConfidence: false,
+    optional: field.optional,
     fieldType: field.fieldType,
     rows: field.rows,
     placeholder: field.placeholder,

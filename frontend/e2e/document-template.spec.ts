@@ -263,7 +263,7 @@ test.describe('Document template consultations', () => {
           '{{long:Executive summary}}',
           '',
           'Primary concern',
-          '{{long:Primary concern}}',
+          '{{optional:long:Primary concern}}',
         ].join('\n'),
       );
 
@@ -293,6 +293,31 @@ test.describe('Document template consultations', () => {
 
       await expect(participantPage.getByRole('heading', { name: new RegExp(`Document Template ${timestamp}`) })).toBeVisible();
       await expect(participantPage.getByRole('heading', { name: 'Document Template', exact: true })).toBeVisible();
+      await expect(participantPage.getByText('Primary concern')).toBeVisible();
+      await expect(participantPage.getByText('Optional')).toBeVisible();
+
+      await participantPage.getByRole('button', { name: /^submit$/i }).click();
+      await expect(participantPage.getByText(/please complete "Organisation" before submitting/i)).toBeVisible();
+
+      const blockedSubmitResponse = await participantApi.post(`${appBase}/submit`, {
+        headers: {
+          Authorization: `Bearer ${participantToken}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        form: {
+          form_id: String(createdFormId),
+          answers: JSON.stringify({
+            q1: { position: '', evidence: '', counterarguments: '', confidence: 5, confidenceJustification: '' },
+            q2: { position: '', evidence: '', counterarguments: '', confidence: 5, confidenceJustification: '' },
+            q3: { position: '', evidence: '', counterarguments: '', confidence: 5, confidenceJustification: '' },
+          }),
+        },
+      });
+      expect(blockedSubmitResponse.status()).toBe(400);
+      const blockedSubmitBody = await blockedSubmitResponse.json();
+      expect(blockedSubmitBody).toMatchObject({
+        detail: 'Please answer "Organisation" before submitting.',
+      });
 
       const organisationBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Organisation' }).first();
       await organisationBlock.locator('input').fill('Northshore Council');
@@ -300,12 +325,14 @@ test.describe('Document template consultations', () => {
       const summaryBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Executive summary' }).first();
       await summaryBlock.locator('textarea').fill('The proposal is viable if the implementation timeline is extended.');
 
-      const concernBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Primary concern' }).first();
-      await concernBlock.locator('textarea').fill('Current staffing assumptions are optimistic and need external validation.');
-
       await participantPage.getByRole('button', { name: /submit/i }).click();
       await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });
       await expect(participantPage.getByText(/waiting/i)).toBeVisible();
+
+      const savedResponse = await getMyResponseDetails(participantApi, appBase, participantToken, createdFormId);
+      expect(savedResponse.answers.q1.position).toBe('Northshore Council');
+      expect(savedResponse.answers.q2.position).toContain('implementation timeline is extended');
+      expect(savedResponse.answers.q3.position ?? '').toBe('');
     } finally {
       await participantContext?.close();
       await adminContext?.close();
@@ -539,6 +566,9 @@ test.describe('Document template consultations', () => {
       await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
 
       await expect(participantPage.getByRole('heading', { name: 'About you' })).toBeVisible();
+      await expect(participantPage.getByRole('button', { name: /voice/i }).last()).toBeVisible();
+      await expect(participantPage.getByText(/voice input/i).last()).toBeVisible();
+      await expect(participantPage.getByText(/enter to submit/i)).toHaveCount(0);
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await expect(participantPage.getByText(/please answer/i)).toBeVisible();
 
@@ -554,8 +584,6 @@ test.describe('Document template consultations', () => {
       const sliders = participantPage.locator('input[type="range"]');
       await sliders.nth(0).fill('8');
       await sliders.nth(1).fill('6');
-      await participantPage.getByRole('textbox', { name: '' }).last().fill('Need clearer implementation guidance.');
-
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await expect(participantPage.getByRole('heading', { name: /thank you for your submission/i })).toBeVisible();
 
@@ -566,7 +594,7 @@ test.describe('Document template consultations', () => {
       expect(savedResponse.answers.q3.position).toContain('Equity');
       expect(savedResponse.answers.q4.position).toBe('8');
       expect(savedResponse.answers.q5.position).toBe('6');
-      expect(savedResponse.answers.q6.position).toContain('Need clearer implementation guidance.');
+      expect(savedResponse.answers.q6?.position ?? '').toBe('');
     } finally {
       if (createdFormId) {
         await deleteForm(adminApi, appBase, adminToken, createdFormId);

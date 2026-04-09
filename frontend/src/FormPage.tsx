@@ -4,7 +4,7 @@ import { ClipboardList, AlertCircle, ChevronDown } from 'lucide-react'
 import { getForm, Form } from './api/forms'
 import { getActiveRound, ActiveRound } from './api/rounds'
 import { submitResponse, hasSubmitted as checkSubmitted, getMyResponse, saveDraft, getDraft, deleteDraft } from './api/responses'
-import { ApiError } from './api/client'
+import { ApiError, getApiErrorDetail } from './api/client'
 import { BackLink, LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
 import DocumentTemplateResponse from './components/DocumentTemplateResponse'
 import SurveyQuestionList from './components/SurveyQuestionList'
@@ -12,7 +12,7 @@ import Skeleton, { SkeletonCard } from './components/Skeleton'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
-import { extractQuestionText, normalizeQuestion } from './utils/questions'
+import { validateDocumentTemplateResponses, validateQuestionResponses } from './utils/responseValidation'
 import { isDocumentTemplate } from './utils/documentTemplate'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 
@@ -193,39 +193,12 @@ export default function FormPage() {
   }, [loadForm])
 
   function validateResponses() {
-    if (isDocumentMode) {
-      const missing = Object.entries(structuredResponses).find(([, answer]) => !answer.position.trim())
-      if (missing) {
-        setSubmitError('Please complete every box before submitting.')
-        return false
-      }
-      return true
-    }
+    const result = isDocumentMode && form?.document_template
+      ? validateDocumentTemplateResponses(form.document_template, structuredResponses)
+      : validateQuestionResponses(roundQuestions, structuredResponses)
 
-    const normalized = roundQuestions.map((question, index) => ({
-      key: `q${index + 1}`,
-      question: normalizeQuestion(question),
-    }))
-
-    const isVisible = (question: ReturnType<typeof normalizeQuestion>) => {
-      if (!question.conditionalOnQuestionId || !question.conditionalOnOption) return true
-      const controlling = normalized.find((item) => item.question.questionId === question.conditionalOnQuestionId)
-      if (!controlling) return false
-      const selected = (structuredResponses[controlling.key]?.position || '')
-        .split('\n')
-        .map((item) => item.trim())
-        .filter(Boolean)
-      return selected.includes(question.conditionalOnOption)
-    }
-
-    const missingQuestion = normalized.find(({ key, question }) => {
-      if (question.optional) return false
-      if (!isVisible(question)) return false
-      return !(structuredResponses[key]?.position || '').trim()
-    })
-
-    if (missingQuestion) {
-      setSubmitError(`Please answer "${extractQuestionText(missingQuestion.question)}" before submitting.`)
+    if (!result.ok) {
+      setSubmitError(result.message)
       return false
     }
 
@@ -260,7 +233,8 @@ export default function FormPage() {
       })
     } catch (err) {
       if (err instanceof ApiError) {
-        setSubmitError(`Submission failed (HTTP ${err.status}). Your answers are saved locally — please try again.`)
+        const detail = getApiErrorDetail(err)
+        setSubmitError(detail || `Submission failed (HTTP ${err.status}). Your answers are saved locally — please try again.`)
       } else {
         setSubmitError('Submission failed. Your answers are saved locally — please try again.')
       }
@@ -461,30 +435,12 @@ export default function FormPage() {
               {hasSubmitted ? 'Update Response' : 'Submit'}
             </LoadingButton>
 
-            {/* Status bar: draft save + keyboard shortcut */}
-            <div className="flex items-center justify-between mt-2 px-1">
+            <div className="mt-2 px-1">
               <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                 {draftStatus === 'saving' && '⏳ Saving draft…'}
                 {draftStatus === 'saved' && '✓ Draft saved'}
                 {draftStatus === 'error' && '⚠ Draft save failed'}
                 {draftStatus === 'idle' && '\u00A0'}
-              </span>
-              <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                <kbd style={{
-                  padding: '1px 5px',
-                  borderRadius: '3px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--muted)',
-                  fontSize: '0.7rem',
-                  fontFamily: 'inherit',
-                }}>⌘</kbd>+<kbd style={{
-                  padding: '1px 5px',
-                  borderRadius: '3px',
-                  border: '1px solid var(--border)',
-                  backgroundColor: 'var(--muted)',
-                  fontSize: '0.7rem',
-                  fontFamily: 'inherit',
-                }}>Enter</kbd> to submit
               </span>
             </div>
 

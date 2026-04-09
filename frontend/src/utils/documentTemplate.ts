@@ -4,46 +4,69 @@ export interface DocumentTemplateField {
   key: string;
   label: string;
   fieldType: 'short' | 'long';
+  optional: boolean;
   rows: number;
   placeholder: string;
 }
 
 const PLACEHOLDER_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/g;
 
+function parseDocumentTemplateToken(rawToken: string): DocumentTemplateField | null {
+  const trimmed = rawToken.trim();
+  if (!trimmed) return null;
+
+  let fieldType: 'short' | 'long' = 'long';
+  let optional = false;
+  let rows = 4;
+  let label = trimmed;
+
+  if (trimmed.includes(':')) {
+    const parts = trimmed.split(':');
+    const labelParts: string[] = [];
+
+    for (const part of parts) {
+      const normalized = part.trim().toLowerCase();
+      if (labelParts.length === 0 && (normalized === 'short' || normalized === 'long')) {
+        fieldType = normalized;
+        rows = normalized === 'short' ? 1 : 6;
+        continue;
+      }
+      if (labelParts.length === 0 && normalized === 'optional') {
+        optional = true;
+        continue;
+      }
+      labelParts.push(part.trim());
+    }
+
+    const nextLabel = labelParts.join(':').trim();
+    if (nextLabel) {
+      label = nextLabel;
+    }
+  }
+
+  return {
+    key: label.toLowerCase(),
+    label,
+    fieldType,
+    optional,
+    rows,
+    placeholder: `Enter ${label.toLowerCase()}`,
+  };
+}
+
 export function parseDocumentTemplateFields(template: string): DocumentTemplateField[] {
   const fields: DocumentTemplateField[] = [];
   const seen = new Set<string>();
 
   for (const match of template.matchAll(PLACEHOLDER_PATTERN)) {
-    const rawToken = (match[1] || '').trim();
-    if (!rawToken) continue;
+    const field = parseDocumentTemplateToken(match[1] || '');
+    if (!field) continue;
 
-    let fieldType: 'short' | 'long' = 'long';
-    let rows = 4;
-    let label = rawToken;
-
-    const separatorIndex = rawToken.indexOf(':');
-    if (separatorIndex > 0) {
-      const prefix = rawToken.slice(0, separatorIndex).trim().toLowerCase();
-      const remainder = rawToken.slice(separatorIndex + 1).trim();
-      if ((prefix === 'short' || prefix === 'long') && remainder) {
-        fieldType = prefix;
-        rows = prefix === 'short' ? 1 : 6;
-        label = remainder;
-      }
-    }
-
-    const key = label.toLowerCase();
+    const key = field.key;
     if (seen.has(key)) continue;
     seen.add(key);
 
-    fields.push({
-      key,
-      label,
-      fieldType,
-      rows,
-      placeholder: `Enter ${label.toLowerCase()}`,
-    });
+    fields.push(field);
   }
 
   return fields;
@@ -65,7 +88,7 @@ export function buildDocumentTemplatePreview(
       blocks.push({ type: 'text', value: preceding });
     }
 
-    const field = parseDocumentTemplateFields(`{{${rawToken}}}`)[0];
+    const field = parseDocumentTemplateToken(rawToken);
     if (field) {
       const response = answers[`q${blocks.filter((block) => block.type === 'field').length + 1}`] ?? emptyStructuredResponse();
       blocks.push({ type: 'field', value: field, response });

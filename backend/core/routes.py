@@ -127,6 +127,69 @@ def _estimate_model_latency_multiplier(model: str | None) -> float:
     return 1.0
 
 
+def _extract_answer_position(answer: Any) -> str:
+    if isinstance(answer, str):
+        return answer.strip()
+    if isinstance(answer, dict):
+        position = answer.get("position")
+        if isinstance(position, str):
+            return position.strip()
+    return ""
+
+
+def _is_question_visible(
+    question: dict[str, Any],
+    questions: list[dict[str, Any]],
+    answers: dict[str, Any],
+) -> bool:
+    controlling_question_id = question.get("conditionalOnQuestionId")
+    controlling_option = question.get("conditionalOnOption")
+    if not controlling_question_id or not controlling_option:
+        return True
+
+    for index, candidate in enumerate(questions):
+        if candidate.get("questionId") != controlling_question_id:
+            continue
+        selected = [
+            item.strip()
+            for item in _extract_answer_position(answers.get(f"q{index + 1}", "")).split("\n")
+            if item.strip()
+        ]
+        return controlling_option in selected
+
+    return False
+
+
+def _validate_required_answers(
+    questions: list[Any] | None,
+    answers: dict[str, Any],
+) -> str | None:
+    raw_questions = list(questions or [])
+    normalized_questions = [
+        question if isinstance(question, dict) else {"label": str(question)}
+        for question in raw_questions
+    ]
+
+    for index, question in enumerate(normalized_questions):
+        if question.get("optional") is True:
+            continue
+        if isinstance(raw_questions[index], dict) and not _is_question_visible(
+            question, normalized_questions, answers
+        ):
+            continue
+        if _extract_answer_position(answers.get(f"q{index + 1}", "")).strip():
+            continue
+
+        label = str(question.get("label") or question.get("text") or question.get("question") or "").strip()
+        return (
+            f'Please answer "{label}" before submitting.'
+            if label
+            else "Please complete all required questions before submitting."
+        )
+
+    return None
+
+
 def _estimate_synthesis_duration_seconds(
     strategy: str,
     response_count: int,
@@ -1203,6 +1266,12 @@ def submit_response(
         db.commit()
 
     data = json.loads(answers)
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=400, detail="Answers payload must be an object")
+
+    validation_error = _validate_required_answers(active_round.questions, data)
+    if validation_error:
+        raise HTTPException(status_code=400, detail=validation_error)
 
     new = Response(
         form_id=form_id,
@@ -3200,17 +3269,22 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
     derived: list[dict[str, object]] = []
     for match in DOCUMENT_PLACEHOLDER_PATTERN.finditer(template):
         raw_token = match.group(1).strip()
-        token_lower = raw_token.lower()
+        token_parts = [part.strip() for part in raw_token.split(":")]
         field_type = "long"
+        optional = False
         rows = 4
-        label = raw_token
-        if ":" in raw_token:
-            prefix, remainder = raw_token.split(":", 1)
-            prefix = prefix.strip().lower()
-            if prefix in {"short", "long"}:
-                field_type = prefix
-                rows = 1 if prefix == "short" else 6
-                label = remainder.strip() or raw_token
+        label_parts: list[str] = []
+        for part in token_parts:
+            normalized = part.lower()
+            if not label_parts and normalized in {"short", "long"}:
+                field_type = normalized
+                rows = 1 if normalized == "short" else 6
+                continue
+            if not label_parts and normalized == "optional":
+                optional = True
+                continue
+            label_parts.append(part)
+        label = ":".join(label_parts).strip() or raw_token
         normalized_key = label.casefold()
         if normalized_key in seen:
             continue
@@ -3221,6 +3295,7 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
                 requireEvidence=False,
                 requireCounterarguments=False,
                 requireConfidence=False,
+                optional=optional,
                 fieldType=field_type,
                 rows=rows,
                 placeholder=f"Enter {label.lower()}",
