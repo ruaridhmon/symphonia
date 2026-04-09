@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { joinForm, magicJoin } from './api/forms';
+import { getPublicForm, startPublicFormSession, type PublicFormDetail } from './api/publicForms';
 import { ApiError, getApiErrorDetail } from './api/client';
 import Container from './layouts/Container';
 import { BackLink, LoadingButton } from './components';
@@ -21,6 +22,11 @@ export default function JoinPage() {
   // Magic-link mode state
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
+  const [publicForm, setPublicForm] = useState<PublicFormDetail | null>(null);
+  const [participantName, setParticipantName] = useState('');
+  const [consentGiven, setConsentGiven] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [startingPublicSession, setStartingPublicSession] = useState(false);
 
   // Manual entry mode state
   const [manualCode, setManualCode] = useState('');
@@ -31,31 +37,59 @@ export default function JoinPage() {
   useEffect(() => {
     if (!code) return;
 
-    if (!token) {
-      sessionStorage.setItem('pending_join_code', code);
-      navigate('/register', { replace: true });
-      return;
-    }
-
+    setError(null);
+    setPublicForm(null);
     setJoining(true);
-    magicJoin(code)
-      .then((result) => {
-        navigate(`/form/${result.form_id}`, { replace: true });
-      })
-      .catch((err) => {
-        if (err instanceof ApiError) {
-          try {
-            const body = JSON.parse(err.message);
-            setError(body.detail || err.message);
-          } catch {
-            setError(err.message);
-          }
-        } else {
-          setError('Failed to join. Please try again.');
+    (async () => {
+      try {
+        const form = await getPublicForm(code);
+        setPublicForm(form);
+      } catch (err) {
+        if (!(err instanceof ApiError) || err.status !== 404) {
+          const detail = getApiErrorDetail(err);
+          setError(detail || 'Failed to open consultation link.');
+          return;
         }
-      })
-      .finally(() => setJoining(false));
+
+        if (!token) {
+          sessionStorage.setItem('pending_join_code', code);
+          navigate('/register', { replace: true });
+          return;
+        }
+
+        try {
+          const result = await magicJoin(code);
+          navigate(`/form/${result.form_id}`, { replace: true });
+        } catch (joinErr) {
+          const detail = getApiErrorDetail(joinErr);
+          setError(detail || 'Failed to join. Please try again.');
+        }
+      } finally {
+        setJoining(false);
+      }
+    })();
   }, [code, token, navigate]);
+
+  async function handleStartPublicSession(e: React.FormEvent) {
+    e.preventDefault();
+    if (!code) return;
+
+    setError(null);
+    setStartingPublicSession(true);
+    try {
+      const result = await startPublicFormSession(code, {
+        participantName,
+        consentGiven,
+        file: uploadedFile,
+      });
+      navigate(`/public/session/${result.session_token}`, { replace: true });
+    } catch (err) {
+      const detail = getApiErrorDetail(err);
+      setError(detail || 'Could not open the public form.');
+    } finally {
+      setStartingPublicSession(false);
+    }
+  }
 
   // ── Manual entry mode: no code in URL ────────────────────────
   const handleManualJoin = async (e: React.FormEvent) => {
@@ -141,6 +175,84 @@ export default function JoinPage() {
             border: '1px solid var(--border)',
           }}
         >
+          {publicForm && (
+            <form onSubmit={handleStartPublicSession} className="space-y-5 text-left">
+              <div className="text-center">
+                <h1 className="text-2xl font-semibold text-foreground">{publicForm.title}</h1>
+                {publicForm.description ? (
+                  <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                    {publicForm.description}
+                  </p>
+                ) : null}
+              </div>
+
+              <div>
+                <label htmlFor="public-name" className="block text-sm font-medium text-foreground">
+                  Your name
+                </label>
+                <input
+                  id="public-name"
+                  type="text"
+                  value={participantName}
+                  onChange={(event) => setParticipantName(event.target.value)}
+                  className="mt-2 w-full rounded-lg px-4 py-3 text-sm"
+                  style={{
+                    border: '1px solid var(--input)',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                  }}
+                  placeholder="Enter your name"
+                  autoFocus
+                />
+              </div>
+
+              {publicForm.public_require_upload ? (
+                <div>
+                  <label htmlFor="public-upload" className="block text-sm font-medium text-foreground">
+                    {publicForm.public_upload_prompt}
+                  </label>
+                  <input
+                    id="public-upload"
+                    type="file"
+                    onChange={(event) => setUploadedFile(event.target.files?.[0] ?? null)}
+                    className="mt-2 block w-full text-sm"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  />
+                </div>
+              ) : null}
+
+              {publicForm.public_require_consent ? (
+                <label className="flex items-start gap-3 rounded-xl p-4" style={{ border: '1px solid var(--border)' }}>
+                  <input
+                    type="checkbox"
+                    checked={consentGiven}
+                    onChange={(event) => setConsentGiven(event.target.checked)}
+                    className="mt-1"
+                  />
+                  <span className="text-sm leading-6" style={{ color: 'var(--foreground)' }}>
+                    {publicForm.public_consent_text}
+                  </span>
+                </label>
+              ) : null}
+
+              {error ? (
+                <p className="text-sm text-center" style={{ color: 'var(--destructive)' }}>
+                  {error}
+                </p>
+              ) : null}
+
+              <LoadingButton
+                type="submit"
+                variant="accent"
+                size="md"
+                className="w-full"
+                loading={startingPublicSession}
+                disabled={!participantName.trim()}
+              >
+                Continue to form
+              </LoadingButton>
+            </form>
+          )}
           {joining && (
             <>
               <div
@@ -150,7 +262,7 @@ export default function JoinPage() {
               <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Joining consultation...</p>
             </>
           )}
-          {error && (
+          {error && !publicForm && !joining && (
             <>
               <p className="text-sm font-medium mb-3" style={{ color: 'var(--destructive)' }}>{error}</p>
               <BackLink to="/" label="Dashboard" />

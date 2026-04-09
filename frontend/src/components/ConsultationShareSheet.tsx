@@ -9,8 +9,8 @@ interface ConsultationShareSheetProps {
 }
 
 function buildJoinLink(joinCode: string): string {
-  if (typeof window === 'undefined') return `/join/${joinCode}`;
-  return new URL(`/join/${encodeURIComponent(joinCode)}`, window.location.origin).toString();
+  if (typeof window === 'undefined') return `/share/${joinCode}`;
+  return new URL(`/share/${encodeURIComponent(joinCode)}`, window.location.origin).toString();
 }
 
 export default function ConsultationShareSheet({

@@ -38,6 +38,9 @@ class User(Base):
     has_submitted_feedback = Column(Boolean, default=False)
     reset_token = Column(String, nullable=True)
     reset_token_expiry = Column(DateTime, nullable=True)
+    is_public_guest = Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
     created_at = Column(
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
@@ -50,6 +53,9 @@ class User(Base):
     )
     owned_forms = relationship(
         "FormModel", foreign_keys="[FormModel.owner_id]", back_populates="owner"
+    )
+    public_sessions = relationship(
+        "PublicFormSession", back_populates="user", cascade="all, delete-orphan"
     )
 
 
@@ -80,6 +86,17 @@ class FormModel(Base):
     questions = Column(JSON, nullable=False)
     document_template = Column(Text, nullable=True)
     allow_join = Column(Boolean, default=True)
+    allow_public_responses = Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    public_require_consent = Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    public_consent_text = Column(Text, nullable=True)
+    public_require_upload = Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    public_upload_prompt = Column(Text, nullable=True)
     join_code = Column(String, unique=True, nullable=False)
 
     expert_labels = Column(
@@ -104,6 +121,9 @@ class FormModel(Base):
         "InviteCode", back_populates="form", cascade="all, delete-orphan"
     )
     owner = relationship("User", foreign_keys=[owner_id], back_populates="owned_forms")
+    public_sessions = relationship(
+        "PublicFormSession", back_populates="form", cascade="all, delete-orphan"
+    )
 
 
 class RoundModel(Base):
@@ -335,6 +355,36 @@ class InviteCode(Base):
 
     form = relationship("FormModel", back_populates="invite_codes")
     creator = relationship("User")
+
+
+class PublicFormSession(Base):
+    __tablename__ = "public_form_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    form_id = Column(Integer, ForeignKey("forms.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False, index=True)
+    session_token = Column(String(128), nullable=False, unique=True, index=True)
+    participant_name = Column(String(255), nullable=False)
+    consent_given = Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    upload_filename = Column(String(255), nullable=True)
+    upload_path = Column(Text, nullable=True)
+    created_at = Column(
+        DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    submitted_at = Column(DateTime, nullable=True)
+
+    form = relationship("FormModel", back_populates="public_sessions")
+    user = relationship("User", back_populates="public_sessions")
+    round = relationship("RoundModel")
 
 
 class AuditLog(Base):

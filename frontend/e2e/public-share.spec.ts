@@ -1,0 +1,142 @@
+import { expect, request as playwrightRequest, test } from '@playwright/test';
+
+const ADMIN_EMAIL = 'antreas@axiotic.ai';
+const ADMIN_PASSWORD = 'test123';
+
+type LoginPayload = {
+  access_token: string;
+  csrf_token?: string;
+  email: string;
+  is_admin?: boolean;
+  role?: string;
+};
+
+async function loginViaApi(
+  request: import('@playwright/test').APIRequestContext,
+  baseURL: string,
+  email: string,
+  password: string,
+) {
+  const response = await request.post(`${baseURL}/login`, {
+    form: {
+      username: email,
+      password,
+    },
+  });
+
+  expect(response.ok(), `Login failed with ${response.status()}`).toBeTruthy();
+  return response.json() as Promise<LoginPayload>;
+}
+
+async function createPublicForm(
+  request: import('@playwright/test').APIRequestContext,
+  baseURL: string,
+  token: string,
+) {
+  const timestamp = Date.now();
+  const response = await request.post(`${baseURL}/forms/create`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    data: {
+      title: `Public Share ${timestamp}`,
+      description: 'Public share link coverage via Playwright.',
+      questions: [
+        {
+          label: 'What is your main reflection?',
+          requireEvidence: false,
+          requireCounterarguments: false,
+          requireConfidence: false,
+          inputType: 'textarea',
+          rows: 4,
+          optional: false,
+        },
+      ],
+      allow_join: true,
+      allow_public_responses: true,
+      public_require_upload: true,
+      public_upload_prompt: 'Upload supporting notes before continuing.',
+      public_require_consent: true,
+      public_consent_text: 'I agree to take part in this consultation.',
+    },
+  });
+
+  expect(response.ok(), `Form creation failed with ${response.status()}`).toBeTruthy();
+  return response.json() as Promise<{ id: number; join_code: string; title: string }>;
+}
+
+async function getResponses(
+  request: import('@playwright/test').APIRequestContext,
+  baseURL: string,
+  token: string,
+  formId: number,
+) {
+  const response = await request.get(`${baseURL}/form/${formId}/responses`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  expect(response.ok(), `Fetching responses failed with ${response.status()}`).toBeTruthy();
+  return response.json() as Promise<Array<{ answers: Record<string, { position: string }> }>>;
+}
+
+async function deleteForm(
+  request: import('@playwright/test').APIRequestContext,
+  baseURL: string,
+  token: string,
+  formId: number,
+) {
+  await request.delete(`${baseURL}/forms/${formId}/delete`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+test.describe('Public share links', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test('guest can pass upload and consent gate, complete the form, and submit', async ({ page, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const adminApi = await playwrightRequest.newContext();
+    let createdFormId: number | null = null;
+
+    try {
+      const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+      const created = await createPublicForm(adminApi, appBase, adminLogin.access_token);
+      createdFormId = created.id;
+
+      await page.goto(`${appBase}/share/${created.join_code}`);
+      await expect(page.getByLabel('Your name')).toBeVisible();
+      await expect(page.getByRole('button', { name: /continue to form/i })).toBeVisible();
+
+      await page.getByLabel('Your name').fill('Playwright Guest');
+      await page.getByLabel('Upload supporting notes before continuing.').setInputFiles({
+        name: 'notes.txt',
+        mimeType: 'text/plain',
+        buffer: Buffer.from('supporting notes'),
+      });
+      await page.getByLabel('I agree to take part in this consultation.').check();
+      await page.getByRole('button', { name: /continue to form/i }).click();
+
+      await expect(page.getByText('Questions')).toBeVisible();
+      await page.getByLabel('Your name').fill('Playwright Guest');
+      await page.getByPlaceholder('Write your response here').fill('The public guest flow works.');
+      await page.getByRole('button', { name: /^submit$/i }).click();
+
+      await expect(page.getByText(/response submitted/i)).toBeVisible();
+
+      const responses = await getResponses(adminApi, appBase, adminLogin.access_token, created.id);
+      expect(responses).toHaveLength(1);
+      expect(responses[0]?.answers?.q1?.position ?? '').toContain('public guest flow works');
+    } finally {
+      if (createdFormId) {
+        const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+        await deleteForm(adminApi, appBase, adminLogin.access_token, createdFormId).catch(() => {});
+      }
+      await adminApi.dispose();
+    }
+  });
+});

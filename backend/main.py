@@ -39,11 +39,30 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
 
 def _ensure_schema_columns() -> None:
     inspector = inspect(engine)
-    form_columns = {column["name"] for column in inspector.get_columns("forms")}
-    if "document_template" not in form_columns:
-        with engine.begin() as conn:
-            conn.execute(text("ALTER TABLE forms ADD COLUMN document_template TEXT"))
-        logger.info("Added forms.document_template column")
+    schema_updates = {
+        "forms": {
+            "document_template": "ALTER TABLE forms ADD COLUMN document_template TEXT",
+            "allow_public_responses": "ALTER TABLE forms ADD COLUMN allow_public_responses BOOLEAN NOT NULL DEFAULT 0",
+            "public_require_consent": "ALTER TABLE forms ADD COLUMN public_require_consent BOOLEAN NOT NULL DEFAULT 0",
+            "public_consent_text": "ALTER TABLE forms ADD COLUMN public_consent_text TEXT",
+            "public_require_upload": "ALTER TABLE forms ADD COLUMN public_require_upload BOOLEAN NOT NULL DEFAULT 0",
+            "public_upload_prompt": "ALTER TABLE forms ADD COLUMN public_upload_prompt TEXT",
+        },
+        "users": {
+            "is_public_guest": "ALTER TABLE users ADD COLUMN is_public_guest BOOLEAN NOT NULL DEFAULT 0",
+        },
+    }
+
+    for table_name, updates in schema_updates.items():
+        existing_columns = {
+            column["name"] for column in inspector.get_columns(table_name)
+        }
+        for column_name, ddl in updates.items():
+            if column_name in existing_columns:
+                continue
+            with engine.begin() as conn:
+                conn.execute(text(ddl))
+            logger.info("Added %s.%s column", table_name, column_name)
 
 
 def _parse_cors_origins() -> list[str]:

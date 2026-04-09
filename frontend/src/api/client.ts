@@ -127,6 +127,34 @@ async function apiClient<T>(
   }
 }
 
+async function publicApiClient<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+  } catch (err) {
+    throw new ApiError(0, err instanceof Error ? err.message : 'Network request failed');
+  }
+
+  if (!response.ok) {
+    let errorBody: string;
+    try {
+      errorBody = await response.text();
+    } catch {
+      errorBody = `HTTP ${response.status}`;
+    }
+    throw new ApiError(response.status, errorBody, response.headers);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    throw new ApiError(response.status, 'Invalid JSON response from server');
+  }
+}
+
 export class ApiError extends Error {
   public headers: Headers;
   constructor(public status: number, message: string, headers?: Headers) {
@@ -177,4 +205,29 @@ export const api = {
 
   delete: <T>(endpoint: string) =>
     apiClient<T>(endpoint, { method: 'DELETE' }),
+};
+
+export const publicApi = {
+  get: <T>(endpoint: string) =>
+    publicApiClient<T>(endpoint),
+
+  post: <T>(endpoint: string, data?: unknown) =>
+    publicApiClient<T>(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: data !== undefined ? JSON.stringify(data) : undefined,
+    }),
+
+  postMultipart: <T>(endpoint: string, data: FormData) =>
+    publicApiClient<T>(endpoint, {
+      method: 'POST',
+      body: data,
+    }),
+
+  put: <T>(endpoint: string, data: unknown) =>
+    publicApiClient<T>(endpoint, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }),
 };

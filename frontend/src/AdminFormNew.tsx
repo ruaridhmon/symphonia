@@ -399,6 +399,13 @@ export default function AdminFormNew() {
   const [allowJoin, setAllowJoin] = useState(true);
   const [anonymous, setAnonymous] = useState(false);
   const [deadline, setDeadline] = useState('');
+  const [allowPublicResponses, setAllowPublicResponses] = useState(false);
+  const [publicRequireConsent, setPublicRequireConsent] = useState(false);
+  const [publicConsentText, setPublicConsentText] = useState(
+    'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
+  );
+  const [publicRequireUpload, setPublicRequireUpload] = useState(false);
+  const [publicUploadPrompt, setPublicUploadPrompt] = useState('Upload a file before you continue.');
   const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
   const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
     label: field.label,
@@ -554,6 +561,11 @@ export default function AdminFormNew() {
         questions: questions.filter(q => q.label.trim() !== ''),
         document_template: documentTemplate.trim() || null,
         allow_join: allowJoin,
+        allow_public_responses: allowPublicResponses,
+        public_require_consent: publicRequireConsent,
+        public_consent_text: publicRequireConsent ? publicConsentText.trim() : null,
+        public_require_upload: publicRequireUpload,
+        public_upload_prompt: publicRequireUpload ? publicUploadPrompt.trim() : null,
         anonymous,
         deadline: deadline || null,
         join_code: joinCode,
@@ -1357,7 +1369,7 @@ export default function AdminFormNew() {
             {/* Collapsible body — CSS max-height transition */}
             <div
               style={{
-                maxHeight: settingsOpen ? 400 : 0,
+                maxHeight: settingsOpen ? 1200 : 0,
                 overflow: 'hidden',
                 transition:
                   'max-height 0.25s ease-in-out, opacity 0.2s ease-in-out',
@@ -1392,6 +1404,108 @@ export default function AdminFormNew() {
                     onChange={setAllowJoin}
                   />
                 </div>
+
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <label
+                      htmlFor="toggle-public-share"
+                      className="block text-sm font-medium"
+                      style={{ color: 'var(--foreground)', cursor: 'pointer' }}
+                    >
+                      Allow public share link
+                    </label>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                      People can open the share link without logging in, enter their name, and submit a response.
+                    </p>
+                  </div>
+                  <ToggleSwitch
+                    id="toggle-public-share"
+                    checked={allowPublicResponses}
+                    onChange={setAllowPublicResponses}
+                  />
+                </div>
+
+                {allowPublicResponses ? (
+                  <>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <label
+                          htmlFor="toggle-public-upload"
+                          className="block text-sm font-medium"
+                          style={{ color: 'var(--foreground)', cursor: 'pointer' }}
+                        >
+                          Require upload before form
+                        </label>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                          Add a first screen where respondents upload a file before entering the form.
+                        </p>
+                      </div>
+                      <ToggleSwitch
+                        id="toggle-public-upload"
+                        checked={publicRequireUpload}
+                        onChange={setPublicRequireUpload}
+                      />
+                    </div>
+
+                    {publicRequireUpload ? (
+                      <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                          Upload prompt
+                        </label>
+                        <input
+                          type="text"
+                          value={publicUploadPrompt}
+                          onChange={(event) => setPublicUploadPrompt(event.target.value)}
+                          className="w-full rounded-lg px-3 py-2 text-sm"
+                          style={{
+                            border: '1px solid var(--input)',
+                            backgroundColor: 'var(--background)',
+                            color: 'var(--foreground)',
+                          }}
+                        />
+                      </div>
+                    ) : null}
+
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <label
+                          htmlFor="toggle-public-consent"
+                          className="block text-sm font-medium"
+                          style={{ color: 'var(--foreground)', cursor: 'pointer' }}
+                        >
+                          Require consent checkbox
+                        </label>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                          Add a first screen where respondents must confirm consent before continuing.
+                        </p>
+                      </div>
+                      <ToggleSwitch
+                        id="toggle-public-consent"
+                        checked={publicRequireConsent}
+                        onChange={setPublicRequireConsent}
+                      />
+                    </div>
+
+                    {publicRequireConsent ? (
+                      <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                          Consent text
+                        </label>
+                        <textarea
+                          value={publicConsentText}
+                          onChange={(event) => setPublicConsentText(event.target.value)}
+                          rows={4}
+                          className="w-full rounded-lg px-3 py-2 text-sm"
+                          style={{
+                            border: '1px solid var(--input)',
+                            backgroundColor: 'var(--background)',
+                            color: 'var(--foreground)',
+                          }}
+                        />
+                      </div>
+                    ) : null}
+                  </>
+                ) : null}
 
                 {/* 2 ── Anonymous responses toggle */}
                 <div className="flex items-start justify-between gap-4">

@@ -23,6 +23,7 @@ const AdminFormNew = lazyWithRetry(() => import('./AdminFormNew'));
 const AdminSettings = lazyWithRetry(() => import('./AdminSettings'));
 const AdminUsers = lazyWithRetry(() => import('./AdminUsers'));
 const JoinPage = lazyWithRetry(() => import('./JoinPage'));
+const PublicFormPage = lazyWithRetry(() => import('./PublicFormPage'));
 
 /**
  * Application routes organised by layout shell.
@@ -89,6 +90,26 @@ export default function Router() {
           />
         </Route>
 
+        {/* ── Public share-link pages ── */}
+        <Route element={<PageLayout />}>
+          <Route
+            path="/share/:code"
+            element={
+              <ErrorBoundary fallbackTitle="Join Error">
+                <JoinPage />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/public/session/:sessionToken"
+            element={
+              <ErrorBoundary fallbackTitle="Public Form Error">
+                <PublicFormPage />
+              </ErrorBoundary>
+            }
+          />
+        </Route>
+
         {/* ── Authenticated pages (shared page shell) ── */}
         <Route element={<PrivateRoute />}>
           <Route element={<PageLayout />}>
@@ -134,14 +155,6 @@ export default function Router() {
             />
             <Route
               path="/join"
-              element={
-                <ErrorBoundary fallbackTitle="Join Error">
-                  <JoinPage />
-                </ErrorBoundary>
-              }
-            />
-            <Route
-              path="/join/:code"
               element={
                 <ErrorBoundary fallbackTitle="Join Error">
                   <JoinPage />

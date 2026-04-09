@@ -10,6 +10,11 @@ export interface Form {
   questions: QuestionInput[];
   document_template?: string | null;
   allow_join: boolean;
+  allow_public_responses?: boolean;
+  public_require_consent?: boolean;
+  public_consent_text?: string | null;
+  public_require_upload?: boolean;
+  public_upload_prompt?: string | null;
   join_code: string;
 }
 
@@ -27,6 +32,11 @@ export interface CreateFormPayload {
   questions: QuestionInput[];
   document_template?: string | null;
   allow_join?: boolean;
+  allow_public_responses?: boolean;
+  public_require_consent?: boolean;
+  public_consent_text?: string | null;
+  public_require_upload?: boolean;
+  public_upload_prompt?: string | null;
   join_code?: string;
 }
 
@@ -35,6 +45,11 @@ export interface UpdateFormPayload {
   questions?: QuestionInput[];
   document_template?: string | null;
   allow_join?: boolean;
+  allow_public_responses?: boolean;
+  public_require_consent?: boolean;
+  public_consent_text?: string | null;
+  public_require_upload?: boolean;
+  public_upload_prompt?: string | null;
 }
 
 /* ── API calls ── */

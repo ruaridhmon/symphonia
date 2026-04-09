@@ -61,6 +61,7 @@ from .models import (
     AuditLog,
     Setting,
     InviteCode,
+    PublicFormSession,
 )
 from .audit import audit_log
 from .auth import (
@@ -792,7 +793,7 @@ async def _notify_synthesis_ready(
                 db.query(Response).filter(Response.round_id == round_id).all()
             )
             for resp in round_responses:
-                if resp.user and resp.user.email:
+                if resp.user and resp.user.email and not resp.user.is_public_guest:
                     recipients.add(resp.user.email)
 
             # Send to each recipient individually
@@ -3246,17 +3247,32 @@ class FormCreate(BaseModel):
     questions: list[str | QuestionConfig]
     allow_join: bool
     join_code: str
+    allow_public_responses: bool = False
+    public_require_consent: bool = False
+    public_consent_text: str | None = None
+    public_require_upload: bool = False
+    public_upload_prompt: str | None = None
 
 
 class FormUpdate(BaseModel):
     title: str
     questions: list[str | QuestionConfig] = []
     document_template: str | None = None
+    allow_public_responses: bool = False
+    public_require_consent: bool = False
+    public_consent_text: str | None = None
+    public_require_upload: bool = False
+    public_upload_prompt: str | None = None
 
 
 DOCUMENT_PLACEHOLDER_PATTERN = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
 WORDPROCESSINGML_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 EDITABLE_DOCUMENT_TEMPLATE_PREFIX = "<!-- symphonia-document-mode: editable -->"
+DEFAULT_PUBLIC_CONSENT_TEXT = (
+    "I confirm that I understand the purpose of this form and consent to my "
+    "response being used within this consultation."
+)
+PUBLIC_UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads" / "public-intake"
 
 
 def _is_editable_document_template(template: str | None) -> bool:
@@ -3282,6 +3298,71 @@ def _html_to_plain_text(value: str) -> str:
     text = re.sub(r"[ \t]+\n", "\n", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+
+def _public_join_form_by_code(db: Session, raw_code: str) -> FormModel | None:
+    form = (
+        db.query(FormModel)
+        .filter(
+            FormModel.join_code == raw_code,
+            FormModel.allow_join,
+            FormModel.allow_public_responses,
+        )
+        .first()
+    )
+    if form:
+        return form
+
+    normalized = normalize_join_code(raw_code)
+    if not normalized:
+        return None
+
+    all_forms = (
+        db.query(FormModel)
+        .filter(FormModel.allow_join, FormModel.allow_public_responses)
+        .all()
+    )
+    for candidate in all_forms:
+        if normalize_join_code(candidate.join_code) == normalized:
+            return candidate
+    return None
+
+
+def _get_active_round_for_form(db: Session, form_id: int) -> RoundModel | None:
+    return (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
+        .first()
+    )
+
+
+def _serialize_public_settings(form: FormModel) -> dict[str, Any]:
+    return {
+        "allow_public_responses": bool(form.allow_public_responses),
+        "public_require_consent": bool(form.public_require_consent),
+        "public_consent_text": (
+            form.public_consent_text.strip()
+            if form.public_consent_text and form.public_consent_text.strip()
+            else DEFAULT_PUBLIC_CONSENT_TEXT
+        ),
+        "public_require_upload": bool(form.public_require_upload),
+        "public_upload_prompt": (
+            form.public_upload_prompt.strip()
+            if form.public_upload_prompt and form.public_upload_prompt.strip()
+            else "Upload a file before you continue."
+        ),
+    }
+
+
+def _guest_user_email(name: str, token: str) -> str:
+    safe_name = re.sub(r"\s+", " ", name).strip() or "Guest participant"
+    safe_name = safe_name[:80]
+    return f"Guest: {safe_name} [{token[:8]}]"
+
+
+def _safe_upload_filename(filename: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", filename).strip("._")
+    return cleaned or "upload.bin"
 
 
 def _normalize_document_template(template: str | None) -> str | None:
@@ -3507,6 +3588,11 @@ class UserFormCreate(BaseModel):
     questions: list[str | QuestionConfig] = []
     document_template: str | None = None
     allow_join: bool = True
+    allow_public_responses: bool = False
+    public_require_consent: bool = False
+    public_consent_text: str | None = None
+    public_require_upload: bool = False
+    public_upload_prompt: str | None = None
 
 
 @router.post(
@@ -3527,6 +3613,12 @@ def user_create_form(
     if not title:
         raise HTTPException(status_code=400, detail="title is required")
     document_template = _normalize_document_template(payload.document_template)
+    public_consent_text = (
+        payload.public_consent_text.strip() if payload.public_consent_text else None
+    )
+    public_upload_prompt = (
+        payload.public_upload_prompt.strip() if payload.public_upload_prompt else None
+    )
     normalized_questions = (
         _build_document_questions(document_template)
         if document_template
@@ -3553,6 +3645,11 @@ def user_create_form(
         questions=normalized_questions,
         document_template=document_template,
         allow_join=payload.allow_join,
+        allow_public_responses=payload.allow_public_responses,
+        public_require_consent=payload.public_require_consent,
+        public_consent_text=public_consent_text,
+        public_require_upload=payload.public_require_upload,
+        public_upload_prompt=public_upload_prompt,
         join_code=code,
         owner_id=user.id,
     )
@@ -3583,6 +3680,7 @@ def user_create_form(
         "title": form.title,
         "join_code": form.join_code,
         "allow_join": form.allow_join,
+        **_serialize_public_settings(form),
         "owner_id": form.owner_id,
         "current_round": 1,
     }
@@ -3696,6 +3794,12 @@ def update_form(
 
     old_title = f.title
     document_template = _normalize_document_template(payload.document_template)
+    public_consent_text = (
+        payload.public_consent_text.strip() if payload.public_consent_text else None
+    )
+    public_upload_prompt = (
+        payload.public_upload_prompt.strip() if payload.public_upload_prompt else None
+    )
     normalized_questions = (
         _build_document_questions(document_template)
         if document_template
@@ -3709,6 +3813,11 @@ def update_form(
     f.title = payload.title
     f.questions = normalized_questions
     f.document_template = document_template
+    f.allow_public_responses = payload.allow_public_responses
+    f.public_require_consent = payload.public_require_consent
+    f.public_consent_text = public_consent_text
+    f.public_require_upload = payload.public_require_upload
+    f.public_upload_prompt = public_upload_prompt
     active_round = (
         db.query(RoundModel)
         .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
@@ -3802,6 +3911,7 @@ def get_forms(
                 "questions": f.questions,
                 "document_template": f.document_template,
                 "allow_join": f.allow_join,
+                **_serialize_public_settings(f),
                 "join_code": f.join_code,
                 "participant_count": participant_count,
                 "current_round": active_round.round_number if active_round else 0,
@@ -3919,9 +4029,342 @@ def get_form(
         "questions": f.questions,
         "document_template": f.document_template,
         "allow_join": f.allow_join,
+        **_serialize_public_settings(f),
         "join_code": f.join_code,
         "expert_labels": f.expert_labels,
     }
+
+
+class PublicSessionDraftPayload(BaseModel):
+    participant_name: str
+    answers: dict[str, Any]
+
+
+def _get_public_session(
+    db: Session,
+    session_token: str,
+) -> PublicFormSession:
+    session = (
+        db.query(PublicFormSession)
+        .filter(PublicFormSession.session_token == session_token)
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Public form session not found")
+    return session
+
+
+@router.get(
+    "/public/forms/{join_code}",
+    tags=["Forms"],
+    summary="Get public form details by join code",
+    description="Return public form metadata and gate requirements for a share link.",
+)
+@limiter.limit(READ_LIMIT)
+def get_public_form(
+    request: Request,
+    join_code: str,
+    db: Session = Depends(get_db),
+):
+    form = _public_join_form_by_code(db, join_code.strip())
+    if not form:
+        raise HTTPException(status_code=404, detail="Public form not found")
+
+    active_round = _get_active_round_for_form(db, form.id)
+    if not active_round:
+        raise HTTPException(status_code=400, detail="This form is not accepting responses right now")
+
+    previous_round = (
+        db.query(RoundModel)
+        .filter(
+            RoundModel.form_id == form.id,
+            RoundModel.round_number == max(1, active_round.round_number - 1),
+        )
+        .first()
+        if active_round.round_number > 1
+        else None
+    )
+
+    return {
+        "id": form.id,
+        "title": form.title,
+        "description": form.description,
+        "questions": active_round.questions or form.questions,
+        "document_template": form.document_template,
+        "join_code": form.join_code,
+        "previous_round_synthesis": previous_round.synthesis if previous_round else "",
+        **_serialize_public_settings(form),
+    }
+
+
+@router.post(
+    "/public/forms/{join_code}/start",
+    tags=["Forms"],
+    summary="Start a public form session",
+    description="Create a guest response session for a public share link, optionally capturing upload and consent first.",
+)
+@limiter.limit(CRUD_LIMIT)
+async def start_public_form_session(
+    request: Request,
+    join_code: str,
+    participant_name: str = Form(...),
+    consent_given: bool = Form(False),
+    file: UploadFile | None = File(None),
+    db: Session = Depends(get_db),
+):
+    form = _public_join_form_by_code(db, join_code.strip())
+    if not form:
+        raise HTTPException(status_code=404, detail="Public form not found")
+
+    active_round = _get_active_round_for_form(db, form.id)
+    if not active_round:
+        raise HTTPException(status_code=400, detail="This form is not accepting responses right now")
+
+    name = participant_name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Please enter your name before continuing.")
+
+    if form.public_require_consent and not consent_given:
+        raise HTTPException(status_code=400, detail="Please confirm consent before continuing.")
+
+    upload_filename = None
+    upload_path = None
+    if form.public_require_upload and not file:
+        raise HTTPException(status_code=400, detail="Please upload a file before continuing.")
+
+    session_token = secrets.token_urlsafe(24)
+    user = User(
+        email=_guest_user_email(name, session_token),
+        hashed_password=get_password_hash(secrets.token_urlsafe(24)),
+        role=UserRole.EXPERT.value,
+        is_public_guest=True,
+    )
+    db.add(user)
+    db.flush()
+
+    if file:
+        original_filename = file.filename or "upload.bin"
+        upload_filename = _safe_upload_filename(original_filename)
+        PUBLIC_UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        suffix = Path(upload_filename).suffix or ".bin"
+        destination = PUBLIC_UPLOAD_DIR / f"{session_token}{suffix}"
+        with destination.open("wb") as fh:
+            fh.write(await file.read())
+        upload_path = str(destination)
+
+    session = PublicFormSession(
+        form_id=form.id,
+        user_id=user.id,
+        round_id=active_round.id,
+        session_token=session_token,
+        participant_name=name,
+        consent_given=consent_given,
+        upload_filename=upload_filename,
+        upload_path=upload_path,
+    )
+    db.add(session)
+    db.commit()
+
+    return {
+        "session_token": session.session_token,
+        "form_id": form.id,
+        "title": form.title,
+    }
+
+
+@router.get(
+    "/public/forms/session/{session_token}",
+    tags=["Forms"],
+    summary="Get a public form session",
+    description="Return form metadata and any saved draft for a guest response session.",
+)
+@limiter.limit(READ_LIMIT)
+def get_public_form_session(
+    request: Request,
+    session_token: str,
+    db: Session = Depends(get_db),
+):
+    session = _get_public_session(db, session_token)
+    form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
+    active_round = _get_active_round_for_form(db, session.form_id)
+    if not form or not active_round or active_round.id != session.round_id:
+        raise HTTPException(status_code=400, detail="This public form session is no longer active.")
+
+    previous_round = (
+        db.query(RoundModel)
+        .filter(
+            RoundModel.form_id == form.id,
+            RoundModel.round_number == max(1, active_round.round_number - 1),
+        )
+        .first()
+        if active_round.round_number > 1
+        else None
+    )
+    draft = (
+        db.query(Draft)
+        .filter(
+            Draft.user_id == session.user_id,
+            Draft.form_id == form.id,
+            Draft.round_id == active_round.id,
+        )
+        .first()
+    )
+    submitted = (
+        db.query(Response)
+        .filter(Response.user_id == session.user_id, Response.round_id == active_round.id)
+        .first()
+        is not None
+    )
+
+    return {
+        "session_token": session.session_token,
+        "participant_name": session.participant_name,
+        "submitted": submitted or session.submitted_at is not None,
+        "upload_filename": session.upload_filename,
+        "form": {
+            "id": form.id,
+            "title": form.title,
+            "description": form.description,
+            "questions": active_round.questions or form.questions,
+            "document_template": form.document_template,
+            "join_code": form.join_code,
+            "previous_round_synthesis": previous_round.synthesis if previous_round else "",
+            **_serialize_public_settings(form),
+        },
+        "draft": {
+            "answers": draft.answers,
+            "updated_at": draft.updated_at.isoformat() if draft and draft.updated_at else None,
+        }
+        if draft
+        else None,
+    }
+
+
+@router.put(
+    "/public/forms/session/{session_token}/draft",
+    tags=["Responses"],
+    summary="Save a public draft",
+    description="Save or update a guest participant draft for a public form session.",
+)
+@limiter.limit(CRUD_LIMIT)
+def save_public_form_draft(
+    request: Request,
+    session_token: str,
+    payload: PublicSessionDraftPayload,
+    db: Session = Depends(get_db),
+):
+    session = _get_public_session(db, session_token)
+    if session.submitted_at:
+        raise HTTPException(status_code=400, detail="This response has already been submitted.")
+
+    form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
+    active_round = _get_active_round_for_form(db, session.form_id)
+    if not form or not active_round or active_round.id != session.round_id:
+        raise HTTPException(status_code=400, detail="This public form session is no longer active.")
+
+    name = payload.participant_name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Please enter your name before continuing.")
+
+    session.participant_name = name
+    if session.user:
+        session.user.email = _guest_user_email(name, session.session_token)
+
+    draft = (
+        db.query(Draft)
+        .filter(
+            Draft.user_id == session.user_id,
+            Draft.form_id == form.id,
+            Draft.round_id == active_round.id,
+        )
+        .first()
+    )
+    if draft:
+        draft.answers = payload.answers
+        draft.updated_at = datetime.now(timezone.utc)
+    else:
+        draft = Draft(
+            user_id=session.user_id,
+            form_id=form.id,
+            round_id=active_round.id,
+            answers=payload.answers,
+        )
+        db.add(draft)
+
+    db.commit()
+    return {"ok": True}
+
+
+@router.post(
+    "/public/forms/session/{session_token}/submit",
+    tags=["Responses"],
+    summary="Submit a public response",
+    description="Submit a guest participant response for a public form session.",
+)
+@limiter.limit(CRUD_LIMIT)
+def submit_public_form_response(
+    request: Request,
+    session_token: str,
+    payload: PublicSessionDraftPayload,
+    db: Session = Depends(get_db),
+):
+    session = _get_public_session(db, session_token)
+    if session.submitted_at:
+        raise HTTPException(status_code=400, detail="This response has already been submitted.")
+
+    form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
+    active_round = _get_active_round_for_form(db, session.form_id)
+    if not form or not active_round or active_round.id != session.round_id:
+        raise HTTPException(status_code=400, detail="This public form session is no longer active.")
+
+    name = payload.participant_name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Please enter your name before submitting.")
+
+    validation_error = _validate_required_answers(active_round.questions, payload.answers)
+    if validation_error:
+        raise HTTPException(status_code=400, detail=validation_error)
+
+    session.participant_name = name
+    session.submitted_at = datetime.now(timezone.utc)
+    if session.user:
+        session.user.email = _guest_user_email(name, session.session_token)
+
+    existing_response = (
+        db.query(Response)
+        .filter(Response.user_id == session.user_id, Response.round_id == active_round.id)
+        .first()
+    )
+    if existing_response:
+        db.delete(existing_response)
+        db.flush()
+
+    db.add(
+        Response(
+            form_id=form.id,
+            user_id=session.user_id,
+            round_id=active_round.id,
+            answers=payload.answers,
+        )
+    )
+    db.add(
+        ArchivedResponse(
+            form_id=form.id,
+            user_id=session.user_id,
+            email=name,
+            answers=payload.answers,
+            round_id=active_round.id,
+        )
+    )
+
+    db.query(Draft).filter(
+        Draft.user_id == session.user_id,
+        Draft.form_id == form.id,
+        Draft.round_id == active_round.id,
+    ).delete()
+
+    db.commit()
+    return {"ok": True}
 
 
 @router.post(
@@ -7022,7 +7465,7 @@ def list_users(
     user: User = Depends(require_platform_admin),
 ):
     """Return all users with their roles. Platform admin only."""
-    users = db.query(User).order_by(User.id).all()
+    users = db.query(User).filter(User.is_public_guest == False).order_by(User.id).all()
     return [
         {
             "id": u.id,

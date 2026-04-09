@@ -28,6 +28,11 @@ interface FormData {
   questions: QuestionInput[];
   document_template?: string | null;
   join_code: string;
+  allow_public_responses?: boolean;
+  public_require_consent?: boolean;
+  public_consent_text?: string | null;
+  public_require_upload?: boolean;
+  public_upload_prompt?: string | null;
 }
 
 function createBlankQuestion(): ConfigurableQuestion {
@@ -106,6 +111,13 @@ export default function FormEditor() {
   const [importSummary, setImportSummary] = useState<QuestionnaireImportResult | null>(null);
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
+  const [allowPublicResponses, setAllowPublicResponses] = useState(false);
+  const [publicRequireConsent, setPublicRequireConsent] = useState(false);
+  const [publicConsentText, setPublicConsentText] = useState(
+    'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
+  );
+  const [publicRequireUpload, setPublicRequireUpload] = useState(false);
+  const [publicUploadPrompt, setPublicUploadPrompt] = useState('Upload a file before you continue.');
   const validQuestions = questions.filter((question) => question.label.trim() !== '');
   const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
   const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
@@ -144,6 +156,14 @@ export default function FormEditor() {
         );
         setDocumentTemplate(form.document_template ?? '');
         setJoinCode(form.join_code);
+        setAllowPublicResponses(Boolean(form.allow_public_responses));
+        setPublicRequireConsent(Boolean(form.public_require_consent));
+        setPublicConsentText(
+          form.public_consent_text?.trim()
+            || 'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
+        );
+        setPublicRequireUpload(Boolean(form.public_require_upload));
+        setPublicUploadPrompt(form.public_upload_prompt?.trim() || 'Upload a file before you continue.');
         setLoading(false);
       })
       .catch(() => {
@@ -209,6 +229,11 @@ export default function FormEditor() {
         title: title.trim(),
         questions: validQuestions,
         document_template: trimmedDocumentTemplate || null,
+        allow_public_responses: allowPublicResponses,
+        public_require_consent: publicRequireConsent,
+        public_consent_text: publicRequireConsent ? publicConsentText.trim() : null,
+        public_require_upload: publicRequireUpload,
+        public_upload_prompt: publicRequireUpload ? publicUploadPrompt.trim() : null,
       });
       toastSuccess('Consultation saved');
     } catch (error) {
@@ -373,6 +398,83 @@ export default function FormEditor() {
               Save changes
             </LoadingButton>
           </div>
+        </div>
+      </section>
+
+      <section className="card-lg p-5 sm:p-6 mb-6">
+        <h2 className="text-base font-semibold text-foreground">Public Share Link</h2>
+        <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+          Let people open the share link without logging in, enter their name, and fill out the form.
+        </p>
+
+        <div className="mt-5 space-y-5">
+          <label className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm font-medium text-foreground">Enable public responses</div>
+              <div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                Uses the existing share link and join code.
+              </div>
+            </div>
+            <ToggleSwitch checked={allowPublicResponses} onChange={setAllowPublicResponses} />
+          </label>
+
+          {allowPublicResponses ? (
+            <>
+              <label className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm font-medium text-foreground">Require upload before form</div>
+                  <div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                    Add a first screen where respondents upload a file before entering the form.
+                  </div>
+                </div>
+                <ToggleSwitch checked={publicRequireUpload} onChange={setPublicRequireUpload} />
+              </label>
+
+              {publicRequireUpload ? (
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-foreground">Upload prompt</label>
+                  <input
+                    type="text"
+                    value={publicUploadPrompt}
+                    onChange={(event) => setPublicUploadPrompt(event.target.value)}
+                    className="w-full rounded-lg px-3 py-2 text-sm"
+                    style={{
+                      border: '1px solid var(--input)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                    }}
+                  />
+                </div>
+              ) : null}
+
+              <label className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm font-medium text-foreground">Require consent checkbox</div>
+                  <div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                    Add a first screen where respondents must agree before continuing.
+                  </div>
+                </div>
+                <ToggleSwitch checked={publicRequireConsent} onChange={setPublicRequireConsent} />
+              </label>
+
+              {publicRequireConsent ? (
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-foreground">Consent text</label>
+                  <textarea
+                    value={publicConsentText}
+                    onChange={(event) => setPublicConsentText(event.target.value)}
+                    rows={4}
+                    className="w-full rounded-lg px-3 py-2 text-sm"
+                    style={{
+                      border: '1px solid var(--input)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                    }}
+                  />
+                </div>
+              ) : null}
+            </>
+          ) : null}
         </div>
       </section>
 
