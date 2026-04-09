@@ -1,5 +1,6 @@
 import type { StructuredResponse } from '../types/structured-input';
 import { buildDocumentTemplatePreview } from '../utils/documentTemplate';
+import { isResponseAnswered } from '../utils/responseValidation';
 
 interface DocumentTemplateResponseProps {
   template: string;
@@ -51,6 +52,7 @@ export default function DocumentTemplateResponse({
             .filter((candidate) => candidate.type === 'field').length}`;
           const response = answers[key] ?? block.response;
           const value = response.position || '';
+          const answered = isResponseAnswered(response);
           const highlighted = !readOnly && highlightedQuestionKey === key;
 
           return (
@@ -81,6 +83,24 @@ export default function DocumentTemplateResponse({
                 >
                   {block.value.optional ? 'Optional' : 'Required'}
                 </span>
+                {!readOnly ? (
+                  <span
+                    aria-label={answered ? 'Question answered' : 'Question not answered'}
+                    title={answered ? 'Answered' : 'Not answered'}
+                    className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold"
+                    style={{
+                      border: answered
+                        ? '1px solid color-mix(in srgb, #138a52 35%, transparent)'
+                        : '1px solid color-mix(in srgb, var(--border) 90%, transparent)',
+                      backgroundColor: answered
+                        ? 'color-mix(in srgb, #138a52 12%, transparent)'
+                        : 'transparent',
+                      color: answered ? '#138a52' : 'var(--muted-foreground)',
+                    }}
+                  >
+                    {answered ? '✓' : ''}
+                  </span>
+                ) : null}
               </label>
               {readOnly ? (
                 <div
