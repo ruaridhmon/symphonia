@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -24,6 +24,8 @@ export default function RichDocumentEditor({
   placeholder = 'Write here…',
   minHeight = '18rem',
 }: RichDocumentEditorProps) {
+  const lastSyncedValueRef = useRef(value);
+
   const editor = useEditor({
     editable: !readOnly,
     immediatelyRender: false,
@@ -38,7 +40,9 @@ export default function RichDocumentEditor({
     ],
     content: value,
     onUpdate: ({ editor: currentEditor }) => {
-      onChange?.(currentEditor.getHTML());
+      const nextHtml = currentEditor.getHTML();
+      lastSyncedValueRef.current = nextHtml;
+      onChange?.(nextHtml);
     },
     editorProps: {
       attributes: {
@@ -54,8 +58,13 @@ export default function RichDocumentEditor({
 
   useEffect(() => {
     if (!editor) return;
-    if (editor.getHTML() === value) return;
+    if (value === lastSyncedValueRef.current) return;
+    if (editor.getHTML() === value) {
+      lastSyncedValueRef.current = value;
+      return;
+    }
     editor.commands.setContent(value, { emitUpdate: false });
+    lastSyncedValueRef.current = value;
   }, [editor, value]);
 
   return (
