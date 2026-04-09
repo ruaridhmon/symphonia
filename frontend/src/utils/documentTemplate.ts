@@ -3,13 +3,51 @@ import { emptyStructuredResponse, type StructuredResponse } from '../types/struc
 export interface DocumentTemplateField {
   key: string;
   label: string;
-  fieldType: 'short' | 'long';
+  fieldType: 'short' | 'long' | 'document';
   optional: boolean;
   rows: number;
   placeholder: string;
 }
 
+export const EDITABLE_DOCUMENT_TEMPLATE_PREFIX = '<!-- symphonia-document-mode: editable -->';
 const PLACEHOLDER_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/g;
+
+export function getDocumentTemplateMode(template: string | null | undefined): 'fillable' | 'editable' {
+  if (!template?.trim()) return 'fillable';
+  return template.trimStart().startsWith(EDITABLE_DOCUMENT_TEMPLATE_PREFIX) ? 'editable' : 'fillable';
+}
+
+export function isEditableDocumentTemplate(template: string | null | undefined): boolean {
+  return getDocumentTemplateMode(template) === 'editable';
+}
+
+export function getDocumentTemplateContent(template: string | null | undefined): string {
+  if (!template) return '';
+  if (!isEditableDocumentTemplate(template)) return template;
+  return template.replace(EDITABLE_DOCUMENT_TEMPLATE_PREFIX, '').trim();
+}
+
+export function createEditableDocumentTemplate(content: string): string {
+  const trimmed = content.trim();
+  return trimmed ? `${EDITABLE_DOCUMENT_TEMPLATE_PREFIX}\n${trimmed}` : EDITABLE_DOCUMENT_TEMPLATE_PREFIX;
+}
+
+export function htmlToPlainText(value: string): string {
+  return value
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<\/(p|div|li|h1|h2|h3|h4|h5|h6|tr)>/gi, '\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/\r/g, '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
 
 function parseDocumentTemplateToken(rawToken: string): DocumentTemplateField | null {
   const trimmed = rawToken.trim();
@@ -55,6 +93,8 @@ function parseDocumentTemplateToken(rawToken: string): DocumentTemplateField | n
 }
 
 export function parseDocumentTemplateFields(template: string): DocumentTemplateField[] {
+  if (isEditableDocumentTemplate(template)) return [];
+
   const fields: DocumentTemplateField[] = [];
   const seen = new Set<string>();
 
@@ -76,6 +116,10 @@ export function buildDocumentTemplatePreview(
   template: string,
   answers: Record<string, StructuredResponse>,
 ): Array<{ type: 'text'; value: string } | { type: 'field'; value: DocumentTemplateField; response: StructuredResponse }> {
+  if (isEditableDocumentTemplate(template)) {
+    return [];
+  }
+
   const blocks: Array<{ type: 'text'; value: string } | { type: 'field'; value: DocumentTemplateField; response: StructuredResponse }> = [];
   let cursor = 0;
 
@@ -109,4 +153,26 @@ export function buildDocumentTemplatePreview(
 
 export function isDocumentTemplate(template: string | null | undefined): boolean {
   return Boolean(template && template.trim());
+}
+
+export function getEditableDocumentQuestion(template: string): DocumentTemplateField | null {
+  if (!isEditableDocumentTemplate(template)) return null;
+  return {
+    key: 'document',
+    label: 'Document response',
+    fieldType: 'document',
+    optional: false,
+    rows: 12,
+    placeholder: 'Edit the shared document here',
+  };
+}
+
+export function buildInitialDocumentTemplateResponses(template: string): Record<string, StructuredResponse> {
+  if (!isEditableDocumentTemplate(template)) return {};
+  return {
+    q1: {
+      ...emptyStructuredResponse(),
+      position: getDocumentTemplateContent(template),
+    },
+  };
 }

@@ -475,6 +475,91 @@ test.describe('Document template consultations', () => {
     }
   });
 
+  test('admin can import an editable document and participants can edit their own copy', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let fixtureDir: string | null = null;
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    let participantContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const participantApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      const fixture = await createQuestionnaireDocx([
+        'Board note',
+        '',
+        'This is the imported opening paragraph.',
+        '',
+        'Second paragraph for editing.',
+      ]);
+      fixtureDir = fixture.dir;
+
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const adminPage = await adminContext.newPage();
+      await adminPage.goto(`${appBase}/admin/forms/new`);
+
+      await adminPage.getByRole('button', { name: /start document template/i }).click();
+      await adminPage.getByRole('button', { name: /editable copy/i }).click();
+      await adminPage.locator('input[type="file"]').setInputFiles(fixture.docxPath);
+
+      await expect(adminPage.getByText('Board note').first()).toBeVisible({ timeout: 10_000 });
+      await adminPage.locator('#form-title').fill(`Editable Copy ${timestamp}`);
+      await adminPage.getByRole('button', { name: /create form/i }).click();
+      await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
+
+      const formIdMatch = adminPage.url().match(/\/admin\/form\/(\d+)$/);
+      expect(formIdMatch).not.toBeNull();
+      createdFormId = Number(formIdMatch?.[1]);
+
+      const form = await getFormDetails(adminApi, appBase, adminToken, createdFormId);
+      expect(form.questions).toHaveLength(1);
+      expect(form.questions[0].fieldType).toBe('document');
+      expect(form.document_template).toContain('symphonia-document-mode: editable');
+
+      const participantEmail = `editable-doc-${timestamp}@example.com`;
+      await registerParticipant(participantApi, appBase, participantEmail, 'test123');
+      const participantLogin = await loginViaApi(participantApi, appBase, participantEmail, 'test123');
+      const participantToken = participantLogin.access_token;
+      participantContext = await browser.newContext({
+        storageState: buildStorageState(appBase, participantLogin),
+      });
+      const participantPage = await participantContext.newPage();
+      await participantPage.goto(`${appBase}/join`);
+      await participantPage.getByPlaceholder(/SYM/i).fill(form.join_code);
+      await participantPage.getByRole('button', { name: /join consultation/i }).click();
+      await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
+
+      await expect(participantPage.getByText('Edit your copy of the document')).toBeVisible();
+      const editor = participantPage.locator('.ProseMirror').last();
+      await editor.click();
+      await participantPage.keyboard.press('Control+A');
+      await participantPage.keyboard.type('Updated board note for this participant only.');
+
+      await participantPage.getByRole('button', { name: /^submit$/i }).click();
+      await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });
+
+      const savedResponse = await getMyResponseDetails(participantApi, appBase, participantToken, createdFormId);
+      expect(savedResponse.answers.q1.position).toContain('Updated board note for this participant only.');
+    } finally {
+      await participantContext?.close();
+      await adminContext?.close();
+      if (createdFormId) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      await participantApi.dispose();
+      await adminApi.dispose();
+      if (fixtureDir) {
+        await rm(fixtureDir, { recursive: true, force: true });
+      }
+    }
+  });
+
   test('admin can import a questionnaire docx into survey questions', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';

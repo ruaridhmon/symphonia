@@ -1,12 +1,12 @@
 import type { StructuredResponse } from '../types/structured-input';
-import { parseDocumentTemplateFields } from './documentTemplate';
+import { getDocumentTemplateMode, htmlToPlainText, parseDocumentTemplateFields } from './documentTemplate';
 import { extractQuestionText, normalizeQuestion, type QuestionInput } from './questions';
 
 function getAnswerPosition(answer: unknown): string {
-  if (typeof answer === 'string') return answer.trim();
+  if (typeof answer === 'string') return htmlToPlainText(answer);
   if (answer && typeof answer === 'object' && 'position' in answer) {
     const position = (answer as StructuredResponse).position;
-    return typeof position === 'string' ? position.trim() : '';
+    return typeof position === 'string' ? htmlToPlainText(position) : '';
   }
   return '';
 }
@@ -15,6 +15,14 @@ export function validateDocumentTemplateResponses(
   template: string,
   answers: Record<string, StructuredResponse>,
 ): { ok: true } | { ok: false; key: string; message: string } {
+  if (getDocumentTemplateMode(template) === 'editable') {
+    return getAnswerPosition(answers.q1) ? { ok: true } : {
+      ok: false,
+      key: 'q1',
+      message: 'Please complete the document before submitting.',
+    };
+  }
+
   const fields = parseDocumentTemplateFields(template);
   const missingField = fields.find((field, index) => {
     if (field.optional) return false;

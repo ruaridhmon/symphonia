@@ -17,7 +17,13 @@ import { useDocumentTitle } from './hooks/useDocumentTitle';
 import TemplatePicker, { type FormTemplate } from './TemplatePicker';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
 import { isSurveyQuestion, normalizeQuestion, type ConfigurableQuestion } from './utils/questions';
-import { isDocumentTemplate, parseDocumentTemplateFields } from './utils/documentTemplate';
+import {
+  buildInitialDocumentTemplateResponses,
+  getEditableDocumentQuestion,
+  isDocumentTemplate,
+  isEditableDocumentTemplate,
+  parseDocumentTemplateFields,
+} from './utils/documentTemplate';
 import type { QuestionnaireImportResult } from './utils/questionnaireImport';
 
 /* ── Helpers ──────────────────────────────────────────────────── */
@@ -396,7 +402,8 @@ export default function AdminFormNew() {
   const [allowJoin, setAllowJoin] = useState(true);
   const [anonymous, setAnonymous] = useState(false);
   const [deadline, setDeadline] = useState('');
-  const documentQuestions = parseDocumentTemplateFields(documentTemplate).map((field) => ({
+  const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
+  const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
     label: field.label,
     requireEvidence: false,
     requireCounterarguments: false,
@@ -513,9 +520,16 @@ export default function AdminFormNew() {
         const key = `q${index + 1}`;
         next[key] = prev[key] ?? emptyStructuredResponse();
       });
+      if (isEditableDocumentTemplate(documentTemplate)) {
+        const initial = buildInitialDocumentTemplateResponses(documentTemplate);
+        return {
+          ...next,
+          q1: prev.q1 && prev.q1.position ? prev.q1 : initial.q1,
+        };
+      }
       return next;
     });
-  }, [previewQuestions]);
+  }, [documentTemplate, previewQuestions]);
 
   const createForm = async () => {
     if (!title.trim()) {
@@ -527,7 +541,11 @@ export default function AdminFormNew() {
       return;
     }
     if (documentTemplate.trim() && documentQuestions.length === 0) {
-      setError('Add at least one {{placeholder}} to the document template.');
+      setError(
+        isEditableDocumentTemplate(documentTemplate)
+          ? 'Add some document content before creating the consultation.'
+          : 'Add at least one {{placeholder}} to the document template.',
+      );
       return;
     }
     setSaving(true);

@@ -1,5 +1,6 @@
-import type { StructuredResponse } from '../types/structured-input';
-import { buildDocumentTemplatePreview } from '../utils/documentTemplate';
+import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
+import RichDocumentEditor from './RichDocumentEditor';
+import { buildDocumentTemplatePreview, getDocumentTemplateContent, isEditableDocumentTemplate } from '../utils/documentTemplate';
 import { isResponseAnswered } from '../utils/responseValidation';
 
 interface DocumentTemplateResponseProps {
@@ -17,6 +18,55 @@ export default function DocumentTemplateResponse({
   highlightedQuestionKey = null,
   readOnly = false,
 }: DocumentTemplateResponseProps) {
+  if (isEditableDocumentTemplate(template)) {
+    const key = 'q1';
+    const response = answers[key];
+    const value = response?.position || getDocumentTemplateContent(template);
+    const highlighted = !readOnly && highlightedQuestionKey === key;
+
+    return (
+      <div
+        className="rounded-xl p-4 sm:p-5"
+        data-question-key={key}
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--foreground) 1.5%, var(--card))',
+          border: highlighted
+            ? '1px solid color-mix(in srgb, var(--destructive) 42%, var(--border))'
+            : '1px solid var(--border)',
+          scrollMarginTop: '6rem',
+        }}
+      >
+        <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
+          <span>Edit your copy of the document</span>
+          {!readOnly ? (
+            <span
+              aria-label={isResponseAnswered(response) ? 'Document ready to submit' : 'Document not ready'}
+              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold"
+              style={{
+                border: isResponseAnswered(response)
+                  ? '1px solid color-mix(in srgb, #138a52 35%, transparent)'
+                  : '1px solid color-mix(in srgb, var(--border) 90%, transparent)',
+                backgroundColor: isResponseAnswered(response)
+                  ? 'color-mix(in srgb, #138a52 12%, transparent)'
+                  : 'transparent',
+                color: isResponseAnswered(response) ? '#138a52' : 'var(--muted-foreground)',
+              }}
+            >
+              {isResponseAnswered(response) ? '✓' : ''}
+            </span>
+          ) : null}
+        </div>
+        <RichDocumentEditor
+          value={value}
+          readOnly={readOnly}
+          placeholder="Write the document here…"
+          minHeight={readOnly ? '14rem' : '20rem'}
+          onChange={(nextValue) => onChange?.(key, { ...(response ?? emptyStructuredResponse()), position: nextValue })}
+        />
+      </div>
+    );
+  }
+
   const blocks = buildDocumentTemplatePreview(template, answers);
 
   return (

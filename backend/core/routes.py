@@ -20,6 +20,7 @@ from pydantic import BaseModel, EmailStr
 from email.message import EmailMessage
 from openai import OpenAI
 import aiosmtplib
+import html
 import json
 import logging
 import os
@@ -129,11 +130,11 @@ def _estimate_model_latency_multiplier(model: str | None) -> float:
 
 def _extract_answer_position(answer: Any) -> str:
     if isinstance(answer, str):
-        return answer.strip()
+        return _html_to_plain_text(answer)
     if isinstance(answer, dict):
         position = answer.get("position")
         if isinstance(position, str):
-            return position.strip()
+            return _html_to_plain_text(position)
     return ""
 
 
@@ -3255,16 +3256,60 @@ class FormUpdate(BaseModel):
 
 DOCUMENT_PLACEHOLDER_PATTERN = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
 WORDPROCESSINGML_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+EDITABLE_DOCUMENT_TEMPLATE_PREFIX = "<!-- symphonia-document-mode: editable -->"
+
+
+def _is_editable_document_template(template: str | None) -> bool:
+    return bool(template and template.lstrip().startswith(EDITABLE_DOCUMENT_TEMPLATE_PREFIX))
+
+
+def _strip_document_template_prefix(template: str | None) -> str:
+    if not template:
+        return ""
+    if not _is_editable_document_template(template):
+        return template
+    return template.replace(EDITABLE_DOCUMENT_TEMPLATE_PREFIX, "", 1).strip()
+
+
+def _html_to_plain_text(value: str) -> str:
+    text = re.sub(r"<style[\s\S]*?</style>", " ", value, flags=re.IGNORECASE)
+    text = re.sub(r"<script[\s\S]*?</script>", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"</(p|div|li|h1|h2|h3|h4|h5|h6|tr)>", "\n", text, flags=re.IGNORECASE)
+    text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = html.unescape(text)
+    text = text.replace("\r", "")
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 
 def _normalize_document_template(template: str | None) -> str | None:
     if template is None:
         return None
-    cleaned = template.replace("\r\n", "\n").replace("\r", "\n").strip()
+    if _is_editable_document_template(template):
+        body = _strip_document_template_prefix(template)
+        cleaned = f"{EDITABLE_DOCUMENT_TEMPLATE_PREFIX}\n{body}".strip()
+    else:
+        cleaned = template.replace("\r\n", "\n").replace("\r", "\n").strip()
     return cleaned or None
 
 
 def _build_document_questions(template: str) -> list[dict[str, object]]:
+    if _is_editable_document_template(template):
+        return [
+            QuestionConfig(
+                label="Document response",
+                requireEvidence=False,
+                requireCounterarguments=False,
+                requireConfidence=False,
+                optional=False,
+                fieldType="document",
+                rows=12,
+                placeholder="Edit the shared document here",
+            ).model_dump()
+        ]
+
     seen: set[str] = set()
     derived: list[dict[str, object]] = []
     for match in DOCUMENT_PLACEHOLDER_PATTERN.finditer(template):
@@ -3345,6 +3390,98 @@ def _extract_text_from_docx_bytes(blob: bytes) -> str:
         cleaned_lines.append(line)
         previous_blank = blank
     return "\n".join(cleaned_lines).strip()
+
+
+def _render_word_run_to_html(run: ET.Element) -> str:
+    chunks: list[str] = []
+    for child in run:
+        tag = child.tag.rsplit("}", 1)[-1]
+        if tag == "t":
+            chunks.append(html.escape(child.text or ""))
+        elif tag in {"br", "cr"}:
+            chunks.append("<br>")
+        elif tag == "tab":
+            chunks.append("&emsp;")
+
+    content = "".join(chunks)
+    if not content:
+        return ""
+
+    properties = run.find("w:rPr", WORDPROCESSINGML_NS)
+    if properties is None:
+        return content
+
+    if properties.find("w:b", WORDPROCESSINGML_NS) is not None:
+        content = f"<strong>{content}</strong>"
+    if properties.find("w:i", WORDPROCESSINGML_NS) is not None:
+        content = f"<em>{content}</em>"
+    if properties.find("w:u", WORDPROCESSINGML_NS) is not None:
+        content = f"<u>{content}</u>"
+    return content
+
+
+def _render_word_paragraph_to_html(paragraph: ET.Element) -> str:
+    runs = paragraph.findall("./w:r", WORDPROCESSINGML_NS)
+    if not runs:
+        return "<p></p>"
+
+    content = "".join(_render_word_run_to_html(run) for run in runs).strip()
+    if not content:
+        return "<p></p>"
+
+    style = paragraph.find("./w:pPr/w:pStyle", WORDPROCESSINGML_NS)
+    style_value = style.get(f"{{{WORDPROCESSINGML_NS['w']}}}val", "") if style is not None else ""
+    style_key = style_value.lower()
+
+    if style_key.startswith("heading1") or style_key == "title":
+        return f"<h1>{content}</h1>"
+    if style_key.startswith("heading2") or style_key == "subtitle":
+        return f"<h2>{content}</h2>"
+    if style_key.startswith("heading3"):
+        return f"<h3>{content}</h3>"
+    return f"<p>{content}</p>"
+
+
+def _render_word_table_to_html(table: ET.Element) -> str:
+    rows_html: list[str] = []
+    for row in table.findall("./w:tr", WORDPROCESSINGML_NS):
+        cells_html: list[str] = []
+        for cell in row.findall("./w:tc", WORDPROCESSINGML_NS):
+            paragraphs = [
+                _render_word_paragraph_to_html(paragraph)
+                for paragraph in cell.findall("./w:p", WORDPROCESSINGML_NS)
+            ]
+            cell_content = "".join(paragraphs).strip() or "<p></p>"
+            cells_html.append(f"<td>{cell_content}</td>")
+        if cells_html:
+            rows_html.append(f"<tr>{''.join(cells_html)}</tr>")
+    return f"<table><tbody>{''.join(rows_html)}</tbody></table>" if rows_html else ""
+
+
+def _extract_editable_document_from_docx_bytes(blob: bytes) -> str:
+    try:
+        with zipfile.ZipFile(BytesIO(blob)) as archive:
+            document_xml = archive.read("word/document.xml")
+    except (KeyError, zipfile.BadZipFile) as exc:
+        raise HTTPException(status_code=400, detail="Invalid .docx file") from exc
+
+    root = ET.fromstring(document_xml)
+    body = root.find("w:body", WORDPROCESSINGML_NS)
+    if body is None:
+        return EDITABLE_DOCUMENT_TEMPLATE_PREFIX
+
+    parts: list[str] = []
+    for child in body:
+        tag = child.tag.rsplit("}", 1)[-1]
+        if tag == "p":
+            parts.append(_render_word_paragraph_to_html(child))
+        elif tag == "tbl":
+            table_html = _render_word_table_to_html(child)
+            if table_html:
+                parts.append(table_html)
+
+    content = "".join(parts).strip() or "<p></p>"
+    return f"{EDITABLE_DOCUMENT_TEMPLATE_PREFIX}\n{content}"
 
 
 def normalize_form_questions(
@@ -3790,27 +3927,36 @@ def get_form(
 @router.post(
     "/forms/document-template/extract",
     tags=["Forms"],
-    summary="Extract plain text from a Word template",
+    summary="Extract a document template from a Word file",
     description=(
-        "Upload a .docx file and return a plain-text template that can be edited "
-        "into a Symphonia document template with {{placeholders}}."
+        "Upload a .docx file and return either a plain-text fillable template or "
+        "an editable document template, depending on the selected mode."
     ),
 )
 @limiter.limit(CRUD_LIMIT)
 async def extract_document_template(
     request: Request,
     file: UploadFile = File(...),
+    mode: str = Form("fillable"),
     user: User = Depends(require_facilitator),
 ):
+    if mode not in {"fillable", "editable"}:
+        raise HTTPException(status_code=400, detail="Unsupported document template mode")
+
     filename = (file.filename or "").lower()
     if not filename.endswith(".docx"):
         raise HTTPException(status_code=400, detail="Please upload a .docx file")
 
     blob = await file.read()
-    extracted = _extract_text_from_docx_bytes(blob)
+    extracted = (
+        _extract_editable_document_from_docx_bytes(blob)
+        if mode == "editable"
+        else _extract_text_from_docx_bytes(blob)
+    )
     return {
         "template": extracted,
         "placeholder_count": len(_build_document_questions(extracted)),
+        "mode": "editable" if _is_editable_document_template(extracted) else "fillable",
     }
 
 

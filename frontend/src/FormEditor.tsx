@@ -14,7 +14,13 @@ import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
 import { isSurveyQuestion, normalizeQuestion, type ConfigurableQuestion, type QuestionInput } from './utils/questions';
-import { isDocumentTemplate, parseDocumentTemplateFields } from './utils/documentTemplate';
+import {
+  buildInitialDocumentTemplateResponses,
+  getEditableDocumentQuestion,
+  isDocumentTemplate,
+  isEditableDocumentTemplate,
+  parseDocumentTemplateFields,
+} from './utils/documentTemplate';
 import type { QuestionnaireImportResult } from './utils/questionnaireImport';
 
 interface FormData {
@@ -101,7 +107,8 @@ export default function FormEditor() {
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const validQuestions = questions.filter((question) => question.label.trim() !== '');
-  const documentQuestions = parseDocumentTemplateFields(documentTemplate).map((field) => ({
+  const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
+  const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
     label: field.label,
     requireEvidence: false,
     requireCounterarguments: false,
@@ -152,9 +159,16 @@ export default function FormEditor() {
         const key = `q${index + 1}`;
         next[key] = prev[key] ?? emptyStructuredResponse();
       });
+      if (isEditableDocumentTemplate(documentTemplate)) {
+        const initial = buildInitialDocumentTemplateResponses(documentTemplate);
+        return {
+          ...next,
+          q1: prev.q1 && prev.q1.position ? prev.q1 : initial.q1,
+        };
+      }
       return next;
     });
-  }, [previewQuestions]);
+  }, [documentTemplate, previewQuestions]);
 
   function setResponseStyle(mode: 'consensus' | 'information') {
     setImportSummary(null);
@@ -182,7 +196,9 @@ export default function FormEditor() {
       return;
     }
     if (trimmedDocumentTemplate && documentQuestions.length === 0) {
-      toastError('Add at least one {{placeholder}} to the document template');
+      toastError(isEditableDocumentTemplate(trimmedDocumentTemplate)
+        ? 'Add some document content before saving'
+        : 'Add at least one {{placeholder}} to the document template');
       return;
     }
 

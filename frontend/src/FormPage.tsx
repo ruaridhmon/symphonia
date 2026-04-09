@@ -13,7 +13,7 @@ import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
 import { validateDocumentTemplateResponses, validateQuestionResponses } from './utils/responseValidation'
-import { isDocumentTemplate } from './utils/documentTemplate'
+import { buildInitialDocumentTemplateResponses, isDocumentTemplate, isEditableDocumentTemplate } from './utils/documentTemplate'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 
 export default function FormPage() {
@@ -49,10 +49,17 @@ export default function FormPage() {
   })
 
   /** Build initial empty structured responses for a set of questions */
-  const buildEmptyResponses = useCallback((questions: (string | Record<string, unknown>)[]) => {
-    return Object.fromEntries(
+  const buildEmptyResponses = useCallback((questions: (string | Record<string, unknown>)[], documentTemplate?: string | null) => {
+    const base = Object.fromEntries(
       questions.map((_: string | Record<string, unknown>, i: number) => [`q${i + 1}`, emptyStructuredResponse()])
     ) as Record<string, StructuredResponse>
+    if (documentTemplate && isEditableDocumentTemplate(documentTemplate)) {
+      return {
+        ...base,
+        ...buildInitialDocumentTemplateResponses(documentTemplate),
+      }
+    }
+    return base
   }, [])
 
   /** Convert legacy flat string answers to structured responses */
@@ -138,7 +145,7 @@ export default function FormPage() {
               setStructuredResponses(legacyToStructured(myResp.answers))
             }
           } catch {
-            setStructuredResponses(buildEmptyResponses(questions))
+            setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
           }
         } else {
           setHasSubmitted(false)
@@ -150,10 +157,10 @@ export default function FormPage() {
               setStructuredResponses(legacyToStructured(draft.answers as Record<string, string | StructuredResponse>))
               setDraftRestored(true)
             } else {
-              setStructuredResponses(buildEmptyResponses(questions))
+              setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
             }
           } catch {
-            setStructuredResponses(buildEmptyResponses(questions))
+            setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
           }
         }
       } catch {
@@ -167,10 +174,10 @@ export default function FormPage() {
             setStructuredResponses(legacyToStructured(draft.answers as Record<string, string | StructuredResponse>))
             setDraftRestored(true)
           } else {
-            setStructuredResponses(buildEmptyResponses(questions))
+            setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
           }
         } catch {
-          setStructuredResponses(buildEmptyResponses(questions))
+          setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
         }
       }
 
