@@ -385,6 +385,149 @@ def _render_synthesis_text(result) -> str:
     return "".join(text_parts) if text_parts else "Synthesis complete."
 
 
+def _safe_export_title(form: FormModel, form_id: int) -> str:
+    safe_title = (
+        "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in (form.title or ""))
+        .strip()
+        .replace(" ", "-")
+        .lower()
+    )
+    return safe_title or f"form-{form_id}"
+
+
+def _build_responses_export_payload(
+    db: Session,
+    rounds_list: list[RoundModel],
+) -> list[dict[str, Any]]:
+    payload: list[dict[str, Any]] = []
+    for rnd in rounds_list:
+        responses = (
+            db.query(Response)
+            .filter(Response.round_id == rnd.id)
+            .order_by(Response.created_at.asc())
+            .all()
+        )
+        payload.append(
+            {
+                "round_number": rnd.round_number,
+                "questions": rnd.questions or [],
+                "responses": [
+                    {
+                        "response_id": item.id,
+                        "email": item.user.email if item.user else None,
+                        "timestamp": item.created_at.isoformat() if item.created_at else None,
+                        "version": item.version,
+                        "answers": item.answers,
+                    }
+                    for item in responses
+                ],
+            }
+        )
+    return payload
+
+
+def _build_responses_markdown(
+    form: FormModel,
+    rounds_payload: list[dict[str, Any]],
+) -> str:
+    lines: list[str] = [f"# {form.title}", "", "## Responses", ""]
+    for round_payload in rounds_payload:
+        lines.append(f"### Round {round_payload['round_number']}")
+        lines.append("")
+        responses = round_payload["responses"]
+        if not responses:
+            lines.append("No responses recorded.")
+            lines.append("")
+            continue
+        for idx, response in enumerate(responses, start=1):
+            lines.append(
+                f"#### Response {idx}"
+                + (f" ({response['email']})" if response.get("email") else "")
+            )
+            timestamp = response.get("timestamp")
+            if timestamp:
+                lines.append(f"- Submitted: {timestamp}")
+            for key, value in (response.get("answers") or {}).items():
+                rendered = json.dumps(value, ensure_ascii=False) if isinstance(value, (dict, list)) else str(value)
+                lines.append(f"- **{key}**: {rendered}")
+            lines.append("")
+    return "\n".join(lines).strip() + "\n"
+
+
+def _build_consultation_markdown(
+    form: FormModel,
+    rounds_list: list[RoundModel],
+    rounds_payload: list[dict[str, Any]],
+) -> str:
+    synthesis_md = _build_synthesis_markdown(form, rounds_list).rstrip()
+    responses_md = _build_responses_markdown(form, rounds_payload).rstrip()
+    return f"{synthesis_md}\n\n---\n\n{responses_md}\n"
+
+
+def _markdown_to_pdf_bytes(md_content: str) -> bytes:
+    weasy_error: Exception | None = None
+    try:
+        import markdown as md_lib
+        from weasyprint import HTML as WeasyHTML
+
+        html_body = md_lib.markdown(md_content, extensions=["tables", "fenced_code"])
+        full_html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"/>
+<style>
+body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; font-size: 14px; line-height: 1.6; color: #333; }}
+h1 {{ font-size: 28px; border-bottom: 2px solid #1d70b8; padding-bottom: 8px; }}
+h2 {{ font-size: 22px; margin-top: 30px; color: #1d70b8; }}
+h3 {{ font-size: 18px; margin-top: 20px; }}
+h4 {{ font-size: 15px; margin-top: 18px; }}
+hr {{ border: none; border-top: 1px solid #ccc; margin: 20px 0; }}
+ul, ol {{ margin-left: 20px; }}
+li {{ margin-bottom: 4px; }}
+strong {{ color: #0b0c0c; }}
+em {{ color: #505a5f; }}
+</style>
+</head><body>{html_body}</body></html>"""
+        return WeasyHTML(string=full_html).write_pdf()
+    except Exception as exc:
+        weasy_error = exc
+
+    try:
+        from fpdf import FPDF
+
+        def _md_to_plain_text(md: str) -> list[str]:
+            lines: list[str] = []
+            for raw in md.splitlines():
+                line = re.sub(r"^#{1,6}\s*", "", raw)
+                line = re.sub(r"^\s*[-*+]\s+", "- ", line)
+                line = re.sub(r"^\s*\d+\.\s+", "", line)
+                line = re.sub(r"\*\*(.*?)\*\*", r"\1", line)
+                line = re.sub(r"\*(.*?)\*", r"\1", line)
+                line = re.sub(r"`(.*?)`", r"\1", line)
+                lines.append(line)
+            return lines
+
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        pdf.set_font("Helvetica", size=11)
+        writable_width = max(20, pdf.w - pdf.l_margin - pdf.r_margin)
+
+        for line in _md_to_plain_text(md_content):
+            if not line.strip():
+                pdf.ln(4)
+                continue
+            safe_line = line.encode("latin-1", "replace").decode("latin-1")
+            pdf.multi_cell(writable_width, 6, text=safe_line)
+
+        out = pdf.output()
+        return bytes(out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1"))
+    except Exception as fpdf_error:
+        detail = "Failed to generate PDF export."
+        if weasy_error:
+            detail += f" WeasyPrint/Markdown error: {weasy_error}"
+        detail += f" FPDF fallback error: {fpdf_error}"
+        raise HTTPException(status_code=500, detail=detail)
+
+
 # ---------------------------------------------------------
 # SYNTHESIS EMAIL NOTIFICATION HELPER
 # ---------------------------------------------------------
@@ -2508,14 +2651,7 @@ def export_synthesis(
         .all()
     )
 
-    safe_title = (
-        "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in form.title)
-        .strip()
-        .replace(" ", "-")
-        .lower()
-    )
-    if not safe_title:
-        safe_title = f"form-{form_id}"
+    safe_title = _safe_export_title(form, form_id)
 
     if format == "json":
         payload = {
@@ -2545,92 +2681,14 @@ def export_synthesis(
     md_content = _build_synthesis_markdown(form, rounds_list)
 
     if format == "pdf":
-        weasy_error: Exception | None = None
-
-        # Try full-fidelity PDF generation first (requires markdown + weasyprint).
-        try:
-            import markdown as md_lib
-            from weasyprint import HTML as WeasyHTML
-
-            html_body = md_lib.markdown(
-                md_content, extensions=["tables", "fenced_code"]
-            )
-            full_html = f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8"/>
-<style>
-body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; font-size: 14px; line-height: 1.6; color: #333; }}
-h1 {{ font-size: 28px; border-bottom: 2px solid #1d70b8; padding-bottom: 8px; }}
-h2 {{ font-size: 22px; margin-top: 30px; color: #1d70b8; }}
-h3 {{ font-size: 18px; margin-top: 20px; }}
-hr {{ border: none; border-top: 1px solid #ccc; margin: 20px 0; }}
-ul, ol {{ margin-left: 20px; }}
-li {{ margin-bottom: 4px; }}
-strong {{ color: #0b0c0c; }}
-em {{ color: #505a5f; }}
-</style>
-</head><body>{html_body}</body></html>"""
-
-            pdf_bytes = WeasyHTML(string=full_html).write_pdf()
-            return FastAPIResponse(
-                content=pdf_bytes,
-                media_type="application/pdf",
-                headers={
-                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
-                },
-            )
-        except Exception as exc:
-            weasy_error = exc
-
-        # Fallback: generate a simple PDF with fpdf2 (pure Python).
-        try:
-            from fpdf import FPDF
-
-            def _md_to_plain_text(md: str) -> list[str]:
-                lines: list[str] = []
-                for raw in md.splitlines():
-                    line = raw
-                    # Remove common markdown syntax for a readable plain-text PDF.
-                    line = re.sub(r"^#{1,6}\s*", "", line)
-                    line = re.sub(r"^\s*[-*+]\s+", "- ", line)
-                    line = re.sub(r"^\s*\d+\.\s+", "", line)
-                    line = re.sub(r"\*\*(.*?)\*\*", r"\1", line)
-                    line = re.sub(r"\*(.*?)\*", r"\1", line)
-                    line = re.sub(r"`(.*?)`", r"\1", line)
-                    lines.append(line)
-                return lines
-
-            pdf = FPDF()
-            pdf.set_auto_page_break(auto=True, margin=15)
-            pdf.add_page()
-            pdf.set_font("Helvetica", size=11)
-
-            writable_width = max(20, pdf.w - pdf.l_margin - pdf.r_margin)
-
-            for line in _md_to_plain_text(md_content):
-                if not line.strip():
-                    pdf.ln(4)
-                    continue
-                # Built-in fonts are latin-1; replace unsupported chars safely.
-                safe_line = line.encode("latin-1", "replace").decode("latin-1")
-                pdf.multi_cell(writable_width, 6, text=safe_line)
-
-            out = pdf.output()
-            pdf_bytes = bytes(
-                out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1")
-            )
-            return FastAPIResponse(
-                content=pdf_bytes,
-                media_type="application/pdf",
-                headers={
-                    "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
-                },
-            )
-        except Exception as fpdf_error:
-            detail = "Failed to generate PDF export."
-            if weasy_error:
-                detail += f" WeasyPrint/Markdown error: {weasy_error}"
-            detail += f" FPDF fallback error: {fpdf_error}"
-            raise HTTPException(status_code=500, detail=detail)
+        pdf_bytes = _markdown_to_pdf_bytes(md_content)
+        return FastAPIResponse(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.pdf"',
+            },
+        )
 
     # Default: markdown
     return FastAPIResponse(
@@ -2638,6 +2696,142 @@ em {{ color: #505a5f; }}
         media_type="text/markdown; charset=utf-8",
         headers={
             "Content-Disposition": f'attachment; filename="{safe_title}-synthesis.md"',
+        },
+    )
+
+
+@router.get(
+    "/forms/{form_id}/export_responses",
+    tags=["Responses"],
+    summary="Export responses document",
+    description=(
+        "Export all rounds' responses as a downloadable document. "
+        "Supports `format=markdown` (default), `format=json`, or `format=pdf`."
+    ),
+)
+def export_responses(
+    form_id: int,
+    format: str = Query("markdown", pattern="^(markdown|json|pdf)$"),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    rounds_list = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id)
+        .order_by(RoundModel.round_number.asc())
+        .all()
+    )
+    safe_title = _safe_export_title(form, form_id)
+    responses_payload = _build_responses_export_payload(db, rounds_list)
+
+    if format == "json":
+        payload = {
+            "form_id": form.id,
+            "title": form.title,
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "rounds": responses_payload,
+        }
+        return FastAPIResponse(
+            content=json.dumps(payload, indent=2, default=str),
+            media_type="application/json",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_title}-responses.json"',
+            },
+        )
+
+    md_content = _build_responses_markdown(form, responses_payload)
+    if format == "pdf":
+        pdf_bytes = _markdown_to_pdf_bytes(md_content)
+        return FastAPIResponse(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_title}-responses.pdf"',
+            },
+        )
+
+    return FastAPIResponse(
+        content=md_content.encode("utf-8"),
+        media_type="text/markdown; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_title}-responses.md"',
+        },
+    )
+
+
+@router.get(
+    "/forms/{form_id}/export_consultation",
+    tags=["Forms"],
+    summary="Export consultation pack",
+    description=(
+        "Export the full consultation pack including synthesis and responses. "
+        "Supports `format=markdown` (default), `format=json`, or `format=pdf`."
+    ),
+)
+def export_consultation(
+    form_id: int,
+    format: str = Query("markdown", pattern="^(markdown|json|pdf)$"),
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    rounds_list = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id)
+        .order_by(RoundModel.round_number.asc())
+        .all()
+    )
+    safe_title = _safe_export_title(form, form_id)
+    responses_payload = _build_responses_export_payload(db, rounds_list)
+
+    if format == "json":
+        payload = {
+            "form_id": form.id,
+            "title": form.title,
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "synthesis": [
+                {
+                    "round_number": rnd.round_number,
+                    "convergence_score": rnd.convergence_score,
+                    "synthesis_json": rnd.synthesis_json,
+                    "synthesis_text": rnd.synthesis,
+                    "questions": rnd.questions,
+                }
+                for rnd in rounds_list
+            ],
+            "responses": responses_payload,
+        }
+        return FastAPIResponse(
+            content=json.dumps(payload, indent=2, default=str),
+            media_type="application/json",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_title}-consultation.json"',
+            },
+        )
+
+    md_content = _build_consultation_markdown(form, rounds_list, responses_payload)
+    if format == "pdf":
+        pdf_bytes = _markdown_to_pdf_bytes(md_content)
+        return FastAPIResponse(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_title}-consultation.pdf"',
+            },
+        )
+
+    return FastAPIResponse(
+        content=md_content.encode("utf-8"),
+        media_type="text/markdown; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="{safe_title}-consultation.md"',
         },
     )
 

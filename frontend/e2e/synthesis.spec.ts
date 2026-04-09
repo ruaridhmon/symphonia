@@ -98,6 +98,18 @@ test.describe('Actions panel', () => {
     await expect(page.getByText('Actions')).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText('Rounds')).toBeVisible({ timeout: 5_000 });
   });
+
+  test('opens the download sheet with export options', async ({ page }) => {
+    await gotoFirstSummary(page);
+
+    await page.getByRole('button', { name: /download/i }).click();
+    await expect(page.getByRole('dialog', { name: /download consultation/i })).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('button', { name: /everything/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /summary only/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /responses only/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /download pdf/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /download word/i })).toBeVisible();
+  });
 });
 
 test.describe('Round navigation', () => {

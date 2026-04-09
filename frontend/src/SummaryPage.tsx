@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { ChartNoAxesColumn, ChevronDown, ChevronRight, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, Download, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -38,6 +38,7 @@ import {
 	ProbeQuestionsPanel,
 	LoadingButton,
 	useToast,
+	DownloadSheet,
 } from './components';
 
 import {
@@ -237,6 +238,7 @@ export default function SummaryPage() {
 	const [synthesisVersions, setSynthesisVersions] = useState<SynthesisVersion[]>([]);
 	const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
 	const [showVersionCompare, setShowVersionCompare] = useState(false);
+	const [downloadSheetOpen, setDownloadSheetOpen] = useState(false);
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
@@ -1031,6 +1033,13 @@ export default function SummaryPage() {
 
 		return (
 		<div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
+			<DownloadSheet
+				open={downloadSheetOpen}
+				onClose={() => setDownloadSheetOpen(false)}
+				form={form}
+				rounds={rounds}
+				structuredRounds={structuredRounds}
+			/>
 			<a href="#main-content" className="skip-to-main">
 				{t('common.skipToMainContent')}
 			</a>
@@ -1415,6 +1424,26 @@ export default function SummaryPage() {
 							isGenerating={isGenerating}
 							onGenerate={generateSummary}
 						/>
+
+						<div className="card p-3">
+							<button
+								type="button"
+								onClick={() => setDownloadSheetOpen(true)}
+								className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-colors"
+								style={{
+									backgroundColor: 'var(--background)',
+									border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+								}}
+							>
+								<Download size={16} style={{ color: 'var(--accent)' }} />
+								<div className="min-w-0 flex-1">
+									<div className="text-sm font-semibold text-foreground">Download</div>
+									<div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+										Export the consultation, the summary, or the responses.
+									</div>
+								</div>
+							</button>
+						</div>
 
 						{activeWorkspaceTab !== 'responses' && synthesisVersions.length > 0 && (
 							<SynthesisVersionPanel
