@@ -207,21 +207,25 @@ export default function DownloadSheet({
   rounds,
   structuredRounds,
 }: DownloadSheetProps) {
-  const providedRounds = rounds ?? [];
-  const providedStructuredRounds = structuredRounds ?? [];
+  const providedRounds = rounds ?? null;
+  const providedStructuredRounds = structuredRounds ?? null;
   const [selectedScope, setSelectedScope] = useState<ExportScope>('consultation');
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [loadedRounds, setLoadedRounds] = useState<Round[]>(providedRounds);
-  const [loadedStructuredRounds, setLoadedStructuredRounds] = useState<RoundWithResponses[]>(providedStructuredRounds);
+  const [loadedRounds, setLoadedRounds] = useState<Round[]>(providedRounds ?? []);
+  const [loadedStructuredRounds, setLoadedStructuredRounds] = useState<RoundWithResponses[]>(providedStructuredRounds ?? []);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
   useEffect(() => {
-    setLoadedRounds(providedRounds);
+    if (providedRounds) {
+      setLoadedRounds(providedRounds);
+    }
   }, [providedRounds]);
 
   useEffect(() => {
-    setLoadedStructuredRounds(providedStructuredRounds);
+    if (providedStructuredRounds) {
+      setLoadedStructuredRounds(providedStructuredRounds);
+    }
   }, [providedStructuredRounds]);
 
   useEffect(() => {
@@ -237,7 +241,7 @@ export default function DownloadSheet({
 
     async function loadDetails() {
       if (!open || !form) return;
-      if (providedRounds.length > 0 && providedStructuredRounds.length > 0) return;
+      if (providedRounds && providedStructuredRounds) return;
 
       setLoadingDetails(true);
       setMessage(null);
@@ -265,7 +269,7 @@ export default function DownloadSheet({
     return () => {
       cancelled = true;
     };
-  }, [open, form?.id, providedRounds.length, providedStructuredRounds.length]);
+  }, [open, form?.id, providedRounds, providedStructuredRounds]);
 
   const visible = open && !!form;
   const exportReady = loadedRounds.length > 0 || loadedStructuredRounds.length > 0;

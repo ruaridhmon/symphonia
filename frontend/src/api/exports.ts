@@ -50,6 +50,20 @@ export async function fetchBackendExport(
     throw new Error(`Export failed (${response.status}): ${detail}`);
   }
 
+  const contentType = response.headers.get('Content-Type') || '';
+  if (format === 'pdf' && !contentType.includes('application/pdf')) {
+    let detail = `Expected PDF export, received ${contentType || 'unknown content type'}.`;
+    try {
+      const bodyText = await response.text();
+      if (bodyText) {
+        detail = `${detail} ${bodyText.slice(0, 160)}`;
+      }
+    } catch {
+      // ignore body read failure
+    }
+    throw new Error(detail);
+  }
+
   const blob = await response.blob();
   const disposition = response.headers.get('Content-Disposition') || '';
   const filenameMatch = disposition.match(/filename="?([^";\n]+)"?/);

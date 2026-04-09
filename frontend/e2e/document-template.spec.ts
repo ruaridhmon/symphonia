@@ -1,5 +1,5 @@
 import { test, expect, request as playwrightRequest } from '@playwright/test';
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -637,6 +637,109 @@ test.describe('Document template consultations', () => {
       if (adminContext) {
         await adminContext.close();
       }
+      await adminApi.dispose();
+    }
+  });
+
+  test('dashboard download sheet exports working pdf and word files', async ({ browser, baseURL }) => {
+    test.setTimeout(120_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    let participantContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const participantApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      const created = await createDocumentTemplateForm(adminApi, appBase, adminToken, {
+        title: `Download Check ${timestamp}`,
+        description: 'Covers dashboard export downloads.',
+        document_template: [
+          'Decision note',
+          '',
+          'Organisation',
+          '{{short:Organisation}}',
+          '',
+          'Executive summary',
+          '{{long:Executive summary}}',
+        ].join('\n'),
+      });
+      createdFormId = created.id;
+
+      const participantEmail = `download-participant-${timestamp}@example.com`;
+      await registerParticipant(participantApi, appBase, participantEmail, 'test123');
+      const participantLogin = await loginViaApi(participantApi, appBase, participantEmail, 'test123');
+      participantContext = await browser.newContext({
+        storageState: buildStorageState(appBase, participantLogin),
+        acceptDownloads: true,
+      });
+      const participantPage = await participantContext.newPage();
+      await participantPage.goto(`${appBase}/join`);
+      await participantPage.getByPlaceholder(/SYM/i).fill(created.join_code);
+      await participantPage.getByRole('button', { name: /join consultation/i }).click();
+      await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
+
+      await participantPage.locator('div.space-y-2').filter({ hasText: 'Organisation' }).first().locator('input').fill('Northshore Council');
+      await participantPage
+        .locator('div.space-y-2')
+        .filter({ hasText: 'Executive summary' })
+        .first()
+        .locator('textarea')
+        .fill('A phased rollout is feasible if governance and staffing are addressed.');
+
+      await participantPage.getByRole('button', { name: /^submit$/i }).click();
+      await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });
+
+      await participantContext.close();
+      participantContext = null;
+
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+        acceptDownloads: true,
+      });
+      const page = await adminContext.newPage();
+      await page.goto(`${appBase}/`);
+
+      const row = page.locator('tr').filter({ hasText: `Download Check ${timestamp}` }).first();
+      await expect(row).toBeVisible();
+
+      await row.getByRole('button', { name: `Download Download Check ${timestamp}` }).click();
+      await expect(page.getByRole('dialog', { name: /download consultation/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /download word/i })).toBeEnabled({ timeout: 15_000 });
+
+      const pdfDownloadPromise = page.waitForEvent('download');
+      await page.getByRole('button', { name: /download pdf/i }).click();
+      const pdfDownload = await pdfDownloadPromise;
+      expect(pdfDownload.suggestedFilename()).toMatch(/\.pdf$/i);
+      const pdfPath = await pdfDownload.path();
+      expect(pdfPath).toBeTruthy();
+      const pdfBytes = await readFile(pdfPath!);
+      expect(pdfBytes.length).toBeGreaterThan(1000);
+      expect(pdfBytes.subarray(0, 4).toString()).toBe('%PDF');
+
+      const wordDownloadPromise = page.waitForEvent('download');
+      await page.getByRole('button', { name: /download word/i }).click();
+      const wordDownload = await wordDownloadPromise;
+      expect(wordDownload.suggestedFilename()).toMatch(/\.docx$/i);
+      const wordPath = await wordDownload.path();
+      expect(wordPath).toBeTruthy();
+      const wordBytes = await readFile(wordPath!);
+      expect(wordBytes.length).toBeGreaterThan(1000);
+      expect(wordBytes.subarray(0, 2).toString()).toBe('PK');
+    } finally {
+      if (participantContext) {
+        await participantContext.close();
+      }
+      if (adminContext) {
+        await adminContext.close();
+      }
+      if (createdFormId) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      await participantApi.dispose();
       await adminApi.dispose();
     }
   });
