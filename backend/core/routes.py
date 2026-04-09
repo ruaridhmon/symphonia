@@ -633,11 +633,13 @@ blockquote {{
 
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.set_margins(16, 16, 16)
         pdf.add_page()
         pdf.set_font("Helvetica", size=11)
         writable_width = max(20, pdf.w - pdf.l_margin - pdf.r_margin)
 
         for line in _md_to_plain_text(md_content):
+            pdf.set_x(pdf.l_margin)
             if not line.strip():
                 pdf.ln(4)
                 continue
