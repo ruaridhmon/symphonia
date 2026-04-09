@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronUp, ChevronDown, Trash2, RefreshCw, BookOpen, X } from 'lucide-react';
-import { API_BASE_URL } from './config';
-import { api } from './api/client';
-import { useAuth } from './AuthContext';
+import { api, getApiErrorDetail } from './api/client';
 import Container from './layouts/Container';
 import { BackLink, LoadingButton } from './components';
 import DocumentTemplateEditor from './components/DocumentTemplateEditor';
@@ -371,7 +369,6 @@ function DelphiGuideModal({ open, onClose }: { open: boolean; onClose: () => voi
 
 export default function AdminFormNew() {
   useDocumentTitle('Create New Form');
-  const { token } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -551,28 +548,19 @@ export default function AdminFormNew() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/forms/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: title.trim(),
-          description: description.trim() || undefined,
-          questions: questions.filter(q => q.label.trim() !== ''),
-          document_template: documentTemplate.trim() || null,
-          allow_join: allowJoin,
-          anonymous,
-          deadline: deadline || null,
-          join_code: joinCode,
-        }),
+      const created = await api.post<{ id: number }>('/forms/create', {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        questions: questions.filter(q => q.label.trim() !== ''),
+        document_template: documentTemplate.trim() || null,
+        allow_join: allowJoin,
+        anonymous,
+        deadline: deadline || null,
+        join_code: joinCode,
       });
-      if (!res.ok) throw new Error(`Save failed (HTTP ${res.status})`);
-      const created = await res.json();
       navigate(`/admin/form/${created.id}`);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong. Please try again.');
+    } catch (err) {
+      setError(getApiErrorDetail(err) || 'Something went wrong. Please try again.');
       setSaving(false);
     }
   };
