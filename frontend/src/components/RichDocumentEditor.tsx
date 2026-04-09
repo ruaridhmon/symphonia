@@ -3,6 +3,10 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
 import { Bold, Italic, Underline as UnderlineIcon, List, ListOrdered } from 'lucide-react';
 
 interface RichDocumentEditorProps {
@@ -26,16 +30,20 @@ export default function RichDocumentEditor({
     extensions: [
       StarterKit,
       Underline,
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell,
       Placeholder.configure({ placeholder }),
     ],
     content: value,
-    editorProps: {
-      attributes: {
-        class: 'focus:outline-none',
-      },
-    },
     onUpdate: ({ editor: currentEditor }) => {
       onChange?.(currentEditor.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: 'symphonia-rich-editor focus:outline-none',
+      },
     },
   });
 
@@ -58,6 +66,47 @@ export default function RichDocumentEditor({
         backgroundColor: 'var(--background)',
       }}
     >
+      <style>{`
+        .symphonia-rich-editor > *:first-child {
+          margin-top: 0;
+        }
+        .symphonia-rich-editor h1,
+        .symphonia-rich-editor h2,
+        .symphonia-rich-editor h3 {
+          line-height: 1.2;
+          color: #10223e;
+        }
+        .symphonia-rich-editor p,
+        .symphonia-rich-editor li {
+          line-height: 1.7;
+        }
+        .symphonia-rich-editor table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1rem 0;
+          table-layout: fixed;
+        }
+        .symphonia-rich-editor th,
+        .symphonia-rich-editor td {
+          border: 1px solid #d5deea;
+          padding: 0.65rem 0.75rem;
+          vertical-align: top;
+        }
+        .symphonia-rich-editor th {
+          background: #eef4fb;
+          font-weight: 600;
+        }
+        .symphonia-rich-editor ul,
+        .symphonia-rich-editor ol {
+          padding-left: 1.25rem;
+        }
+        .symphonia-rich-editor blockquote {
+          border-left: 3px solid #9db5d1;
+          margin: 1rem 0;
+          padding-left: 1rem;
+          color: #42526b;
+        }
+      `}</style>
       {!readOnly ? (
         <div
           className="flex flex-wrap items-center gap-2 border-b px-3 py-2"
@@ -117,11 +166,25 @@ export default function RichDocumentEditor({
       <div
         className="prose prose-sm max-w-none px-4 py-4"
         style={{
-          minHeight,
           color: 'var(--foreground)',
+          backgroundColor: 'color-mix(in srgb, #ffffff 96%, var(--background))',
+          minHeight: `calc(${minHeight} + 2rem)`,
+          display: 'flex',
+          justifyContent: 'center',
         }}
       >
-        <EditorContent editor={editor} />
+        <div
+          className="w-full max-w-[860px] rounded-lg px-6 py-7 sm:px-10 sm:py-9"
+          style={{
+            minHeight,
+            backgroundColor: '#fff',
+            color: '#172033',
+            boxShadow: '0 12px 40px color-mix(in srgb, var(--foreground) 10%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--border) 75%, transparent)',
+          }}
+        >
+          <EditorContent editor={editor} />
+        </div>
       </div>
     </div>
   );

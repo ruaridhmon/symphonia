@@ -6,6 +6,7 @@ import {
   createEditableDocumentTemplate,
   getDocumentTemplateContent,
   getDocumentTemplateMode,
+  htmlToPlainText,
   isEditableDocumentTemplate,
   parseDocumentTemplateFields,
 } from '../utils/documentTemplate';
@@ -18,6 +19,30 @@ function getCookie(name: string): string | null {
 interface DocumentTemplateEditorProps {
   value: string;
   onChange: (value: string) => void;
+}
+
+function normalizeImportedDocumentHtml(sourceHtml: string): string {
+  const parser = new DOMParser();
+  const document = parser.parseFromString(sourceHtml, 'text/html');
+
+  document.querySelectorAll('script, style').forEach((node) => node.remove());
+
+  document.querySelectorAll('*').forEach((element) => {
+    const allowedAttributes = new Set(['href', 'colspan', 'rowspan']);
+    for (const attribute of Array.from(element.attributes)) {
+      if (!allowedAttributes.has(attribute.name.toLowerCase())) {
+        element.removeAttribute(attribute.name);
+      }
+    }
+  });
+
+  if (!document.body.innerHTML.trim()) {
+    return '<p></p>';
+  }
+
+  return document.body.innerHTML
+    .replace(/<p>\s*<\/p>/g, '<p></p>')
+    .trim();
 }
 
 export default function DocumentTemplateEditor({
@@ -37,6 +62,29 @@ export default function DocumentTemplateEditor({
     setUploadError(null);
 
     try {
+      if (mode === 'editable') {
+        const mammoth = await import('mammoth/mammoth.browser');
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.convertToHtml(
+          { arrayBuffer },
+          {
+            includeEmbeddedStyleMap: true,
+            ignoreEmptyParagraphs: false,
+            styleMap: [
+              "p[style-name='Title'] => h1:fresh",
+              "p[style-name='Subtitle'] => h2:fresh",
+            ],
+          },
+        );
+
+        const normalizedHtml = normalizeImportedDocumentHtml(result.value);
+        onChange(createEditableDocumentTemplate(normalizedHtml));
+        if (result.messages.some((message) => message.type === 'warning')) {
+          setUploadError('Imported with minor formatting compromises. Review the document before sharing.');
+        }
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('mode', mode);
@@ -86,12 +134,7 @@ export default function DocumentTemplateEditor({
       return;
     }
 
-    const fallback = editableContent
-      .replace(/<\/(p|div|li|h1|h2|h3|h4|h5|h6|tr)>/gi, '\n')
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<[^>]+>/g, '')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+    const fallback = htmlToPlainText(editableContent);
     onChange(fallback);
   }
 
@@ -202,7 +245,7 @@ export default function DocumentTemplateEditor({
           }}
         >
           {isEditableDocumentTemplate(value) ? (
-            <>Participants will open this document and edit their own copy directly. Their individual version is saved as their response.</>
+            <>Participants will open this document and edit their own copy directly. `.docx` imports preserve much more structure here than the fill-field mode.</>
           ) : (
             <><code>{'{{short:Field}}'}</code> creates a one-line answer box. <code>{'{{long:Field}}'}</code> creates a
             larger response area. Reusing the same placeholder name will map to one shared field.</>
