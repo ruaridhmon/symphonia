@@ -58,8 +58,7 @@ export default function NextRoundQuestionsCard({
               style={{ opacity: 0.55, transition: 'opacity 0.15s ease', minWidth: 0, paddingInline: '0.65rem' }}
               className="group-hover:!opacity-100"
               icon={<X size={14} aria-hidden="true" />}
-            >
-            </LoadingButton>
+            >Remove</LoadingButton>
           </div>
         ))}
       </div>

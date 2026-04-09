@@ -24,6 +24,10 @@ import {
 } from './utils/documentTemplate';
 import type { QuestionnaireImportResult } from './utils/questionnaireImport';
 
+function toQuestionInputs(questions: ConfigurableQuestion[]) {
+  return questions as unknown as Array<string | Record<string, unknown>>;
+}
+
 /* ── Helpers ──────────────────────────────────────────────────── */
 
 function generateJoinCode(): string {
@@ -1242,7 +1246,7 @@ export default function AdminFormNew() {
                   />
                 ) : (
                   <SurveyQuestionList
-                    questions={questions}
+                    questions={toQuestionInputs(questions)}
                     formId="preview"
                     responses={previewResponses}
                     onChange={(key, value) =>

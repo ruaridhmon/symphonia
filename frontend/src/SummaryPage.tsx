@@ -296,7 +296,7 @@ export default function SummaryPage() {
 					return {
 						formId,
 						roundId: progressRoundId,
-						jobId: prev?.jobId ?? null,
+						jobId: null,
 						mode: synthesisMode,
 						model: selectedModel,
 						stage: typeof data.stage === 'string' ? data.stage : 'preparing',

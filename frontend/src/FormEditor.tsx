@@ -23,6 +23,10 @@ import {
 } from './utils/documentTemplate';
 import type { QuestionnaireImportResult } from './utils/questionnaireImport';
 
+function toQuestionInputs(questions: ConfigurableQuestion[]): QuestionInput[] {
+  return questions as unknown as QuestionInput[];
+}
+
 interface FormData {
   title: string;
   questions: QuestionInput[];
@@ -827,7 +831,7 @@ export default function FormEditor() {
                   />
                 ) : (
                   <SurveyQuestionList
-                    questions={questions}
+                    questions={toQuestionInputs(questions)}
                     formId={`edit-preview-${id ?? 'form'}`}
                     responses={previewResponses}
                     onChange={(key, value) =>

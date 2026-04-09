@@ -239,7 +239,7 @@ export default function ResponseEditor({
                 {extractQuestionText(q)}
               </div>
               {isStructuredAnswer(answer) ? (
-                renderStructuredAnswer(answer as Record<string, unknown>)
+                renderStructuredAnswer(answer as unknown as Record<string, unknown>)
               ) : (
                 <div
                   className="text-sm leading-relaxed"

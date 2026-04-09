@@ -63,7 +63,7 @@ export default function RichDocumentEditor({
       lastSyncedValueRef.current = value;
       return;
     }
-    editor.commands.setContent(value, { emitUpdate: false });
+    editor.commands.setContent(value, false);
     lastSyncedValueRef.current = value;
   }, [editor, value]);
 

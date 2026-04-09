@@ -90,7 +90,7 @@ export default function DocumentTemplateEditor({
 
         const normalizedHtml = normalizeImportedDocumentHtml(result.value);
         onChange(createEditableDocumentTemplate(normalizedHtml));
-        if (result.messages.some((message) => message.type === 'warning')) {
+        if (result.messages.some((message: { type?: string }) => message.type === 'warning')) {
           setUploadError('Imported with minor formatting compromises. Review the document before sharing.');
         }
         return;

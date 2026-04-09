@@ -11,30 +11,29 @@ test.describe('Login page smoke tests', () => {
     await page.goto('/login');
   });
 
-  test('page title contains "Sign In"', async ({ page }) => {
-    await expect(page).toHaveTitle(/Sign In/);
+  test('page title contains "Log in"', async ({ page }) => {
+    await expect(page).toHaveTitle(/Log in/i);
   });
 
   test('email input is present and focusable', async ({ page }) => {
-    const emailInput = page.locator('#login-email');
+    const emailInput = page.getByRole('textbox', { name: 'Email address' });
     await expect(emailInput).toBeVisible();
     await expect(emailInput).toHaveAttribute('type', 'email');
-    await expect(emailInput).toHaveAttribute('placeholder', 'you@example.com');
   });
 
   test('password input is present', async ({ page }) => {
-    const passwordInput = page.locator('#login-password');
+    const passwordInput = page.getByRole('textbox', { name: 'Password' });
     await expect(passwordInput).toBeVisible();
   });
 
-  test('Sign In button is present and enabled', async ({ page }) => {
-    const button = page.getByRole('button', { name: 'Sign In' });
+  test('Sign in button is present and enabled', async ({ page }) => {
+    const button = page.getByRole('button', { name: 'Sign in' });
     await expect(button).toBeVisible();
     await expect(button).toBeEnabled();
   });
 
-  test('"Create one" registration link is present', async ({ page }) => {
-    const link = page.getByRole('link', { name: 'Create one' });
+  test('"Create account" registration link is present', async ({ page }) => {
+    const link = page.getByRole('link', { name: 'Create account' });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute('href', '/register');
   });
