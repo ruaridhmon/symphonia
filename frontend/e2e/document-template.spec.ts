@@ -815,15 +815,25 @@ test.describe('Document template consultations', () => {
       expect((menuBox?.bottom ?? 0) <= (editorBox?.bottom ?? 0) + 220).toBeTruthy();
 
       await slashMenuButton.click();
-      await adminPage.locator('.symphonia-fillable-node').first().click();
+      const selectedNode = adminPage.locator('.symphonia-fillable-node').first();
+      await selectedNode.click();
 
       const inspector = adminPage.getByLabel('Field settings inspector');
       await expect(inspector).toBeVisible();
 
       const inspectorBox = await inspector.boundingBox();
+      const selectedNodeBox = await selectedNode.boundingBox();
       expect(inspectorBox).not.toBeNull();
+      expect(selectedNodeBox).not.toBeNull();
       expect((inspectorBox?.left ?? 0) <= (editorBox?.right ?? 0) + 24).toBeTruthy();
       expect((inspectorBox?.top ?? 0) >= (editorBox?.top ?? 0) - 8).toBeTruthy();
+      expect(Math.abs((inspectorBox?.top ?? 0) - (selectedNodeBox?.top ?? 0)) <= 120).toBeTruthy();
+      expect(
+        Math.min(
+          Math.abs((inspectorBox?.left ?? 0) - (selectedNodeBox?.right ?? 0)),
+          Math.abs(((inspectorBox?.left ?? 0) + (inspectorBox?.width ?? 0)) - (selectedNodeBox?.left ?? 0)),
+        ) <= 80,
+      ).toBeTruthy();
     } finally {
       if (adminContext) {
         await adminContext.close();

@@ -664,28 +664,41 @@ export default function FillableDocumentEditor({
       }
 
       const areaRect = workAreaRef.current.getBoundingClientRect();
-      const coords = editor.view.coordsAtPos(selectedField.pos);
-      const gutter = 18;
-      const inspectorWidth = Math.min(352, Math.max(280, areaRect.width - 32));
-      const preferredRight = coords.right - areaRect.left + gutter;
-      const preferredLeft = coords.left - areaRect.left - inspectorWidth - gutter;
+      const nodeElement = editor.view.nodeDOM(selectedField.pos);
+      const nodeRect = nodeElement instanceof HTMLElement
+        ? nodeElement.getBoundingClientRect()
+        : editor.view.coordsAtPos(selectedField.pos);
+      const gutter = 10;
+      const edgePadding = 12;
+      const inspectorWidth = Math.min(320, Math.max(260, areaRect.width * 0.34));
+      const preferredRight = nodeRect.right - areaRect.left + gutter;
+      const preferredLeft = nodeRect.left - areaRect.left - inspectorWidth - gutter;
+      const spaceOnRight = areaRect.right - nodeRect.right;
+      const spaceOnLeft = nodeRect.left - areaRect.left;
       let left = preferredRight;
 
-      if (left + inspectorWidth > areaRect.width - 16) {
+      if (spaceOnRight < inspectorWidth + gutter && spaceOnLeft >= inspectorWidth + gutter) {
         left = preferredLeft;
-      }
-      if (left < 16) {
-        left = Math.max(16, areaRect.width - inspectorWidth - 16);
+      } else if (spaceOnRight < inspectorWidth + gutter) {
+        left = Math.min(
+          Math.max(edgePadding, nodeRect.left - areaRect.left),
+          areaRect.width - inspectorWidth - edgePadding,
+        );
       }
 
-      let top = coords.top - areaRect.top - 18;
-      const maxHeight = Math.max(320, areaRect.height - 32);
-      top = Math.max(16, Math.min(top, areaRect.height - Math.min(maxHeight, 520) - 16));
+      left = Math.max(edgePadding, Math.min(left, areaRect.width - inspectorWidth - edgePadding));
+
+      let top = nodeRect.top - areaRect.top - 10;
+      const maxHeight = Math.max(300, areaRect.height - edgePadding * 2);
+      top = Math.max(
+        edgePadding,
+        Math.min(top, areaRect.height - Math.min(maxHeight, 520) - edgePadding),
+      );
 
       setInspectorStyle({
         top,
         left,
-        maxHeight: Math.max(280, areaRect.height - top - 16),
+        maxHeight: Math.max(260, areaRect.height - top - edgePadding),
       });
     }
 
