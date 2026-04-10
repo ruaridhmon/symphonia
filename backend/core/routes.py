@@ -3828,6 +3828,421 @@ def _extract_text_from_docx_bytes(blob: bytes) -> str:
     return "\n".join(cleaned_lines).strip()
 
 
+def _slugify_document_field_key(value: str, fallback: str) -> str:
+    normalized = re.sub(r"[^a-z0-9]+", "-", value.strip().lower()).strip("-")
+    return normalized or fallback
+
+
+def _coerce_ai_import_questions(
+    payload: Any,
+) -> tuple[str | None, list[str], list[QuestionConfig]]:
+    if not isinstance(payload, dict):
+        return None, [], []
+
+    title = payload.get("documentTitle")
+    document_title = str(title).strip() if isinstance(title, str) else None
+
+    intro_paragraphs: list[str] = []
+    raw_intro = payload.get("introParagraphs")
+    if isinstance(raw_intro, list):
+        intro_paragraphs = [
+            str(item).strip() for item in raw_intro if str(item).strip()
+        ][:12]
+
+    questions: list[QuestionConfig] = []
+    raw_questions = payload.get("questions")
+    if not isinstance(raw_questions, list):
+        return document_title, intro_paragraphs, questions
+
+    seen_ids: set[str] = set()
+    valid_input_types = {
+        "text",
+        "textarea",
+        "single_select",
+        "multi_select",
+        "slider",
+        "likert",
+    }
+
+    for index, item in enumerate(raw_questions, start=1):
+        if not isinstance(item, dict):
+            continue
+
+        label = str(item.get("label", "")).strip()
+        if not label:
+            continue
+
+        input_type = str(item.get("inputType", "textarea")).strip().lower()
+        if input_type not in valid_input_types:
+            input_type = "textarea"
+
+        options = item.get("options")
+        parsed_options = None
+        if isinstance(options, list):
+            parsed_options = [
+                str(option).strip() for option in options if str(option).strip()
+            ]
+            if not parsed_options:
+                parsed_options = None
+
+        if input_type in {"single_select", "multi_select"} and (
+            not parsed_options or len(parsed_options) < 2
+        ):
+            continue
+
+        if input_type == "likert" and (not parsed_options or len(parsed_options) < 2):
+            parsed_options = [
+                "Strongly disagree",
+                "Disagree",
+                "Neither agree nor disagree",
+                "Agree",
+                "Strongly agree",
+            ]
+
+        question_id = str(item.get("questionId", "")).strip() or f"Q{index}"
+        if question_id in seen_ids:
+            question_id = f"{question_id}_{index}"
+        seen_ids.add(question_id)
+
+        section_title = item.get("sectionTitle")
+        help_text = item.get("helpText")
+        conditional_question_id = item.get("conditionalOnQuestionId")
+        conditional_option = item.get("conditionalOnOption")
+
+        def parse_int(name: str) -> int | None:
+            raw = item.get(name)
+            if raw is None or raw == "":
+                return None
+            try:
+                return int(raw)
+            except (TypeError, ValueError):
+                return None
+
+        min_value = parse_int("minValue")
+        max_value = parse_int("maxValue")
+        max_selections = parse_int("maxSelections")
+        if input_type == "slider":
+            min_value = 0 if min_value is None else min_value
+            max_value = 10 if max_value is None else max_value
+        if (
+            input_type == "multi_select"
+            and max_selections is not None
+            and max_selections < 1
+        ):
+            max_selections = None
+
+        question = QuestionConfig(
+            label=label,
+            requireEvidence=False,
+            requireCounterarguments=False,
+            requireConfidence=False,
+            questionId=question_id,
+            sectionTitle=str(section_title).strip()
+            if isinstance(section_title, str) and section_title.strip()
+            else None,
+            helpText=str(help_text).strip()
+            if isinstance(help_text, str) and help_text.strip()
+            else None,
+            optional=bool(item.get("optional", False)),
+            conditionalOnQuestionId=(
+                str(conditional_question_id).strip()
+                if isinstance(conditional_question_id, str)
+                and str(conditional_question_id).strip()
+                else None
+            ),
+            conditionalOnOption=(
+                str(conditional_option).strip()
+                if isinstance(conditional_option, str)
+                and str(conditional_option).strip()
+                else None
+            ),
+            inputType=input_type,
+            options=parsed_options,
+            allowUnsure=bool(item.get("allowUnsure", False))
+            if input_type == "likert"
+            else None,
+            maxSelections=max_selections if input_type == "multi_select" else None,
+            minValue=min_value if input_type == "slider" else None,
+            maxValue=max_value if input_type == "slider" else None,
+            minLabel=(
+                str(item.get("minLabel")).strip()
+                if input_type == "slider"
+                and isinstance(item.get("minLabel"), str)
+                and str(item.get("minLabel")).strip()
+                else None
+            ),
+            midLabel=(
+                str(item.get("midLabel")).strip()
+                if input_type == "slider"
+                and isinstance(item.get("midLabel"), str)
+                and str(item.get("midLabel")).strip()
+                else None
+            ),
+            maxLabel=(
+                str(item.get("maxLabel")).strip()
+                if input_type == "slider"
+                and isinstance(item.get("maxLabel"), str)
+                and str(item.get("maxLabel")).strip()
+                else None
+            ),
+            importedFromQuestionnaire=True,
+            fieldType="short"
+            if input_type == "text"
+            else "long"
+            if input_type == "textarea"
+            else input_type,
+            rows=1 if input_type == "text" else 4 if input_type == "textarea" else None,
+            placeholder=(
+                str(item.get("placeholder")).strip()
+                if isinstance(item.get("placeholder"), str)
+                and str(item.get("placeholder")).strip()
+                else "Write a short response"
+                if input_type == "text"
+                else "Write your response here"
+                if input_type == "textarea"
+                else None
+            ),
+        )
+        questions.append(question)
+
+    return document_title, intro_paragraphs, questions
+
+
+def _serialize_rich_document_field_html(
+    question: QuestionConfig,
+    *,
+    fallback_index: int,
+) -> str:
+    field_key = _slugify_document_field_key(
+        question.questionId or question.label, f"field-{fallback_index}"
+    )
+    field_type = question.fieldType or (
+        "short"
+        if question.inputType == "text"
+        else "long"
+        if question.inputType == "textarea"
+        else question.inputType or "long"
+    )
+    input_type = question.inputType or (
+        "text"
+        if field_type == "short"
+        else "textarea"
+        if field_type == "long"
+        else field_type
+    )
+
+    attributes: dict[str, str] = {
+        "data-symphonia-field-key": field_key,
+        "data-symphonia-field-label": question.label,
+        "data-symphonia-show-label": "false",
+        "data-symphonia-field-type": field_type,
+        "data-symphonia-input-type": input_type,
+        "data-symphonia-optional": "true" if question.optional else "false",
+        "data-symphonia-rows": str(question.rows or (1 if input_type == "text" else 4)),
+        "data-symphonia-placeholder": question.placeholder
+        or (
+            "Write a short response"
+            if input_type == "text"
+            else "Write your response here"
+        ),
+    }
+
+    if question.options:
+        attributes["data-symphonia-options"] = json.dumps(
+            question.options, ensure_ascii=False
+        )
+    if question.maxSelections is not None:
+        attributes["data-symphonia-max-selections"] = str(question.maxSelections)
+    if question.minValue is not None:
+        attributes["data-symphonia-min-value"] = str(question.minValue)
+    if question.maxValue is not None:
+        attributes["data-symphonia-max-value"] = str(question.maxValue)
+    if question.minLabel:
+        attributes["data-symphonia-min-label"] = question.minLabel
+    if question.midLabel:
+        attributes["data-symphonia-mid-label"] = question.midLabel
+    if question.maxLabel:
+        attributes["data-symphonia-max-label"] = question.maxLabel
+    if question.allowUnsure:
+        attributes["data-symphonia-allow-unsure"] = "true"
+
+    serialized_attrs = " ".join(
+        f'{key}="{html.escape(value, quote=True)}"' for key, value in attributes.items()
+    )
+    return f"<span {serialized_attrs}></span>"
+
+
+def _build_llm_fillable_document_template(
+    *,
+    document_title: str | None,
+    intro_paragraphs: list[str],
+    questions: list[QuestionConfig],
+) -> str:
+    if not questions:
+        raise HTTPException(
+            status_code=422,
+            detail="The AI import could not identify any usable fillable fields in that document.",
+        )
+
+    parts: list[str] = []
+    if document_title and not re.match(
+        r"^round\s+\d+\s*:", document_title, re.IGNORECASE
+    ):
+        parts.append(f"<h1>{html.escape(document_title)}</h1>")
+
+    for paragraph in intro_paragraphs:
+        parts.append(
+            f'<p style="font-size: 1rem; line-height: 1.8; color: #32455f;">{html.escape(paragraph)}</p>'
+        )
+
+    current_section: str | None = None
+    question_label_by_id = {
+        question.questionId: question.label
+        for question in questions
+        if question.questionId
+    }
+
+    for index, question in enumerate(questions, start=1):
+        if question.sectionTitle and question.sectionTitle != current_section:
+            current_section = question.sectionTitle
+            parts.append(
+                f'<h2 style="margin-top: 1.4rem;">{html.escape(question.sectionTitle)}</h2>'
+            )
+
+        help_bits: list[str] = []
+        if question.helpText:
+            help_bits.append(question.helpText)
+        if question.inputType == "multi_select" and question.maxSelections:
+            help_bits.append(f"Select up to {question.maxSelections}.")
+        if question.conditionalOnQuestionId and question.conditionalOnOption:
+            controlling_label = question_label_by_id.get(
+                question.conditionalOnQuestionId, "the earlier question"
+            )
+            help_bits.append(
+                f'Shown when "{question.conditionalOnOption}" is selected for {controlling_label}.'
+            )
+
+        field_html = _serialize_rich_document_field_html(question, fallback_index=index)
+        question_id_label = question.questionId or f"Question {index}"
+        help_html = (
+            f'<div style="margin-top: 0.7rem; font-size: 0.84rem; line-height: 1.55; color: #58708a;">{html.escape(" ".join(help_bits))}</div>'
+            if help_bits
+            else ""
+        )
+
+        parts.append(
+            f"""
+<div style="margin: 0 0 1rem; padding: 1rem 1rem 1.05rem; border-radius: 1.15rem; border: 1px solid #dbe4ef; background: rgba(255,255,255,0.84);">
+  <div style="margin-bottom: 0.55rem; font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #6a7b90;">{html.escape(question_id_label)}</div>
+  <div style="margin-bottom: 0.75rem; font-size: 1rem; line-height: 1.65; font-weight: 600; color: #16263e;">{html.escape(question.label)}</div>
+  <div>{field_html}</div>
+  {help_html}
+</div>
+""".strip()
+        )
+
+    body = "".join(parts).strip() or "<p></p>"
+    return f"{RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX}\n{body}"
+
+
+def _extract_fillable_template_with_llm(blob: bytes, db: Session) -> str:
+    extracted_text = _extract_text_from_docx_bytes(blob)
+    if not extracted_text.strip():
+        raise HTTPException(
+            status_code=422,
+            detail="The uploaded .docx did not contain readable text for AI conversion.",
+        )
+
+    openai_client = get_openai_client()
+    if not openai_client:
+        raise HTTPException(
+            status_code=503,
+            detail="AI-assisted document import is not configured. Please add an OpenRouter API key in Settings.",
+        )
+
+    prompt = f"""You are converting a consultation questionnaire extracted from a Word document into a structured fillable survey schema.
+
+Return ONLY valid JSON with this exact shape:
+{{
+  "documentTitle": "optional title",
+  "introParagraphs": ["optional introductory paragraph"],
+  "questions": [
+    {{
+      "questionId": "Q1",
+      "label": "Question text",
+      "sectionTitle": "Optional section title",
+      "inputType": "text|textarea|single_select|multi_select|slider|likert",
+      "options": ["Option 1", "Option 2"],
+      "maxSelections": 3,
+      "optional": false,
+      "minValue": 0,
+      "maxValue": 10,
+      "minLabel": "Low label",
+      "midLabel": "Mid label",
+      "maxLabel": "High label",
+      "allowUnsure": false,
+      "helpText": "Only include concise routing or instruction text when necessary",
+      "conditionalOnQuestionId": "Q1",
+      "conditionalOnOption": "Other"
+    }}
+  ]
+}}
+
+Rules:
+- Preserve the order of the source document.
+- Convert only actual answerable questions into schema items.
+- Use `single_select` when exactly one option should be chosen.
+- Use `multi_select` when multiple options are allowed, especially when the source says "select up to N".
+- Use `slider` for explicit 0-10 scales.
+- Use `likert` for explicit agree/disagree or importance scales with named points.
+- Use `text` only for very short follow-ups like "Other: please specify"; otherwise use `textarea`.
+- If the source includes "Other", create a separate conditional short-text question for the specify prompt.
+- Keep section titles when they are explicit.
+- Do not invent questions that are not supported by the source.
+- Do not return markdown fences or commentary.
+
+Source document text:
+{extracted_text}
+"""
+
+    resolved_model = _resolve_synthesis_model(db)
+    try:
+        completion = openai_client.chat.completions.create(
+            model=resolved_model,
+            max_tokens=8192,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You convert questionnaire documents into precise structured survey schemas. "
+                        "Be conservative, preserve ordering, and return valid JSON only."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+            response_format={"type": "json_object"},
+        )
+        raw_content = completion.choices[0].message.content or "{}"
+        try:
+            parsed = json.loads(raw_content)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", raw_content, re.DOTALL)
+            parsed = json.loads(match.group(0)) if match else {}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502, detail=f"AI-assisted document import failed: {exc}"
+        )
+
+    document_title, intro_paragraphs, questions = _coerce_ai_import_questions(parsed)
+    return _build_llm_fillable_document_template(
+        document_title=document_title,
+        intro_paragraphs=intro_paragraphs,
+        questions=questions,
+    )
+
+
 def _render_word_run_to_html(run: ET.Element) -> str:
     chunks: list[str] = []
     for child in run:
@@ -4825,6 +5240,8 @@ async def extract_document_template(
     request: Request,
     file: UploadFile = File(...),
     mode: str = Form("fillable"),
+    assist: str = Form("standard"),
+    db: Session = Depends(get_db),
     user: User = Depends(require_facilitator),
 ):
     normalized_mode = "fillable" if mode == "fillable-rich" else mode
@@ -4838,11 +5255,14 @@ async def extract_document_template(
         raise HTTPException(status_code=400, detail="Please upload a .docx file")
 
     blob = await file.read()
-    extracted = (
-        _extract_editable_document_from_docx_bytes(blob)
-        if normalized_mode == "editable"
-        else _extract_text_from_docx_bytes(blob)
-    )
+    if assist == "llm_fillable" and normalized_mode == "fillable":
+        extracted = _extract_fillable_template_with_llm(blob, db)
+    else:
+        extracted = (
+            _extract_editable_document_from_docx_bytes(blob)
+            if normalized_mode == "editable"
+            else _extract_text_from_docx_bytes(blob)
+        )
     return {
         "template": extracted,
         "placeholder_count": len(_build_document_questions(extracted)),

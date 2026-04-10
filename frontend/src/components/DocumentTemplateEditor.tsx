@@ -77,6 +77,33 @@ export default function DocumentTemplateEditor({
       }
 
       if (mode === 'fillable-rich' || mode === 'fillable') {
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('mode', 'fillable');
+          formData.append('assist', 'llm_fillable');
+
+          const csrfToken = getCookie('csrf_token');
+          const bearerToken = localStorage.getItem('access_token');
+          const response = await fetch(`${API_BASE_URL}/forms/document-template/extract`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+            headers: {
+              ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+              ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}),
+            },
+          });
+
+          const payload = await response.json().catch(() => ({}));
+          if (response.ok && typeof payload.template === 'string' && payload.template.trim()) {
+            onChange(payload.template);
+            return;
+          }
+        } catch {
+          // Fall back to local import heuristics when AI import is unavailable.
+        }
+
         const [normalizedHtml, rawQuestionnaireText] = await Promise.all([
           importDocxAsHtml(file),
           extractQuestionnaireTextFromDocx(file),
