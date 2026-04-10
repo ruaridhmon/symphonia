@@ -207,7 +207,7 @@ function VoiceButton({
         cursor: !isSupported ? 'not-allowed' : 'pointer',
       }}
     >
-      {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+      {isSupported ? (isListening ? <MicOff size={14} /> : <Mic size={14} />) : null}
       {!isSupported ? 'Voice unavailable' : isListening ? 'Listening…' : 'Voice input'}
     </button>
   );
