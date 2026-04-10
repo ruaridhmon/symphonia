@@ -295,7 +295,6 @@ test.describe('Document template consultations', () => {
       await adminPage.locator('#form-title').fill(`Document Template ${timestamp}`);
       await adminPage.locator('#form-description').fill('Playwright coverage for the document-template flow.');
 
-      await adminPage.getByRole('button', { name: /^Edit document text$/i }).first().click();
       const templateEditor = adminPage.locator('.ProseMirror').first();
       await expect(templateEditor).toBeVisible();
       await templateEditor.click();

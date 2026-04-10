@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { Extension, Node, mergeAttributes, type Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
@@ -11,7 +11,6 @@ import { Bold, ChevronDown, Heading1, Heading2, Highlighter, Italic, List, ListO
 import type { StructuredResponse } from '../types/structured-input';
 import type { DocumentTemplateField } from '../utils/documentTemplate';
 import { createDocumentTemplatePlaceholder, createRichFillableDocumentTemplate } from '../utils/documentTemplate';
-import DocumentTemplateResponse from './DocumentTemplateResponse';
 
 interface FillableDocumentEditorProps {
   value: string;
@@ -259,19 +258,18 @@ function mergeInlineStyle(existingStyle: string | null | undefined, nextRules: R
 export default function FillableDocumentEditor({
   value,
   onChange,
-  previewAnswers,
-  onPreviewChange,
+  previewAnswers: _previewAnswers,
+  onPreviewChange: _onPreviewChange,
 }: FillableDocumentEditorProps) {
   const lastSyncedValueRef = useRef(value);
   const [slashMenu, setSlashMenu] = useState<{ start: number; end: number; query: string; labelHint: string } | null>(null);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
-  const [viewMode, setViewMode] = useState<'author' | 'participant'>('participant');
   const [selectedField, setSelectedField] = useState<SelectedFieldState | null>(null);
   const filteredCommands = COMMAND_OPTIONS.filter((option) =>
     !slashMenu?.query || option.label.toLowerCase().includes(slashMenu.query) || option.description.toLowerCase().includes(slashMenu.query),
   );
-  const [selectedFontFamily, setSelectedFontFamily] = useState(FONT_PRESETS[1].style.fontFamily);
-  const [selectedFontSize, setSelectedFontSize] = useState(SIZE_PRESETS[1].fontSize);
+  const [selectedFontFamily, setSelectedFontFamily] = useState<string>(FONT_PRESETS[1].style.fontFamily);
+  const [selectedFontSize, setSelectedFontSize] = useState<string>(SIZE_PRESETS[1].fontSize);
 
   function buildInsertedField(option: CommandOption) {
     const labelHint = slashMenu?.labelHint?.trim();
@@ -280,7 +278,7 @@ export default function FillableDocumentEditor({
   }
 
   const editor = useEditor({
-    editable: viewMode === 'author',
+    editable: true,
     immediatelyRender: false,
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2] } }),
@@ -358,15 +356,8 @@ export default function FillableDocumentEditor({
 
   useEffect(() => {
     if (!editor) return;
-    editor.setEditable(viewMode === 'author');
-  }, [editor, viewMode]);
-
-  useEffect(() => {
-    if (!editor || viewMode !== 'author') return;
-    window.setTimeout(() => {
-      editor.commands.focus();
-    }, 0);
-  }, [editor, viewMode]);
+    editor.setEditable(true);
+  }, [editor]);
 
   useEffect(() => {
     if (!editor) return;
@@ -435,15 +426,6 @@ export default function FillableDocumentEditor({
       .run();
   }
 
-  function handleLiveCanvasClick(event: ReactMouseEvent<HTMLDivElement>) {
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
-    if (target.closest('input, textarea, button, select, label, [role="radio"], [role="radiogroup"], [data-question-key]')) {
-      return;
-    }
-    setViewMode('author');
-  }
-
   function updateSelectedField(updates: Partial<SelectedFieldState['attrs']>) {
     if (!editor || !selectedField) return;
     const nextAttrs = { ...selectedField.attrs, ...updates };
@@ -469,30 +451,6 @@ export default function FillableDocumentEditor({
         }
       })()
     : '';
-
-  function findFieldStateByQuestionKey(questionKey: string): SelectedFieldState | null {
-    if (!editor) return null;
-    let match: SelectedFieldState | null = null;
-    let nextIndex = 1;
-    const seen = new Map<string, number>();
-    editor.state.doc.descendants((node, pos) => {
-      if (node.type.name !== FIELD_NODE_NAME) return;
-      const key = String(node.attrs.key || '');
-      let questionIndex = seen.get(key);
-      if (!questionIndex) {
-        questionIndex = nextIndex;
-        seen.set(key, questionIndex);
-        nextIndex += 1;
-      }
-      if (`q${questionIndex}` === questionKey && !match) {
-        match = {
-          pos,
-          attrs: node.attrs as SelectedFieldState['attrs'],
-        };
-      }
-    });
-    return match;
-  }
 
   return (
     <div
@@ -531,47 +489,22 @@ export default function FillableDocumentEditor({
       >
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-foreground">Live document canvas</div>
+            <div className="text-sm font-semibold text-foreground">Document canvas</div>
             <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-              Work on the same page participants will read. Switch between editing the document text and trying the live fields.
+              Edit the document directly here. Type normally for document text, type <code>/</code> to insert fields, and click a field chip to configure it.
             </p>
-          </div>
-          <div className="inline-flex overflow-hidden rounded-xl self-start" style={{ border: '1px solid var(--border)' }}>
-            {[
-              { id: 'participant', label: 'Live participant view' },
-              { id: 'author', label: 'Edit document text' },
-            ].map((option) => {
-              const active = viewMode === option.id;
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setViewMode(option.id as 'author' | 'participant')}
-                  className="px-3 py-2 text-sm font-medium"
-                  style={{
-                    border: 'none',
-                    borderRight: option.id === 'participant' ? '1px solid var(--border)' : 'none',
-                    backgroundColor: active ? '#fff' : 'transparent',
-                    color: active ? 'var(--foreground)' : 'var(--muted-foreground)',
-                  }}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
           </div>
           <div className="flex flex-wrap gap-2">
             <span
               className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
               style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)', color: 'var(--muted-foreground)' }}
             >
-              Type `/` for field commands
+              Single inline editing surface
             </span>
           </div>
         </div>
 
-        {viewMode === 'author' ? (
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
             <div className="mr-1 flex items-center gap-2 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
               <Type size={14} style={{ color: 'var(--muted-foreground)' }} />
               <select
@@ -662,29 +595,7 @@ export default function FillableDocumentEditor({
                 Divider
               </button>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-              style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)', color: 'var(--muted-foreground)' }}
-            >
-              Click a field to edit it, or click the document text to jump straight into editing
-            </span>
-            <button
-              type="button"
-              onClick={() => setViewMode('author')}
-              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
-                color: 'var(--accent)',
-              }}
-            >
-              Edit document text
-            </button>
-          </div>
-        )}
+        </div>
       </div>
 
       <div
@@ -694,73 +605,55 @@ export default function FillableDocumentEditor({
             'radial-gradient(circle at top, rgba(186,205,235,0.22), transparent 34%), linear-gradient(180deg, #f5f8fc 0%, #eef3f9 100%)',
         }}
       >
-        {viewMode === 'author' ? (
-          <div className="mx-auto grid max-w-[1180px] gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="mx-auto grid max-w-[1180px] gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
             <div
               data-testid="document-template-rich-editor"
               className="relative rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
               style={{ borderColor: 'rgba(148, 163, 184, 0.28)' }}
             >
-              {viewMode === 'author' ? (
-                <>
-                  <EditorContent editor={editor} />
-                  {slashMenu && filteredCommands.length > 0 ? (
-                    <div
-                      className="absolute left-8 top-8 z-10 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
+              <EditorContent editor={editor} />
+              {slashMenu && filteredCommands.length > 0 ? (
+                <div
+                  className="absolute left-8 top-8 z-10 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.97)',
+                    border: '1px solid rgba(148,163,184,0.26)',
+                    boxShadow: '0 26px 60px -34px rgba(15,23,42,0.42)',
+                  }}
+                >
+                  {filteredCommands.map((option, index) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        if (!editor || !slashMenu) return;
+                        const insertedField = buildInsertedField(option);
+                        editor.chain().focus().deleteRange({ from: slashMenu.start, to: slashMenu.end }).insertContent({
+                          type: FIELD_NODE_NAME,
+                          attrs: {
+                            ...insertedField,
+                            options: JSON.stringify(insertedField.options ?? []),
+                          },
+                        }).run();
+                        setSlashMenu(null);
+                      }}
+                      className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left"
                       style={{
-                        backgroundColor: 'rgba(255,255,255,0.97)',
-                        border: '1px solid rgba(148,163,184,0.26)',
-                        boxShadow: '0 26px 60px -34px rgba(15,23,42,0.42)',
+                        border: 'none',
+                        backgroundColor: index === selectedCommandIndex ? 'rgba(37,99,235,0.08)' : 'transparent',
+                        color: 'var(--foreground)',
                       }}
                     >
-                      {filteredCommands.map((option, index) => (
-                        <button
-                          key={option.id}
-                          type="button"
-                          onMouseDown={(event) => event.preventDefault()}
-                          onClick={() => {
-                            if (!editor || !slashMenu) return;
-                            const insertedField = buildInsertedField(option);
-                            editor.chain().focus().deleteRange({ from: slashMenu.start, to: slashMenu.end }).insertContent({
-                              type: FIELD_NODE_NAME,
-                              attrs: {
-                                ...insertedField,
-                                options: JSON.stringify(insertedField.options ?? []),
-                              },
-                            }).run();
-                            setSlashMenu(null);
-                          }}
-                          className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left"
-                          style={{
-                            border: 'none',
-                            backgroundColor: index === selectedCommandIndex ? 'rgba(37,99,235,0.08)' : 'transparent',
-                            color: 'var(--foreground)',
-                          }}
-                        >
-                          <div>
-                            <div className="text-sm font-semibold">{option.label}</div>
-                            <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.description}</div>
-                          </div>
-                          <ChevronDown size={14} style={{ transform: 'rotate(-90deg)', color: 'var(--muted-foreground)' }} />
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
-                </>
-              ) : (
-                <div onClick={handleLiveCanvasClick}>
-                  <DocumentTemplateResponse
-                    template={createRichFillableDocumentTemplate(editor?.getHTML() || '')}
-                    answers={previewAnswers}
-                    onChange={onPreviewChange}
-                    onFieldSelect={(questionKey) => {
-                      const nextField = findFieldStateByQuestionKey(questionKey);
-                      if (nextField) setSelectedField(nextField);
-                    }}
-                    compact
-                  />
+                      <div>
+                        <div className="text-sm font-semibold">{option.label}</div>
+                        <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.description}</div>
+                      </div>
+                      <ChevronDown size={14} style={{ transform: 'rotate(-90deg)', color: 'var(--muted-foreground)' }} />
+                    </button>
+                  ))}
                 </div>
-              )}
+              ) : null}
             </div>
 
             <div
@@ -932,15 +825,6 @@ export default function FillableDocumentEditor({
               )}
             </div>
           </div>
-        ) : (
-          <div className="mx-auto max-w-[900px]">
-            <DocumentTemplateResponse
-              template={createRichFillableDocumentTemplate(editor?.getHTML() || '')}
-              answers={previewAnswers}
-              onChange={onPreviewChange}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
