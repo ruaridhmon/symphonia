@@ -46,6 +46,7 @@ export default function DocumentTemplateEditor({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [slashQuery, setSlashQuery] = useState('');
   const [slashRange, setSlashRange] = useState<{ start: number; end: number } | null>(null);
+  const [fillableView, setFillableView] = useState<'author' | 'participant'>('author');
   const mode = getDocumentTemplateMode(value);
   const editableContent = getDocumentTemplateContent(value);
   const fields = useMemo(() => parseDocumentTemplateFields(value), [value]);
@@ -247,123 +248,150 @@ export default function DocumentTemplateEditor({
             onChange={(nextValue) => onChange(createEditableDocumentTemplate(nextValue))}
           />
         ) : (
-          <div className="space-y-4">
-            <div
-              className="rounded-2xl p-4"
-              style={{
-                backgroundColor: 'color-mix(in srgb, white 84%, var(--background))',
-                border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-              }}
-            >
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                {COMMAND_OPTIONS.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => insertTemplateAtCursor(option.value)}
-                    className="rounded-full px-3 py-1.5 text-xs font-medium"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
-                      color: 'var(--accent)',
-                      border: '1px solid color-mix(in srgb, var(--accent) 24%, transparent)',
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+          <div
+            className="rounded-2xl p-4"
+            style={{
+              backgroundColor: 'color-mix(in srgb, white 84%, var(--background))',
+              border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+            }}
+          >
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                className="inline-flex overflow-hidden rounded-xl"
+                style={{ border: '1px solid color-mix(in srgb, var(--border) 80%, transparent)' }}
+              >
+                {[
+                  { id: 'author', label: 'Authoring view' },
+                  { id: 'participant', label: 'Participant view' },
+                ].map((option) => {
+                  const active = fillableView === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setFillableView(option.id as 'author' | 'participant')}
+                      className="px-3 py-2 text-sm font-medium"
+                      style={{
+                        border: 'none',
+                        borderRight: option.id === 'author' ? '1px solid color-mix(in srgb, var(--border) 80%, transparent)' : 'none',
+                        backgroundColor: active ? 'white' : 'transparent',
+                        color: active ? 'var(--foreground)' : 'var(--muted-foreground)',
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
               </div>
-              <div className="text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
-                Write the document as normal text, then type <code>/</code> or use the buttons above to insert fillable parts directly into the draft.
-              </div>
-              <div className="relative mt-4">
-                <textarea
-                  ref={textareaRef}
-                  data-testid="document-template-source"
-                  value={value}
-                  onChange={(event) => {
-                    onChange(event.target.value);
-                    updateSlashState(event.target.value, event.target.selectionStart ?? 0);
-                  }}
-                  onClick={(event) => updateSlashState(event.currentTarget.value, event.currentTarget.selectionStart ?? 0)}
-                  onKeyUp={(event) => updateSlashState(event.currentTarget.value, event.currentTarget.selectionStart ?? 0)}
-                  onBlur={() => {
-                    window.setTimeout(() => {
-                      setSlashQuery('');
-                      setSlashRange(null);
-                    }, 120);
-                  }}
-                  rows={16}
-                  className="w-full rounded-2xl px-5 py-5 text-sm"
-                  style={{
-                    border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-                    backgroundColor: 'white',
-                    color: 'var(--foreground)',
-                    outline: 'none',
-                    resize: 'vertical',
-                    lineHeight: 1.75,
-                    fontFamily: 'Georgia, Cambria, \"Times New Roman\", serif',
-                    boxShadow: '0 10px 24px -24px rgba(15, 23, 42, 0.45)',
-                  }}
-                  placeholder={`Background\nThis consultation asks experts to complete the draft note below.\n\nRecommendation\n{{long:Executive summary}}\n\nLead organisation\n{{short:Organisation}}`}
-                />
-                {slashRange && filteredCommands.length > 0 ? (
-                  <div
-                    className="absolute left-4 right-4 top-4 z-10 rounded-2xl p-2"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, white 94%, var(--card))',
-                      border: '1px solid color-mix(in srgb, var(--border) 85%, transparent)',
-                      boxShadow: '0 18px 40px -28px rgba(15, 23, 42, 0.5)',
-                    }}
-                  >
-                    {filteredCommands.map((option) => (
-                      <button
-                        key={option.id}
-                        type="button"
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => insertTemplateAtCursor(option.value)}
-                        className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left"
-                        style={{
-                          border: 'none',
-                          background: 'transparent',
-                          color: 'var(--foreground)',
-                        }}
-                      >
-                        <span className="text-sm font-medium">{option.label}</span>
-                        <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                          {option.description}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
+              <span
+                className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+                style={{
+                  backgroundColor: 'var(--background)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--muted-foreground)',
+                }}
+              >
+                {fields.length} field{fields.length === 1 ? '' : 's'}
+              </span>
             </div>
 
-            <div>
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <div>
-                  <h4 className="text-sm font-semibold text-foreground">Live participant view</h4>
-                  <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    This now uses the same document flow participants will complete.
-                  </p>
+            {fillableView === 'author' ? (
+              <>
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  {COMMAND_OPTIONS.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => insertTemplateAtCursor(option.value)}
+                      className="rounded-full px-3 py-1.5 text-xs font-medium"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+                        color: 'var(--accent)',
+                        border: '1px solid color-mix(in srgb, var(--accent) 24%, transparent)',
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
                 </div>
-                <span
-                  className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-                  style={{
-                    backgroundColor: 'var(--background)',
-                    border: '1px solid var(--border)',
-                    color: 'var(--muted-foreground)',
-                  }}
-                >
-                  {fields.length} field{fields.length === 1 ? '' : 's'}
-                </span>
+                <div className="text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
+                  Write the document as normal text, then type <code>/</code> or use the buttons above to insert fillable parts directly into the draft.
+                </div>
+                <div className="relative mt-4">
+                  <textarea
+                    ref={textareaRef}
+                    data-testid="document-template-source"
+                    value={value}
+                    onChange={(event) => {
+                      onChange(event.target.value);
+                      updateSlashState(event.target.value, event.target.selectionStart ?? 0);
+                    }}
+                    onClick={(event) => updateSlashState(event.currentTarget.value, event.currentTarget.selectionStart ?? 0)}
+                    onKeyUp={(event) => updateSlashState(event.currentTarget.value, event.currentTarget.selectionStart ?? 0)}
+                    onBlur={() => {
+                      window.setTimeout(() => {
+                        setSlashQuery('');
+                        setSlashRange(null);
+                      }, 120);
+                    }}
+                    rows={16}
+                    className="w-full rounded-2xl px-5 py-5 text-sm"
+                    style={{
+                      border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+                      backgroundColor: 'white',
+                      color: 'var(--foreground)',
+                      outline: 'none',
+                      resize: 'vertical',
+                      lineHeight: 1.75,
+                      fontFamily: 'Georgia, Cambria, \"Times New Roman\", serif',
+                      boxShadow: '0 10px 24px -24px rgba(15, 23, 42, 0.45)',
+                    }}
+                    placeholder={`Background\nThis consultation asks experts to complete the draft note below.\n\nRecommendation\n{{long:Executive summary}}\n\nLead organisation\n{{short:Organisation}}`}
+                  />
+                  {slashRange && filteredCommands.length > 0 ? (
+                    <div
+                      className="absolute left-4 right-4 top-4 z-10 rounded-2xl p-2"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, white 94%, var(--card))',
+                        border: '1px solid color-mix(in srgb, var(--border) 85%, transparent)',
+                        boxShadow: '0 18px 40px -28px rgba(15, 23, 42, 0.5)',
+                      }}
+                    >
+                      {filteredCommands.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => insertTemplateAtCursor(option.value)}
+                          className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left"
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            color: 'var(--foreground)',
+                          }}
+                        >
+                          <span className="text-sm font-medium">{option.label}</span>
+                          <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                            {option.description}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            ) : (
+              <div>
+                <div className="mb-3 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
+                  This is the same document flow participants will complete. Switch back to authoring view to change the source text or insert fields.
+                </div>
+                <DocumentTemplateResponse
+                  template={value}
+                  answers={previewAnswers}
+                  onChange={onPreviewChange}
+                />
               </div>
-              <DocumentTemplateResponse
-                template={value}
-                answers={previewAnswers}
-                onChange={onPreviewChange}
-              />
-            </div>
+            )}
           </div>
         )}
       </div>
