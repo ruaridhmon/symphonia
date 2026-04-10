@@ -250,6 +250,17 @@ function fieldFromType(type: CommandOption['field']['fieldType'], label: string,
   };
 }
 
+function normalizeOptionRowsForEditor(rows: string[]): string[] {
+  const next = rows.map((item) => item.replace(/\r/g, ''));
+  while (next.length > 1 && next[next.length - 1] === '' && next[next.length - 2] === '') {
+    next.pop();
+  }
+  if (next.length === 0 || next[next.length - 1] !== '') {
+    next.push('');
+  }
+  return next;
+}
+
 const COMMAND_OPTIONS: CommandOption[] = [
   { id: 'short', label: 'Short text', description: 'Single-line response', field: fieldFromType('short', 'Field name') },
   { id: 'long', label: 'Long text', description: 'Paragraph response', field: fieldFromType('long', 'Section response') },
@@ -475,13 +486,17 @@ export default function FillableDocumentEditor({
   const rootRef = useRef<HTMLDivElement | null>(null);
   const workAreaRef = useRef<HTMLDivElement | null>(null);
   const documentCanvasRef = useRef<HTMLDivElement | null>(null);
+  const optionsEditorRef = useRef<HTMLDivElement | null>(null);
+  const optionInputRefs = useRef<Array<HTMLTextAreaElement | null>>([]);
+  const pendingOptionFocusIndexRef = useRef<number | null>(null);
+  const selectedFieldOptionRowsRef = useRef<string[]>(['']);
   const changeTimerRef = useRef<number | null>(null);
   const pendingValueRef = useRef<string | null>(null);
   const lastSyncedValueRef = useRef(value);
   const [slashMenu, setSlashMenu] = useState<{ start: number; end: number; query: string; labelHint: string } | null>(null);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [selectedField, setSelectedField] = useState<SelectedFieldState | null>(null);
-  const [selectedFieldOptionsDraft, setSelectedFieldOptionsDraft] = useState('');
+  const [selectedFieldOptionRows, setSelectedFieldOptionRows] = useState<string[]>(['']);
   const [selectedFieldOptionsDirty, setSelectedFieldOptionsDirty] = useState(false);
   const [inspectorStyle, setInspectorStyle] = useState<{ top: number; left: number; maxHeight: number } | null>(null);
   const filteredCommands = COMMAND_OPTIONS.filter((option) =>
@@ -685,19 +700,40 @@ export default function FillableDocumentEditor({
 
   useEffect(() => {
     if (!selectedField) {
-      setSelectedFieldOptionsDraft('');
+      selectedFieldOptionRowsRef.current = [''];
+      setSelectedFieldOptionRows(['']);
       setSelectedFieldOptionsDirty(false);
       return;
     }
     try {
       const parsed = JSON.parse(selectedField.attrs.options || '[]');
-      setSelectedFieldOptionsDraft(Array.isArray(parsed) ? parsed.join('\n') : '');
+      const nextRows = normalizeOptionRowsForEditor(
+        Array.isArray(parsed) && parsed.length > 0
+          ? parsed.map((item) => String(item ?? ''))
+          : [''],
+      );
+      selectedFieldOptionRowsRef.current = nextRows;
+      setSelectedFieldOptionRows(nextRows);
       setSelectedFieldOptionsDirty(false);
     } catch {
-      setSelectedFieldOptionsDraft('');
+      selectedFieldOptionRowsRef.current = [''];
+      setSelectedFieldOptionRows(['']);
       setSelectedFieldOptionsDirty(false);
     }
   }, [selectedField?.pos, selectedField?.attrs.key]);
+
+  useEffect(() => {
+    const focusIndex = pendingOptionFocusIndexRef.current;
+    if (focusIndex === null) return;
+    pendingOptionFocusIndexRef.current = null;
+    const target = optionInputRefs.current[focusIndex];
+    if (!target) return;
+    window.requestAnimationFrame(() => {
+      target.focus();
+      const end = target.value.length;
+      target.setSelectionRange(end, end);
+    });
+  }, [selectedFieldOptionRows]);
 
   useEffect(() => {
     function updateInspectorPosition() {
@@ -852,8 +888,36 @@ export default function FillableDocumentEditor({
     setSelectedField(null);
   }
 
-  function updateSelectedFieldOptionsDraft(nextDraft: string) {
-    setSelectedFieldOptionsDraft(nextDraft);
+  function updateSelectedFieldOptionRow(index: number, nextValue: string) {
+    setSelectedFieldOptionRows((current) => {
+      const next = [...current];
+      if (nextValue.includes('\n')) {
+        const parts = nextValue.replace(/\r/g, '').split('\n');
+        pendingOptionFocusIndexRef.current = Math.min(index + 1, current.length);
+        next.splice(index, 1, ...parts);
+      } else {
+        next[index] = nextValue;
+      }
+      const normalized = normalizeOptionRowsForEditor(next);
+      selectedFieldOptionRowsRef.current = normalized;
+      return normalized;
+    });
+    setSelectedFieldOptionsDirty(true);
+  }
+
+  function removeSelectedFieldOptionRow(index: number) {
+    pendingOptionFocusIndexRef.current = Math.max(0, index - 1);
+    setSelectedFieldOptionRows((current) => {
+      if (current.length <= 1) {
+        selectedFieldOptionRowsRef.current = [''];
+        return [''];
+      }
+      const next = [...current];
+      next.splice(index, 1);
+      const normalized = normalizeOptionRowsForEditor(next.length > 0 ? next : ['']);
+      selectedFieldOptionRowsRef.current = normalized;
+      return normalized;
+    });
     setSelectedFieldOptionsDirty(true);
   }
 
@@ -861,8 +925,7 @@ export default function FillableDocumentEditor({
     if (!selectedField || !selectedFieldOptionsDirty) return;
 
     const normalizedOptions = JSON.stringify(
-      selectedFieldOptionsDraft
-        .split('\n')
+      selectedFieldOptionRowsRef.current
         .map((item) => item.replace(/\r/g, ''))
         .filter((item) => item.trim().length > 0)
         .map((item) => item.trim()),
@@ -875,19 +938,54 @@ export default function FillableDocumentEditor({
     setSelectedFieldOptionsDirty(false);
   }
 
-  function stopInspectorEvent(
-    event:
-      | React.MouseEvent<HTMLInputElement | HTMLTextAreaElement>
-      | React.PointerEvent<HTMLInputElement | HTMLTextAreaElement>
-      | React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) {
+  function stopInspectorEvent(event: {
+    stopPropagation: () => void;
+    nativeEvent?: {
+      stopImmediatePropagation?: () => void;
+    };
+  }) {
     event.stopPropagation();
-    if ('nativeEvent' in event && typeof event.nativeEvent.stopImmediatePropagation === 'function') {
-      event.nativeEvent.stopImmediatePropagation();
+    const nativeEvent = event.nativeEvent;
+    if (typeof nativeEvent?.stopImmediatePropagation === 'function') {
+      nativeEvent.stopImmediatePropagation();
     }
   }
 
-  const settingsInputHandlers = {
+  function handleOptionRowKeyDown(index: number, event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    stopInspectorEvent(event);
+    if (event.key === 'Backspace' && selectedFieldOptionRows[index] === '' && selectedFieldOptionRows.length > 1) {
+      event.preventDefault();
+      removeSelectedFieldOptionRow(index);
+    }
+  }
+
+  function handleOptionRowPaste(index: number, event: React.ClipboardEvent<HTMLTextAreaElement>) {
+    stopInspectorEvent(event);
+    const text = event.clipboardData.getData('text/plain').replace(/\r/g, '');
+    if (!text.includes('\n')) {
+      return;
+    }
+    event.preventDefault();
+    const lines = text.split('\n');
+    setSelectedFieldOptionRows((current) => {
+      const next = [...current];
+      next.splice(index, 1, ...lines);
+      const normalized = normalizeOptionRowsForEditor(next);
+      selectedFieldOptionRowsRef.current = normalized;
+      return normalized;
+    });
+    setSelectedFieldOptionsDirty(true);
+  }
+
+  function handleOptionRowBlur(event: React.FocusEvent<HTMLTextAreaElement>) {
+    const nextTarget = event.relatedTarget;
+    if (nextTarget instanceof Node && optionsEditorRef.current?.contains(nextTarget)) {
+      return;
+    }
+    commitSelectedFieldOptionsDraft();
+  }
+
+  const settingsPointerHandlers = {
     onFocus: () => setSlashMenu(null),
     onMouseDownCapture: stopInspectorEvent,
     onMouseDown: stopInspectorEvent,
@@ -895,8 +993,18 @@ export default function FillableDocumentEditor({
     onPointerDown: stopInspectorEvent,
     onClickCapture: stopInspectorEvent,
     onClick: stopInspectorEvent,
+  };
+
+  const settingsInputHandlers = {
+    ...settingsPointerHandlers,
     onKeyDownCapture: stopInspectorEvent,
     onKeyDown: stopInspectorEvent,
+    onKeyUpCapture: stopInspectorEvent,
+    onKeyUp: stopInspectorEvent,
+  };
+
+  const optionRowInputHandlers = {
+    ...settingsPointerHandlers,
     onKeyUpCapture: stopInspectorEvent,
     onKeyUp: stopInspectorEvent,
   };
@@ -1243,26 +1351,70 @@ export default function FillableDocumentEditor({
                         </div>
                       ) : null}
 
-                      {(selectedField.attrs.fieldType === 'single_select' || selectedField.attrs.fieldType === 'multi_select' || selectedField.attrs.fieldType === 'likert') ? (
-                        <div>
-                          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                            Options
-                          </label>
-                          <textarea
-                            aria-label="Field options"
-                            value={selectedFieldOptionsDraft}
-                            {...settingsInputHandlers}
-                            onChange={(event) => updateSelectedFieldOptionsDraft(event.target.value)}
-                            onBlur={commitSelectedFieldOptionsDraft}
-                            rows={6}
-                            className="w-full rounded-xl px-3 py-2 text-sm"
-                            style={{ border: '1px solid var(--input)', backgroundColor: 'white', resize: 'vertical' }}
-                          />
-                          <p className="mt-1 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-                            Put one option on each line. Spaces inside an option are preserved.
-                          </p>
-                        </div>
-                      ) : null}
+	                      {(selectedField.attrs.fieldType === 'single_select' || selectedField.attrs.fieldType === 'multi_select' || selectedField.attrs.fieldType === 'likert') ? (
+	                        <div>
+	                          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+	                            Options
+	                          </label>
+                            <div
+                              ref={optionsEditorRef}
+                              className="space-y-2 rounded-2xl p-2"
+                              style={{
+                                border: '1px solid var(--input)',
+                                backgroundColor: 'color-mix(in srgb, white 92%, var(--background))',
+                              }}
+                            >
+                              {selectedFieldOptionRows.map((option, index) => (
+                                <div key={`option-row-${index}`} className="flex items-center gap-2">
+                                  <div
+                                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[11px] font-semibold"
+                                    style={{
+                                      backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                                      color: 'var(--accent)',
+                                    }}
+                                  >
+                                    {index + 1}
+                                  </div>
+                                  <textarea
+                                    ref={(node) => {
+                                      optionInputRefs.current[index] = node;
+                                    }}
+                                    aria-label={index === 0 ? 'Field options' : `Field option ${index + 1}`}
+                                    value={option}
+                                    {...optionRowInputHandlers}
+                                    onChange={(event) => updateSelectedFieldOptionRow(index, event.target.value)}
+                                    onKeyDownCapture={(event) => handleOptionRowKeyDown(index, event)}
+                                    onPaste={(event) => handleOptionRowPaste(index, event)}
+                                    onBlur={handleOptionRowBlur}
+                                    rows={1}
+                                    className="w-full rounded-xl px-3 py-2 text-sm"
+                                    style={{ border: '1px solid var(--input)', backgroundColor: 'white', resize: 'none', lineHeight: 1.45 }}
+                                  />
+                                  <button
+                                    type="button"
+                                    onMouseDown={stopInspectorEvent}
+                                    onClick={(event) => {
+                                      stopInspectorEvent(event);
+                                      removeSelectedFieldOptionRow(index);
+                                    }}
+                                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                                    style={{
+                                      border: '1px solid color-mix(in srgb, var(--destructive) 22%, transparent)',
+                                      color: 'var(--destructive)',
+                                      backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
+                                    }}
+                                    aria-label={`Remove option ${index + 1}`}
+                                  >
+                                    <X size={15} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+	                          <p className="mt-1 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+	                            Each row is one option. Edit any row directly, and use the blank final row for the next option.
+	                          </p>
+	                        </div>
+	                      ) : null}
 
                       {selectedField.attrs.fieldType === 'multi_select' ? (
                         <div>
