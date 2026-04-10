@@ -3794,6 +3794,24 @@ def _validate_document_template(template: str | None) -> list[str | dict[str, ob
 
 
 def _extract_text_from_docx_bytes(blob: bytes) -> str:
+    def _extract_paragraph_fragments(paragraph: ET.Element) -> list[str]:
+        pieces: list[str] = []
+        for node in paragraph.iter():
+            tag = node.tag.rsplit("}", 1)[-1]
+            if tag == "t":
+                pieces.append(node.text or "")
+            elif tag in {"br", "cr"}:
+                pieces.append("\n")
+            elif tag == "tab":
+                pieces.append("\t")
+
+        text = "".join(pieces)
+        if "\n" not in text:
+            return [text.strip()]
+
+        fragments = [fragment.strip() for fragment in text.splitlines()]
+        return fragments if any(fragments) else [""]
+
     try:
         with zipfile.ZipFile(BytesIO(blob)) as archive:
             document_xml = archive.read("word/document.xml")
@@ -3809,17 +3827,16 @@ def _extract_text_from_docx_bytes(blob: bytes) -> str:
     for child in body:
         tag = child.tag.rsplit("}", 1)[-1]
         if tag == "p":
-            text = "".join(
-                node.text or "" for node in child.findall(".//w:t", WORDPROCESSINGML_NS)
-            ).strip()
-            lines.append(text)
+            lines.extend(_extract_paragraph_fragments(child))
         elif tag == "tbl":
             for row in child.findall(".//w:tr", WORDPROCESSINGML_NS):
                 cells = []
                 for cell in row.findall("./w:tc", WORDPROCESSINGML_NS):
-                    cell_text = "".join(
-                        node.text or ""
-                        for node in cell.findall(".//w:t", WORDPROCESSINGML_NS)
+                    cell_text = " ".join(
+                        fragment
+                        for paragraph in cell.findall("./w:p", WORDPROCESSINGML_NS)
+                        for fragment in _extract_paragraph_fragments(paragraph)
+                        if fragment
                     ).strip()
                     cells.append(cell_text)
                 if any(cells):

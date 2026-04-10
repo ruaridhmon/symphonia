@@ -29,19 +29,49 @@ interface QuestionBlock {
   lines: string[];
 }
 
-const QUESTION_START_RE = /^(Q\d+[a-zA-Z]?)[.:]\s+(.*)$/i;
-const QUESTION_ID_ONLY_RE = /^(Q\d+[a-zA-Z]?)(?:[.:])?\s*$/i;
+const QUESTION_START_RE = /^(Q\d+[a-zA-Z]?)(?:[.:)\-])?\s+(.*)$/i;
+const QUESTION_ID_ONLY_RE = /^(Q\d+[a-zA-Z]?)(?:[.:)\-])?\s*$/i;
 const ROUND_START_RE = /^Round\s+(\d+)\s*:\s*(.+)$/i;
 const SECTION_RE = /^Section\s+[A-Z0-9]+\.\s*(.+)$/i;
-const METADATA_LINE_RE = /^(?:Response type:|Routing:|Anchor labels:)/i;
+const METADATA_LINE_RE = /^(?:Response type:|Routing:|Anchor labels:|Show only if\b|Only if\b|Populate this dynamically\b|Dynamic list:)/i;
 
-function normalizeLines(text: string): string[] {
+function normalizeQuestionnaireSource(text: string): string {
   return text
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
     .replace(/\u00a0/g, ' ')
+    .replace(/\u200b/g, '')
     .replace(/[–—]/g, '-')
+    .replace(/([^\n])\s+(?=Round\s+\d+\s*:)/gi, '$1\n')
+    .replace(/([^\n])\s+(?=Section\s+[A-Z0-9]+\.\s+)/g, '$1\n')
+    .replace(/([^\n])\s+(?=(?:Response type:|Routing:|Anchor labels:))/gi, '$1\n')
+    .replace(/\s*([•●▪◦])\s*/g, '\n$1 ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n');
+}
+
+function shouldSplitEmbeddedQuestionStart(prefix: string): boolean {
+  const normalizedPrefix = prefix.trim().toLowerCase();
+  if (!normalizedPrefix) return false;
+  return !/(?:same list as|selected in|selected for|shown in|before|after|from|of|in|for|question)\s*$/.test(normalizedPrefix);
+}
+
+function splitEmbeddedQuestionStarts(line: string): string[] {
+  const normalized = line.trim();
+  if (!normalized) return [];
+
+  const match = normalized.match(/^(.*?)(Q\d+[a-zA-Z]?(?:[.:)\-])\s+.*)$/i);
+  if (!match || !shouldSplitEmbeddedQuestionStart(match[1])) {
+    return [normalized];
+  }
+
+  return [match[1].trim(), match[2].trim()].filter(Boolean);
+}
+
+function normalizeLines(text: string): string[] {
+  return normalizeQuestionnaireSource(text)
     .split('\n')
+    .flatMap((line) => splitEmbeddedQuestionStarts(line))
     .map((line) => line.trim());
 }
 
@@ -83,6 +113,23 @@ function mergeSplitQuestionLines(lines: string[]): string[] {
 
 function stripListMarker(line: string): string {
   return line.replace(/^(?:[•●▪◦*-]|\d+[.)]|[a-z][.)])\s+/, '').trim();
+}
+
+function explodeInlineDelimitedOptions(line: string): string[] {
+  const normalized = line.trim();
+  if (!normalized) return [];
+
+  if (normalized.includes('|')) {
+    const parts = normalized
+      .split(/\s*\|\s*/)
+      .map((part) => stripListMarker(part))
+      .filter(Boolean);
+    if (parts.length >= 2) {
+      return parts;
+    }
+  }
+
+  return [normalized];
 }
 
 function parseAnchorLabels(line: string | null): Pick<ConfigurableQuestion, 'minLabel' | 'midLabel' | 'maxLabel'> {
@@ -297,27 +344,44 @@ function parseBlock(
   optionRegistry: Map<string, string[]>,
 ): { questions: ConfigurableQuestion[]; warnings: string[]; exportedOptions?: string[] } {
   const warnings: string[] = [];
-  const responseTypeLine = block.lines.find((line) => /^Response type:/i.test(line)) ?? null;
-  const routingLine = block.lines.find((line) => /^Routing:/i.test(line)) ?? null;
-  const anchorLine = block.lines.find((line) => /^Anchor labels:/i.test(line)) ?? null;
+  const normalizedBlockLines = block.lines
+    .flatMap((line) => normalizeLines(line))
+    .filter((line) => line.trim() !== '');
+  const firstMetadataIndex = normalizedBlockLines.findIndex((line) => /^Response type:|^Routing:|^Anchor labels:/i.test(line));
+  const label =
+    firstMetadataIndex > 0
+      ? [block.label, ...normalizedBlockLines.slice(0, firstMetadataIndex)].join(' ').replace(/\s+/g, ' ').trim()
+      : block.label;
+  const blockLines = firstMetadataIndex > 0
+    ? normalizedBlockLines.slice(firstMetadataIndex)
+    : normalizedBlockLines;
+
+  const responseTypeLine = blockLines.find((line) => /^Response type:/i.test(line)) ?? null;
+  const routingLine =
+    blockLines.find((line) => /^Routing:/i.test(line))
+    ?? blockLines.find((line) => /^Show only if\b|^Only if\b/i.test(line))
+    ?? null;
+  const anchorLine = blockLines.find((line) => /^Anchor labels:/i.test(line)) ?? null;
 
   const responseType = responseTypeLine?.replace(/^Response type:\s*/i, '').trim() ?? null;
   const routing = routingLine?.replace(/^Routing:\s*/i, '').trim() ?? null;
   const routingCondition = extractRoutingCondition(routing);
   const anchorLabels = parseAnchorLabels(anchorLine?.replace(/^Anchor labels:\s*/i, '').trim() ?? null);
 
-  const contentLines = block.lines.filter((line) => {
+  const contentLines = blockLines.filter((line) => {
     return (
       line &&
       !/^Response type:/i.test(line) &&
       !/^Routing:/i.test(line) &&
-      !/^Anchor labels:/i.test(line)
+      !/^Anchor labels:/i.test(line) &&
+      !/^Show only if\b|^Only if\b/i.test(line)
     );
   });
 
-  const extraNotes = contentLines.filter((line) => /^Optional:|^Before Q\d+|^Populate this dynamically/i.test(line));
+  const extraNotes = contentLines.filter((line) => /^Optional:|^Before Q\d+|^Populate this dynamically|^Dynamic list:/i.test(line));
   const optionLines = contentLines
-    .filter((line) => !/^Optional:|^Before Q\d+|^Populate this dynamically/i.test(line))
+    .filter((line) => !/^Optional:|^Before Q\d+|^Populate this dynamically|^Dynamic list:/i.test(line))
+    .flatMap((line) => explodeInlineDelimitedOptions(line))
     .map((line) => stripListMarker(line))
     .filter(Boolean);
   const referenceId =
@@ -327,14 +391,14 @@ function parseBlock(
     null;
 
   const resolvedOptions = referenceId ? optionRegistry.get(referenceId) ?? [] : optionLines;
-  const detectedInputType = detectInputType(responseType, block.label);
+  const detectedInputType = detectInputType(responseType, label);
   const inputType =
     !responseType && optionLines.length >= 2 && detectedInputType === 'textarea'
       ? 'single_select'
       : detectedInputType;
   const likertScale = inputType === 'likert' ? extractLikertScale(responseType, resolvedOptions) : null;
   const helpText = buildHelpText(routing, extraNotes);
-  const dynamicSource = [block.label, responseType, routing, ...contentLines].filter(Boolean).join(' ');
+  const dynamicSource = [label, responseType, routing, ...contentLines].filter(Boolean).join(' ');
 
   if (isDynamicQuestion(dynamicSource)) {
     warnings.push(`${block.questionId} was skipped because it depends on dynamic or routed list generation.`);
@@ -347,7 +411,7 @@ function parseBlock(
         label: item,
         questionId: `${block.questionId}_${index + 1}`,
         helpText: buildHelpText(routing, extraNotes),
-        groupPrompt: block.label,
+        groupPrompt: label,
         inputType: 'slider',
         minValue: 0,
         maxValue: 10,
@@ -381,6 +445,7 @@ function parseBlock(
     : null;
 
   const question = buildQuestionBase(block, {
+    label,
     helpText,
     inputType,
     conditionalOnQuestionId: routingCondition?.questionId ?? null,

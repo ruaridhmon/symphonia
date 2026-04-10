@@ -37,6 +37,46 @@ def _build_questionnaire_docx(lines: list[str]) -> bytes:
     return output.getvalue()
 
 
+def _build_questionnaire_docx_with_soft_breaks(
+    paragraph_runs: list[list[str]],
+) -> bytes:
+    content_types_xml = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>"""
+    rels_xml = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>"""
+    paragraphs = []
+    for runs in paragraph_runs:
+        if not runs:
+            paragraphs.append("<w:p/>")
+            continue
+        fragments = []
+        for index, run in enumerate(runs):
+            if index > 0:
+                fragments.append("<w:r><w:br/></w:r>")
+            fragments.append(f"<w:r><w:t>{run}</w:t></w:r>")
+        paragraphs.append(f"<w:p>{''.join(fragments)}</w:p>")
+    document_xml = f"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    {" ".join(paragraphs)}
+    <w:sectPr/>
+  </w:body>
+</w:document>"""
+
+    output = BytesIO()
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("[Content_Types].xml", content_types_xml)
+        archive.writestr("_rels/.rels", rels_xml)
+        archive.writestr("word/document.xml", document_xml)
+    return output.getvalue()
+
+
 class _FakeMessage:
     def __init__(self, content: str):
         self.content = content
@@ -161,3 +201,44 @@ def test_llm_fillable_docx_import_returns_rich_template(
     assert 'data-symphonia-field-type="slider"' in payload["template"]
     assert 'data-symphonia-min-label="Not significant"' in payload["template"]
     assert "Other: Please specify" in payload["template"]
+
+
+def test_standard_docx_extract_preserves_soft_line_breaks(
+    client: TestClient, admin_headers: dict
+):
+    docx_bytes = _build_questionnaire_docx_with_soft_breaks(
+        [
+            [
+                "Q0. Which of the following best describes your current role?",
+                "Response type: Select one.",
+            ],
+            [
+                "School leader",
+                "Teacher",
+                "Other",
+            ],
+        ]
+    )
+
+    response = client.post(
+        "/forms/document-template/extract",
+        headers=admin_headers,
+        files={
+            "file": (
+                "questionnaire.docx",
+                docx_bytes,
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+        },
+        data={"mode": "fillable"},
+    )
+
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["template"].splitlines()[:5] == [
+        "Q0. Which of the following best describes your current role?",
+        "Response type: Select one.",
+        "School leader",
+        "Teacher",
+        "Other",
+    ]

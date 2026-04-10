@@ -52,12 +52,12 @@ export default function DocumentTemplateEditor({
     ? getRichFillableTemplateContent(value)
     : convertLegacyFillableTemplateToRichHtml(value);
   const questionnaireConversion = useMemo(() => {
-    if (isEditableDocumentTemplate(value)) return null;
+    if (isEditableDocumentTemplate(value) || fields.length > 0) return null;
     const plainText = extractQuestionnaireTextFromHtml(fillableContent).trim() || htmlToPlainText(fillableContent).trim();
     if (!plainText) return null;
     const converted = convertQuestionnaireTextToRichTemplate(plainText);
     return converted.questions.length > 0 ? converted : null;
-  }, [fillableContent, value]);
+  }, [fillableContent, fields.length, value]);
 
   function applyQuestionnaireConversion() {
     setUploadError(null);
@@ -95,6 +95,32 @@ export default function DocumentTemplateEditor({
       }
 
       if (mode === 'fillable-rich' || mode === 'fillable') {
+        const requestStandardExtraction = async () => {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('mode', 'fillable');
+
+          const csrfToken = getCookie('csrf_token');
+          const bearerToken = localStorage.getItem('access_token');
+          const response = await fetch(`${API_BASE_URL}/forms/document-template/extract`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+            headers: {
+              ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
+              ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}),
+            },
+          });
+
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok || typeof payload.template !== 'string') {
+            return null;
+          }
+
+          const converted = convertQuestionnaireTextToRichTemplate(payload.template);
+          return converted.questions.length > 0 ? converted.template : null;
+        };
+
         try {
           const formData = new FormData();
           formData.append('file', file);
@@ -120,6 +146,12 @@ export default function DocumentTemplateEditor({
           }
         } catch {
           // Fall back to local import heuristics when AI import is unavailable.
+        }
+
+        const serverExtractedTemplate = await requestStandardExtraction().catch(() => null);
+        if (serverExtractedTemplate) {
+          onChange(serverExtractedTemplate);
+          return;
         }
 
         const [normalizedHtml, rawQuestionnaireText] = await Promise.all([
@@ -268,7 +300,7 @@ export default function DocumentTemplateEditor({
             <Upload size={15} />
             {isUploading ? 'Importing…' : 'Import .docx'}
           </button>
-          {!isEditableDocumentTemplate(value) && questionnaireConversion ? (
+          {!isEditableDocumentTemplate(value) && fields.length === 0 && questionnaireConversion ? (
             <button
               type="button"
               onClick={applyQuestionnaireConversion}
@@ -322,7 +354,7 @@ export default function DocumentTemplateEditor({
             ? 'Participants will open this document and edit their own copy directly. `.docx` imports preserve much more structure here than the fill-field mode.'
             : 'Type / to insert fields, then click a field only when you need to edit its settings. The document canvas now stays full width until a field is selected.'}
         </p>
-        {!isEditableDocumentTemplate(value) && questionnaireConversion ? (
+        {!isEditableDocumentTemplate(value) && fields.length === 0 && questionnaireConversion ? (
           <p className="mt-2">
             Detected {questionnaireConversion.questions.length} questionnaire field{questionnaireConversion.questions.length === 1 ? '' : 's'} in the current text. Use <strong>Auto-build fields</strong> to convert them into typed single select, multi select, slider, and text controls.
           </p>
