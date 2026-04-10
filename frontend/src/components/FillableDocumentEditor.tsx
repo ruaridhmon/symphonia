@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { Node, mergeAttributes, type Editor } from '@tiptap/core';
+import { Extension, Node, mergeAttributes, type Editor } from '@tiptap/core';
+import { NodeSelection } from '@tiptap/pm/state';
 import Highlight from '@tiptap/extension-highlight';
 import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
@@ -26,9 +27,57 @@ type CommandOption = {
   field: DocumentTemplateField;
 };
 
+type SelectedFieldState = {
+  pos: number;
+  attrs: {
+    key: string;
+    label: string;
+    fieldType: DocumentTemplateField['fieldType'];
+    inputType: DocumentTemplateField['inputType'];
+    optional: boolean;
+    rows: number;
+    placeholder: string;
+    options: string;
+    minValue: number | null;
+    maxValue: number | null;
+    minLabel: string | null;
+    midLabel: string | null;
+    maxLabel: string | null;
+    allowUnsure: boolean;
+  };
+};
+
 const COLOR_SWATCHES = ['#172033', '#1d4ed8', '#0f766e', '#b45309', '#be123c', '#6d28d9'];
 
 const FIELD_NODE_NAME = 'fillableField';
+
+const ImportedDocumentStyles = Extension.create({
+  name: 'importedDocumentStyles',
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['textStyle'],
+        attributes: {
+          style: {
+            default: null,
+            parseHTML: (element) => element.getAttribute('style'),
+            renderHTML: (attributes) => (attributes.style ? { style: attributes.style } : {}),
+          },
+        },
+      },
+      {
+        types: ['paragraph', 'heading', FIELD_NODE_NAME],
+        attributes: {
+          style: {
+            default: null,
+            parseHTML: (element) => element.getAttribute('style'),
+            renderHTML: (attributes) => (attributes.style ? { style: attributes.style } : {}),
+          },
+        },
+      },
+    ];
+  },
+});
 
 const FillableFieldNode = Node.create({
   name: FIELD_NODE_NAME,
@@ -81,7 +130,7 @@ const FillableFieldNode = Node.create({
         class: 'symphonia-fillable-chip',
         contenteditable: 'false',
       }),
-      `${HTMLAttributes.label}${HTMLAttributes.optional ? ' · optional' : ''}`,
+      `${HTMLAttributes.label} · ${String(HTMLAttributes.fieldType || 'field').replace('_', ' ')}${HTMLAttributes.optional ? ' · optional' : ''}`,
     ];
   },
 });
@@ -179,6 +228,7 @@ export default function FillableDocumentEditor({
   const [slashMenu, setSlashMenu] = useState<{ start: number; end: number; query: string; labelHint: string } | null>(null);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [viewMode, setViewMode] = useState<'author' | 'participant'>('author');
+  const [selectedField, setSelectedField] = useState<SelectedFieldState | null>(null);
   const filteredCommands = COMMAND_OPTIONS.filter((option) =>
     !slashMenu?.query || option.label.toLowerCase().includes(slashMenu.query) || option.description.toLowerCase().includes(slashMenu.query),
   );
@@ -197,6 +247,7 @@ export default function FillableDocumentEditor({
       TextStyle,
       Highlight.configure({ multicolor: true }),
       Underline,
+      ImportedDocumentStyles,
       Placeholder.configure({ placeholder: 'Write the document here, then type / to insert fillable fields…' }),
       FillableFieldNode,
     ],
@@ -213,6 +264,15 @@ export default function FillableDocumentEditor({
       const nextSlash = getSlashMenuState(currentEditor);
       setSlashMenu(nextSlash);
       if (!nextSlash) setSelectedCommandIndex(0);
+      const selection = currentEditor.state.selection;
+      if (selection instanceof NodeSelection && selection.node.type.name === FIELD_NODE_NAME) {
+        setSelectedField({
+          pos: selection.from,
+          attrs: selection.node.attrs as SelectedFieldState['attrs'],
+        });
+      } else {
+        setSelectedField(null);
+      }
     },
     editorProps: {
       attributes: {
@@ -278,6 +338,32 @@ export default function FillableDocumentEditor({
   function setTextColor(color: string) {
     editor?.chain().focus().setMark('textStyle', { style: `color: ${color}` }).run();
   }
+
+  function updateSelectedField(updates: Partial<SelectedFieldState['attrs']>) {
+    if (!editor || !selectedField) return;
+    const nextAttrs = { ...selectedField.attrs, ...updates };
+    editor.view.dispatch(
+      editor.state.tr.setNodeMarkup(selectedField.pos, undefined, nextAttrs),
+    );
+    setSelectedField({ pos: selectedField.pos, attrs: nextAttrs });
+  }
+
+  function removeSelectedField() {
+    if (!editor || !selectedField) return;
+    editor.chain().focus().deleteRange({ from: selectedField.pos, to: selectedField.pos + 1 }).run();
+    setSelectedField(null);
+  }
+
+  const selectedFieldOptions = selectedField
+    ? (() => {
+        try {
+          const parsed = JSON.parse(selectedField.attrs.options || '[]');
+          return Array.isArray(parsed) ? parsed.join('\n') : '';
+        } catch {
+          return '';
+        }
+      })()
+    : '';
 
   return (
     <div
@@ -382,54 +468,225 @@ export default function FillableDocumentEditor({
         }}
       >
         {viewMode === 'author' ? (
-          <div
-            data-testid="document-template-rich-editor"
-            className="mx-auto max-w-[900px] rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
-            style={{ borderColor: 'rgba(148, 163, 184, 0.28)' }}
-          >
-            <EditorContent editor={editor} />
-            {slashMenu && filteredCommands.length > 0 ? (
-              <div
-                className="absolute left-8 top-8 z-10 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.97)',
-                  border: '1px solid rgba(148,163,184,0.26)',
-                  boxShadow: '0 26px 60px -34px rgba(15,23,42,0.42)',
-                }}
-              >
-                {filteredCommands.map((option, index) => (
+          <div className="mx-auto grid max-w-[1180px] gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+            <div
+              data-testid="document-template-rich-editor"
+              className="relative rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
+              style={{ borderColor: 'rgba(148, 163, 184, 0.28)' }}
+            >
+              <EditorContent editor={editor} />
+              {slashMenu && filteredCommands.length > 0 ? (
+                <div
+                  className="absolute left-8 top-8 z-10 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.97)',
+                    border: '1px solid rgba(148,163,184,0.26)',
+                    boxShadow: '0 26px 60px -34px rgba(15,23,42,0.42)',
+                  }}
+                >
+                  {filteredCommands.map((option, index) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        if (!editor || !slashMenu) return;
+                        const insertedField = buildInsertedField(option);
+                        editor.chain().focus().deleteRange({ from: slashMenu.start, to: slashMenu.end }).insertContent({
+                          type: FIELD_NODE_NAME,
+                          attrs: {
+                            ...insertedField,
+                            options: JSON.stringify(insertedField.options ?? []),
+                          },
+                        }).run();
+                        setSlashMenu(null);
+                      }}
+                      className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left"
+                      style={{
+                        border: 'none',
+                        backgroundColor: index === selectedCommandIndex ? 'rgba(37,99,235,0.08)' : 'transparent',
+                        color: 'var(--foreground)',
+                      }}
+                    >
+                      <div>
+                        <div className="text-sm font-semibold">{option.label}</div>
+                        <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.description}</div>
+                      </div>
+                      <ChevronDown size={14} style={{ transform: 'rotate(-90deg)', color: 'var(--muted-foreground)' }} />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            <div
+              className="rounded-[1.35rem] border px-4 py-4"
+              style={{
+                borderColor: 'rgba(148, 163, 184, 0.24)',
+                backgroundColor: 'rgba(255,255,255,0.76)',
+                boxShadow: '0 18px 40px -32px rgba(15,23,42,0.34)',
+              }}
+            >
+              <div className="text-sm font-semibold text-foreground">Field settings</div>
+              <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
+                Click an inserted field in the document to edit its label, placeholder, options, or range.
+              </p>
+
+              {selectedField ? (
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                      Label
+                    </label>
+                    <input
+                      value={selectedField.attrs.label}
+                      onChange={(event) =>
+                        updateSelectedField({
+                          label: event.target.value,
+                          key: event.target.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'field',
+                          placeholder: `Enter ${event.target.value.trim().toLowerCase() || 'response'}`,
+                        })
+                      }
+                      className="w-full rounded-xl px-3 py-2 text-sm"
+                      style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                      Placeholder
+                    </label>
+                    <input
+                      value={selectedField.attrs.placeholder}
+                      onChange={(event) => updateSelectedField({ placeholder: event.target.value })}
+                      className="w-full rounded-xl px-3 py-2 text-sm"
+                      style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                    />
+                  </div>
+
+                  <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedField.attrs.optional}
+                      onChange={(event) => updateSelectedField({ optional: event.target.checked })}
+                    />
+                    Optional field
+                  </label>
+
+                  {(selectedField.attrs.fieldType === 'long' || selectedField.attrs.fieldType === 'short') ? (
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                        Rows
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={selectedField.attrs.rows}
+                        onChange={(event) => updateSelectedField({ rows: Number(event.target.value) || 1 })}
+                        className="w-full rounded-xl px-3 py-2 text-sm"
+                        style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                      />
+                    </div>
+                  ) : null}
+
+                  {(selectedField.attrs.fieldType === 'single_select' || selectedField.attrs.fieldType === 'multi_select' || selectedField.attrs.fieldType === 'likert') ? (
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                        Options
+                      </label>
+                      <textarea
+                        value={selectedFieldOptions}
+                        onChange={(event) =>
+                          updateSelectedField({
+                            options: JSON.stringify(
+                              event.target.value
+                                .split('\n')
+                                .map((item) => item.trim())
+                                .filter(Boolean),
+                            ),
+                          })
+                        }
+                        rows={6}
+                        className="w-full rounded-xl px-3 py-2 text-sm"
+                        style={{ border: '1px solid var(--input)', backgroundColor: 'white', resize: 'vertical' }}
+                      />
+                    </div>
+                  ) : null}
+
+                  {selectedField.attrs.fieldType === 'slider' ? (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                          Min
+                        </label>
+                        <input
+                          type="number"
+                          value={selectedField.attrs.minValue ?? 0}
+                          onChange={(event) => updateSelectedField({ minValue: Number(event.target.value) })}
+                          className="w-full rounded-xl px-3 py-2 text-sm"
+                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                          Max
+                        </label>
+                        <input
+                          type="number"
+                          value={selectedField.attrs.maxValue ?? 10}
+                          onChange={(event) => updateSelectedField({ maxValue: Number(event.target.value) })}
+                          className="w-full rounded-xl px-3 py-2 text-sm"
+                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                          Min label
+                        </label>
+                        <input
+                          value={selectedField.attrs.minLabel ?? ''}
+                          onChange={(event) => updateSelectedField({ minLabel: event.target.value })}
+                          className="w-full rounded-xl px-3 py-2 text-sm"
+                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                          Max label
+                        </label>
+                        <input
+                          value={selectedField.attrs.maxLabel ?? ''}
+                          onChange={(event) => updateSelectedField({ maxLabel: event.target.value })}
+                          className="w-full rounded-xl px-3 py-2 text-sm"
+                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+
                   <button
-                    key={option.id}
                     type="button"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => {
-                      if (!editor || !slashMenu) return;
-                      const insertedField = buildInsertedField(option);
-                      editor.chain().focus().deleteRange({ from: slashMenu.start, to: slashMenu.end }).insertContent({
-                        type: FIELD_NODE_NAME,
-                        attrs: {
-                          ...insertedField,
-                          options: JSON.stringify(insertedField.options ?? []),
-                        },
-                      }).run();
-                      setSlashMenu(null);
-                    }}
-                    className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left"
+                    onClick={removeSelectedField}
+                    className="w-full rounded-xl px-3 py-2 text-sm font-medium"
                     style={{
-                      border: 'none',
-                      backgroundColor: index === selectedCommandIndex ? 'rgba(37,99,235,0.08)' : 'transparent',
-                      color: 'var(--foreground)',
+                      backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
+                      color: 'var(--destructive)',
+                      border: '1px solid color-mix(in srgb, var(--destructive) 20%, transparent)',
                     }}
                   >
-                    <div>
-                      <div className="text-sm font-semibold">{option.label}</div>
-                      <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.description}</div>
-                    </div>
-                    <ChevronDown size={14} style={{ transform: 'rotate(-90deg)', color: 'var(--muted-foreground)' }} />
+                    Remove field
                   </button>
-                ))}
-              </div>
-            ) : null}
+                </div>
+              ) : (
+                <div
+                  className="mt-4 rounded-2xl px-3 py-4 text-sm"
+                  style={{ backgroundColor: 'color-mix(in srgb, var(--background) 88%, white)', color: 'var(--muted-foreground)' }}
+                >
+                  No field selected.
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="mx-auto max-w-[900px]">
