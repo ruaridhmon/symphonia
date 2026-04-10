@@ -11,6 +11,7 @@ from sqlalchemy import (
     JSON,
     Float,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime, timezone
@@ -70,6 +71,10 @@ class UserFormUnlock(Base):
     joined_at = Column(
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
+    consent_given = Column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
+    consented_at = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="unlocked_forms")
     form = relationship("FormModel", back_populates="unlocked_by_users")
@@ -95,6 +100,11 @@ class FormModel(Base):
         Boolean, nullable=False, default=False, server_default="0"
     )
     public_upload_prompt = Column(Text, nullable=True)
+    require_consent = Column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
+    consent_text = Column(Text, nullable=True)
+    consent_document = Column(Text, nullable=True)
     join_code = Column(String, unique=True, nullable=False)
 
     expert_labels = Column(

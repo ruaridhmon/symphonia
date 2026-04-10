@@ -133,7 +133,10 @@ async function publicApiClient<T>(
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      credentials: 'omit',
+    });
   } catch (err) {
     throw new ApiError(0, err instanceof Error ? err.message : 'Network request failed');
   }

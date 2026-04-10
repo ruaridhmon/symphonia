@@ -5,6 +5,7 @@ import { api, getApiErrorDetail } from './api/client';
 import { BackLink, LoadingButton } from './components';
 import DocumentTemplateEditor from './components/DocumentTemplateEditor';
 import DocumentTemplateResponse from './components/DocumentTemplateResponse';
+import ConsentSettings from './components/ConsentSettings';
 import PublicShareSettings from './components/PublicShareSettings';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import QuestionnaireImporter from './components/QuestionnaireImporter';
@@ -35,6 +36,9 @@ interface FormData {
   document_template?: string | null;
   join_code: string;
   allow_public_responses?: boolean;
+  consent_required?: boolean;
+  consent_text?: string | null;
+  consent_document?: string | null;
   public_require_consent?: boolean;
   public_consent_text?: string | null;
   public_require_upload?: boolean;
@@ -78,10 +82,11 @@ export default function FormEditor() {
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const [allowPublicResponses, setAllowPublicResponses] = useState(false);
-  const [publicRequireConsent, setPublicRequireConsent] = useState(false);
-  const [publicConsentText, setPublicConsentText] = useState(
+  const [requireConsent, setRequireConsent] = useState(false);
+  const [consentText, setConsentText] = useState(
     'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
   );
+  const [consentDocument, setConsentDocument] = useState('');
   const validQuestions = questions.filter((question) => question.label.trim() !== '');
   const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
   const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
@@ -121,11 +126,13 @@ export default function FormEditor() {
         setDocumentTemplate(form.document_template ?? '');
         setJoinCode(form.join_code);
         setAllowPublicResponses(Boolean(form.allow_public_responses));
-        setPublicRequireConsent(Boolean(form.public_require_consent));
-        setPublicConsentText(
-          form.public_consent_text?.trim()
+        setRequireConsent(Boolean(form.consent_required ?? form.public_require_consent));
+        setConsentText(
+          form.consent_text?.trim()
+            || form.public_consent_text?.trim()
             || 'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
         );
+        setConsentDocument(form.consent_document ?? '');
         setLoading(false);
       })
       .catch(() => {
@@ -192,8 +199,11 @@ export default function FormEditor() {
         questions: validQuestions,
         document_template: trimmedDocumentTemplate || null,
         allow_public_responses: allowPublicResponses,
-        public_require_consent: publicRequireConsent,
-        public_consent_text: publicRequireConsent ? publicConsentText.trim() : null,
+        require_consent: requireConsent,
+        consent_text: requireConsent ? consentText.trim() : null,
+        consent_document: requireConsent && consentDocument.trim() ? consentDocument.trim() : null,
+        public_require_consent: false,
+        public_consent_text: null,
         public_require_upload: false,
         public_upload_prompt: null,
       });
@@ -367,10 +377,14 @@ export default function FormEditor() {
         <PublicShareSettings
           enabled={allowPublicResponses}
           onEnabledChange={setAllowPublicResponses}
-          requireConsent={publicRequireConsent}
-          onRequireConsentChange={setPublicRequireConsent}
-          consentText={publicConsentText}
-          onConsentTextChange={setPublicConsentText}
+        />
+        <ConsentSettings
+          enabled={requireConsent}
+          onEnabledChange={setRequireConsent}
+          consentText={consentText}
+          onConsentTextChange={setConsentText}
+          consentDocument={consentDocument}
+          onConsentDocumentChange={setConsentDocument}
         />
       </section>
 

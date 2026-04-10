@@ -47,9 +47,16 @@ def _ensure_schema_columns() -> None:
             "public_consent_text": "ALTER TABLE forms ADD COLUMN public_consent_text TEXT",
             "public_require_upload": "ALTER TABLE forms ADD COLUMN public_require_upload BOOLEAN NOT NULL DEFAULT FALSE",
             "public_upload_prompt": "ALTER TABLE forms ADD COLUMN public_upload_prompt TEXT",
+            "require_consent": "ALTER TABLE forms ADD COLUMN require_consent BOOLEAN NOT NULL DEFAULT FALSE",
+            "consent_text": "ALTER TABLE forms ADD COLUMN consent_text TEXT",
+            "consent_document": "ALTER TABLE forms ADD COLUMN consent_document TEXT",
         },
         "users": {
             "is_public_guest": "ALTER TABLE users ADD COLUMN is_public_guest BOOLEAN NOT NULL DEFAULT FALSE",
+        },
+        "user_form_unlocks": {
+            "consent_given": "ALTER TABLE user_form_unlocks ADD COLUMN consent_given BOOLEAN NOT NULL DEFAULT FALSE",
+            "consented_at": "ALTER TABLE user_form_unlocks ADD COLUMN consented_at TIMESTAMP",
         },
     }
 

@@ -6,6 +6,7 @@ import Container from './layouts/Container';
 import { BackLink, LoadingButton } from './components';
 import DocumentTemplateEditor from './components/DocumentTemplateEditor';
 import DocumentTemplateResponse from './components/DocumentTemplateResponse';
+import ConsentSettings from './components/ConsentSettings';
 import PublicShareSettings from './components/PublicShareSettings';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import QuestionnaireImporter from './components/QuestionnaireImporter';
@@ -364,10 +365,11 @@ export default function AdminFormNew() {
   const [anonymous, setAnonymous] = useState(false);
   const [deadline, setDeadline] = useState('');
   const [allowPublicResponses, setAllowPublicResponses] = useState(false);
-  const [publicRequireConsent, setPublicRequireConsent] = useState(false);
-  const [publicConsentText, setPublicConsentText] = useState(
+  const [requireConsent, setRequireConsent] = useState(false);
+  const [consentText, setConsentText] = useState(
     'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
   );
+  const [consentDocument, setConsentDocument] = useState('');
   const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
   const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
     label: field.label,
@@ -524,8 +526,11 @@ export default function AdminFormNew() {
         document_template: documentTemplate.trim() || null,
         allow_join: allowJoin,
         allow_public_responses: allowPublicResponses,
-        public_require_consent: publicRequireConsent,
-        public_consent_text: publicRequireConsent ? publicConsentText.trim() : null,
+        require_consent: requireConsent,
+        consent_text: requireConsent ? consentText.trim() : null,
+        consent_document: requireConsent && consentDocument.trim() ? consentDocument.trim() : null,
+        public_require_consent: false,
+        public_consent_text: null,
         public_require_upload: false,
         public_upload_prompt: null,
         anonymous,
@@ -1371,10 +1376,14 @@ export default function AdminFormNew() {
                 <PublicShareSettings
                   enabled={allowPublicResponses}
                   onEnabledChange={setAllowPublicResponses}
-                  requireConsent={publicRequireConsent}
-                  onRequireConsentChange={setPublicRequireConsent}
-                  consentText={publicConsentText}
-                  onConsentTextChange={setPublicConsentText}
+                />
+                <ConsentSettings
+                  enabled={requireConsent}
+                  onEnabledChange={setRequireConsent}
+                  consentText={consentText}
+                  onConsentTextChange={setConsentText}
+                  consentDocument={consentDocument}
+                  onConsentDocumentChange={setConsentDocument}
                 />
 
                 {/* 2 ── Anonymous responses toggle */}

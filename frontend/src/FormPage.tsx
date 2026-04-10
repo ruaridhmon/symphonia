@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ClipboardList, AlertCircle, ChevronDown } from 'lucide-react'
-import { getForm, Form } from './api/forms'
+import { getForm, Form, acceptFormConsent } from './api/forms'
 import { getActiveRound, ActiveRound } from './api/rounds'
 import { submitResponse, hasSubmitted as checkSubmitted, getMyResponse, saveDraft, getDraft, deleteDraft } from './api/responses'
 import { ApiError, getApiErrorDetail } from './api/client'
 import { BackLink, LoadingButton, SynthesisDisplay, PresenceIndicator, StructuredInput } from './components'
+import ConsentGate from './components/ConsentGate'
 import DocumentTemplateResponse from './components/DocumentTemplateResponse'
 import SurveyQuestionList from './components/SurveyQuestionList'
 import Skeleton, { SkeletonCard } from './components/Skeleton'
@@ -35,6 +36,9 @@ export default function FormPage() {
   const [mode, setMode] = useState('loading') // loading, filling, reviewing, error
   const [loadError, setLoadError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [consentChecked, setConsentChecked] = useState(false)
+  const [consentError, setConsentError] = useState<string | null>(null)
+  const [isAcceptingConsent, setIsAcceptingConsent] = useState(false)
   const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [draftRestored, setDraftRestored] = useState(false)
   const [highlightedQuestionKey, setHighlightedQuestionKey] = useState<string | null>(null)
@@ -200,6 +204,25 @@ export default function FormPage() {
     loadForm()
   }, [loadForm])
 
+  async function handleAcceptConsent() {
+    if (!formId || !form?.consent_required) return
+    if (!consentChecked) {
+      setConsentError('Please confirm consent before continuing.')
+      return
+    }
+
+    setIsAcceptingConsent(true)
+    setConsentError(null)
+    try {
+      await acceptFormConsent(formId)
+      setForm((current) => current ? { ...current, consent_completed: true } : current)
+    } catch (err) {
+      setConsentError(getApiErrorDetail(err) || 'Could not save consent right now.')
+    } finally {
+      setIsAcceptingConsent(false)
+    }
+  }
+
   function validateResponses() {
     const result = isDocumentMode && form?.document_template
       ? validateDocumentTemplateResponses(form.document_template, structuredResponses)
@@ -325,6 +348,32 @@ export default function FormPage() {
   }
 
   const isDocumentMode = isDocumentTemplate(form.document_template)
+  const needsConsent = Boolean(form.consent_required && !form.consent_completed && !hasSubmitted)
+
+  if (needsConsent) {
+    return (
+      <div className="min-h-screen bg-background px-4 py-6 sm:py-8">
+        <div className="max-w-3xl mx-auto">
+          <BackLink to="/" label="Dashboard" className="mb-4" />
+          <ConsentGate
+            title={form.title}
+            description="Please review this information before entering the form."
+            consentText={form.consent_text || ''}
+            consentDocument={form.consent_document}
+            checked={consentChecked}
+            onCheckedChange={(value) => {
+              setConsentChecked(value)
+              if (value) setConsentError(null)
+            }}
+            onContinue={handleAcceptConsent}
+            loading={isAcceptingConsent}
+            continueLabel="Continue to form"
+            error={consentError}
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:py-8">

@@ -9,6 +9,10 @@ export interface PublicFormDetail {
   join_code: string;
   previous_round_synthesis?: string;
   allow_public_responses: boolean;
+  consent_required: boolean;
+  consent_text: string;
+  consent_document?: string | null;
+  consent_completed?: boolean;
   public_require_consent: boolean;
   public_consent_text: string;
   public_require_upload: boolean;

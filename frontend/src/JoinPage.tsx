@@ -6,6 +6,7 @@ import { getPublicForm, startPublicFormSession, type PublicFormDetail } from './
 import { ApiError, getApiErrorDetail } from './api/client';
 import Container from './layouts/Container';
 import { BackLink, LoadingButton } from './components';
+import ConsentGate from './components/ConsentGate';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 /**
@@ -204,18 +205,17 @@ export default function JoinPage() {
                 />
               </div>
 
-              {publicForm.public_require_consent ? (
-                <label className="flex items-start gap-3 rounded-xl p-4" style={{ border: '1px solid var(--border)' }}>
-                  <input
-                    type="checkbox"
-                    checked={consentGiven}
-                    onChange={(event) => setConsentGiven(event.target.checked)}
-                    className="mt-1"
-                  />
-                  <span className="text-sm leading-6" style={{ color: 'var(--foreground)' }}>
-                    {publicForm.public_consent_text}
-                  </span>
-                </label>
+              {publicForm.consent_required ? (
+                <ConsentGate
+                  title="Consent"
+                  description="Please review this before continuing to the form."
+                  consentText={publicForm.consent_text}
+                  consentDocument={publicForm.consent_document}
+                  checked={consentGiven}
+                  onCheckedChange={setConsentGiven}
+                  onContinue={() => {}}
+                  hideAction
+                />
               ) : null}
 
               {error ? (
@@ -230,7 +230,7 @@ export default function JoinPage() {
                 size="md"
                 className="w-full"
                 loading={startingPublicSession}
-                disabled={!participantName.trim()}
+                disabled={!participantName.trim() || (publicForm.consent_required && !consentGiven)}
               >
                 Continue to form
               </LoadingButton>

@@ -1270,6 +1270,11 @@ def submit_response(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    _ensure_user_consent_for_form(db, form, user)
+
     active_round = (
         db.query(RoundModel)
         .filter(RoundModel.form_id == form_id, RoundModel.is_active)
@@ -1414,6 +1419,11 @@ def save_draft(
     user: User = Depends(get_current_user),
 ):
     """Upsert a draft for the active round. Called by the frontend auto-save."""
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    _ensure_user_consent_for_form(db, form, user)
+
     active_round = (
         db.query(RoundModel)
         .filter(RoundModel.form_id == form_id, RoundModel.is_active)
@@ -3276,6 +3286,9 @@ class FormCreate(BaseModel):
     allow_join: bool
     join_code: str
     allow_public_responses: bool = False
+    require_consent: bool = False
+    consent_text: str | None = None
+    consent_document: str | None = None
     public_require_consent: bool = False
     public_consent_text: str | None = None
     public_require_upload: bool = False
@@ -3287,6 +3300,9 @@ class FormUpdate(BaseModel):
     questions: list[str | QuestionConfig] = []
     document_template: str | None = None
     allow_public_responses: bool = False
+    require_consent: bool = False
+    consent_text: str | None = None
+    consent_document: str | None = None
     public_require_consent: bool = False
     public_consent_text: str | None = None
     public_require_upload: bool = False
@@ -3370,17 +3386,85 @@ def _get_active_round_for_form(db: Session, form_id: int) -> RoundModel | None:
     )
 
 
+def _get_user_form_unlock(
+    db: Session, *, form_id: int, user_id: int
+) -> UserFormUnlock | None:
+    return (
+        db.query(UserFormUnlock)
+        .filter(UserFormUnlock.form_id == form_id, UserFormUnlock.user_id == user_id)
+        .first()
+    )
+
+
+def _user_has_completed_consent(
+    form: FormModel, user: User, unlock: UserFormUnlock | None
+) -> bool:
+    if not _consent_required(form):
+        return True
+    if user.role in (
+        UserRole.FACILITATOR.value,
+        UserRole.PLATFORM_ADMIN.value,
+    ) and form.owner_id == user.id:
+        return True
+    return bool(unlock and unlock.consent_given)
+
+
+def _ensure_user_consent_for_form(
+    db: Session, form: FormModel, user: User
+) -> UserFormUnlock | None:
+    unlock = _get_user_form_unlock(db, form_id=form.id, user_id=user.id)
+    if not _user_has_completed_consent(form, user, unlock):
+        raise HTTPException(
+            status_code=403,
+            detail="Please complete the consent step before continuing.",
+        )
+    return unlock
+
+
 def _serialize_public_settings(form: FormModel) -> dict[str, Any]:
     return {
         "allow_public_responses": bool(form.allow_public_responses),
-        "public_require_consent": bool(form.public_require_consent),
+        "public_require_consent": _consent_required(form),
         "public_consent_text": (
-            form.public_consent_text.strip()
-            if form.public_consent_text and form.public_consent_text.strip()
-            else DEFAULT_PUBLIC_CONSENT_TEXT
+            _consent_text(form)
         ),
         "public_require_upload": False,
         "public_upload_prompt": "",
+    }
+
+
+def _consent_required(form: FormModel) -> bool:
+    return bool(
+        getattr(form, "require_consent", False) or form.public_require_consent
+    )
+
+
+def _consent_text(form: FormModel) -> str:
+    text_value = (
+        getattr(form, "consent_text", None)
+        or form.public_consent_text
+        or DEFAULT_PUBLIC_CONSENT_TEXT
+    )
+    stripped = text_value.strip() if text_value else ""
+    return stripped or DEFAULT_PUBLIC_CONSENT_TEXT
+
+
+def _consent_document(form: FormModel) -> str | None:
+    document_value = getattr(form, "consent_document", None)
+    if not document_value:
+        return None
+    stripped = document_value.strip()
+    return stripped or None
+
+
+def _serialize_consent_settings(
+    form: FormModel, *, consent_completed: bool = False
+) -> dict[str, Any]:
+    return {
+        "consent_required": _consent_required(form),
+        "consent_text": _consent_text(form),
+        "consent_document": _consent_document(form),
+        "consent_completed": consent_completed or not _consent_required(form),
     }
 
 
@@ -3643,6 +3727,9 @@ class UserFormCreate(BaseModel):
     document_template: str | None = None
     allow_join: bool = True
     allow_public_responses: bool = False
+    require_consent: bool = False
+    consent_text: str | None = None
+    consent_document: str | None = None
     public_require_consent: bool = False
     public_consent_text: str | None = None
     public_require_upload: bool = False
@@ -3670,6 +3757,8 @@ def user_create_form(
     public_consent_text = (
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )
+    consent_text = payload.consent_text.strip() if payload.consent_text else None
+    consent_document = payload.consent_document.strip() if payload.consent_document else None
     normalized_questions = (
         _validate_document_template(document_template)
         if document_template
@@ -3692,8 +3781,11 @@ def user_create_form(
         document_template=document_template,
         allow_join=payload.allow_join,
         allow_public_responses=payload.allow_public_responses,
-        public_require_consent=payload.public_require_consent,
-        public_consent_text=public_consent_text,
+        require_consent=payload.require_consent or payload.public_require_consent,
+        consent_text=consent_text or public_consent_text,
+        consent_document=consent_document,
+        public_require_consent=False,
+        public_consent_text=None,
         public_require_upload=False,
         public_upload_prompt=None,
         join_code=code,
@@ -3727,6 +3819,7 @@ def user_create_form(
         "join_code": form.join_code,
         "allow_join": form.allow_join,
         **_serialize_public_settings(form),
+        **_serialize_consent_settings(form),
         "owner_id": form.owner_id,
         "current_round": 1,
     }
@@ -3843,6 +3936,8 @@ def update_form(
     public_consent_text = (
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )
+    consent_text = payload.consent_text.strip() if payload.consent_text else None
+    consent_document = payload.consent_document.strip() if payload.consent_document else None
     normalized_questions = (
         _validate_document_template(document_template)
         if document_template
@@ -3852,8 +3947,11 @@ def update_form(
     f.questions = normalized_questions
     f.document_template = document_template
     f.allow_public_responses = payload.allow_public_responses
-    f.public_require_consent = payload.public_require_consent
-    f.public_consent_text = public_consent_text
+    f.require_consent = payload.require_consent or payload.public_require_consent
+    f.consent_text = consent_text or public_consent_text
+    f.consent_document = consent_document
+    f.public_require_consent = False
+    f.public_consent_text = None
     f.public_require_upload = False
     f.public_upload_prompt = None
     active_round = (
@@ -3950,6 +4048,7 @@ def get_forms(
                 "document_template": f.document_template,
                 "allow_join": f.allow_join,
                 **_serialize_public_settings(f),
+                **_serialize_consent_settings(f),
                 "join_code": f.join_code,
                 "participant_count": participant_count,
                 "current_round": active_round.round_number if active_round else 0,
@@ -4061,6 +4160,8 @@ def get_form(
     if not f:
         raise HTTPException(status_code=404, detail="Form not found")
 
+    unlock = _get_user_form_unlock(db, form_id=form_id, user_id=user.id)
+
     return {
         "id": f.id,
         "title": f.title,
@@ -4068,9 +4169,47 @@ def get_form(
         "document_template": f.document_template,
         "allow_join": f.allow_join,
         **_serialize_public_settings(f),
+        **_serialize_consent_settings(
+            f, consent_completed=_user_has_completed_consent(f, user, unlock)
+        ),
         "join_code": f.join_code,
         "expert_labels": f.expert_labels,
     }
+
+
+class ConsentAcceptancePayload(BaseModel):
+    accepted: bool = True
+
+
+@router.post(
+    "/forms/{form_id}/consent",
+    tags=["Forms"],
+    summary="Accept the consent step for a form",
+)
+@limiter.limit(CRUD_LIMIT)
+def accept_form_consent(
+    form_id: int,
+    request: Request,
+    payload: ConsentAcceptancePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    if not _consent_required(form):
+        return {"ok": True, "consent_completed": True}
+    if not payload.accepted:
+        raise HTTPException(status_code=400, detail="Please confirm consent first.")
+
+    unlock = _get_user_form_unlock(db, form_id=form_id, user_id=user.id)
+    if not unlock:
+        unlock = UserFormUnlock(user_id=user.id, form_id=form_id)
+        db.add(unlock)
+    unlock.consent_given = True
+    unlock.consented_at = datetime.now(timezone.utc)
+    db.commit()
+    return {"ok": True, "consent_completed": True}
 
 
 class PublicSessionDraftPayload(BaseModel):
@@ -4134,6 +4273,7 @@ def get_public_form(
         "join_code": form.join_code,
         "previous_round_synthesis": previous_round.synthesis if previous_round else "",
         **_serialize_public_settings(form),
+        **_serialize_consent_settings(form),
     }
 
 
@@ -4168,7 +4308,7 @@ async def start_public_form_session(
             status_code=400, detail="Please enter your name before continuing."
         )
 
-    if form.public_require_consent and not consent_given:
+    if _consent_required(form) and not consent_given:
         raise HTTPException(
             status_code=400, detail="Please confirm consent before continuing."
         )
@@ -4280,6 +4420,9 @@ def get_public_form_session(
             if previous_round
             else "",
             **_serialize_public_settings(form),
+            **_serialize_consent_settings(
+                form, consent_completed=bool(session.consent_given)
+            ),
         },
         "draft": {
             "answers": draft.answers,
@@ -4316,6 +4459,11 @@ def save_public_form_draft(
     if not form or not active_round or active_round.id != session.round_id:
         raise HTTPException(
             status_code=400, detail="This public form session is no longer active."
+        )
+    if _consent_required(form) and not session.consent_given:
+        raise HTTPException(
+            status_code=403,
+            detail="Please complete the consent step before continuing.",
         )
 
     name = payload.participant_name.strip()
@@ -4377,6 +4525,11 @@ def submit_public_form_response(
     if not form or not active_round or active_round.id != session.round_id:
         raise HTTPException(
             status_code=400, detail="This public form session is no longer active."
+        )
+    if _consent_required(form) and not session.consent_given:
+        raise HTTPException(
+            status_code=403,
+            detail="Please complete the consent step before continuing.",
         )
 
     name = payload.participant_name.strip()

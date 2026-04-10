@@ -11,6 +11,10 @@ export interface Form {
   document_template?: string | null;
   allow_join: boolean;
   allow_public_responses?: boolean;
+  consent_required?: boolean;
+  consent_text?: string | null;
+  consent_document?: string | null;
+  consent_completed?: boolean;
   public_require_consent?: boolean;
   public_consent_text?: string | null;
   public_require_upload?: boolean;
@@ -33,6 +37,9 @@ export interface CreateFormPayload {
   document_template?: string | null;
   allow_join?: boolean;
   allow_public_responses?: boolean;
+  require_consent?: boolean;
+  consent_text?: string | null;
+  consent_document?: string | null;
   public_require_consent?: boolean;
   public_consent_text?: string | null;
   public_require_upload?: boolean;
@@ -46,6 +53,9 @@ export interface UpdateFormPayload {
   document_template?: string | null;
   allow_join?: boolean;
   allow_public_responses?: boolean;
+  require_consent?: boolean;
+  consent_text?: string | null;
+  consent_document?: string | null;
   public_require_consent?: boolean;
   public_consent_text?: string | null;
   public_require_upload?: boolean;
@@ -72,6 +82,10 @@ export function createForm(data: CreateFormPayload) {
 /** Admin: update a form */
 export function updateForm(formId: number, data: UpdateFormPayload) {
   return api.put<FormDetail>(`/forms/${formId}`, data);
+}
+
+export function acceptFormConsent(formId: number) {
+  return api.post<{ ok: boolean; consent_completed: boolean }>(`/forms/${formId}/consent`, { accepted: true });
 }
 
 /** User: list forms the current user has unlocked */
