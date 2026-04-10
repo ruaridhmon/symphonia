@@ -3433,6 +3433,11 @@ def _parse_rich_document_field_attrs(template: str) -> list[dict[str, Any]]:
         mid_label = attrs.get("data-symphonia-mid-label") or None
         max_label = attrs.get("data-symphonia-max-label") or None
         allow_unsure = _parse_bool_attr(attrs.get("data-symphonia-allow-unsure"))
+        question_id = attrs.get("data-symphonia-question-id") or None
+        conditional_question_id = (
+            attrs.get("data-symphonia-conditional-question-id") or None
+        )
+        conditional_option = attrs.get("data-symphonia-conditional-option") or None
 
         if field_type in {"single_select", "multi_select"} and not options:
             options = ["Option 1", "Option 2"]
@@ -3456,7 +3461,10 @@ def _parse_rich_document_field_attrs(template: str) -> list[dict[str, Any]]:
                 requireEvidence=False,
                 requireCounterarguments=False,
                 requireConfidence=False,
+                questionId=question_id,
                 optional=_parse_bool_attr(attrs.get("data-symphonia-optional")),
+                conditionalOnQuestionId=conditional_question_id,
+                conditionalOnOption=conditional_option,
                 inputType=input_type,
                 options=options,
                 minValue=min_value,
@@ -4033,6 +4041,7 @@ def _serialize_rich_document_field_html(
 
     attributes: dict[str, str] = {
         "data-symphonia-field-key": field_key,
+        "data-symphonia-question-id": question.questionId or field_key,
         "data-symphonia-field-label": question.label,
         "data-symphonia-show-label": "false",
         "data-symphonia-field-type": field_type,
@@ -4065,6 +4074,12 @@ def _serialize_rich_document_field_html(
         attributes["data-symphonia-max-label"] = question.maxLabel
     if question.allowUnsure:
         attributes["data-symphonia-allow-unsure"] = "true"
+    if question.conditionalOnQuestionId:
+        attributes["data-symphonia-conditional-question-id"] = (
+            question.conditionalOnQuestionId
+        )
+    if question.conditionalOnOption:
+        attributes["data-symphonia-conditional-option"] = question.conditionalOnOption
 
     serialized_attrs = " ".join(
         f'{key}="{html.escape(value, quote=True)}"' for key, value in attributes.items()

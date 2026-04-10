@@ -6,6 +6,7 @@ import {
 import {
   createRichFillableDocumentTemplate,
   serializeRichDocumentField,
+  slugifyDocumentFieldKey,
   type DocumentTemplateField,
 } from './documentTemplate';
 
@@ -152,7 +153,15 @@ function extractReferenceId(text: string | null): string | null {
 }
 
 function isDynamicQuestion(text: string): boolean {
-  return /populate this dynamically|dynamic list|top 8 issues|selected in q\d+|selected item/i.test(text);
+  return /populate this dynamically|dynamic list|top 8 issues|items selected in q\d+|selected item/i.test(text);
+}
+
+function shouldSkipDynamicSubQuestions(block: QuestionBlock): boolean {
+  const source = [block.label, ...block.lines].join(' ');
+  return (
+    /selected in q\d+|selected item/i.test(source) &&
+    /for each|following\s+(?:three|\d+)\s+dimensions/i.test(source)
+  );
 }
 
 function buildHelpText(
@@ -189,17 +198,59 @@ function buildQuestionBase(
   };
 }
 
-function extractOtherSpecifyOption(option: string): { optionLabel: string; prompt: string | null; rows: number } | null {
-  const match = option.match(/^(other)(?:\s*\((.+)\))?$/i);
+function extractRoutingCondition(routing: string | null): { questionId: string; option: string } | null {
+  if (!routing) return null;
+  const match = routing.match(/only if\s+[‘'"]?(.+?)[’'"]?\s+selected in\s+(Q\d+[a-zA-Z]?)/i);
   if (!match) return null;
-  const suffix = match[2]?.trim() ?? '';
-  const prompt = suffix
-    ? suffix.charAt(0).toUpperCase() + suffix.slice(1)
-    : 'Please specify';
   return {
-    optionLabel: option.trim(),
+    option: match[1].trim(),
+    questionId: match[2].trim(),
+  };
+}
+
+function inferFollowUpRows(source: string): number {
+  const match = source.match(/max\s+(\d+)\s+words?/i);
+  if (!match) return 3;
+  const maxWords = Number(match[1]);
+  if (maxWords <= 30) return 2;
+  if (maxWords <= 80) return 3;
+  return 4;
+}
+
+function extractOptionFollowUp(option: string): { optionLabel: string; label: string; prompt: string; rows: number } | null {
+  const trimmed = option.trim();
+  if (!trimmed) return null;
+
+  if (/^other$/i.test(trimmed)) {
+    return {
+      optionLabel: trimmed,
+      label: 'Other: Please specify',
+      prompt: 'Please specify',
+      rows: 2,
+    };
+  }
+
+  const match = trimmed.match(/^(.*?)(?:\s*\((.+)\))$/);
+  if (!match) return null;
+
+  const baseLabel = match[1].trim();
+  const suffix = match[2].trim();
+  const looksLikeFollowUp =
+    /^other$/i.test(baseLabel) ||
+    /please specify|free text|self-describe|self describe/i.test(suffix) ||
+    /please specify|self-describe|self describe/i.test(baseLabel);
+  if (!looksLikeFollowUp) return null;
+
+  const prompt = /^other$/i.test(baseLabel)
+    ? 'Please specify'
+    : /self-describe|self describe/i.test(baseLabel)
+      ? 'Please describe'
+      : 'Please specify';
+  return {
+    optionLabel: trimmed,
+    label: `${baseLabel}: ${prompt}`,
     prompt,
-    rows: /max\s+\d+\s+words?/i.test(suffix) && !/120|100|80|60|50|40|30/i.test(suffix) ? 2 : 3,
+    rows: inferFollowUpRows(suffix),
   };
 }
 
@@ -214,6 +265,7 @@ function parseBlock(
 
   const responseType = responseTypeLine?.replace(/^Response type:\s*/i, '').trim() ?? null;
   const routing = routingLine?.replace(/^Routing:\s*/i, '').trim() ?? null;
+  const routingCondition = extractRoutingCondition(routing);
   const anchorLabels = parseAnchorLabels(anchorLine?.replace(/^Anchor labels:\s*/i, '').trim() ?? null);
 
   const contentLines = block.lines.filter((line) => {
@@ -286,13 +338,15 @@ function parseBlock(
 
   const otherSpecify = (inputType === 'single_select' || inputType === 'multi_select')
     ? resolvedOptions
-        .map((option) => extractOtherSpecifyOption(option))
-        .find((item): item is { optionLabel: string; prompt: string | null; rows: number } => !!item) ?? null
+        .map((option) => extractOptionFollowUp(option))
+        .find((item): item is { optionLabel: string; label: string; prompt: string; rows: number } => !!item) ?? null
     : null;
 
   const question = buildQuestionBase(block, {
     helpText,
     inputType,
+    conditionalOnQuestionId: routingCondition?.questionId ?? null,
+    conditionalOnOption: routingCondition?.option ?? null,
     options:
       inputType === 'single_select' || inputType === 'multi_select'
         ? resolvedOptions
@@ -320,11 +374,11 @@ function parseBlock(
   if (otherSpecify) {
     questions.push(
       buildQuestionBase(block, {
-        label: `Other: ${otherSpecify.prompt ?? 'Please specify'}`,
+        label: otherSpecify.label,
         questionId: `${block.questionId}_other`,
         inputType: 'text',
         rows: null,
-        placeholder: otherSpecify.prompt ?? 'Please specify',
+        placeholder: otherSpecify.prompt,
         helpText: null,
         optional: false,
         conditionalOnQuestionId: block.questionId,
@@ -414,13 +468,36 @@ export function parseQuestionnaireText(text: string): QuestionnaireImportResult 
   const questions: ConfigurableQuestion[] = [];
   const warnings: string[] = [];
   const optionRegistry = new Map<string, string[]>();
+  let skipSubQuestionsForPrefix: string | null = null;
 
   for (const block of blocks) {
+    const normalizedQuestionId = block.questionId.trim().toLowerCase();
+    if (
+      skipSubQuestionsForPrefix &&
+      normalizedQuestionId !== skipSubQuestionsForPrefix &&
+      normalizedQuestionId.startsWith(skipSubQuestionsForPrefix)
+    ) {
+      warnings.push(
+        `${block.questionId} was skipped because it belongs to a dynamic repeated question block that cannot be built statically.`,
+      );
+      continue;
+    }
+    if (skipSubQuestionsForPrefix && !normalizedQuestionId.startsWith(skipSubQuestionsForPrefix)) {
+      skipSubQuestionsForPrefix = null;
+    }
+
     const parsed = parseBlock(block, optionRegistry);
     questions.push(...parsed.questions);
     warnings.push(...parsed.warnings);
     if (parsed.exportedOptions && parsed.exportedOptions.length > 0) {
       optionRegistry.set(block.questionId, parsed.exportedOptions);
+    }
+    if (
+      parsed.questions.length === 0 &&
+      parsed.warnings.some((warning) => warning.includes('dynamic or routed list generation')) &&
+      shouldSkipDynamicSubQuestions(block)
+    ) {
+      skipSubQuestionsForPrefix = normalizedQuestionId;
     }
   }
 
@@ -459,7 +536,8 @@ function questionToDocumentField(question: ConfigurableQuestion, fallbackKey: st
         : inputType;
 
   return {
-    key: question.questionId?.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || fallbackKey,
+    key: slugifyDocumentFieldKey(question.questionId?.trim() || fallbackKey),
+    questionId: question.questionId?.trim() || undefined,
     label: question.label,
     showLabel: false,
     fieldType,
@@ -477,6 +555,8 @@ function questionToDocumentField(question: ConfigurableQuestion, fallbackKey: st
     midLabel: question.midLabel ?? undefined,
     maxLabel: question.maxLabel ?? undefined,
     allowUnsure: question.allowUnsure ?? undefined,
+    conditionalOnQuestionId: question.conditionalOnQuestionId ?? undefined,
+    conditionalOnOption: question.conditionalOnOption ?? undefined,
   };
 }
 

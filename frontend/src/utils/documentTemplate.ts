@@ -3,6 +3,7 @@ import { DEFAULT_LIKERT_OPTIONS, type SurveyInputType } from './questions';
 
 export interface DocumentTemplateField {
   key: string;
+  questionId?: string;
   label: string;
   showLabel?: boolean;
   fieldType: 'short' | 'long' | 'document' | 'single_select' | 'multi_select' | 'slider' | 'likert';
@@ -18,6 +19,8 @@ export interface DocumentTemplateField {
   midLabel?: string;
   maxLabel?: string;
   allowUnsure?: boolean;
+  conditionalOnQuestionId?: string;
+  conditionalOnOption?: string;
 }
 
 export interface RenderableDocumentTemplateField extends DocumentTemplateField {
@@ -38,7 +41,7 @@ export const RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX = '<!-- symphonia-document-m
 const PLACEHOLDER_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/g;
 const FIELD_TAG_SELECTOR = 'span[data-symphonia-field-key]';
 
-function slugifyLabel(value: string): string {
+export function slugifyDocumentFieldKey(value: string): string {
   return value
     .trim()
     .toLowerCase()
@@ -226,6 +229,7 @@ export function createDocumentTemplatePlaceholder(
 export function serializeRichDocumentField(field: DocumentTemplateField): string {
   const attributes = new Map<string, string>([
     ['data-symphonia-field-key', field.key],
+    ['data-symphonia-question-id', field.questionId || field.key],
     ['data-symphonia-field-label', field.label],
     ['data-symphonia-show-label', field.showLabel === false ? 'false' : 'true'],
     ['data-symphonia-field-type', field.fieldType],
@@ -242,6 +246,12 @@ export function serializeRichDocumentField(field: DocumentTemplateField): string
   if (field.midLabel) attributes.set('data-symphonia-mid-label', field.midLabel);
   if (field.maxLabel) attributes.set('data-symphonia-max-label', field.maxLabel);
   if (field.allowUnsure) attributes.set('data-symphonia-allow-unsure', 'true');
+  if (field.conditionalOnQuestionId) {
+    attributes.set('data-symphonia-conditional-question-id', field.conditionalOnQuestionId);
+  }
+  if (field.conditionalOnOption) {
+    attributes.set('data-symphonia-conditional-option', field.conditionalOnOption);
+  }
 
   const attrs = Array.from(attributes.entries())
     .map(([key, value]) => `${key}="${value.replace(/"/g, '&quot;')}"`)
@@ -251,7 +261,7 @@ export function serializeRichDocumentField(field: DocumentTemplateField): string
 
 function parseRichDocumentFieldElement(element: Element): DocumentTemplateField | null {
   const label = element.getAttribute('data-symphonia-field-label')?.trim();
-  const key = element.getAttribute('data-symphonia-field-key')?.trim() || (label ? slugifyLabel(label) : '');
+  const key = element.getAttribute('data-symphonia-field-key')?.trim() || (label ? slugifyDocumentFieldKey(label) : '');
   const fieldType = element.getAttribute('data-symphonia-field-type') as DocumentTemplateField['fieldType'] | null;
   const inputType = element.getAttribute('data-symphonia-input-type') as DocumentTemplateField['inputType'] | null;
   if (!label || !fieldType || !inputType) return null;
@@ -278,6 +288,7 @@ function parseRichDocumentFieldElement(element: Element): DocumentTemplateField 
 
   return {
     key,
+    questionId: element.getAttribute('data-symphonia-question-id')?.trim() || undefined,
     label,
     showLabel: element.getAttribute('data-symphonia-show-label') !== 'false',
     fieldType,
@@ -293,6 +304,8 @@ function parseRichDocumentFieldElement(element: Element): DocumentTemplateField 
     midLabel: element.getAttribute('data-symphonia-mid-label') || undefined,
     maxLabel: element.getAttribute('data-symphonia-max-label') || undefined,
     allowUnsure: element.getAttribute('data-symphonia-allow-unsure') === 'true',
+    conditionalOnQuestionId: element.getAttribute('data-symphonia-conditional-question-id')?.trim() || undefined,
+    conditionalOnOption: element.getAttribute('data-symphonia-conditional-option')?.trim() || undefined,
   };
 }
 

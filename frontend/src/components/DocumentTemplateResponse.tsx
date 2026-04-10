@@ -9,6 +9,7 @@ import {
   getRichFillableTemplateContent,
   isEditableDocumentTemplate,
   isRichFillableDocumentTemplate,
+  slugifyDocumentFieldKey,
   type RenderableDocumentTemplateField,
 } from '../utils/documentTemplate';
 import { isResponseAnswered } from '../utils/responseValidation';
@@ -44,9 +45,31 @@ function parseInlineStyle(styleValue: string | null): CSSProperties | undefined 
   return Object.keys(style).length ? style : undefined;
 }
 
+function extractSelectedOptions(response: StructuredResponse | undefined): string[] {
+  return (response?.position || '')
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function isRichFieldVisible(
+  field: RenderableDocumentTemplateField,
+  orderedEntries: Array<{ field: RenderableDocumentTemplateField; response: StructuredResponse }>,
+): boolean {
+  if (!field.conditionalOnQuestionId || !field.conditionalOnOption) return true;
+  const controllingQuestionId = field.conditionalOnQuestionId;
+  const controlling = orderedEntries.find(({ field: candidate }) => (
+    candidate.questionId === controllingQuestionId ||
+    candidate.key === slugifyDocumentFieldKey(controllingQuestionId)
+  ));
+  if (!controlling) return false;
+  return extractSelectedOptions(controlling.response).includes(field.conditionalOnOption);
+}
+
 function renderRichTemplateNode({
   node,
   fieldMap,
+  orderedEntries,
   highlightedQuestionKey,
   readOnly,
   onChange,
@@ -55,6 +78,7 @@ function renderRichTemplateNode({
 }: {
   node: ChildNode;
   fieldMap: Map<string, { field: RenderableDocumentTemplateField; response: StructuredResponse }>;
+  orderedEntries: Array<{ field: RenderableDocumentTemplateField; response: StructuredResponse }>;
   highlightedQuestionKey: string | null;
   readOnly: boolean;
   onChange?: (key: string, value: StructuredResponse) => void;
@@ -73,7 +97,7 @@ function renderRichTemplateNode({
   const fieldKey = element.getAttribute('data-symphonia-field-key');
   if (fieldKey) {
     const entry = fieldMap.get(fieldKey);
-    if (!entry) return null;
+    if (!entry || !isRichFieldVisible(entry.field, orderedEntries)) return null;
     return (
       <DocumentTemplateFieldControl
         key={`${keyPrefix}-${entry.field.questionKey}`}
@@ -87,6 +111,19 @@ function renderRichTemplateNode({
     );
   }
 
+  const descendantFieldKeys = Array.from(element.querySelectorAll<HTMLElement>('[data-symphonia-field-key]'))
+    .map((fieldElement) => fieldElement.getAttribute('data-symphonia-field-key'))
+    .filter((value): value is string => !!value);
+  if (
+    descendantFieldKeys.length > 0 &&
+    descendantFieldKeys.every((descendantKey) => {
+      const entry = fieldMap.get(descendantKey);
+      return !entry || !isRichFieldVisible(entry.field, orderedEntries);
+    })
+  ) {
+    return null;
+  }
+
   const tagName = element.tagName.toLowerCase();
   const allowedTags = new Set([
     'p', 'div', 'span', 'strong', 'em', 'u', 's', 'mark',
@@ -97,6 +134,7 @@ function renderRichTemplateNode({
       renderRichTemplateNode({
         node: child,
         fieldMap,
+        orderedEntries,
         highlightedQuestionKey,
         readOnly,
         onChange,
@@ -126,6 +164,7 @@ function renderRichTemplateNode({
     renderRichTemplateNode({
       node: child,
       fieldMap,
+      orderedEntries,
       highlightedQuestionKey,
       readOnly,
       onChange,
@@ -207,10 +246,12 @@ export default function DocumentTemplateResponse({
     const parser = new DOMParser();
     const document = parser.parseFromString(getRichFillableTemplateContent(template) || '<p></p>', 'text/html');
     const fieldMap = buildRichDocumentTemplateFieldMap(template, answers);
+    const orderedEntries = Array.from(fieldMap.values());
     const content = Array.from(document.body.childNodes).map((node, index) =>
       renderRichTemplateNode({
         node,
         fieldMap,
+        orderedEntries,
         highlightedQuestionKey,
         readOnly,
         onChange,

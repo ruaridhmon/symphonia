@@ -1,5 +1,11 @@
 import type { StructuredResponse } from '../types/structured-input';
-import { getDocumentTemplateMode, htmlToPlainText, parseDocumentTemplateFields } from './documentTemplate';
+import {
+  getDocumentTemplateMode,
+  htmlToPlainText,
+  parseDocumentTemplateFields,
+  slugifyDocumentFieldKey,
+  type DocumentTemplateField,
+} from './documentTemplate';
 import { extractQuestionText, normalizeQuestion, type QuestionInput } from './questions';
 
 function getAnswerPosition(answer: unknown): string {
@@ -24,17 +30,37 @@ export function validateDocumentTemplateResponses(
   }
 
   const fields = parseDocumentTemplateFields(template);
-  const missingField = fields.find((field, index) => {
+  const orderedFields = fields.map((field, index) => ({
+    field,
+    key: `q${index + 1}`,
+  }));
+
+  const isVisible = (field: DocumentTemplateField) => {
+    if (!field.conditionalOnQuestionId || !field.conditionalOnOption) return true;
+    const controllingQuestionId = field.conditionalOnQuestionId;
+    const controlling = orderedFields.find(({ field: candidate }) => (
+      candidate.questionId === controllingQuestionId ||
+      candidate.key === slugifyDocumentFieldKey(controllingQuestionId)
+    ));
+    if (!controlling) return false;
+    const selected = getAnswerPosition(answers[controlling.key])
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return selected.includes(field.conditionalOnOption);
+  };
+
+  const missingField = orderedFields.find(({ field, key }) => {
     if (field.optional) return false;
-    return !getAnswerPosition(answers[`q${index + 1}`]);
+    if (!isVisible(field)) return false;
+    return !getAnswerPosition(answers[key]);
   });
 
   if (!missingField) return { ok: true };
-  const key = `q${fields.indexOf(missingField) + 1}`;
   return {
     ok: false,
-    key,
-    message: `Please complete "${missingField.label}" before submitting.`,
+    key: missingField.key,
+    message: `Please complete "${missingField.field.label}" before submitting.`,
   };
 }
 
