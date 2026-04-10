@@ -3,7 +3,11 @@ import { Sparkles, Upload, FileText } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import RichDocumentEditor from './RichDocumentEditor';
 import FillableDocumentEditor from './FillableDocumentEditor';
-import { extractQuestionnaireTextFromHtml, importDocxAsHtml } from '../utils/docxImport';
+import {
+  extractQuestionnaireTextFromDocx,
+  extractQuestionnaireTextFromHtml,
+  importDocxAsHtml,
+} from '../utils/docxImport';
 import { convertQuestionnaireTextToRichTemplate } from '../utils/questionnaireImport';
 import {
   createEditableDocumentTemplate,
@@ -73,8 +77,14 @@ export default function DocumentTemplateEditor({
       }
 
       if (mode === 'fillable-rich' || mode === 'fillable') {
-        const normalizedHtml = await importDocxAsHtml(file);
-        const extractedQuestionnaireText = extractQuestionnaireTextFromHtml(normalizedHtml) || htmlToPlainText(normalizedHtml);
+        const [normalizedHtml, rawQuestionnaireText] = await Promise.all([
+          importDocxAsHtml(file),
+          extractQuestionnaireTextFromDocx(file),
+        ]);
+        const extractedQuestionnaireText =
+          rawQuestionnaireText ||
+          extractQuestionnaireTextFromHtml(normalizedHtml) ||
+          htmlToPlainText(normalizedHtml);
         const converted = convertQuestionnaireTextToRichTemplate(extractedQuestionnaireText);
         if (converted.questions.length > 0) {
           onChange(converted.template);

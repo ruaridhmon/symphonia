@@ -162,6 +162,16 @@ export function extractQuestionnaireTextFromHtml(sourceHtml: string): string {
   return cleanedLines.join('\n').trim();
 }
 
+function normalizeQuestionnaireRawText(source: string): string {
+  return source
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\u00a0/g, ' ')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function inlineDocxImportStyles(container: HTMLElement): string {
   const styleProperties = [
     'color',
@@ -233,4 +243,11 @@ export async function importDocxAsHtml(file: File): Promise<string> {
   });
 
   return normalizeImportedDocumentHtml(inlineDocxImportStyles(container));
+}
+
+export async function extractQuestionnaireTextFromDocx(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const mammoth = await import('mammoth/mammoth.browser');
+  const result = await mammoth.extractRawText({ arrayBuffer });
+  return normalizeQuestionnaireRawText(result.value ?? '');
 }

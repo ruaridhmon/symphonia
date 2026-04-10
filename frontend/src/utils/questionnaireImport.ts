@@ -36,6 +36,8 @@ function normalizeLines(text: string): string[] {
   return text
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
+    .replace(/\u00a0/g, ' ')
+    .replace(/[–—]/g, '-')
     .split('\n')
     .map((line) => line.trim());
 }
@@ -67,11 +69,20 @@ function parseAnchorLabels(line: string | null): Pick<ConfigurableQuestion, 'min
 function detectInputType(responseType: string | null, label: string): SurveyInputType {
   const source = `${responseType ?? ''} ${label}`.toLowerCase();
   if (source.includes('select up to')) return 'multi_select';
+  if (/choose\s+up\s+to\s+\d+/i.test(source)) return 'multi_select';
   if (source.includes('likert') || source.includes('five-point') || source.includes('five point')) {
     return 'likert';
   }
-  if (source.includes('select one') || source.includes('select 1')) return 'single_select';
-  if (source.includes('slider')) return 'slider';
+  if (
+    source.includes('select one') ||
+    source.includes('select 1') ||
+    source.includes('choose one') ||
+    source.includes('choose 1') ||
+    source.includes('single choice')
+  ) {
+    return 'single_select';
+  }
+  if (source.includes('slider') || /0\s*-\s*10/i.test(source) || /0\s*to\s*10/i.test(source)) return 'slider';
   if (/0\s*=\s*.+10\s*=\s*/i.test(label)) return 'slider';
   if (source.includes('free text')) {
     const wordsMatch = source.match(/max\s+(\d+)\s+words?/);
