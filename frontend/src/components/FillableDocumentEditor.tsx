@@ -706,7 +706,12 @@ export default function FillableDocumentEditor({
             'radial-gradient(circle at top, rgba(186,205,235,0.22), transparent 34%), linear-gradient(180deg, #f5f8fc 0%, #eef3f9 100%)',
         }}
       >
-        <div className="mx-auto grid max-w-[1180px] gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div
+          className="mx-auto grid max-w-[1280px] gap-4"
+          style={{
+            gridTemplateColumns: selectedField ? 'minmax(0, 1fr) minmax(18rem, 20rem)' : 'minmax(0, 1fr)',
+          }}
+        >
             <div
               data-testid="document-template-rich-editor"
               className="relative rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
@@ -757,20 +762,20 @@ export default function FillableDocumentEditor({
               ) : null}
             </div>
 
-            <div
-              className="rounded-[1.35rem] border px-4 py-4"
-              style={{
-                borderColor: 'rgba(148, 163, 184, 0.24)',
-                backgroundColor: 'rgba(255,255,255,0.76)',
-                boxShadow: '0 18px 40px -32px rgba(15,23,42,0.34)',
-              }}
-            >
-              <div className="text-sm font-semibold text-foreground">Field settings</div>
-              <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
-                Click an inserted field in the document to edit its label, placeholder, options, or range.
-              </p>
+            {selectedField ? (
+              <div
+                className="rounded-[1.35rem] border px-4 py-4"
+                style={{
+                  borderColor: 'rgba(148, 163, 184, 0.24)',
+                  backgroundColor: 'rgba(255,255,255,0.76)',
+                  boxShadow: '0 18px 40px -32px rgba(15,23,42,0.34)',
+                }}
+              >
+                <div className="text-sm font-semibold text-foreground">Field settings</div>
+                <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
+                  Click an inserted field in the document to edit its label, placeholder, options, or range.
+                </p>
 
-              {selectedField ? (
                 <div className="mt-4 space-y-3">
                   <div>
                     <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
@@ -946,15 +951,8 @@ export default function FillableDocumentEditor({
                     Remove field
                   </button>
                 </div>
-              ) : (
-                <div
-                  className="mt-4 rounded-2xl px-3 py-4 text-sm"
-                  style={{ backgroundColor: 'color-mix(in srgb, var(--background) 88%, white)', color: 'var(--muted-foreground)' }}
-                >
-                  No field selected.
-                </div>
-              )}
-            </div>
+              </div>
+            ) : null}
           </div>
       </div>
     </div>

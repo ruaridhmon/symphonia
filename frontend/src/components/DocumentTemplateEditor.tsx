@@ -205,60 +205,29 @@ export default function DocumentTemplateEditor({
         )}
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <div
-          className="rounded-lg px-3 py-3 text-xs"
-          style={{
-            backgroundColor: 'var(--background)',
-            border: '1px solid var(--border)',
-            color: 'var(--muted-foreground)',
-            lineHeight: 1.6,
-          }}
-        >
-          {isEditableDocumentTemplate(value) ? (
-            <>Participants will open this document and edit their own copy directly. `.docx` imports preserve much more structure here than the fill-field mode.</>
-          ) : (
-            <>Fillable documents now use a rich inline editor. Type <code>/</code> to insert fields, then format the surrounding text with headings, emphasis, lists, colour, and highlight.</>
-          )}
+      <div
+        className="mt-4 rounded-lg px-3 py-3 text-xs"
+        style={{
+          backgroundColor: 'var(--background)',
+          border: '1px solid var(--border)',
+          color: 'var(--muted-foreground)',
+          lineHeight: 1.6,
+        }}
+      >
+        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+          <FileText size={15} />
+          {isEditableDocumentTemplate(value) ? 'Document guidance' : 'Fillable document guidance'}
         </div>
-
-        <div
-          className="rounded-lg px-3 py-3"
-          style={{
-            backgroundColor: 'var(--background)',
-            border: '1px solid var(--border)',
-          }}
-        >
-          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-            <FileText size={15} />
-            {isEditableDocumentTemplate(value) ? 'Participant view' : 'Fillable fields'}
-          </div>
-          {isEditableDocumentTemplate(value) ? (
-            <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
-              Participants will see the imported document itself and can edit their own version before submitting.
-            </p>
-          ) : fields.length === 0 ? (
-            <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-              Add at least one placeholder to create a document form.
-            </p>
-          ) : (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {fields.map((field) => (
-                <span
-                  key={field.key}
-                  className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium"
-                  style={{
-                    backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                    color: 'var(--accent)',
-                  }}
-                >
-                  {field.label}
-                  {!isEditableDocumentTemplate(value) && field.fieldType !== 'short' && field.fieldType !== 'long' ? ` · ${field.fieldType.replace('_', ' ')}` : ''}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        <p className="mt-2">
+          {isEditableDocumentTemplate(value)
+            ? 'Participants will open this document and edit their own copy directly. `.docx` imports preserve much more structure here than the fill-field mode.'
+            : 'Type / to insert fields, then click a field only when you need to edit its settings. The document canvas now stays full width until a field is selected.'}
+        </p>
+        {!isEditableDocumentTemplate(value) && fields.length > 0 ? (
+          <p className="mt-2">
+            {fields.length} field{fields.length === 1 ? '' : 's'} currently in this document.
+          </p>
+        ) : null}
       </div>
 
       {uploadError && (
