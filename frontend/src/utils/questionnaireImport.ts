@@ -14,6 +14,7 @@ export interface QuestionnaireImportResult {
   warnings: string[];
   importedRoundLabel: string | null;
   skippedRoundLabels: string[];
+  introParagraphs: string[];
 }
 
 export interface QuestionnaireRichTemplateResult extends QuestionnaireImportResult {
@@ -331,6 +332,7 @@ export function parseQuestionnaireText(text: string): QuestionnaireImportResult 
   const blocks: QuestionBlock[] = [];
   const skippedRoundLabels: string[] = [];
   let importedRoundLabel: string | null = null;
+  const introParagraphs: string[] = [];
   let currentSection: string | null = null;
   let currentBlock: QuestionBlock | null = null;
   let importEnabled = true;
@@ -382,6 +384,8 @@ export function parseQuestionnaireText(text: string): QuestionnaireImportResult 
 
     if (currentBlock) {
       currentBlock.lines.push(line);
+    } else if (currentSection === null) {
+      introParagraphs.push(line);
     }
   }
 
@@ -415,6 +419,7 @@ export function parseQuestionnaireText(text: string): QuestionnaireImportResult 
     warnings,
     importedRoundLabel,
     skippedRoundLabels,
+    introParagraphs,
   };
 }
 
@@ -438,6 +443,7 @@ function questionToDocumentField(question: ConfigurableQuestion, fallbackKey: st
   return {
     key: question.questionId?.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || fallbackKey,
     label: question.label,
+    showLabel: false,
     fieldType,
     inputType,
     optional: question.optional ?? false,
@@ -459,10 +465,21 @@ function questionToDocumentField(question: ConfigurableQuestion, fallbackKey: st
 export function convertQuestionnaireTextToRichTemplate(text: string): QuestionnaireRichTemplateResult {
   const parsed = parseQuestionnaireText(text);
   const htmlParts: string[] = [];
+  const questionLabelById = new Map(
+    parsed.questions
+      .filter((question) => question.questionId)
+      .map((question) => [question.questionId as string, question.label]),
+  );
 
-  if (parsed.importedRoundLabel) {
+  if (parsed.importedRoundLabel && !/full question set/i.test(parsed.importedRoundLabel)) {
     htmlParts.push(`<h1>${escapeHtml(parsed.importedRoundLabel)}</h1>`);
   }
+
+  parsed.introParagraphs.forEach((paragraph) => {
+    htmlParts.push(
+      `<p style="font-size: 1rem; line-height: 1.8; color: #32455f;">${escapeHtml(paragraph)}</p>`,
+    );
+  });
 
   let currentSection: string | null = null;
   let currentGroupPrompt: string | null = null;
@@ -471,12 +488,14 @@ export function convertQuestionnaireTextToRichTemplate(text: string): Questionna
     if (question.sectionTitle && question.sectionTitle !== currentSection) {
       currentSection = question.sectionTitle;
       currentGroupPrompt = null;
-      htmlParts.push(`<h2>${escapeHtml(question.sectionTitle)}</h2>`);
+      htmlParts.push(`<h2 style="margin-top: 1.4rem;">${escapeHtml(question.sectionTitle)}</h2>`);
     }
 
     if (question.groupPrompt && question.groupPrompt !== currentGroupPrompt) {
       currentGroupPrompt = question.groupPrompt;
-      htmlParts.push(`<p><strong>${escapeHtml(question.groupPrompt)}</strong></p>`);
+      htmlParts.push(
+        `<div style="margin: 0.8rem 0 0.65rem; padding: 0.8rem 1rem; border-radius: 1rem; background: #f3f7fb; border: 1px solid #d7e3f0;"><strong>${escapeHtml(question.groupPrompt)}</strong></div>`,
+      );
     }
 
     const field = questionToDocumentField(question, `field-${index + 1}`);
@@ -487,20 +506,18 @@ export function convertQuestionnaireTextToRichTemplate(text: string): Questionna
         ? `Select up to ${question.maxSelections}.`
         : null,
       question.conditionalOnQuestionId && question.conditionalOnOption
-        ? `Show only if ${question.conditionalOnQuestionId} includes “${question.conditionalOnOption}”.`
+        ? `Shown when “${question.conditionalOnOption}” is selected for ${questionLabelById.get(question.conditionalOnQuestionId) ?? 'the earlier question'}.`
         : null,
     ].filter((value): value is string => !!value && value.trim() !== '');
 
-    if (field.fieldType === 'short') {
-      htmlParts.push(`<p><strong>${escapeHtml(question.questionId ?? `Q${index + 1}`)}.</strong> ${escapeHtml(question.label)} ${fieldHtml}</p>`);
-    } else {
-      htmlParts.push(`<p><strong>${escapeHtml(question.questionId ?? `Q${index + 1}`)}.</strong> ${escapeHtml(question.label)}</p>`);
-      htmlParts.push(`<p>${fieldHtml}</p>`);
-    }
-
-    if (helpBits.length > 0) {
-      htmlParts.push(`<blockquote>${escapeHtml(helpBits.join(' '))}</blockquote>`);
-    }
+    htmlParts.push(
+      `<div style="margin: 0 0 1rem; padding: 1rem 1rem 1.05rem; border-radius: 1.15rem; border: 1px solid #dbe4ef; background: rgba(255,255,255,0.84);">
+        <div style="margin-bottom: 0.55rem; font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #6a7b90;">${escapeHtml(question.questionId ?? `Question ${index + 1}`)}</div>
+        <div style="margin-bottom: 0.75rem; font-size: 1rem; line-height: 1.65; font-weight: 600; color: #16263e;">${escapeHtml(question.label)}</div>
+        <div>${fieldHtml}</div>
+        ${helpBits.length > 0 ? `<div style="margin-top: 0.7rem; font-size: 0.84rem; line-height: 1.55; color: #58708a;">${escapeHtml(helpBits.join(' '))}</div>` : ''}
+      </div>`,
+    );
   });
 
   const templateHtml = htmlParts.join('');

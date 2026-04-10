@@ -33,6 +33,7 @@ type SelectedFieldState = {
   attrs: {
     key: string;
     label: string;
+    showLabel: boolean;
     fieldType: DocumentTemplateField['fieldType'];
     inputType: DocumentTemplateField['inputType'];
     optional: boolean;
@@ -79,6 +80,7 @@ function FieldNodePreview({ attrs, selected }: { attrs: SelectedFieldState['attr
     key: attrs.key,
     questionKey: attrs.key,
     label: attrs.label,
+    showLabel: attrs.showLabel,
     fieldType: attrs.fieldType,
     inputType: attrs.inputType,
     optional: attrs.optional,
@@ -157,6 +159,7 @@ const FillableFieldNode = Node.create({
     return {
       key: { default: 'field' },
       label: { default: 'Field' },
+      showLabel: { default: true },
       fieldType: { default: 'short' },
       inputType: { default: 'text' },
       optional: { default: false },
@@ -187,6 +190,7 @@ const FillableFieldNode = Node.create({
       mergeAttributes(HTMLAttributes, {
         'data-symphonia-field-key': HTMLAttributes.key,
         'data-symphonia-field-label': HTMLAttributes.label,
+        'data-symphonia-show-label': HTMLAttributes.showLabel === false ? 'false' : 'true',
         'data-symphonia-field-type': HTMLAttributes.fieldType,
         'data-symphonia-input-type': HTMLAttributes.inputType,
         'data-symphonia-optional': HTMLAttributes.optional ? 'true' : 'false',

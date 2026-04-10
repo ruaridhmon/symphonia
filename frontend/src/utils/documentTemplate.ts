@@ -4,6 +4,7 @@ import { DEFAULT_LIKERT_OPTIONS, type SurveyInputType } from './questions';
 export interface DocumentTemplateField {
   key: string;
   label: string;
+  showLabel?: boolean;
   fieldType: 'short' | 'long' | 'document' | 'single_select' | 'multi_select' | 'slider' | 'likert';
   inputType: SurveyInputType | 'document';
   optional: boolean;
@@ -226,6 +227,7 @@ export function serializeRichDocumentField(field: DocumentTemplateField): string
   const attributes = new Map<string, string>([
     ['data-symphonia-field-key', field.key],
     ['data-symphonia-field-label', field.label],
+    ['data-symphonia-show-label', field.showLabel === false ? 'false' : 'true'],
     ['data-symphonia-field-type', field.fieldType],
     ['data-symphonia-input-type', field.inputType],
     ['data-symphonia-optional', field.optional ? 'true' : 'false'],
@@ -277,6 +279,7 @@ function parseRichDocumentFieldElement(element: Element): DocumentTemplateField 
   return {
     key,
     label,
+    showLabel: element.getAttribute('data-symphonia-show-label') !== 'false',
     fieldType,
     inputType,
     optional: element.getAttribute('data-symphonia-optional') === 'true',
