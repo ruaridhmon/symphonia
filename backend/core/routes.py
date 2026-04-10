@@ -3460,6 +3460,28 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
     return derived
 
 
+def _validate_document_template(template: str | None) -> list[str | dict[str, object]]:
+    if not template:
+        return []
+
+    normalized_questions = _build_document_questions(template)
+    if _is_editable_document_template(template):
+        editable_body = _html_to_plain_text(_strip_document_template_prefix(template))
+        if not editable_body.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Editable document templates must include some document content",
+            )
+        return normalized_questions
+
+    if not normalized_questions:
+        raise HTTPException(
+            status_code=400,
+            detail="Document templates must include at least one {{placeholder}}",
+        )
+    return normalized_questions
+
+
 def _extract_text_from_docx_bytes(blob: bytes) -> str:
     try:
         with zipfile.ZipFile(BytesIO(blob)) as archive:
@@ -3649,15 +3671,10 @@ def user_create_form(
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )
     normalized_questions = (
-        _build_document_questions(document_template)
+        _validate_document_template(document_template)
         if document_template
         else normalize_form_questions(payload.questions)
     )
-    if document_template and not normalized_questions:
-        raise HTTPException(
-            status_code=400,
-            detail="Document templates must include at least one {{placeholder}}",
-        )
 
     for _ in range(10):
         code = generate_join_code()
@@ -3827,15 +3844,10 @@ def update_form(
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )
     normalized_questions = (
-        _build_document_questions(document_template)
+        _validate_document_template(document_template)
         if document_template
         else normalize_form_questions(payload.questions)
     )
-    if document_template and not normalized_questions:
-        raise HTTPException(
-            status_code=400,
-            detail="Document templates must include at least one {{placeholder}}",
-        )
     f.title = payload.title
     f.questions = normalized_questions
     f.document_template = document_template

@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
+import { Extension } from '@tiptap/core';
 import { EditorContent, useEditor } from '@tiptap/react';
+import Highlight from '@tiptap/extension-highlight';
 import StarterKit from '@tiptap/starter-kit';
+import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import Table from '@tiptap/extension-table';
@@ -17,6 +20,39 @@ interface RichDocumentEditorProps {
   minHeight?: string;
 }
 
+const ImportedDocumentStyles = Extension.create({
+  name: 'importedDocumentStyles',
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['textStyle'],
+        attributes: {
+          style: {
+            default: null,
+            parseHTML: (element) => element.getAttribute('style'),
+            renderHTML: (attributes) => (attributes.style ? { style: attributes.style } : {}),
+          },
+        },
+      },
+      {
+        types: ['paragraph', 'heading', 'tableCell', 'tableHeader'],
+        attributes: {
+          class: {
+            default: null,
+            parseHTML: (element) => element.getAttribute('class'),
+            renderHTML: (attributes) => (attributes.class ? { class: attributes.class } : {}),
+          },
+          style: {
+            default: null,
+            parseHTML: (element) => element.getAttribute('style'),
+            renderHTML: (attributes) => (attributes.style ? { style: attributes.style } : {}),
+          },
+        },
+      },
+    ];
+  },
+});
+
 export default function RichDocumentEditor({
   value,
   onChange,
@@ -31,11 +67,14 @@ export default function RichDocumentEditor({
     immediatelyRender: false,
     extensions: [
       StarterKit,
+      TextStyle,
+      Highlight.configure({ multicolor: true }),
       Underline,
       Table.configure({ resizable: true }),
       TableRow,
       TableHeader,
       TableCell,
+      ImportedDocumentStyles,
       Placeholder.configure({ placeholder }),
     ],
     content: value,
@@ -88,6 +127,15 @@ export default function RichDocumentEditor({
         .symphonia-rich-editor p,
         .symphonia-rich-editor li {
           line-height: 1.7;
+        }
+        .symphonia-rich-editor [style*="text-align: center"] {
+          text-align: center;
+        }
+        .symphonia-rich-editor [style*="text-align: right"] {
+          text-align: right;
+        }
+        .symphonia-rich-editor [style*="text-align: justify"] {
+          text-align: justify;
         }
         .symphonia-rich-editor table {
           width: 100%;

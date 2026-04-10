@@ -3,6 +3,7 @@ import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
 
 const ADMIN_EMAIL = 'antreas@axiotic.ai';
 const ADMIN_PASSWORD = 'test123';
@@ -220,6 +221,49 @@ async function createQuestionnaireDocx(lines: string[]) {
 
   const docxPath = path.join(dir, 'questionnaire.docx');
   execFileSync('zip', ['-qr', docxPath, '[Content_Types].xml', '_rels', 'word'], { cwd: dir });
+  return { dir, docxPath };
+}
+
+async function createStyledEditableDocx() {
+  const dir = await mkdtemp(path.join(tmpdir(), 'symphonia-editable-doc-'));
+  const docxPath = path.join(dir, 'editable.docx');
+
+  const document = new Document({
+    sections: [
+      {
+        children: [
+          new Paragraph({
+            text: 'Board note',
+            heading: HeadingLevel.HEADING_1,
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: 'Section overview',
+                bold: true,
+                color: '4472C4',
+                highlight: 'yellow',
+              }),
+            ],
+          }),
+          new Paragraph({
+            children: [
+              new TextRun('This document keeps '),
+              new TextRun({
+                text: 'imported emphasis',
+                italics: true,
+                color: 'C00000',
+              }),
+              new TextRun(' and section structure.'),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  const buffer = await Packer.toBuffer(document);
+  await writeFile(docxPath, buffer);
   return { dir, docxPath };
 }
 
@@ -489,13 +533,7 @@ test.describe('Document template consultations', () => {
     const adminToken = adminLogin.access_token;
 
     try {
-      const fixture = await createQuestionnaireDocx([
-        'Board note',
-        '',
-        'This is the imported opening paragraph.',
-        '',
-        'Second paragraph for editing.',
-      ]);
+      const fixture = await createStyledEditableDocx();
       fixtureDir = fixture.dir;
 
       adminContext = await browser.newContext({
@@ -509,6 +547,9 @@ test.describe('Document template consultations', () => {
       await adminPage.locator('input[type="file"]').setInputFiles(fixture.docxPath);
 
       await expect(adminPage.getByText('Board note').first()).toBeVisible({ timeout: 10_000 });
+      await expect(adminPage.locator('.ProseMirror [style*="color"]', { hasText: 'Section overview' })).toBeVisible();
+      await expect(adminPage.locator('.ProseMirror [style*="background-color"]', { hasText: 'Section overview' })).toBeVisible();
+      await expect(adminPage.locator('.ProseMirror [style*="color"]', { hasText: 'imported emphasis' })).toBeVisible();
       await adminPage.locator('#form-title').fill(`Editable Copy ${timestamp}`);
       await adminPage.getByRole('button', { name: /create form/i }).click();
       await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
@@ -521,6 +562,9 @@ test.describe('Document template consultations', () => {
       expect(form.questions).toHaveLength(1);
       expect(form.questions[0].fieldType).toBe('document');
       expect(form.document_template).toContain('symphonia-document-mode: editable');
+      expect(form.document_template).toContain('Board note');
+      expect(form.document_template).toMatch(/style="[^"]*color:/);
+      expect(form.document_template).toMatch(/style="[^"]*background-color:/);
 
       const participantEmail = `editable-doc-${timestamp}@example.com`;
       await registerParticipant(participantApi, appBase, participantEmail, 'test123');
