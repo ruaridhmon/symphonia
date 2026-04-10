@@ -110,13 +110,14 @@ export default function DocumentTemplateFieldControl({
           readOnly
           tabIndex={-1}
           placeholder={field.placeholder}
-          className="w-full rounded-xl px-3 py-2.5 text-sm"
+          className="w-full rounded-[1.4rem] px-4 py-3 text-sm leading-6"
           style={{
             border: '1px solid var(--input)',
-            backgroundColor: 'white',
+            backgroundColor: 'color-mix(in srgb, var(--background) 84%, var(--card) 16%)',
             color: 'var(--foreground)',
             outline: 'none',
             pointerEvents: 'none',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)',
           }}
         />
       ) : previewOnly && field.fieldType === 'long' ? (
@@ -126,15 +127,17 @@ export default function DocumentTemplateFieldControl({
           tabIndex={-1}
           placeholder={field.placeholder}
           rows={field.rows}
-          className="w-full rounded-xl px-3 py-3 text-sm"
+          className="w-full rounded-[1.6rem] px-4 py-3.5 text-sm leading-6"
           style={{
             border: '1px solid var(--input)',
-            backgroundColor: 'white',
+            backgroundColor: 'color-mix(in srgb, var(--background) 84%, var(--card) 16%)',
             color: 'var(--foreground)',
             outline: 'none',
             resize: 'vertical',
             lineHeight: 1.6,
             pointerEvents: 'none',
+            minHeight: field.rows && field.rows <= 2 ? undefined : '7rem',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)',
           }}
         />
       ) : readOnly && usesInlineTextField ? (

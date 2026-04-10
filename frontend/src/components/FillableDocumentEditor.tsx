@@ -800,13 +800,14 @@ export default function FillableDocumentEditor({
       </div>
 
       <div
-        className="relative px-4 py-5"
+        className="px-4 py-5"
         style={{
           background:
             'radial-gradient(circle at top, rgba(186,205,235,0.22), transparent 34%), linear-gradient(180deg, #f5f8fc 0%, #eef3f9 100%)',
         }}
       >
-        <div className="mx-auto max-w-[1280px]">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 xl:flex-row xl:items-start">
+          <div className="min-w-0 flex-1">
             <div
               data-testid="document-template-rich-editor"
               className="relative rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
@@ -855,43 +856,65 @@ export default function FillableDocumentEditor({
                   ))}
                 </div>
               ) : null}
+            </div>
+          </div>
 
-              {selectedField ? (
+          {selectedField ? (
+            <aside
+              className="w-full shrink-0 xl:sticky xl:top-4 xl:w-[22rem]"
+              aria-label="Field settings inspector"
+            >
+              <div
+                className="rounded-[1.25rem] border p-4"
+                style={{
+                  borderColor: 'rgba(148, 163, 184, 0.22)',
+                  backgroundColor: 'rgba(255,255,255,0.96)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 24px 55px -34px rgba(15,23,42,0.24)',
+                }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">Field settings</div>
+                    <p className="mt-1 text-[11px]" style={{ color: 'var(--muted-foreground)', lineHeight: 1.5 }}>
+                      Adjust the selected field from the side so the document stays fully visible.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedField(null);
+                      editor?.commands.focus();
+                    }}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full"
+                    style={{
+                      border: '1px solid color-mix(in srgb, var(--border) 84%, transparent)',
+                      backgroundColor: 'rgba(255,255,255,0.85)',
+                      color: 'var(--muted-foreground)',
+                    }}
+                    aria-label="Close field settings"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
                 <div
-                  className="absolute right-5 top-5 z-10 w-[min(22rem,calc(100%-2.5rem))] rounded-[1.25rem] border p-3"
+                  className="mt-3 rounded-2xl border px-3 py-3"
                   style={{
-                    borderColor: 'rgba(148, 163, 184, 0.22)',
-                    backgroundColor: 'rgba(255,255,255,0.96)',
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: '0 24px 55px -34px rgba(15,23,42,0.42)',
+                    borderColor: 'color-mix(in srgb, var(--border) 80%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--background) 82%, white)',
                   }}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold text-foreground">Field settings</div>
-                      <p className="mt-1 text-[11px]" style={{ color: 'var(--muted-foreground)', lineHeight: 1.5 }}>
-                        Edit this field without leaving the document canvas.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedField(null);
-                        editor?.commands.focus();
-                      }}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full"
-                      style={{
-                        border: '1px solid color-mix(in srgb, var(--border) 84%, transparent)',
-                        backgroundColor: 'rgba(255,255,255,0.85)',
-                        color: 'var(--muted-foreground)',
-                      }}
-                      aria-label="Close field settings"
-                    >
-                      <X size={14} />
-                    </button>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                    Selected field
                   </div>
+                  <div className="mt-2 text-sm font-semibold text-foreground">{selectedField.attrs.label || 'Untitled field'}</div>
+                  <div className="mt-2 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)' }}>
+                    {String(selectedField.attrs.fieldType).replace('_', ' ')}
+                  </div>
+                </div>
 
-                  <div className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-1">
+                <div className="mt-4 max-h-[72vh] space-y-3 overflow-y-auto pr-1">
                     <div>
                       <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
                         Label
@@ -1065,10 +1088,10 @@ export default function FillableDocumentEditor({
                     >
                       Remove field
                     </button>
-                  </div>
                 </div>
-              ) : null}
-            </div>
+              </div>
+            </aside>
+          ) : null}
         </div>
       </div>
     </div>
