@@ -4206,11 +4206,12 @@ Source document text:
 """
 
     resolved_model = _resolve_synthesis_model(db)
-    try:
-        completion = openai_client.chat.completions.create(
-            model=resolved_model,
-            max_tokens=8192,
-            messages=[
+
+    def _call_import_model(*, use_response_format: bool) -> str:
+        request_kwargs: dict[str, Any] = {
+            "model": resolved_model,
+            "max_tokens": 8192,
+            "messages": [
                 {
                     "role": "system",
                     "content": (
@@ -4220,9 +4221,23 @@ Source document text:
                 },
                 {"role": "user", "content": prompt},
             ],
-            response_format={"type": "json_object"},
-        )
-        raw_content = completion.choices[0].message.content or "{}"
+        }
+        if use_response_format:
+            request_kwargs["response_format"] = {"type": "json_object"}
+        completion = openai_client.chat.completions.create(**request_kwargs)
+        return completion.choices[0].message.content or "{}"
+
+    try:
+        try:
+            raw_content = _call_import_model(use_response_format=True)
+        except Exception as structured_exc:
+            logger.warning(
+                "AI import structured-output attempt failed for model %s; retrying without response_format: %s",
+                resolved_model,
+                structured_exc,
+            )
+            raw_content = _call_import_model(use_response_format=False)
+
         try:
             parsed = json.loads(raw_content)
         except json.JSONDecodeError:
