@@ -704,9 +704,10 @@ class ConsensusLibraryAdapter:
         round_id: Optional[int],
     ) -> AdapterSynthesisContext:
         """Build a unique synthesis context to avoid cross-run checkpoint reuse."""
+        model_name = getattr(self, "model", None)
         fingerprint_payload = {
             "strategy": self._effective_strategy,
-            "model": self.model,
+            "model": model_name,
             "questions": questions,
             "responses": responses,
         }
@@ -719,9 +720,13 @@ class ConsensusLibraryAdapter:
             ).encode("utf-8")
         ).hexdigest()[:16]
 
-        study_label = f"form-{form_id}" if form_id is not None else f"adhoc-{fingerprint[:8]}"
+        study_label = (
+            f"form-{form_id}" if form_id is not None else f"adhoc-{fingerprint[:8]}"
+        )
         round_label = (
-            f"round-{round_id}" if round_id is not None else f"round-{fingerprint[8:12]}"
+            f"round-{round_id}"
+            if round_id is not None
+            else f"round-{fingerprint[8:12]}"
         )
         question_label = f"{self._effective_strategy}-{fingerprint[12:]}"
 

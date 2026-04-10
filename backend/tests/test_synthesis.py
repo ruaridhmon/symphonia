@@ -851,7 +851,9 @@ class TestCommentsContextIntegration:
         second = adapter._build_runtime_context(
             question_text="1. SEN funding question",
             questions=[{"label": "SEN funding question"}],
-            responses=[{"answers": {"q1": "Special educational needs budgets are stretched"}}],
+            responses=[
+                {"answers": {"q1": "Special educational needs budgets are stretched"}}
+            ],
             form_id=9,
             round_id=3,
         )

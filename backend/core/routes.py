@@ -154,7 +154,9 @@ def _is_question_visible(
             continue
         selected = [
             item.strip()
-            for item in _extract_answer_position(answers.get(f"q{index + 1}", "")).split("\n")
+            for item in _extract_answer_position(
+                answers.get(f"q{index + 1}", "")
+            ).split("\n")
             if item.strip()
         ]
         return controlling_option in selected
@@ -182,7 +184,12 @@ def _validate_required_answers(
         if _extract_answer_position(answers.get(f"q{index + 1}", "")).strip():
             continue
 
-        label = str(question.get("label") or question.get("text") or question.get("question") or "").strip()
+        label = str(
+            question.get("label")
+            or question.get("text")
+            or question.get("question")
+            or ""
+        ).strip()
         return (
             f'Please answer "{label}" before submitting.'
             if label
@@ -219,11 +226,17 @@ def _estimate_synthesis_duration_seconds(
 
     if strategy == "committee":
         base = 55 + count * 18 + max(0, analysts - 1) * 8
-        return min(round(float(profile["timeout_seconds"]) * 0.85 * latency), round(base * latency))
+        return min(
+            round(float(profile["timeout_seconds"]) * 0.85 * latency),
+            round(base * latency),
+        )
 
     if strategy == "ttd":
         base = 85 + count * 28 + max(0, analysts - 1) * 10
-        return min(round(float(profile["timeout_seconds"]) * 0.8 * latency), round(base * latency))
+        return min(
+            round(float(profile["timeout_seconds"]) * 0.8 * latency),
+            round(base * latency),
+        )
 
     return 60
 
@@ -339,7 +352,10 @@ async def _prune_synthesis_jobs() -> None:
         if status not in {"completed", "failed"}:
             continue
         completed_at = job.get("completed_at") or job.get("updated_at") or now
-        if isinstance(completed_at, datetime) and (now - completed_at).total_seconds() > SYNTHESIS_JOB_TTL_SECONDS:
+        if (
+            isinstance(completed_at, datetime)
+            and (now - completed_at).total_seconds() > SYNTHESIS_JOB_TTL_SECONDS
+        ):
             expired_job_ids.append(job_id)
 
     for job_id in expired_job_ids:
@@ -453,7 +469,9 @@ def _render_synthesis_text(result) -> str:
 
 def _safe_export_title(form: FormModel, form_id: int) -> str:
     safe_title = (
-        "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in (form.title or ""))
+        "".join(
+            c if c.isalnum() or c in (" ", "-", "_") else "" for c in (form.title or "")
+        )
         .strip()
         .replace(" ", "-")
         .lower()
@@ -481,7 +499,9 @@ def _build_responses_export_payload(
                     {
                         "response_id": item.id,
                         "email": item.user.email if item.user else None,
-                        "timestamp": item.created_at.isoformat() if item.created_at else None,
+                        "timestamp": item.created_at.isoformat()
+                        if item.created_at
+                        else None,
                         "version": item.version,
                         "answers": item.answers,
                     }
@@ -716,7 +736,9 @@ blockquote {{
             pdf.multi_cell(writable_width, 6, text=safe_line)
 
         out = pdf.output()
-        return bytes(out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1"))
+        return bytes(
+            out if isinstance(out, (bytes, bytearray)) else out.encode("latin-1")
+        )
     except Exception as fpdf_error:
         detail = "Failed to generate PDF export."
         if weasy_error:
@@ -2105,6 +2127,7 @@ async def _run_synthesis_job(
     """
     db = SessionLocal()
     try:
+
         async def progress_callback(stage: str, step: int, total: int):
             if job_id:
                 await _update_synthesis_job(
@@ -2324,7 +2347,9 @@ async def _run_synthesis_job(
                 await _update_synthesis_job(
                     job_id,
                     status="failed",
-                    error=_sanitize_error_message(f"Synthesis failed unexpectedly: {exc}"),
+                    error=_sanitize_error_message(
+                        f"Synthesis failed unexpectedly: {exc}"
+                    ),
                     completed_at=_utcnow(),
                     task=None,
                 )
@@ -2525,7 +2550,10 @@ async def generate_synthesis_for_round(
             estimate_seconds=estimated_seconds,
             estimate_label=estimated_label,
         )
-        if job.get("task") is None and job.get("status") not in {"running", "completed"}:
+        if job.get("task") is None and job.get("status") not in {
+            "running",
+            "completed",
+        }:
             task = asyncio.create_task(
                 _launch_synthesis_job(
                     job["job_id"],
@@ -3266,7 +3294,9 @@ class FormUpdate(BaseModel):
 
 
 DOCUMENT_PLACEHOLDER_PATTERN = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
-WORDPROCESSINGML_NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
+WORDPROCESSINGML_NS = {
+    "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+}
 EDITABLE_DOCUMENT_TEMPLATE_PREFIX = "<!-- symphonia-document-mode: editable -->"
 DEFAULT_PUBLIC_CONSENT_TEXT = (
     "I confirm that I understand the purpose of this form and consent to my "
@@ -3276,7 +3306,9 @@ PUBLIC_UPLOAD_DIR = Path(__file__).resolve().parent.parent / "uploads" / "public
 
 
 def _is_editable_document_template(template: str | None) -> bool:
-    return bool(template and template.lstrip().startswith(EDITABLE_DOCUMENT_TEMPLATE_PREFIX))
+    return bool(
+        template and template.lstrip().startswith(EDITABLE_DOCUMENT_TEMPLATE_PREFIX)
+    )
 
 
 def _strip_document_template_prefix(template: str | None) -> str:
@@ -3290,7 +3322,9 @@ def _strip_document_template_prefix(template: str | None) -> str:
 def _html_to_plain_text(value: str) -> str:
     text = re.sub(r"<style[\s\S]*?</style>", " ", value, flags=re.IGNORECASE)
     text = re.sub(r"<script[\s\S]*?</script>", " ", text, flags=re.IGNORECASE)
-    text = re.sub(r"</(p|div|li|h1|h2|h3|h4|h5|h6|tr)>", "\n", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"</(p|div|li|h1|h2|h3|h4|h5|h6|tr)>", "\n", text, flags=re.IGNORECASE
+    )
     text = re.sub(r"<br\s*/?>", "\n", text, flags=re.IGNORECASE)
     text = re.sub(r"<[^>]+>", " ", text)
     text = html.unescape(text)
@@ -3511,7 +3545,9 @@ def _render_word_paragraph_to_html(paragraph: ET.Element) -> str:
         return "<p></p>"
 
     style = paragraph.find("./w:pPr/w:pStyle", WORDPROCESSINGML_NS)
-    style_value = style.get(f"{{{WORDPROCESSINGML_NS['w']}}}val", "") if style is not None else ""
+    style_value = (
+        style.get(f"{{{WORDPROCESSINGML_NS['w']}}}val", "") if style is not None else ""
+    )
     style_key = style_value.lower()
 
     if style_key.startswith("heading1") or style_key == "title":
@@ -4072,7 +4108,9 @@ def get_public_form(
 
     active_round = _get_active_round_for_form(db, form.id)
     if not active_round:
-        raise HTTPException(status_code=400, detail="This form is not accepting responses right now")
+        raise HTTPException(
+            status_code=400, detail="This form is not accepting responses right now"
+        )
 
     previous_round = (
         db.query(RoundModel)
@@ -4118,19 +4156,27 @@ async def start_public_form_session(
 
     active_round = _get_active_round_for_form(db, form.id)
     if not active_round:
-        raise HTTPException(status_code=400, detail="This form is not accepting responses right now")
+        raise HTTPException(
+            status_code=400, detail="This form is not accepting responses right now"
+        )
 
     name = participant_name.strip()
     if not name:
-        raise HTTPException(status_code=400, detail="Please enter your name before continuing.")
+        raise HTTPException(
+            status_code=400, detail="Please enter your name before continuing."
+        )
 
     if form.public_require_consent and not consent_given:
-        raise HTTPException(status_code=400, detail="Please confirm consent before continuing.")
+        raise HTTPException(
+            status_code=400, detail="Please confirm consent before continuing."
+        )
 
     upload_filename = None
     upload_path = None
     if form.public_require_upload and not file:
-        raise HTTPException(status_code=400, detail="Please upload a file before continuing.")
+        raise HTTPException(
+            status_code=400, detail="Please upload a file before continuing."
+        )
 
     session_token = secrets.token_urlsafe(24)
     user = User(
@@ -4188,7 +4234,9 @@ def get_public_form_session(
     form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
     active_round = _get_active_round_for_form(db, session.form_id)
     if not form or not active_round or active_round.id != session.round_id:
-        raise HTTPException(status_code=400, detail="This public form session is no longer active.")
+        raise HTTPException(
+            status_code=400, detail="This public form session is no longer active."
+        )
 
     previous_round = (
         db.query(RoundModel)
@@ -4211,7 +4259,9 @@ def get_public_form_session(
     )
     submitted = (
         db.query(Response)
-        .filter(Response.user_id == session.user_id, Response.round_id == active_round.id)
+        .filter(
+            Response.user_id == session.user_id, Response.round_id == active_round.id
+        )
         .first()
         is not None
     )
@@ -4228,12 +4278,16 @@ def get_public_form_session(
             "questions": active_round.questions or form.questions,
             "document_template": form.document_template,
             "join_code": form.join_code,
-            "previous_round_synthesis": previous_round.synthesis if previous_round else "",
+            "previous_round_synthesis": previous_round.synthesis
+            if previous_round
+            else "",
             **_serialize_public_settings(form),
         },
         "draft": {
             "answers": draft.answers,
-            "updated_at": draft.updated_at.isoformat() if draft and draft.updated_at else None,
+            "updated_at": draft.updated_at.isoformat()
+            if draft and draft.updated_at
+            else None,
         }
         if draft
         else None,
@@ -4255,16 +4309,22 @@ def save_public_form_draft(
 ):
     session = _get_public_session(db, session_token)
     if session.submitted_at:
-        raise HTTPException(status_code=400, detail="This response has already been submitted.")
+        raise HTTPException(
+            status_code=400, detail="This response has already been submitted."
+        )
 
     form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
     active_round = _get_active_round_for_form(db, session.form_id)
     if not form or not active_round or active_round.id != session.round_id:
-        raise HTTPException(status_code=400, detail="This public form session is no longer active.")
+        raise HTTPException(
+            status_code=400, detail="This public form session is no longer active."
+        )
 
     name = payload.participant_name.strip()
     if not name:
-        raise HTTPException(status_code=400, detail="Please enter your name before continuing.")
+        raise HTTPException(
+            status_code=400, detail="Please enter your name before continuing."
+        )
 
     session.participant_name = name
     if session.user:
@@ -4310,18 +4370,26 @@ def submit_public_form_response(
 ):
     session = _get_public_session(db, session_token)
     if session.submitted_at:
-        raise HTTPException(status_code=400, detail="This response has already been submitted.")
+        raise HTTPException(
+            status_code=400, detail="This response has already been submitted."
+        )
 
     form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
     active_round = _get_active_round_for_form(db, session.form_id)
     if not form or not active_round or active_round.id != session.round_id:
-        raise HTTPException(status_code=400, detail="This public form session is no longer active.")
+        raise HTTPException(
+            status_code=400, detail="This public form session is no longer active."
+        )
 
     name = payload.participant_name.strip()
     if not name:
-        raise HTTPException(status_code=400, detail="Please enter your name before submitting.")
+        raise HTTPException(
+            status_code=400, detail="Please enter your name before submitting."
+        )
 
-    validation_error = _validate_required_answers(active_round.questions, payload.answers)
+    validation_error = _validate_required_answers(
+        active_round.questions, payload.answers
+    )
     if validation_error:
         raise HTTPException(status_code=400, detail=validation_error)
 
@@ -4332,7 +4400,9 @@ def submit_public_form_response(
 
     existing_response = (
         db.query(Response)
-        .filter(Response.user_id == session.user_id, Response.round_id == active_round.id)
+        .filter(
+            Response.user_id == session.user_id, Response.round_id == active_round.id
+        )
         .first()
     )
     if existing_response:
@@ -4384,7 +4454,9 @@ async def extract_document_template(
     user: User = Depends(require_facilitator),
 ):
     if mode not in {"fillable", "editable"}:
-        raise HTTPException(status_code=400, detail="Unsupported document template mode")
+        raise HTTPException(
+            status_code=400, detail="Unsupported document template mode"
+        )
 
     filename = (file.filename or "").lower()
     if not filename.endswith(".docx"):

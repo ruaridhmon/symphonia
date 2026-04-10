@@ -22,6 +22,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
+from core.synthesis import Agreement, SynthesisResult
 from tests.conftest import (
     create_form,
     register_and_login,
@@ -184,32 +185,25 @@ class TestMalformedApiResponse:
         rounds_resp = client.get(f"/forms/{form_id}/rounds", headers=admin_headers)
         round_id = rounds_resp.json()[0]["id"]
 
-        # Mock the OpenAI client to return malformed text
-        mock_completion = MagicMock()
-        mock_completion.choices = [
-            MagicMock(
-                message=MagicMock(
-                    content="This is not valid JSON at all, just rambling text."
-                )
+        raw_text = "This is not valid JSON at all, just rambling text."
+        mock_synthesiser = MagicMock()
+        mock_synthesiser.run = AsyncMock(
+            return_value=SynthesisResult(
+                agreements=[],
+                disagreements=[],
+                nuances=[],
+                confidence_map={},
+                follow_up_probes=[],
+                provenance={"source": "test"},
+                analyst_reports=[],
+                meta_synthesis_reasoning="Returned raw narrative fallback",
+                narrative=raw_text,
             )
-        ]
-        mock_client = MagicMock()
-        mock_client.chat.completions.create.return_value = mock_completion
-
-        # Synthesis now runs as a background task — capture the coroutine
-        # so we can run it synchronously with the test DB.
-        captured_coro = None
-
-        def _intercept_create_task(coro, **kwargs):
-            nonlocal captured_coro
-            captured_coro = coro
-            fut = asyncio.get_running_loop().create_future()
-            fut.set_result(None)
-            return fut
+        )
 
         with (
-            patch("core.routes.get_openai_client", return_value=mock_client),
-            patch("asyncio.create_task", side_effect=_intercept_create_task),
+            patch("core.routes.SessionLocal", TestingSessionLocal),
+            patch("core.routes.get_synthesiser", return_value=mock_synthesiser),
         ):
             resp = client.post(
                 f"/forms/{form_id}/rounds/{round_id}/generate_synthesis",
@@ -218,18 +212,6 @@ class TestMalformedApiResponse:
             )
 
         assert resp.status_code == 200
-
-        # Run the captured background task synchronously against the test DB
-        assert captured_coro is not None
-        with (
-            patch("core.routes.SessionLocal", TestingSessionLocal),
-            patch("core.routes.get_openai_client", return_value=mock_client),
-        ):
-            _loop = asyncio.new_event_loop()
-            try:
-                _loop.run_until_complete(captured_coro)
-            finally:
-                _loop.close()
 
         # Fetch the result via the synthesis versions API
         versions_resp = client.get(
@@ -241,9 +223,9 @@ class TestMalformedApiResponse:
         assert len(versions) >= 1
         data = versions[-1]
 
-        # synthesis_json should be None (couldn't parse)
-        assert data.get("synthesis_json") is None
-        # Raw text should be preserved as the synthesis
+        # The synthesis result is stored even when only narrative text is present.
+        assert data.get("synthesis_json") is not None
+        assert data["synthesis_json"]["narrative"] == raw_text
         assert "rambling text" in data.get("synthesis", "")
 
         # Restore
@@ -286,25 +268,33 @@ class TestMalformedApiResponse:
             }
         )
 
-        mock_completion = MagicMock()
-        mock_completion.choices = [MagicMock(message=MagicMock(content=valid_json))]
-        mock_client = MagicMock()
-        mock_client.chat.completions.create.return_value = mock_completion
-
-        # Synthesis now runs as a background task — capture the coroutine
-        # so we can run it synchronously with the test DB.
-        captured_coro = None
-
-        def _intercept_create_task(coro, **kwargs):
-            nonlocal captured_coro
-            captured_coro = coro
-            fut = asyncio.get_running_loop().create_future()
-            fut.set_result(None)
-            return fut
+        mock_synthesiser = MagicMock()
+        mock_synthesiser.run = AsyncMock(
+            return_value=SynthesisResult(
+                agreements=[
+                    Agreement(
+                        claim="Experts agree on X",
+                        supporting_experts=[1],
+                        confidence=0.9,
+                        evidence_summary="Based on response 1",
+                        evidence_excerpts=[],
+                    )
+                ],
+                disagreements=[],
+                nuances=[],
+                confidence_map={"overall": 0.85},
+                follow_up_probes=[],
+                provenance={"source": "test"},
+                analyst_reports=[],
+                meta_synthesis_reasoning="Direct synthesis",
+                narrative="Test narrative",
+                claims_raw=json.loads(valid_json).get("agreements"),
+            )
+        )
 
         with (
-            patch("core.routes.get_openai_client", return_value=mock_client),
-            patch("asyncio.create_task", side_effect=_intercept_create_task),
+            patch("core.routes.SessionLocal", TestingSessionLocal),
+            patch("core.routes.get_synthesiser", return_value=mock_synthesiser),
         ):
             resp = client.post(
                 f"/forms/{form_id}/rounds/{round_id}/generate_synthesis",
@@ -313,18 +303,6 @@ class TestMalformedApiResponse:
             )
 
         assert resp.status_code == 200
-
-        # Run the captured background task synchronously against the test DB
-        assert captured_coro is not None
-        with (
-            patch("core.routes.SessionLocal", TestingSessionLocal),
-            patch("core.routes.get_openai_client", return_value=mock_client),
-        ):
-            _loop = asyncio.new_event_loop()
-            try:
-                _loop.run_until_complete(captured_coro)
-            finally:
-                _loop.close()
 
         # Fetch the result via the synthesis versions API
         versions_resp = client.get(

@@ -38,9 +38,7 @@ class User(Base):
     has_submitted_feedback = Column(Boolean, default=False)
     reset_token = Column(String, nullable=True)
     reset_token_expiry = Column(DateTime, nullable=True)
-    is_public_guest = Column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    is_public_guest = Column(Boolean, nullable=False, default=False, server_default="0")
     created_at = Column(
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
@@ -366,9 +364,7 @@ class PublicFormSession(Base):
     round_id = Column(Integer, ForeignKey("rounds.id"), nullable=False, index=True)
     session_token = Column(String(128), nullable=False, unique=True, index=True)
     participant_name = Column(String(255), nullable=False)
-    consent_given = Column(
-        Boolean, nullable=False, default=False, server_default="0"
-    )
+    consent_given = Column(Boolean, nullable=False, default=False, server_default="0")
     upload_filename = Column(String(255), nullable=True)
     upload_path = Column(Text, nullable=True)
     created_at = Column(
