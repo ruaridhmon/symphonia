@@ -4,6 +4,7 @@ import { API_BASE_URL } from '../config';
 import RichDocumentEditor from './RichDocumentEditor';
 import FillableDocumentEditor from './FillableDocumentEditor';
 import { importDocxAsHtml } from '../utils/docxImport';
+import { convertQuestionnaireTextToRichTemplate } from '../utils/questionnaireImport';
 import {
   createEditableDocumentTemplate,
   createRichFillableDocumentTemplate,
@@ -80,7 +81,14 @@ export default function DocumentTemplateEditor({
       }
 
       if (typeof payload.template === 'string') {
-        onChange(payload.template);
+        const nextTemplate =
+          mode === 'fillable-rich' || mode === 'fillable'
+            ? (() => {
+                const converted = convertQuestionnaireTextToRichTemplate(payload.template);
+                return converted.questions.length > 0 ? converted.template : payload.template;
+              })()
+            : payload.template;
+        onChange(nextTemplate);
       }
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : 'Failed to import .docx file');

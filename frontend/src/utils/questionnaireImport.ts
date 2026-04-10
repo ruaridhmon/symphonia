@@ -3,12 +3,21 @@ import {
   type ConfigurableQuestion,
   type SurveyInputType,
 } from './questions';
+import {
+  createRichFillableDocumentTemplate,
+  serializeRichDocumentField,
+  type DocumentTemplateField,
+} from './documentTemplate';
 
 export interface QuestionnaireImportResult {
   questions: ConfigurableQuestion[];
   warnings: string[];
   importedRoundLabel: string | null;
   skippedRoundLabels: string[];
+}
+
+export interface QuestionnaireRichTemplateResult extends QuestionnaireImportResult {
+  template: string;
 }
 
 interface QuestionBlock {
@@ -406,5 +415,97 @@ export function parseQuestionnaireText(text: string): QuestionnaireImportResult 
     warnings,
     importedRoundLabel,
     skippedRoundLabels,
+  };
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function questionToDocumentField(question: ConfigurableQuestion, fallbackKey: string): DocumentTemplateField {
+  const inputType = question.inputType ?? 'textarea';
+  const fieldType: DocumentTemplateField['fieldType'] =
+    inputType === 'text'
+      ? 'short'
+      : inputType === 'textarea'
+        ? 'long'
+        : inputType;
+
+  return {
+    key: question.questionId?.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || fallbackKey,
+    label: question.label,
+    fieldType,
+    inputType,
+    optional: question.optional ?? false,
+    rows: question.rows ?? (inputType === 'text' ? 1 : 4),
+    placeholder:
+      question.placeholder ??
+      (inputType === 'text' ? 'Write a short response' : 'Write your response here'),
+    options: question.options ?? undefined,
+    maxSelections: question.maxSelections ?? undefined,
+    minValue: question.minValue ?? undefined,
+    maxValue: question.maxValue ?? undefined,
+    minLabel: question.minLabel ?? undefined,
+    midLabel: question.midLabel ?? undefined,
+    maxLabel: question.maxLabel ?? undefined,
+    allowUnsure: question.allowUnsure ?? undefined,
+  };
+}
+
+export function convertQuestionnaireTextToRichTemplate(text: string): QuestionnaireRichTemplateResult {
+  const parsed = parseQuestionnaireText(text);
+  const htmlParts: string[] = [];
+
+  if (parsed.importedRoundLabel) {
+    htmlParts.push(`<h1>${escapeHtml(parsed.importedRoundLabel)}</h1>`);
+  }
+
+  let currentSection: string | null = null;
+  let currentGroupPrompt: string | null = null;
+
+  parsed.questions.forEach((question, index) => {
+    if (question.sectionTitle && question.sectionTitle !== currentSection) {
+      currentSection = question.sectionTitle;
+      currentGroupPrompt = null;
+      htmlParts.push(`<h2>${escapeHtml(question.sectionTitle)}</h2>`);
+    }
+
+    if (question.groupPrompt && question.groupPrompt !== currentGroupPrompt) {
+      currentGroupPrompt = question.groupPrompt;
+      htmlParts.push(`<p><strong>${escapeHtml(question.groupPrompt)}</strong></p>`);
+    }
+
+    const field = questionToDocumentField(question, `field-${index + 1}`);
+    const fieldHtml = serializeRichDocumentField(field);
+    const helpBits = [
+      question.helpText,
+      question.maxSelections && question.inputType === 'multi_select'
+        ? `Select up to ${question.maxSelections}.`
+        : null,
+      question.conditionalOnQuestionId && question.conditionalOnOption
+        ? `Show only if ${question.conditionalOnQuestionId} includes “${question.conditionalOnOption}”.`
+        : null,
+    ].filter((value): value is string => !!value && value.trim() !== '');
+
+    if (field.fieldType === 'short') {
+      htmlParts.push(`<p><strong>${escapeHtml(question.questionId ?? `Q${index + 1}`)}.</strong> ${escapeHtml(question.label)} ${fieldHtml}</p>`);
+    } else {
+      htmlParts.push(`<p><strong>${escapeHtml(question.questionId ?? `Q${index + 1}`)}.</strong> ${escapeHtml(question.label)}</p>`);
+      htmlParts.push(`<p>${fieldHtml}</p>`);
+    }
+
+    if (helpBits.length > 0) {
+      htmlParts.push(`<blockquote>${escapeHtml(helpBits.join(' '))}</blockquote>`);
+    }
+  });
+
+  const templateHtml = htmlParts.join('');
+  return {
+    ...parsed,
+    template: createRichFillableDocumentTemplate(templateHtml || '<p></p>'),
   };
 }

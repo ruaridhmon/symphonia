@@ -518,6 +518,87 @@ test.describe('Document template consultations', () => {
     }
   });
 
+  test('fillable document import detects structured response types from questionnaire-style docx', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    let fixtureDir: string | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      const fixture = await createQuestionnaireDocx([
+        'Round 1: Full question set',
+        '',
+        'Section A. About you',
+        '',
+        'Q1. Which role best describes you?',
+        'Response type: Select one.',
+        'School leader',
+        'Teacher',
+        'Support staff',
+        '',
+        'Q2. Which two issues matter most?',
+        'Response type: Select up to 2.',
+        'Workload',
+        'Safeguarding',
+        'Vendor lock-in',
+        '',
+        'Q3. Rate each challenge below.',
+        'Response type: 0–10 slider for each item.',
+        'Anchor labels: 0 = Not significant, 5 = Moderate, 10 = Very significant',
+        'Workload burden',
+        'Safeguarding risk',
+        '',
+        'Q4. Optional comments',
+        'Response type: Free text, max 40 words.',
+      ]);
+      fixtureDir = fixture.dir;
+
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const adminPage = await adminContext.newPage();
+      await adminPage.goto(`${appBase}/admin/forms/new`);
+
+      await adminPage.getByRole('button', { name: /start document template/i }).click();
+      await adminPage.locator('#form-title').fill(`Imported Fillable Document ${timestamp}`);
+
+      await adminPage.locator('input[type="file"]').setInputFiles(fixture.docxPath);
+
+      await expect(adminPage.getByText('Which role best describes you?').first()).toBeVisible();
+      await expect(adminPage.getByText('Workload burden').first()).toBeVisible();
+
+      await adminPage.getByRole('button', { name: /create form/i }).click();
+      await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
+
+      const formIdMatch = adminPage.url().match(/\/admin\/form\/(\d+)$/);
+      expect(formIdMatch).not.toBeNull();
+      createdFormId = Number(formIdMatch?.[1]);
+
+      const form = await getFormDetails(adminApi, appBase, adminToken, createdFormId);
+      expect(typeof form.document_template).toBe('string');
+      expect(form.document_template).toContain('data-symphonia-field-type="single_select"');
+      expect(form.document_template).toContain('data-symphonia-field-type="multi_select"');
+      expect(form.document_template).toContain('data-symphonia-field-type="slider"');
+      expect(form.document_template).toContain('data-symphonia-max-selections="2"');
+    } finally {
+      if (adminContext) {
+        await adminContext.close();
+      }
+      if (fixtureDir) {
+        await rm(fixtureDir, { recursive: true, force: true });
+      }
+      if (createdFormId) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      await adminApi.dispose();
+    }
+  });
+
   test('fillable documents support richer response types inline', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';

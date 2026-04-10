@@ -12,6 +12,7 @@ function toQuestion(field: RenderableDocumentTemplateField): ConfigurableQuestio
     requireConfidence: false,
     inputType: field.inputType === 'document' ? 'textarea' : field.inputType,
     options: field.options,
+    maxSelections: field.maxSelections,
     minValue: field.minValue,
     maxValue: field.maxValue,
     minLabel: field.minLabel,

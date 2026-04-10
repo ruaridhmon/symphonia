@@ -39,6 +39,7 @@ type SelectedFieldState = {
     rows: number;
     placeholder: string;
     options: string;
+    maxSelections: number | null;
     minValue: number | null;
     maxValue: number | null;
     minLabel: string | null;
@@ -84,6 +85,7 @@ function FieldNodePreview({ attrs, selected }: { attrs: SelectedFieldState['attr
     rows: attrs.rows,
     placeholder: attrs.placeholder,
     options: parseFieldOptions(attrs.options),
+    maxSelections: attrs.maxSelections ?? undefined,
     minValue: attrs.minValue ?? undefined,
     maxValue: attrs.maxValue ?? undefined,
     minLabel: attrs.minLabel ?? undefined,
@@ -160,6 +162,7 @@ const FillableFieldNode = Node.create({
       rows: { default: 4 },
       placeholder: { default: 'Enter response' },
       options: { default: '[]' },
+      maxSelections: { default: null },
       minValue: { default: null },
       maxValue: { default: null },
       minLabel: { default: null },
@@ -189,6 +192,7 @@ const FillableFieldNode = Node.create({
         'data-symphonia-rows': String(HTMLAttributes.rows ?? 4),
         'data-symphonia-placeholder': HTMLAttributes.placeholder,
         'data-symphonia-options': HTMLAttributes.options,
+        'data-symphonia-max-selections': HTMLAttributes.maxSelections,
         'data-symphonia-min-value': HTMLAttributes.minValue,
         'data-symphonia-max-value': HTMLAttributes.maxValue,
         'data-symphonia-min-label': HTMLAttributes.minLabel,
@@ -223,6 +227,7 @@ function fieldFromType(type: CommandOption['field']['fieldType'], label: string,
     rows: normalizedType === 'short' ? 1 : 6,
     placeholder: `Enter ${textLabel.toLowerCase()}`,
     options: normalizedType === 'single_select' || normalizedType === 'multi_select' || normalizedType === 'likert' ? options : undefined,
+    maxSelections: undefined,
     minValue: normalizedType === 'slider' ? Number(options[0] ?? 0) : undefined,
     maxValue: normalizedType === 'slider' ? Number(options[1] ?? 10) : undefined,
     minLabel: normalizedType === 'slider' ? (options[2] ?? 'Low') : undefined,
@@ -847,6 +852,27 @@ export default function FillableDocumentEditor({
                         rows={6}
                         className="w-full rounded-xl px-3 py-2 text-sm"
                         style={{ border: '1px solid var(--input)', backgroundColor: 'white', resize: 'vertical' }}
+                      />
+                    </div>
+                  ) : null}
+
+                  {selectedField.attrs.fieldType === 'multi_select' ? (
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                        Max selections
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={selectedField.attrs.maxSelections ?? ''}
+                        {...settingsInputHandlers}
+                        onChange={(event) =>
+                          updateSelectedField({
+                            maxSelections: event.target.value ? Number(event.target.value) : null,
+                          })
+                        }
+                        className="w-full rounded-xl px-3 py-2 text-sm"
+                        style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
                       />
                     </div>
                   ) : null}

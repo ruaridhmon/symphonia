@@ -10,6 +10,7 @@ export interface DocumentTemplateField {
   rows: number;
   placeholder: string;
   options?: string[];
+  maxSelections?: number;
   minValue?: number;
   maxValue?: number;
   minLabel?: string;
@@ -232,6 +233,7 @@ export function serializeRichDocumentField(field: DocumentTemplateField): string
     ['data-symphonia-placeholder', field.placeholder],
   ]);
   if (field.options?.length) attributes.set('data-symphonia-options', JSON.stringify(field.options));
+  if (typeof field.maxSelections === 'number') attributes.set('data-symphonia-max-selections', String(field.maxSelections));
   if (typeof field.minValue === 'number') attributes.set('data-symphonia-min-value', String(field.minValue));
   if (typeof field.maxValue === 'number') attributes.set('data-symphonia-max-value', String(field.maxValue));
   if (field.minLabel) attributes.set('data-symphonia-min-label', field.minLabel);
@@ -281,6 +283,7 @@ function parseRichDocumentFieldElement(element: Element): DocumentTemplateField 
     rows: parseNumberAttr('data-symphonia-rows') ?? (fieldType === 'short' ? 1 : 6),
     placeholder: element.getAttribute('data-symphonia-placeholder') || `Enter ${label.toLowerCase()}`,
     options,
+    maxSelections: parseNumberAttr('data-symphonia-max-selections'),
     minValue: parseNumberAttr('data-symphonia-min-value'),
     maxValue: parseNumberAttr('data-symphonia-max-value'),
     minLabel: element.getAttribute('data-symphonia-min-label') || undefined,
