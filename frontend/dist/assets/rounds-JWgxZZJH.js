@@ -1,0 +1,1 @@
+import{b as t}from"./index-3GD1JdhK.js";function s(n){return t.get(`/forms/${n}/rounds`)}function e(n){return t.get(`/forms/${n}/active_round`)}function u(n,o){return t.post(`/forms/${n}/next_round`,o)}function i(n){return t.get(`/forms/${n}/rounds_with_responses`)}export{i as a,e as b,s as g,u as n};

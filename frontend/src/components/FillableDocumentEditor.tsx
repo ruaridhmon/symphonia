@@ -875,12 +875,30 @@ export default function FillableDocumentEditor({
     setSelectedFieldOptionsDirty(false);
   }
 
+  function stopInspectorEvent(
+    event:
+      | React.MouseEvent<HTMLInputElement | HTMLTextAreaElement>
+      | React.PointerEvent<HTMLInputElement | HTMLTextAreaElement>
+      | React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    event.stopPropagation();
+    if ('nativeEvent' in event && typeof event.nativeEvent.stopImmediatePropagation === 'function') {
+      event.nativeEvent.stopImmediatePropagation();
+    }
+  }
+
   const settingsInputHandlers = {
     onFocus: () => setSlashMenu(null),
-    onMouseDown: (event: React.MouseEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
-    onPointerDown: (event: React.PointerEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
-    onKeyDown: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
-    onKeyDownCapture: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
+    onMouseDownCapture: stopInspectorEvent,
+    onMouseDown: stopInspectorEvent,
+    onPointerDownCapture: stopInspectorEvent,
+    onPointerDown: stopInspectorEvent,
+    onClickCapture: stopInspectorEvent,
+    onClick: stopInspectorEvent,
+    onKeyDownCapture: stopInspectorEvent,
+    onKeyDown: stopInspectorEvent,
+    onKeyUpCapture: stopInspectorEvent,
+    onKeyUp: stopInspectorEvent,
   };
 
   const settingsCheckboxHandlers = {
