@@ -42,14 +42,14 @@ def _ensure_schema_columns() -> None:
     schema_updates = {
         "forms": {
             "document_template": "ALTER TABLE forms ADD COLUMN document_template TEXT",
-            "allow_public_responses": "ALTER TABLE forms ADD COLUMN allow_public_responses BOOLEAN NOT NULL DEFAULT 0",
-            "public_require_consent": "ALTER TABLE forms ADD COLUMN public_require_consent BOOLEAN NOT NULL DEFAULT 0",
+            "allow_public_responses": "ALTER TABLE forms ADD COLUMN allow_public_responses BOOLEAN NOT NULL DEFAULT FALSE",
+            "public_require_consent": "ALTER TABLE forms ADD COLUMN public_require_consent BOOLEAN NOT NULL DEFAULT FALSE",
             "public_consent_text": "ALTER TABLE forms ADD COLUMN public_consent_text TEXT",
-            "public_require_upload": "ALTER TABLE forms ADD COLUMN public_require_upload BOOLEAN NOT NULL DEFAULT 0",
+            "public_require_upload": "ALTER TABLE forms ADD COLUMN public_require_upload BOOLEAN NOT NULL DEFAULT FALSE",
             "public_upload_prompt": "ALTER TABLE forms ADD COLUMN public_upload_prompt TEXT",
         },
         "users": {
-            "is_public_guest": "ALTER TABLE users ADD COLUMN is_public_guest BOOLEAN NOT NULL DEFAULT 0",
+            "is_public_guest": "ALTER TABLE users ADD COLUMN is_public_guest BOOLEAN NOT NULL DEFAULT FALSE",
         },
     }
 
