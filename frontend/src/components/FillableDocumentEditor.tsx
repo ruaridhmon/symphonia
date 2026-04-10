@@ -656,7 +656,7 @@ export default function FillableDocumentEditor({
   return (
     <div
       ref={rootRef}
-      className="overflow-hidden rounded-[1.7rem]"
+      className="overflow-visible rounded-[1.7rem]"
       style={{
         border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
         background:
@@ -810,13 +810,13 @@ export default function FillableDocumentEditor({
           <div className="min-w-0 flex-1">
             <div
               data-testid="document-template-rich-editor"
-              className="relative rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
+              className="relative overflow-visible rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
               style={{ borderColor: 'rgba(148, 163, 184, 0.28)' }}
             >
               <EditorContent editor={editor} />
               {slashMenu && filteredCommands.length > 0 ? (
                 <div
-                  className="absolute left-8 top-8 z-10 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
+                  className="absolute left-8 top-8 z-40 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
                   style={{
                     backgroundColor: 'rgba(255,255,255,0.97)',
                     border: '1px solid rgba(148,163,184,0.26)',
