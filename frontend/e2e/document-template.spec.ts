@@ -782,6 +782,54 @@ test.describe('Document template consultations', () => {
     }
   });
 
+  test('fillable editor keeps slash menu visible and docks field settings beside the canvas', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    try {
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const adminPage = await adminContext.newPage();
+      await adminPage.goto(`${appBase}/admin/forms/new`);
+      await adminPage.getByRole('button', { name: /start document template/i }).click();
+
+      const editor = adminPage.locator('.symphonia-fillable-editor');
+      await editor.click();
+      await adminPage.keyboard.type('/');
+
+      const slashMenuButton = adminPage.getByRole('button', { name: /short text/i }).first();
+      const slashMenu = slashMenuButton.locator('xpath=ancestor::div[contains(@class,"absolute")]').first();
+      await expect(slashMenuButton).toBeVisible();
+
+      const editorCard = adminPage.locator('[data-testid="document-template-rich-editor"]');
+      const menuBox = await slashMenu.boundingBox();
+      const editorBox = await editorCard.boundingBox();
+      expect(menuBox).not.toBeNull();
+      expect(editorBox).not.toBeNull();
+      expect((menuBox?.right ?? 0) <= (editorBox?.right ?? 0) + 4).toBeTruthy();
+      expect((menuBox?.bottom ?? 0) <= (editorBox?.bottom ?? 0) + 220).toBeTruthy();
+
+      await slashMenuButton.click();
+      await adminPage.locator('.symphonia-fillable-node').first().click();
+
+      const inspector = adminPage.getByLabel('Field settings inspector');
+      await expect(inspector).toBeVisible();
+
+      const inspectorBox = await inspector.boundingBox();
+      expect(inspectorBox).not.toBeNull();
+      expect((inspectorBox?.left ?? 0) >= (editorBox?.right ?? 0) - 8).toBeTruthy();
+    } finally {
+      if (adminContext) {
+        await adminContext.close();
+      }
+      await adminApi.dispose();
+    }
+  });
+
   test('admin can import an editable document and participants can edit their own copy', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';
