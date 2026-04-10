@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { EditorContent, useEditor } from '@tiptap/react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { EditorContent, NodeViewWrapper, ReactNodeViewRenderer, useEditor } from '@tiptap/react';
 import { Extension, Node, mergeAttributes, type Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
 import Highlight from '@tiptap/extension-highlight';
@@ -62,6 +62,160 @@ const SIZE_PRESETS = [
 
 const FIELD_NODE_NAME = 'fillableField';
 
+function parseFieldOptions(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw || '[]');
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+function FieldNodePreview({ attrs, selected }: { attrs: SelectedFieldState['attrs']; selected: boolean }) {
+  const options = parseFieldOptions(attrs.options);
+  const commonShellStyle: CSSProperties = {
+    border: selected
+      ? '1px solid color-mix(in srgb, var(--accent) 40%, transparent)'
+      : '1px solid color-mix(in srgb, var(--border) 84%, transparent)',
+    backgroundColor: selected
+      ? 'color-mix(in srgb, var(--accent) 4%, white)'
+      : 'color-mix(in srgb, var(--background) 84%, white)',
+    boxShadow: selected
+      ? '0 16px 34px -24px rgba(37,99,235,0.42)'
+      : '0 12px 28px -24px rgba(15,23,42,0.28)',
+  };
+
+  return (
+    <span
+      className="symphonia-fillable-node inline-flex max-w-full align-middle"
+      contentEditable={false}
+      data-question-key={attrs.key}
+    >
+      <span
+        className="inline-flex min-w-[16rem] max-w-[28rem] flex-col gap-2 rounded-2xl px-3 py-3"
+        style={commonShellStyle}
+      >
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+            {attrs.label}
+          </span>
+          <span
+            className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            style={{
+              backgroundColor: attrs.optional
+                ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+                : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+              color: attrs.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+            }}
+          >
+            {attrs.optional ? 'Optional' : 'Required'}
+          </span>
+        </span>
+
+        {attrs.fieldType === 'short' ? (
+          <span
+            className="rounded-xl px-3 py-2.5 text-sm"
+            style={{
+              border: '1px solid var(--input)',
+              backgroundColor: 'white',
+              color: 'var(--muted-foreground)',
+            }}
+          >
+            {attrs.placeholder || 'Enter response'}
+          </span>
+        ) : null}
+
+        {attrs.fieldType === 'long' ? (
+          <span
+            className="rounded-xl px-3 py-3 text-sm whitespace-pre-wrap"
+            style={{
+              border: '1px solid var(--input)',
+              backgroundColor: 'white',
+              color: 'var(--muted-foreground)',
+              minHeight: `${Math.max(attrs.rows ?? 4, 3) * 1.55}rem`,
+              lineHeight: 1.6,
+            }}
+          >
+            {attrs.placeholder || 'Enter response'}
+          </span>
+        ) : null}
+
+        {(attrs.fieldType === 'single_select' || attrs.fieldType === 'multi_select') ? (
+          <span className="flex flex-wrap gap-2">
+            {options.map((option) => (
+              <span
+                key={option}
+                className="inline-flex items-center rounded-full px-2.5 py-1.5 text-xs font-medium"
+                style={{
+                  border: '1px solid color-mix(in srgb, var(--border) 84%, transparent)',
+                  backgroundColor: 'white',
+                  color: 'var(--foreground)',
+                }}
+              >
+                {attrs.fieldType === 'multi_select' ? '☐' : '◯'} {option}
+              </span>
+            ))}
+          </span>
+        ) : null}
+
+        {attrs.fieldType === 'slider' ? (
+          <span className="flex flex-col gap-2">
+            <span
+              className="h-2 rounded-full"
+              style={{
+                background: 'linear-gradient(90deg, color-mix(in srgb, var(--accent) 22%, white) 0%, color-mix(in srgb, var(--accent) 58%, white) 100%)',
+              }}
+            />
+            <span className="flex items-center justify-between text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+              <span>{attrs.minLabel || attrs.minValue || 0}</span>
+              <span className="font-semibold" style={{ color: 'var(--foreground)' }}>
+                {attrs.minValue ?? 0} - {attrs.maxValue ?? 10}
+              </span>
+              <span>{attrs.maxLabel || attrs.maxValue || 10}</span>
+            </span>
+          </span>
+        ) : null}
+
+        {attrs.fieldType === 'likert' ? (
+          <span className="flex flex-wrap gap-2">
+            {options.map((option) => (
+              <span
+                key={option}
+                className="inline-flex items-center rounded-full px-2.5 py-1.5 text-xs font-medium"
+                style={{
+                  border: '1px solid color-mix(in srgb, var(--border) 84%, transparent)',
+                  backgroundColor: 'white',
+                  color: 'var(--foreground)',
+                }}
+              >
+                ◯ {option}
+              </span>
+            ))}
+            {attrs.allowUnsure ? (
+              <span
+                className="inline-flex items-center rounded-full px-2.5 py-1.5 text-xs font-medium"
+                style={{
+                  border: '1px solid color-mix(in srgb, var(--border) 84%, transparent)',
+                  backgroundColor: 'white',
+                  color: 'var(--foreground)',
+                }}
+              >
+                ◯ Unsure
+              </span>
+            ) : null}
+          </span>
+        ) : null}
+      </span>
+    </span>
+  );
+}
+
+const FillableFieldNodeView = ReactNodeViewRenderer((props) => (
+  <NodeViewWrapper as="span" className="inline-flex align-middle">
+    <FieldNodePreview attrs={props.node.attrs as SelectedFieldState['attrs']} selected={props.selected} />
+  </NodeViewWrapper>
+));
+
 const ImportedDocumentStyles = Extension.create({
   name: 'importedDocumentStyles',
   addGlobalAttributes() {
@@ -114,6 +268,10 @@ const FillableFieldNode = Node.create({
       maxLabel: { default: null },
       allowUnsure: { default: false },
     };
+  },
+
+  addNodeView() {
+    return FillableFieldNodeView;
   },
 
   parseHTML() {
@@ -467,19 +625,10 @@ export default function FillableDocumentEditor({
         .symphonia-fillable-editor h2 { font-size: 1.25rem; line-height: 1.2; margin: 1.15rem 0 0.65rem; color: #183153; font-weight: 650; }
         .symphonia-fillable-editor p, .symphonia-fillable-editor li { line-height: 1.75; color: #182333; }
         .symphonia-fillable-editor ul, .symphonia-fillable-editor ol { padding-left: 1.25rem; }
-        .symphonia-fillable-editor .symphonia-fillable-chip {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.35rem;
-          padding: 0.32rem 0.72rem;
-          margin: 0 0.15rem;
-          border-radius: 999px;
-          border: 1px solid rgba(45, 99, 182, 0.18);
-          background: rgba(45, 99, 182, 0.08);
-          color: #1f4ea3;
-          font-size: 0.82rem;
-          font-weight: 600;
-          white-space: nowrap;
+        .symphonia-fillable-editor .symphonia-fillable-node { margin: 0.12rem 0.22rem; vertical-align: middle; }
+        .symphonia-fillable-editor .ProseMirror-selectednode .symphonia-fillable-node > span > span {
+          border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+          box-shadow: 0 18px 34px -24px rgba(37,99,235,0.45) !important;
         }
       `}</style>
 

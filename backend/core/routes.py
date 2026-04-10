@@ -3336,7 +3336,8 @@ def _is_editable_document_template(template: str | None) -> bool:
 
 def _is_rich_fillable_document_template(template: str | None) -> bool:
     return bool(
-        template and template.lstrip().startswith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX)
+        template
+        and template.lstrip().startswith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX)
     )
 
 
@@ -3396,7 +3397,13 @@ def _parse_rich_document_field_attrs(template: str) -> list[dict[str, Any]]:
             "slider",
             "likert",
         }:
-            input_type = "text" if field_type == "short" else "textarea" if field_type == "long" else field_type
+            input_type = (
+                "text"
+                if field_type == "short"
+                else "textarea"
+                if field_type == "long"
+                else field_type
+            )
 
         options: list[str] | None = None
         raw_options = attrs.get("data-symphonia-options")
@@ -3417,7 +3424,9 @@ def _parse_rich_document_field_attrs(template: str) -> list[dict[str, Any]]:
             except ValueError:
                 return None
 
-        rows = parse_int_attr("data-symphonia-rows") or (1 if field_type == "short" else 6)
+        rows = parse_int_attr("data-symphonia-rows") or (
+            1 if field_type == "short" else 6
+        )
         min_value = parse_int_attr("data-symphonia-min-value")
         max_value = parse_int_attr("data-symphonia-max-value")
         min_label = attrs.get("data-symphonia-min-label") or None
@@ -3459,8 +3468,7 @@ def _parse_rich_document_field_attrs(template: str) -> list[dict[str, Any]]:
                 fieldType=field_type,
                 rows=rows,
                 placeholder=(
-                    attrs.get("data-symphonia-placeholder")
-                    or f"Enter {label.lower()}"
+                    attrs.get("data-symphonia-placeholder") or f"Enter {label.lower()}"
                 ),
             ).model_dump()
         )
