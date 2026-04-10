@@ -398,7 +398,7 @@ export default function FormEditor() {
         />
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]">
+      <div className={isDocumentMode && !isEditableDocumentTemplate(documentTemplate) ? 'grid gap-6' : 'grid gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]'}>
         <div className="space-y-6 min-w-0">
           <div className="card-lg p-6">
             <div className="mb-6 space-y-4">
@@ -695,6 +695,7 @@ export default function FormEditor() {
         </div>
         </div>
 
+        {!(isDocumentMode && !isEditableDocumentTemplate(documentTemplate)) ? (
         <aside className="xl:sticky xl:top-24 self-start space-y-6">
           <div className="card-lg p-5 sm:p-6">
             <div className="flex items-center justify-between gap-3">
@@ -797,6 +798,7 @@ export default function FormEditor() {
             </LoadingButton>
           </div>
         </aside>
+        ) : null}
       </div>
     </div>
   );

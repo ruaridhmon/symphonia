@@ -1172,6 +1172,7 @@ export default function AdminFormNew() {
             </>
           )}
 
+          {!(isDocumentMode && !isEditableDocumentTemplate(documentTemplate)) ? (
           <div className="mb-6">
             <div className="flex items-center justify-between gap-3 mb-3">
               <div>
@@ -1251,6 +1252,7 @@ export default function AdminFormNew() {
               )}
             </div>
           </div>
+          ) : null}
 
           {/* ── Join Code (moved lower for clearer flow) ─────────────── */}
           <div className="space-y-1.5 mb-6">
