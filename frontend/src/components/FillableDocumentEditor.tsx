@@ -402,6 +402,44 @@ function SegmentedToolbarButton({
   );
 }
 
+function ColorSwatchButton({
+  label,
+  color,
+  active,
+  onClick,
+}: {
+  label: string;
+  color: string;
+  active?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className="inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+      style={{
+        border: active
+          ? '2px solid color-mix(in srgb, var(--accent) 42%, transparent)'
+          : '1px solid color-mix(in srgb, var(--border) 76%, transparent)',
+        backgroundColor: 'white',
+        boxShadow: active
+          ? '0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent)'
+          : 'none',
+      }}
+    >
+      <span
+        aria-hidden="true"
+        className="h-4 w-4 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+    </button>
+  );
+}
+
 function mergeInlineStyle(existingStyle: string | null | undefined, nextRules: Record<string, string | null | undefined>) {
   const styleMap = new Map<string, string>();
   (existingStyle || '')
@@ -939,19 +977,17 @@ export default function FillableDocumentEditor({
             </div>
             <div className="mr-1 flex items-center gap-2 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
               <PaintBucket size={14} style={{ color: selectedColor }} />
-              <select
-                aria-label="Text color"
-                value={selectedColor}
-                onChange={(event) => setTextColor(event.target.value)}
-                className="rounded-xl px-2.5 py-1.5 text-xs font-medium"
-                style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'white', color: 'var(--foreground)' }}
-              >
+              <div className="flex flex-wrap items-center gap-1.5" aria-label="Text color" role="group">
                 {COLOR_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
+                  <ColorSwatchButton
+                    key={option.value}
+                    label={option.label}
+                    color={option.value}
+                    active={selectedColor === option.value}
+                    onClick={() => setTextColor(option.value)}
+                  />
                 ))}
-              </select>
+              </div>
             </div>
             <RichToolbarButton label="Bold" active={Boolean(editor?.isActive('bold'))} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold size={14} />} />
             <RichToolbarButton label="Italic" active={Boolean(editor?.isActive('italic'))} onClick={() => editor?.chain().focus().toggleItalic().run()} icon={<Italic size={14} />} />
