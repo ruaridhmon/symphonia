@@ -693,7 +693,7 @@ export default function FillableDocumentEditor({
     } catch {
       setSelectedFieldOptionsDraft('');
     }
-  }, [selectedField]);
+  }, [selectedField?.pos, selectedField?.attrs.key]);
 
   useEffect(() => {
     function updateInspectorPosition() {
