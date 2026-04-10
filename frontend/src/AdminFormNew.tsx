@@ -833,7 +833,14 @@ export default function AdminFormNew() {
 
           {isDocumentMode ? (
             <div className="mb-6">
-              <DocumentTemplateEditor value={documentTemplate} onChange={setDocumentTemplate} />
+              <DocumentTemplateEditor
+                value={documentTemplate}
+                onChange={setDocumentTemplate}
+                previewAnswers={previewResponses}
+                onPreviewChange={(key, value) =>
+                  setPreviewResponses(prev => ({ ...prev, [key]: value }))
+                }
+              />
             </div>
           ) : (
             <>
@@ -1186,7 +1193,19 @@ export default function AdminFormNew() {
                 </p>
               </div>
 
-              {validPreviewQuestions.length === 0 ? (
+              {isDocumentMode && !isEditableDocumentTemplate(documentTemplate) ? (
+                <div
+                  className="rounded-lg px-4 py-5 text-sm"
+                  style={{
+                    backgroundColor: 'var(--background)',
+                    border: '1px dashed var(--border)',
+                    color: 'var(--muted-foreground)',
+                    lineHeight: 1.7,
+                  }}
+                >
+                  Fillable document preview now lives directly inside the editor so the authoring view and participant view stay linked while you build the template.
+                </div>
+              ) : validPreviewQuestions.length === 0 ? (
                 <div
                   className="rounded-lg px-4 py-5 text-sm"
                   style={{

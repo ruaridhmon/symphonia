@@ -9,6 +9,19 @@ export interface DocumentTemplateField {
   placeholder: string;
 }
 
+export interface RenderableDocumentTemplateField extends DocumentTemplateField {
+  questionKey: string;
+}
+
+export type DocumentTemplateLineSegment =
+  | { type: 'text'; value: string }
+  | { type: 'field'; value: RenderableDocumentTemplateField; response: StructuredResponse };
+
+export interface DocumentTemplateLine {
+  key: string;
+  segments: DocumentTemplateLineSegment[];
+}
+
 export const EDITABLE_DOCUMENT_TEMPLATE_PREFIX = '<!-- symphonia-document-mode: editable -->';
 const PLACEHOLDER_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/g;
 
@@ -92,6 +105,16 @@ function parseDocumentTemplateToken(rawToken: string): DocumentTemplateField | n
   };
 }
 
+export function createDocumentTemplatePlaceholder(
+  fieldType: 'short' | 'long',
+  label: string,
+  optional = false,
+): string {
+  const normalizedLabel = label.trim() || (fieldType === 'short' ? 'Field' : 'Response');
+  const prefix = optional ? `optional:${fieldType}` : fieldType;
+  return `{{${prefix}:${normalizedLabel}}}`;
+}
+
 export function parseDocumentTemplateFields(template: string): DocumentTemplateField[] {
   if (isEditableDocumentTemplate(template)) return [];
 
@@ -149,6 +172,81 @@ export function buildDocumentTemplatePreview(
   }
 
   return blocks;
+}
+
+export function buildDocumentTemplateLines(
+  template: string,
+  answers: Record<string, StructuredResponse>,
+): DocumentTemplateLine[] {
+  if (isEditableDocumentTemplate(template)) {
+    return [];
+  }
+
+  const segments: DocumentTemplateLineSegment[] = [];
+  const keyToQuestionKey = new Map<string, string>();
+  let nextQuestionIndex = 1;
+  let cursor = 0;
+
+  for (const match of template.matchAll(PLACEHOLDER_PATTERN)) {
+    const fullMatch = match[0];
+    const rawToken = match[1] || '';
+    const start = match.index ?? 0;
+    const preceding = template.slice(cursor, start);
+    if (preceding) {
+      segments.push({ type: 'text', value: preceding });
+    }
+
+    const field = parseDocumentTemplateToken(rawToken);
+    if (field) {
+      let questionKey = keyToQuestionKey.get(field.key);
+      if (!questionKey) {
+        questionKey = `q${nextQuestionIndex}`;
+        keyToQuestionKey.set(field.key, questionKey);
+        nextQuestionIndex += 1;
+      }
+      segments.push({
+        type: 'field',
+        value: { ...field, questionKey },
+        response: answers[questionKey] ?? emptyStructuredResponse(),
+      });
+    } else {
+      segments.push({ type: 'text', value: fullMatch });
+    }
+
+    cursor = start + fullMatch.length;
+  }
+
+  const trailing = template.slice(cursor);
+  if (trailing) {
+    segments.push({ type: 'text', value: trailing });
+  }
+
+  const lines: DocumentTemplateLine[] = [{ key: 'line-0', segments: [] }];
+  let lineIndex = 0;
+
+  const appendLine = () => {
+    lineIndex += 1;
+    lines.push({ key: `line-${lineIndex}`, segments: [] });
+  };
+
+  for (const segment of segments) {
+    if (segment.type === 'field') {
+      lines[lines.length - 1].segments.push(segment);
+      continue;
+    }
+
+    const parts = segment.value.split('\n');
+    parts.forEach((part, partIndex) => {
+      if (part) {
+        lines[lines.length - 1].segments.push({ type: 'text', value: part });
+      }
+      if (partIndex < parts.length - 1) {
+        appendLine();
+      }
+    });
+  }
+
+  return lines;
 }
 
 export function isDocumentTemplate(template: string | null | undefined): boolean {

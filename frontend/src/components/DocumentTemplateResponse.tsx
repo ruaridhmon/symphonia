@@ -1,6 +1,6 @@
 import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
 import RichDocumentEditor from './RichDocumentEditor';
-import { buildDocumentTemplatePreview, getDocumentTemplateContent, isEditableDocumentTemplate } from '../utils/documentTemplate';
+import { buildDocumentTemplateLines, getDocumentTemplateContent, isEditableDocumentTemplate } from '../utils/documentTemplate';
 import { isResponseAnswered } from '../utils/responseValidation';
 
 interface DocumentTemplateResponseProps {
@@ -67,140 +67,164 @@ export default function DocumentTemplateResponse({
     );
   }
 
-  const blocks = buildDocumentTemplatePreview(template, answers);
+  const lines = buildDocumentTemplateLines(template, answers);
 
   return (
     <div
       className="rounded-xl p-4 sm:p-5"
       style={{
-        backgroundColor: 'color-mix(in srgb, var(--foreground) 1.5%, var(--card))',
+        background:
+          'linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white) 0%, color-mix(in srgb, var(--foreground) 1%, var(--card)) 100%)',
         border: '1px solid var(--border)',
       }}
     >
-      <div className="space-y-4">
-        {blocks.map((block, index) => {
-          if (block.type === 'text') {
-            const parts = block.value.split('\n').filter((part, partIndex, list) => part.trim() || partIndex < list.length - 1);
-            if (parts.length === 0) return null;
+      <div
+        className="rounded-2xl px-4 py-5 sm:px-5 sm:py-6"
+        style={{
+          backgroundColor: 'color-mix(in srgb, white 88%, var(--background))',
+          border: '1px solid color-mix(in srgb, var(--border) 68%, transparent)',
+          boxShadow: '0 10px 24px -20px rgba(15, 23, 42, 0.38)',
+        }}
+      >
+        <div className="space-y-3">
+          {lines.map((line) => {
+            if (line.segments.length === 0) {
+              return <div key={line.key} style={{ minHeight: '0.9rem' }} aria-hidden="true" />;
+            }
+
             return (
-              <div key={`text-${index}`} className="space-y-3">
-                {parts.map((part, partIndex) => (
-                  <p
-                    key={`text-${index}-${partIndex}`}
-                    className="text-sm whitespace-pre-wrap"
-                    style={{ color: 'var(--foreground)', lineHeight: 1.7 }}
-                  >
-                    {part || '\u00A0'}
-                  </p>
-                ))}
+              <div
+                key={line.key}
+                className="flex flex-wrap items-start gap-x-2 gap-y-2"
+                style={{ minHeight: '1.9rem' }}
+              >
+                {line.segments.map((segment, segmentIndex) => {
+                  if (segment.type === 'text') {
+                    return (
+                      <span
+                        key={`${line.key}-text-${segmentIndex}`}
+                        className="text-sm whitespace-pre-wrap"
+                        style={{ color: 'var(--foreground)', lineHeight: 1.75 }}
+                      >
+                        {segment.value}
+                      </span>
+                    );
+                  }
+
+                  const { questionKey } = segment.value;
+                  const response = answers[questionKey] ?? segment.response;
+                  const value = response.position || '';
+                  const answered = isResponseAnswered(response);
+                  const highlighted = !readOnly && highlightedQuestionKey === questionKey;
+                  const isShort = segment.value.fieldType === 'short';
+
+                  return (
+                    <span
+                      key={`${line.key}-${questionKey}-${segmentIndex}`}
+                      className="inline-flex min-w-[15rem] max-w-full flex-col gap-1 rounded-2xl px-3 py-2.5 align-top"
+                      data-question-key={questionKey}
+                      style={{
+                        width: isShort ? 'min(100%, 22rem)' : 'min(100%, 34rem)',
+                        backgroundColor: highlighted
+                          ? 'color-mix(in srgb, var(--destructive) 4%, white)'
+                          : 'color-mix(in srgb, var(--background) 78%, white)',
+                        border: highlighted
+                          ? '1px solid color-mix(in srgb, var(--destructive) 42%, var(--border))'
+                          : '1px solid color-mix(in srgb, var(--border) 88%, transparent)',
+                        boxShadow: answered
+                          ? 'inset 0 0 0 1px color-mix(in srgb, #138a52 18%, transparent)'
+                          : 'none',
+                        scrollMarginTop: '6rem',
+                      }}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+                          {segment.value.label}
+                        </span>
+                        <span
+                          className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                          style={{
+                            backgroundColor: segment.value.optional
+                              ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+                              : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                            color: segment.value.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+                          }}
+                        >
+                          {segment.value.optional ? 'Optional' : 'Required'}
+                        </span>
+                        {!readOnly ? (
+                          <span
+                            aria-label={answered ? 'Question answered' : 'Question not answered'}
+                            title={answered ? 'Answered' : 'Not answered'}
+                            className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold"
+                            style={{
+                              border: answered
+                                ? '1px solid color-mix(in srgb, #138a52 35%, transparent)'
+                                : '1px solid color-mix(in srgb, var(--border) 90%, transparent)',
+                              backgroundColor: answered
+                                ? 'color-mix(in srgb, #138a52 12%, transparent)'
+                                : 'transparent',
+                              color: answered ? '#138a52' : 'var(--muted-foreground)',
+                            }}
+                          >
+                            {answered ? '✓' : ''}
+                          </span>
+                        ) : null}
+                      </span>
+                      {readOnly ? (
+                        <span
+                          className="rounded-xl px-3 py-2.5 text-sm whitespace-pre-wrap"
+                          style={{
+                            backgroundColor: 'color-mix(in srgb, white 75%, var(--background))',
+                            border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+                            color: value ? 'var(--foreground)' : 'var(--muted-foreground)',
+                            minHeight: isShort ? undefined : '7rem',
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {value || 'No response provided.'}
+                        </span>
+                      ) : isShort ? (
+                        <input
+                          value={value}
+                          onChange={(event) =>
+                            onChange?.(questionKey, { ...response, position: event.target.value })
+                          }
+                          placeholder={segment.value.placeholder}
+                          className="w-full rounded-xl px-3 py-2.5 text-sm"
+                          style={{
+                            border: '1px solid var(--input)',
+                            backgroundColor: 'white',
+                            color: 'var(--foreground)',
+                            outline: 'none',
+                          }}
+                        />
+                      ) : (
+                        <textarea
+                          value={value}
+                          onChange={(event) =>
+                            onChange?.(questionKey, { ...response, position: event.target.value })
+                          }
+                          placeholder={segment.value.placeholder}
+                          rows={segment.value.rows}
+                          className="w-full rounded-xl px-3 py-3 text-sm"
+                          style={{
+                            border: '1px solid var(--input)',
+                            backgroundColor: 'white',
+                            color: 'var(--foreground)',
+                            outline: 'none',
+                            resize: 'vertical',
+                            lineHeight: 1.6,
+                          }}
+                        />
+                      )}
+                    </span>
+                  );
+                })}
               </div>
             );
-          }
-
-          const key = `q${blocks
-            .slice(0, index + 1)
-            .filter((candidate) => candidate.type === 'field').length}`;
-          const response = answers[key] ?? block.response;
-          const value = response.position || '';
-          const answered = isResponseAnswered(response);
-          const highlighted = !readOnly && highlightedQuestionKey === key;
-
-          return (
-            <div
-              key={`field-${key}`}
-              className="space-y-2 rounded-2xl px-3 py-3 sm:px-4"
-              data-question-key={key}
-              style={{
-                border: highlighted
-                  ? '1px solid color-mix(in srgb, var(--destructive) 42%, var(--border))'
-                  : '1px solid transparent',
-                backgroundColor: highlighted
-                  ? 'color-mix(in srgb, var(--destructive) 5%, transparent)'
-                  : 'transparent',
-                scrollMarginTop: '6rem',
-              }}
-            >
-              <label className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <span>{block.value.label}</span>
-                <span
-                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
-                  style={{
-                    backgroundColor: block.value.optional
-                      ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
-                      : 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                    color: block.value.optional ? 'var(--muted-foreground)' : 'var(--accent)',
-                  }}
-                >
-                  {block.value.optional ? 'Optional' : 'Required'}
-                </span>
-                {!readOnly ? (
-                  <span
-                    aria-label={answered ? 'Question answered' : 'Question not answered'}
-                    title={answered ? 'Answered' : 'Not answered'}
-                    className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold"
-                    style={{
-                      border: answered
-                        ? '1px solid color-mix(in srgb, #138a52 35%, transparent)'
-                        : '1px solid color-mix(in srgb, var(--border) 90%, transparent)',
-                      backgroundColor: answered
-                        ? 'color-mix(in srgb, #138a52 12%, transparent)'
-                        : 'transparent',
-                      color: answered ? '#138a52' : 'var(--muted-foreground)',
-                    }}
-                  >
-                    {answered ? '✓' : ''}
-                  </span>
-                ) : null}
-              </label>
-              {readOnly ? (
-                <div
-                  className="rounded-lg px-3 py-3 text-sm whitespace-pre-wrap"
-                  style={{
-                    backgroundColor: 'var(--background)',
-                    border: '1px solid var(--border)',
-                    color: value ? 'var(--foreground)' : 'var(--muted-foreground)',
-                    minHeight: block.value.fieldType === 'short' ? undefined : '7rem',
-                  }}
-                >
-                  {value || 'No response provided.'}
-                </div>
-              ) : block.value.fieldType === 'short' ? (
-                <input
-                  value={value}
-                  onChange={(event) =>
-                    onChange?.(key, { ...response, position: event.target.value })
-                  }
-                  placeholder={block.value.placeholder}
-                  className="w-full rounded-lg px-3 py-2.5 text-sm"
-                  style={{
-                    border: '1px solid var(--input)',
-                    backgroundColor: 'var(--background)',
-                    color: 'var(--foreground)',
-                    outline: 'none',
-                  }}
-                />
-              ) : (
-                <textarea
-                  value={value}
-                  onChange={(event) =>
-                    onChange?.(key, { ...response, position: event.target.value })
-                  }
-                  placeholder={block.value.placeholder}
-                  rows={block.value.rows}
-                  className="w-full rounded-lg px-3 py-3 text-sm"
-                  style={{
-                    border: '1px solid var(--input)',
-                    backgroundColor: 'var(--background)',
-                    color: 'var(--foreground)',
-                    outline: 'none',
-                    resize: 'vertical',
-                    lineHeight: 1.6,
-                  }}
-                />
-              )}
-            </div>
-          );
-        })}
+          })}
+        </div>
       </div>
     </div>
   );

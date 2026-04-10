@@ -469,6 +469,10 @@ export default function FormEditor() {
               <DocumentTemplateEditor
                 value={documentTemplate}
                 onChange={setDocumentTemplate}
+                previewAnswers={previewResponses}
+                onPreviewChange={(key, value) =>
+                  setPreviewResponses((prev) => ({ ...prev, [key]: value }))
+                }
               />
             ) : (
             <>
@@ -713,7 +717,19 @@ export default function FormEditor() {
                   {validPreviewQuestions.length} field{validPreviewQuestions.length === 1 ? '' : 's'}
                 </div>
               </div>
-              {validPreviewQuestions.length === 0 ? (
+              {isDocumentMode && !isEditableDocumentTemplate(documentTemplate) ? (
+                <div
+                  className="rounded-xl px-4 py-5 text-sm"
+                  style={{
+                    backgroundColor: 'var(--background)',
+                    border: '1px dashed var(--border)',
+                    color: 'var(--muted-foreground)',
+                    lineHeight: 1.7,
+                  }}
+                >
+                  Fillable document preview is now embedded directly in the editor so the document and participant view stay linked while you edit the template.
+                </div>
+              ) : validPreviewQuestions.length === 0 ? (
                 <div
                   className="rounded-xl px-4 py-5 text-sm"
                   style={{

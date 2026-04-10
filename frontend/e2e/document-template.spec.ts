@@ -295,7 +295,7 @@ test.describe('Document template consultations', () => {
       await adminPage.locator('#form-title').fill(`Document Template ${timestamp}`);
       await adminPage.locator('#form-description').fill('Playwright coverage for the document-template flow.');
 
-      const templateEditor = adminPage.locator('textarea').nth(1);
+      const templateEditor = adminPage.getByTestId('document-template-source');
       await templateEditor.fill(
         [
           'Decision note',
@@ -337,8 +337,8 @@ test.describe('Document template consultations', () => {
 
       await expect(participantPage.getByRole('heading', { name: new RegExp(`Document Template ${timestamp}`) })).toBeVisible();
       await expect(participantPage.getByRole('heading', { name: 'Document Template', exact: true })).toBeVisible();
-      await expect(participantPage.getByText('Primary concern')).toBeVisible();
-      await expect(participantPage.getByText('Optional')).toBeVisible();
+      await expect(participantPage.locator('[data-question-key="q3"]')).toBeVisible();
+      await expect(participantPage.locator('[data-question-key="q3"]').getByText('Optional')).toBeVisible();
 
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await expect(participantPage.getByText(/please complete "Organisation" before submitting/i)).toBeVisible();
@@ -364,11 +364,8 @@ test.describe('Document template consultations', () => {
         detail: 'Please answer "Organisation" before submitting.',
       });
 
-      const organisationBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Organisation' }).first();
-      await organisationBlock.locator('input').fill('Northshore Council');
-
-      const summaryBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Executive summary' }).first();
-      await summaryBlock.locator('textarea').fill('The proposal is viable if the implementation timeline is extended.');
+      await participantPage.locator('[data-question-key="q1"] input').fill('Northshore Council');
+      await participantPage.locator('[data-question-key="q2"] textarea').fill('The proposal is viable if the implementation timeline is extended.');
 
       await participantPage.getByRole('button', { name: /submit/i }).click();
       await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });
@@ -424,7 +421,7 @@ test.describe('Document template consultations', () => {
       await expect(adminPage.getByLabel('Consultation title')).toHaveValue(`Editable Document ${timestamp}`);
       await expect(adminPage.getByRole('button', { name: /Document template/i })).toBeVisible();
 
-      await adminPage.locator('textarea').first().fill(
+      await adminPage.getByTestId('document-template-source').fill(
         [
           'Briefing note',
           '',
@@ -494,21 +491,16 @@ test.describe('Document template consultations', () => {
       await participantPage.getByRole('button', { name: /join consultation/i }).click();
       await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
 
-      const organisationBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Organisation' }).first();
-      await organisationBlock.locator('input').fill('Harbour Authority');
-
-      const summaryBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Executive summary' }).first();
-      await summaryBlock.locator('textarea').fill('A phased rollout is safer than a single launch window.');
+      await participantPage.locator('[data-question-key="q1"] input').fill('Harbour Authority');
+      await participantPage.locator('[data-question-key="q2"] textarea').fill('A phased rollout is safer than a single launch window.');
 
       await expect(participantPage.getByText(/draft saved/i)).toBeVisible({ timeout: 10_000 });
 
       await participantPage.reload();
 
-      const restoredOrganisationBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Organisation' }).first();
-      const restoredSummaryBlock = participantPage.locator('div.space-y-2').filter({ hasText: 'Executive summary' }).first();
       await expect(participantPage.getByText(/previous draft has been restored/i)).toBeVisible({ timeout: 10_000 });
-      await expect(restoredOrganisationBlock.locator('input')).toHaveValue('Harbour Authority');
-      await expect(restoredSummaryBlock.locator('textarea')).toHaveValue('A phased rollout is safer than a single launch window.');
+      await expect(participantPage.locator('[data-question-key="q1"] input')).toHaveValue('Harbour Authority');
+      await expect(participantPage.locator('[data-question-key="q2"] textarea')).toHaveValue('A phased rollout is safer than a single launch window.');
     } finally {
       await participantContext?.close();
       if (createdFormId) {
@@ -922,13 +914,8 @@ test.describe('Document template consultations', () => {
       await participantPage.getByRole('button', { name: /join consultation/i }).click();
       await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
 
-      await participantPage.locator('div.space-y-2').filter({ hasText: 'Organisation' }).first().locator('input').fill('Northshore Council');
-      await participantPage
-        .locator('div.space-y-2')
-        .filter({ hasText: 'Executive summary' })
-        .first()
-        .locator('textarea')
-        .fill('A phased rollout is feasible if governance and staffing are addressed.');
+      await participantPage.locator('[data-question-key="q1"] input').fill('Northshore Council');
+      await participantPage.locator('[data-question-key="q2"] textarea').fill('A phased rollout is feasible if governance and staffing are addressed.');
 
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });
