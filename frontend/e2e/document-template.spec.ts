@@ -511,6 +511,87 @@ test.describe('Document template consultations', () => {
     }
   });
 
+  test('fillable documents support richer response types inline', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let participantContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const participantApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      const created = await createDocumentTemplateForm(adminApi, appBase, adminToken, {
+        title: `Typed Fillable ${timestamp}`,
+        description: 'Seeded for typed fillable document coverage.',
+        document_template: [
+          'Programme review',
+          '',
+          'Organisation',
+          '{{short:Organisation}}',
+          '',
+          'Preferred direction',
+          '{{single_select:Preferred direction|Expand now|Pilot first|Pause}}',
+          '',
+          'Concerns to monitor',
+          '{{multi_select:Concerns to monitor|Cost|Capacity|Risk}}',
+          '',
+          'Priority score',
+          '{{slider:Priority score|0|10|Low|Balanced|High}}',
+          '',
+          'Importance rating',
+          `{{likert:Importance rating|${['Unimportant', 'Low', 'Moderate', 'High', 'Critical', 'Unsure'].join('|')}}}`,
+        ].join('\n'),
+      });
+      createdFormId = created.id;
+
+      const participantEmail = `typed-fillable-${timestamp}@example.com`;
+      await registerParticipant(participantApi, appBase, participantEmail, 'test123');
+      const participantLogin = await loginViaApi(participantApi, appBase, participantEmail, 'test123');
+      const participantToken = participantLogin.access_token;
+      participantContext = await browser.newContext({
+        storageState: buildStorageState(appBase, participantLogin),
+      });
+      const participantPage = await participantContext.newPage();
+      await participantPage.goto(`${appBase}/join`);
+      await participantPage.getByPlaceholder(/SYM/i).fill(created.join_code);
+      await participantPage.getByRole('button', { name: /join consultation/i }).click();
+      await participantPage.waitForURL(new RegExp(`/form/${createdFormId}$`), { timeout: 20_000 });
+
+      await participantPage.locator('[data-question-key="q1"] input').fill('Northshore Council');
+      await participantPage.locator('[data-question-key="q2"] input[type="radio"]').first().check();
+      await participantPage.locator('[data-question-key="q3"] input[type="checkbox"]').nth(0).check();
+      await participantPage.locator('[data-question-key="q3"] input[type="checkbox"]').nth(2).check();
+      await participantPage.locator('[data-question-key="q4"] input[type="range"]').evaluate((input) => {
+        const element = input as HTMLInputElement;
+        element.value = '8';
+        element.dispatchEvent(new Event('input', { bubbles: true }));
+        element.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      await participantPage.locator('[data-question-key="q5"] input[type="radio"]').nth(3).check();
+
+      await participantPage.getByRole('button', { name: /^submit$/i }).click();
+      await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });
+
+      const savedResponse = await getMyResponseDetails(participantApi, appBase, participantToken, createdFormId);
+      expect(savedResponse.answers.q1.position).toBe('Northshore Council');
+      expect(savedResponse.answers.q2.position).toBe('Expand now');
+      expect(savedResponse.answers.q3.position).toContain('Cost');
+      expect(savedResponse.answers.q3.position).toContain('Risk');
+      expect(savedResponse.answers.q4.position).toBe('8');
+      expect(savedResponse.answers.q5.position).toBe('High');
+    } finally {
+      await participantContext?.close();
+      if (createdFormId) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      await participantApi.dispose();
+      await adminApi.dispose();
+    }
+  });
+
   test('admin can import an editable document and participants can edit their own copy', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';

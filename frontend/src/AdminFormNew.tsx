@@ -378,8 +378,16 @@ export default function AdminFormNew() {
     requireConfidence: false,
     optional: field.optional,
     fieldType: field.fieldType,
+    inputType: field.inputType === 'document' ? null : field.inputType,
     rows: field.rows,
     placeholder: field.placeholder,
+    options: field.options,
+    minValue: field.minValue,
+    maxValue: field.maxValue,
+    minLabel: field.minLabel,
+    midLabel: field.midLabel,
+    maxLabel: field.maxLabel,
+    allowUnsure: field.allowUnsure,
   }));
   const isDocumentMode = isDocumentTemplate(documentTemplate);
   const previewQuestions = isDocumentMode ? documentQuestions : questions;

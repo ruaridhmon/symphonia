@@ -1,12 +1,21 @@
 import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
+import { DEFAULT_LIKERT_OPTIONS, type SurveyInputType } from './questions';
 
 export interface DocumentTemplateField {
   key: string;
   label: string;
-  fieldType: 'short' | 'long' | 'document';
+  fieldType: 'short' | 'long' | 'document' | 'single_select' | 'multi_select' | 'slider' | 'likert';
+  inputType: SurveyInputType | 'document';
   optional: boolean;
   rows: number;
   placeholder: string;
+  options?: string[];
+  minValue?: number;
+  maxValue?: number;
+  minLabel?: string;
+  midLabel?: string;
+  maxLabel?: string;
+  allowUnsure?: boolean;
 }
 
 export interface RenderableDocumentTemplateField extends DocumentTemplateField {
@@ -66,10 +75,17 @@ function parseDocumentTemplateToken(rawToken: string): DocumentTemplateField | n
   const trimmed = rawToken.trim();
   if (!trimmed) return null;
 
-  let fieldType: 'short' | 'long' = 'long';
+  let fieldType: DocumentTemplateField['fieldType'] = 'long';
   let optional = false;
   let rows = 4;
   let label = trimmed;
+  let options: string[] | undefined;
+  let minValue: number | undefined;
+  let maxValue: number | undefined;
+  let minLabel: string | undefined;
+  let midLabel: string | undefined;
+  let maxLabel: string | undefined;
+  let allowUnsure = false;
 
   if (trimmed.includes(':')) {
     const parts = trimmed.split(':');
@@ -77,8 +93,18 @@ function parseDocumentTemplateToken(rawToken: string): DocumentTemplateField | n
 
     for (const part of parts) {
       const normalized = part.trim().toLowerCase();
-      if (labelParts.length === 0 && (normalized === 'short' || normalized === 'long')) {
-        fieldType = normalized;
+      if (
+        labelParts.length === 0 &&
+        (
+          normalized === 'short' ||
+          normalized === 'long' ||
+          normalized === 'single_select' ||
+          normalized === 'multi_select' ||
+          normalized === 'slider' ||
+          normalized === 'likert'
+        )
+      ) {
+        fieldType = normalized as DocumentTemplateField['fieldType'];
         rows = normalized === 'short' ? 1 : 6;
         continue;
       }
@@ -91,27 +117,79 @@ function parseDocumentTemplateToken(rawToken: string): DocumentTemplateField | n
 
     const nextLabel = labelParts.join(':').trim();
     if (nextLabel) {
-      label = nextLabel;
+      const segments = nextLabel.split('|').map((segment) => segment.trim()).filter(Boolean);
+      if (segments.length > 0) {
+        label = segments[0];
+      }
+
+      if (fieldType === 'single_select' || fieldType === 'multi_select') {
+        options = segments.slice(1);
+        if (!options.length) {
+          options = ['Option 1', 'Option 2'];
+        }
+      } else if (fieldType === 'slider') {
+        const maybeMin = Number(segments[1]);
+        const maybeMax = Number(segments[2]);
+        minValue = Number.isFinite(maybeMin) ? maybeMin : 0;
+        maxValue = Number.isFinite(maybeMax) ? maybeMax : 10;
+        minLabel = segments[3] || String(minValue);
+        midLabel = segments[4] || undefined;
+        maxLabel = segments[5] || String(maxValue);
+      } else if (fieldType === 'likert') {
+        options = segments.slice(1);
+        const last = options[options.length - 1]?.toLowerCase();
+        if (last === 'unsure') {
+          allowUnsure = true;
+          options.pop();
+        }
+        if (options.length < 2) {
+          options = [...DEFAULT_LIKERT_OPTIONS];
+        }
+      }
     }
   }
+
+  const inputType: DocumentTemplateField['inputType'] =
+    fieldType === 'short'
+      ? 'text'
+      : fieldType === 'long'
+        ? 'textarea'
+        : fieldType;
 
   return {
     key: label.toLowerCase(),
     label,
     fieldType,
+    inputType,
     optional,
     rows,
     placeholder: `Enter ${label.toLowerCase()}`,
+    options,
+    minValue,
+    maxValue,
+    minLabel,
+    midLabel,
+    maxLabel,
+    allowUnsure,
   };
 }
 
 export function createDocumentTemplatePlaceholder(
-  fieldType: 'short' | 'long',
+  fieldType: 'short' | 'long' | 'single_select' | 'multi_select' | 'slider' | 'likert',
   label: string,
   optional = false,
 ): string {
   const normalizedLabel = label.trim() || (fieldType === 'short' ? 'Field' : 'Response');
   const prefix = optional ? `optional:${fieldType}` : fieldType;
+  if (fieldType === 'single_select' || fieldType === 'multi_select') {
+    return `{{${prefix}:${normalizedLabel}|Option 1|Option 2|Option 3}}`;
+  }
+  if (fieldType === 'slider') {
+    return `{{${prefix}:${normalizedLabel}|0|10|Low|Midpoint|High}}`;
+  }
+  if (fieldType === 'likert') {
+    return `{{${prefix}:${normalizedLabel}|${DEFAULT_LIKERT_OPTIONS.join('|')}|Unsure}}`;
+  }
   return `{{${prefix}:${normalizedLabel}}}`;
 }
 
@@ -259,6 +337,7 @@ export function getEditableDocumentQuestion(template: string): DocumentTemplateF
     key: 'document',
     label: 'Document response',
     fieldType: 'document',
+    inputType: 'document',
     optional: false,
     rows: 12,
     placeholder: 'Edit the shared document here',

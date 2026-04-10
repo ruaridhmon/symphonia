@@ -30,6 +30,10 @@ interface DocumentTemplateEditorProps {
 const COMMAND_OPTIONS = [
   { id: 'short', label: 'Short text', description: 'Single-line answer', value: createDocumentTemplatePlaceholder('short', 'Field name') },
   { id: 'long', label: 'Long text', description: 'Paragraph answer', value: createDocumentTemplatePlaceholder('long', 'Section response') },
+  { id: 'single select', label: 'Single select', description: 'Choose one option', value: createDocumentTemplatePlaceholder('single_select', 'Decision') },
+  { id: 'multi select', label: 'Multi select', description: 'Choose several options', value: createDocumentTemplatePlaceholder('multi_select', 'Themes') },
+  { id: 'slider', label: '0-10 slider', description: 'Numeric scale', value: createDocumentTemplatePlaceholder('slider', 'Priority score') },
+  { id: 'likert', label: 'Likert scale', description: 'Importance / agreement scale', value: createDocumentTemplatePlaceholder('likert', 'Importance rating') },
   { id: 'optional short', label: 'Optional short text', description: 'Single-line optional answer', value: createDocumentTemplatePlaceholder('short', 'Optional field', true) },
   { id: 'optional long', label: 'Optional long text', description: 'Paragraph optional answer', value: createDocumentTemplatePlaceholder('long', 'Optional response', true) },
 ];
@@ -410,7 +414,7 @@ export default function DocumentTemplateEditor({
             <>Participants will open this document and edit their own copy directly. `.docx` imports preserve much more structure here than the fill-field mode.</>
           ) : (
             <><code>{'{{short:Field}}'}</code> creates a one-line answer box. <code>{'{{long:Field}}'}</code> creates a
-            larger response area. Typing <code>/</code> in the editor opens quick insert options, and reusing the same placeholder name maps to one shared field.</>
+            larger response area. You can also insert selects, multi-selects, Likert scales, and <code>{'{{slider:Priority|0|10|Low|Midpoint|High}}'}</code>. Typing <code>/</code> in the editor opens quick insert options, and reusing the same placeholder name maps to one shared field.</>
           )}
         </div>
 
@@ -445,6 +449,7 @@ export default function DocumentTemplateEditor({
                   }}
                 >
                   {field.label}
+                  {!isEditableDocumentTemplate(value) && field.fieldType !== 'short' && field.fieldType !== 'long' ? ` · ${field.fieldType.replace('_', ' ')}` : ''}
                 </span>
               ))}
             </div>

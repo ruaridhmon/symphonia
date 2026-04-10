@@ -3500,6 +3500,7 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
                 requireConfidence=False,
                 optional=False,
                 fieldType="document",
+                inputType="textarea",
                 rows=12,
                 placeholder="Edit the shared document here",
             ).model_dump()
@@ -3514,9 +3515,16 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
         optional = False
         rows = 4
         label_parts: list[str] = []
+        options: list[str] | None = None
+        min_value: int | None = None
+        max_value: int | None = None
+        min_label: str | None = None
+        mid_label: str | None = None
+        max_label: str | None = None
+        allow_unsure = False
         for part in token_parts:
             normalized = part.lower()
-            if not label_parts and normalized in {"short", "long"}:
+            if not label_parts and normalized in {"short", "long", "single_select", "multi_select", "slider", "likert"}:
                 field_type = normalized
                 rows = 1 if normalized == "short" else 6
                 continue
@@ -3524,11 +3532,41 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
                 optional = True
                 continue
             label_parts.append(part)
-        label = ":".join(label_parts).strip() or raw_token
+        combined_label = ":".join(label_parts).strip() or raw_token
+        segments = [segment.strip() for segment in combined_label.split("|") if segment.strip()]
+        label = segments[0] if segments else combined_label
+        if field_type in {"single_select", "multi_select"}:
+            options = segments[1:] or ["Option 1", "Option 2"]
+        elif field_type == "slider":
+            min_value = int(segments[1]) if len(segments) > 1 and segments[1].isdigit() else 0
+            max_value = int(segments[2]) if len(segments) > 2 and segments[2].isdigit() else 10
+            min_label = segments[3] if len(segments) > 3 else str(min_value)
+            mid_label = segments[4] if len(segments) > 4 else None
+            max_label = segments[5] if len(segments) > 5 else str(max_value)
+        elif field_type == "likert":
+            options = segments[1:]
+            if options and options[-1].casefold() == "unsure":
+                allow_unsure = True
+                options = options[:-1]
+            if not options or len(options) < 2:
+                options = [
+                    "Unimportant",
+                    "Somewhat important",
+                    "Moderately important",
+                    "Very important",
+                    "Essential",
+                ]
         normalized_key = label.casefold()
         if normalized_key in seen:
             continue
         seen.add(normalized_key)
+        input_type = (
+            "text"
+            if field_type == "short"
+            else "textarea"
+            if field_type == "long"
+            else field_type
+        )
         derived.append(
             QuestionConfig(
                 label=label,
@@ -3536,6 +3574,14 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
                 requireCounterarguments=False,
                 requireConfidence=False,
                 optional=optional,
+                inputType=input_type,
+                options=options,
+                minValue=min_value,
+                maxValue=max_value,
+                minLabel=min_label,
+                midLabel=mid_label,
+                maxLabel=max_label,
+                allowUnsure=allow_unsure,
                 fieldType=field_type,
                 rows=rows,
                 placeholder=f"Enter {label.lower()}",

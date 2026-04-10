@@ -1,5 +1,6 @@
 import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
 import RichDocumentEditor from './RichDocumentEditor';
+import SurveyQuestionInput from './SurveyQuestionInput';
 import { buildDocumentTemplateLines, getDocumentTemplateContent, isEditableDocumentTemplate } from '../utils/documentTemplate';
 import { isResponseAnswered } from '../utils/responseValidation';
 
@@ -69,6 +70,10 @@ export default function DocumentTemplateResponse({
 
   const lines = buildDocumentTemplateLines(template, answers);
 
+  function isInlineTextField(fieldType: string) {
+    return fieldType === 'short' || fieldType === 'long';
+  }
+
   return (
     <div
       className="rounded-xl p-4 sm:p-5"
@@ -117,14 +122,17 @@ export default function DocumentTemplateResponse({
                   const answered = isResponseAnswered(response);
                   const highlighted = !readOnly && highlightedQuestionKey === questionKey;
                   const isShort = segment.value.fieldType === 'short';
+                  const usesInlineTextField = isInlineTextField(segment.value.fieldType);
 
                   return (
-                    <span
+                    <div
                       key={`${line.key}-${questionKey}-${segmentIndex}`}
                       className="inline-flex min-w-[15rem] max-w-full flex-col gap-1 rounded-2xl px-3 py-2.5 align-top"
                       data-question-key={questionKey}
                       style={{
-                        width: isShort ? 'min(100%, 22rem)' : 'min(100%, 34rem)',
+                        width: usesInlineTextField
+                          ? (isShort ? 'min(100%, 22rem)' : 'min(100%, 34rem)')
+                          : 'min(100%, 38rem)',
                         backgroundColor: highlighted
                           ? 'color-mix(in srgb, var(--destructive) 4%, white)'
                           : 'color-mix(in srgb, var(--background) 78%, white)',
@@ -171,7 +179,7 @@ export default function DocumentTemplateResponse({
                           </span>
                         ) : null}
                       </span>
-                      {readOnly ? (
+                      {readOnly && usesInlineTextField ? (
                         <span
                           className="rounded-xl px-3 py-2.5 text-sm whitespace-pre-wrap"
                           style={{
@@ -184,7 +192,29 @@ export default function DocumentTemplateResponse({
                         >
                           {value || 'No response provided.'}
                         </span>
-                      ) : isShort ? (
+                      ) : readOnly ? (
+                        <SurveyQuestionInput
+                          question={{
+                            label: segment.value.label,
+                            requireEvidence: false,
+                            requireCounterarguments: false,
+                            requireConfidence: false,
+                            inputType: segment.value.inputType === 'document' ? 'textarea' : segment.value.inputType,
+                            options: segment.value.options,
+                            minValue: segment.value.minValue,
+                            maxValue: segment.value.maxValue,
+                            minLabel: segment.value.minLabel,
+                            midLabel: segment.value.midLabel,
+                            maxLabel: segment.value.maxLabel,
+                            allowUnsure: segment.value.allowUnsure,
+                            placeholder: segment.value.placeholder,
+                            rows: segment.value.rows,
+                          }}
+                          value={response}
+                          onChange={() => {}}
+                          readOnly
+                        />
+                      ) : usesInlineTextField && isShort ? (
                         <input
                           value={value}
                           onChange={(event) =>
@@ -199,7 +229,7 @@ export default function DocumentTemplateResponse({
                             outline: 'none',
                           }}
                         />
-                      ) : (
+                      ) : usesInlineTextField ? (
                         <textarea
                           value={value}
                           onChange={(event) =>
@@ -217,8 +247,30 @@ export default function DocumentTemplateResponse({
                             lineHeight: 1.6,
                           }}
                         />
+                      ) : (
+                        <SurveyQuestionInput
+                          question={{
+                            label: segment.value.label,
+                            requireEvidence: false,
+                            requireCounterarguments: false,
+                            requireConfidence: false,
+                            inputType: segment.value.inputType === 'document' ? 'textarea' : segment.value.inputType,
+                            options: segment.value.options,
+                            minValue: segment.value.minValue,
+                            maxValue: segment.value.maxValue,
+                            minLabel: segment.value.minLabel,
+                            midLabel: segment.value.midLabel,
+                            maxLabel: segment.value.maxLabel,
+                            allowUnsure: segment.value.allowUnsure,
+                            placeholder: segment.value.placeholder,
+                            rows: segment.value.rows,
+                          }}
+                          value={response}
+                          onChange={(nextValue) => onChange?.(questionKey, nextValue)}
+                          readOnly={readOnly}
+                        />
                       )}
-                    </span>
+                    </div>
                   );
                 })}
               </div>
