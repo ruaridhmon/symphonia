@@ -29,9 +29,11 @@ interface QuestionBlock {
   lines: string[];
 }
 
-const QUESTION_START_RE = /^(Q\d+[a-zA-Z]?)\.\s+(.*)$/;
+const QUESTION_START_RE = /^(Q\d+[a-zA-Z]?)[.:]\s+(.*)$/i;
+const QUESTION_ID_ONLY_RE = /^(Q\d+[a-zA-Z]?)(?:[.:])?\s*$/i;
 const ROUND_START_RE = /^Round\s+(\d+)\s*:\s*(.+)$/i;
 const SECTION_RE = /^Section\s+[A-Z0-9]+\.\s*(.+)$/i;
+const METADATA_LINE_RE = /^(?:Response type:|Routing:|Anchor labels:)/i;
 
 function normalizeLines(text: string): string[] {
   return text
@@ -41,6 +43,42 @@ function normalizeLines(text: string): string[] {
     .replace(/[–—]/g, '-')
     .split('\n')
     .map((line) => line.trim());
+}
+
+function mergeSplitQuestionLines(lines: string[]): string[] {
+  const merged: string[] = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const questionIdOnlyMatch = line.match(QUESTION_ID_ONLY_RE);
+    if (!questionIdOnlyMatch) {
+      merged.push(line);
+      continue;
+    }
+
+    let lookahead = index + 1;
+    while (lookahead < lines.length && !lines[lookahead]) {
+      lookahead += 1;
+    }
+
+    const nextLine = lines[lookahead] ?? '';
+    if (
+      nextLine &&
+      !ROUND_START_RE.test(nextLine) &&
+      !SECTION_RE.test(nextLine) &&
+      !QUESTION_START_RE.test(nextLine) &&
+      !QUESTION_ID_ONLY_RE.test(nextLine) &&
+      !METADATA_LINE_RE.test(nextLine)
+    ) {
+      merged.push(`${questionIdOnlyMatch[1]}. ${nextLine}`);
+      index = lookahead;
+      continue;
+    }
+
+    merged.push(`${questionIdOnlyMatch[1]}.`);
+  }
+
+  return merged;
 }
 
 function stripListMarker(line: string): string {
@@ -400,7 +438,7 @@ function parseBlock(
 }
 
 export function parseQuestionnaireText(text: string): QuestionnaireImportResult {
-  const lines = normalizeLines(text);
+  const lines = mergeSplitQuestionLines(normalizeLines(text));
   const blocks: QuestionBlock[] = [];
   const skippedRoundLabels: string[] = [];
   let importedRoundLabel: string | null = null;

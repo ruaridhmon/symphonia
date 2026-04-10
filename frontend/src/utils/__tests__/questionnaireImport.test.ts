@@ -503,6 +503,98 @@ describe('questionnaireImport', () => {
     });
   });
 
+  it('parses split question id and prompt lines into the correct typed fields', () => {
+    const questionnaireText = [
+      'Round 1: Full question set',
+      '',
+      'Section A. About you',
+      '',
+      'Q0.',
+      'Which of the following best describes your current role?',
+      'Response type: Select one.',
+      'School/college senior leader',
+      'Middle leader',
+      'Teacher/lecturer/tutor',
+      'Support staff',
+      'Other',
+      '',
+      'Q0a.',
+      'Which stakeholder group are you responding as part of?',
+      'Response type: Select one.',
+      'School / college leadership group',
+      'TUC / workforce group',
+      'Other / mixed perspective',
+      '',
+      'Q1.',
+      'Thinking about AI in education over the next 2-3 years, how significant is each of the following challenges in your context?',
+      'Response type: 0-10 slider for each item.',
+      'Anchor labels: 0 = Not at all significant, 5 = Moderately significant, 10 = Extremely significant',
+      'Staff AI literacy, capability, and training',
+      'Time available for training and implementation',
+    ].join('\n');
+
+    const parsed = parseQuestionnaireText(questionnaireText);
+    expect(parsed.questions.map((question) => question.questionId)).toEqual([
+      'Q0',
+      'Q0_other',
+      'Q0a',
+      'Q1_1',
+      'Q1_2',
+    ]);
+    expect(parsed.questions[0]).toMatchObject({
+      questionId: 'Q0',
+      label: 'Which of the following best describes your current role?',
+      inputType: 'single_select',
+      options: [
+        'School/college senior leader',
+        'Middle leader',
+        'Teacher/lecturer/tutor',
+        'Support staff',
+        'Other',
+      ],
+    });
+    expect(parsed.questions[2]).toMatchObject({
+      questionId: 'Q0a',
+      label: 'Which stakeholder group are you responding as part of?',
+      inputType: 'single_select',
+      options: ['School / college leadership group', 'TUC / workforce group', 'Other / mixed perspective'],
+    });
+    expect(parsed.questions[3]).toMatchObject({
+      questionId: 'Q1_1',
+      label: 'Staff AI literacy, capability, and training',
+      inputType: 'slider',
+      minLabel: 'Not at all significant',
+      midLabel: 'Moderately significant',
+      maxLabel: 'Extremely significant',
+    });
+
+    const converted = convertQuestionnaireTextToRichTemplate(questionnaireText);
+    const fields = parseDocumentTemplateFields(converted.template);
+    expect(fields.map((field) => field.fieldType)).toEqual([
+      'single_select',
+      'short',
+      'single_select',
+      'slider',
+      'slider',
+    ]);
+    expect(fields[0]).toMatchObject({
+      questionId: 'Q0',
+      label: 'Which of the following best describes your current role?',
+      options: [
+        'School/college senior leader',
+        'Middle leader',
+        'Teacher/lecturer/tutor',
+        'Support staff',
+        'Other',
+      ],
+    });
+    expect(fields[3]).toMatchObject({
+      questionId: 'Q1_1',
+      label: 'Staff AI literacy, capability, and training',
+      fieldType: 'slider',
+    });
+  });
+
   it('imports the full AI education questionnaire with correct static field types and routed follow-ups', () => {
     const parsed = parseQuestionnaireText(FULL_AI_EDUCATION_QUESTIONNAIRE);
 
