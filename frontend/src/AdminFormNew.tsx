@@ -559,8 +559,9 @@ export default function AdminFormNew() {
         <DelphiGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
 
         <BackLink
-          onClick={() => showTemplatePicker ? navigate('/') : handleBackToTemplates()}
-          label={showTemplatePicker ? 'Dashboard' : 'Templates'}
+          {...(showTemplatePicker
+            ? { to: '/', label: 'Consultations' }
+            : { onClick: handleBackToTemplates, label: 'Templates' })}
           className="mb-6"
         />
 

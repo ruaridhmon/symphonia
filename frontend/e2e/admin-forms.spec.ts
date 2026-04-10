@@ -57,6 +57,20 @@ test.describe('Create form — template picker', () => {
     ).toBeVisible({ timeout: 8_000 });
   });
 
+  test('consultations back link returns to the dashboard', async ({ page }) => {
+    await page.goto('/admin/forms/new');
+
+    const backLink = page.getByRole('link', { name: /consultations/i });
+    await expect(backLink).toBeVisible({ timeout: 8_000 });
+    await backLink.click();
+
+    await page.waitForURL('/', { timeout: 8_000 });
+    await expect(page).toHaveURL(/\/$/);
+    await expect(
+      page.getByRole('button', { name: /new consultation|new form/i }),
+    ).toBeVisible({ timeout: 8_000 });
+  });
+
   test('"Choose a template" heading and "Start from scratch" option are shown', async ({ page }) => {
     await page.goto('/admin/forms/new');
 
