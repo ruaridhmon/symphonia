@@ -7,7 +7,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
-import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, ChevronDown, Heading1, Heading2, Highlighter, Italic, List, ListOrdered, PaintBucket, Pilcrow, SeparatorHorizontal, Type, Underline as UnderlineIcon } from 'lucide-react';
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, ChevronDown, Heading1, Heading2, Highlighter, Italic, List, ListOrdered, PaintBucket, Pilcrow, SeparatorHorizontal, Type, Underline as UnderlineIcon, X } from 'lucide-react';
 import { emptyStructuredResponse } from '../types/structured-input';
 import type { StructuredResponse } from '../types/structured-input';
 import DocumentTemplateFieldControl from './DocumentTemplateFieldControl';
@@ -706,12 +706,7 @@ export default function FillableDocumentEditor({
             'radial-gradient(circle at top, rgba(186,205,235,0.22), transparent 34%), linear-gradient(180deg, #f5f8fc 0%, #eef3f9 100%)',
         }}
       >
-        <div
-          className="mx-auto grid max-w-[1280px] gap-4"
-          style={{
-            gridTemplateColumns: selectedField ? 'minmax(0, 1fr) minmax(18rem, 20rem)' : 'minmax(0, 1fr)',
-          }}
-        >
+        <div className="mx-auto max-w-[1280px]">
             <div
               data-testid="document-template-rich-editor"
               className="relative rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
@@ -760,200 +755,221 @@ export default function FillableDocumentEditor({
                   ))}
                 </div>
               ) : null}
-            </div>
 
-            {selectedField ? (
-              <div
-                className="rounded-[1.35rem] border px-4 py-4"
-                style={{
-                  borderColor: 'rgba(148, 163, 184, 0.24)',
-                  backgroundColor: 'rgba(255,255,255,0.76)',
-                  boxShadow: '0 18px 40px -32px rgba(15,23,42,0.34)',
-                }}
-              >
-                <div className="text-sm font-semibold text-foreground">Field settings</div>
-                <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
-                  Click an inserted field in the document to edit its label, placeholder, options, or range.
-                </p>
-
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                      Label
-                    </label>
-                    <input
-                      value={selectedField.attrs.label}
-                      {...settingsInputHandlers}
-                      onChange={(event) =>
-                        updateSelectedField({
-                          label: event.target.value,
-                          key: event.target.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'field',
-                          placeholder: `Enter ${event.target.value.trim().toLowerCase() || 'response'}`,
-                        })
-                      }
-                      className="w-full rounded-xl px-3 py-2 text-sm"
-                      style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                    />
+              {selectedField ? (
+                <div
+                  className="absolute right-5 top-5 z-10 w-[min(22rem,calc(100%-2.5rem))] rounded-[1.25rem] border p-3"
+                  style={{
+                    borderColor: 'rgba(148, 163, 184, 0.22)',
+                    backgroundColor: 'rgba(255,255,255,0.96)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 24px 55px -34px rgba(15,23,42,0.42)',
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-foreground">Field settings</div>
+                      <p className="mt-1 text-[11px]" style={{ color: 'var(--muted-foreground)', lineHeight: 1.5 }}>
+                        Edit this field without leaving the document canvas.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedField(null);
+                        editor?.commands.focus();
+                      }}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full"
+                      style={{
+                        border: '1px solid color-mix(in srgb, var(--border) 84%, transparent)',
+                        backgroundColor: 'rgba(255,255,255,0.85)',
+                        color: 'var(--muted-foreground)',
+                      }}
+                      aria-label="Close field settings"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
 
-                  <div>
-                    <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                      Placeholder
-                    </label>
-                    <input
-                      value={selectedField.attrs.placeholder}
-                      {...settingsInputHandlers}
-                      onChange={(event) => updateSelectedField({ placeholder: event.target.value })}
-                      className="w-full rounded-xl px-3 py-2 text-sm"
-                      style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                    />
-                  </div>
-
-                  <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground)' }}>
-                    <input
-                      type="checkbox"
-                      checked={selectedField.attrs.optional}
-                      {...settingsCheckboxHandlers}
-                      onChange={(event) => updateSelectedField({ optional: event.target.checked })}
-                    />
-                    Optional field
-                  </label>
-
-                  {(selectedField.attrs.fieldType === 'long' || selectedField.attrs.fieldType === 'short') ? (
+                  <div className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-1">
                     <div>
                       <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                        Rows
+                        Label
                       </label>
                       <input
-                        type="number"
-                        min={1}
-                        max={12}
-                        value={selectedField.attrs.rows}
-                        {...settingsInputHandlers}
-                        onChange={(event) => updateSelectedField({ rows: Number(event.target.value) || 1 })}
-                        className="w-full rounded-xl px-3 py-2 text-sm"
-                        style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                      />
-                    </div>
-                  ) : null}
-
-                  {(selectedField.attrs.fieldType === 'single_select' || selectedField.attrs.fieldType === 'multi_select' || selectedField.attrs.fieldType === 'likert') ? (
-                    <div>
-                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                        Options
-                      </label>
-                      <textarea
-                        value={selectedFieldOptions}
+                        value={selectedField.attrs.label}
                         {...settingsInputHandlers}
                         onChange={(event) =>
                           updateSelectedField({
-                            options: JSON.stringify(
-                              event.target.value
-                                .split('\n')
-                                .map((item) => item.trim())
-                                .filter(Boolean),
-                            ),
-                          })
-                        }
-                        rows={6}
-                        className="w-full rounded-xl px-3 py-2 text-sm"
-                        style={{ border: '1px solid var(--input)', backgroundColor: 'white', resize: 'vertical' }}
-                      />
-                    </div>
-                  ) : null}
-
-                  {selectedField.attrs.fieldType === 'multi_select' ? (
-                    <div>
-                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                        Max selections
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        value={selectedField.attrs.maxSelections ?? ''}
-                        {...settingsInputHandlers}
-                        onChange={(event) =>
-                          updateSelectedField({
-                            maxSelections: event.target.value ? Number(event.target.value) : null,
+                            label: event.target.value,
+                            key: event.target.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'field',
+                            placeholder: `Enter ${event.target.value.trim().toLowerCase() || 'response'}`,
                           })
                         }
                         className="w-full rounded-xl px-3 py-2 text-sm"
                         style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
                       />
                     </div>
-                  ) : null}
 
-                  {selectedField.attrs.fieldType === 'slider' ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                          Min
-                        </label>
-                        <input
-                          type="number"
-                          value={selectedField.attrs.minValue ?? 0}
-                          {...settingsInputHandlers}
-                          onChange={(event) => updateSelectedField({ minValue: Number(event.target.value) })}
-                          className="w-full rounded-xl px-3 py-2 text-sm"
-                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                          Max
-                        </label>
-                        <input
-                          type="number"
-                          value={selectedField.attrs.maxValue ?? 10}
-                          {...settingsInputHandlers}
-                          onChange={(event) => updateSelectedField({ maxValue: Number(event.target.value) })}
-                          className="w-full rounded-xl px-3 py-2 text-sm"
-                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                          Min label
-                        </label>
-                        <input
-                          value={selectedField.attrs.minLabel ?? ''}
-                          {...settingsInputHandlers}
-                          onChange={(event) => updateSelectedField({ minLabel: event.target.value })}
-                          className="w-full rounded-xl px-3 py-2 text-sm"
-                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                          Max label
-                        </label>
-                        <input
-                          value={selectedField.attrs.maxLabel ?? ''}
-                          {...settingsInputHandlers}
-                          onChange={(event) => updateSelectedField({ maxLabel: event.target.value })}
-                          className="w-full rounded-xl px-3 py-2 text-sm"
-                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                        />
-                      </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                        Placeholder
+                      </label>
+                      <input
+                        value={selectedField.attrs.placeholder}
+                        {...settingsInputHandlers}
+                        onChange={(event) => updateSelectedField({ placeholder: event.target.value })}
+                        className="w-full rounded-xl px-3 py-2 text-sm"
+                        style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                      />
                     </div>
-                  ) : null}
 
-                  <button
-                    type="button"
-                    onClick={removeSelectedField}
-                    className="w-full rounded-xl px-3 py-2 text-sm font-medium"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
-                      color: 'var(--destructive)',
-                      border: '1px solid color-mix(in srgb, var(--destructive) 20%, transparent)',
-                    }}
-                  >
-                    Remove field
-                  </button>
+                    <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground)' }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedField.attrs.optional}
+                        {...settingsCheckboxHandlers}
+                        onChange={(event) => updateSelectedField({ optional: event.target.checked })}
+                      />
+                      Optional field
+                    </label>
+
+                    {(selectedField.attrs.fieldType === 'long' || selectedField.attrs.fieldType === 'short') ? (
+                      <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                          Rows
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={12}
+                          value={selectedField.attrs.rows}
+                          {...settingsInputHandlers}
+                          onChange={(event) => updateSelectedField({ rows: Number(event.target.value) || 1 })}
+                          className="w-full rounded-xl px-3 py-2 text-sm"
+                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                        />
+                      </div>
+                    ) : null}
+
+                    {(selectedField.attrs.fieldType === 'single_select' || selectedField.attrs.fieldType === 'multi_select' || selectedField.attrs.fieldType === 'likert') ? (
+                      <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                          Options
+                        </label>
+                        <textarea
+                          value={selectedFieldOptions}
+                          {...settingsInputHandlers}
+                          onChange={(event) =>
+                            updateSelectedField({
+                              options: JSON.stringify(
+                                event.target.value
+                                  .split('\n')
+                                  .map((item) => item.trim())
+                                  .filter(Boolean),
+                              ),
+                            })
+                          }
+                          rows={6}
+                          className="w-full rounded-xl px-3 py-2 text-sm"
+                          style={{ border: '1px solid var(--input)', backgroundColor: 'white', resize: 'vertical' }}
+                        />
+                      </div>
+                    ) : null}
+
+                    {selectedField.attrs.fieldType === 'multi_select' ? (
+                      <div>
+                        <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                          Max selections
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          value={selectedField.attrs.maxSelections ?? ''}
+                          {...settingsInputHandlers}
+                          onChange={(event) =>
+                            updateSelectedField({
+                              maxSelections: event.target.value ? Number(event.target.value) : null,
+                            })
+                          }
+                          className="w-full rounded-xl px-3 py-2 text-sm"
+                          style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                        />
+                      </div>
+                    ) : null}
+
+                    {selectedField.attrs.fieldType === 'slider' ? (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                            Min
+                          </label>
+                          <input
+                            type="number"
+                            value={selectedField.attrs.minValue ?? 0}
+                            {...settingsInputHandlers}
+                            onChange={(event) => updateSelectedField({ minValue: Number(event.target.value) })}
+                            className="w-full rounded-xl px-3 py-2 text-sm"
+                            style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                            Max
+                          </label>
+                          <input
+                            type="number"
+                            value={selectedField.attrs.maxValue ?? 10}
+                            {...settingsInputHandlers}
+                            onChange={(event) => updateSelectedField({ maxValue: Number(event.target.value) })}
+                            className="w-full rounded-xl px-3 py-2 text-sm"
+                            style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                            Min label
+                          </label>
+                          <input
+                            value={selectedField.attrs.minLabel ?? ''}
+                            {...settingsInputHandlers}
+                            onChange={(event) => updateSelectedField({ minLabel: event.target.value })}
+                            className="w-full rounded-xl px-3 py-2 text-sm"
+                            style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                            Max label
+                          </label>
+                          <input
+                            value={selectedField.attrs.maxLabel ?? ''}
+                            {...settingsInputHandlers}
+                            onChange={(event) => updateSelectedField({ maxLabel: event.target.value })}
+                            className="w-full rounded-xl px-3 py-2 text-sm"
+                            style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
+                          />
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      onClick={removeSelectedField}
+                      className="w-full rounded-xl px-3 py-2 text-sm font-medium"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
+                        color: 'var(--destructive)',
+                        border: '1px solid color-mix(in srgb, var(--destructive) 20%, transparent)',
+                      }}
+                    >
+                      Remove field
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : null}
-          </div>
+              ) : null}
+            </div>
+        </div>
       </div>
     </div>
   );
