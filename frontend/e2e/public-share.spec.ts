@@ -55,8 +55,6 @@ async function createPublicForm(
       ],
       allow_join: true,
       allow_public_responses: true,
-      public_require_upload: true,
-      public_upload_prompt: 'Upload supporting notes before continuing.',
       public_require_consent: true,
       public_consent_text: 'I agree to take part in this consultation.',
     },
@@ -97,7 +95,7 @@ async function deleteForm(
 test.describe('Public share links', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('guest can pass upload and consent gate, complete the form, and submit', async ({ page, baseURL }) => {
+  test('guest can pass the consent gate, complete the form, and submit', async ({ page, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';
     const adminApi = await playwrightRequest.newContext();
@@ -111,13 +109,9 @@ test.describe('Public share links', () => {
       await page.goto(`${appBase}/share/${created.join_code}`);
       await expect(page.getByLabel('Your name')).toBeVisible();
       await expect(page.getByRole('button', { name: /continue to form/i })).toBeVisible();
+      await expect(page.locator('input[type="file"]')).toHaveCount(0);
 
       await page.getByLabel('Your name').fill('Playwright Guest');
-      await page.getByLabel('Upload supporting notes before continuing.').setInputFiles({
-        name: 'notes.txt',
-        mimeType: 'text/plain',
-        buffer: Buffer.from('supporting notes'),
-      });
       await page.getByLabel('I agree to take part in this consultation.').check();
       await page.getByRole('button', { name: /continue to form/i }).click();
 

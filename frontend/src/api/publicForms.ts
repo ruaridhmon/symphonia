@@ -36,15 +36,11 @@ export function startPublicFormSession(
   data: {
     participantName: string;
     consentGiven: boolean;
-    file?: File | null;
   },
 ) {
   const formData = new FormData();
   formData.append('participant_name', data.participantName);
   formData.append('consent_given', data.consentGiven ? 'true' : 'false');
-  if (data.file) {
-    formData.append('file', data.file);
-  }
   return publicApi.postMultipart<{ session_token: string; form_id: number; title: string }>(
     `/public/forms/${encodeURIComponent(joinCode)}/start`,
     formData,

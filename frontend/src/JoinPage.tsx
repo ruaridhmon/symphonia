@@ -25,7 +25,6 @@ export default function JoinPage() {
   const [publicForm, setPublicForm] = useState<PublicFormDetail | null>(null);
   const [participantName, setParticipantName] = useState('');
   const [consentGiven, setConsentGiven] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [startingPublicSession, setStartingPublicSession] = useState(false);
 
   // Manual entry mode state
@@ -80,7 +79,6 @@ export default function JoinPage() {
       const result = await startPublicFormSession(code, {
         participantName,
         consentGiven,
-        file: uploadedFile,
       });
       navigate(`/public/session/${result.session_token}`, { replace: true });
     } catch (err) {
@@ -205,21 +203,6 @@ export default function JoinPage() {
                   autoFocus
                 />
               </div>
-
-              {publicForm.public_require_upload ? (
-                <div>
-                  <label htmlFor="public-upload" className="block text-sm font-medium text-foreground">
-                    {publicForm.public_upload_prompt}
-                  </label>
-                  <input
-                    id="public-upload"
-                    type="file"
-                    onChange={(event) => setUploadedFile(event.target.files?.[0] ?? null)}
-                    className="mt-2 block w-full text-sm"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  />
-                </div>
-              ) : null}
 
               {publicForm.public_require_consent ? (
                 <label className="flex items-start gap-3 rounded-xl p-4" style={{ border: '1px solid var(--border)' }}>

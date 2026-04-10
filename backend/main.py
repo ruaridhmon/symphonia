@@ -247,6 +247,10 @@ _CSRF_EXEMPT_BASE_PATHS = {"/login", "/register", "/logout", "/ws"}
 CSRF_EXEMPT_PATHS = _CSRF_EXEMPT_BASE_PATHS | {
     f"/api{path}" for path in _CSRF_EXEMPT_BASE_PATHS
 }
+CSRF_EXEMPT_PREFIXES = (
+    "/public/forms/",
+    "/api/public/forms/",
+)
 
 
 @app.middleware("http")
@@ -256,6 +260,8 @@ async def csrf_protection(request: Request, call_next):
 
     path = request.url.path.rstrip("/")
     if path in CSRF_EXEMPT_PATHS:
+        return await call_next(request)
+    if any(path.startswith(prefix) for prefix in CSRF_EXEMPT_PREFIXES):
         return await call_next(request)
 
     # Only enforce CSRF when auth comes from cookies (not Bearer tokens).

@@ -5,11 +5,13 @@ import { api, getApiErrorDetail } from './api/client';
 import { BackLink, LoadingButton } from './components';
 import DocumentTemplateEditor from './components/DocumentTemplateEditor';
 import DocumentTemplateResponse from './components/DocumentTemplateResponse';
+import PublicShareSettings from './components/PublicShareSettings';
 import QuestionModeToggle from './components/QuestionModeToggle';
 import QuestionnaireImporter from './components/QuestionnaireImporter';
 import SurveyQuestionConfigurator from './components/SurveyQuestionConfigurator';
 import StructuredInput from './components/StructuredInput';
 import SurveyQuestionList from './components/SurveyQuestionList';
+import { ToggleSwitch } from './components/ToggleSwitch';
 import { useToast } from './components/Toast';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { emptyStructuredResponse, type StructuredResponse } from './types/structured-input';
@@ -60,46 +62,6 @@ function createBlankSurveyQuestion(): ConfigurableQuestion {
   };
 }
 
-function ToggleSwitch({
-  checked,
-  onChange,
-  id,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  id?: string;
-}) {
-  return (
-    <button
-      type="button"
-      id={id}
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className="relative inline-flex shrink-0 rounded-full transition-colors duration-200 focus-visible:outline-none"
-      style={{
-        width: 40,
-        height: 22,
-        backgroundColor: checked ? 'var(--accent)' : 'var(--input)',
-        cursor: 'pointer',
-        border: 'none',
-        padding: 0,
-      }}
-    >
-      <span
-        className="block rounded-full shadow-sm transition-transform duration-200"
-        style={{
-          width: 18,
-          height: 18,
-          marginTop: 2,
-          marginLeft: checked ? 20 : 2,
-          backgroundColor: '#fff',
-        }}
-      />
-    </button>
-  );
-}
-
 export default function FormEditor() {
   const { id } = useParams();
   useDocumentTitle('Edit Consultation');
@@ -120,8 +82,6 @@ export default function FormEditor() {
   const [publicConsentText, setPublicConsentText] = useState(
     'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
   );
-  const [publicRequireUpload, setPublicRequireUpload] = useState(false);
-  const [publicUploadPrompt, setPublicUploadPrompt] = useState('Upload a file before you continue.');
   const validQuestions = questions.filter((question) => question.label.trim() !== '');
   const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
   const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
@@ -166,8 +126,6 @@ export default function FormEditor() {
           form.public_consent_text?.trim()
             || 'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
         );
-        setPublicRequireUpload(Boolean(form.public_require_upload));
-        setPublicUploadPrompt(form.public_upload_prompt?.trim() || 'Upload a file before you continue.');
         setLoading(false);
       })
       .catch(() => {
@@ -236,8 +194,8 @@ export default function FormEditor() {
         allow_public_responses: allowPublicResponses,
         public_require_consent: publicRequireConsent,
         public_consent_text: publicRequireConsent ? publicConsentText.trim() : null,
-        public_require_upload: publicRequireUpload,
-        public_upload_prompt: publicRequireUpload ? publicUploadPrompt.trim() : null,
+        public_require_upload: false,
+        public_upload_prompt: null,
       });
       toastSuccess('Consultation saved');
     } catch (error) {
@@ -405,81 +363,15 @@ export default function FormEditor() {
         </div>
       </section>
 
-      <section className="card-lg p-5 sm:p-6 mb-6">
-        <h2 className="text-base font-semibold text-foreground">Public Share Link</h2>
-        <p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          Let people open the share link without logging in, enter their name, and fill out the form.
-        </p>
-
-        <div className="mt-5 space-y-5">
-          <label className="flex items-start justify-between gap-4">
-            <div>
-              <div className="text-sm font-medium text-foreground">Enable public responses</div>
-              <div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                Uses the existing share link and join code.
-              </div>
-            </div>
-            <ToggleSwitch checked={allowPublicResponses} onChange={setAllowPublicResponses} />
-          </label>
-
-          {allowPublicResponses ? (
-            <>
-              <label className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-sm font-medium text-foreground">Require upload before form</div>
-                  <div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    Add a first screen where respondents upload a file before entering the form.
-                  </div>
-                </div>
-                <ToggleSwitch checked={publicRequireUpload} onChange={setPublicRequireUpload} />
-              </label>
-
-              {publicRequireUpload ? (
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground">Upload prompt</label>
-                  <input
-                    type="text"
-                    value={publicUploadPrompt}
-                    onChange={(event) => setPublicUploadPrompt(event.target.value)}
-                    className="w-full rounded-lg px-3 py-2 text-sm"
-                    style={{
-                      border: '1px solid var(--input)',
-                      backgroundColor: 'var(--background)',
-                      color: 'var(--foreground)',
-                    }}
-                  />
-                </div>
-              ) : null}
-
-              <label className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-sm font-medium text-foreground">Require consent checkbox</div>
-                  <div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    Add a first screen where respondents must agree before continuing.
-                  </div>
-                </div>
-                <ToggleSwitch checked={publicRequireConsent} onChange={setPublicRequireConsent} />
-              </label>
-
-              {publicRequireConsent ? (
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-foreground">Consent text</label>
-                  <textarea
-                    value={publicConsentText}
-                    onChange={(event) => setPublicConsentText(event.target.value)}
-                    rows={4}
-                    className="w-full rounded-lg px-3 py-2 text-sm"
-                    style={{
-                      border: '1px solid var(--input)',
-                      backgroundColor: 'var(--background)',
-                      color: 'var(--foreground)',
-                    }}
-                  />
-                </div>
-              ) : null}
-            </>
-          ) : null}
-        </div>
+      <section className="mb-6">
+        <PublicShareSettings
+          enabled={allowPublicResponses}
+          onEnabledChange={setAllowPublicResponses}
+          requireConsent={publicRequireConsent}
+          onRequireConsentChange={setPublicRequireConsent}
+          consentText={publicConsentText}
+          onConsentTextChange={setPublicConsentText}
+        />
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]">

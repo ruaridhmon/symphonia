@@ -3379,12 +3379,8 @@ def _serialize_public_settings(form: FormModel) -> dict[str, Any]:
             if form.public_consent_text and form.public_consent_text.strip()
             else DEFAULT_PUBLIC_CONSENT_TEXT
         ),
-        "public_require_upload": bool(form.public_require_upload),
-        "public_upload_prompt": (
-            form.public_upload_prompt.strip()
-            if form.public_upload_prompt and form.public_upload_prompt.strip()
-            else "Upload a file before you continue."
-        ),
+        "public_require_upload": False,
+        "public_upload_prompt": "",
     }
 
 
@@ -3652,9 +3648,6 @@ def user_create_form(
     public_consent_text = (
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )
-    public_upload_prompt = (
-        payload.public_upload_prompt.strip() if payload.public_upload_prompt else None
-    )
     normalized_questions = (
         _build_document_questions(document_template)
         if document_template
@@ -3684,8 +3677,8 @@ def user_create_form(
         allow_public_responses=payload.allow_public_responses,
         public_require_consent=payload.public_require_consent,
         public_consent_text=public_consent_text,
-        public_require_upload=payload.public_require_upload,
-        public_upload_prompt=public_upload_prompt,
+        public_require_upload=False,
+        public_upload_prompt=None,
         join_code=code,
         owner_id=user.id,
     )
@@ -3833,9 +3826,6 @@ def update_form(
     public_consent_text = (
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )
-    public_upload_prompt = (
-        payload.public_upload_prompt.strip() if payload.public_upload_prompt else None
-    )
     normalized_questions = (
         _build_document_questions(document_template)
         if document_template
@@ -3852,8 +3842,8 @@ def update_form(
     f.allow_public_responses = payload.allow_public_responses
     f.public_require_consent = payload.public_require_consent
     f.public_consent_text = public_consent_text
-    f.public_require_upload = payload.public_require_upload
-    f.public_upload_prompt = public_upload_prompt
+    f.public_require_upload = False
+    f.public_upload_prompt = None
     active_round = (
         db.query(RoundModel)
         .filter(RoundModel.form_id == form_id, RoundModel.is_active == True)
@@ -4173,10 +4163,6 @@ async def start_public_form_session(
 
     upload_filename = None
     upload_path = None
-    if form.public_require_upload and not file:
-        raise HTTPException(
-            status_code=400, detail="Please upload a file before continuing."
-        )
 
     session_token = secrets.token_urlsafe(24)
     user = User(
