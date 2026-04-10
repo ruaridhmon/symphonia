@@ -4827,7 +4827,8 @@ async def extract_document_template(
     mode: str = Form("fillable"),
     user: User = Depends(require_facilitator),
 ):
-    if mode not in {"fillable", "editable"}:
+    normalized_mode = "fillable" if mode == "fillable-rich" else mode
+    if normalized_mode not in {"fillable", "editable"}:
         raise HTTPException(
             status_code=400, detail="Unsupported document template mode"
         )
@@ -4839,7 +4840,7 @@ async def extract_document_template(
     blob = await file.read()
     extracted = (
         _extract_editable_document_from_docx_bytes(blob)
-        if mode == "editable"
+        if normalized_mode == "editable"
         else _extract_text_from_docx_bytes(blob)
     )
     return {

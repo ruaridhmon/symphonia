@@ -60,7 +60,7 @@ export default function DocumentTemplateEditor({
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('mode', mode);
+      formData.append('mode', mode === 'fillable-rich' ? 'fillable' : mode);
 
       const csrfToken = getCookie('csrf_token');
       const bearerToken = localStorage.getItem('access_token');
