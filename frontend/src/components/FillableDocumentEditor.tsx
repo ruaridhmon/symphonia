@@ -286,14 +286,74 @@ function RichToolbarButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-xl"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-2xl transition-colors"
       style={{
-        border: active ? '1px solid color-mix(in srgb, var(--accent) 35%, transparent)' : '1px solid var(--border)',
-        backgroundColor: active ? 'color-mix(in srgb, var(--accent) 9%, transparent)' : 'transparent',
+        border: active ? '1px solid color-mix(in srgb, var(--accent) 28%, transparent)' : '1px solid color-mix(in srgb, var(--border) 82%, transparent)',
+        backgroundColor: active ? 'color-mix(in srgb, var(--accent) 9%, white)' : 'rgba(255,255,255,0.88)',
         color: active ? 'var(--accent)' : 'var(--muted-foreground)',
+        boxShadow: active
+          ? '0 14px 28px -22px rgba(37,99,235,0.45)'
+          : '0 10px 24px -24px rgba(15,23,42,0.22)',
       }}
     >
       {icon}
+    </button>
+  );
+}
+
+function ToolbarGroup({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="flex flex-wrap items-center gap-2 rounded-[1.3rem] px-3 py-3"
+      style={{
+        border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(246,249,252,0.92) 100%)',
+        boxShadow: '0 18px 38px -34px rgba(15,23,42,0.22)',
+      }}
+    >
+      <span
+        className="mr-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]"
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--foreground) 4%, transparent)',
+          color: 'var(--muted-foreground)',
+        }}
+      >
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+}
+
+function QuickInsertButton({
+  label,
+  icon,
+  onClick,
+}: {
+  label: string;
+  icon: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium"
+      style={{
+        border: '1px solid color-mix(in srgb, var(--border) 80%, transparent)',
+        backgroundColor: 'rgba(255,255,255,0.92)',
+        color: 'var(--foreground)',
+        boxShadow: '0 10px 24px -24px rgba(15,23,42,0.22)',
+      }}
+    >
+      {icon}
+      {label}
     </button>
   );
 }
@@ -674,21 +734,37 @@ export default function FillableDocumentEditor({
       ref={rootRef}
       className="overflow-visible rounded-[1.7rem]"
       style={{
-        border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+        border: '1px solid color-mix(in srgb, #d7e0ea 92%, transparent)',
         background:
-          'linear-gradient(180deg, color-mix(in srgb, #fbfcff 96%, var(--background)) 0%, color-mix(in srgb, #f1f5fb 88%, var(--background)) 100%)',
+          'linear-gradient(180deg, #f7f5f1 0%, #edf3f7 42%, #eef4f8 100%)',
+        boxShadow: '0 30px 70px -52px rgba(15,23,42,0.28)',
       }}
     >
       <style>{`
         .symphonia-fillable-editor > *:first-child { margin-top: 0; }
-        .symphonia-fillable-editor h1 { font-size: 1.85rem; line-height: 1.15; margin: 0 0 0.8rem; color: #10223e; font-weight: 700; }
-        .symphonia-fillable-editor h2 { font-size: 1.25rem; line-height: 1.2; margin: 1.15rem 0 0.65rem; color: #183153; font-weight: 650; }
-        .symphonia-fillable-editor p, .symphonia-fillable-editor li { line-height: 1.75; color: #182333; }
-        .symphonia-fillable-editor ul, .symphonia-fillable-editor ol { padding-left: 1.25rem; }
+        .symphonia-fillable-editor .ProseMirror { min-height: 32rem; }
+        .symphonia-fillable-editor h1 { font-size: 2rem; line-height: 1.08; margin: 0 0 0.95rem; color: #102038; font-weight: 700; letter-spacing: -0.03em; }
+        .symphonia-fillable-editor h2 { font-size: 1.28rem; line-height: 1.2; margin: 1.35rem 0 0.72rem; color: #1d3552; font-weight: 650; letter-spacing: -0.02em; }
+        .symphonia-fillable-editor h3 { font-size: 1.05rem; line-height: 1.28; margin: 1rem 0 0.55rem; color: #27415f; font-weight: 650; }
+        .symphonia-fillable-editor p, .symphonia-fillable-editor li { line-height: 1.85; color: #1a2433; font-size: 1rem; }
+        .symphonia-fillable-editor ul, .symphonia-fillable-editor ol { padding-left: 1.4rem; }
+        .symphonia-fillable-editor blockquote {
+          margin: 1rem 0;
+          padding: 0.9rem 1.1rem;
+          border-left: 3px solid rgba(28, 99, 171, 0.28);
+          background: linear-gradient(180deg, rgba(240,246,251,0.92) 0%, rgba(247,250,252,0.92) 100%);
+          color: #35516e;
+          border-radius: 1rem;
+        }
+        .symphonia-fillable-editor hr {
+          border: none;
+          border-top: 1px solid rgba(193, 205, 217, 0.72);
+          margin: 1.3rem 0;
+        }
         .symphonia-fillable-editor [style*="text-align: center"] { text-align: center; }
         .symphonia-fillable-editor [style*="text-align: right"] { text-align: right; }
         .symphonia-fillable-editor [style*="text-align: justify"] { text-align: justify; }
-        .symphonia-fillable-editor .symphonia-fillable-node { margin: 0.12rem 0.22rem; vertical-align: middle; }
+        .symphonia-fillable-editor .symphonia-fillable-node { margin: 0.18rem 0.28rem; vertical-align: middle; }
         .symphonia-fillable-editor .ProseMirror-selectednode .symphonia-fillable-node > span > span {
           border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
           box-shadow: 0 18px 34px -24px rgba(37,99,235,0.45) !important;
@@ -696,35 +772,42 @@ export default function FillableDocumentEditor({
       `}</style>
 
       <div
-        className="flex flex-col gap-3 border-b px-4 py-4"
-        style={{ borderColor: 'color-mix(in srgb, var(--border) 75%, transparent)' }}
+        className="flex flex-col gap-4 border-b px-5 py-5"
+        style={{ borderColor: 'color-mix(in srgb, #d6e0ea 88%, transparent)' }}
       >
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-foreground">Document canvas</div>
-            <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-              Edit the document directly here. Type normally for document text, type <code>/</code> to insert fields, and click a field chip to configure it.
+            <div
+              className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]"
+              style={{ backgroundColor: 'rgba(255,255,255,0.8)', color: '#5a6b80' }}
+            >
+              Fillable document studio
+            </div>
+            <div className="mt-3 text-lg font-semibold text-foreground">Document canvas</div>
+            <p className="mt-1.5 max-w-2xl text-sm" style={{ color: '#617489', lineHeight: 1.7 }}>
+              Compose the final participant-facing document here. Type normally for content, use <code>/</code> for fields, and configure only the selected field in the side inspector.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <span
-              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-              style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)', color: 'var(--muted-foreground)' }}
+              className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium"
+              style={{ backgroundColor: 'rgba(255,255,255,0.82)', border: '1px solid rgba(193,205,217,0.78)', color: '#5c6f84' }}
             >
-              Single inline editing surface
+              One editing surface, one live document view
             </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-            <div className="mr-1 flex items-center gap-2 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+        <div className="flex flex-col gap-3">
+          <ToolbarGroup label="Typography">
+            <div className="mr-1 flex items-center gap-2 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
               <Type size={14} style={{ color: 'var(--muted-foreground)' }} />
               <select
                 aria-label="Font family"
                 value={selectedFontFamily}
                 onChange={(event) => setFontFamily(event.target.value)}
-                className="rounded-lg px-2.5 py-1 text-xs font-medium"
-                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
+                className="rounded-xl px-2.5 py-1.5 text-xs font-medium"
+                style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'white', color: 'var(--foreground)' }}
               >
                 {FONT_PRESETS.map((preset) => (
                   <option key={preset.id} value={preset.style.fontFamily} style={{ fontFamily: preset.style.fontFamily }}>
@@ -733,13 +816,13 @@ export default function FillableDocumentEditor({
                 ))}
               </select>
             </div>
-            <div className="mr-1 flex items-center gap-2 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+            <div className="mr-1 flex items-center gap-2 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
               <select
                 aria-label="Font size"
                 value={selectedFontSize}
                 onChange={(event) => setFontSize(event.target.value)}
-                className="rounded-lg px-2.5 py-1 text-xs font-medium"
-                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
+                className="rounded-xl px-2.5 py-1.5 text-xs font-medium"
+                style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'white', color: 'var(--foreground)' }}
               >
                 {SIZE_PRESETS.map((preset) => (
                   <option key={preset.id} value={preset.fontSize}>
@@ -753,6 +836,9 @@ export default function FillableDocumentEditor({
             <RichToolbarButton label="Underline" active={Boolean(editor?.isActive('underline'))} onClick={() => editor?.chain().focus().toggleUnderline().run()} icon={<UnderlineIcon size={14} />} />
             <RichToolbarButton label="Heading 1" active={Boolean(editor?.isActive('heading', { level: 1 }))} onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} icon={<Heading1 size={14} />} />
             <RichToolbarButton label="Heading 2" active={Boolean(editor?.isActive('heading', { level: 2 }))} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} icon={<Heading2 size={14} />} />
+          </ToolbarGroup>
+
+          <ToolbarGroup label="Layout">
             <RichToolbarButton label="Bullets" active={Boolean(editor?.isActive('bulletList'))} onClick={() => editor?.chain().focus().toggleBulletList().run()} icon={<List size={14} />} />
             <RichToolbarButton label="Numbered" active={Boolean(editor?.isActive('orderedList'))} onClick={() => editor?.chain().focus().toggleOrderedList().run()} icon={<ListOrdered size={14} />} />
             <RichToolbarButton label="Align left" active={isAligned('left')} onClick={() => setBlockTextAlign('left')} icon={<AlignLeft size={14} />} />
@@ -760,7 +846,7 @@ export default function FillableDocumentEditor({
             <RichToolbarButton label="Align right" active={isAligned('right')} onClick={() => setBlockTextAlign('right')} icon={<AlignRight size={14} />} />
             <RichToolbarButton label="Justify" active={isAligned('justify')} onClick={() => setBlockTextAlign('justify')} icon={<AlignJustify size={14} />} />
             <RichToolbarButton label="Highlight" active={Boolean(editor?.isActive('highlight'))} onClick={() => editor?.chain().focus().toggleHighlight({ color: '#fff3a3' }).run()} icon={<Highlighter size={14} />} />
-            <div className="ml-1 flex items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+            <div className="ml-1 flex items-center gap-1 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
               <PaintBucket size={14} style={{ color: 'var(--muted-foreground)' }} />
               {COLOR_SWATCHES.map((color) => (
                 <button
@@ -774,69 +860,57 @@ export default function FillableDocumentEditor({
                 />
               ))}
             </div>
-            <div className="ml-1 flex flex-wrap items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
-              <button
-                type="button"
-                onClick={() => insertSectionHeading(1, 'New section')}
-                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
-                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
-              >
-                <Heading1 size={13} />
-                Section
-              </button>
-              <button
-                type="button"
-                onClick={() => insertSectionHeading(2, 'Subsection')}
-                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
-                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
-              >
-                <Pilcrow size={13} />
-                Subsection
-              </button>
-              <button
-                type="button"
-                onClick={insertGuidanceBlock}
-                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
-                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
-              >
-                <Type size={13} />
-                Guidance
-              </button>
-              <button
-                type="button"
-                onClick={insertDivider}
-                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
-                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
-              >
-                <SeparatorHorizontal size={13} />
-                Divider
-              </button>
-            </div>
+          </ToolbarGroup>
+
+          <ToolbarGroup label="Structure">
+            <QuickInsertButton label="Section" icon={<Heading1 size={13} />} onClick={() => insertSectionHeading(1, 'New section')} />
+            <QuickInsertButton label="Subsection" icon={<Pilcrow size={13} />} onClick={() => insertSectionHeading(2, 'Subsection')} />
+            <QuickInsertButton label="Guidance" icon={<Type size={13} />} onClick={insertGuidanceBlock} />
+            <QuickInsertButton label="Divider" icon={<SeparatorHorizontal size={13} />} onClick={insertDivider} />
+          </ToolbarGroup>
         </div>
       </div>
 
       <div
-        className="px-4 py-5"
+        className="px-4 py-6"
         style={{
           background:
-            'radial-gradient(circle at top, rgba(186,205,235,0.22), transparent 34%), linear-gradient(180deg, #f5f8fc 0%, #eef3f9 100%)',
+            'radial-gradient(circle at top, rgba(188,205,219,0.32), transparent 34%), linear-gradient(180deg, #edf3f6 0%, #eef2f5 100%)',
         }}
       >
         <div className="mx-auto flex max-w-[1440px] flex-col gap-4 xl:flex-row xl:items-start">
           <div className="min-w-0 flex-1">
-            <div
-              data-testid="document-template-rich-editor"
-              className="relative overflow-visible rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
-              style={{ borderColor: 'rgba(148, 163, 184, 0.28)' }}
-            >
-              <EditorContent editor={editor} />
+            <div className="rounded-[2rem] border px-4 py-4" style={{ borderColor: 'rgba(196,206,216,0.7)', background: 'linear-gradient(180deg, rgba(255,255,255,0.46) 0%, rgba(241,245,248,0.55) 100%)' }}>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-2">
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#6c7c8e' }}>Live document view</div>
+                  <div className="mt-1 text-sm font-medium text-foreground">This is the surface participants will experience.</div>
+                </div>
+                <div className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium" style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '1px solid rgba(193,205,217,0.82)', color: '#5d7085' }}>
+                  Type <code className="mx-1">/</code> for fields
+                </div>
+              </div>
+
+              <div
+                data-testid="document-template-rich-editor"
+                className="relative overflow-visible rounded-[1.8rem] border bg-white px-10 py-12 shadow-[0_30px_70px_-42px_rgba(15,23,42,0.4)]"
+                style={{ borderColor: 'rgba(168, 182, 196, 0.24)' }}
+              >
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-10 rounded-t-[1.8rem]" style={{ background: 'linear-gradient(180deg, rgba(244,247,249,0.92) 0%, rgba(255,255,255,0) 100%)' }} />
+                <div className="pointer-events-none absolute left-10 top-5 right-10 flex items-center justify-between text-[11px] uppercase tracking-[0.16em]" style={{ color: '#7a8797' }}>
+                  <span>Participant document</span>
+                  <span>Editable fill fields</span>
+                </div>
+                <div className="relative">
+                  <EditorContent editor={editor} />
+                </div>
               {slashMenu && filteredCommands.length > 0 ? (
                 <div
-                  className="absolute left-8 top-8 z-40 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
+                  className="absolute left-8 top-14 z-40 w-[min(34rem,calc(100%-4rem))] rounded-[1.45rem] p-2"
                   style={{
-                    backgroundColor: 'rgba(255,255,255,0.97)',
-                    border: '1px solid rgba(148,163,184,0.26)',
-                    boxShadow: '0 26px 60px -34px rgba(15,23,42,0.42)',
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
+                    border: '1px solid rgba(186,198,210,0.42)',
+                    boxShadow: '0 30px 70px -36px rgba(15,23,42,0.38)',
                   }}
                 >
                   {filteredCommands.map((option, index) => (
@@ -856,7 +930,7 @@ export default function FillableDocumentEditor({
                         }).run();
                         setSlashMenu(null);
                       }}
-                      className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left"
+                      className="flex w-full items-center justify-between rounded-[1rem] px-3.5 py-3 text-left"
                       style={{
                         border: 'none',
                         backgroundColor: index === selectedCommandIndex ? 'rgba(37,99,235,0.08)' : 'transparent',
@@ -873,6 +947,7 @@ export default function FillableDocumentEditor({
                 </div>
               ) : null}
             </div>
+            </div>
           </div>
 
           {selectedField ? (
@@ -881,12 +956,12 @@ export default function FillableDocumentEditor({
               aria-label="Field settings inspector"
             >
               <div
-                className="rounded-[1.25rem] border p-4"
+                className="rounded-[1.45rem] border p-4"
                 style={{
-                  borderColor: 'rgba(148, 163, 184, 0.22)',
-                  backgroundColor: 'rgba(255,255,255,0.96)',
+                  borderColor: 'rgba(176, 190, 202, 0.4)',
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(246,248,250,0.97) 100%)',
                   backdropFilter: 'blur(10px)',
-                  boxShadow: '0 24px 55px -34px rgba(15,23,42,0.24)',
+                  boxShadow: '0 28px 65px -42px rgba(15,23,42,0.28)',
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -915,10 +990,10 @@ export default function FillableDocumentEditor({
                 </div>
 
                 <div
-                  className="mt-3 rounded-2xl border px-3 py-3"
+                  className="mt-3 rounded-[1.2rem] border px-3.5 py-3.5"
                   style={{
-                    borderColor: 'color-mix(in srgb, var(--border) 80%, transparent)',
-                    backgroundColor: 'color-mix(in srgb, var(--background) 82%, white)',
+                    borderColor: 'rgba(196,206,216,0.7)',
+                    background: 'linear-gradient(180deg, rgba(245,248,250,0.92) 0%, rgba(255,255,255,0.95) 100%)',
                   }}
                 >
                   <div className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
@@ -1090,7 +1165,7 @@ export default function FillableDocumentEditor({
                     <button
                       type="button"
                       onClick={removeSelectedField}
-                      className="w-full rounded-xl px-3 py-2 text-sm font-medium"
+                      className="w-full rounded-[1rem] px-3 py-2.5 text-sm font-medium"
                       style={{
                         backgroundColor: 'color-mix(in srgb, var(--destructive) 8%, transparent)',
                         color: 'var(--destructive)',
@@ -1102,7 +1177,26 @@ export default function FillableDocumentEditor({
                 </div>
               </div>
             </aside>
-          ) : null}
+          ) : (
+            <aside className="w-full shrink-0 xl:sticky xl:top-4 xl:w-[22rem]">
+              <div
+                className="rounded-[1.45rem] border p-4"
+                style={{
+                  borderColor: 'rgba(201, 211, 220, 0.65)',
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(244,247,249,0.92) 100%)',
+                  boxShadow: '0 24px 55px -42px rgba(15,23,42,0.2)',
+                }}
+              >
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#6c7c8e' }}>
+                  Inspector
+                </div>
+                <div className="mt-2 text-sm font-semibold text-foreground">Select a field to configure it</div>
+                <p className="mt-2 text-sm" style={{ color: '#66788d', lineHeight: 1.7 }}>
+                  The document stays clean until you select a field. Once selected, its label, options, scale, and requirement settings appear here.
+                </p>
+              </div>
+            </aside>
+          )}
         </div>
       </div>
     </div>
