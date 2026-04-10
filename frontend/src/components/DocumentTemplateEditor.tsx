@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { Upload, FileText } from 'lucide-react';
+import { Sparkles, Upload, FileText } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import RichDocumentEditor from './RichDocumentEditor';
 import FillableDocumentEditor from './FillableDocumentEditor';
@@ -46,6 +46,19 @@ export default function DocumentTemplateEditor({
   const fillableContent = isRichFillableDocumentTemplate(value)
     ? getRichFillableTemplateContent(value)
     : convertLegacyFillableTemplateToRichHtml(value);
+  const questionnaireConversion = useMemo(() => {
+    if (isEditableDocumentTemplate(value)) return null;
+    const plainText = htmlToPlainText(fillableContent).trim();
+    if (!plainText) return null;
+    const converted = convertQuestionnaireTextToRichTemplate(plainText);
+    return converted.questions.length > 0 ? converted : null;
+  }, [fillableContent, value]);
+
+  function applyQuestionnaireConversion() {
+    if (!questionnaireConversion) return;
+    setUploadError(null);
+    onChange(questionnaireConversion.template);
+  }
 
   async function handleFileSelected(file: File | null) {
     if (!file) return;
@@ -184,6 +197,21 @@ export default function DocumentTemplateEditor({
             <Upload size={15} />
             {isUploading ? 'Importing…' : 'Import .docx'}
           </button>
+          {!isEditableDocumentTemplate(value) && questionnaireConversion ? (
+            <button
+              type="button"
+              onClick={applyQuestionnaireConversion}
+              className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium"
+              style={{
+                backgroundColor: 'color-mix(in srgb, #0f766e 10%, transparent)',
+                color: '#0f766e',
+                border: '1px solid color-mix(in srgb, #0f766e 24%, transparent)',
+              }}
+            >
+              <Sparkles size={15} />
+              Auto-build fields
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -223,6 +251,11 @@ export default function DocumentTemplateEditor({
             ? 'Participants will open this document and edit their own copy directly. `.docx` imports preserve much more structure here than the fill-field mode.'
             : 'Type / to insert fields, then click a field only when you need to edit its settings. The document canvas now stays full width until a field is selected.'}
         </p>
+        {!isEditableDocumentTemplate(value) && questionnaireConversion ? (
+          <p className="mt-2">
+            Detected {questionnaireConversion.questions.length} questionnaire field{questionnaireConversion.questions.length === 1 ? '' : 's'} in the current text. Use <strong>Auto-build fields</strong> to convert them into typed single select, multi select, slider, and text controls.
+          </p>
+        ) : null}
         {!isEditableDocumentTemplate(value) && fields.length > 0 ? (
           <p className="mt-2">
             {fields.length} field{fields.length === 1 ? '' : 's'} currently in this document.

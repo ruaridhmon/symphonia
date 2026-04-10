@@ -40,6 +40,10 @@ function normalizeLines(text: string): string[] {
     .map((line) => line.trim());
 }
 
+function stripListMarker(line: string): string {
+  return line.replace(/^(?:[•●▪◦*-]|\d+[.)]|[a-z][.)])\s+/, '').trim();
+}
+
 function parseAnchorLabels(line: string | null): Pick<ConfigurableQuestion, 'minLabel' | 'midLabel' | 'maxLabel'> {
   if (!line) {
     return {
@@ -211,7 +215,10 @@ function parseBlock(
   });
 
   const extraNotes = contentLines.filter((line) => /^Optional:|^Before Q\d+|^Populate this dynamically/i.test(line));
-  const optionLines = contentLines.filter((line) => !/^Optional:|^Before Q\d+|^Populate this dynamically/i.test(line));
+  const optionLines = contentLines
+    .filter((line) => !/^Optional:|^Before Q\d+|^Populate this dynamically/i.test(line))
+    .map((line) => stripListMarker(line))
+    .filter(Boolean);
   const referenceId =
     extractReferenceId(responseType) ??
     extractReferenceId(routing) ??

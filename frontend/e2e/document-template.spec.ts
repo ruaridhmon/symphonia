@@ -599,6 +599,107 @@ test.describe('Document template consultations', () => {
     }
   });
 
+  test('fillable document editor can convert pasted questionnaire text into typed fields', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const adminPage = await adminContext.newPage();
+      await adminPage.goto(`${appBase}/admin/forms/new`);
+
+      await adminPage.getByRole('button', { name: /start document template/i }).click();
+      await adminPage.locator('#form-title').fill(`Pasted Questionnaire ${timestamp}`);
+
+      const questionnaireText = [
+        'Round 1: Full question set',
+        '',
+        'Intro text for participants',
+        '',
+        'Thank you for taking part in this consultation on AI in education.',
+        '',
+        'Section A. About you',
+        '',
+        'Q0. Which of the following best describes your current role?',
+        'Response type: Select one.',
+        '',
+        '• School/college senior leader',
+        '• Middle leader',
+        '• Teacher/lecturer/tutor',
+        '• Support staff',
+        '• Other',
+        '',
+        'Q0a. Which stakeholder group are you responding as part of?',
+        'Response type: Select one.',
+        '',
+        '• School / college leadership group',
+        '• TUC / workforce group',
+        '• Other / mixed perspective',
+        '',
+        'Q1. Which five of the above challenges most need attention now?',
+        'Response type: Select up to 5.',
+        '',
+        '• Workload',
+        '• Safeguarding',
+        '• Vendor lock-in',
+        '',
+        'Q2. Thinking about AI in education over the next 2–3 years, how significant is each challenge?',
+        'Response type: 0–10 slider for each item.',
+        'Anchor labels: 0 = Not at all significant, 5 = Moderately significant, 10 = Extremely significant',
+        '',
+        '• Staff AI literacy',
+        '• Governance uncertainty',
+        '',
+        'Q3. Optional: anything important about your context?',
+        'Response type: Free text, max 40 words.',
+      ].join('\n');
+
+      const editor = adminPage.locator('.symphonia-fillable-editor');
+      await editor.click();
+      await adminPage.keyboard.press('Control+A');
+      await adminPage.keyboard.press('Backspace');
+      await adminPage.keyboard.insertText(questionnaireText);
+
+      await expect(adminPage.getByRole('button', { name: /auto-build fields/i })).toBeVisible();
+      await adminPage.getByRole('button', { name: /auto-build fields/i }).click();
+
+      await expect(adminPage.getByText('Which of the following best describes your current role?').first()).toBeVisible();
+      await expect(adminPage.getByText('Staff AI literacy').first()).toBeVisible();
+
+      await adminPage.getByRole('button', { name: /create form/i }).click();
+      await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
+
+      const formIdMatch = adminPage.url().match(/\/admin\/form\/(\d+)$/);
+      expect(formIdMatch).not.toBeNull();
+      createdFormId = Number(formIdMatch?.[1]);
+
+      const form = await getFormDetails(adminApi, appBase, adminToken, createdFormId);
+      expect(typeof form.document_template).toBe('string');
+      expect(form.document_template).toContain('data-symphonia-field-type="single_select"');
+      expect(form.document_template).toContain('data-symphonia-field-type="multi_select"');
+      expect(form.document_template).toContain('data-symphonia-field-type="slider"');
+      expect(form.document_template).toContain('data-symphonia-field-type="long"');
+      expect(form.document_template).not.toContain('• School/college senior leader');
+      expect(form.document_template).toContain('School/college senior leader');
+    } finally {
+      if (adminContext) {
+        await adminContext.close();
+      }
+      if (createdFormId !== null) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      await adminApi.dispose();
+    }
+  });
+
   test('fillable documents support richer response types inline', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';

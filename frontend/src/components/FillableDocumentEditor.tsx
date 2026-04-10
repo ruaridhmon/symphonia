@@ -13,6 +13,7 @@ import type { StructuredResponse } from '../types/structured-input';
 import DocumentTemplateFieldControl from './DocumentTemplateFieldControl';
 import type { DocumentTemplateField } from '../utils/documentTemplate';
 import { createDocumentTemplatePlaceholder, createRichFillableDocumentTemplate } from '../utils/documentTemplate';
+import { convertQuestionnaireTextToRichTemplate } from '../utils/questionnaireImport';
 
 interface FillableDocumentEditorProps {
   value: string;
@@ -348,6 +349,20 @@ export default function FillableDocumentEditor({
     return fieldFromType(option.field.fieldType, label, option.field.optional);
   }
 
+  function applyQuestionnaireConversion(sourceText: string) {
+    if (!editor) return false;
+    const converted = convertQuestionnaireTextToRichTemplate(sourceText);
+    if (converted.questions.length === 0) return false;
+    const nextValue = converted.template.replace(/^<!--\s*symphonia-document-mode:\s*fillable-rich\s*-->\s*/i, '');
+    clearPendingChange();
+    editor.commands.setContent(nextValue || '<p></p>', false);
+    lastSyncedValueRef.current = nextValue;
+    onChange(createRichFillableDocumentTemplate(nextValue));
+    setSlashMenu(null);
+    setSelectedCommandIndex(0);
+    return true;
+  }
+
   function flushPendingChange() {
     if (changeTimerRef.current !== null) {
       window.clearTimeout(changeTimerRef.current);
@@ -454,6 +469,27 @@ export default function FillableDocumentEditor({
         if (event.key === 'Escape') {
           event.preventDefault();
           setSlashMenu(null);
+          return true;
+        }
+        return false;
+      },
+      handlePaste: (_view, event) => {
+        const plainText = event.clipboardData?.getData('text/plain')?.trim();
+        if (!plainText || plainText.length < 30) return false;
+        if (!/(^|\n)\s*Q\d+[a-z]?\.\s+/i.test(plainText) || !/response type:/i.test(plainText)) return false;
+        if (!editor) return false;
+        let existingFieldCount = 0;
+        editor.state.doc.descendants((node) => {
+          if (node.type.name === FIELD_NODE_NAME) existingFieldCount += 1;
+        });
+        const currentText = editor.getText().trim();
+        const shouldReplaceWholeDocument = currentText.length < 160 && existingFieldCount === 0;
+        if (!shouldReplaceWholeDocument) {
+          return false;
+        }
+        const didConvert = applyQuestionnaireConversion(plainText);
+        if (didConvert) {
+          event.preventDefault();
           return true;
         }
         return false;
