@@ -58,6 +58,8 @@ function parseInlineStyle(styleValue: string | null): CSSProperties | undefined 
     if (property === 'text-align') style.textAlign = value as CSSProperties['textAlign'];
     if (property === 'font-weight') style.fontWeight = value as CSSProperties['fontWeight'];
     if (property === 'font-style') style.fontStyle = value as CSSProperties['fontStyle'];
+    if (property === 'font-family') style.fontFamily = value;
+    if (property === 'font-size') style.fontSize = value;
     if (property === 'text-decoration') style.textDecoration = value;
     if (property === 'margin-left') style.marginLeft = value;
   });
@@ -220,7 +222,7 @@ function renderRichTemplateNode({
   const tagName = element.tagName.toLowerCase();
   const allowedTags = new Set([
     'p', 'div', 'span', 'strong', 'em', 'u', 's', 'mark',
-    'h1', 'h2', 'h3', 'blockquote', 'ul', 'ol', 'li', 'br',
+    'h1', 'h2', 'h3', 'blockquote', 'ul', 'ol', 'li', 'br', 'hr',
   ]);
   if (!allowedTags.has(tagName)) {
     return Array.from(element.childNodes).map((child, index) =>
@@ -238,6 +240,18 @@ function renderRichTemplateNode({
 
   if (tagName === 'br') {
     return <br key={keyPrefix} />;
+  }
+  if (tagName === 'hr') {
+    return (
+      <hr
+        key={keyPrefix}
+        style={{
+          border: 'none',
+          borderTop: '1px solid color-mix(in srgb, var(--border) 78%, transparent)',
+          margin: '1.2rem 0',
+        }}
+      />
+    );
   }
 
   const children = Array.from(element.childNodes).map((child, index) =>

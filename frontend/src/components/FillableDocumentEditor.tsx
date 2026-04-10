@@ -7,7 +7,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
-import { Bold, ChevronDown, Heading1, Heading2, Highlighter, Italic, List, ListOrdered, PaintBucket, Underline as UnderlineIcon } from 'lucide-react';
+import { Bold, ChevronDown, Heading1, Heading2, Highlighter, Italic, List, ListOrdered, PaintBucket, Pilcrow, SeparatorHorizontal, Type, Underline as UnderlineIcon } from 'lucide-react';
 import type { StructuredResponse } from '../types/structured-input';
 import type { DocumentTemplateField } from '../utils/documentTemplate';
 import { createDocumentTemplatePlaceholder, createRichFillableDocumentTemplate } from '../utils/documentTemplate';
@@ -48,6 +48,16 @@ type SelectedFieldState = {
 };
 
 const COLOR_SWATCHES = ['#172033', '#1d4ed8', '#0f766e', '#b45309', '#be123c', '#6d28d9'];
+const FONT_PRESETS = [
+  { id: 'editorial', label: 'Editorial', style: { fontFamily: 'Georgia, "Times New Roman", serif' } },
+  { id: 'modern', label: 'Modern', style: { fontFamily: '"Aptos", "Segoe UI", sans-serif' } },
+  { id: 'technical', label: 'Technical', style: { fontFamily: '"IBM Plex Sans", "Helvetica Neue", sans-serif' } },
+] as const;
+const SIZE_PRESETS = [
+  { id: 'body', label: 'Body', fontSize: '1rem' },
+  { id: 'large', label: 'Large', fontSize: '1.125rem' },
+  { id: 'display', label: 'Display', fontSize: '1.35rem' },
+] as const;
 
 const FIELD_NODE_NAME = 'fillableField';
 
@@ -218,6 +228,32 @@ function RichToolbarButton({
   );
 }
 
+function mergeInlineStyle(existingStyle: string | null | undefined, nextRules: Record<string, string | null | undefined>) {
+  const styleMap = new Map<string, string>();
+  (existingStyle || '')
+    .split(';')
+    .map((rule) => rule.trim())
+    .filter(Boolean)
+    .forEach((rule) => {
+      const [rawProperty, ...rawValue] = rule.split(':');
+      const property = rawProperty?.trim();
+      const value = rawValue.join(':').trim();
+      if (property && value) styleMap.set(property, value);
+    });
+
+  Object.entries(nextRules).forEach(([property, value]) => {
+    if (!value) {
+      styleMap.delete(property);
+      return;
+    }
+    styleMap.set(property, value);
+  });
+
+  return Array.from(styleMap.entries())
+    .map(([property, value]) => `${property}: ${value}`)
+    .join('; ');
+}
+
 export default function FillableDocumentEditor({
   value,
   onChange,
@@ -336,7 +372,54 @@ export default function FillableDocumentEditor({
   }, [editor, value]);
 
   function setTextColor(color: string) {
-    editor?.chain().focus().setMark('textStyle', { style: `color: ${color}` }).run();
+    if (!editor) return;
+    const currentStyle = (editor.getAttributes('textStyle').style as string | undefined) ?? '';
+    editor.chain().focus().setMark('textStyle', {
+      style: mergeInlineStyle(currentStyle, { color }),
+    }).run();
+  }
+
+  function setFontFamily(fontFamily: string) {
+    if (!editor) return;
+    const currentStyle = (editor.getAttributes('textStyle').style as string | undefined) ?? '';
+    editor.chain().focus().setMark('textStyle', {
+      style: mergeInlineStyle(currentStyle, { 'font-family': fontFamily }),
+    }).run();
+  }
+
+  function setFontSize(fontSize: string) {
+    if (!editor) return;
+    const currentStyle = (editor.getAttributes('textStyle').style as string | undefined) ?? '';
+    editor.chain().focus().setMark('textStyle', {
+      style: mergeInlineStyle(currentStyle, { 'font-size': fontSize }),
+    }).run();
+  }
+
+  function insertSectionHeading(level: 1 | 2, title: string) {
+    if (!editor) return;
+    editor
+      .chain()
+      .focus()
+      .insertContent(`<h${level}>${title}</h${level}><p></p>`)
+      .run();
+  }
+
+  function insertGuidanceBlock() {
+    if (!editor) return;
+    editor
+      .chain()
+      .focus()
+      .insertContent('<blockquote>Use this section to give context or instructions before the next response field.</blockquote><p></p>')
+      .run();
+  }
+
+  function insertDivider() {
+    if (!editor) return;
+    editor
+      .chain()
+      .focus()
+      .insertContent('<hr><p></p>')
+      .run();
   }
 
   function updateSelectedField(updates: Partial<SelectedFieldState['attrs']>) {
@@ -467,6 +550,43 @@ export default function FillableDocumentEditor({
 
         {viewMode === 'author' ? (
           <div className="flex flex-wrap items-center gap-2">
+            <div className="mr-1 flex flex-wrap items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+              <Type size={14} style={{ color: 'var(--muted-foreground)' }} />
+              {FONT_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => setFontFamily(preset.style.fontFamily)}
+                  className="rounded-lg px-2.5 py-1 text-xs font-medium"
+                  style={{
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'white',
+                    color: 'var(--foreground)',
+                    fontFamily: preset.style.fontFamily,
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+            <div className="mr-1 flex flex-wrap items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+              {SIZE_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => setFontSize(preset.fontSize)}
+                  className="rounded-lg px-2.5 py-1 text-xs font-medium"
+                  style={{
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'white',
+                    color: 'var(--foreground)',
+                    fontSize: preset.fontSize,
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
             <RichToolbarButton label="Bold" active={Boolean(editor?.isActive('bold'))} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold size={14} />} />
             <RichToolbarButton label="Italic" active={Boolean(editor?.isActive('italic'))} onClick={() => editor?.chain().focus().toggleItalic().run()} icon={<Italic size={14} />} />
             <RichToolbarButton label="Underline" active={Boolean(editor?.isActive('underline'))} onClick={() => editor?.chain().focus().toggleUnderline().run()} icon={<UnderlineIcon size={14} />} />
@@ -487,6 +607,44 @@ export default function FillableDocumentEditor({
                   style={{ backgroundColor: color, border: '1px solid rgba(15,23,42,0.14)' }}
                 />
               ))}
+            </div>
+            <div className="ml-1 flex flex-wrap items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+              <button
+                type="button"
+                onClick={() => insertSectionHeading(1, 'New section')}
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
+                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
+              >
+                <Heading1 size={13} />
+                Section
+              </button>
+              <button
+                type="button"
+                onClick={() => insertSectionHeading(2, 'Subsection')}
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
+                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
+              >
+                <Pilcrow size={13} />
+                Subsection
+              </button>
+              <button
+                type="button"
+                onClick={insertGuidanceBlock}
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
+                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
+              >
+                <Type size={13} />
+                Guidance
+              </button>
+              <button
+                type="button"
+                onClick={insertDivider}
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium"
+                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
+              >
+                <SeparatorHorizontal size={13} />
+                Divider
+              </button>
             </div>
           </div>
         ) : (
