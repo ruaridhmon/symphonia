@@ -164,23 +164,10 @@ class TestFormErrors:
         assert resp.status_code == 404
         assert "not found" in resp.json()["detail"].lower()
 
-    def test_submit_response_no_active_round(
+    def test_submit_response_nonexistent_form(
         self, client: TestClient, admin_headers: dict, participant_headers: dict
     ):
-        """Submitting a response to a form with no active round → 400."""
-        # Create a form (it gets an active round automatically)
-        form = create_form(client, admin_headers, title="NoRoundForm")
-        form_id = form["id"]
-
-        # Deactivate the round by advancing and then making none active
-        # Use the next_round endpoint to create round 2, deactivating round 1
-        client.post(f"/forms/{form_id}/next_round", headers=admin_headers)
-        # Now deactivate round 2 by advancing again — round 2 becomes inactive
-        client.post(f"/forms/{form_id}/next_round", headers=admin_headers)
-
-        # Deactivate ALL rounds manually via internal DB hack isn't possible
-        # via API. Instead, we test the submit endpoint when form_id is bogus
-        # (no round for that form → 400)
+        """Submitting a response to a missing form → 404."""
         resp = client.post(
             "/submit",
             data={
@@ -189,8 +176,8 @@ class TestFormErrors:
             },
             headers=participant_headers,
         )
-        assert resp.status_code == 400
-        assert "no active round" in resp.json()["detail"].lower()
+        assert resp.status_code == 404
+        assert "form not found" in resp.json()["detail"].lower()
 
     def test_get_my_response_no_active_round(
         self, client: TestClient, admin_headers: dict, participant_headers: dict
