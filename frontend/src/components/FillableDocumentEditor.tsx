@@ -53,6 +53,7 @@ type SelectedFieldState = {
 
 const COLOR_OPTIONS = [
   { value: '#172033', label: 'Ink' },
+  { value: '#6b7280', label: 'Grey' },
   { value: '#1d4ed8', label: 'Blue' },
   { value: '#0f766e', label: 'Teal' },
   { value: '#b45309', label: 'Amber' },
@@ -413,44 +414,6 @@ function SegmentedToolbarButton({
   );
 }
 
-function ColorSwatchButton({
-  label,
-  color,
-  active,
-  onClick,
-}: {
-  label: string;
-  color: string;
-  active?: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className="inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors"
-      style={{
-        border: active
-          ? '2px solid color-mix(in srgb, var(--accent) 42%, transparent)'
-          : '1px solid color-mix(in srgb, var(--border) 76%, transparent)',
-        backgroundColor: 'white',
-        boxShadow: active
-          ? '0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent)'
-          : 'none',
-      }}
-    >
-      <span
-        aria-hidden="true"
-        className="h-4 w-4 rounded-full"
-        style={{ backgroundColor: color }}
-      />
-    </button>
-  );
-}
-
 function mergeInlineStyle(existingStyle: string | null | undefined, nextRules: Record<string, string | null | undefined>) {
   const styleMap = new Map<string, string>();
   (existingStyle || '')
@@ -484,6 +447,7 @@ export default function FillableDocumentEditor({
   onPreviewChange: _onPreviewChange,
 }: FillableDocumentEditorProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const colorMenuRef = useRef<HTMLDivElement | null>(null);
   const workAreaRef = useRef<HTMLDivElement | null>(null);
   const documentCanvasRef = useRef<HTMLDivElement | null>(null);
   const optionsEditorRef = useRef<HTMLDivElement | null>(null);
@@ -505,6 +469,8 @@ export default function FillableDocumentEditor({
   const [selectedFontFamily, setSelectedFontFamily] = useState<string>(FONT_PRESETS[1].style.fontFamily);
   const [selectedFontSize, setSelectedFontSize] = useState<string>(SIZE_PRESETS[1].fontSize);
   const [selectedColor, setSelectedColor] = useState<string>(COLOR_OPTIONS[0].value);
+  const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
+  const selectedColorOption = COLOR_OPTIONS.find((option) => option.value === selectedColor) ?? COLOR_OPTIONS[0];
 
   function buildInsertedField(option: CommandOption) {
     const labelHint = slashMenu?.labelHint?.trim();
@@ -671,6 +637,9 @@ export default function FillableDocumentEditor({
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
+      if (isColorMenuOpen && !colorMenuRef.current?.contains(event.target as globalThis.Node | null)) {
+        setIsColorMenuOpen(false);
+      }
       if (!rootRef.current?.contains(event.target as globalThis.Node | null)) {
         flushPendingChange();
       }
@@ -680,7 +649,7 @@ export default function FillableDocumentEditor({
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown, true);
     };
-  });
+  }, [isColorMenuOpen]);
 
   useEffect(() => {
     if (!editor) return;
@@ -795,6 +764,7 @@ export default function FillableDocumentEditor({
   function setTextColor(color: string) {
     if (!editor) return;
     setSelectedColor(color);
+    setIsColorMenuOpen(false);
     const currentStyle = (editor.getAttributes('textStyle').style as string | undefined) ?? '';
     editor.chain().focus().setMark('textStyle', {
       style: mergeInlineStyle(currentStyle, { color }),
@@ -1118,19 +1088,86 @@ export default function FillableDocumentEditor({
                 ))}
               </select>
             </div>
-            <div className="mr-1 flex items-center gap-2 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
-              <PaintBucket size={14} style={{ color: selectedColor }} />
-              <div className="flex flex-wrap items-center gap-1.5" aria-label="Text color" role="group">
-                {COLOR_OPTIONS.map((option) => (
-                  <ColorSwatchButton
-                    key={option.value}
-                    label={option.label}
-                    color={option.value}
-                    active={selectedColor === option.value}
-                    onClick={() => setTextColor(option.value)}
-                  />
-                ))}
-              </div>
+            <div className="relative mr-1" ref={colorMenuRef}>
+              <button
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => setIsColorMenuOpen((current) => !current)}
+                aria-label="Text color"
+                aria-haspopup="menu"
+                aria-expanded={isColorMenuOpen}
+                title={`Text color: ${selectedColorOption.label}`}
+                className="inline-flex items-center gap-2 rounded-2xl px-3 py-1.5 transition-colors"
+                style={{
+                  border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)',
+                  backgroundColor: 'rgba(248,250,252,0.92)',
+                  color: 'var(--foreground)',
+                }}
+              >
+                <PaintBucket size={14} style={{ color: selectedColor }} />
+                <span
+                  aria-hidden="true"
+                  className="h-4 w-4 rounded-full"
+                  style={{
+                    backgroundColor: selectedColor,
+                    border: '1px solid color-mix(in srgb, var(--border) 68%, transparent)',
+                    boxShadow: selectedColor === '#6b7280'
+                      ? 'inset 0 0 0 1px rgba(255,255,255,0.4)'
+                      : 'none',
+                  }}
+                />
+                <ChevronDown size={13} style={{ color: 'var(--muted-foreground)' }} />
+              </button>
+
+              {isColorMenuOpen ? (
+                <div
+                  role="menu"
+                  aria-label="Text color options"
+                  className="absolute left-0 top-[calc(100%+0.45rem)] z-40 min-w-[9.5rem] rounded-2xl p-2"
+                  style={{
+                    border: '1px solid color-mix(in srgb, var(--border) 74%, transparent)',
+                    backgroundColor: 'rgba(255,255,255,0.98)',
+                    boxShadow: '0 20px 45px rgba(15,23,42,0.16)',
+                    backdropFilter: 'blur(14px)',
+                  }}
+                >
+                  <div className="grid grid-cols-4 gap-2">
+                    {COLOR_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        role="menuitem"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => setTextColor(option.value)}
+                        aria-label={option.label}
+                        title={option.label}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl transition-transform hover:scale-[1.04]"
+                        style={{
+                          border: selectedColor === option.value
+                            ? '2px solid color-mix(in srgb, var(--accent) 42%, transparent)'
+                            : '1px solid color-mix(in srgb, var(--border) 76%, transparent)',
+                          backgroundColor: 'white',
+                          boxShadow: selectedColor === option.value
+                            ? '0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent)'
+                            : 'none',
+                        }}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="h-5 w-5 rounded-full"
+                          style={{
+                            backgroundColor: option.value,
+                            border: '1px solid color-mix(in srgb, var(--border) 64%, transparent)',
+                            boxShadow: option.value === '#6b7280'
+                              ? 'inset 0 0 0 1px rgba(255,255,255,0.45)'
+                              : 'none',
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
             <RichToolbarButton label="Bold" active={Boolean(editor?.isActive('bold'))} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold size={14} />} />
             <RichToolbarButton label="Italic" active={Boolean(editor?.isActive('italic'))} onClick={() => editor?.chain().focus().toggleItalic().run()} icon={<Italic size={14} />} />
