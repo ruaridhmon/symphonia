@@ -227,7 +227,7 @@ export default function FillableDocumentEditor({
   const lastSyncedValueRef = useRef(value);
   const [slashMenu, setSlashMenu] = useState<{ start: number; end: number; query: string; labelHint: string } | null>(null);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
-  const [viewMode, setViewMode] = useState<'author' | 'participant'>('author');
+  const [viewMode, setViewMode] = useState<'author' | 'participant'>('participant');
   const [selectedField, setSelectedField] = useState<SelectedFieldState | null>(null);
   const filteredCommands = COMMAND_OPTIONS.filter((option) =>
     !slashMenu?.query || option.label.toLowerCase().includes(slashMenu.query) || option.description.toLowerCase().includes(slashMenu.query),
@@ -365,6 +365,30 @@ export default function FillableDocumentEditor({
       })()
     : '';
 
+  function findFieldStateByQuestionKey(questionKey: string): SelectedFieldState | null {
+    if (!editor) return null;
+    let match: SelectedFieldState | null = null;
+    let nextIndex = 1;
+    const seen = new Map<string, number>();
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name !== FIELD_NODE_NAME) return;
+      const key = String(node.attrs.key || '');
+      let questionIndex = seen.get(key);
+      if (!questionIndex) {
+        questionIndex = nextIndex;
+        seen.set(key, questionIndex);
+        nextIndex += 1;
+      }
+      if (`q${questionIndex}` === questionKey && !match) {
+        match = {
+          pos,
+          attrs: node.attrs as SelectedFieldState['attrs'],
+        };
+      }
+    });
+    return match;
+  }
+
   return (
     <div
       className="overflow-hidden rounded-[1.7rem]"
@@ -401,10 +425,16 @@ export default function FillableDocumentEditor({
         style={{ borderColor: 'color-mix(in srgb, var(--border) 75%, transparent)' }}
       >
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="inline-flex overflow-hidden rounded-xl" style={{ border: '1px solid var(--border)' }}>
+          <div>
+            <div className="text-sm font-semibold text-foreground">Live document canvas</div>
+            <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+              Work on the same page participants will read. Switch between editing the document text and trying the live fields.
+            </p>
+          </div>
+          <div className="inline-flex overflow-hidden rounded-xl self-start" style={{ border: '1px solid var(--border)' }}>
             {[
-              { id: 'author', label: 'Authoring view' },
-              { id: 'participant', label: 'Participant preview' },
+              { id: 'participant', label: 'Live participant view' },
+              { id: 'author', label: 'Edit document text' },
             ].map((option) => {
               const active = viewMode === option.id;
               return (
@@ -415,7 +445,7 @@ export default function FillableDocumentEditor({
                   className="px-3 py-2 text-sm font-medium"
                   style={{
                     border: 'none',
-                    borderRight: option.id === 'author' ? '1px solid var(--border)' : 'none',
+                    borderRight: option.id === 'participant' ? '1px solid var(--border)' : 'none',
                     backgroundColor: active ? '#fff' : 'transparent',
                     color: active ? 'var(--foreground)' : 'var(--muted-foreground)',
                   }}
@@ -435,29 +465,52 @@ export default function FillableDocumentEditor({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <RichToolbarButton label="Bold" active={Boolean(editor?.isActive('bold'))} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold size={14} />} />
-          <RichToolbarButton label="Italic" active={Boolean(editor?.isActive('italic'))} onClick={() => editor?.chain().focus().toggleItalic().run()} icon={<Italic size={14} />} />
-          <RichToolbarButton label="Underline" active={Boolean(editor?.isActive('underline'))} onClick={() => editor?.chain().focus().toggleUnderline().run()} icon={<UnderlineIcon size={14} />} />
-          <RichToolbarButton label="Heading 1" active={Boolean(editor?.isActive('heading', { level: 1 }))} onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} icon={<Heading1 size={14} />} />
-          <RichToolbarButton label="Heading 2" active={Boolean(editor?.isActive('heading', { level: 2 }))} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} icon={<Heading2 size={14} />} />
-          <RichToolbarButton label="Bullets" active={Boolean(editor?.isActive('bulletList'))} onClick={() => editor?.chain().focus().toggleBulletList().run()} icon={<List size={14} />} />
-          <RichToolbarButton label="Numbered" active={Boolean(editor?.isActive('orderedList'))} onClick={() => editor?.chain().focus().toggleOrderedList().run()} icon={<ListOrdered size={14} />} />
-          <RichToolbarButton label="Highlight" active={Boolean(editor?.isActive('highlight'))} onClick={() => editor?.chain().focus().toggleHighlight({ color: '#fff3a3' }).run()} icon={<Highlighter size={14} />} />
-          <div className="ml-1 flex items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
-            <PaintBucket size={14} style={{ color: 'var(--muted-foreground)' }} />
-            {COLOR_SWATCHES.map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setTextColor(color)}
-                aria-label={`Set text color ${color}`}
-                className="h-5 w-5 rounded-full"
-                style={{ backgroundColor: color, border: '1px solid rgba(15,23,42,0.14)' }}
-              />
-            ))}
+        {viewMode === 'author' ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <RichToolbarButton label="Bold" active={Boolean(editor?.isActive('bold'))} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold size={14} />} />
+            <RichToolbarButton label="Italic" active={Boolean(editor?.isActive('italic'))} onClick={() => editor?.chain().focus().toggleItalic().run()} icon={<Italic size={14} />} />
+            <RichToolbarButton label="Underline" active={Boolean(editor?.isActive('underline'))} onClick={() => editor?.chain().focus().toggleUnderline().run()} icon={<UnderlineIcon size={14} />} />
+            <RichToolbarButton label="Heading 1" active={Boolean(editor?.isActive('heading', { level: 1 }))} onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} icon={<Heading1 size={14} />} />
+            <RichToolbarButton label="Heading 2" active={Boolean(editor?.isActive('heading', { level: 2 }))} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} icon={<Heading2 size={14} />} />
+            <RichToolbarButton label="Bullets" active={Boolean(editor?.isActive('bulletList'))} onClick={() => editor?.chain().focus().toggleBulletList().run()} icon={<List size={14} />} />
+            <RichToolbarButton label="Numbered" active={Boolean(editor?.isActive('orderedList'))} onClick={() => editor?.chain().focus().toggleOrderedList().run()} icon={<ListOrdered size={14} />} />
+            <RichToolbarButton label="Highlight" active={Boolean(editor?.isActive('highlight'))} onClick={() => editor?.chain().focus().toggleHighlight({ color: '#fff3a3' }).run()} icon={<Highlighter size={14} />} />
+            <div className="ml-1 flex items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+              <PaintBucket size={14} style={{ color: 'var(--muted-foreground)' }} />
+              {COLOR_SWATCHES.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setTextColor(color)}
+                  aria-label={`Set text color ${color}`}
+                  className="h-5 w-5 rounded-full"
+                  style={{ backgroundColor: color, border: '1px solid rgba(15,23,42,0.14)' }}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+              style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)', color: 'var(--muted-foreground)' }}
+            >
+              Click a field to edit its settings
+            </span>
+            <button
+              type="button"
+              onClick={() => setViewMode('author')}
+              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)',
+                color: 'var(--accent)',
+              }}
+            >
+              Edit document text
+            </button>
+          </div>
+        )}
       </div>
 
       <div
@@ -474,49 +527,64 @@ export default function FillableDocumentEditor({
               className="relative rounded-[1.4rem] border bg-white px-8 py-10 shadow-[0_18px_50px_-28px_rgba(15,23,42,0.45)]"
               style={{ borderColor: 'rgba(148, 163, 184, 0.28)' }}
             >
-              <EditorContent editor={editor} />
-              {slashMenu && filteredCommands.length > 0 ? (
-                <div
-                  className="absolute left-8 top-8 z-10 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.97)',
-                    border: '1px solid rgba(148,163,184,0.26)',
-                    boxShadow: '0 26px 60px -34px rgba(15,23,42,0.42)',
-                  }}
-                >
-                  {filteredCommands.map((option, index) => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => {
-                        if (!editor || !slashMenu) return;
-                        const insertedField = buildInsertedField(option);
-                        editor.chain().focus().deleteRange({ from: slashMenu.start, to: slashMenu.end }).insertContent({
-                          type: FIELD_NODE_NAME,
-                          attrs: {
-                            ...insertedField,
-                            options: JSON.stringify(insertedField.options ?? []),
-                          },
-                        }).run();
-                        setSlashMenu(null);
-                      }}
-                      className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left"
+              {viewMode === 'author' ? (
+                <>
+                  <EditorContent editor={editor} />
+                  {slashMenu && filteredCommands.length > 0 ? (
+                    <div
+                      className="absolute left-8 top-8 z-10 w-[min(32rem,calc(100%-4rem))] rounded-2xl p-2"
                       style={{
-                        border: 'none',
-                        backgroundColor: index === selectedCommandIndex ? 'rgba(37,99,235,0.08)' : 'transparent',
-                        color: 'var(--foreground)',
+                        backgroundColor: 'rgba(255,255,255,0.97)',
+                        border: '1px solid rgba(148,163,184,0.26)',
+                        boxShadow: '0 26px 60px -34px rgba(15,23,42,0.42)',
                       }}
                     >
-                      <div>
-                        <div className="text-sm font-semibold">{option.label}</div>
-                        <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.description}</div>
-                      </div>
-                      <ChevronDown size={14} style={{ transform: 'rotate(-90deg)', color: 'var(--muted-foreground)' }} />
-                    </button>
-                  ))}
-                </div>
-              ) : null}
+                      {filteredCommands.map((option, index) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => {
+                            if (!editor || !slashMenu) return;
+                            const insertedField = buildInsertedField(option);
+                            editor.chain().focus().deleteRange({ from: slashMenu.start, to: slashMenu.end }).insertContent({
+                              type: FIELD_NODE_NAME,
+                              attrs: {
+                                ...insertedField,
+                                options: JSON.stringify(insertedField.options ?? []),
+                              },
+                            }).run();
+                            setSlashMenu(null);
+                          }}
+                          className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left"
+                          style={{
+                            border: 'none',
+                            backgroundColor: index === selectedCommandIndex ? 'rgba(37,99,235,0.08)' : 'transparent',
+                            color: 'var(--foreground)',
+                          }}
+                        >
+                          <div>
+                            <div className="text-sm font-semibold">{option.label}</div>
+                            <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>{option.description}</div>
+                          </div>
+                          <ChevronDown size={14} style={{ transform: 'rotate(-90deg)', color: 'var(--muted-foreground)' }} />
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <DocumentTemplateResponse
+                  template={createRichFillableDocumentTemplate(editor?.getHTML() || '')}
+                  answers={previewAnswers}
+                  onChange={onPreviewChange}
+                  onFieldSelect={(questionKey) => {
+                    const nextField = findFieldStateByQuestionKey(questionKey);
+                    if (nextField) setSelectedField(nextField);
+                  }}
+                  compact
+                />
+              )}
             </div>
 
             <div

@@ -18,8 +18,10 @@ interface DocumentTemplateResponseProps {
   template: string;
   answers: Record<string, StructuredResponse>;
   onChange?: (key: string, value: StructuredResponse) => void;
+  onFieldSelect?: (questionKey: string) => void;
   highlightedQuestionKey?: string | null;
   readOnly?: boolean;
+  compact?: boolean;
 }
 
 function toQuestion(field: RenderableDocumentTemplateField): ConfigurableQuestion {
@@ -68,12 +70,14 @@ function RichFieldControl({
   readOnly,
   highlighted,
   onChange,
+  onSelect,
 }: {
   field: RenderableDocumentTemplateField;
   response: StructuredResponse;
   readOnly: boolean;
   highlighted: boolean;
   onChange?: (nextValue: StructuredResponse) => void;
+  onSelect?: () => void;
 }) {
   const value = response.position || '';
   const answered = isResponseAnswered(response);
@@ -83,6 +87,7 @@ function RichFieldControl({
     <span
       className="inline-flex max-w-full flex-col gap-1.5 rounded-2xl px-3 py-2 align-middle"
       data-question-key={field.questionKey}
+      onClick={() => onSelect?.()}
       style={{
         minWidth: usesInlineTextField ? '16rem' : '22rem',
         backgroundColor: highlighted
@@ -95,6 +100,7 @@ function RichFieldControl({
             : '1px solid color-mix(in srgb, var(--border) 88%, transparent)',
         boxShadow: '0 10px 24px -22px rgba(15, 23, 42, 0.28)',
         scrollMarginTop: '6rem',
+        cursor: onSelect ? 'pointer' : 'default',
       }}
     >
       <span className="flex flex-wrap items-center gap-2">
@@ -174,6 +180,7 @@ function renderRichTemplateNode({
   highlightedQuestionKey,
   readOnly,
   onChange,
+  onFieldSelect,
   keyPrefix,
 }: {
   node: ChildNode;
@@ -181,6 +188,7 @@ function renderRichTemplateNode({
   highlightedQuestionKey: string | null;
   readOnly: boolean;
   onChange?: (key: string, value: StructuredResponse) => void;
+  onFieldSelect?: (questionKey: string) => void;
   keyPrefix: string;
 }): ReactNode {
   if (node.nodeType === Node.TEXT_NODE) {
@@ -204,6 +212,7 @@ function renderRichTemplateNode({
         readOnly={readOnly}
         highlighted={highlightedQuestionKey === entry.field.questionKey}
         onChange={(nextValue) => onChange?.(entry.field.questionKey, nextValue)}
+        onSelect={() => onFieldSelect?.(entry.field.questionKey)}
       />
     );
   }
@@ -221,6 +230,7 @@ function renderRichTemplateNode({
         highlightedQuestionKey,
         readOnly,
         onChange,
+        onFieldSelect,
         keyPrefix: `${keyPrefix}-${index}`,
       }),
     );
@@ -237,6 +247,7 @@ function renderRichTemplateNode({
       highlightedQuestionKey,
       readOnly,
       onChange,
+      onFieldSelect,
       keyPrefix: `${keyPrefix}-${index}`,
     }),
   );
@@ -256,8 +267,10 @@ export default function DocumentTemplateResponse({
   template,
   answers,
   onChange,
+  onFieldSelect,
   highlightedQuestionKey = null,
   readOnly = false,
+  compact = false,
 }: DocumentTemplateResponseProps) {
   if (isEditableDocumentTemplate(template)) {
     const key = 'q1';
@@ -325,11 +338,12 @@ export default function DocumentTemplateResponse({
 
     return (
       <div
-        className="rounded-xl p-4 sm:p-5"
+        className={compact ? '' : 'rounded-xl p-4 sm:p-5'}
         style={{
-          background:
-            'linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white) 0%, color-mix(in srgb, var(--foreground) 1%, var(--card)) 100%)',
-          border: '1px solid var(--border)',
+          background: compact
+            ? 'transparent'
+            : 'linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white) 0%, color-mix(in srgb, var(--foreground) 1%, var(--card)) 100%)',
+          border: compact ? 'none' : '1px solid var(--border)',
         }}
       >
         <style>{`
@@ -350,11 +364,11 @@ export default function DocumentTemplateResponse({
           }
         `}</style>
         <div
-          className="rounded-2xl px-5 py-6 sm:px-6 sm:py-7"
+          className={compact ? '' : 'rounded-2xl px-5 py-6 sm:px-6 sm:py-7'}
           style={{
-            backgroundColor: 'color-mix(in srgb, white 88%, var(--background))',
-            border: '1px solid color-mix(in srgb, var(--border) 68%, transparent)',
-            boxShadow: '0 10px 24px -20px rgba(15, 23, 42, 0.38)',
+            backgroundColor: compact ? 'transparent' : 'color-mix(in srgb, white 88%, var(--background))',
+            border: compact ? 'none' : '1px solid color-mix(in srgb, var(--border) 68%, transparent)',
+            boxShadow: compact ? 'none' : '0 10px 24px -20px rgba(15, 23, 42, 0.38)',
           }}
         >
           <div className="symphonia-rich-template space-y-3">{content}</div>
@@ -373,9 +387,9 @@ export default function DocumentTemplateResponse({
     <div
       className="rounded-xl p-4 sm:p-5"
       style={{
-        background:
-          'linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white) 0%, color-mix(in srgb, var(--foreground) 1%, var(--card)) 100%)',
-        border: '1px solid var(--border)',
+          background:
+            'linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white) 0%, color-mix(in srgb, var(--foreground) 1%, var(--card)) 100%)',
+          border: '1px solid var(--border)',
       }}
     >
       <div
