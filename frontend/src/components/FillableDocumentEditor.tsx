@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { Extension, Node, mergeAttributes, type Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
@@ -54,9 +54,11 @@ const FONT_PRESETS = [
   { id: 'technical', label: 'Technical', style: { fontFamily: '"IBM Plex Sans", "Helvetica Neue", sans-serif' } },
 ] as const;
 const SIZE_PRESETS = [
-  { id: 'body', label: 'Body', fontSize: '1rem' },
-  { id: 'large', label: 'Large', fontSize: '1.125rem' },
-  { id: 'display', label: 'Display', fontSize: '1.35rem' },
+  { id: '14', label: '14', fontSize: '0.875rem' },
+  { id: '16', label: '16', fontSize: '1rem' },
+  { id: '18', label: '18', fontSize: '1.125rem' },
+  { id: '22', label: '22', fontSize: '1.375rem' },
+  { id: '28', label: '28', fontSize: '1.75rem' },
 ] as const;
 
 const FIELD_NODE_NAME = 'fillableField';
@@ -268,6 +270,8 @@ export default function FillableDocumentEditor({
   const filteredCommands = COMMAND_OPTIONS.filter((option) =>
     !slashMenu?.query || option.label.toLowerCase().includes(slashMenu.query) || option.description.toLowerCase().includes(slashMenu.query),
   );
+  const [selectedFontFamily, setSelectedFontFamily] = useState(FONT_PRESETS[1].style.fontFamily);
+  const [selectedFontSize, setSelectedFontSize] = useState(SIZE_PRESETS[1].fontSize);
 
   function buildInsertedField(option: CommandOption) {
     const labelHint = slashMenu?.labelHint?.trim();
@@ -358,6 +362,13 @@ export default function FillableDocumentEditor({
   }, [editor, viewMode]);
 
   useEffect(() => {
+    if (!editor || viewMode !== 'author') return;
+    window.setTimeout(() => {
+      editor.commands.focus();
+    }, 0);
+  }, [editor, viewMode]);
+
+  useEffect(() => {
     if (!editor) return;
     const content = value.trimStart().startsWith('<!-- symphonia-document-mode:')
       ? value.replace(/^<!--\s*symphonia-document-mode:\s*fillable-rich\s*-->\s*/i, '')
@@ -381,6 +392,7 @@ export default function FillableDocumentEditor({
 
   function setFontFamily(fontFamily: string) {
     if (!editor) return;
+    setSelectedFontFamily(fontFamily);
     const currentStyle = (editor.getAttributes('textStyle').style as string | undefined) ?? '';
     editor.chain().focus().setMark('textStyle', {
       style: mergeInlineStyle(currentStyle, { 'font-family': fontFamily }),
@@ -389,6 +401,7 @@ export default function FillableDocumentEditor({
 
   function setFontSize(fontSize: string) {
     if (!editor) return;
+    setSelectedFontSize(fontSize);
     const currentStyle = (editor.getAttributes('textStyle').style as string | undefined) ?? '';
     editor.chain().focus().setMark('textStyle', {
       style: mergeInlineStyle(currentStyle, { 'font-size': fontSize }),
@@ -420,6 +433,15 @@ export default function FillableDocumentEditor({
       .focus()
       .insertContent('<hr><p></p>')
       .run();
+  }
+
+  function handleLiveCanvasClick(event: ReactMouseEvent<HTMLDivElement>) {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.closest('input, textarea, button, select, label, [role="radio"], [role="radiogroup"], [data-question-key]')) {
+      return;
+    }
+    setViewMode('author');
   }
 
   function updateSelectedField(updates: Partial<SelectedFieldState['attrs']>) {
@@ -550,42 +572,36 @@ export default function FillableDocumentEditor({
 
         {viewMode === 'author' ? (
           <div className="flex flex-wrap items-center gap-2">
-            <div className="mr-1 flex flex-wrap items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+            <div className="mr-1 flex items-center gap-2 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
               <Type size={14} style={{ color: 'var(--muted-foreground)' }} />
-              {FONT_PRESETS.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => setFontFamily(preset.style.fontFamily)}
-                  className="rounded-lg px-2.5 py-1 text-xs font-medium"
-                  style={{
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'white',
-                    color: 'var(--foreground)',
-                    fontFamily: preset.style.fontFamily,
-                  }}
-                >
-                  {preset.label}
-                </button>
-              ))}
+              <select
+                aria-label="Font family"
+                value={selectedFontFamily}
+                onChange={(event) => setFontFamily(event.target.value)}
+                className="rounded-lg px-2.5 py-1 text-xs font-medium"
+                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
+              >
+                {FONT_PRESETS.map((preset) => (
+                  <option key={preset.id} value={preset.style.fontFamily} style={{ fontFamily: preset.style.fontFamily }}>
+                    {preset.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="mr-1 flex flex-wrap items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
-              {SIZE_PRESETS.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => setFontSize(preset.fontSize)}
-                  className="rounded-lg px-2.5 py-1 text-xs font-medium"
-                  style={{
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'white',
-                    color: 'var(--foreground)',
-                    fontSize: preset.fontSize,
-                  }}
-                >
-                  {preset.label}
-                </button>
-              ))}
+            <div className="mr-1 flex items-center gap-2 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
+              <select
+                aria-label="Font size"
+                value={selectedFontSize}
+                onChange={(event) => setFontSize(event.target.value)}
+                className="rounded-lg px-2.5 py-1 text-xs font-medium"
+                style={{ border: '1px solid var(--border)', backgroundColor: 'white', color: 'var(--foreground)' }}
+              >
+                {SIZE_PRESETS.map((preset) => (
+                  <option key={preset.id} value={preset.fontSize}>
+                    {preset.label}px
+                  </option>
+                ))}
+              </select>
             </div>
             <RichToolbarButton label="Bold" active={Boolean(editor?.isActive('bold'))} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold size={14} />} />
             <RichToolbarButton label="Italic" active={Boolean(editor?.isActive('italic'))} onClick={() => editor?.chain().focus().toggleItalic().run()} icon={<Italic size={14} />} />
@@ -653,7 +669,7 @@ export default function FillableDocumentEditor({
               className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
               style={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)', color: 'var(--muted-foreground)' }}
             >
-              Click a field to edit its settings
+              Click a field to edit it, or click the document text to jump straight into editing
             </span>
             <button
               type="button"
@@ -732,16 +748,18 @@ export default function FillableDocumentEditor({
                   ) : null}
                 </>
               ) : (
-                <DocumentTemplateResponse
-                  template={createRichFillableDocumentTemplate(editor?.getHTML() || '')}
-                  answers={previewAnswers}
-                  onChange={onPreviewChange}
-                  onFieldSelect={(questionKey) => {
-                    const nextField = findFieldStateByQuestionKey(questionKey);
-                    if (nextField) setSelectedField(nextField);
-                  }}
-                  compact
-                />
+                <div onClick={handleLiveCanvasClick}>
+                  <DocumentTemplateResponse
+                    template={createRichFillableDocumentTemplate(editor?.getHTML() || '')}
+                    answers={previewAnswers}
+                    onChange={onPreviewChange}
+                    onFieldSelect={(questionKey) => {
+                      const nextField = findFieldStateByQuestionKey(questionKey);
+                      if (nextField) setSelectedField(nextField);
+                    }}
+                    compact
+                  />
+                </div>
               )}
             </div>
 
