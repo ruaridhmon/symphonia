@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Sparkles, Upload, FileText } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import RichDocumentEditor from './RichDocumentEditor';
@@ -44,6 +44,7 @@ export default function DocumentTemplateEditor({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [pendingAutoBuild, setPendingAutoBuild] = useState(false);
   const mode = getDocumentTemplateMode(value);
   const editableContent = getDocumentTemplateContent(value);
   const fields = useMemo(() => parseDocumentTemplateFields(value), [value]);
@@ -59,10 +60,27 @@ export default function DocumentTemplateEditor({
   }, [fillableContent, value]);
 
   function applyQuestionnaireConversion() {
-    if (!questionnaireConversion) return;
     setUploadError(null);
-    onChange(questionnaireConversion.template);
+    setPendingAutoBuild(true);
   }
+
+  useEffect(() => {
+    if (!pendingAutoBuild || isEditableDocumentTemplate(value)) return;
+    const plainText =
+      extractQuestionnaireTextFromHtml(fillableContent).trim() ||
+      htmlToPlainText(fillableContent).trim();
+    if (!plainText) {
+      setPendingAutoBuild(false);
+      return;
+    }
+    const converted = convertQuestionnaireTextToRichTemplate(plainText);
+    setPendingAutoBuild(false);
+    if (converted.questions.length === 0) {
+      setUploadError('No questionnaire fields could be inferred from the current document text.');
+      return;
+    }
+    onChange(converted.template);
+  }, [fillableContent, onChange, pendingAutoBuild, value]);
 
   async function handleFileSelected(file: File | null) {
     if (!file) return;

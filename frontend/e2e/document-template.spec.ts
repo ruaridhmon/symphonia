@@ -700,6 +700,76 @@ test.describe('Document template consultations', () => {
     }
   });
 
+  test('auto-build fields converts partial questionnaire excerpts into select and slider fields', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+
+    try {
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const adminPage = await adminContext.newPage();
+      await adminPage.goto(`${appBase}/admin/forms/new`);
+
+      await adminPage.getByRole('button', { name: /start document template/i }).click();
+
+      const questionnaireText = [
+        'perience and judgement. There are no right or wrong answers. Estimated completion time: 12-15 minutes.',
+        '',
+        'Section A. About you',
+        '',
+        'Q0. Which of the following best describes your current role?',
+        'Response type: Select one.',
+        'School/college senior leader',
+        'Middle leader',
+        'Teacher/lecturer/tutor',
+        'Support staff',
+        'Digital / data / IT lead',
+        'Governor / trustee / board member',
+        'Union / workforce representative',
+        'Policy / system leader',
+        'Researcher / adviser',
+        'Other',
+        '',
+        'Q0a. Which stakeholder group are you responding as part of?',
+        'Response type: Select one.',
+        'School / college leadership group',
+        'TUC / workforce group',
+        'Other / mixed perspective',
+        '',
+        'Q1. Thinking about AI in education over the next 2-3 years, how significant is each of the following challenges in your context?',
+        'Response type: 0-10 slider for each item.',
+        'Anchor labels: 0 = Not at all significant, 5 = Moderately significant, 10 = Extremely significant',
+        'Staff AI literacy, capability, and training',
+        'Time available for training and implementation',
+      ].join('\n');
+
+      const editor = adminPage.locator('.symphonia-fillable-editor');
+      await editor.click();
+      await adminPage.keyboard.press('Control+A');
+      await adminPage.keyboard.press('Backspace');
+      await adminPage.keyboard.insertText(questionnaireText);
+
+      await adminPage.getByRole('button', { name: /auto-build fields/i }).click();
+
+      await expect(adminPage.locator('.symphonia-fillable-node')).toHaveCount(5);
+      await expect(adminPage.getByText('Which of the following best describes your current role?').first()).toBeVisible();
+      await expect(adminPage.getByText('Staff AI literacy, capability, and training').first()).toBeVisible();
+
+      const content = await editor.textContent();
+      expect(content ?? '').not.toContain('Response type: Select one.');
+      expect(content ?? '').not.toContain('Response type: 0-10 slider for each item.');
+    } finally {
+      if (adminContext) {
+        await adminContext.close();
+      }
+      await adminApi.dispose();
+    }
+  });
+
   test('fillable documents support richer response types inline', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';

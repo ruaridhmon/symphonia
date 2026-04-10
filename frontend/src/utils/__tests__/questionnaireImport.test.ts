@@ -152,4 +152,83 @@ describe('questionnaireImport', () => {
       maxLabel: 'Very significant',
     });
   });
+
+  it('handles partial questionnaire excerpts and preserves select and slider field types', () => {
+    const questionnaireText = [
+      'perience and judgement. There are no right or wrong answers. Estimated completion time: 12-15 minutes.',
+      '',
+      'Section A. About you',
+      '',
+      'Q0. Which of the following best describes your current role?',
+      'Response type: Select one.',
+      'School/college senior leader',
+      'Middle leader',
+      'Teacher/lecturer/tutor',
+      'Support staff',
+      'Digital / data / IT lead',
+      'Governor / trustee / board member',
+      'Union / workforce representative',
+      'Policy / system leader',
+      'Researcher / adviser',
+      'Other',
+      '',
+      'Q0a. Which stakeholder group are you responding as part of?',
+      'Response type: Select one.',
+      'School / college leadership group',
+      'TUC / workforce group',
+      'Other / mixed perspective',
+      '',
+      'Q1. Thinking about AI in education over the next 2-3 years, how significant is each of the following challenges in your context?',
+      'Response type: 0-10 slider for each item.',
+      'Anchor labels: 0 = Not at all significant, 5 = Moderately significant, 10 = Extremely significant',
+      'Staff AI literacy, capability, and training',
+      'Time available for training and implementation',
+    ].join('\n');
+
+    const converted = convertQuestionnaireTextToRichTemplate(questionnaireText);
+    const fields = parseDocumentTemplateFields(converted.template);
+
+    expect(fields.map((field) => field.fieldType)).toEqual([
+      'single_select',
+      'short',
+      'single_select',
+      'slider',
+      'slider',
+    ]);
+    expect(fields[0]).toMatchObject({
+      label: 'Which of the following best describes your current role?',
+      options: [
+        'School/college senior leader',
+        'Middle leader',
+        'Teacher/lecturer/tutor',
+        'Support staff',
+        'Digital / data / IT lead',
+        'Governor / trustee / board member',
+        'Union / workforce representative',
+        'Policy / system leader',
+        'Researcher / adviser',
+        'Other',
+      ],
+    });
+    expect(fields[2]).toMatchObject({
+      label: 'Which stakeholder group are you responding as part of?',
+      fieldType: 'single_select',
+      options: [
+        'School / college leadership group',
+        'TUC / workforce group',
+        'Other / mixed perspective',
+      ],
+    });
+    expect(fields[3]).toMatchObject({
+      label: 'Staff AI literacy, capability, and training',
+      fieldType: 'slider',
+      minLabel: 'Not at all significant',
+      midLabel: 'Moderately significant',
+      maxLabel: 'Extremely significant',
+    });
+    expect(fields[4]).toMatchObject({
+      label: 'Time available for training and implementation',
+      fieldType: 'slider',
+    });
+  });
 });
