@@ -7,7 +7,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
 import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
-import { Bold, ChevronDown, Heading1, Heading2, Highlighter, Italic, List, ListOrdered, PaintBucket, Pilcrow, SeparatorHorizontal, Type, Underline as UnderlineIcon } from 'lucide-react';
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, ChevronDown, Heading1, Heading2, Highlighter, Italic, List, ListOrdered, PaintBucket, Pilcrow, SeparatorHorizontal, Type, Underline as UnderlineIcon } from 'lucide-react';
 import type { StructuredResponse } from '../types/structured-input';
 import type { DocumentTemplateField } from '../utils/documentTemplate';
 import { createDocumentTemplatePlaceholder, createRichFillableDocumentTemplate } from '../utils/documentTemplate';
@@ -372,6 +372,7 @@ function RichToolbarButton({
   return (
     <button
       type="button"
+      onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       aria-label={label}
       title={label}
@@ -539,6 +540,32 @@ export default function FillableDocumentEditor({
     }).run();
   }
 
+  function setBlockTextAlign(alignment: 'left' | 'center' | 'right' | 'justify') {
+    if (!editor) return;
+    const headingStyle = (editor.getAttributes('heading').style as string | undefined) ?? '';
+    const paragraphStyle = (editor.getAttributes('paragraph').style as string | undefined) ?? '';
+    const nextStyle = { 'text-align': alignment === 'left' ? null : alignment };
+    const nextHeadingStyle = mergeInlineStyle(headingStyle, nextStyle);
+    const nextParagraphStyle = mergeInlineStyle(paragraphStyle, nextStyle);
+
+    editor.chain().focus().updateAttributes('paragraph', { style: nextParagraphStyle || null }).run();
+    editor.chain().focus().updateAttributes('heading', { style: nextHeadingStyle || null }).run();
+  }
+
+  function isAligned(alignment: 'left' | 'center' | 'right' | 'justify') {
+    const headingStyle = String(editor?.getAttributes('heading').style ?? '');
+    const paragraphStyle = String(editor?.getAttributes('paragraph').style ?? '');
+    if (alignment === 'left') {
+      return !headingStyle.includes('text-align: center')
+        && !headingStyle.includes('text-align: right')
+        && !headingStyle.includes('text-align: justify')
+        && !paragraphStyle.includes('text-align: center')
+        && !paragraphStyle.includes('text-align: right')
+        && !paragraphStyle.includes('text-align: justify');
+    }
+    return headingStyle.includes(`text-align: ${alignment}`) || paragraphStyle.includes(`text-align: ${alignment}`);
+  }
+
   function setFontFamily(fontFamily: string) {
     if (!editor) return;
     setSelectedFontFamily(fontFamily);
@@ -625,6 +652,9 @@ export default function FillableDocumentEditor({
         .symphonia-fillable-editor h2 { font-size: 1.25rem; line-height: 1.2; margin: 1.15rem 0 0.65rem; color: #183153; font-weight: 650; }
         .symphonia-fillable-editor p, .symphonia-fillable-editor li { line-height: 1.75; color: #182333; }
         .symphonia-fillable-editor ul, .symphonia-fillable-editor ol { padding-left: 1.25rem; }
+        .symphonia-fillable-editor [style*="text-align: center"] { text-align: center; }
+        .symphonia-fillable-editor [style*="text-align: right"] { text-align: right; }
+        .symphonia-fillable-editor [style*="text-align: justify"] { text-align: justify; }
         .symphonia-fillable-editor .symphonia-fillable-node { margin: 0.12rem 0.22rem; vertical-align: middle; }
         .symphonia-fillable-editor .ProseMirror-selectednode .symphonia-fillable-node > span > span {
           border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
@@ -692,6 +722,10 @@ export default function FillableDocumentEditor({
             <RichToolbarButton label="Heading 2" active={Boolean(editor?.isActive('heading', { level: 2 }))} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} icon={<Heading2 size={14} />} />
             <RichToolbarButton label="Bullets" active={Boolean(editor?.isActive('bulletList'))} onClick={() => editor?.chain().focus().toggleBulletList().run()} icon={<List size={14} />} />
             <RichToolbarButton label="Numbered" active={Boolean(editor?.isActive('orderedList'))} onClick={() => editor?.chain().focus().toggleOrderedList().run()} icon={<ListOrdered size={14} />} />
+            <RichToolbarButton label="Align left" active={isAligned('left')} onClick={() => setBlockTextAlign('left')} icon={<AlignLeft size={14} />} />
+            <RichToolbarButton label="Align center" active={isAligned('center')} onClick={() => setBlockTextAlign('center')} icon={<AlignCenter size={14} />} />
+            <RichToolbarButton label="Align right" active={isAligned('right')} onClick={() => setBlockTextAlign('right')} icon={<AlignRight size={14} />} />
+            <RichToolbarButton label="Justify" active={isAligned('justify')} onClick={() => setBlockTextAlign('justify')} icon={<AlignJustify size={14} />} />
             <RichToolbarButton label="Highlight" active={Boolean(editor?.isActive('highlight'))} onClick={() => editor?.chain().focus().toggleHighlight({ color: '#fff3a3' }).run()} icon={<Highlighter size={14} />} />
             <div className="ml-1 flex items-center gap-1 rounded-xl px-2 py-1" style={{ border: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.55)' }}>
               <PaintBucket size={14} style={{ color: 'var(--muted-foreground)' }} />
@@ -699,6 +733,7 @@ export default function FillableDocumentEditor({
                 <button
                   key={color}
                   type="button"
+                  onMouseDown={(event) => event.preventDefault()}
                   onClick={() => setTextColor(color)}
                   aria-label={`Set text color ${color}`}
                   className="h-5 w-5 rounded-full"
