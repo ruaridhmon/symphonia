@@ -3401,10 +3401,14 @@ def _user_has_completed_consent(
 ) -> bool:
     if not _consent_required(form):
         return True
-    if user.role in (
-        UserRole.FACILITATOR.value,
-        UserRole.PLATFORM_ADMIN.value,
-    ) and form.owner_id == user.id:
+    if (
+        user.role
+        in (
+            UserRole.FACILITATOR.value,
+            UserRole.PLATFORM_ADMIN.value,
+        )
+        and form.owner_id == user.id
+    ):
         return True
     return bool(unlock and unlock.consent_given)
 
@@ -3425,18 +3429,14 @@ def _serialize_public_settings(form: FormModel) -> dict[str, Any]:
     return {
         "allow_public_responses": bool(form.allow_public_responses),
         "public_require_consent": _consent_required(form),
-        "public_consent_text": (
-            _consent_text(form)
-        ),
+        "public_consent_text": (_consent_text(form)),
         "public_require_upload": False,
         "public_upload_prompt": "",
     }
 
 
 def _consent_required(form: FormModel) -> bool:
-    return bool(
-        getattr(form, "require_consent", False) or form.public_require_consent
-    )
+    return bool(getattr(form, "require_consent", False) or form.public_require_consent)
 
 
 def _consent_text(form: FormModel) -> str:
@@ -3524,7 +3524,14 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
         allow_unsure = False
         for part in token_parts:
             normalized = part.lower()
-            if not label_parts and normalized in {"short", "long", "single_select", "multi_select", "slider", "likert"}:
+            if not label_parts and normalized in {
+                "short",
+                "long",
+                "single_select",
+                "multi_select",
+                "slider",
+                "likert",
+            }:
                 field_type = normalized
                 rows = 1 if normalized == "short" else 6
                 continue
@@ -3533,13 +3540,19 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
                 continue
             label_parts.append(part)
         combined_label = ":".join(label_parts).strip() or raw_token
-        segments = [segment.strip() for segment in combined_label.split("|") if segment.strip()]
+        segments = [
+            segment.strip() for segment in combined_label.split("|") if segment.strip()
+        ]
         label = segments[0] if segments else combined_label
         if field_type in {"single_select", "multi_select"}:
             options = segments[1:] or ["Option 1", "Option 2"]
         elif field_type == "slider":
-            min_value = int(segments[1]) if len(segments) > 1 and segments[1].isdigit() else 0
-            max_value = int(segments[2]) if len(segments) > 2 and segments[2].isdigit() else 10
+            min_value = (
+                int(segments[1]) if len(segments) > 1 and segments[1].isdigit() else 0
+            )
+            max_value = (
+                int(segments[2]) if len(segments) > 2 and segments[2].isdigit() else 10
+            )
             min_label = segments[3] if len(segments) > 3 else str(min_value)
             mid_label = segments[4] if len(segments) > 4 else None
             max_label = segments[5] if len(segments) > 5 else str(max_value)
@@ -3804,7 +3817,9 @@ def user_create_form(
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )
     consent_text = payload.consent_text.strip() if payload.consent_text else None
-    consent_document = payload.consent_document.strip() if payload.consent_document else None
+    consent_document = (
+        payload.consent_document.strip() if payload.consent_document else None
+    )
     normalized_questions = (
         _validate_document_template(document_template)
         if document_template
@@ -3983,7 +3998,9 @@ def update_form(
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )
     consent_text = payload.consent_text.strip() if payload.consent_text else None
-    consent_document = payload.consent_document.strip() if payload.consent_document else None
+    consent_document = (
+        payload.consent_document.strip() if payload.consent_document else None
+    )
     normalized_questions = (
         _validate_document_template(document_template)
         if document_template
