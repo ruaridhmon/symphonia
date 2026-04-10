@@ -3,7 +3,7 @@ import { Sparkles, Upload, FileText } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import RichDocumentEditor from './RichDocumentEditor';
 import FillableDocumentEditor from './FillableDocumentEditor';
-import { importDocxAsHtml } from '../utils/docxImport';
+import { extractQuestionnaireTextFromHtml, importDocxAsHtml } from '../utils/docxImport';
 import { convertQuestionnaireTextToRichTemplate } from '../utils/questionnaireImport';
 import {
   createEditableDocumentTemplate,
@@ -48,7 +48,7 @@ export default function DocumentTemplateEditor({
     : convertLegacyFillableTemplateToRichHtml(value);
   const questionnaireConversion = useMemo(() => {
     if (isEditableDocumentTemplate(value)) return null;
-    const plainText = htmlToPlainText(fillableContent).trim();
+    const plainText = extractQuestionnaireTextFromHtml(fillableContent).trim() || htmlToPlainText(fillableContent).trim();
     if (!plainText) return null;
     const converted = convertQuestionnaireTextToRichTemplate(plainText);
     return converted.questions.length > 0 ? converted : null;
@@ -74,7 +74,8 @@ export default function DocumentTemplateEditor({
 
       if (mode === 'fillable-rich' || mode === 'fillable') {
         const normalizedHtml = await importDocxAsHtml(file);
-        const converted = convertQuestionnaireTextToRichTemplate(htmlToPlainText(normalizedHtml));
+        const extractedQuestionnaireText = extractQuestionnaireTextFromHtml(normalizedHtml) || htmlToPlainText(normalizedHtml);
+        const converted = convertQuestionnaireTextToRichTemplate(extractedQuestionnaireText);
         if (converted.questions.length > 0) {
           onChange(converted.template);
           return;

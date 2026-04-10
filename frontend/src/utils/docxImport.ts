@@ -62,6 +62,106 @@ export function normalizeImportedDocumentHtml(sourceHtml: string): string {
     .trim();
 }
 
+function extractLineFromNode(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.textContent?.replace(/\s+/g, ' ') ?? '';
+  }
+
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return '';
+  }
+
+  const element = node as HTMLElement;
+  const tag = element.tagName.toLowerCase();
+
+  if (tag === 'br') {
+    return '\n';
+  }
+
+  const children = Array.from(element.childNodes).map(extractLineFromNode).join('');
+  return children;
+}
+
+export function extractQuestionnaireTextFromHtml(sourceHtml: string): string {
+  const parser = new DOMParser();
+  const document = parser.parseFromString(sourceHtml, 'text/html');
+  const lines: string[] = [];
+
+  function pushLine(value: string, prefix = '') {
+    const normalized = value.replace(/\s+/g, ' ').trim();
+    if (!normalized) return;
+    lines.push(prefix ? `${prefix}${normalized}` : normalized);
+  }
+
+  function walk(node: Node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      pushLine(node.textContent ?? '');
+      return;
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return;
+    }
+
+    const element = node as HTMLElement;
+    const tag = element.tagName.toLowerCase();
+
+    if (tag === 'ul' || tag === 'ol') {
+      Array.from(element.children).forEach((child, index) => {
+        if (child.tagName.toLowerCase() !== 'li') {
+          walk(child);
+          return;
+        }
+        const marker = tag === 'ol' ? `${index + 1}. ` : '• ';
+        pushLine(extractLineFromNode(child), marker);
+      });
+      return;
+    }
+
+    if (tag === 'table') {
+      element.querySelectorAll('tr').forEach((row) => {
+        const cells = Array.from(row.querySelectorAll('th, td'))
+          .map((cell) => extractLineFromNode(cell))
+          .map((value) => value.replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+        if (cells.length > 0) {
+          lines.push(cells.join(' | '));
+        }
+      });
+      return;
+    }
+
+    if (['p', 'li', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)) {
+      const text = extractLineFromNode(element).replace(/\n+/g, ' ').trim();
+      if (text) {
+        lines.push(text);
+      }
+      return;
+    }
+
+    if (tag === 'div') {
+      Array.from(element.childNodes).forEach(walk);
+      return;
+    }
+
+    Array.from(element.childNodes).forEach(walk);
+  }
+
+  Array.from(document.body.childNodes).forEach(walk);
+
+  const cleanedLines: string[] = [];
+  let previousBlank = false;
+  for (const line of lines) {
+    const normalized = line.trim();
+    const isBlank = !normalized;
+    if (isBlank && previousBlank) continue;
+    cleanedLines.push(normalized);
+    previousBlank = isBlank;
+  }
+
+  return cleanedLines.join('\n').trim();
+}
+
 function inlineDocxImportStyles(container: HTMLElement): string {
   const styleProperties = [
     'color',
