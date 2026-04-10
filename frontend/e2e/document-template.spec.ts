@@ -576,9 +576,9 @@ test.describe('Document template consultations', () => {
       await slider.press('End');
       await slider.press('ArrowLeft');
       await slider.press('ArrowLeft');
-      await expect(participantPage.locator('[data-question-key="q4"]')).toContainText('8');
+      await expect(participantPage.locator('[data-question-key="q4"]').first()).toContainText('8');
       await participantPage.locator('[data-question-key="q5"] label').nth(3).click();
-      await expect(participantPage.locator('[data-question-key="q5"]')).toContainText('✓');
+      await expect(participantPage.locator('[data-question-key="q5"]').first()).toContainText('✓');
 
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });
