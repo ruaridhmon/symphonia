@@ -103,7 +103,8 @@ function FieldNodePreview({ attrs, selected }: { attrs: SelectedFieldState['attr
       <DocumentTemplateFieldControl
         field={field}
         response={emptyStructuredResponse()}
-        readOnly
+        readOnly={false}
+        previewOnly
         highlighted={selected}
         emptyReadOnlyText={attrs.placeholder || 'Enter response'}
       />

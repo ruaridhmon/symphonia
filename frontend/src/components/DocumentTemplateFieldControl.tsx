@@ -30,6 +30,7 @@ interface DocumentTemplateFieldControlProps {
   field: RenderableDocumentTemplateField;
   response: StructuredResponse;
   readOnly: boolean;
+  previewOnly?: boolean;
   highlighted?: boolean;
   onChange?: (nextValue: StructuredResponse) => void;
   onSelect?: () => void;
@@ -40,6 +41,7 @@ export default function DocumentTemplateFieldControl({
   field,
   response,
   readOnly,
+  previewOnly = false,
   highlighted = false,
   onChange,
   onSelect,
@@ -86,7 +88,40 @@ export default function DocumentTemplateFieldControl({
         </span>
       </span>
 
-      {readOnly && usesInlineTextField ? (
+      {previewOnly && field.fieldType === 'short' ? (
+        <input
+          value=""
+          readOnly
+          tabIndex={-1}
+          placeholder={field.placeholder}
+          className="w-full rounded-xl px-3 py-2.5 text-sm"
+          style={{
+            border: '1px solid var(--input)',
+            backgroundColor: 'white',
+            color: 'var(--foreground)',
+            outline: 'none',
+            pointerEvents: 'none',
+          }}
+        />
+      ) : previewOnly && field.fieldType === 'long' ? (
+        <textarea
+          value=""
+          readOnly
+          tabIndex={-1}
+          placeholder={field.placeholder}
+          rows={field.rows}
+          className="w-full rounded-xl px-3 py-3 text-sm"
+          style={{
+            border: '1px solid var(--input)',
+            backgroundColor: 'white',
+            color: 'var(--foreground)',
+            outline: 'none',
+            resize: 'vertical',
+            lineHeight: 1.6,
+            pointerEvents: 'none',
+          }}
+        />
+      ) : readOnly && usesInlineTextField ? (
         <span
           className="rounded-xl px-3 py-2.5 text-sm whitespace-pre-wrap"
           style={{
@@ -134,6 +169,7 @@ export default function DocumentTemplateFieldControl({
           value={response}
           onChange={(nextValue) => onChange?.(nextValue)}
           readOnly={readOnly}
+          previewOnly={previewOnly}
         />
       )}
     </span>

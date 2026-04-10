@@ -8,6 +8,7 @@ interface SurveyQuestionInputProps {
   value: StructuredResponse;
   onChange: (value: StructuredResponse) => void;
   readOnly?: boolean;
+  previewOnly?: boolean;
 }
 
 type SpeechRecognitionLike = {
@@ -218,6 +219,7 @@ export default function SurveyQuestionInput({
   value,
   onChange,
   readOnly = false,
+  previewOnly = false,
 }: SurveyQuestionInputProps) {
   const inputType = question.inputType ?? 'textarea';
   const options = question.options ?? [];
@@ -305,7 +307,7 @@ export default function SurveyQuestionInput({
 
   if (inputType === 'single_select') {
     return (
-      <div>
+      <div style={previewOnly ? { pointerEvents: 'none' } : undefined}>
         {renderHelpText(question.helpText)}
         {!value.position.trim() ? (
           <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
@@ -340,7 +342,7 @@ export default function SurveyQuestionInput({
 
   if (inputType === 'multi_select') {
     return (
-      <div>
+      <div style={previewOnly ? { pointerEvents: 'none' } : undefined}>
         {renderHelpText(question.helpText)}
         {question.maxSelections ? (
           <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
@@ -388,7 +390,7 @@ export default function SurveyQuestionInput({
 
   if (inputType === 'slider') {
     return (
-      <div>
+      <div style={previewOnly ? { pointerEvents: 'none' } : undefined}>
         {renderHelpText(question.helpText)}
         <p
           className="mb-2 text-xs"
@@ -445,7 +447,7 @@ export default function SurveyQuestionInput({
       : likertOptions;
 
     return (
-      <div>
+      <div style={previewOnly ? { pointerEvents: 'none' } : undefined}>
         {renderHelpText(question.helpText)}
         {!value.position.trim() ? (
           <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
