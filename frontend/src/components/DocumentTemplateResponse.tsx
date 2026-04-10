@@ -1,7 +1,17 @@
+import { createElement, type CSSProperties, type ReactNode } from 'react';
 import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
 import RichDocumentEditor from './RichDocumentEditor';
 import SurveyQuestionInput from './SurveyQuestionInput';
-import { buildDocumentTemplateLines, getDocumentTemplateContent, isEditableDocumentTemplate } from '../utils/documentTemplate';
+import type { ConfigurableQuestion } from '../utils/questions';
+import {
+  buildDocumentTemplateLines,
+  buildRichDocumentTemplateFieldMap,
+  getDocumentTemplateContent,
+  getRichFillableTemplateContent,
+  isEditableDocumentTemplate,
+  isRichFillableDocumentTemplate,
+  type RenderableDocumentTemplateField,
+} from '../utils/documentTemplate';
 import { isResponseAnswered } from '../utils/responseValidation';
 
 interface DocumentTemplateResponseProps {
@@ -10,6 +20,236 @@ interface DocumentTemplateResponseProps {
   onChange?: (key: string, value: StructuredResponse) => void;
   highlightedQuestionKey?: string | null;
   readOnly?: boolean;
+}
+
+function toQuestion(field: RenderableDocumentTemplateField): ConfigurableQuestion {
+  return {
+    label: field.label,
+    requireEvidence: false,
+    requireCounterarguments: false,
+    requireConfidence: false,
+    inputType: field.inputType === 'document' ? 'textarea' : field.inputType,
+    options: field.options,
+    minValue: field.minValue,
+    maxValue: field.maxValue,
+    minLabel: field.minLabel,
+    midLabel: field.midLabel,
+    maxLabel: field.maxLabel,
+    allowUnsure: field.allowUnsure,
+    placeholder: field.placeholder,
+    rows: field.rows,
+    optional: field.optional,
+    fieldType: field.fieldType === 'short' || field.fieldType === 'long' ? field.fieldType : null,
+  };
+}
+
+function parseInlineStyle(styleValue: string | null): CSSProperties | undefined {
+  if (!styleValue?.trim()) return undefined;
+  const style: CSSProperties = {};
+  styleValue.split(';').forEach((rule) => {
+    const [rawProperty, rawValue] = rule.split(':');
+    const property = rawProperty?.trim().toLowerCase();
+    const value = rawValue?.trim();
+    if (!property || !value) return;
+    if (property === 'color') style.color = value;
+    if (property === 'background-color') style.backgroundColor = value;
+    if (property === 'text-align') style.textAlign = value as CSSProperties['textAlign'];
+    if (property === 'font-weight') style.fontWeight = value as CSSProperties['fontWeight'];
+    if (property === 'font-style') style.fontStyle = value as CSSProperties['fontStyle'];
+    if (property === 'text-decoration') style.textDecoration = value;
+    if (property === 'margin-left') style.marginLeft = value;
+  });
+  return Object.keys(style).length ? style : undefined;
+}
+
+function RichFieldControl({
+  field,
+  response,
+  readOnly,
+  highlighted,
+  onChange,
+}: {
+  field: RenderableDocumentTemplateField;
+  response: StructuredResponse;
+  readOnly: boolean;
+  highlighted: boolean;
+  onChange?: (nextValue: StructuredResponse) => void;
+}) {
+  const value = response.position || '';
+  const answered = isResponseAnswered(response);
+  const usesInlineTextField = field.fieldType === 'short' || field.fieldType === 'long';
+
+  return (
+    <span
+      className="inline-flex max-w-full flex-col gap-1.5 rounded-2xl px-3 py-2 align-middle"
+      data-question-key={field.questionKey}
+      style={{
+        minWidth: usesInlineTextField ? '16rem' : '22rem',
+        backgroundColor: highlighted
+          ? 'color-mix(in srgb, var(--destructive) 4%, white)'
+          : 'color-mix(in srgb, var(--background) 84%, white)',
+        border: highlighted
+          ? '1px solid color-mix(in srgb, var(--destructive) 42%, var(--border))'
+          : answered
+            ? '1px solid color-mix(in srgb, #138a52 24%, transparent)'
+            : '1px solid color-mix(in srgb, var(--border) 88%, transparent)',
+        boxShadow: '0 10px 24px -22px rgba(15, 23, 42, 0.28)',
+        scrollMarginTop: '6rem',
+      }}
+    >
+      <span className="flex flex-wrap items-center gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+          {field.label}
+        </span>
+        <span
+          className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+          style={{
+            backgroundColor: field.optional
+              ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+              : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+            color: field.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+          }}
+        >
+          {field.optional ? 'Optional' : 'Required'}
+        </span>
+      </span>
+
+      {readOnly && usesInlineTextField ? (
+        <span
+          className="rounded-xl px-3 py-2.5 text-sm whitespace-pre-wrap"
+          style={{
+            backgroundColor: 'color-mix(in srgb, white 75%, var(--background))',
+            border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+            color: value ? 'var(--foreground)' : 'var(--muted-foreground)',
+            minHeight: field.fieldType === 'short' ? undefined : '7rem',
+            lineHeight: 1.6,
+          }}
+        >
+          {value || 'No response provided.'}
+        </span>
+      ) : !readOnly && field.fieldType === 'short' ? (
+        <input
+          value={value}
+          onChange={(event) => onChange?.({ ...response, position: event.target.value })}
+          placeholder={field.placeholder}
+          className="w-full rounded-xl px-3 py-2.5 text-sm"
+          style={{
+            border: '1px solid var(--input)',
+            backgroundColor: 'white',
+            color: 'var(--foreground)',
+            outline: 'none',
+          }}
+        />
+      ) : !readOnly && field.fieldType === 'long' ? (
+        <textarea
+          value={value}
+          onChange={(event) => onChange?.({ ...response, position: event.target.value })}
+          placeholder={field.placeholder}
+          rows={field.rows}
+          className="w-full rounded-xl px-3 py-3 text-sm"
+          style={{
+            border: '1px solid var(--input)',
+            backgroundColor: 'white',
+            color: 'var(--foreground)',
+            outline: 'none',
+            resize: 'vertical',
+            lineHeight: 1.6,
+          }}
+        />
+      ) : (
+        <SurveyQuestionInput
+          question={toQuestion(field)}
+          value={response}
+          onChange={(nextValue) => onChange?.(nextValue)}
+          readOnly={readOnly}
+        />
+      )}
+    </span>
+  );
+}
+
+function renderRichTemplateNode({
+  node,
+  fieldMap,
+  highlightedQuestionKey,
+  readOnly,
+  onChange,
+  keyPrefix,
+}: {
+  node: ChildNode;
+  fieldMap: Map<string, { field: RenderableDocumentTemplateField; response: StructuredResponse }>;
+  highlightedQuestionKey: string | null;
+  readOnly: boolean;
+  onChange?: (key: string, value: StructuredResponse) => void;
+  keyPrefix: string;
+}): ReactNode {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.textContent;
+  }
+
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return null;
+  }
+
+  const element = node as HTMLElement;
+  const fieldKey = element.getAttribute('data-symphonia-field-key');
+  if (fieldKey) {
+    const entry = fieldMap.get(fieldKey);
+    if (!entry) return null;
+    return (
+      <RichFieldControl
+        key={`${keyPrefix}-${entry.field.questionKey}`}
+        field={entry.field}
+        response={entry.response}
+        readOnly={readOnly}
+        highlighted={highlightedQuestionKey === entry.field.questionKey}
+        onChange={(nextValue) => onChange?.(entry.field.questionKey, nextValue)}
+      />
+    );
+  }
+
+  const tagName = element.tagName.toLowerCase();
+  const allowedTags = new Set([
+    'p', 'div', 'span', 'strong', 'em', 'u', 's', 'mark',
+    'h1', 'h2', 'h3', 'blockquote', 'ul', 'ol', 'li', 'br',
+  ]);
+  if (!allowedTags.has(tagName)) {
+    return Array.from(element.childNodes).map((child, index) =>
+      renderRichTemplateNode({
+        node: child,
+        fieldMap,
+        highlightedQuestionKey,
+        readOnly,
+        onChange,
+        keyPrefix: `${keyPrefix}-${index}`,
+      }),
+    );
+  }
+
+  if (tagName === 'br') {
+    return <br key={keyPrefix} />;
+  }
+
+  const children = Array.from(element.childNodes).map((child, index) =>
+    renderRichTemplateNode({
+      node: child,
+      fieldMap,
+      highlightedQuestionKey,
+      readOnly,
+      onChange,
+      keyPrefix: `${keyPrefix}-${index}`,
+    }),
+  );
+
+  return createElement(
+    tagName,
+    {
+      key: keyPrefix,
+      className: element.className || undefined,
+      style: parseInlineStyle(element.getAttribute('style')),
+    },
+    children,
+  );
 }
 
 export default function DocumentTemplateResponse({
@@ -64,6 +304,61 @@ export default function DocumentTemplateResponse({
           minHeight={readOnly ? '14rem' : '20rem'}
           onChange={(nextValue) => onChange?.(key, { ...(response ?? emptyStructuredResponse()), position: nextValue })}
         />
+      </div>
+    );
+  }
+
+  if (isRichFillableDocumentTemplate(template)) {
+    const parser = new DOMParser();
+    const document = parser.parseFromString(getRichFillableTemplateContent(template) || '<p></p>', 'text/html');
+    const fieldMap = buildRichDocumentTemplateFieldMap(template, answers);
+    const content = Array.from(document.body.childNodes).map((node, index) =>
+      renderRichTemplateNode({
+        node,
+        fieldMap,
+        highlightedQuestionKey,
+        readOnly,
+        onChange,
+        keyPrefix: `rich-${index}`,
+      }),
+    );
+
+    return (
+      <div
+        className="rounded-xl p-4 sm:p-5"
+        style={{
+          background:
+            'linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white) 0%, color-mix(in srgb, var(--foreground) 1%, var(--card)) 100%)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <style>{`
+          .symphonia-rich-template {
+            color: var(--foreground);
+          }
+          .symphonia-rich-template h1 { font-size: 1.9rem; line-height: 1.15; margin: 0 0 1rem; font-weight: 700; color: #10223e; }
+          .symphonia-rich-template h2 { font-size: 1.3rem; line-height: 1.2; margin: 1.15rem 0 0.7rem; font-weight: 650; color: #183153; }
+          .symphonia-rich-template h3 { font-size: 1.08rem; line-height: 1.3; margin: 1rem 0 0.55rem; font-weight: 650; color: #1f3557; }
+          .symphonia-rich-template p, .symphonia-rich-template li { line-height: 1.8; }
+          .symphonia-rich-template ul, .symphonia-rich-template ol { padding-left: 1.35rem; margin: 0.7rem 0; }
+          .symphonia-rich-template blockquote {
+            margin: 0.9rem 0;
+            padding: 0.75rem 1rem;
+            border-left: 4px solid color-mix(in srgb, var(--accent) 42%, transparent);
+            background: color-mix(in srgb, var(--accent) 5%, white);
+            border-radius: 0.9rem;
+          }
+        `}</style>
+        <div
+          className="rounded-2xl px-5 py-6 sm:px-6 sm:py-7"
+          style={{
+            backgroundColor: 'color-mix(in srgb, white 88%, var(--background))',
+            border: '1px solid color-mix(in srgb, var(--border) 68%, transparent)',
+            boxShadow: '0 10px 24px -20px rgba(15, 23, 42, 0.38)',
+          }}
+        >
+          <div className="symphonia-rich-template space-y-3">{content}</div>
+        </div>
       </div>
     );
   }
@@ -194,22 +489,7 @@ export default function DocumentTemplateResponse({
                         </span>
                       ) : readOnly ? (
                         <SurveyQuestionInput
-                          question={{
-                            label: segment.value.label,
-                            requireEvidence: false,
-                            requireCounterarguments: false,
-                            requireConfidence: false,
-                            inputType: segment.value.inputType === 'document' ? 'textarea' : segment.value.inputType,
-                            options: segment.value.options,
-                            minValue: segment.value.minValue,
-                            maxValue: segment.value.maxValue,
-                            minLabel: segment.value.minLabel,
-                            midLabel: segment.value.midLabel,
-                            maxLabel: segment.value.maxLabel,
-                            allowUnsure: segment.value.allowUnsure,
-                            placeholder: segment.value.placeholder,
-                            rows: segment.value.rows,
-                          }}
+                          question={toQuestion(segment.value)}
                           value={response}
                           onChange={() => {}}
                           readOnly
@@ -249,22 +529,7 @@ export default function DocumentTemplateResponse({
                         />
                       ) : (
                         <SurveyQuestionInput
-                          question={{
-                            label: segment.value.label,
-                            requireEvidence: false,
-                            requireCounterarguments: false,
-                            requireConfidence: false,
-                            inputType: segment.value.inputType === 'document' ? 'textarea' : segment.value.inputType,
-                            options: segment.value.options,
-                            minValue: segment.value.minValue,
-                            maxValue: segment.value.maxValue,
-                            minLabel: segment.value.minLabel,
-                            midLabel: segment.value.midLabel,
-                            maxLabel: segment.value.maxLabel,
-                            allowUnsure: segment.value.allowUnsure,
-                            placeholder: segment.value.placeholder,
-                            rows: segment.value.rows,
-                          }}
+                          question={toQuestion(segment.value)}
                           value={response}
                           onChange={(nextValue) => onChange?.(questionKey, nextValue)}
                           readOnly={readOnly}

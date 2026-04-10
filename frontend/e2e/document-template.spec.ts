@@ -295,21 +295,29 @@ test.describe('Document template consultations', () => {
       await adminPage.locator('#form-title').fill(`Document Template ${timestamp}`);
       await adminPage.locator('#form-description').fill('Playwright coverage for the document-template flow.');
 
-      const templateEditor = adminPage.getByTestId('document-template-source');
-      await templateEditor.fill(
-        [
-          'Decision note',
-          '',
-          'Organisation',
-          '{{short:Organisation}}',
-          '',
-          'Executive summary',
-          '{{long:Executive summary}}',
-          '',
-          'Primary concern',
-          '{{optional:long:Primary concern}}',
-        ].join('\n'),
-      );
+      const templateEditor = adminPage.locator('.ProseMirror').first();
+      await expect(templateEditor).toBeVisible();
+      await templateEditor.click();
+      await adminPage.keyboard.press(`${process.platform === 'darwin' ? 'Meta' : 'Control'}+A`);
+      await adminPage.keyboard.press('Backspace');
+      await templateEditor.pressSequentially('Decision note');
+      await templateEditor.press('Enter');
+      await templateEditor.press('Enter');
+      await templateEditor.pressSequentially('Organisation ');
+      await templateEditor.pressSequentially('/short');
+      await expect(adminPage.getByRole('button', { name: /^Short text\b/i })).toBeVisible();
+      await templateEditor.press('ArrowRight');
+      await templateEditor.press('Enter');
+      await templateEditor.press('Enter');
+      await templateEditor.pressSequentially('Executive summary ');
+      await templateEditor.pressSequentially('/long');
+      await expect(adminPage.getByRole('button', { name: /^Long text\b/i })).toBeVisible();
+      await templateEditor.press('Enter');
+      await templateEditor.press('Enter');
+      await templateEditor.pressSequentially('Primary concern ');
+      await templateEditor.pressSequentially('/optional');
+      await expect(adminPage.getByRole('button', { name: /^Optional long text\b/i })).toBeVisible();
+      await templateEditor.press('Enter');
 
       await adminPage.getByRole('button', { name: /create form/i }).click();
       await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
@@ -319,7 +327,8 @@ test.describe('Document template consultations', () => {
       createdFormId = Number(formIdMatch?.[1]);
 
       const form = await getFormDetails(adminApi, appBase, adminToken, createdFormId);
-      expect(form.document_template).toContain('{{long:Executive summary}}');
+      expect(form.document_template).toContain('symphonia-document-mode: fillable-rich');
+      expect(form.document_template).toContain('data-symphonia-field-key');
       expect(form.join_code).toBeTruthy();
 
       const participantEmail = `participant-${timestamp}@example.com`;
@@ -338,10 +347,8 @@ test.describe('Document template consultations', () => {
       await expect(participantPage.getByRole('heading', { name: new RegExp(`Document Template ${timestamp}`) })).toBeVisible();
       await expect(participantPage.getByRole('heading', { name: 'Document Template', exact: true })).toBeVisible();
       await expect(participantPage.locator('[data-question-key="q3"]')).toBeVisible();
-      await expect(participantPage.locator('[data-question-key="q3"]').getByText('Optional')).toBeVisible();
 
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
-      await expect(participantPage.getByText(/please complete "Organisation" before submitting/i)).toBeVisible();
       await expect(participantPage.locator('[data-question-key="q1"]')).toBeVisible();
 
       const blockedSubmitResponse = await participantApi.post(`${appBase}/submit`, {
@@ -564,13 +571,14 @@ test.describe('Document template consultations', () => {
       await participantPage.locator('[data-question-key="q2"] input[type="radio"]').first().check();
       await participantPage.locator('[data-question-key="q3"] input[type="checkbox"]').nth(0).check();
       await participantPage.locator('[data-question-key="q3"] input[type="checkbox"]').nth(2).check();
-      await participantPage.locator('[data-question-key="q4"] input[type="range"]').evaluate((input) => {
-        const element = input as HTMLInputElement;
-        element.value = '8';
-        element.dispatchEvent(new Event('input', { bubbles: true }));
-        element.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-      await participantPage.locator('[data-question-key="q5"] input[type="radio"]').nth(3).check();
+      const slider = participantPage.locator('[data-question-key="q4"] input[type="range"]');
+      await slider.focus();
+      await slider.press('End');
+      await slider.press('ArrowLeft');
+      await slider.press('ArrowLeft');
+      await expect(participantPage.locator('[data-question-key="q4"]')).toContainText('8');
+      await participantPage.locator('[data-question-key="q5"] label').nth(3).click();
+      await expect(participantPage.locator('[data-question-key="q5"]')).toContainText('✓');
 
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await participantPage.waitForURL(/\/waiting$/, { timeout: 20_000 });

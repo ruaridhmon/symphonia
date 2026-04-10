@@ -3310,10 +3310,17 @@ class FormUpdate(BaseModel):
 
 
 DOCUMENT_PLACEHOLDER_PATTERN = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
+RICH_DOCUMENT_FIELD_PATTERN = re.compile(
+    r"<span\b[^>]*data-symphonia-field-key=(['\"])(?P<key>.*?)\1(?P<attrs>[^>]*)>",
+    re.IGNORECASE | re.DOTALL,
+)
 WORDPROCESSINGML_NS = {
     "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 }
 EDITABLE_DOCUMENT_TEMPLATE_PREFIX = "<!-- symphonia-document-mode: editable -->"
+RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX = (
+    "<!-- symphonia-document-mode: fillable-rich -->"
+)
 DEFAULT_PUBLIC_CONSENT_TEXT = (
     "I confirm that I understand the purpose of this form and consent to my "
     "response being used within this consultation."
@@ -3327,12 +3334,137 @@ def _is_editable_document_template(template: str | None) -> bool:
     )
 
 
+def _is_rich_fillable_document_template(template: str | None) -> bool:
+    return bool(
+        template and template.lstrip().startswith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX)
+    )
+
+
 def _strip_document_template_prefix(template: str | None) -> str:
     if not template:
         return ""
-    if not _is_editable_document_template(template):
-        return template
-    return template.replace(EDITABLE_DOCUMENT_TEMPLATE_PREFIX, "", 1).strip()
+    if _is_editable_document_template(template):
+        return template.replace(EDITABLE_DOCUMENT_TEMPLATE_PREFIX, "", 1).strip()
+    if _is_rich_fillable_document_template(template):
+        return template.replace(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX, "", 1).strip()
+    return template
+
+
+def _parse_bool_attr(value: str | None) -> bool:
+    return (value or "").strip().lower() == "true"
+
+
+def _parse_rich_document_field_attrs(template: str) -> list[dict[str, Any]]:
+    body = _strip_document_template_prefix(template)
+    seen: set[str] = set()
+    derived: list[dict[str, Any]] = []
+
+    for match in RICH_DOCUMENT_FIELD_PATTERN.finditer(body):
+        tag_markup = match.group(0)
+        attrs = {
+            attr_match.group("name"): html.unescape(attr_match.group("value"))
+            for attr_match in re.finditer(
+                r'(?P<name>data-symphonia-[a-z-]+)=(["\'])(?P<value>.*?)\2',
+                tag_markup,
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+        }
+        label = attrs.get("data-symphonia-field-label", "").strip()
+        if not label:
+            continue
+        normalized_key = label.casefold()
+        if normalized_key in seen:
+            continue
+        seen.add(normalized_key)
+
+        field_type = attrs.get("data-symphonia-field-type", "long").strip().lower()
+        input_type = attrs.get("data-symphonia-input-type", "textarea").strip().lower()
+        if field_type not in {
+            "short",
+            "long",
+            "single_select",
+            "multi_select",
+            "slider",
+            "likert",
+        }:
+            continue
+        if input_type not in {
+            "text",
+            "textarea",
+            "single_select",
+            "multi_select",
+            "slider",
+            "likert",
+        }:
+            input_type = "text" if field_type == "short" else "textarea" if field_type == "long" else field_type
+
+        options: list[str] | None = None
+        raw_options = attrs.get("data-symphonia-options")
+        if raw_options:
+            try:
+                parsed = json.loads(raw_options)
+            except json.JSONDecodeError:
+                parsed = None
+            if isinstance(parsed, list):
+                options = [str(item).strip() for item in parsed if str(item).strip()]
+
+        def parse_int_attr(name: str) -> int | None:
+            raw = attrs.get(name)
+            if raw is None or raw == "":
+                return None
+            try:
+                return int(raw)
+            except ValueError:
+                return None
+
+        rows = parse_int_attr("data-symphonia-rows") or (1 if field_type == "short" else 6)
+        min_value = parse_int_attr("data-symphonia-min-value")
+        max_value = parse_int_attr("data-symphonia-max-value")
+        min_label = attrs.get("data-symphonia-min-label") or None
+        mid_label = attrs.get("data-symphonia-mid-label") or None
+        max_label = attrs.get("data-symphonia-max-label") or None
+        allow_unsure = _parse_bool_attr(attrs.get("data-symphonia-allow-unsure"))
+
+        if field_type in {"single_select", "multi_select"} and not options:
+            options = ["Option 1", "Option 2"]
+        if field_type == "slider":
+            min_value = 0 if min_value is None else min_value
+            max_value = 10 if max_value is None else max_value
+            min_label = min_label or str(min_value)
+            max_label = max_label or str(max_value)
+        if field_type == "likert" and (not options or len(options) < 2):
+            options = [
+                "Unimportant",
+                "Somewhat important",
+                "Moderately important",
+                "Very important",
+                "Essential",
+            ]
+
+        derived.append(
+            QuestionConfig(
+                label=label,
+                requireEvidence=False,
+                requireCounterarguments=False,
+                requireConfidence=False,
+                optional=_parse_bool_attr(attrs.get("data-symphonia-optional")),
+                inputType=input_type,
+                options=options,
+                minValue=min_value,
+                maxValue=max_value,
+                minLabel=min_label,
+                midLabel=mid_label,
+                maxLabel=max_label,
+                allowUnsure=allow_unsure,
+                fieldType=field_type,
+                rows=rows,
+                placeholder=(
+                    attrs.get("data-symphonia-placeholder")
+                    or f"Enter {label.lower()}"
+                ),
+            ).model_dump()
+        )
+    return derived
 
 
 def _html_to_plain_text(value: str) -> str:
@@ -3485,6 +3617,9 @@ def _normalize_document_template(template: str | None) -> str | None:
     if _is_editable_document_template(template):
         body = _strip_document_template_prefix(template)
         cleaned = f"{EDITABLE_DOCUMENT_TEMPLATE_PREFIX}\n{body}".strip()
+    elif _is_rich_fillable_document_template(template):
+        body = _strip_document_template_prefix(template)
+        cleaned = f"{RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX}\n{body}".strip()
     else:
         cleaned = template.replace("\r\n", "\n").replace("\r", "\n").strip()
     return cleaned or None
@@ -3505,6 +3640,9 @@ def _build_document_questions(template: str) -> list[dict[str, object]]:
                 placeholder="Edit the shared document here",
             ).model_dump()
         ]
+
+    if _is_rich_fillable_document_template(template):
+        return _parse_rich_document_field_attrs(template)
 
     seen: set[str] = set()
     derived: list[dict[str, object]] = []
@@ -3614,6 +3752,20 @@ def _validate_document_template(template: str | None) -> list[str | dict[str, ob
             raise HTTPException(
                 status_code=400,
                 detail="Editable document templates must include some document content",
+            )
+        return normalized_questions
+
+    if _is_rich_fillable_document_template(template):
+        rich_body = _strip_document_template_prefix(template)
+        if not _html_to_plain_text(rich_body).strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Fillable document templates must include some document content",
+            )
+        if not normalized_questions:
+            raise HTTPException(
+                status_code=400,
+                detail="Fillable document templates must include at least one field",
             )
         return normalized_questions
 

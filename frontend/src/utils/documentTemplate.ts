@@ -32,11 +32,28 @@ export interface DocumentTemplateLine {
 }
 
 export const EDITABLE_DOCUMENT_TEMPLATE_PREFIX = '<!-- symphonia-document-mode: editable -->';
+export const RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX = '<!-- symphonia-document-mode: fillable-rich -->';
 const PLACEHOLDER_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/g;
+const FIELD_TAG_SELECTOR = 'span[data-symphonia-field-key]';
 
-export function getDocumentTemplateMode(template: string | null | undefined): 'fillable' | 'editable' {
+function slugifyLabel(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'field';
+}
+
+export function getDocumentTemplateMode(template: string | null | undefined): 'fillable' | 'fillable-rich' | 'editable' {
   if (!template?.trim()) return 'fillable';
-  return template.trimStart().startsWith(EDITABLE_DOCUMENT_TEMPLATE_PREFIX) ? 'editable' : 'fillable';
+  const trimmed = template.trimStart();
+  if (trimmed.startsWith(EDITABLE_DOCUMENT_TEMPLATE_PREFIX)) return 'editable';
+  if (trimmed.startsWith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX)) return 'fillable-rich';
+  return 'fillable';
+}
+
+export function isRichFillableDocumentTemplate(template: string | null | undefined): boolean {
+  return Boolean(template?.trimStart().startsWith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX));
 }
 
 export function isEditableDocumentTemplate(template: string | null | undefined): boolean {
@@ -49,9 +66,20 @@ export function getDocumentTemplateContent(template: string | null | undefined):
   return template.replace(EDITABLE_DOCUMENT_TEMPLATE_PREFIX, '').trim();
 }
 
+export function getRichFillableTemplateContent(template: string | null | undefined): string {
+  if (!template) return '';
+  if (!isRichFillableDocumentTemplate(template)) return template;
+  return template.replace(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX, '').trim();
+}
+
 export function createEditableDocumentTemplate(content: string): string {
   const trimmed = content.trim();
   return trimmed ? `${EDITABLE_DOCUMENT_TEMPLATE_PREFIX}\n${trimmed}` : EDITABLE_DOCUMENT_TEMPLATE_PREFIX;
+}
+
+export function createRichFillableDocumentTemplate(content: string): string {
+  const trimmed = content.trim();
+  return trimmed ? `${RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX}\n${trimmed}` : RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX;
 }
 
 export function htmlToPlainText(value: string): string {
@@ -193,8 +221,118 @@ export function createDocumentTemplatePlaceholder(
   return `{{${prefix}:${normalizedLabel}}}`;
 }
 
+export function serializeRichDocumentField(field: DocumentTemplateField): string {
+  const attributes = new Map<string, string>([
+    ['data-symphonia-field-key', field.key],
+    ['data-symphonia-field-label', field.label],
+    ['data-symphonia-field-type', field.fieldType],
+    ['data-symphonia-input-type', field.inputType],
+    ['data-symphonia-optional', field.optional ? 'true' : 'false'],
+    ['data-symphonia-rows', String(field.rows)],
+    ['data-symphonia-placeholder', field.placeholder],
+  ]);
+  if (field.options?.length) attributes.set('data-symphonia-options', JSON.stringify(field.options));
+  if (typeof field.minValue === 'number') attributes.set('data-symphonia-min-value', String(field.minValue));
+  if (typeof field.maxValue === 'number') attributes.set('data-symphonia-max-value', String(field.maxValue));
+  if (field.minLabel) attributes.set('data-symphonia-min-label', field.minLabel);
+  if (field.midLabel) attributes.set('data-symphonia-mid-label', field.midLabel);
+  if (field.maxLabel) attributes.set('data-symphonia-max-label', field.maxLabel);
+  if (field.allowUnsure) attributes.set('data-symphonia-allow-unsure', 'true');
+
+  const attrs = Array.from(attributes.entries())
+    .map(([key, value]) => `${key}="${value.replace(/"/g, '&quot;')}"`)
+    .join(' ');
+  return `<span ${attrs}></span>`;
+}
+
+function parseRichDocumentFieldElement(element: Element): DocumentTemplateField | null {
+  const label = element.getAttribute('data-symphonia-field-label')?.trim();
+  const key = element.getAttribute('data-symphonia-field-key')?.trim() || (label ? slugifyLabel(label) : '');
+  const fieldType = element.getAttribute('data-symphonia-field-type') as DocumentTemplateField['fieldType'] | null;
+  const inputType = element.getAttribute('data-symphonia-input-type') as DocumentTemplateField['inputType'] | null;
+  if (!label || !fieldType || !inputType) return null;
+
+  let options: string[] | undefined;
+  const rawOptions = element.getAttribute('data-symphonia-options');
+  if (rawOptions) {
+    try {
+      const parsed = JSON.parse(rawOptions);
+      if (Array.isArray(parsed)) {
+        options = parsed.filter((item): item is string => typeof item === 'string');
+      }
+    } catch {
+      options = undefined;
+    }
+  }
+
+  const parseNumberAttr = (name: string) => {
+    const raw = element.getAttribute(name);
+    if (raw == null) return undefined;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  };
+
+  return {
+    key,
+    label,
+    fieldType,
+    inputType,
+    optional: element.getAttribute('data-symphonia-optional') === 'true',
+    rows: parseNumberAttr('data-symphonia-rows') ?? (fieldType === 'short' ? 1 : 6),
+    placeholder: element.getAttribute('data-symphonia-placeholder') || `Enter ${label.toLowerCase()}`,
+    options,
+    minValue: parseNumberAttr('data-symphonia-min-value'),
+    maxValue: parseNumberAttr('data-symphonia-max-value'),
+    minLabel: element.getAttribute('data-symphonia-min-label') || undefined,
+    midLabel: element.getAttribute('data-symphonia-mid-label') || undefined,
+    maxLabel: element.getAttribute('data-symphonia-max-label') || undefined,
+    allowUnsure: element.getAttribute('data-symphonia-allow-unsure') === 'true',
+  };
+}
+
+export function convertLegacyFillableTemplateToRichHtml(template: string): string {
+  const blocks = buildDocumentTemplatePreview(template, {});
+  if (blocks.length === 0) return '<p></p>';
+  const paragraphs: string[] = [];
+  let current = '';
+
+  const flush = () => {
+    paragraphs.push(current.trim() ? `<p>${current}</p>` : '<p></p>');
+    current = '';
+  };
+
+  blocks.forEach((block) => {
+    if (block.type === 'text') {
+      const parts = block.value.split('\n');
+      parts.forEach((part, index) => {
+        if (part) current += part;
+        if (index < parts.length - 1) flush();
+      });
+      return;
+    }
+    current += serializeRichDocumentField(block.value);
+  });
+
+  if (current || paragraphs.length === 0) flush();
+  return paragraphs.join('');
+}
+
 export function parseDocumentTemplateFields(template: string): DocumentTemplateField[] {
   if (isEditableDocumentTemplate(template)) return [];
+  if (isRichFillableDocumentTemplate(template)) {
+    const html = getRichFillableTemplateContent(template);
+    const parser = new DOMParser();
+    const document = parser.parseFromString(html || '<p></p>', 'text/html');
+    const fields: DocumentTemplateField[] = [];
+    const seen = new Set<string>();
+    document.querySelectorAll(FIELD_TAG_SELECTOR).forEach((element) => {
+      const field = parseRichDocumentFieldElement(element);
+      if (!field || seen.has(field.key)) return;
+      seen.add(field.key);
+      fields.push(field);
+    });
+    return fields;
+  }
 
   const fields: DocumentTemplateField[] = [];
   const seen = new Set<string>();
@@ -325,6 +463,34 @@ export function buildDocumentTemplateLines(
   }
 
   return lines;
+}
+
+export function buildRichDocumentTemplateFieldMap(
+  template: string,
+  answers: Record<string, StructuredResponse>,
+): Map<string, { field: RenderableDocumentTemplateField; response: StructuredResponse }> {
+  const map = new Map<string, { field: RenderableDocumentTemplateField; response: StructuredResponse }>();
+  if (!isRichFillableDocumentTemplate(template)) return map;
+  const html = getRichFillableTemplateContent(template);
+  const parser = new DOMParser();
+  const document = parser.parseFromString(html || '<p></p>', 'text/html');
+  const keyToQuestionKey = new Map<string, string>();
+  let index = 1;
+  document.querySelectorAll(FIELD_TAG_SELECTOR).forEach((element) => {
+    const field = parseRichDocumentFieldElement(element);
+    if (!field) return;
+    let questionKey = keyToQuestionKey.get(field.key);
+    if (!questionKey) {
+      questionKey = `q${index}`;
+      keyToQuestionKey.set(field.key, questionKey);
+      index += 1;
+    }
+    map.set(field.key, {
+      field: { ...field, questionKey },
+      response: answers[questionKey] ?? emptyStructuredResponse(),
+    });
+  });
+  return map;
 }
 
 export function isDocumentTemplate(template: string | null | undefined): boolean {
