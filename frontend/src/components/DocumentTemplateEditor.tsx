@@ -72,6 +72,21 @@ export default function DocumentTemplateEditor({
         return;
       }
 
+      if (mode === 'fillable-rich' || mode === 'fillable') {
+        const normalizedHtml = await importDocxAsHtml(file);
+        const converted = convertQuestionnaireTextToRichTemplate(htmlToPlainText(normalizedHtml));
+        if (converted.questions.length > 0) {
+          onChange(converted.template);
+          return;
+        }
+
+        const paragraphs = normalizedHtml.trim();
+        if (paragraphs) {
+          onChange(createRichFillableDocumentTemplate(paragraphs));
+          return;
+        }
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('mode', mode === 'fillable-rich' ? 'fillable' : mode);
