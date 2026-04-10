@@ -782,7 +782,7 @@ test.describe('Document template consultations', () => {
     }
   });
 
-  test('fillable editor keeps slash menu visible and docks field settings beside the canvas', async ({ browser, baseURL }) => {
+  test('fillable editor keeps slash menu visible and positions field settings near the selected field', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';
     let adminContext: import('@playwright/test').BrowserContext | null = null;
@@ -796,6 +796,7 @@ test.describe('Document template consultations', () => {
       const adminPage = await adminContext.newPage();
       await adminPage.goto(`${appBase}/admin/forms/new`);
       await adminPage.getByRole('button', { name: /start document template/i }).click();
+      await expect(adminPage.getByLabel('Field settings inspector')).toHaveCount(0);
 
       const editor = adminPage.locator('.symphonia-fillable-editor');
       await editor.click();
@@ -821,7 +822,8 @@ test.describe('Document template consultations', () => {
 
       const inspectorBox = await inspector.boundingBox();
       expect(inspectorBox).not.toBeNull();
-      expect((inspectorBox?.left ?? 0) >= (editorBox?.right ?? 0) - 8).toBeTruthy();
+      expect((inspectorBox?.left ?? 0) <= (editorBox?.right ?? 0) + 24).toBeTruthy();
+      expect((inspectorBox?.top ?? 0) >= (editorBox?.top ?? 0) - 8).toBeTruthy();
     } finally {
       if (adminContext) {
         await adminContext.close();

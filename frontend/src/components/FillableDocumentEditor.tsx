@@ -443,6 +443,7 @@ export default function FillableDocumentEditor({
   onPreviewChange: _onPreviewChange,
 }: FillableDocumentEditorProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const workAreaRef = useRef<HTMLDivElement | null>(null);
   const changeTimerRef = useRef<number | null>(null);
   const pendingValueRef = useRef<string | null>(null);
   const lastSyncedValueRef = useRef(value);
@@ -450,6 +451,7 @@ export default function FillableDocumentEditor({
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [selectedField, setSelectedField] = useState<SelectedFieldState | null>(null);
   const [selectedFieldOptionsDraft, setSelectedFieldOptionsDraft] = useState('');
+  const [inspectorStyle, setInspectorStyle] = useState<{ top: number; left: number; maxHeight: number } | null>(null);
   const filteredCommands = COMMAND_OPTIONS.filter((option) =>
     !slashMenu?.query || option.label.toLowerCase().includes(slashMenu.query) || option.description.toLowerCase().includes(slashMenu.query),
   );
@@ -660,6 +662,50 @@ export default function FillableDocumentEditor({
       setSelectedFieldOptionsDraft('');
     }
   }, [selectedField]);
+
+  useEffect(() => {
+    function updateInspectorPosition() {
+      if (!selectedField || !editor || !workAreaRef.current) {
+        setInspectorStyle(null);
+        return;
+      }
+
+      const areaRect = workAreaRef.current.getBoundingClientRect();
+      const coords = editor.view.coordsAtPos(selectedField.pos);
+      const gutter = 18;
+      const inspectorWidth = Math.min(352, Math.max(280, areaRect.width - 32));
+      const preferredRight = coords.right - areaRect.left + gutter;
+      const preferredLeft = coords.left - areaRect.left - inspectorWidth - gutter;
+      let left = preferredRight;
+
+      if (left + inspectorWidth > areaRect.width - 16) {
+        left = preferredLeft;
+      }
+      if (left < 16) {
+        left = Math.max(16, areaRect.width - inspectorWidth - 16);
+      }
+
+      let top = coords.top - areaRect.top - 18;
+      const maxHeight = Math.max(320, areaRect.height - 32);
+      top = Math.max(16, Math.min(top, areaRect.height - Math.min(maxHeight, 520) - 16));
+
+      setInspectorStyle({
+        top,
+        left,
+        maxHeight: Math.max(280, areaRect.height - top - 16),
+      });
+    }
+
+    updateInspectorPosition();
+    if (!selectedField) return;
+
+    window.addEventListener('resize', updateInspectorPosition);
+    window.addEventListener('scroll', updateInspectorPosition, true);
+    return () => {
+      window.removeEventListener('resize', updateInspectorPosition);
+      window.removeEventListener('scroll', updateInspectorPosition, true);
+    };
+  }, [editor, selectedField]);
 
   function setTextColor(color: string) {
     if (!editor) return;
@@ -932,8 +978,7 @@ export default function FillableDocumentEditor({
             'radial-gradient(circle at top, rgba(188,205,219,0.32), transparent 34%), linear-gradient(180deg, #edf3f6 0%, #eef2f5 100%)',
         }}
       >
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-4 xl:flex-row xl:items-start">
-          <div className="min-w-0 flex-1">
+        <div ref={workAreaRef} className="mx-auto max-w-[1440px]">
             <div className="rounded-[2rem] border px-4 py-4" style={{ borderColor: 'rgba(196,206,216,0.7)', background: 'linear-gradient(180deg, rgba(255,255,255,0.46) 0%, rgba(241,245,248,0.55) 100%)' }}>
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-2">
                 <div>
@@ -1001,17 +1046,15 @@ export default function FillableDocumentEditor({
                 </div>
               ) : null}
             </div>
-            </div>
           </div>
-
-          {selectedField ? (
-            <aside
-              className="w-full shrink-0 xl:sticky xl:top-4 xl:w-[22rem]"
-              aria-label="Field settings inspector"
-            >
+            {selectedField && inspectorStyle ? (
               <div
-                className="rounded-[1.45rem] border p-4"
+                aria-label="Field settings inspector"
+                className="absolute z-30 w-[min(22rem,calc(100%-2rem))] rounded-[1.45rem] border p-4"
                 style={{
+                  top: inspectorStyle.top,
+                  left: inspectorStyle.left,
+                  maxHeight: inspectorStyle.maxHeight,
                   borderColor: 'rgba(176, 190, 202, 0.4)',
                   background: 'linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(246,248,250,0.97) 100%)',
                   backdropFilter: 'blur(10px)',
@@ -1059,7 +1102,7 @@ export default function FillableDocumentEditor({
                   </div>
                 </div>
 
-                <div className="mt-4 max-h-[72vh] space-y-3 overflow-y-auto pr-1">
+                <div className="mt-4 space-y-3 overflow-y-auto pr-1" style={{ maxHeight: inspectorStyle.maxHeight - 110 }}>
                     <div>
                       <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
                         Label
@@ -1230,27 +1273,7 @@ export default function FillableDocumentEditor({
                     </button>
                 </div>
               </div>
-            </aside>
-          ) : (
-            <aside className="w-full shrink-0 xl:sticky xl:top-4 xl:w-[22rem]">
-              <div
-                className="rounded-[1.45rem] border p-4"
-                style={{
-                  borderColor: 'rgba(201, 211, 220, 0.65)',
-                  background: 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(244,247,249,0.92) 100%)',
-                  boxShadow: '0 24px 55px -42px rgba(15,23,42,0.2)',
-                }}
-              >
-                <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#6c7c8e' }}>
-                  Inspector
-                </div>
-                <div className="mt-2 text-sm font-semibold text-foreground">Select a field to configure it</div>
-                <p className="mt-2 text-sm" style={{ color: '#66788d', lineHeight: 1.7 }}>
-                  The document stays clean until you select a field. Once selected, its label, options, scale, and requirement settings appear here.
-                </p>
-              </div>
-            </aside>
-          )}
+            ) : null}
         </div>
       </div>
     </div>
