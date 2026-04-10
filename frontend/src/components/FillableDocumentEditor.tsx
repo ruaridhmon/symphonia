@@ -329,6 +329,9 @@ export default function FillableDocumentEditor({
   previewAnswers: _previewAnswers,
   onPreviewChange: _onPreviewChange,
 }: FillableDocumentEditorProps) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const changeTimerRef = useRef<number | null>(null);
+  const pendingValueRef = useRef<string | null>(null);
   const lastSyncedValueRef = useRef(value);
   const [slashMenu, setSlashMenu] = useState<{ start: number; end: number; query: string; labelHint: string } | null>(null);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
@@ -343,6 +346,39 @@ export default function FillableDocumentEditor({
     const labelHint = slashMenu?.labelHint?.trim();
     const label = labelHint || option.field.label;
     return fieldFromType(option.field.fieldType, label, option.field.optional);
+  }
+
+  function flushPendingChange() {
+    if (changeTimerRef.current !== null) {
+      window.clearTimeout(changeTimerRef.current);
+      changeTimerRef.current = null;
+    }
+    if (pendingValueRef.current === null) return;
+    const nextValue = pendingValueRef.current;
+    pendingValueRef.current = null;
+    onChange(createRichFillableDocumentTemplate(nextValue));
+  }
+
+  function clearPendingChange() {
+    if (changeTimerRef.current !== null) {
+      window.clearTimeout(changeTimerRef.current);
+      changeTimerRef.current = null;
+    }
+    pendingValueRef.current = null;
+  }
+
+  function scheduleChange(nextHtml: string, immediate = false) {
+    pendingValueRef.current = nextHtml;
+    if (immediate) {
+      flushPendingChange();
+      return;
+    }
+    if (changeTimerRef.current !== null) {
+      window.clearTimeout(changeTimerRef.current);
+    }
+    changeTimerRef.current = window.setTimeout(() => {
+      flushPendingChange();
+    }, 140);
   }
 
   const editor = useEditor({
@@ -361,10 +397,13 @@ export default function FillableDocumentEditor({
     onUpdate: ({ editor: currentEditor }) => {
       const nextHtml = currentEditor.getHTML();
       lastSyncedValueRef.current = nextHtml;
-      onChange(createRichFillableDocumentTemplate(nextHtml));
+      scheduleChange(nextHtml);
       const nextSlash = getSlashMenuState(currentEditor);
       setSlashMenu(nextSlash);
       setSelectedCommandIndex(0);
+    },
+    onBlur: () => {
+      flushPendingChange();
     },
     onSelectionUpdate: ({ editor: currentEditor }) => {
       const nextSlash = getSlashMenuState(currentEditor);
@@ -427,6 +466,23 @@ export default function FillableDocumentEditor({
     editor.setEditable(true);
   }, [editor]);
 
+  useEffect(() => () => {
+    clearPendingChange();
+  }, []);
+
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as globalThis.Node | null)) {
+        flushPendingChange();
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+    };
+  });
+
   useEffect(() => {
     if (!editor) return;
     const content = value.trimStart().startsWith('<!-- symphonia-document-mode:')
@@ -434,9 +490,11 @@ export default function FillableDocumentEditor({
       : value;
     if (content === lastSyncedValueRef.current) return;
     if (editor.getHTML() === content) {
+      clearPendingChange();
       lastSyncedValueRef.current = content;
       return;
     }
+    clearPendingChange();
     editor.commands.setContent(content || '<p></p>', false);
     lastSyncedValueRef.current = content;
   }, [editor, value]);
@@ -526,6 +584,7 @@ export default function FillableDocumentEditor({
     editor.view.dispatch(
       editor.state.tr.setNodeMarkup(selectedField.pos, undefined, nextAttrs),
     );
+    lastSyncedValueRef.current = editor.getHTML();
     setSelectedField({ pos: selectedField.pos, attrs: nextAttrs });
   }
 
@@ -560,6 +619,7 @@ export default function FillableDocumentEditor({
 
   return (
     <div
+      ref={rootRef}
       className="overflow-hidden rounded-[1.7rem]"
       style={{
         border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',

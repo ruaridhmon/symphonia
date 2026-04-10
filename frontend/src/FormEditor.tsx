@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Trash2, Plus, Save, ChevronUp, ChevronDown, Copy, Ticket } from 'lucide-react';
 import { api, getApiErrorDetail } from './api/client';
@@ -88,27 +88,29 @@ export default function FormEditor() {
   );
   const [consentDocument, setConsentDocument] = useState('');
   const validQuestions = questions.filter((question) => question.label.trim() !== '');
-  const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
-  const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
-    label: field.label,
-    requireEvidence: false,
-    requireCounterarguments: false,
-    requireConfidence: false,
-    optional: field.optional,
-    fieldType: field.fieldType,
-    inputType: field.inputType === 'document' ? null : field.inputType,
-    rows: field.rows,
-    placeholder: field.placeholder,
-    options: field.options,
-    minValue: field.minValue,
-    maxValue: field.maxValue,
-    minLabel: field.minLabel,
-    midLabel: field.midLabel,
-    maxLabel: field.maxLabel,
-    allowUnsure: field.allowUnsure,
-  }));
+  const editableDocumentQuestion = useMemo(() => getEditableDocumentQuestion(documentTemplate), [documentTemplate]);
+  const documentQuestions = useMemo<ConfigurableQuestion[]>(() => (
+    (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
+      label: field.label,
+      requireEvidence: false,
+      requireCounterarguments: false,
+      requireConfidence: false,
+      optional: field.optional,
+      fieldType: field.fieldType === 'short' || field.fieldType === 'long' ? field.fieldType : null,
+      inputType: field.inputType === 'document' ? null : field.inputType,
+      rows: field.rows,
+      placeholder: field.placeholder,
+      options: field.options,
+      minValue: field.minValue,
+      maxValue: field.maxValue,
+      minLabel: field.minLabel,
+      midLabel: field.midLabel,
+      maxLabel: field.maxLabel,
+      allowUnsure: field.allowUnsure,
+    }))
+  ), [documentTemplate, editableDocumentQuestion]);
   const isDocumentMode = isDocumentTemplate(documentTemplate);
-  const previewQuestions = isDocumentMode ? documentQuestions : questions;
+  const previewQuestions: ConfigurableQuestion[] = isDocumentMode ? documentQuestions : questions;
   const validPreviewQuestions = previewQuestions.filter((question) => question.label.trim() !== '');
   const isSurveyMode =
     questions.length > 0 &&

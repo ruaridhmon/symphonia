@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronUp, ChevronDown, Trash2, RefreshCw, BookOpen, X } from 'lucide-react';
 import { api, getApiErrorDetail } from './api/client';
@@ -370,27 +370,29 @@ export default function AdminFormNew() {
     'I confirm that I understand the purpose of this form and consent to my response being used within this consultation.',
   );
   const [consentDocument, setConsentDocument] = useState('');
-  const editableDocumentQuestion = getEditableDocumentQuestion(documentTemplate);
-  const documentQuestions = (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
-    label: field.label,
-    requireEvidence: false,
-    requireCounterarguments: false,
-    requireConfidence: false,
-    optional: field.optional,
-    fieldType: field.fieldType,
-    inputType: field.inputType === 'document' ? null : field.inputType,
-    rows: field.rows,
-    placeholder: field.placeholder,
-    options: field.options,
-    minValue: field.minValue,
-    maxValue: field.maxValue,
-    minLabel: field.minLabel,
-    midLabel: field.midLabel,
-    maxLabel: field.maxLabel,
-    allowUnsure: field.allowUnsure,
-  }));
+  const editableDocumentQuestion = useMemo(() => getEditableDocumentQuestion(documentTemplate), [documentTemplate]);
+  const documentQuestions = useMemo<ConfigurableQuestion[]>(() => (
+    (editableDocumentQuestion ? [editableDocumentQuestion] : parseDocumentTemplateFields(documentTemplate)).map((field) => ({
+      label: field.label,
+      requireEvidence: false,
+      requireCounterarguments: false,
+      requireConfidence: false,
+      optional: field.optional,
+      fieldType: field.fieldType === 'short' || field.fieldType === 'long' ? field.fieldType : null,
+      inputType: field.inputType === 'document' ? null : field.inputType,
+      rows: field.rows,
+      placeholder: field.placeholder,
+      options: field.options,
+      minValue: field.minValue,
+      maxValue: field.maxValue,
+      minLabel: field.minLabel,
+      midLabel: field.midLabel,
+      maxLabel: field.maxLabel,
+      allowUnsure: field.allowUnsure,
+    }))
+  ), [documentTemplate, editableDocumentQuestion]);
   const isDocumentMode = isDocumentTemplate(documentTemplate);
-  const previewQuestions = isDocumentMode ? documentQuestions : questions;
+  const previewQuestions: ConfigurableQuestion[] = isDocumentMode ? documentQuestions : questions;
   const validPreviewQuestions = previewQuestions.filter((question) => question.label.trim() !== '');
   const isSurveyMode =
     questions.length > 0 &&
@@ -492,7 +494,7 @@ export default function AdminFormNew() {
   useEffect(() => {
     setPreviewResponses(prev => {
       const next: Record<string, StructuredResponse> = {};
-      previewQuestions.forEach((_, index) => {
+      previewQuestions.forEach((_: ConfigurableQuestion, index: number) => {
         const key = `q${index + 1}`;
         next[key] = prev[key] ?? emptyStructuredResponse();
       });
