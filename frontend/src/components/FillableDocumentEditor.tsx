@@ -358,6 +358,58 @@ function QuickInsertButton({
   );
 }
 
+function SegmentedToolbar({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="inline-flex items-center overflow-hidden rounded-2xl"
+      style={{
+        border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)',
+        backgroundColor: 'rgba(248,250,252,0.92)',
+        boxShadow: '0 10px 24px -24px rgba(15,23,42,0.22)',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SegmentedToolbarButton({
+  label,
+  active,
+  onClick,
+  icon,
+  first = false,
+}: {
+  label: string;
+  active?: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+  first?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className="inline-flex h-10 w-10 items-center justify-center transition-colors"
+      style={{
+        border: 'none',
+        borderLeft: first ? 'none' : '1px solid color-mix(in srgb, var(--border) 76%, transparent)',
+        backgroundColor: active ? 'color-mix(in srgb, var(--accent) 10%, white)' : 'transparent',
+        color: active ? 'var(--accent)' : 'var(--muted-foreground)',
+      }}
+    >
+      {icon}
+    </button>
+  );
+}
+
 function mergeInlineStyle(existingStyle: string | null | undefined, nextRules: Record<string, string | null | undefined>) {
   const styleMap = new Map<string, string>();
   (existingStyle || '')
@@ -841,10 +893,12 @@ export default function FillableDocumentEditor({
           <ToolbarGroup label="Layout">
             <RichToolbarButton label="Bullets" active={Boolean(editor?.isActive('bulletList'))} onClick={() => editor?.chain().focus().toggleBulletList().run()} icon={<List size={14} />} />
             <RichToolbarButton label="Numbered" active={Boolean(editor?.isActive('orderedList'))} onClick={() => editor?.chain().focus().toggleOrderedList().run()} icon={<ListOrdered size={14} />} />
-            <RichToolbarButton label="Align left" active={isAligned('left')} onClick={() => setBlockTextAlign('left')} icon={<AlignLeft size={14} />} />
-            <RichToolbarButton label="Align center" active={isAligned('center')} onClick={() => setBlockTextAlign('center')} icon={<AlignCenter size={14} />} />
-            <RichToolbarButton label="Align right" active={isAligned('right')} onClick={() => setBlockTextAlign('right')} icon={<AlignRight size={14} />} />
-            <RichToolbarButton label="Justify" active={isAligned('justify')} onClick={() => setBlockTextAlign('justify')} icon={<AlignJustify size={14} />} />
+            <SegmentedToolbar>
+              <SegmentedToolbarButton label="Align left" active={isAligned('left')} onClick={() => setBlockTextAlign('left')} icon={<AlignLeft size={14} />} first />
+              <SegmentedToolbarButton label="Align center" active={isAligned('center')} onClick={() => setBlockTextAlign('center')} icon={<AlignCenter size={14} />} />
+              <SegmentedToolbarButton label="Align right" active={isAligned('right')} onClick={() => setBlockTextAlign('right')} icon={<AlignRight size={14} />} />
+              <SegmentedToolbarButton label="Justify" active={isAligned('justify')} onClick={() => setBlockTextAlign('justify')} icon={<AlignJustify size={14} />} />
+            </SegmentedToolbar>
             <RichToolbarButton label="Highlight" active={Boolean(editor?.isActive('highlight'))} onClick={() => editor?.chain().focus().toggleHighlight({ color: '#fff3a3' }).run()} icon={<Highlighter size={14} />} />
             <div className="ml-1 flex items-center gap-1 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
               <PaintBucket size={14} style={{ color: 'var(--muted-foreground)' }} />
