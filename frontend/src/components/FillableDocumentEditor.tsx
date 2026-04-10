@@ -536,6 +536,18 @@ export default function FillableDocumentEditor({
       })()
     : '';
 
+  const settingsInputHandlers = {
+    onFocus: () => setSlashMenu(null),
+    onMouseDown: (event: React.MouseEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
+    onKeyDown: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
+  };
+
+  const settingsCheckboxHandlers = {
+    onFocus: () => setSlashMenu(null),
+    onMouseDown: (event: React.MouseEvent<HTMLInputElement>) => event.stopPropagation(),
+    onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => event.stopPropagation(),
+  };
+
   return (
     <div
       className="overflow-hidden rounded-[1.7rem]"
@@ -760,6 +772,7 @@ export default function FillableDocumentEditor({
                     </label>
                     <input
                       value={selectedField.attrs.label}
+                      {...settingsInputHandlers}
                       onChange={(event) =>
                         updateSelectedField({
                           label: event.target.value,
@@ -778,6 +791,7 @@ export default function FillableDocumentEditor({
                     </label>
                     <input
                       value={selectedField.attrs.placeholder}
+                      {...settingsInputHandlers}
                       onChange={(event) => updateSelectedField({ placeholder: event.target.value })}
                       className="w-full rounded-xl px-3 py-2 text-sm"
                       style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
@@ -788,6 +802,7 @@ export default function FillableDocumentEditor({
                     <input
                       type="checkbox"
                       checked={selectedField.attrs.optional}
+                      {...settingsCheckboxHandlers}
                       onChange={(event) => updateSelectedField({ optional: event.target.checked })}
                     />
                     Optional field
@@ -803,6 +818,7 @@ export default function FillableDocumentEditor({
                         min={1}
                         max={12}
                         value={selectedField.attrs.rows}
+                        {...settingsInputHandlers}
                         onChange={(event) => updateSelectedField({ rows: Number(event.target.value) || 1 })}
                         className="w-full rounded-xl px-3 py-2 text-sm"
                         style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
@@ -817,6 +833,7 @@ export default function FillableDocumentEditor({
                       </label>
                       <textarea
                         value={selectedFieldOptions}
+                        {...settingsInputHandlers}
                         onChange={(event) =>
                           updateSelectedField({
                             options: JSON.stringify(
@@ -843,6 +860,7 @@ export default function FillableDocumentEditor({
                         <input
                           type="number"
                           value={selectedField.attrs.minValue ?? 0}
+                          {...settingsInputHandlers}
                           onChange={(event) => updateSelectedField({ minValue: Number(event.target.value) })}
                           className="w-full rounded-xl px-3 py-2 text-sm"
                           style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
@@ -855,6 +873,7 @@ export default function FillableDocumentEditor({
                         <input
                           type="number"
                           value={selectedField.attrs.maxValue ?? 10}
+                          {...settingsInputHandlers}
                           onChange={(event) => updateSelectedField({ maxValue: Number(event.target.value) })}
                           className="w-full rounded-xl px-3 py-2 text-sm"
                           style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
@@ -866,6 +885,7 @@ export default function FillableDocumentEditor({
                         </label>
                         <input
                           value={selectedField.attrs.minLabel ?? ''}
+                          {...settingsInputHandlers}
                           onChange={(event) => updateSelectedField({ minLabel: event.target.value })}
                           className="w-full rounded-xl px-3 py-2 text-sm"
                           style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
@@ -877,6 +897,7 @@ export default function FillableDocumentEditor({
                         </label>
                         <input
                           value={selectedField.attrs.maxLabel ?? ''}
+                          {...settingsInputHandlers}
                           onChange={(event) => updateSelectedField({ maxLabel: event.target.value })}
                           className="w-full rounded-xl px-3 py-2 text-sm"
                           style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
