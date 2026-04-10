@@ -51,7 +51,14 @@ type SelectedFieldState = {
   };
 };
 
-const COLOR_SWATCHES = ['#172033', '#1d4ed8', '#0f766e', '#b45309', '#be123c', '#6d28d9'];
+const COLOR_OPTIONS = [
+  { value: '#172033', label: 'Ink' },
+  { value: '#1d4ed8', label: 'Blue' },
+  { value: '#0f766e', label: 'Teal' },
+  { value: '#b45309', label: 'Amber' },
+  { value: '#be123c', label: 'Rose' },
+  { value: '#6d28d9', label: 'Violet' },
+] as const;
 const FONT_PRESETS = [
   { id: 'editorial', label: 'Editorial', style: { fontFamily: 'Georgia, "Times New Roman", serif' } },
   { id: 'modern', label: 'Modern', style: { fontFamily: '"Aptos", "Segoe UI", sans-serif' } },
@@ -301,31 +308,16 @@ function RichToolbarButton({
   );
 }
 
-function ToolbarGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
+function ToolbarGroup({ children }: { children: ReactNode }) {
   return (
     <div
-      className="flex flex-wrap items-center gap-2 rounded-[1.3rem] px-3 py-3"
+      className="flex flex-wrap items-center gap-2 rounded-2xl px-2.5 py-2"
       style={{
         border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)',
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(246,249,252,0.92) 100%)',
-        boxShadow: '0 18px 38px -34px rgba(15,23,42,0.22)',
+        background: 'rgba(255,255,255,0.94)',
+        boxShadow: '0 12px 28px -28px rgba(15,23,42,0.18)',
       }}
     >
-      <span
-        className="mr-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]"
-        style={{
-          backgroundColor: 'color-mix(in srgb, var(--foreground) 4%, transparent)',
-          color: 'var(--muted-foreground)',
-        }}
-      >
-        {label}
-      </span>
       {children}
     </div>
   );
@@ -457,6 +449,7 @@ export default function FillableDocumentEditor({
   );
   const [selectedFontFamily, setSelectedFontFamily] = useState<string>(FONT_PRESETS[1].style.fontFamily);
   const [selectedFontSize, setSelectedFontSize] = useState<string>(SIZE_PRESETS[1].fontSize);
+  const [selectedColor, setSelectedColor] = useState<string>(COLOR_OPTIONS[0].value);
 
   function buildInsertedField(option: CommandOption) {
     const labelHint = slashMenu?.labelHint?.trim();
@@ -709,6 +702,7 @@ export default function FillableDocumentEditor({
 
   function setTextColor(color: string) {
     if (!editor) return;
+    setSelectedColor(color);
     const currentStyle = (editor.getAttributes('textStyle').style as string | undefined) ?? '';
     editor.chain().focus().setMark('textStyle', {
       style: mergeInlineStyle(currentStyle, { color }),
@@ -896,8 +890,8 @@ export default function FillableDocumentEditor({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <ToolbarGroup label="Typography">
+        <div className="flex flex-wrap items-center gap-2">
+          <ToolbarGroup>
             <div className="mr-1 flex items-center gap-2 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
               <Type size={14} style={{ color: 'var(--muted-foreground)' }} />
               <select
@@ -915,6 +909,7 @@ export default function FillableDocumentEditor({
               </select>
             </div>
             <div className="mr-1 flex items-center gap-2 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
+              <span className="text-[11px] font-medium uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>Size</span>
               <select
                 aria-label="Font size"
                 value={selectedFontSize}
@@ -929,6 +924,22 @@ export default function FillableDocumentEditor({
                 ))}
               </select>
             </div>
+            <div className="mr-1 flex items-center gap-2 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
+              <PaintBucket size={14} style={{ color: selectedColor }} />
+              <select
+                aria-label="Text color"
+                value={selectedColor}
+                onChange={(event) => setTextColor(event.target.value)}
+                className="rounded-xl px-2.5 py-1.5 text-xs font-medium"
+                style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'white', color: 'var(--foreground)' }}
+              >
+                {COLOR_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <RichToolbarButton label="Bold" active={Boolean(editor?.isActive('bold'))} onClick={() => editor?.chain().focus().toggleBold().run()} icon={<Bold size={14} />} />
             <RichToolbarButton label="Italic" active={Boolean(editor?.isActive('italic'))} onClick={() => editor?.chain().focus().toggleItalic().run()} icon={<Italic size={14} />} />
             <RichToolbarButton label="Underline" active={Boolean(editor?.isActive('underline'))} onClick={() => editor?.chain().focus().toggleUnderline().run()} icon={<UnderlineIcon size={14} />} />
@@ -936,7 +947,7 @@ export default function FillableDocumentEditor({
             <RichToolbarButton label="Heading 2" active={Boolean(editor?.isActive('heading', { level: 2 }))} onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} icon={<Heading2 size={14} />} />
           </ToolbarGroup>
 
-          <ToolbarGroup label="Layout">
+          <ToolbarGroup>
             <RichToolbarButton label="Bullets" active={Boolean(editor?.isActive('bulletList'))} onClick={() => editor?.chain().focus().toggleBulletList().run()} icon={<List size={14} />} />
             <RichToolbarButton label="Numbered" active={Boolean(editor?.isActive('orderedList'))} onClick={() => editor?.chain().focus().toggleOrderedList().run()} icon={<ListOrdered size={14} />} />
             <SegmentedToolbar>
@@ -946,23 +957,9 @@ export default function FillableDocumentEditor({
               <SegmentedToolbarButton label="Justify" active={isAligned('justify')} onClick={() => setBlockTextAlign('justify')} icon={<AlignJustify size={14} />} />
             </SegmentedToolbar>
             <RichToolbarButton label="Highlight" active={Boolean(editor?.isActive('highlight'))} onClick={() => editor?.chain().focus().toggleHighlight({ color: '#fff3a3' }).run()} icon={<Highlighter size={14} />} />
-            <div className="ml-1 flex items-center gap-1 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
-              <PaintBucket size={14} style={{ color: 'var(--muted-foreground)' }} />
-              {COLOR_SWATCHES.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => setTextColor(color)}
-                  aria-label={`Set text color ${color}`}
-                  className="h-5 w-5 rounded-full"
-                  style={{ backgroundColor: color, border: '1px solid rgba(15,23,42,0.14)' }}
-                />
-              ))}
-            </div>
           </ToolbarGroup>
 
-          <ToolbarGroup label="Structure">
+          <ToolbarGroup>
             <QuickInsertButton label="Section" icon={<Heading1 size={13} />} onClick={() => insertSectionHeading(1, 'New section')} />
             <QuickInsertButton label="Subsection" icon={<Pilcrow size={13} />} onClick={() => insertSectionHeading(2, 'Subsection')} />
             <QuickInsertButton label="Guidance" icon={<Type size={13} />} onClick={insertGuidanceBlock} />
