@@ -337,6 +337,7 @@ export default function FillableDocumentEditor({
   const [slashMenu, setSlashMenu] = useState<{ start: number; end: number; query: string; labelHint: string } | null>(null);
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [selectedField, setSelectedField] = useState<SelectedFieldState | null>(null);
+  const [selectedFieldOptionsDraft, setSelectedFieldOptionsDraft] = useState('');
   const filteredCommands = COMMAND_OPTIONS.filter((option) =>
     !slashMenu?.query || option.label.toLowerCase().includes(slashMenu.query) || option.description.toLowerCase().includes(slashMenu.query),
   );
@@ -535,6 +536,19 @@ export default function FillableDocumentEditor({
     lastSyncedValueRef.current = content;
   }, [editor, value]);
 
+  useEffect(() => {
+    if (!selectedField) {
+      setSelectedFieldOptionsDraft('');
+      return;
+    }
+    try {
+      const parsed = JSON.parse(selectedField.attrs.options || '[]');
+      setSelectedFieldOptionsDraft(Array.isArray(parsed) ? parsed.join('\n') : '');
+    } catch {
+      setSelectedFieldOptionsDraft('');
+    }
+  }, [selectedField]);
+
   function setTextColor(color: string) {
     if (!editor) return;
     const currentStyle = (editor.getAttributes('textStyle').style as string | undefined) ?? '';
@@ -630,16 +644,18 @@ export default function FillableDocumentEditor({
     setSelectedField(null);
   }
 
-  const selectedFieldOptions = selectedField
-    ? (() => {
-        try {
-          const parsed = JSON.parse(selectedField.attrs.options || '[]');
-          return Array.isArray(parsed) ? parsed.join('\n') : '';
-        } catch {
-          return '';
-        }
-      })()
-    : '';
+  function updateSelectedFieldOptionsDraft(nextDraft: string) {
+    setSelectedFieldOptionsDraft(nextDraft);
+    updateSelectedField({
+      options: JSON.stringify(
+        nextDraft
+          .split('\n')
+          .map((item) => item.replace(/\r/g, ''))
+          .filter((item) => item.trim().length > 0)
+          .map((item) => item.trim()),
+      ),
+    });
+  }
 
   const settingsInputHandlers = {
     onFocus: () => setSlashMenu(null),
@@ -981,22 +997,17 @@ export default function FillableDocumentEditor({
                           Options
                         </label>
                         <textarea
-                          value={selectedFieldOptions}
+                          aria-label="Field options"
+                          value={selectedFieldOptionsDraft}
                           {...settingsInputHandlers}
-                          onChange={(event) =>
-                            updateSelectedField({
-                              options: JSON.stringify(
-                                event.target.value
-                                  .split('\n')
-                                  .map((item) => item.trim())
-                                  .filter(Boolean),
-                              ),
-                            })
-                          }
+                          onChange={(event) => updateSelectedFieldOptionsDraft(event.target.value)}
                           rows={6}
                           className="w-full rounded-xl px-3 py-2 text-sm"
                           style={{ border: '1px solid var(--input)', backgroundColor: 'white', resize: 'vertical' }}
                         />
+                        <p className="mt-1 text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                          Put one option on each line. Spaces inside an option are preserved.
+                        </p>
                       </div>
                     ) : null}
 
