@@ -482,6 +482,7 @@ export default function FillableDocumentEditor({
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [selectedField, setSelectedField] = useState<SelectedFieldState | null>(null);
   const [selectedFieldOptionsDraft, setSelectedFieldOptionsDraft] = useState('');
+  const [selectedFieldOptionsDirty, setSelectedFieldOptionsDirty] = useState(false);
   const [inspectorStyle, setInspectorStyle] = useState<{ top: number; left: number; maxHeight: number } | null>(null);
   const filteredCommands = COMMAND_OPTIONS.filter((option) =>
     !slashMenu?.query || option.label.toLowerCase().includes(slashMenu.query) || option.description.toLowerCase().includes(slashMenu.query),
@@ -685,13 +686,16 @@ export default function FillableDocumentEditor({
   useEffect(() => {
     if (!selectedField) {
       setSelectedFieldOptionsDraft('');
+      setSelectedFieldOptionsDirty(false);
       return;
     }
     try {
       const parsed = JSON.parse(selectedField.attrs.options || '[]');
       setSelectedFieldOptionsDraft(Array.isArray(parsed) ? parsed.join('\n') : '');
+      setSelectedFieldOptionsDirty(false);
     } catch {
       setSelectedFieldOptionsDraft('');
+      setSelectedFieldOptionsDirty(false);
     }
   }, [selectedField?.pos, selectedField?.attrs.key]);
 
@@ -850,21 +854,33 @@ export default function FillableDocumentEditor({
 
   function updateSelectedFieldOptionsDraft(nextDraft: string) {
     setSelectedFieldOptionsDraft(nextDraft);
-    updateSelectedField({
-      options: JSON.stringify(
-        nextDraft
-          .split('\n')
-          .map((item) => item.replace(/\r/g, ''))
-          .filter((item) => item.trim().length > 0)
-          .map((item) => item.trim()),
-      ),
-    });
+    setSelectedFieldOptionsDirty(true);
+  }
+
+  function commitSelectedFieldOptionsDraft() {
+    if (!selectedField || !selectedFieldOptionsDirty) return;
+
+    const normalizedOptions = JSON.stringify(
+      selectedFieldOptionsDraft
+        .split('\n')
+        .map((item) => item.replace(/\r/g, ''))
+        .filter((item) => item.trim().length > 0)
+        .map((item) => item.trim()),
+    );
+
+    if (normalizedOptions !== (selectedField.attrs.options || '[]')) {
+      updateSelectedField({ options: normalizedOptions });
+    }
+
+    setSelectedFieldOptionsDirty(false);
   }
 
   const settingsInputHandlers = {
     onFocus: () => setSlashMenu(null),
     onMouseDown: (event: React.MouseEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
+    onPointerDown: (event: React.PointerEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
     onKeyDown: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
+    onKeyDownCapture: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => event.stopPropagation(),
   };
 
   const settingsCheckboxHandlers = {
@@ -1219,6 +1235,7 @@ export default function FillableDocumentEditor({
                             value={selectedFieldOptionsDraft}
                             {...settingsInputHandlers}
                             onChange={(event) => updateSelectedFieldOptionsDraft(event.target.value)}
+                            onBlur={commitSelectedFieldOptionsDraft}
                             rows={6}
                             className="w-full rounded-xl px-3 py-2 text-sm"
                             style={{ border: '1px solid var(--input)', backgroundColor: 'white', resize: 'vertical' }}
