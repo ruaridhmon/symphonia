@@ -242,3 +242,47 @@ def test_standard_docx_extract_preserves_soft_line_breaks(
         "Teacher",
         "Other",
     ]
+
+
+def test_create_form_accepts_unprefixed_rich_fillable_document_template(
+    client: TestClient, admin_headers: dict
+):
+    unprefixed_template = """
+    <div>
+      <div>Q13 What is the single issue about AI in education that most keeps you awake at night, and why?</div>
+      <span
+        data-symphonia-field-key="q13"
+        data-symphonia-question-id="Q13"
+        data-symphonia-field-label="What is the single issue about AI in education that most keeps you awake at night, and why?"
+        data-symphonia-field-type="long"
+        data-symphonia-input-type="textarea"
+        data-symphonia-optional="false"
+        data-symphonia-rows="4"
+        data-symphonia-placeholder="Write your response here"
+      ></span>
+    </div>
+    """.strip()
+
+    response = client.post(
+        "/forms/create",
+        headers=admin_headers,
+        json={
+            "title": "Rich fillable save fallback",
+            "questions": [],
+            "document_template": unprefixed_template,
+        },
+    )
+
+    assert response.status_code == 201, response.text
+    created = response.json()
+
+    detail_response = client.get(
+        f"/forms/{created['id']}",
+        headers=admin_headers,
+    )
+    assert detail_response.status_code == 200, detail_response.text
+    payload = detail_response.json()
+
+    assert payload["document_template"].startswith(
+        "<!-- symphonia-document-mode: fillable-rich -->"
+    )
