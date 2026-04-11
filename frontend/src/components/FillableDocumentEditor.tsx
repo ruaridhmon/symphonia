@@ -13,11 +13,13 @@ import type { StructuredResponse } from '../types/structured-input';
 import DocumentTemplateFieldControl from './DocumentTemplateFieldControl';
 import type { DocumentTemplateField } from '../utils/documentTemplate';
 import { createDocumentTemplatePlaceholder, createRichFillableDocumentTemplate } from '../utils/documentTemplate';
+import { attachQuestionnaireSourceToHtml, stripQuestionnaireSourceFromHtml } from '../utils/docxImport';
 import { convertQuestionnaireTextToRichTemplate } from '../utils/questionnaireImport';
 
 interface FillableDocumentEditorProps {
   value: string;
   onChange: (value: string) => void;
+  questionnaireSource?: string | null;
   previewAnswers: Record<string, StructuredResponse>;
   onPreviewChange?: (key: string, value: StructuredResponse) => void;
 }
@@ -443,6 +445,7 @@ function mergeInlineStyle(existingStyle: string | null | undefined, nextRules: R
 export default function FillableDocumentEditor({
   value,
   onChange,
+  questionnaireSource = null,
   previewAnswers: _previewAnswers,
   onPreviewChange: _onPreviewChange,
 }: FillableDocumentEditorProps) {
@@ -472,6 +475,15 @@ export default function FillableDocumentEditor({
   const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
   const selectedColorOption = COLOR_OPTIONS.find((option) => option.value === selectedColor) ?? COLOR_OPTIONS[0];
 
+  function serializeTemplateContent(nextHtml: string) {
+    if (!questionnaireSource?.trim()) {
+      return createRichFillableDocumentTemplate(nextHtml);
+    }
+    return createRichFillableDocumentTemplate(
+      attachQuestionnaireSourceToHtml(nextHtml, questionnaireSource),
+    );
+  }
+
   function buildInsertedField(option: CommandOption) {
     const labelHint = slashMenu?.labelHint?.trim();
     const label = labelHint || option.field.label;
@@ -500,7 +512,7 @@ export default function FillableDocumentEditor({
     if (pendingValueRef.current === null) return;
     const nextValue = pendingValueRef.current;
     pendingValueRef.current = null;
-    onChange(createRichFillableDocumentTemplate(nextValue));
+    onChange(serializeTemplateContent(nextValue));
   }
 
   function clearPendingChange() {
@@ -654,7 +666,9 @@ export default function FillableDocumentEditor({
   useEffect(() => {
     if (!editor) return;
     const content = value.trimStart().startsWith('<!-- symphonia-document-mode:')
-      ? value.replace(/^<!--\s*symphonia-document-mode:\s*fillable-rich\s*-->\s*/i, '')
+      ? stripQuestionnaireSourceFromHtml(
+          value.replace(/^<!--\s*symphonia-document-mode:\s*fillable-rich\s*-->\s*/i, ''),
+        )
       : value;
     if (content === lastSyncedValueRef.current) return;
     if (editor.getHTML() === content) {
