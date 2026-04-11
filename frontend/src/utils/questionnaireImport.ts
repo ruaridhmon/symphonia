@@ -713,8 +713,10 @@ export function convertQuestionnaireTextToRichTemplate(text: string): Questionna
 
     htmlParts.push(
       `<div style="margin: 0 0 1rem; padding: 1rem 1rem 1.05rem; border-radius: 1.15rem; border: 1px solid #dbe4ef; background: rgba(255,255,255,0.84);">
-        <div style="margin-bottom: 0.55rem; font-size: 0.76rem; letter-spacing: 0.08em; text-transform: uppercase; color: #6a7b90;">${escapeHtml(question.questionId ?? `Question ${index + 1}`)}</div>
-        <div style="margin-bottom: 0.75rem; font-size: 1rem; line-height: 1.65; font-weight: 600; color: #16263e;">${escapeHtml(question.label)}</div>
+        <div style="margin-bottom: 0.75rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem;" data-symphonia-question-heading="true">
+          <span style="display: inline-flex; align-items: center; border-radius: 999px; padding: 0.18rem 0.58rem; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #35506d; background: #edf3f8;">${escapeHtml(question.questionId ?? `Question ${index + 1}`)}</span>
+          <span style="flex: 1 1 24rem; min-width: min(24rem, 100%); font-size: 1rem; line-height: 1.65; font-weight: 600; color: #16263e;">${escapeHtml(question.label)}</span>
+        </div>
         <div>${fieldHtml}</div>
         ${helpBits.length > 0 ? `<div style="margin-top: 0.7rem; font-size: 0.84rem; line-height: 1.55; color: #58708a;">${escapeHtml(helpBits.join(' '))}</div>` : ''}
       </div>`,

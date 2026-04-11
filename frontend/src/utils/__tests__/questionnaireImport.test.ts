@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseDocumentTemplateFields } from '../documentTemplate';
+import { getRichFillableTemplateContent, parseDocumentTemplateFields } from '../documentTemplate';
 import {
   attachQuestionnaireSourceToHtml,
   extractQuestionnaireSourceFromHtml,
@@ -731,6 +731,26 @@ describe('questionnaireImport', () => {
       questionId: 'Q1_1',
       fieldType: 'slider',
     });
+  });
+
+  it('renders the question id inline with the question text in generated fillable templates', () => {
+    const questionnaireText = [
+      'Section L. Open responses',
+      '',
+      'Q13',
+      'What is the single issue about AI in education that most “keeps you awake at night”, and why?',
+      'Response type: Free text, max 120 words.',
+    ].join('\n');
+
+    const converted = convertQuestionnaireTextToRichTemplate(questionnaireText);
+    const html = getRichFillableTemplateContent(converted.template);
+    const document = new DOMParser().parseFromString(html, 'text/html');
+    const heading = document.querySelector('[data-symphonia-question-heading="true"]');
+
+    expect(heading).not.toBeNull();
+    expect(heading?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'Q13 What is the single issue about AI in education that most “keeps you awake at night”, and why?',
+    );
   });
 
   it('imports the full AI education questionnaire with correct static field types and routed follow-ups', () => {
