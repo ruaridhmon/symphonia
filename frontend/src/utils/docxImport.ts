@@ -88,9 +88,14 @@ export function extractQuestionnaireTextFromHtml(sourceHtml: string): string {
   const lines: string[] = [];
 
   function pushLine(value: string, prefix = '') {
-    const normalized = value.replace(/\s+/g, ' ').trim();
-    if (!normalized) return;
-    lines.push(prefix ? `${prefix}${normalized}` : normalized);
+    const normalizedChunks = value
+      .split(/\n+/)
+      .map((chunk) => chunk.replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+    if (normalizedChunks.length === 0) return;
+    normalizedChunks.forEach((chunk, index) => {
+      lines.push(index === 0 && prefix ? `${prefix}${chunk}` : chunk);
+    });
   }
 
   function walk(node: Node) {
@@ -132,10 +137,7 @@ export function extractQuestionnaireTextFromHtml(sourceHtml: string): string {
     }
 
     if (['p', 'li', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)) {
-      const text = extractLineFromNode(element).replace(/\n+/g, ' ').trim();
-      if (text) {
-        lines.push(text);
-      }
+      pushLine(extractLineFromNode(element));
       return;
     }
 

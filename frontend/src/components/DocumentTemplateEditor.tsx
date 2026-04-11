@@ -59,6 +59,17 @@ export default function DocumentTemplateEditor({
     return converted.questions.length > 0 ? converted : null;
   }, [fillableContent, fields.length, value]);
 
+  function buildTypedTemplateFromQuestionnaireText(sourceText: string | null | undefined): string | null {
+    const plainText = sourceText?.trim();
+    if (!plainText) return null;
+    const converted = convertQuestionnaireTextToRichTemplate(plainText);
+    return converted.questions.length > 0 ? converted.template : null;
+  }
+
+  function hasRenderableFields(template: string | null | undefined): boolean {
+    return typeof template === 'string' && parseDocumentTemplateFields(template).length > 0;
+  }
+
   function applyQuestionnaireConversion() {
     setUploadError(null);
     setPendingAutoBuild(true);
@@ -117,9 +128,17 @@ export default function DocumentTemplateEditor({
             return null;
           }
 
-          const converted = convertQuestionnaireTextToRichTemplate(payload.template);
-          return converted.questions.length > 0 ? converted.template : null;
+          return {
+            extractedText: payload.template,
+            typedTemplate: buildTypedTemplateFromQuestionnaireText(payload.template),
+          };
         };
+
+        const standardExtraction = await requestStandardExtraction().catch(() => null);
+        if (standardExtraction?.typedTemplate) {
+          onChange(standardExtraction.typedTemplate);
+          return;
+        }
 
         try {
           const formData = new FormData();
@@ -140,7 +159,12 @@ export default function DocumentTemplateEditor({
           });
 
           const payload = await response.json().catch(() => ({}));
-          if (response.ok && typeof payload.template === 'string' && payload.template.trim()) {
+          if (
+            response.ok &&
+            typeof payload.template === 'string' &&
+            payload.template.trim() &&
+            hasRenderableFields(payload.template)
+          ) {
             onChange(payload.template);
             return;
           }
@@ -148,23 +172,18 @@ export default function DocumentTemplateEditor({
           // Fall back to local import heuristics when AI import is unavailable.
         }
 
-        const serverExtractedTemplate = await requestStandardExtraction().catch(() => null);
-        if (serverExtractedTemplate) {
-          onChange(serverExtractedTemplate);
-          return;
-        }
-
         const [normalizedHtml, rawQuestionnaireText] = await Promise.all([
           importDocxAsHtml(file),
           extractQuestionnaireTextFromDocx(file),
         ]);
         const extractedQuestionnaireText =
+          standardExtraction?.extractedText ||
           rawQuestionnaireText ||
           extractQuestionnaireTextFromHtml(normalizedHtml) ||
           htmlToPlainText(normalizedHtml);
-        const converted = convertQuestionnaireTextToRichTemplate(extractedQuestionnaireText);
-        if (converted.questions.length > 0) {
-          onChange(converted.template);
+        const convertedTemplate = buildTypedTemplateFromQuestionnaireText(extractedQuestionnaireText);
+        if (convertedTemplate) {
+          onChange(convertedTemplate);
           return;
         }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseDocumentTemplateFields } from '../documentTemplate';
+import { extractQuestionnaireTextFromHtml } from '../docxImport';
 import { convertQuestionnaireTextToRichTemplate, parseQuestionnaireText } from '../questionnaireImport';
 
 const FULL_AI_EDUCATION_QUESTIONNAIRE = `
@@ -648,6 +649,39 @@ describe('questionnaireImport', () => {
       minLabel: 'Not at all significant',
       midLabel: 'Moderately significant',
       maxLabel: 'Extremely significant',
+    });
+  });
+
+  it('preserves soft line breaks from imported html when auto-building fields', () => {
+    const importedHtml = [
+      '<p>Q0.<br>Which of the following best describes your current role?<br>Response type: Select one.<br>School/college senior leader<br>Middle leader<br>Other</p>',
+      '<p>Q1.<br>Thinking about AI in education over the next 2-3 years, how significant is each of the following challenges in your context?<br>Response type: 0-10 slider for each item.<br>Anchor labels: 0 = Not at all significant, 5 = Moderately significant, 10 = Extremely significant<br>Staff AI literacy, capability, and training<br>Time available for training and implementation</p>',
+    ].join('');
+
+    const extractedText = extractQuestionnaireTextFromHtml(importedHtml);
+    expect(extractedText).toContain('Q0.\nWhich of the following best describes your current role?');
+    expect(extractedText).toContain('School/college senior leader\nMiddle leader\nOther');
+    expect(extractedText).toContain(
+      'Response type: 0-10 slider for each item.\nAnchor labels: 0 = Not at all significant, 5 = Moderately significant, 10 = Extremely significant',
+    );
+
+    const converted = convertQuestionnaireTextToRichTemplate(extractedText);
+    const fields = parseDocumentTemplateFields(converted.template);
+
+    expect(fields.map((field) => field.fieldType)).toEqual([
+      'single_select',
+      'short',
+      'slider',
+      'slider',
+    ]);
+    expect(fields[0]).toMatchObject({
+      questionId: 'Q0',
+      options: ['School/college senior leader', 'Middle leader', 'Other'],
+    });
+    expect(fields[2]).toMatchObject({
+      questionId: 'Q1_1',
+      fieldType: 'slider',
+      label: 'Staff AI literacy, capability, and training',
     });
   });
 
