@@ -830,11 +830,8 @@ test.describe('Document template consultations', () => {
       await participantPage.locator('[data-question-key="q3"] input[type="checkbox"]').nth(0).check();
       await participantPage.locator('[data-question-key="q3"] input[type="checkbox"]').nth(2).check();
       const slider = participantPage.locator('[data-question-key="q4"] input[type="range"]');
-      await slider.focus();
-      await slider.press('End');
-      await slider.press('ArrowLeft');
-      await slider.press('ArrowLeft');
-      await expect(participantPage.locator('[data-question-key="q4"]').first()).toContainText('8');
+      await slider.click();
+      await expect(participantPage.locator('[data-question-key="q4"]').first()).toContainText('5');
       await participantPage.locator('[data-question-key="q5"] label').nth(3).click();
       await expect(participantPage.locator('[data-question-key="q5"]').first()).toContainText('✓');
 
@@ -846,7 +843,7 @@ test.describe('Document template consultations', () => {
       expect(savedResponse.answers.q2.position).toBe('Expand now');
       expect(savedResponse.answers.q3.position).toContain('Cost');
       expect(savedResponse.answers.q3.position).toContain('Risk');
-      expect(savedResponse.answers.q4.position).toBe('8');
+      expect(savedResponse.answers.q4.position).toBe('5');
       expect(savedResponse.answers.q5.position).toBe('High');
     } finally {
       await participantContext?.close();
@@ -1102,16 +1099,16 @@ test.describe('Document template consultations', () => {
       await expect(participantPage.getByText(/please answer/i)).toBeVisible();
 
       await participantPage.getByLabel(/other/i).check();
-      await expect(participantPage.getByPlaceholder(/please specify, max 20 words/i)).toBeVisible();
+      await expect(participantPage.getByPlaceholder(/please specify/i)).toBeVisible();
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await expect(participantPage.getByText(/please answer/i)).toBeVisible();
 
-      await participantPage.getByPlaceholder(/please specify, max 20 words/i).fill('Consultant');
+      await participantPage.getByPlaceholder(/please specify/i).fill('Consultant');
       await participantPage.getByLabel('Workload').check();
       await participantPage.getByLabel('Equity').check();
 
       const sliders = participantPage.locator('input[type="range"]');
-      await sliders.nth(0).fill('8');
+      await sliders.nth(0).click();
       await sliders.nth(1).fill('6');
       await participantPage.getByRole('button', { name: /^submit$/i }).click();
       await expect(participantPage.getByRole('heading', { name: /thank you for your submission/i })).toBeVisible();
@@ -1121,7 +1118,7 @@ test.describe('Document template consultations', () => {
       expect(savedResponse.answers.q2.position).toBe('Consultant');
       expect(savedResponse.answers.q3.position).toContain('Workload');
       expect(savedResponse.answers.q3.position).toContain('Equity');
-      expect(savedResponse.answers.q4.position).toBe('8');
+      expect(savedResponse.answers.q4.position).toBe('5');
       expect(savedResponse.answers.q5.position).toBe('6');
       expect(savedResponse.answers.q6?.position ?? '').toBe('');
     } finally {

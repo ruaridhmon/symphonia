@@ -55,7 +55,7 @@ export default function SurveyQuestionList({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {groups.map((group) => (
         <section
           key={group.id}
@@ -80,7 +80,7 @@ export default function SurveyQuestionList({
             </div>
           ) : null}
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             {group.items.map(({ key, index, question }, itemIndex) => {
               if (!isQuestionVisible(question)) return null;
               const options = extractQuestionOptions(question);
@@ -97,7 +97,7 @@ export default function SurveyQuestionList({
               return (
                 <div
                   key={key}
-                  className="last:mb-0 rounded-2xl px-3 py-3 sm:px-4"
+                  className="last:mb-0 rounded-[1.35rem] px-3 py-2.5 sm:px-4 sm:py-3"
                   data-question-key={key}
                   style={{
                     border: highlighted
@@ -105,7 +105,7 @@ export default function SurveyQuestionList({
                       : '1px solid transparent',
                     backgroundColor: highlighted
                       ? 'color-mix(in srgb, var(--destructive) 5%, transparent)'
-                      : 'transparent',
+                      : 'color-mix(in srgb, var(--foreground) 1.5%, transparent)',
                     scrollMarginTop: '6rem',
                   }}
                 >
@@ -117,7 +117,7 @@ export default function SurveyQuestionList({
                       {question.groupPrompt}
                     </p>
                   ) : null}
-                  <label className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+                  <label className="mb-2.5 flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
                     <span>{question.label}</span>
                     <span
                       className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"

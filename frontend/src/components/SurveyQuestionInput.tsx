@@ -48,6 +48,18 @@ const composerFieldStyle = {
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)',
 } as const;
 
+function clampNumber(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function parseSliderValue(position: string, min: number, max: number): number | null {
+  const trimmed = position.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  if (!Number.isFinite(parsed)) return null;
+  return clampNumber(parsed, min, max);
+}
+
 function updatePosition(value: StructuredResponse, position: string): StructuredResponse {
   return {
     ...value,
@@ -227,13 +239,17 @@ export default function SurveyQuestionInput({
   const selectedValues = decodeSelections(value.position);
   const sliderMin = question.minValue ?? 0;
   const sliderMax = question.maxValue ?? 10;
-  const sliderValue =
-    value.position.trim() === '' ? null : Math.min(sliderMax, Math.max(sliderMin, Number(value.position)));
+  const sliderMidpoint = Math.round((sliderMin + sliderMax) / 2);
+  const sliderValue = parseSliderValue(value.position, sliderMin, sliderMax);
   const voiceInput = useVoiceInput(
     !readOnly && (inputType === 'text' || inputType === 'textarea'),
     value.position,
     (nextValue) => onChange(updatePosition(value, nextValue)),
   );
+
+  function commitSliderValue(nextValue: number) {
+    onChange(updatePosition(value, String(clampNumber(nextValue, sliderMin, sliderMax))));
+  }
 
   if (readOnly) {
     return (
@@ -253,11 +269,23 @@ export default function SurveyQuestionInput({
               ))}
             </ul>
           ) : inputType === 'slider' && sliderValue !== null && Number.isFinite(sliderValue) ? (
-            <div>
-              <div className="text-lg font-semibold text-foreground">{sliderValue}</div>
-              <div className="mt-1 flex justify-between gap-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-lg font-semibold text-foreground tabular-nums">{sliderValue}</div>
+                <div
+                  className="inline-flex min-w-[3.25rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                    color: 'var(--accent)',
+                  }}
+                >
+                  Score
+                </div>
+              </div>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 text-[11px] leading-4" style={{ color: 'var(--muted-foreground)' }}>
                 <span>{question.minLabel ?? sliderMin}</span>
-                <span>{question.maxLabel ?? sliderMax}</span>
+                <span className="text-center">{question.midLabel ?? '\u00A0'}</span>
+                <span className="text-right">{question.maxLabel ?? sliderMax}</span>
               </div>
             </div>
           ) : inputType === 'likert' && value.position.trim() ? (
@@ -392,28 +420,28 @@ export default function SurveyQuestionInput({
     return (
       <div style={previewOnly ? { pointerEvents: 'none' } : undefined}>
         {renderHelpText(question.helpText)}
-        <p
-          className="mb-2 text-xs"
-          style={{ color: 'var(--muted-foreground)', minHeight: '1rem' }}
-        >
-          {sliderValue === null ? 'No rating selected yet.' : '\u00A0'}
-        </p>
         <div
-          className="rounded-xl px-3.5 py-2.5"
+          className="rounded-[1.15rem] px-3.5 py-3"
           style={{
-            backgroundColor: 'var(--background)',
-            border: '1px solid var(--border)',
+            backgroundColor: 'color-mix(in srgb, var(--background) 80%, var(--card) 20%)',
+            border: '1px solid color-mix(in srgb, var(--border) 82%, transparent)',
           }}
         >
-          <div className="mb-1.5 flex items-center justify-end">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <span
+              className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              {sliderValue === null ? 'Choose a score' : 'Selected score'}
+            </span>
             <div
-              className="inline-flex min-w-[2.5rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold"
+              className="inline-flex min-w-[3.5rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums"
               style={{
                 backgroundColor: sliderValue === null ? 'var(--muted)' : 'color-mix(in srgb, var(--accent) 10%, transparent)',
                 color: sliderValue === null ? 'var(--muted-foreground)' : 'var(--accent)',
               }}
             >
-              {sliderValue ?? 'Not set'}
+              {sliderValue ?? 'Unset'}
             </div>
           </div>
           <input
@@ -421,8 +449,13 @@ export default function SurveyQuestionInput({
             min={sliderMin}
             max={sliderMax}
             step={1}
-            value={sliderValue ?? Math.round((sliderMin + sliderMax) / 2)}
-            onChange={(event) => onChange(updatePosition(value, event.target.value))}
+            value={sliderValue ?? sliderMidpoint}
+            onPointerDown={() => {
+              if (sliderValue === null) {
+                commitSliderValue(sliderMidpoint);
+              }
+            }}
+            onChange={(event) => commitSliderValue(Number(event.target.value))}
             className="w-full"
             style={{
               opacity: sliderValue === null ? 0.65 : 1,
@@ -430,11 +463,12 @@ export default function SurveyQuestionInput({
             }}
           />
           <div
-            className="mt-1.5 flex items-start justify-between gap-3 text-[11px] leading-4"
+            className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 text-[11px] leading-4"
             style={{ color: 'var(--muted-foreground)' }}
           >
-            <span className="max-w-[46%] text-left">{question.minLabel ?? sliderMin}</span>
-            <span className="max-w-[46%] text-right">{question.maxLabel ?? sliderMax}</span>
+            <span className="text-left">{question.minLabel ?? sliderMin}</span>
+            <span className="text-center">{question.midLabel ?? '\u00A0'}</span>
+            <span className="text-right">{question.maxLabel ?? sliderMax}</span>
           </div>
         </div>
       </div>

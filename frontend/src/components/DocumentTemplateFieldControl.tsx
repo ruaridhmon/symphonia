@@ -54,11 +54,11 @@ export default function DocumentTemplateFieldControl({
 
   return (
     <span
-      className="inline-flex max-w-full flex-col gap-1.5 rounded-2xl px-3 py-2 align-middle"
+      className="inline-flex max-w-full flex-col gap-1 rounded-[1.15rem] px-3 py-2 align-middle"
       data-question-key={field.questionKey}
       onClick={() => onSelect?.()}
       style={{
-        minWidth: usesInlineTextField ? '16rem' : '22rem',
+        minWidth: usesInlineTextField ? '15rem' : '18rem',
         backgroundColor: highlighted
           ? 'color-mix(in srgb, var(--destructive) 4%, white)'
           : 'color-mix(in srgb, var(--background) 84%, white)',
@@ -67,7 +67,7 @@ export default function DocumentTemplateFieldControl({
           : answered
             ? '1px solid color-mix(in srgb, #138a52 24%, transparent)'
             : '1px solid color-mix(in srgb, var(--border) 88%, transparent)',
-        boxShadow: '0 10px 24px -22px rgba(15, 23, 42, 0.28)',
+        boxShadow: '0 10px 24px -24px rgba(15, 23, 42, 0.24)',
         scrollMarginTop: '6rem',
         cursor: onSelect ? 'pointer' : 'default',
       }}
