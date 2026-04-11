@@ -3637,7 +3637,9 @@ def _normalize_document_template(template: str | None) -> str | None:
         body = _strip_document_template_prefix(template)
         cleaned = f"{RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX}\n{body}".strip()
     elif RICH_DOCUMENT_FIELD_PATTERN.search(template):
-        cleaned = f"{RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX}\n{template.strip()}".strip()
+        cleaned = (
+            f"{RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX}\n{template.strip()}".strip()
+        )
     else:
         cleaned = template.replace("\r\n", "\n").replace("\r", "\n").strip()
     return cleaned or None
