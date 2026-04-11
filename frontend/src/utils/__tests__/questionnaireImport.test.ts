@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { getRichFillableTemplateContent, parseDocumentTemplateFields } from '../documentTemplate';
+import {
+  getDocumentTemplateMode,
+  getRichFillableTemplateContent,
+  parseDocumentTemplateFields,
+} from '../documentTemplate';
 import {
   attachQuestionnaireSourceToHtml,
   extractQuestionnaireSourceFromHtml,
@@ -750,6 +754,38 @@ describe('questionnaireImport', () => {
     expect(heading).not.toBeNull();
     expect(heading?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
       'Q13 What is the single issue about AI in education that most “keeps you awake at night”, and why?',
+    );
+  });
+
+  it('treats unprefixed rich fillable html as a rich document template', () => {
+    const unprefixedRichTemplate = `
+      <div>
+        <div data-symphonia-question-heading="true">Q13 What is the single issue about AI in education that most keeps you awake at night, and why?</div>
+        <span
+          data-symphonia-field-key="q13"
+          data-symphonia-question-id="Q13"
+          data-symphonia-field-label="What is the single issue about AI in education that most keeps you awake at night, and why?"
+          data-symphonia-field-type="long"
+          data-symphonia-input-type="textarea"
+          data-symphonia-optional="false"
+          data-symphonia-rows="4"
+          data-symphonia-placeholder="Write your response here"
+        ></span>
+      </div>
+    `.trim();
+
+    expect(getDocumentTemplateMode(unprefixedRichTemplate)).toBe('fillable-rich');
+
+    const fields = parseDocumentTemplateFields(unprefixedRichTemplate);
+    expect(fields).toHaveLength(1);
+    expect(fields[0]).toMatchObject({
+      questionId: 'Q13',
+      fieldType: 'long',
+      inputType: 'textarea',
+    });
+
+    expect(getRichFillableTemplateContent(unprefixedRichTemplate)).toContain(
+      'data-symphonia-field-key="q13"',
     );
   });
 

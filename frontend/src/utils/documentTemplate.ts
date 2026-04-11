@@ -40,6 +40,7 @@ export const EDITABLE_DOCUMENT_TEMPLATE_PREFIX = '<!-- symphonia-document-mode: 
 export const RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX = '<!-- symphonia-document-mode: fillable-rich -->';
 const PLACEHOLDER_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/g;
 const FIELD_TAG_SELECTOR = 'span[data-symphonia-field-key]';
+const RICH_FIELD_MARKUP_RE = /<span\b[^>]*data-symphonia-field-key\s*=/i;
 
 export function slugifyDocumentFieldKey(value: string): string {
   return value
@@ -53,12 +54,14 @@ export function getDocumentTemplateMode(template: string | null | undefined): 'f
   if (!template?.trim()) return 'fillable';
   const trimmed = template.trimStart();
   if (trimmed.startsWith(EDITABLE_DOCUMENT_TEMPLATE_PREFIX)) return 'editable';
-  if (trimmed.startsWith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX)) return 'fillable-rich';
+  if (trimmed.startsWith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX) || RICH_FIELD_MARKUP_RE.test(trimmed)) {
+    return 'fillable-rich';
+  }
   return 'fillable';
 }
 
 export function isRichFillableDocumentTemplate(template: string | null | undefined): boolean {
-  return Boolean(template?.trimStart().startsWith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX));
+  return getDocumentTemplateMode(template) === 'fillable-rich';
 }
 
 export function isEditableDocumentTemplate(template: string | null | undefined): boolean {
@@ -74,7 +77,10 @@ export function getDocumentTemplateContent(template: string | null | undefined):
 export function getRichFillableTemplateContent(template: string | null | undefined): string {
   if (!template) return '';
   if (!isRichFillableDocumentTemplate(template)) return template;
-  return template.replace(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX, '').trim();
+  if (template.trimStart().startsWith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX)) {
+    return template.replace(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX, '').trim();
+  }
+  return template.trim();
 }
 
 export function createEditableDocumentTemplate(content: string): string {
