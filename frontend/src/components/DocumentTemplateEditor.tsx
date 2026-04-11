@@ -4,6 +4,8 @@ import { API_BASE_URL } from '../config';
 import RichDocumentEditor from './RichDocumentEditor';
 import FillableDocumentEditor from './FillableDocumentEditor';
 import {
+  attachQuestionnaireSourceToHtml,
+  extractQuestionnaireSourceFromHtml,
   extractQuestionnaireTextFromDocx,
   extractQuestionnaireTextFromHtml,
   importDocxAsHtml,
@@ -51,13 +53,20 @@ export default function DocumentTemplateEditor({
   const fillableContent = isRichFillableDocumentTemplate(value)
     ? getRichFillableTemplateContent(value)
     : convertLegacyFillableTemplateToRichHtml(value);
+  const importedQuestionnaireSource = useMemo(
+    () => extractQuestionnaireSourceFromHtml(fillableContent),
+    [fillableContent],
+  );
   const questionnaireConversion = useMemo(() => {
     if (isEditableDocumentTemplate(value) || fields.length > 0) return null;
-    const plainText = extractQuestionnaireTextFromHtml(fillableContent).trim() || htmlToPlainText(fillableContent).trim();
+    const plainText =
+      importedQuestionnaireSource?.trim() ||
+      extractQuestionnaireTextFromHtml(fillableContent).trim() ||
+      htmlToPlainText(fillableContent).trim();
     if (!plainText) return null;
     const converted = convertQuestionnaireTextToRichTemplate(plainText);
     return converted.questions.length > 0 ? converted : null;
-  }, [fillableContent, fields.length, value]);
+  }, [fillableContent, fields.length, importedQuestionnaireSource, value]);
 
   function buildTypedTemplateFromQuestionnaireText(sourceText: string | null | undefined): string | null {
     const plainText = sourceText?.trim();
@@ -78,6 +87,7 @@ export default function DocumentTemplateEditor({
   useEffect(() => {
     if (!pendingAutoBuild || isEditableDocumentTemplate(value)) return;
     const plainText =
+      importedQuestionnaireSource?.trim() ||
       extractQuestionnaireTextFromHtml(fillableContent).trim() ||
       htmlToPlainText(fillableContent).trim();
     if (!plainText) {
@@ -91,7 +101,7 @@ export default function DocumentTemplateEditor({
       return;
     }
     onChange(converted.template);
-  }, [fillableContent, onChange, pendingAutoBuild, value]);
+  }, [fillableContent, importedQuestionnaireSource, onChange, pendingAutoBuild, value]);
 
   async function handleFileSelected(file: File | null) {
     if (!file) return;
@@ -189,7 +199,10 @@ export default function DocumentTemplateEditor({
 
         const paragraphs = normalizedHtml.trim();
         if (paragraphs) {
-          onChange(createRichFillableDocumentTemplate(paragraphs));
+          const importedContent = extractedQuestionnaireText
+            ? attachQuestionnaireSourceToHtml(paragraphs, extractedQuestionnaireText)
+            : paragraphs;
+          onChange(createRichFillableDocumentTemplate(importedContent));
           return;
         }
       }

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { parseDocumentTemplateFields } from '../documentTemplate';
-import { extractQuestionnaireTextFromHtml } from '../docxImport';
+import {
+  attachQuestionnaireSourceToHtml,
+  extractQuestionnaireSourceFromHtml,
+  extractQuestionnaireTextFromHtml,
+} from '../docxImport';
 import { convertQuestionnaireTextToRichTemplate, parseQuestionnaireText } from '../questionnaireImport';
 
 const FULL_AI_EDUCATION_QUESTIONNAIRE = `
@@ -682,6 +686,50 @@ describe('questionnaireImport', () => {
       questionId: 'Q1_1',
       fieldType: 'slider',
       label: 'Staff AI literacy, capability, and training',
+    });
+  });
+
+  it('preserves the original extracted questionnaire text for auto-build after docx import', () => {
+    const questionnaireText = [
+      'Q0.',
+      'Which of the following best describes your current role?',
+      'Response type: Select one.',
+      'School/college senior leader',
+      'Middle leader',
+      'Other',
+      '',
+      'Q1.',
+      'Thinking about AI in education over the next 2-3 years, how significant is each of the following challenges in your context?',
+      'Response type: 0-10 slider for each item.',
+      'Anchor labels: 0 = Not at all significant, 5 = Moderately significant, 10 = Extremely significant',
+      'Staff AI literacy, capability, and training',
+      'Time available for training and implementation',
+    ].join('\n');
+
+    const importedHtml = attachQuestionnaireSourceToHtml(
+      '<p>Styled import preview that may not preserve every line break visually.</p>',
+      questionnaireText,
+    );
+    expect(extractQuestionnaireSourceFromHtml(importedHtml)).toBe(questionnaireText);
+
+    const converted = convertQuestionnaireTextToRichTemplate(
+      extractQuestionnaireSourceFromHtml(importedHtml) ?? '',
+    );
+    const fields = parseDocumentTemplateFields(converted.template);
+
+    expect(fields.map((field) => field.fieldType)).toEqual([
+      'single_select',
+      'short',
+      'slider',
+      'slider',
+    ]);
+    expect(fields[0]).toMatchObject({
+      questionId: 'Q0',
+      options: ['School/college senior leader', 'Middle leader', 'Other'],
+    });
+    expect(fields[2]).toMatchObject({
+      questionId: 'Q1_1',
+      fieldType: 'slider',
     });
   });
 

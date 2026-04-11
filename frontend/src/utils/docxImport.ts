@@ -62,6 +62,34 @@ export function normalizeImportedDocumentHtml(sourceHtml: string): string {
     .trim();
 }
 
+const QUESTIONNAIRE_SOURCE_COMMENT_RE = /<!--\s*symphonia-questionnaire-source:([\s\S]*?)-->/i;
+
+export function attachQuestionnaireSourceToHtml(sourceHtml: string, questionnaireText: string): string {
+  const normalizedSourceHtml = stripQuestionnaireSourceFromHtml(sourceHtml).trim();
+  const normalizedQuestionnaireText = questionnaireText.trim();
+  if (!normalizedQuestionnaireText) {
+    return normalizedSourceHtml;
+  }
+
+  const encoded = encodeURIComponent(normalizedQuestionnaireText);
+  return `<!-- symphonia-questionnaire-source:${encoded} -->\n${normalizedSourceHtml}`.trim();
+}
+
+export function extractQuestionnaireSourceFromHtml(sourceHtml: string): string | null {
+  const match = sourceHtml.match(QUESTIONNAIRE_SOURCE_COMMENT_RE);
+  if (!match) return null;
+  try {
+    const decoded = decodeURIComponent(match[1].trim());
+    return decoded.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+export function stripQuestionnaireSourceFromHtml(sourceHtml: string): string {
+  return sourceHtml.replace(QUESTIONNAIRE_SOURCE_COMMENT_RE, '').trim();
+}
+
 function extractLineFromNode(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) {
     return node.textContent?.replace(/\s+/g, ' ') ?? '';
