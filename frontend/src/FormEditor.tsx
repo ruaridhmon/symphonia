@@ -194,13 +194,6 @@ export default function FormEditor() {
       toastError('Please add at least one question');
       return;
     }
-    if (trimmedDocumentTemplate && documentQuestions.length === 0) {
-      toastError(isEditableDocumentTemplate(trimmedDocumentTemplate)
-        ? 'Add some document content before saving'
-        : 'Add at least one {{placeholder}} to the document template');
-      return;
-    }
-
     setSaving(true);
 
     try {

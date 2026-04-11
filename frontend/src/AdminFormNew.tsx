@@ -518,14 +518,6 @@ export default function AdminFormNew() {
       setError('Please add at least one question.');
       return;
     }
-    if (documentTemplate.trim() && documentQuestions.length === 0) {
-      setError(
-        isEditableDocumentTemplate(documentTemplate)
-          ? 'Add some document content before creating the consultation.'
-          : 'Add at least one {{placeholder}} to the document template.',
-      );
-      return;
-    }
     setSaving(true);
     setError(null);
     try {
