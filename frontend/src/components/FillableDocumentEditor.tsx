@@ -35,6 +35,7 @@ type SelectedFieldState = {
   pos: number;
   attrs: {
     key: string;
+    questionId: string | null;
     label: string;
     showLabel: boolean;
     fieldType: DocumentTemplateField['fieldType'];
@@ -50,6 +51,8 @@ type SelectedFieldState = {
     midLabel: string | null;
     maxLabel: string | null;
     allowUnsure: boolean;
+    conditionalOnQuestionId: string | null;
+    conditionalOnOption: string | null;
   };
 };
 
@@ -167,23 +170,101 @@ const FillableFieldNode = Node.create({
   selectable: true,
 
   addAttributes() {
+    const parseStringAttribute = (name: string) => ({
+      parseHTML: (element: HTMLElement) => element.getAttribute(name),
+      renderHTML: () => ({}),
+    });
+    const parseBooleanAttribute = (name: string, defaultValue: boolean) => ({
+      default: defaultValue,
+      parseHTML: (element: HTMLElement) => {
+        const raw = element.getAttribute(name);
+        if (raw === null) return defaultValue;
+        return raw === 'true';
+      },
+      renderHTML: () => ({}),
+    });
+    const parseNullableNumberAttribute = (name: string) => ({
+      default: null,
+      parseHTML: (element: HTMLElement) => {
+        const raw = element.getAttribute(name);
+        if (raw == null || raw === '') return null;
+        const parsed = Number(raw);
+        return Number.isFinite(parsed) ? parsed : null;
+      },
+      renderHTML: () => ({}),
+    });
+
     return {
-      key: { default: 'field' },
-      label: { default: 'Field' },
-      showLabel: { default: true },
-      fieldType: { default: 'short' },
-      inputType: { default: 'text' },
-      optional: { default: false },
-      rows: { default: 4 },
-      placeholder: { default: 'Enter response' },
-      options: { default: '[]' },
-      maxSelections: { default: null },
-      minValue: { default: null },
-      maxValue: { default: null },
-      minLabel: { default: null },
-      midLabel: { default: null },
-      maxLabel: { default: null },
-      allowUnsure: { default: false },
+      key: {
+        default: 'field',
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-symphonia-field-key') ?? 'field',
+        renderHTML: () => ({}),
+      },
+      questionId: {
+        default: null,
+        ...parseStringAttribute('data-symphonia-question-id'),
+      },
+      label: {
+        default: 'Field',
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-symphonia-field-label') ?? 'Field',
+        renderHTML: () => ({}),
+      },
+      showLabel: parseBooleanAttribute('data-symphonia-show-label', true),
+      fieldType: {
+        default: 'short',
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-symphonia-field-type') ?? 'short',
+        renderHTML: () => ({}),
+      },
+      inputType: {
+        default: 'text',
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-symphonia-input-type') ?? 'text',
+        renderHTML: () => ({}),
+      },
+      optional: parseBooleanAttribute('data-symphonia-optional', false),
+      rows: {
+        default: 4,
+        parseHTML: (element: HTMLElement) => {
+          const raw = element.getAttribute('data-symphonia-rows');
+          if (!raw) return 4;
+          const parsed = Number(raw);
+          return Number.isFinite(parsed) ? parsed : 4;
+        },
+        renderHTML: () => ({}),
+      },
+      placeholder: {
+        default: 'Enter response',
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-symphonia-placeholder') ?? 'Enter response',
+        renderHTML: () => ({}),
+      },
+      options: {
+        default: '[]',
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-symphonia-options') ?? '[]',
+        renderHTML: () => ({}),
+      },
+      maxSelections: parseNullableNumberAttribute('data-symphonia-max-selections'),
+      minValue: parseNullableNumberAttribute('data-symphonia-min-value'),
+      maxValue: parseNullableNumberAttribute('data-symphonia-max-value'),
+      minLabel: {
+        default: null,
+        ...parseStringAttribute('data-symphonia-min-label'),
+      },
+      midLabel: {
+        default: null,
+        ...parseStringAttribute('data-symphonia-mid-label'),
+      },
+      maxLabel: {
+        default: null,
+        ...parseStringAttribute('data-symphonia-max-label'),
+      },
+      allowUnsure: parseBooleanAttribute('data-symphonia-allow-unsure', false),
+      conditionalOnQuestionId: {
+        default: null,
+        ...parseStringAttribute('data-symphonia-conditional-question-id'),
+      },
+      conditionalOnOption: {
+        default: null,
+        ...parseStringAttribute('data-symphonia-conditional-option'),
+      },
     };
   },
 
@@ -200,6 +281,7 @@ const FillableFieldNode = Node.create({
       'span',
       mergeAttributes(HTMLAttributes, {
         'data-symphonia-field-key': HTMLAttributes.key,
+        'data-symphonia-question-id': HTMLAttributes.questionId,
         'data-symphonia-field-label': HTMLAttributes.label,
         'data-symphonia-show-label': HTMLAttributes.showLabel === false ? 'false' : 'true',
         'data-symphonia-field-type': HTMLAttributes.fieldType,
@@ -215,6 +297,8 @@ const FillableFieldNode = Node.create({
         'data-symphonia-mid-label': HTMLAttributes.midLabel,
         'data-symphonia-max-label': HTMLAttributes.maxLabel,
         'data-symphonia-allow-unsure': HTMLAttributes.allowUnsure ? 'true' : 'false',
+        'data-symphonia-conditional-question-id': HTMLAttributes.conditionalOnQuestionId,
+        'data-symphonia-conditional-option': HTMLAttributes.conditionalOnOption,
         class: 'symphonia-fillable-chip',
         contenteditable: 'false',
       }),

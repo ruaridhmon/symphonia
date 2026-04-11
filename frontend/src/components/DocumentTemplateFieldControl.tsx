@@ -6,6 +6,7 @@ import { isResponseAnswered } from '../utils/responseValidation';
 
 function toQuestion(field: RenderableDocumentTemplateField): ConfigurableQuestion {
   return {
+    questionId: field.questionId ?? field.questionKey,
     label: field.label,
     requireEvidence: false,
     requireCounterarguments: false,

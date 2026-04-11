@@ -571,6 +571,12 @@ test.describe('Document template consultations', () => {
 
       await expect(adminPage.getByText('Which role best describes you?').first()).toBeVisible();
       await expect(adminPage.getByText('Workload burden').first()).toBeVisible();
+      await expect(adminPage.locator('.symphonia-fillable-node input[type="radio"]')).toHaveCount(3);
+      await expect(adminPage.locator('.symphonia-fillable-node input[type="checkbox"]')).toHaveCount(3);
+      await expect(adminPage.locator('.symphonia-fillable-node input[type="range"]')).toHaveCount(2);
+      await expect(adminPage.locator('.symphonia-fillable-node input[type="text"][placeholder="Enter response"]')).toHaveCount(0);
+      await expect(adminPage.getByText('School leader').first()).toBeVisible();
+      await expect(adminPage.getByText('Teacher').first()).toBeVisible();
 
       await adminPage.getByRole('button', { name: /create form/i }).click();
       await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
