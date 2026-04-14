@@ -277,33 +277,34 @@ const FillableFieldNode = Node.create({
     return [{ tag: 'span[data-symphonia-field-key]' }];
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ node, HTMLAttributes }) {
+    const attrs = node.attrs as SelectedFieldState['attrs'];
     return [
       'span',
       mergeAttributes(HTMLAttributes, {
-        'data-symphonia-field-key': HTMLAttributes.key,
-        'data-symphonia-question-id': HTMLAttributes.questionId,
-        'data-symphonia-field-label': HTMLAttributes.label,
-        'data-symphonia-show-label': HTMLAttributes.showLabel === false ? 'false' : 'true',
-        'data-symphonia-field-type': HTMLAttributes.fieldType,
-        'data-symphonia-input-type': HTMLAttributes.inputType,
-        'data-symphonia-optional': HTMLAttributes.optional ? 'true' : 'false',
-        'data-symphonia-rows': String(HTMLAttributes.rows ?? 4),
-        'data-symphonia-placeholder': HTMLAttributes.placeholder,
-        'data-symphonia-options': HTMLAttributes.options,
-        'data-symphonia-max-selections': HTMLAttributes.maxSelections,
-        'data-symphonia-min-value': HTMLAttributes.minValue,
-        'data-symphonia-max-value': HTMLAttributes.maxValue,
-        'data-symphonia-min-label': HTMLAttributes.minLabel,
-        'data-symphonia-mid-label': HTMLAttributes.midLabel,
-        'data-symphonia-max-label': HTMLAttributes.maxLabel,
-        'data-symphonia-allow-unsure': HTMLAttributes.allowUnsure ? 'true' : 'false',
-        'data-symphonia-conditional-question-id': HTMLAttributes.conditionalOnQuestionId,
-        'data-symphonia-conditional-option': HTMLAttributes.conditionalOnOption,
+        'data-symphonia-field-key': attrs.key,
+        'data-symphonia-question-id': attrs.questionId,
+        'data-symphonia-field-label': attrs.label,
+        'data-symphonia-show-label': attrs.showLabel === false ? 'false' : 'true',
+        'data-symphonia-field-type': attrs.fieldType,
+        'data-symphonia-input-type': attrs.inputType,
+        'data-symphonia-optional': attrs.optional ? 'true' : 'false',
+        'data-symphonia-rows': String(attrs.rows ?? 4),
+        'data-symphonia-placeholder': attrs.placeholder,
+        'data-symphonia-options': attrs.options,
+        'data-symphonia-max-selections': attrs.maxSelections,
+        'data-symphonia-min-value': attrs.minValue,
+        'data-symphonia-max-value': attrs.maxValue,
+        'data-symphonia-min-label': attrs.minLabel,
+        'data-symphonia-mid-label': attrs.midLabel,
+        'data-symphonia-max-label': attrs.maxLabel,
+        'data-symphonia-allow-unsure': attrs.allowUnsure ? 'true' : 'false',
+        'data-symphonia-conditional-question-id': attrs.conditionalOnQuestionId,
+        'data-symphonia-conditional-option': attrs.conditionalOnOption,
         class: 'symphonia-fillable-chip',
         contenteditable: 'false',
       }),
-      `${HTMLAttributes.label} · ${String(HTMLAttributes.fieldType || 'field').replace('_', ' ')}${HTMLAttributes.optional ? ' · optional' : ''}`,
+      `${attrs.label} · ${String(attrs.fieldType || 'field').replace('_', ' ')}${attrs.optional ? ' · optional' : ''}`,
     ];
   },
 });
@@ -602,7 +603,7 @@ export default function FillableDocumentEditor({
       changeTimerRef.current = null;
     }
     if (pendingValueRef.current === null) return;
-    const nextValue = pendingValueRef.current;
+    const nextValue = editor?.getHTML() ?? pendingValueRef.current;
     pendingValueRef.current = null;
     commitSerializedTemplate(nextValue);
   }

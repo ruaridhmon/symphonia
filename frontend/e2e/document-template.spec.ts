@@ -605,6 +605,89 @@ test.describe('Document template consultations', () => {
     }
   });
 
+  test('imported fillable documents can still save after removing surrounding text', async ({ browser, baseURL }) => {
+    test.setTimeout(90_000);
+    const appBase = baseURL ?? 'http://127.0.0.1:8767';
+    const timestamp = Date.now();
+    let createdFormId: number | null = null;
+    let originalTemplate: string | null = null;
+    let adminContext: import('@playwright/test').BrowserContext | null = null;
+    let fixtureDir: string | null = null;
+    const adminApi = await playwrightRequest.newContext();
+    const adminLogin = await loginViaApi(adminApi, appBase, ADMIN_EMAIL, ADMIN_PASSWORD);
+    const adminToken = adminLogin.access_token;
+
+    try {
+      const fixture = await createQuestionnaireDocx([
+        'Introductory note for reviewers',
+        '',
+        'Q1. Which role best describes you?',
+        'Response type: Select one.',
+        'School leader',
+        'Teacher',
+        '',
+        'Q2. Optional comments',
+        'Response type: Free text, max 40 words.',
+      ]);
+      fixtureDir = fixture.dir;
+
+      adminContext = await browser.newContext({
+        storageState: buildStorageState(appBase, adminLogin),
+      });
+      const adminPage = await adminContext.newPage();
+      await adminPage.goto(`${appBase}/admin/forms/new`);
+
+      await adminPage.getByRole('button', { name: /start document template/i }).click();
+      await adminPage.locator('#form-title').fill(`Imported Editable ${timestamp}`);
+      await adminPage.locator('input[type="file"]').setInputFiles(fixture.docxPath);
+
+      await expect(adminPage.getByText('Introductory note for reviewers').first()).toBeVisible();
+      await expect(adminPage.locator('.symphonia-fillable-node')).toHaveCount(2);
+
+      await adminPage.getByRole('button', { name: /create form/i }).click();
+      await adminPage.waitForURL(/\/admin\/form\/\d+$/, { timeout: 20_000 });
+
+      const formIdMatch = adminPage.url().match(/\/admin\/form\/(\d+)$/);
+      expect(formIdMatch).not.toBeNull();
+      createdFormId = Number(formIdMatch?.[1]);
+      originalTemplate = (await getFormDetails(adminApi, appBase, adminToken, createdFormId)).document_template;
+
+      const introParagraph = adminPage.locator('.symphonia-fillable-editor p', {
+        hasText: 'Introductory note for reviewers',
+      }).first();
+      await expect(introParagraph).toBeVisible();
+      await introParagraph.click();
+      await adminPage.keyboard.press('End');
+      for (let count = 0; count < 9; count += 1) {
+        await adminPage.keyboard.press('Backspace');
+      }
+      await expect.poll(async () => adminPage.locator('.symphonia-fillable-node').count()).toBeGreaterThan(0);
+
+      const saveResponse = adminPage.waitForResponse(
+        (response) =>
+          response.url().endsWith(`/api/forms/${createdFormId}`) &&
+          response.request().method() === 'PUT' &&
+          response.status() === 200,
+      );
+      await adminPage.getByRole('button', { name: /save changes/i }).click();
+      await saveResponse;
+      await expect(adminPage.getByText('Fillable document templates must include at least one field.')).toHaveCount(0);
+
+      const updated = await getFormDetails(adminApi, appBase, adminToken, createdFormId);
+      expect(updated.document_template).not.toBe(originalTemplate);
+      expect(updated.document_template).toMatch(/data-symphonia-field-type="/);
+    } finally {
+      await adminContext?.close();
+      if (fixtureDir) {
+        await rm(fixtureDir, { recursive: true, force: true });
+      }
+      if (createdFormId) {
+        await deleteForm(adminApi, appBase, adminToken, createdFormId);
+      }
+      await adminApi.dispose();
+    }
+  });
+
   test('fillable document editor can convert pasted questionnaire text into typed fields', async ({ browser, baseURL }) => {
     test.setTimeout(90_000);
     const appBase = baseURL ?? 'http://127.0.0.1:8767';

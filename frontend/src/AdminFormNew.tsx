@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronUp, ChevronDown, Trash2, RefreshCw, BookOpen, X } from 'lucide-react';
 import { api, getApiErrorDetail } from './api/client';
@@ -349,6 +349,7 @@ export default function AdminFormNew() {
   const [joinCode, setJoinCode] = useState(() => generateJoinCode());
   const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
   const [documentTemplate, setDocumentTemplate] = useState('');
+  const documentTemplateRef = useRef('');
   const [importSummary, setImportSummary] = useState<QuestionnaireImportResult | null>(null);
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
   const [saving, setSaving] = useState(false);
@@ -398,6 +399,11 @@ export default function AdminFormNew() {
     questions.length > 0 &&
     questions.every((question) => isSurveyQuestion(question));
 
+  const updateDocumentTemplate = (nextValue: string) => {
+    documentTemplateRef.current = nextValue;
+    setDocumentTemplate(nextValue);
+  };
+
   // Load synthesis model from settings
   useEffect(() => {
     api.get<Record<string, string>>('/admin/settings')
@@ -410,7 +416,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(template);
     setTitle(template.name);
     setDescription(template.description);
-    setDocumentTemplate('');
+    updateDocumentTemplate('');
     setImportSummary(null);
     setQuestions(template.default_questions.map(normalizeQuestion));
     setCurrentStep('editor');
@@ -421,7 +427,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
     setTitle('');
     setDescription('');
-    setDocumentTemplate('');
+    updateDocumentTemplate('');
     setImportSummary(null);
     setQuestions([createBlankQuestion()]);
     setCurrentStep('editor');
@@ -432,7 +438,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
     setTitle('');
     setDescription('');
-    setDocumentTemplate('');
+    updateDocumentTemplate('');
     setImportSummary(null);
     setQuestions([createBlankSurveyQuestion()]);
     setCurrentStep('editor');
@@ -443,7 +449,7 @@ export default function AdminFormNew() {
     setSelectedTemplate(null);
     setTitle('');
     setDescription('');
-    setDocumentTemplate('');
+    updateDocumentTemplate('');
     setImportSummary(null);
     setQuestions([createBlankSurveyQuestion()]);
     setCurrentStep('editor');
@@ -455,7 +461,7 @@ export default function AdminFormNew() {
     setTitle('');
     setDescription('');
     setQuestions([createBlankSurveyQuestion()]);
-    setDocumentTemplate('Title\n{{long:Executive summary}}\n');
+    updateDocumentTemplate('Title\n{{long:Executive summary}}\n');
     setImportSummary(null);
     setCurrentStep('editor');
     setSearchParams({ step: 'editor' });
@@ -514,7 +520,7 @@ export default function AdminFormNew() {
       setError('Please enter a form title.');
       return;
     }
-    if (!documentTemplate.trim() && questions.filter(q => q.label.trim() !== '').length === 0) {
+    if (!documentTemplateRef.current.trim() && questions.filter(q => q.label.trim() !== '').length === 0) {
       setError('Please add at least one question.');
       return;
     }
@@ -525,7 +531,7 @@ export default function AdminFormNew() {
         title: title.trim(),
         description: description.trim() || undefined,
         questions: questions.filter(q => q.label.trim() !== ''),
-        document_template: documentTemplate.trim() || null,
+        document_template: documentTemplateRef.current.trim() || null,
         allow_join: allowJoin,
         allow_public_responses: allowPublicResponses,
         require_consent: requireConsent,
@@ -547,15 +553,15 @@ export default function AdminFormNew() {
   };
 
   const switchToQuestionMode = () => {
-    setDocumentTemplate('');
+    updateDocumentTemplate('');
     if (questions.length === 0) {
       setQuestions([createBlankQuestion()]);
     }
   };
 
   const switchToDocumentMode = () => {
-    if (!documentTemplate.trim()) {
-      setDocumentTemplate('Title\n{{long:Executive summary}}\n');
+    if (!documentTemplateRef.current.trim()) {
+      updateDocumentTemplate('Title\n{{long:Executive summary}}\n');
     }
   };
 
@@ -800,7 +806,7 @@ export default function AdminFormNew() {
               <QuestionnaireImporter
                 onQuestionsImported={(importedQuestions) => {
                   setQuestions(importedQuestions);
-                  setDocumentTemplate('');
+                  updateDocumentTemplate('');
                   setError(null);
                 }}
                 onImported={(result) => setImportSummary(result)}
@@ -837,7 +843,7 @@ export default function AdminFormNew() {
             <div className="mb-6">
               <DocumentTemplateEditor
                 value={documentTemplate}
-                onChange={setDocumentTemplate}
+                onChange={updateDocumentTemplate}
                 previewAnswers={previewResponses}
                 onPreviewChange={(key, value) =>
                   setPreviewResponses(prev => ({ ...prev, [key]: value }))

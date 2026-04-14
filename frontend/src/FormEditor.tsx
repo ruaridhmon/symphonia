@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Trash2, Plus, Save, ChevronUp, ChevronDown, Copy, Ticket } from 'lucide-react';
 import { api, getApiErrorDetail } from './api/client';
@@ -78,6 +78,7 @@ export default function FormEditor() {
   const [title, setTitle] = useState('');
   const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
   const [documentTemplate, setDocumentTemplate] = useState('');
+  const documentTemplateRef = useRef('');
   const [importSummary, setImportSummary] = useState<QuestionnaireImportResult | null>(null);
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
@@ -118,6 +119,11 @@ export default function FormEditor() {
   const questionModeLabel = isDocumentMode ? 'Document template' : (isSurveyMode ? 'Survey' : 'Consensus');
   const consultationHeading = title.trim() || 'Untitled Consultation';
 
+  function updateDocumentTemplate(nextValue: string) {
+    documentTemplateRef.current = nextValue;
+    setDocumentTemplate(nextValue);
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) {
@@ -133,7 +139,7 @@ export default function FormEditor() {
             ? form.questions.map((question) => normalizeQuestion(question))
             : [createBlankQuestion()],
         );
-        setDocumentTemplate(form.document_template ?? '');
+        updateDocumentTemplate(form.document_template ?? '');
         setJoinCode(form.join_code);
         setAllowPublicResponses(Boolean(form.allow_public_responses));
         setRequireConsent(Boolean(form.consent_required ?? form.public_require_consent));
@@ -188,7 +194,7 @@ export default function FormEditor() {
     }
 
     const validQuestions = questions.filter((q) => q.label.trim() !== '');
-    const trimmedDocumentTemplate = documentTemplate.trim();
+    const trimmedDocumentTemplate = documentTemplateRef.current.trim();
 
     if (!trimmedDocumentTemplate && validQuestions.length === 0) {
       toastError('Please add at least one question');
@@ -259,7 +265,7 @@ export default function FormEditor() {
   }
 
   function switchToQuestionMode() {
-    setDocumentTemplate('');
+    updateDocumentTemplate('');
     if (questions.length === 0) {
       setQuestions([createBlankQuestion()]);
     }
@@ -267,8 +273,8 @@ export default function FormEditor() {
 
   function switchToDocumentMode() {
     setImportSummary(null);
-    if (!documentTemplate.trim()) {
-      setDocumentTemplate('Title\n{{long:Executive summary}}\n');
+    if (!documentTemplateRef.current.trim()) {
+      updateDocumentTemplate('Title\n{{long:Executive summary}}\n');
     }
   }
 
@@ -433,7 +439,7 @@ export default function FormEditor() {
                       <QuestionnaireImporter
                         onQuestionsImported={(importedQuestions) => {
                           setQuestions(importedQuestions);
-                          setDocumentTemplate('');
+                          updateDocumentTemplate('');
                         }}
                         onImported={(result) => setImportSummary(result)}
                       />
@@ -471,7 +477,7 @@ export default function FormEditor() {
             {isDocumentMode ? (
               <DocumentTemplateEditor
                 value={documentTemplate}
-                onChange={setDocumentTemplate}
+                onChange={updateDocumentTemplate}
                 previewAnswers={previewResponses}
                 onPreviewChange={(key, value) =>
                   setPreviewResponses((prev) => ({ ...prev, [key]: value }))
