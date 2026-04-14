@@ -116,6 +116,7 @@ export default function FormPage() {
 
     setLoadError(null)
     setMode('loading')
+    setDraftRestored(false)
 
     try {
       const formData = await getForm(Number(id))
@@ -142,47 +143,54 @@ export default function FormPage() {
         const submitStatus = await checkSubmitted(Number(id))
         if (submitStatus.submitted) {
           setHasSubmitted(true)
-          setMode('reviewing')
+          let nextResponses = buildEmptyResponses(questions, formData.document_template)
           try {
             const myResp = await getMyResponse(Number(id))
             if (myResp.answers) {
-              setStructuredResponses(legacyToStructured(myResp.answers))
+              nextResponses = legacyToStructured(myResp.answers)
             }
           } catch {
-            setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
+            // Fall back to empty structured responses when the submitted payload
+            // is unavailable.
           }
+          setStructuredResponses(nextResponses)
+          setMode('reviewing')
         } else {
           setHasSubmitted(false)
-          setMode('filling')
+          let nextResponses = buildEmptyResponses(questions, formData.document_template)
+          let restoredDraft = false
           // Try to restore server-side draft first
           try {
             const { draft } = await getDraft(Number(id))
             if (draft?.answers) {
-              setStructuredResponses(legacyToStructured(draft.answers as Record<string, string | StructuredResponse>))
-              setDraftRestored(true)
-            } else {
-              setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
+              nextResponses = legacyToStructured(draft.answers as Record<string, string | StructuredResponse>)
+              restoredDraft = true
             }
           } catch {
-            setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
+            // Fall back to empty structured responses when no draft exists.
           }
+          setStructuredResponses(nextResponses)
+          setDraftRestored(restoredDraft)
+          setMode('filling')
         }
       } catch {
         // If can't check submit status, assume not submitted
         setHasSubmitted(false)
-        setMode('filling')
+        let nextResponses = buildEmptyResponses(questions, formData.document_template)
+        let restoredDraft = false
         // Try to restore server-side draft
         try {
           const { draft } = await getDraft(Number(id))
           if (draft?.answers) {
-            setStructuredResponses(legacyToStructured(draft.answers as Record<string, string | StructuredResponse>))
-            setDraftRestored(true)
-          } else {
-            setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
+            nextResponses = legacyToStructured(draft.answers as Record<string, string | StructuredResponse>)
+            restoredDraft = true
           }
         } catch {
-          setStructuredResponses(buildEmptyResponses(questions, formData.document_template))
+          // Fall back to empty structured responses when no draft exists.
         }
+        setStructuredResponses(nextResponses)
+        setDraftRestored(restoredDraft)
+        setMode('filling')
       }
 
       setPreviousSynthesis(roundData?.previous_round_synthesis || '')
