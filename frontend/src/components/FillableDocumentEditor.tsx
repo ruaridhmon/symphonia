@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { EditorContent, NodeViewWrapper, ReactNodeViewRenderer, useEditor } from '@tiptap/react';
 import { Extension, Node, mergeAttributes, type Editor } from '@tiptap/core';
 import { NodeSelection } from '@tiptap/pm/state';
+import { flushSync } from 'react-dom';
 import Highlight from '@tiptap/extension-highlight';
 import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
@@ -568,6 +569,13 @@ export default function FillableDocumentEditor({
     );
   }
 
+  function commitSerializedTemplate(nextHtml: string) {
+    const serialized = serializeTemplateContent(nextHtml);
+    flushSync(() => {
+      onChange(serialized);
+    });
+  }
+
   function buildInsertedField(option: CommandOption) {
     const labelHint = slashMenu?.labelHint?.trim();
     const label = labelHint || option.field.label;
@@ -582,7 +590,7 @@ export default function FillableDocumentEditor({
     clearPendingChange();
     editor.commands.setContent(nextValue || '<p></p>', false);
     lastSyncedValueRef.current = nextValue;
-    onChange(createRichFillableDocumentTemplate(nextValue));
+    commitSerializedTemplate(nextValue);
     setSlashMenu(null);
     setSelectedCommandIndex(0);
     return true;
@@ -596,7 +604,7 @@ export default function FillableDocumentEditor({
     if (pendingValueRef.current === null) return;
     const nextValue = pendingValueRef.current;
     pendingValueRef.current = null;
-    onChange(serializeTemplateContent(nextValue));
+    commitSerializedTemplate(nextValue);
   }
 
   function clearPendingChange() {
