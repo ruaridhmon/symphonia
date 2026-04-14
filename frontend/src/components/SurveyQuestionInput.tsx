@@ -251,6 +251,11 @@ export default function SurveyQuestionInput({
     onChange(updatePosition(value, String(clampNumber(nextValue, sliderMin, sliderMax))));
   }
 
+  function commitCurrentSliderValue(target: HTMLInputElement | null) {
+    const parsed = Number(target?.value ?? sliderMidpoint);
+    commitSliderValue(Number.isFinite(parsed) ? parsed : sliderMidpoint);
+  }
+
   if (readOnly) {
     return (
       <div>
@@ -450,9 +455,14 @@ export default function SurveyQuestionInput({
             max={sliderMax}
             step={1}
             value={sliderValue ?? sliderMidpoint}
-            onPointerDown={() => {
+            onPointerDown={(event) => {
               if (sliderValue === null) {
-                commitSliderValue(sliderMidpoint);
+                commitCurrentSliderValue(event.currentTarget);
+              }
+            }}
+            onClick={(event) => {
+              if (sliderValue === null) {
+                commitCurrentSliderValue(event.currentTarget);
               }
             }}
             onChange={(event) => commitSliderValue(Number(event.target.value))}
