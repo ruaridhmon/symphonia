@@ -291,6 +291,16 @@ export default function DocumentTemplateResponse({
     return fieldType === 'short' || fieldType === 'long';
   }
 
+  function usesFullWidthField(fieldType: string) {
+    return (
+      isInlineTextField(fieldType) ||
+      fieldType === 'single_select' ||
+      fieldType === 'multi_select' ||
+      fieldType === 'slider' ||
+      fieldType === 'likert'
+    );
+  }
+
   return (
     <div
       className="rounded-xl p-4 sm:p-5"
@@ -337,7 +347,7 @@ export default function DocumentTemplateResponse({
                   const response = answers[questionKey] ?? segment.response;
                   const answered = isResponseAnswered(response);
                   const highlighted = !readOnly && highlightedQuestionKey === questionKey;
-                  const usesInlineTextField = isInlineTextField(segment.value.fieldType);
+                  const fullWidthField = usesFullWidthField(segment.value.fieldType);
 
                   return (
                     <div
@@ -345,8 +355,8 @@ export default function DocumentTemplateResponse({
                       className="flex max-w-full flex-col gap-1 rounded-2xl px-3 py-2.5 align-top"
                       data-question-key={questionKey}
                       style={{
-                        width: usesInlineTextField ? '100%' : 'min(100%, 38rem)',
-                        minWidth: usesInlineTextField ? 0 : '15rem',
+                        width: fullWidthField ? '100%' : 'min(100%, 38rem)',
+                        minWidth: fullWidthField ? 0 : '15rem',
                         backgroundColor: highlighted
                           ? 'color-mix(in srgb, var(--destructive) 4%, white)'
                           : 'color-mix(in srgb, var(--background) 78%, white)',
