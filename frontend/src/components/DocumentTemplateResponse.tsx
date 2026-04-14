@@ -1,5 +1,6 @@
 import { createElement, type CSSProperties, type ReactNode } from 'react';
 import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
+import AnswerStateBadge from './AnswerStateBadge';
 import RichDocumentEditor from './RichDocumentEditor';
 import DocumentTemplateFieldControl from './DocumentTemplateFieldControl';
 import {
@@ -213,23 +214,7 @@ export default function DocumentTemplateResponse({
       >
         <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
           <span>Edit your copy of the document</span>
-          {!readOnly ? (
-            <span
-              aria-label={isResponseAnswered(response) ? 'Document ready to submit' : 'Document not ready'}
-              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold"
-              style={{
-                border: isResponseAnswered(response)
-                  ? '1px solid color-mix(in srgb, #138a52 35%, transparent)'
-                  : '1px solid color-mix(in srgb, var(--border) 90%, transparent)',
-                backgroundColor: isResponseAnswered(response)
-                  ? 'color-mix(in srgb, #138a52 12%, transparent)'
-                  : 'transparent',
-                color: isResponseAnswered(response) ? '#138a52' : 'var(--muted-foreground)',
-              }}
-            >
-              {isResponseAnswered(response) ? '✓' : ''}
-            </span>
-          ) : null}
+          {!readOnly ? <AnswerStateBadge answered={isResponseAnswered(response)} /> : null}
         </div>
         <RichDocumentEditor
           value={value}
@@ -350,21 +335,18 @@ export default function DocumentTemplateResponse({
 
                   const { questionKey } = segment.value;
                   const response = answers[questionKey] ?? segment.response;
-                  const value = response.position || '';
                   const answered = isResponseAnswered(response);
                   const highlighted = !readOnly && highlightedQuestionKey === questionKey;
-                  const isShort = segment.value.fieldType === 'short';
                   const usesInlineTextField = isInlineTextField(segment.value.fieldType);
 
                   return (
                     <div
                       key={`${line.key}-${questionKey}-${segmentIndex}`}
-                      className="inline-flex min-w-[15rem] max-w-full flex-col gap-1 rounded-2xl px-3 py-2.5 align-top"
+                      className="flex max-w-full flex-col gap-1 rounded-2xl px-3 py-2.5 align-top"
                       data-question-key={questionKey}
                       style={{
-                        width: usesInlineTextField
-                          ? (isShort ? 'min(100%, 22rem)' : 'min(100%, 34rem)')
-                          : 'min(100%, 38rem)',
+                        width: usesInlineTextField ? '100%' : 'min(100%, 38rem)',
+                        minWidth: usesInlineTextField ? 0 : '15rem',
                         backgroundColor: highlighted
                           ? 'color-mix(in srgb, var(--destructive) 4%, white)'
                           : 'color-mix(in srgb, var(--background) 78%, white)',
@@ -392,29 +374,13 @@ export default function DocumentTemplateResponse({
                         >
                           {segment.value.optional ? 'Optional' : 'Required'}
                         </span>
-                        {!readOnly ? (
-                          <span
-                            aria-label={answered ? 'Question answered' : 'Question not answered'}
-                            title={answered ? 'Answered' : 'Not answered'}
-                            className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold"
-                            style={{
-                              border: answered
-                                ? '1px solid color-mix(in srgb, #138a52 35%, transparent)'
-                                : '1px solid color-mix(in srgb, var(--border) 90%, transparent)',
-                              backgroundColor: answered
-                                ? 'color-mix(in srgb, #138a52 12%, transparent)'
-                                : 'transparent',
-                              color: answered ? '#138a52' : 'var(--muted-foreground)',
-                            }}
-                          >
-                            {answered ? '✓' : ''}
-                          </span>
-                        ) : null}
+                        {!readOnly ? <AnswerStateBadge answered={answered} /> : null}
                       </span>
                       <DocumentTemplateFieldControl
-                        field={segment.value}
+                        field={{ ...segment.value, showLabel: false }}
                         response={response}
                         readOnly={readOnly}
+                        showMeta={false}
                         onChange={(nextValue) => onChange?.(questionKey, nextValue)}
                         highlighted={false}
                       />

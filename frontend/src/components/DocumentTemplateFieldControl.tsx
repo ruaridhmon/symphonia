@@ -1,5 +1,6 @@
 import type { StructuredResponse } from '../types/structured-input';
 import SurveyQuestionInput from './SurveyQuestionInput';
+import AnswerStateBadge from './AnswerStateBadge';
 import type { ConfigurableQuestion } from '../utils/questions';
 import type { RenderableDocumentTemplateField } from '../utils/documentTemplate';
 import { isResponseAnswered } from '../utils/responseValidation';
@@ -33,6 +34,7 @@ interface DocumentTemplateFieldControlProps {
   readOnly: boolean;
   previewOnly?: boolean;
   highlighted?: boolean;
+  showMeta?: boolean;
   onChange?: (nextValue: StructuredResponse) => void;
   onSelect?: () => void;
   emptyReadOnlyText?: string;
@@ -44,6 +46,7 @@ export default function DocumentTemplateFieldControl({
   readOnly,
   previewOnly = false,
   highlighted = false,
+  showMeta = true,
   onChange,
   onSelect,
   emptyReadOnlyText = 'No response provided.',
@@ -51,14 +54,21 @@ export default function DocumentTemplateFieldControl({
   const value = response.position || '';
   const answered = isResponseAnswered(response);
   const usesInlineTextField = field.fieldType === 'short' || field.fieldType === 'long';
+  const textFieldStyle = {
+    border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+    backgroundColor: 'color-mix(in srgb, var(--background) 84%, var(--card) 16%)',
+    color: 'var(--foreground)',
+    outline: 'none',
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)',
+  } as const;
 
   return (
     <span
-      className="inline-flex max-w-full flex-col gap-1 rounded-[1.15rem] px-3 py-2 align-middle"
+      className={`${usesInlineTextField ? 'flex w-full' : 'inline-flex max-w-full'} flex-col gap-1 rounded-[1.15rem] px-3 py-2 align-middle`}
       data-question-key={field.questionKey}
       onClick={() => onSelect?.()}
       style={{
-        minWidth: usesInlineTextField ? '15rem' : '18rem',
+        minWidth: usesInlineTextField ? 0 : '18rem',
         backgroundColor: highlighted
           ? 'color-mix(in srgb, var(--destructive) 4%, white)'
           : 'color-mix(in srgb, var(--background) 84%, white)',
@@ -72,18 +82,21 @@ export default function DocumentTemplateFieldControl({
         cursor: onSelect ? 'pointer' : 'default',
       }}
     >
-      {field.showLabel === false ? (
+      {showMeta ? (field.showLabel === false ? (
         <span className="flex justify-end">
-          <span
-            className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-            style={{
-              backgroundColor: field.optional
-                ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
-                : 'color-mix(in srgb, var(--accent) 10%, transparent)',
-              color: field.optional ? 'var(--muted-foreground)' : 'var(--accent)',
-            }}
-          >
-            {field.optional ? 'Optional' : 'Required'}
+          <span className="flex flex-wrap items-center justify-end gap-2">
+            <span
+              className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+              style={{
+                backgroundColor: field.optional
+                  ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+                  : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                color: field.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+              }}
+            >
+              {field.optional ? 'Optional' : 'Required'}
+            </span>
+            {!readOnly ? <AnswerStateBadge answered={answered} /> : null}
           </span>
         </span>
       ) : (
@@ -102,8 +115,9 @@ export default function DocumentTemplateFieldControl({
           >
             {field.optional ? 'Optional' : 'Required'}
           </span>
+          {!readOnly ? <AnswerStateBadge answered={answered} /> : null}
         </span>
-      )}
+      )) : null}
 
       {previewOnly && field.fieldType === 'short' ? (
         <input
@@ -159,13 +173,8 @@ export default function DocumentTemplateFieldControl({
           value={value}
           onChange={(event) => onChange?.({ ...response, position: event.target.value })}
           placeholder={field.placeholder}
-          className="w-full rounded-xl px-3 py-2.5 text-sm"
-          style={{
-            border: '1px solid var(--input)',
-            backgroundColor: 'white',
-            color: 'var(--foreground)',
-            outline: 'none',
-          }}
+          className="w-full rounded-[1.15rem] px-4 py-3 text-sm leading-6"
+          style={textFieldStyle}
         />
       ) : !readOnly && field.fieldType === 'long' ? (
         <textarea
@@ -173,14 +182,12 @@ export default function DocumentTemplateFieldControl({
           onChange={(event) => onChange?.({ ...response, position: event.target.value })}
           placeholder={field.placeholder}
           rows={field.rows}
-          className="w-full rounded-xl px-3 py-3 text-sm"
+          className="w-full rounded-[1.15rem] px-4 py-3.5 text-sm leading-6"
           style={{
-            border: '1px solid var(--input)',
-            backgroundColor: 'white',
-            color: 'var(--foreground)',
-            outline: 'none',
+            ...textFieldStyle,
             resize: 'vertical',
             lineHeight: 1.6,
+            minHeight: field.rows && field.rows <= 2 ? undefined : '8rem',
           }}
         />
       ) : (
