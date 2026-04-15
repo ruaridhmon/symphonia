@@ -415,9 +415,9 @@ function parseBlock(
         inputType: 'slider',
         minValue: 0,
         maxValue: 10,
-        minLabel: anchorLabels.minLabel,
-        midLabel: anchorLabels.midLabel,
-        maxLabel: anchorLabels.maxLabel,
+        minLabel: null,
+        midLabel: null,
+        maxLabel: null,
       }),
     );
     return { questions, warnings, exportedOptions: resolvedOptions };
@@ -460,9 +460,9 @@ function parseBlock(
     maxSelections: inputType === 'multi_select' ? extractMaxSelections(responseType) : null,
     minValue: inputType === 'slider' ? 0 : null,
     maxValue: inputType === 'slider' ? 10 : null,
-    minLabel: inputType === 'slider' ? anchorLabels.minLabel : null,
-    midLabel: inputType === 'slider' ? anchorLabels.midLabel : null,
-    maxLabel: inputType === 'slider' ? anchorLabels.maxLabel : null,
+    minLabel: null,
+    midLabel: null,
+    maxLabel: null,
     rows: inputType === 'textarea' ? 4 : null,
     placeholder:
       inputType === 'text'
@@ -654,9 +654,9 @@ function questionToDocumentField(question: ConfigurableQuestion, fallbackKey: st
     maxSelections: question.maxSelections ?? undefined,
     minValue: question.minValue ?? undefined,
     maxValue: question.maxValue ?? undefined,
-    minLabel: question.minLabel ?? undefined,
-    midLabel: question.midLabel ?? undefined,
-    maxLabel: question.maxLabel ?? undefined,
+    minLabel: fieldType === 'slider' ? undefined : question.minLabel ?? undefined,
+    midLabel: fieldType === 'slider' ? undefined : question.midLabel ?? undefined,
+    maxLabel: fieldType === 'slider' ? undefined : question.maxLabel ?? undefined,
     allowUnsure: question.allowUnsure ?? undefined,
     conditionalOnQuestionId: question.conditionalOnQuestionId ?? undefined,
     conditionalOnOption: question.conditionalOnOption ?? undefined,

@@ -364,9 +364,6 @@ describe('questionnaireImport', () => {
       label: 'Staff AI literacy',
       minValue: 0,
       maxValue: 10,
-      minLabel: 'Not at all significant',
-      midLabel: 'Moderately significant',
-      maxLabel: 'Extremely significant',
     });
     expect(parsed.questions[5]).toMatchObject({
       questionId: 'Q2_2',
@@ -428,9 +425,8 @@ describe('questionnaireImport', () => {
     expect(fields[3]).toMatchObject({
       label: 'Workload burden',
       fieldType: 'slider',
-      minLabel: 'Not significant',
-      midLabel: 'Moderate',
-      maxLabel: 'Very significant',
+      minValue: 0,
+      maxValue: 10,
     });
   });
 
@@ -503,9 +499,8 @@ describe('questionnaireImport', () => {
     expect(fields[3]).toMatchObject({
       label: 'Staff AI literacy, capability, and training',
       fieldType: 'slider',
-      minLabel: 'Not at all significant',
-      midLabel: 'Moderately significant',
-      maxLabel: 'Extremely significant',
+      minValue: 0,
+      maxValue: 10,
     });
     expect(fields[4]).toMatchObject({
       label: 'Time available for training and implementation',
@@ -573,9 +568,8 @@ describe('questionnaireImport', () => {
       questionId: 'Q1_1',
       label: 'Staff AI literacy, capability, and training',
       inputType: 'slider',
-      minLabel: 'Not at all significant',
-      midLabel: 'Moderately significant',
-      maxLabel: 'Extremely significant',
+      minValue: 0,
+      maxValue: 10,
     });
 
     const converted = convertQuestionnaireTextToRichTemplate(questionnaireText);
@@ -639,9 +633,8 @@ describe('questionnaireImport', () => {
       questionId: 'Q1_1',
       label: 'Staff AI literacy, capability, and training',
       inputType: 'slider',
-      minLabel: 'Not at all significant',
-      midLabel: 'Moderately significant',
-      maxLabel: 'Extremely significant',
+      minValue: 0,
+      maxValue: 10,
     });
 
     const converted = convertQuestionnaireTextToRichTemplate(questionnaireText);
@@ -655,9 +648,8 @@ describe('questionnaireImport', () => {
     expect(fields[2]).toMatchObject({
       questionId: 'Q1_1',
       fieldType: 'slider',
-      minLabel: 'Not at all significant',
-      midLabel: 'Moderately significant',
-      maxLabel: 'Extremely significant',
+      minValue: 0,
+      maxValue: 10,
     });
   });
 
@@ -822,9 +814,8 @@ describe('questionnaireImport', () => {
     expect(parsed.questions.find((question) => question.questionId === 'Q1_1')).toMatchObject({
       inputType: 'slider',
       label: 'Staff AI literacy, capability, and training',
-      minLabel: 'Not at all significant',
-      midLabel: 'Moderately significant',
-      maxLabel: 'Extremely significant',
+      minValue: 0,
+      maxValue: 10,
     });
     expect(parsed.questions.find((question) => question.questionId === 'Q2')).toMatchObject({
       inputType: 'multi_select',

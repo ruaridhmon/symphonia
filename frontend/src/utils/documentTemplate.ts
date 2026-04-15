@@ -171,9 +171,9 @@ function parseDocumentTemplateToken(rawToken: string): DocumentTemplateField | n
         const maybeMax = Number(segments[2]);
         minValue = Number.isFinite(maybeMin) ? maybeMin : 0;
         maxValue = Number.isFinite(maybeMax) ? maybeMax : 10;
-        minLabel = segments[3] || String(minValue);
-        midLabel = segments[4] || undefined;
-        maxLabel = segments[5] || String(maxValue);
+        minLabel = undefined;
+        midLabel = undefined;
+        maxLabel = undefined;
       } else if (fieldType === 'likert') {
         options = segments.slice(1);
         const last = options[options.length - 1]?.toLowerCase();
@@ -248,9 +248,9 @@ export function serializeRichDocumentField(field: DocumentTemplateField): string
   if (typeof field.maxSelections === 'number') attributes.set('data-symphonia-max-selections', String(field.maxSelections));
   if (typeof field.minValue === 'number') attributes.set('data-symphonia-min-value', String(field.minValue));
   if (typeof field.maxValue === 'number') attributes.set('data-symphonia-max-value', String(field.maxValue));
-  if (field.minLabel) attributes.set('data-symphonia-min-label', field.minLabel);
-  if (field.midLabel) attributes.set('data-symphonia-mid-label', field.midLabel);
-  if (field.maxLabel) attributes.set('data-symphonia-max-label', field.maxLabel);
+  if (field.fieldType !== 'slider' && field.minLabel) attributes.set('data-symphonia-min-label', field.minLabel);
+  if (field.fieldType !== 'slider' && field.midLabel) attributes.set('data-symphonia-mid-label', field.midLabel);
+  if (field.fieldType !== 'slider' && field.maxLabel) attributes.set('data-symphonia-max-label', field.maxLabel);
   if (field.allowUnsure) attributes.set('data-symphonia-allow-unsure', 'true');
   if (field.conditionalOnQuestionId) {
     attributes.set('data-symphonia-conditional-question-id', field.conditionalOnQuestionId);
@@ -306,9 +306,9 @@ function parseRichDocumentFieldElement(element: Element): DocumentTemplateField 
     maxSelections: parseNumberAttr('data-symphonia-max-selections'),
     minValue: parseNumberAttr('data-symphonia-min-value'),
     maxValue: parseNumberAttr('data-symphonia-max-value'),
-    minLabel: element.getAttribute('data-symphonia-min-label') || undefined,
-    midLabel: element.getAttribute('data-symphonia-mid-label') || undefined,
-    maxLabel: element.getAttribute('data-symphonia-max-label') || undefined,
+    minLabel: fieldType === 'slider' ? undefined : element.getAttribute('data-symphonia-min-label') || undefined,
+    midLabel: fieldType === 'slider' ? undefined : element.getAttribute('data-symphonia-mid-label') || undefined,
+    maxLabel: fieldType === 'slider' ? undefined : element.getAttribute('data-symphonia-max-label') || undefined,
     allowUnsure: element.getAttribute('data-symphonia-allow-unsure') === 'true',
     conditionalOnQuestionId: element.getAttribute('data-symphonia-conditional-question-id')?.trim() || undefined,
     conditionalOnOption: element.getAttribute('data-symphonia-conditional-option')?.trim() || undefined,
