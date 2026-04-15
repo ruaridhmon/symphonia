@@ -91,18 +91,29 @@ export default function DocumentTemplateFieldControl({
       {showMeta ? (field.showLabel === false ? (
         <span className="flex justify-end">
           <span className="flex flex-wrap items-center justify-end gap-2">
-            <span
-              className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-              style={{
-                backgroundColor: field.optional
-                  ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
-                  : 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                color: field.optional ? 'var(--muted-foreground)' : 'var(--accent)',
-              }}
-            >
-              {field.optional ? 'Optional' : 'Required'}
-            </span>
-            {!readOnly ? <AnswerStateBadge answered={answered} /> : null}
+            {readOnly ? (
+              <AnswerStateBadge
+                answered={answered}
+                answeredLabel="Answered"
+                pendingLabel="No response"
+                showLabel
+              />
+            ) : (
+              <>
+                <span
+                  className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                  style={{
+                    backgroundColor: field.optional
+                      ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+                      : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                    color: field.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+                  }}
+                >
+                  {field.optional ? 'Optional' : 'Required'}
+                </span>
+                <AnswerStateBadge answered={answered} />
+              </>
+            )}
           </span>
         </span>
       ) : (
@@ -110,18 +121,29 @@ export default function DocumentTemplateFieldControl({
           <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
             {field.label}
           </span>
-          <span
-            className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-            style={{
-              backgroundColor: field.optional
-                ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
-                : 'color-mix(in srgb, var(--accent) 10%, transparent)',
-              color: field.optional ? 'var(--muted-foreground)' : 'var(--accent)',
-            }}
-          >
-            {field.optional ? 'Optional' : 'Required'}
-          </span>
-          {!readOnly ? <AnswerStateBadge answered={answered} /> : null}
+          {readOnly ? (
+            <AnswerStateBadge
+              answered={answered}
+              answeredLabel="Answered"
+              pendingLabel="No response"
+              showLabel
+            />
+          ) : (
+            <>
+              <span
+                className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                style={{
+                  backgroundColor: field.optional
+                    ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+                    : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                  color: field.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+                }}
+              >
+                {field.optional ? 'Optional' : 'Required'}
+              </span>
+              <AnswerStateBadge answered={answered} />
+            </>
+          )}
         </span>
       )) : null}
 

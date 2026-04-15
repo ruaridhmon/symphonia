@@ -4,18 +4,22 @@ interface AnswerStateBadgeProps {
   answered: boolean;
   answeredLabel?: string;
   pendingLabel?: string;
+  showLabel?: boolean;
 }
 
 export default function AnswerStateBadge({
   answered,
   answeredLabel = 'Answered',
   pendingLabel = 'Not answered yet',
+  showLabel = false,
 }: AnswerStateBadgeProps) {
+  const label = answered ? answeredLabel : pendingLabel;
+
   return (
     <span
-      aria-label={answered ? answeredLabel : pendingLabel}
-      title={answered ? answeredLabel : pendingLabel}
-      className="inline-flex h-5 w-5 items-center justify-center rounded-full"
+      aria-label={label}
+      title={label}
+      className={`inline-flex items-center justify-center rounded-full ${showLabel ? 'gap-1.5 px-2 py-0.5 text-[11px] font-medium' : 'h-5 w-5'}`}
       style={{
         backgroundColor: answered
           ? 'color-mix(in srgb, #138a52 12%, transparent)'
@@ -35,6 +39,7 @@ export default function AnswerStateBadge({
           style={{ backgroundColor: 'color-mix(in srgb, var(--border) 78%, var(--muted-foreground))' }}
         />
       )}
+      {showLabel ? <span>{label}</span> : null}
     </span>
   );
 }

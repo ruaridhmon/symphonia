@@ -120,20 +120,29 @@ export default function SurveyQuestionList({
                   ) : null}
                   <label className="mb-2.5 flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
                     <span>{question.label}</span>
-                    <span
-                      className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
-                      style={{
-                        backgroundColor: question.optional
-                          ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
-                          : 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                        color: question.optional ? 'var(--muted-foreground)' : 'var(--accent)',
-                      }}
-                    >
-                      {question.optional ? 'Optional' : 'Required'}
-                    </span>
-                    {!readOnly ? (
-                      <AnswerStateBadge answered={answered} />
-                    ) : null}
+                    {readOnly ? (
+                      <AnswerStateBadge
+                        answered={answered}
+                        answeredLabel="Answered"
+                        pendingLabel="No response"
+                        showLabel
+                      />
+                    ) : (
+                      <>
+                        <span
+                          className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+                          style={{
+                            backgroundColor: question.optional
+                              ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+                              : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                            color: question.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+                          }}
+                        >
+                          {question.optional ? 'Optional' : 'Required'}
+                        </span>
+                        <AnswerStateBadge answered={answered} />
+                      </>
+                    )}
                   </label>
                   {surveyQuestion ? (
                     <SurveyQuestionInput
