@@ -1609,30 +1609,6 @@ export default function FillableDocumentEditor({
                               style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
                             />
                           </div>
-                          <div>
-                            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                              Min label
-                            </label>
-                            <input
-                              value={selectedField.attrs.minLabel ?? ''}
-                              {...settingsInputHandlers}
-                              onChange={(event) => updateSelectedField({ minLabel: event.target.value })}
-                              className="w-full rounded-xl px-3 py-2 text-sm"
-                              style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                            />
-                          </div>
-                          <div>
-                            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
-                              Max label
-                            </label>
-                            <input
-                              value={selectedField.attrs.maxLabel ?? ''}
-                              {...settingsInputHandlers}
-                              onChange={(event) => updateSelectedField({ maxLabel: event.target.value })}
-                              className="w-full rounded-xl px-3 py-2 text-sm"
-                              style={{ border: '1px solid var(--input)', backgroundColor: 'white' }}
-                            />
-                          </div>
                         </div>
                       ) : null}
 

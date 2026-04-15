@@ -313,59 +313,6 @@ export default function SurveyQuestionConfigurator({
         </div>
       )}
 
-      {inputType === 'slider' ? (
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="space-y-1.5">
-            <FieldLabel htmlFor={`${baseId}-min-label`}>Left label</FieldLabel>
-            <input
-              id={`${baseId}-min-label`}
-              type="text"
-              value={question.minLabel ?? ''}
-              onChange={(event) => patch({ minLabel: event.target.value || null })}
-              className="w-full rounded-lg px-3 py-2 text-sm"
-              style={{
-                border: '1px solid var(--input)',
-                backgroundColor: 'var(--background)',
-                color: 'var(--foreground)',
-              }}
-              placeholder="Not at all important"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <FieldLabel htmlFor={`${baseId}-mid-label`}>Middle label</FieldLabel>
-            <input
-              id={`${baseId}-mid-label`}
-              type="text"
-              value={question.midLabel ?? ''}
-              onChange={(event) => patch({ midLabel: event.target.value || null })}
-              className="w-full rounded-lg px-3 py-2 text-sm"
-              style={{
-                border: '1px solid var(--input)',
-                backgroundColor: 'var(--background)',
-                color: 'var(--foreground)',
-              }}
-              placeholder="Moderate"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <FieldLabel htmlFor={`${baseId}-max-label`}>Right label</FieldLabel>
-            <input
-              id={`${baseId}-max-label`}
-              type="text"
-              value={question.maxLabel ?? ''}
-              onChange={(event) => patch({ maxLabel: event.target.value || null })}
-              className="w-full rounded-lg px-3 py-2 text-sm"
-              style={{
-                border: '1px solid var(--input)',
-                backgroundColor: 'var(--background)',
-                color: 'var(--foreground)',
-              }}
-              placeholder="Extremely important"
-            />
-          </div>
-        </div>
-      ) : null}
-
       {(inputType === 'text' || inputType === 'textarea') && (
         <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
           <div className="space-y-1.5">
