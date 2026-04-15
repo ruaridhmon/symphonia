@@ -35,4 +35,30 @@ describe('SurveyQuestionInput slider', () => {
       }),
     );
   });
+
+  it('shows numeric endpoints and no midpoint label', () => {
+    render(
+      <SurveyQuestionInput
+        question={{
+          label: 'Staff AI literacy, capability, and training',
+          requireEvidence: false,
+          requireCounterarguments: false,
+          requireConfidence: false,
+          inputType: 'slider',
+          minValue: 0,
+          maxValue: 10,
+          minLabel: 'Not at all significant',
+          midLabel: 'Moderately significant',
+          maxLabel: 'Extremely significant',
+        }}
+        value={emptyStructuredResponse()}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText('Choose a score')).not.toBeInTheDocument();
+    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.queryByText('Moderately significant')).not.toBeInTheDocument();
+  });
 });

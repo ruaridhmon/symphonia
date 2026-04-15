@@ -332,9 +332,9 @@ function fieldFromType(type: CommandOption['field']['fieldType'], label: string,
     maxSelections: undefined,
     minValue: normalizedType === 'slider' ? Number(options[0] ?? 0) : undefined,
     maxValue: normalizedType === 'slider' ? Number(options[1] ?? 10) : undefined,
-    minLabel: normalizedType === 'slider' ? (options[2] ?? 'Low') : undefined,
-    midLabel: normalizedType === 'slider' ? (options[3] ?? 'Midpoint') : undefined,
-    maxLabel: normalizedType === 'slider' ? (options[4] ?? 'High') : undefined,
+    minLabel: normalizedType === 'slider' ? options[2] : undefined,
+    midLabel: normalizedType === 'slider' ? options[3] : undefined,
+    maxLabel: normalizedType === 'slider' ? options[4] : undefined,
     allowUnsure: normalizedType === 'likert',
   };
 }

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Sparkles, Upload, FileText } from 'lucide-react';
 import { API_BASE_URL } from '../config';
-import RichDocumentEditor from './RichDocumentEditor';
 import FillableDocumentEditor from './FillableDocumentEditor';
+import DocumentTemplateResponse from './DocumentTemplateResponse';
 import {
   attachQuestionnaireSourceToHtml,
   extractQuestionnaireSourceFromHtml,
@@ -23,7 +23,7 @@ import {
   isRichFillableDocumentTemplate,
   parseDocumentTemplateFields,
 } from '../utils/documentTemplate';
-import type { StructuredResponse } from '../types/structured-input';
+import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
 
 function getCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
@@ -316,11 +316,18 @@ export default function DocumentTemplateEditor({
 
       <div className="mt-4">
         {isEditableDocumentTemplate(value) ? (
-          <RichDocumentEditor
-            value={editableContent}
-            placeholder="Paste or import the base document here…"
-            minHeight="20rem"
-            onChange={(nextValue) => onChange(createEditableDocumentTemplate(nextValue))}
+          <DocumentTemplateResponse
+            template={value}
+            answers={{
+              q1: {
+                ...emptyStructuredResponse(),
+                position: editableContent,
+              },
+            }}
+            editableHeading="Edit document template"
+            editablePlaceholder="Paste or import the base document here…"
+            editableMinHeight="20rem"
+            onChange={(_, nextValue) => onChange(createEditableDocumentTemplate(nextValue.position))}
           />
         ) : (
           <FillableDocumentEditor

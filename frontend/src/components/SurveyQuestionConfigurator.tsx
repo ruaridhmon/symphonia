@@ -87,9 +87,9 @@ function getSurveyDefaults(inputType: SurveyInputType): Partial<ConfigurableQues
       rows: null,
       minValue: 0,
       maxValue: 10,
-      minLabel: 'Low',
-      midLabel: 'Medium',
-      maxLabel: 'High',
+      minLabel: null,
+      midLabel: null,
+      maxLabel: null,
     };
   }
 

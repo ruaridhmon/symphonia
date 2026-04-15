@@ -309,8 +309,8 @@ function extractOptionFollowUp(option: string): { optionLabel: string; label: st
   if (/^other$/i.test(trimmed)) {
     return {
       optionLabel: trimmed,
-      label: 'Other: Please specify',
-      prompt: 'Please specify',
+      label: 'Other',
+      prompt: 'Write your answer here',
       rows: 2,
     };
   }

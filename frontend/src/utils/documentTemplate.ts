@@ -224,7 +224,7 @@ export function createDocumentTemplatePlaceholder(
     return `{{${prefix}:${normalizedLabel}|Option 1|Option 2|Option 3}}`;
   }
   if (fieldType === 'slider') {
-    return `{{${prefix}:${normalizedLabel}|0|10|Low|Midpoint|High}}`;
+    return `{{${prefix}:${normalizedLabel}|0|10}}`;
   }
   if (fieldType === 'likert') {
     return `{{${prefix}:${normalizedLabel}|${DEFAULT_LIKERT_OPTIONS.join('|')}|Unsure}}`;

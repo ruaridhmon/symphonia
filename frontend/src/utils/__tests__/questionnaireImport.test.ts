@@ -416,8 +416,9 @@ describe('questionnaireImport', () => {
     ]);
     expect(fields[0]?.options).toEqual(['School leader', 'Teacher', 'Support staff', 'Other']);
     expect(fields[1]).toMatchObject({
-      label: 'Other: Please specify',
+      label: 'Other',
       optional: false,
+      placeholder: 'Write your answer here',
     });
     expect(fields[2]).toMatchObject({
       fieldType: 'multi_select',

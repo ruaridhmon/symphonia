@@ -23,6 +23,9 @@ interface DocumentTemplateResponseProps {
   highlightedQuestionKey?: string | null;
   readOnly?: boolean;
   compact?: boolean;
+  editableHeading?: string;
+  editablePlaceholder?: string;
+  editableMinHeight?: string;
 }
 
 function parseInlineStyle(styleValue: string | null): CSSProperties | undefined {
@@ -193,6 +196,9 @@ export default function DocumentTemplateResponse({
   highlightedQuestionKey = null,
   readOnly = false,
   compact = false,
+  editableHeading = 'Edit your copy of the document',
+  editablePlaceholder = 'Write the document here…',
+  editableMinHeight,
 }: DocumentTemplateResponseProps) {
   if (isEditableDocumentTemplate(template)) {
     const key = 'q1';
@@ -213,14 +219,19 @@ export default function DocumentTemplateResponse({
         }}
       >
         <div className="mb-3 flex items-center gap-2 text-sm font-medium text-foreground">
-          <span>Edit your copy of the document</span>
-          {!readOnly ? <AnswerStateBadge answered={isResponseAnswered(response)} /> : null}
+          <span>{editableHeading}</span>
+          <AnswerStateBadge
+            answered={isResponseAnswered(response)}
+            answeredLabel="Answered"
+            pendingLabel="No response"
+            showLabel={readOnly}
+          />
         </div>
         <RichDocumentEditor
           value={value}
           readOnly={readOnly}
-          placeholder="Write the document here…"
-          minHeight={readOnly ? '14rem' : '20rem'}
+          placeholder={editablePlaceholder}
+          minHeight={editableMinHeight ?? (readOnly ? '14rem' : '20rem')}
           onChange={(nextValue) => onChange?.(key, { ...(response ?? emptyStructuredResponse()), position: nextValue })}
         />
       </div>
@@ -373,18 +384,29 @@ export default function DocumentTemplateResponse({
                         <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
                           {segment.value.label}
                         </span>
-                        <span
-                          className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                          style={{
-                            backgroundColor: segment.value.optional
-                              ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
-                              : 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                            color: segment.value.optional ? 'var(--muted-foreground)' : 'var(--accent)',
-                          }}
-                        >
-                          {segment.value.optional ? 'Optional' : 'Required'}
-                        </span>
-                        {!readOnly ? <AnswerStateBadge answered={answered} /> : null}
+                        {readOnly ? (
+                          <AnswerStateBadge
+                            answered={answered}
+                            answeredLabel="Answered"
+                            pendingLabel="No response"
+                            showLabel
+                          />
+                        ) : (
+                          <>
+                            <span
+                              className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                              style={{
+                                backgroundColor: segment.value.optional
+                                  ? 'color-mix(in srgb, var(--foreground) 5%, transparent)'
+                                  : 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                                color: segment.value.optional ? 'var(--muted-foreground)' : 'var(--accent)',
+                              }}
+                            >
+                              {segment.value.optional ? 'Optional' : 'Required'}
+                            </span>
+                            <AnswerStateBadge answered={answered} />
+                          </>
+                        )}
                       </span>
                       <DocumentTemplateFieldControl
                         field={{ ...segment.value, showLabel: false }}

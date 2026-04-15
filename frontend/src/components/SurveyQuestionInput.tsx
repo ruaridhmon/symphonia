@@ -60,6 +60,10 @@ function parseSliderValue(position: string, min: number, max: number): number | 
   return clampNumber(parsed, min, max);
 }
 
+function formatSliderBoundary(value: number): string {
+  return String(value);
+}
+
 function updatePosition(value: StructuredResponse, position: string): StructuredResponse {
   return {
     ...value,
@@ -241,6 +245,8 @@ export default function SurveyQuestionInput({
   const sliderMax = question.maxValue ?? 10;
   const sliderMidpoint = Math.round((sliderMin + sliderMax) / 2);
   const sliderValue = parseSliderValue(value.position, sliderMin, sliderMax);
+  const sliderStartLabel = formatSliderBoundary(sliderMin);
+  const sliderEndLabel = formatSliderBoundary(sliderMax);
   const voiceInput = useVoiceInput(
     !readOnly && (inputType === 'text' || inputType === 'textarea'),
     value.position,
@@ -275,22 +281,20 @@ export default function SurveyQuestionInput({
             </ul>
           ) : inputType === 'slider' && sliderValue !== null && Number.isFinite(sliderValue) ? (
             <div className="space-y-2">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-lg font-semibold text-foreground tabular-nums">{sliderValue}</div>
+              <div className="flex justify-end">
                 <div
-                  className="inline-flex min-w-[3.25rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold"
+                  className="inline-flex min-w-[3.25rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums"
                   style={{
                     backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
                     color: 'var(--accent)',
                   }}
                 >
-                  Score
+                  {sliderValue}
                 </div>
               </div>
-              <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 text-[11px] leading-4" style={{ color: 'var(--muted-foreground)' }}>
-                <span>{question.minLabel ?? sliderMin}</span>
-                <span className="text-center">{question.midLabel ?? '\u00A0'}</span>
-                <span className="text-right">{question.maxLabel ?? sliderMax}</span>
+              <div className="flex items-start justify-between gap-3 text-[11px] leading-4" style={{ color: 'var(--muted-foreground)' }}>
+                <span>{sliderStartLabel}</span>
+                <span className="text-right">{sliderEndLabel}</span>
               </div>
             </div>
           ) : inputType === 'likert' && value.position.trim() ? (
@@ -432,13 +436,7 @@ export default function SurveyQuestionInput({
             border: '1px solid color-mix(in srgb, var(--border) 82%, transparent)',
           }}
         >
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <span
-              className="text-[11px] font-semibold uppercase tracking-[0.14em]"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              {sliderValue === null ? 'Choose a score' : 'Selected score'}
-            </span>
+          <div className="mb-2 flex justify-end">
             <div
               className="inline-flex min-w-[3.5rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums"
               style={{
@@ -473,12 +471,11 @@ export default function SurveyQuestionInput({
             }}
           />
           <div
-            className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 text-[11px] leading-4"
+            className="mt-2 flex items-start justify-between gap-3 text-[11px] leading-4"
             style={{ color: 'var(--muted-foreground)' }}
           >
-            <span className="text-left">{question.minLabel ?? sliderMin}</span>
-            <span className="text-center">{question.midLabel ?? '\u00A0'}</span>
-            <span className="text-right">{question.maxLabel ?? sliderMax}</span>
+            <span className="text-left">{sliderStartLabel}</span>
+            <span className="text-right">{sliderEndLabel}</span>
           </div>
         </div>
       </div>
