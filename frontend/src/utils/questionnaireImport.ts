@@ -666,11 +666,6 @@ function questionToDocumentField(question: ConfigurableQuestion, fallbackKey: st
 export function convertQuestionnaireTextToRichTemplate(text: string): QuestionnaireRichTemplateResult {
   const parsed = parseQuestionnaireText(text);
   const htmlParts: string[] = [];
-  const questionLabelById = new Map(
-    parsed.questions
-      .filter((question) => question.questionId)
-      .map((question) => [question.questionId as string, question.label]),
-  );
 
   if (parsed.importedRoundLabel && !/full question set/i.test(parsed.importedRoundLabel)) {
     htmlParts.push(`<h1>${escapeHtml(parsed.importedRoundLabel)}</h1>`);
@@ -705,9 +700,6 @@ export function convertQuestionnaireTextToRichTemplate(text: string): Questionna
       question.helpText,
       question.maxSelections && question.inputType === 'multi_select'
         ? `Select up to ${question.maxSelections}.`
-        : null,
-      question.conditionalOnQuestionId && question.conditionalOnOption
-        ? `Shown when “${question.conditionalOnOption}” is selected for ${questionLabelById.get(question.conditionalOnQuestionId) ?? 'the earlier question'}.`
         : null,
     ].filter((value): value is string => !!value && value.trim() !== '');
 

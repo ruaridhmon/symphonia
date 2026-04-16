@@ -132,10 +132,25 @@ def _estimate_model_latency_multiplier(model: str | None) -> float:
 def _extract_answer_position(answer: Any) -> str:
     if isinstance(answer, str):
         return _html_to_plain_text(answer)
+    if isinstance(answer, (int, float)) and not isinstance(answer, bool):
+        return str(answer)
+    if isinstance(answer, bool):
+        return str(answer)
+    if isinstance(answer, list):
+        return "\n".join(
+            item
+            for item in (
+                _extract_answer_position(candidate).strip() for candidate in answer
+            )
+            if item
+        )
     if isinstance(answer, dict):
-        position = answer.get("position")
-        if isinstance(position, str):
-            return _html_to_plain_text(position)
+        for key in ("position", "value", "answer", "selected", "selectedScore", "score"):
+            if key not in answer:
+                continue
+            position = _extract_answer_position(answer.get(key))
+            if position.strip():
+                return position
     return ""
 
 
@@ -4132,11 +4147,6 @@ def _build_llm_fillable_document_template(
         )
 
     current_section: str | None = None
-    question_label_by_id = {
-        question.questionId: question.label
-        for question in questions
-        if question.questionId
-    }
 
     for index, question in enumerate(questions, start=1):
         if question.sectionTitle and question.sectionTitle != current_section:
@@ -4150,13 +4160,6 @@ def _build_llm_fillable_document_template(
             help_bits.append(question.helpText)
         if question.inputType == "multi_select" and question.maxSelections:
             help_bits.append(f"Select up to {question.maxSelections}.")
-        if question.conditionalOnQuestionId and question.conditionalOnOption:
-            controlling_label = question_label_by_id.get(
-                question.conditionalOnQuestionId, "the earlier question"
-            )
-            help_bits.append(
-                f'Shown when "{question.conditionalOnOption}" is selected for {controlling_label}.'
-            )
 
         field_html = _serialize_rich_document_field_html(question, fallback_index=index)
         question_id_label = question.questionId or f"Question {index}"

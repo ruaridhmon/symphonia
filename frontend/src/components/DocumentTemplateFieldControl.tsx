@@ -61,11 +61,11 @@ export default function DocumentTemplateFieldControl({
     field.fieldType === 'slider' ||
     field.fieldType === 'likert';
   const textFieldStyle = {
-    border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-    backgroundColor: 'color-mix(in srgb, var(--background) 84%, var(--card) 16%)',
+    border: '1px solid var(--border)',
+    backgroundColor: 'var(--background)',
     color: 'var(--foreground)',
     outline: 'none',
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)',
+    boxShadow: 'none',
   } as const;
 
   return (

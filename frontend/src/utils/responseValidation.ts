@@ -6,15 +6,11 @@ import {
   slugifyDocumentFieldKey,
   type DocumentTemplateField,
 } from './documentTemplate';
+import { coerceAnswerPosition } from './answers';
 import { extractQuestionText, normalizeQuestion, type QuestionInput } from './questions';
 
 function getAnswerPosition(answer: unknown): string {
-  if (typeof answer === 'string') return htmlToPlainText(answer);
-  if (answer && typeof answer === 'object' && 'position' in answer) {
-    const position = (answer as StructuredResponse).position;
-    return typeof position === 'string' ? htmlToPlainText(position) : '';
-  }
-  return '';
+  return htmlToPlainText(coerceAnswerPosition(answer));
 }
 
 export function validateDocumentTemplateResponses(

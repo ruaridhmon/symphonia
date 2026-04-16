@@ -868,4 +868,25 @@ describe('questionnaireImport', () => {
     expect(fields.find((field) => field.questionId === 'Q4a')).toBeUndefined();
     expect(fields.find((field) => field.questionId === 'Q15')).toBeUndefined();
   });
+
+  it('does not render conditional routing notes as participant-facing helper text', () => {
+    const converted = convertQuestionnaireTextToRichTemplate(FULL_AI_EDUCATION_QUESTIONNAIRE);
+    const html = getRichFillableTemplateContent(converted.template);
+
+    expect(html).not.toContain('Shown when');
+    expect(html).not.toContain('Prefer to self-describe (free text, max 20 words)” is selected');
+    expect(html).not.toContain('“Other” is selected');
+  });
+
+  it('strips legacy conditional helper text from existing rich fillable templates', () => {
+    const template = `
+      <!-- symphonia-document-mode: fillable-rich -->
+      <div>
+        <span data-symphonia-field-key="q1" data-symphonia-question-id="Q1" data-symphonia-field-label="What is your gender?" data-symphonia-show-label="true" data-symphonia-field-type="single_select" data-symphonia-input-type="single_select" data-symphonia-optional="false" data-symphonia-rows="1" data-symphonia-placeholder="Select one" data-symphonia-options="[&quot;Woman&quot;,&quot;Prefer to self-describe (free text, max 20 words)&quot;]"></span>
+        <div>Shown when “Prefer to self-describe (free text, max 20 words)” is selected for What is your gender?.</div>
+      </div>
+    `;
+
+    expect(getRichFillableTemplateContent(template)).not.toContain('Shown when');
+  });
 });

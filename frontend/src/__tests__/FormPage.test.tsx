@@ -1,5 +1,5 @@
 import { act, type ReactNode } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import FormPage from '../FormPage';
@@ -142,5 +142,51 @@ describe('FormPage draft initialization', () => {
 
     expect(await screen.findByTestId('survey-question-list')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^submit$/i })).toBeInTheDocument();
+  });
+
+  it('clears a validation error once the highlighted question is answered', async () => {
+    const question = {
+      label: 'Staff AI literacy, capability, and training',
+      requireEvidence: false,
+      requireCounterarguments: false,
+      requireConfidence: false,
+      inputType: 'slider',
+    };
+
+    mocks.getForm.mockResolvedValue({
+      title: 'Validation test form',
+      questions: [question],
+      consent_required: false,
+      consent_completed: true,
+      document_template: null,
+    });
+    mocks.getActiveRound.mockResolvedValue({
+      round_number: 1,
+      questions: [question],
+      previous_round_synthesis: '',
+    });
+    mocks.hasSubmitted.mockResolvedValue({ submitted: false });
+    mocks.getDraft.mockResolvedValue({ draft: null });
+
+    render(
+      <MemoryRouter initialEntries={['/form/1']}>
+        <Routes>
+          <Route path="/form/:id" element={<FormPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole('button', { name: /^submit$/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /^submit$/i }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Please answer "Staff AI literacy, capability, and training" before submitting.',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Set slider' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
   });
 });

@@ -13,6 +13,7 @@ import {
   slugifyDocumentFieldKey,
   type RenderableDocumentTemplateField,
 } from '../utils/documentTemplate';
+import type { QuestionInput } from '../utils/questions';
 import { isResponseAnswered } from '../utils/responseValidation';
 
 interface DocumentTemplateResponseProps {
@@ -26,6 +27,7 @@ interface DocumentTemplateResponseProps {
   editableHeading?: string;
   editablePlaceholder?: string;
   editableMinHeight?: string;
+  questions?: QuestionInput[];
 }
 
 function parseInlineStyle(styleValue: string | null): CSSProperties | undefined {
@@ -199,6 +201,7 @@ export default function DocumentTemplateResponse({
   editableHeading = 'Edit your copy of the document',
   editablePlaceholder = 'Write the document here…',
   editableMinHeight,
+  questions,
 }: DocumentTemplateResponseProps) {
   if (isEditableDocumentTemplate(template)) {
     const key = 'q1';
@@ -241,7 +244,7 @@ export default function DocumentTemplateResponse({
   if (isRichFillableDocumentTemplate(template)) {
     const parser = new DOMParser();
     const document = parser.parseFromString(getRichFillableTemplateContent(template) || '<p></p>', 'text/html');
-    const fieldMap = buildRichDocumentTemplateFieldMap(template, answers);
+    const fieldMap = buildRichDocumentTemplateFieldMap(template, answers, questions);
     const orderedEntries = Array.from(fieldMap.values());
     const content = Array.from(document.body.childNodes).map((node, index) =>
       renderRichTemplateNode({

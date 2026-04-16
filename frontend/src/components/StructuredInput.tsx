@@ -254,7 +254,7 @@ export default function StructuredInput({
           ref={autoResize}
           rows={2}
           placeholder={primaryPlaceholder}
-          className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+          className="w-full rounded-lg border border-border bg-background px-4 py-2.5 resize-none overflow-hidden"
           value={value.position}
           onChange={e => update({ position: e.target.value })}
           onInput={e => autoResize(e.target as HTMLTextAreaElement)}
@@ -268,7 +268,7 @@ export default function StructuredInput({
             ref={autoResize}
             rows={3}
             placeholder="What data, research, or experience supports your position? Include references where possible…"
-            className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 resize-none overflow-hidden"
             value={value.evidence}
             onChange={e => update({ evidence: e.target.value })}
             onInput={e => autoResize(e.target as HTMLTextAreaElement)}
@@ -285,7 +285,7 @@ export default function StructuredInput({
                 ref={autoResize}
                 rows={2}
                 placeholder="What are the strongest arguments against your position?"
-                className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+                className="w-full rounded-lg border border-border bg-background px-4 py-2.5 resize-none overflow-hidden"
                 value={value.counterarguments}
                 onChange={e => update({ counterarguments: e.target.value })}
                 onInput={e => autoResize(e.target as HTMLTextAreaElement)}
@@ -327,7 +327,7 @@ export default function StructuredInput({
                 ref={autoResize}
                 rows={1}
                 placeholder="Why this confidence level? What would change your mind?"
-                className="w-full rounded-lg px-4 py-2.5 resize-none overflow-hidden bg-muted"
+                className="w-full rounded-lg border border-border bg-background px-4 py-2.5 resize-none overflow-hidden"
                 style={{ marginTop: '0.5rem' }}
                 value={value.confidenceJustification}
                 onChange={e => update({ confidenceJustification: e.target.value })}
@@ -371,7 +371,7 @@ export default function StructuredInput({
                   <input
                     type="text"
                     placeholder="Add a citation (URL, DOI, or reference)…"
-                    className="rounded-lg px-3 py-2 bg-muted"
+                    className="rounded-lg border border-border bg-background px-3 py-2"
                     style={{ flex: 1, fontSize: '0.8125rem' }}
                     value={newCitation}
                     onChange={e => setNewCitation(e.target.value)}
@@ -405,7 +405,7 @@ export default function StructuredInput({
                   <input
                     type="text"
                     placeholder="Name or email of expert…"
-                    className="rounded-lg px-3 py-2 bg-muted"
+                    className="rounded-lg border border-border bg-background px-3 py-2"
                     style={{ flex: 1, fontSize: '0.8125rem' }}
                     value={newNomination}
                     onChange={e => setNewNomination(e.target.value)}

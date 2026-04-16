@@ -42,10 +42,10 @@ declare global {
 }
 
 const composerFieldStyle = {
-  border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-  backgroundColor: 'color-mix(in srgb, var(--background) 84%, var(--card) 16%)',
+  border: '1px solid var(--border)',
+  backgroundColor: 'var(--background)',
   color: 'var(--foreground)',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)',
+  boxShadow: 'none',
 } as const;
 
 function clampNumber(value: number, min: number, max: number): number {
@@ -262,60 +262,6 @@ export default function SurveyQuestionInput({
     commitSliderValue(Number.isFinite(parsed) ? parsed : sliderMidpoint);
   }
 
-  if (readOnly) {
-    return (
-      <div>
-        {renderHelpText(question.helpText)}
-        <div
-          className="rounded-xl px-4 py-3"
-          style={{
-            backgroundColor: 'var(--background)',
-            border: '1px solid var(--border)',
-          }}
-        >
-          {inputType === 'multi_select' && selectedValues.length > 0 ? (
-            <ul className="space-y-1 text-sm text-foreground">
-              {selectedValues.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : inputType === 'slider' && sliderValue !== null && Number.isFinite(sliderValue) ? (
-            <div className="space-y-2">
-              <div className="flex justify-end">
-                <div
-                  className="inline-flex min-w-[3.25rem] items-center justify-center rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums"
-                  style={{
-                    backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                    color: 'var(--accent)',
-                  }}
-                >
-                  {sliderValue}
-                </div>
-              </div>
-              <div className="flex items-start justify-between gap-3 text-[11px] leading-4" style={{ color: 'var(--muted-foreground)' }}>
-                <span>{sliderStartLabel}</span>
-                <span className="text-right">{sliderEndLabel}</span>
-              </div>
-            </div>
-          ) : inputType === 'likert' && value.position.trim() ? (
-            <div className="space-y-1">
-              <div className="text-sm font-semibold text-foreground">{value.position}</div>
-              {question.allowUnsure ? (
-                <div className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                  Scale: {likertOptions.join(' | ')} | Don't know / unsure
-                </div>
-              ) : null}
-            </div>
-          ) : value.position.trim() ? (
-            <div className="whitespace-pre-wrap text-sm text-foreground">{value.position}</div>
-          ) : (
-            <span style={{ color: 'var(--muted-foreground)' }}>No response provided</span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   if (inputType === 'text') {
     return (
       <div>
@@ -325,19 +271,24 @@ export default function SurveyQuestionInput({
             type="text"
             className="w-full rounded-[1.4rem] px-4 py-3 pr-24 text-sm leading-6"
             style={composerFieldStyle}
-            placeholder={question.placeholder ?? 'Write a short response'}
+            placeholder={readOnly ? 'No response provided' : question.placeholder ?? 'Write a short response'}
             value={value.position}
+            readOnly={readOnly}
             onChange={(event) => onChange(updatePosition(value, event.target.value))}
           />
-          <div className="absolute inset-y-0 right-2 flex items-center">
-            <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
-          </div>
+          {!readOnly ? (
+            <div className="absolute inset-y-0 right-2 flex items-center">
+              <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
+            </div>
+          ) : null}
         </div>
-        <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-          {voiceInput.isSupported
-            ? 'Use voice input to dictate this answer.'
-            : 'Voice input appears here on supported browsers.'}
-        </p>
+        {!readOnly ? (
+          <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+            {voiceInput.isSupported
+              ? 'Use voice input to dictate this answer.'
+              : 'Voice input appears here on supported browsers.'}
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -355,17 +306,19 @@ export default function SurveyQuestionInput({
           {options.map((option) => (
             <label
               key={option}
-              className="flex items-start gap-3 rounded-xl px-3.5 py-2.5 text-sm transition-colors"
+              className={`flex items-start gap-3 rounded-xl px-3.5 py-2.5 text-sm transition-colors ${readOnly ? '' : ''}`}
               style={{
                 backgroundColor: value.position === option ? 'color-mix(in srgb, var(--accent) 6%, var(--background))' : 'var(--background)',
                 border: value.position === option ? '1px solid color-mix(in srgb, var(--accent) 30%, var(--border))' : '1px solid var(--border)',
                 color: 'var(--foreground)',
+                cursor: readOnly ? 'default' : 'pointer',
               }}
             >
               <input
                 type="radio"
                 name={question.questionId ?? question.label}
                 checked={value.position === option}
+                disabled={readOnly}
                 onChange={() => onChange(updatePosition(value, option))}
                 style={{ accentColor: value.position === option ? 'var(--accent)' : 'var(--muted-foreground)' }}
               />
@@ -402,12 +355,13 @@ export default function SurveyQuestionInput({
                   backgroundColor: checked ? 'color-mix(in srgb, var(--accent) 6%, var(--background))' : 'var(--background)',
                   border: checked ? '1px solid color-mix(in srgb, var(--accent) 30%, var(--border))' : '1px solid var(--border)',
                   color: disabled ? 'var(--muted-foreground)' : 'var(--foreground)',
+                  cursor: readOnly ? 'default' : 'pointer',
                 }}
               >
                 <input
                   type="checkbox"
                   checked={checked}
-                  disabled={disabled}
+                  disabled={disabled || readOnly}
                   style={{ accentColor: checked ? 'var(--accent)' : 'var(--muted-foreground)' }}
                   onChange={(event) => {
                     const nextSelections = event.target.checked
@@ -432,8 +386,8 @@ export default function SurveyQuestionInput({
         <div
           className="rounded-[1.15rem] px-3.5 py-3"
           style={{
-            backgroundColor: 'color-mix(in srgb, var(--background) 80%, var(--card) 20%)',
-            border: '1px solid color-mix(in srgb, var(--border) 82%, transparent)',
+            backgroundColor: 'var(--background)',
+            border: '1px solid var(--border)',
           }}
         >
           <div className="mb-2 flex justify-end">
@@ -453,13 +407,14 @@ export default function SurveyQuestionInput({
             max={sliderMax}
             step={1}
             value={sliderValue ?? sliderMidpoint}
+            disabled={readOnly}
             onPointerDown={(event) => {
-              if (sliderValue === null) {
+              if (!readOnly && sliderValue === null) {
                 commitCurrentSliderValue(event.currentTarget);
               }
             }}
             onClick={(event) => {
-              if (sliderValue === null) {
+              if (!readOnly && sliderValue === null) {
                 commitCurrentSliderValue(event.currentTarget);
               }
             }}
@@ -468,6 +423,7 @@ export default function SurveyQuestionInput({
             style={{
               opacity: sliderValue === null ? 0.65 : 1,
               accentColor: sliderValue === null ? 'var(--muted-foreground)' : 'var(--accent)',
+              cursor: readOnly ? 'default' : 'pointer',
             }}
           />
           <div
@@ -507,7 +463,7 @@ export default function SurveyQuestionInput({
               return (
                 <label
                   key={option}
-                  className="flex min-h-[4.5rem] cursor-pointer flex-col justify-between rounded-2xl px-3 py-3 text-left transition-colors"
+                  className="flex min-h-[4.5rem] flex-col justify-between rounded-2xl px-3 py-3 text-left transition-colors"
                   style={{
                     backgroundColor: selected
                       ? 'color-mix(in srgb, var(--accent) 8%, var(--background))'
@@ -516,12 +472,14 @@ export default function SurveyQuestionInput({
                       ? '1px solid color-mix(in srgb, var(--accent) 34%, var(--border))'
                       : '1px solid var(--border)',
                     color: 'var(--foreground)',
+                    cursor: readOnly ? 'default' : 'pointer',
                   }}
                 >
                   <input
                     type="radio"
                     name={question.questionId ?? question.label}
                     checked={selected}
+                    disabled={readOnly}
                     onChange={() => onChange(updatePosition(value, option))}
                     className="sr-only"
                     aria-label={option}
@@ -563,19 +521,24 @@ export default function SurveyQuestionInput({
             resize: 'vertical',
             minHeight: question.rows && question.rows <= 2 ? undefined : '7rem',
           }}
-          placeholder={question.placeholder ?? 'Write your response here'}
+          placeholder={readOnly ? 'No response provided' : question.placeholder ?? 'Write your response here'}
           value={value.position}
+          readOnly={readOnly}
           onChange={(event) => onChange(updatePosition(value, event.target.value))}
         />
-        <div className="absolute bottom-2 right-2">
-          <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
-        </div>
+        {!readOnly ? (
+          <div className="absolute bottom-2 right-2">
+            <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
+          </div>
+        ) : null}
       </div>
-      <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-        {voiceInput.isSupported
-          ? 'Use voice input to dictate this answer.'
-          : 'Voice input appears here on supported browsers.'}
-      </p>
+      {!readOnly ? (
+        <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+          {voiceInput.isSupported
+            ? 'Use voice input to dictate this answer.'
+            : 'Voice input appears here on supported browsers.'}
+        </p>
+      ) : null}
     </div>
   );
 }

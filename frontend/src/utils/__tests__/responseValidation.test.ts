@@ -41,4 +41,28 @@ describe('responseValidation', () => {
       ),
     ).toEqual({ ok: true });
   });
+
+  it('treats numeric and legacy answer shapes as answered survey responses', () => {
+    expect(isResponseAnswered({ ...emptyStructuredResponse(), position: 2 as never })).toBe(true);
+    expect(isResponseAnswered({ value: 4 } as never)).toBe(true);
+    expect(isResponseAnswered({ selectedScore: 6 } as never)).toBe(true);
+    expect(isResponseAnswered({ answer: ['Workload', 'Equity'] } as never)).toBe(true);
+
+    expect(
+      validateQuestionResponses(
+        [
+          {
+            label: 'How significant is this issue?',
+            inputType: 'slider',
+            optional: false,
+            minValue: 0,
+            maxValue: 10,
+          },
+        ],
+        {
+          q1: { value: 2 } as never,
+        },
+      ),
+    ).toEqual({ ok: true });
+  });
 });

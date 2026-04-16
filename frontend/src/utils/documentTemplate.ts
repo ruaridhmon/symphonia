@@ -1,5 +1,10 @@
 import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
-import { DEFAULT_LIKERT_OPTIONS, type SurveyInputType } from './questions';
+import {
+  DEFAULT_LIKERT_OPTIONS,
+  normalizeQuestion,
+  type QuestionInput,
+  type SurveyInputType,
+} from './questions';
 
 export interface DocumentTemplateField {
   key: string;
@@ -41,6 +46,8 @@ export const RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX = '<!-- symphonia-document-m
 const PLACEHOLDER_PATTERN = /\{\{\s*([^{}]+?)\s*\}\}/g;
 const FIELD_TAG_SELECTOR = 'span[data-symphonia-field-key]';
 const RICH_FIELD_MARKUP_RE = /<span\b[^>]*data-symphonia-field-key\s*=/i;
+const LEGACY_CONDITIONAL_HELP_TEXT_RE =
+  /\s*Shown when [“"][^”"]+[”"] is selected for .*?\.(?=(?:\s|<|$))/gi;
 
 export function slugifyDocumentFieldKey(value: string): string {
   return value
@@ -76,11 +83,15 @@ export function getDocumentTemplateContent(template: string | null | undefined):
 
 export function getRichFillableTemplateContent(template: string | null | undefined): string {
   if (!template) return '';
+  const stripLegacyConditionalHelpText = (value: string) =>
+    value.replace(LEGACY_CONDITIONAL_HELP_TEXT_RE, '');
   if (!isRichFillableDocumentTemplate(template)) return template;
   if (template.trimStart().startsWith(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX)) {
-    return template.replace(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX, '').trim();
+    return stripLegacyConditionalHelpText(
+      template.replace(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX, '').trim(),
+    );
   }
-  return template.trim();
+  return stripLegacyConditionalHelpText(template.trim());
 }
 
 export function createEditableDocumentTemplate(content: string): string {
@@ -493,6 +504,7 @@ export function buildDocumentTemplateLines(
 export function buildRichDocumentTemplateFieldMap(
   template: string,
   answers: Record<string, StructuredResponse>,
+  questions?: QuestionInput[],
 ): Map<string, { field: RenderableDocumentTemplateField; response: StructuredResponse }> {
   const map = new Map<string, { field: RenderableDocumentTemplateField; response: StructuredResponse }>();
   if (!isRichFillableDocumentTemplate(template)) return map;
@@ -500,13 +512,17 @@ export function buildRichDocumentTemplateFieldMap(
   const parser = new DOMParser();
   const document = parser.parseFromString(html || '<p></p>', 'text/html');
   const keyToQuestionKey = new Map<string, string>();
+  const questionKeyMapping = buildRichTemplateQuestionKeyMapping(questions);
   let index = 1;
   document.querySelectorAll(FIELD_TAG_SELECTOR).forEach((element) => {
     const field = parseRichDocumentFieldElement(element);
     if (!field) return;
+    if (field.questionId && questionKeyMapping && !questionKeyMapping.has(field.questionId)) {
+      return;
+    }
     let questionKey = keyToQuestionKey.get(field.key);
     if (!questionKey) {
-      questionKey = `q${index}`;
+      questionKey = (field.questionId && questionKeyMapping?.get(field.questionId)) || `q${index}`;
       keyToQuestionKey.set(field.key, questionKey);
       index += 1;
     }
@@ -516,6 +532,78 @@ export function buildRichDocumentTemplateFieldMap(
     });
   });
   return map;
+}
+
+function buildRichTemplateQuestionKeyMapping(
+  questions?: QuestionInput[],
+): Map<string, string> | null {
+  if (!questions?.length) return null;
+
+  const byQuestionId = new Map<string, string>();
+  questions.forEach((question, index) => {
+    const normalized = normalizeQuestion(question);
+    if (!normalized.questionId) return;
+    byQuestionId.set(normalized.questionId, `q${index + 1}`);
+  });
+
+  return byQuestionId;
+}
+
+export function remapRichFillableAnswersToQuestionOrder(
+  template: string,
+  questions: QuestionInput[],
+  answers: Record<string, StructuredResponse>,
+): Record<string, StructuredResponse> {
+  if (!isRichFillableDocumentTemplate(template) || !questions.length) {
+    return answers;
+  }
+
+  const normalizedQuestions = questions.map((question, index) => ({
+    question: normalizeQuestion(question),
+    key: `q${index + 1}`,
+  }));
+  const questionKeyById = new Map(
+    normalizedQuestions
+      .filter((entry) => entry.question.questionId)
+      .map((entry) => [entry.question.questionId as string, entry.key]),
+  );
+  const templateFields = parseDocumentTemplateFields(template);
+
+  let oldOrderEvidence = 0;
+  let questionOrderEvidence = 0;
+
+  templateFields.forEach((field, index) => {
+    const sourceKey = `q${index + 1}`;
+    const targetKey = field.questionId ? questionKeyById.get(field.questionId) : undefined;
+    if (!targetKey || targetKey === sourceKey) return;
+
+    const sourceAnswered = !!answers[sourceKey]?.position?.trim();
+    const targetAnswered = !!answers[targetKey]?.position?.trim();
+    if (sourceAnswered && !targetAnswered) oldOrderEvidence += 1;
+    if (targetAnswered && !sourceAnswered) questionOrderEvidence += 1;
+  });
+
+  if (oldOrderEvidence <= questionOrderEvidence) {
+    return answers;
+  }
+
+  const remapped = { ...answers };
+  templateFields.forEach((field, index) => {
+    const sourceKey = `q${index + 1}`;
+    const sourceAnswer = answers[sourceKey];
+    if (!sourceAnswer) return;
+
+    if (!field.questionId) {
+      remapped[sourceKey] = sourceAnswer;
+      return;
+    }
+
+    const targetKey = questionKeyById.get(field.questionId);
+    if (!targetKey) return;
+    remapped[targetKey] = sourceAnswer;
+  });
+
+  return remapped;
 }
 
 export function isDocumentTemplate(template: string | null | undefined): boolean {

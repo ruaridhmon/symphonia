@@ -13,8 +13,15 @@ import Skeleton, { SkeletonCard } from './components/Skeleton'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
-import { validateDocumentTemplateResponses, validateQuestionResponses } from './utils/responseValidation'
-import { buildInitialDocumentTemplateResponses, isDocumentTemplate, isEditableDocumentTemplate } from './utils/documentTemplate'
+import { normalizeAnswerRecord } from './utils/answers'
+import { isResponseAnswered, validateDocumentTemplateResponses, validateQuestionResponses } from './utils/responseValidation'
+import {
+  buildInitialDocumentTemplateResponses,
+  isDocumentTemplate,
+  isEditableDocumentTemplate,
+  isRichFillableDocumentTemplate,
+  remapRichFillableAnswersToQuestionOrder,
+} from './utils/documentTemplate'
 import { useDocumentTitle } from './hooks/useDocumentTitle'
 
 export default function FormPage() {
@@ -68,22 +75,7 @@ export default function FormPage() {
 
   /** Convert legacy flat string answers to structured responses */
   const legacyToStructured = useCallback((answers: Record<string, unknown>): Record<string, StructuredResponse> => {
-    const result: Record<string, StructuredResponse> = {}
-    for (const [key, val] of Object.entries(answers)) {
-      if (typeof val === 'string') {
-        result[key] = { ...emptyStructuredResponse(), position: val }
-      } else if (
-        val &&
-        typeof val === 'object' &&
-        'position' in val &&
-        typeof (val as StructuredResponse).position === 'string'
-      ) {
-        result[key] = { ...emptyStructuredResponse(), ...(val as Partial<StructuredResponse>) }
-      } else {
-        result[key] = emptyStructuredResponse()
-      }
-    }
-    return result
+    return normalizeAnswerRecord(answers)
   }, [])
 
   /** Debounced server-side draft save (2s after last keystroke) */
@@ -153,6 +145,13 @@ export default function FormPage() {
             // Fall back to empty structured responses when the submitted payload
             // is unavailable.
           }
+          if (isRichFillableDocumentTemplate(formData.document_template)) {
+            nextResponses = remapRichFillableAnswersToQuestionOrder(
+              formData.document_template ?? '',
+              questions,
+              nextResponses,
+            )
+          }
           setStructuredResponses(nextResponses)
           setMode('reviewing')
         } else {
@@ -168,6 +167,13 @@ export default function FormPage() {
             }
           } catch {
             // Fall back to empty structured responses when no draft exists.
+          }
+          if (isRichFillableDocumentTemplate(formData.document_template)) {
+            nextResponses = remapRichFillableAnswersToQuestionOrder(
+              formData.document_template ?? '',
+              questions,
+              nextResponses,
+            )
           }
           setStructuredResponses(nextResponses)
           setDraftRestored(restoredDraft)
@@ -187,6 +193,13 @@ export default function FormPage() {
           }
         } catch {
           // Fall back to empty structured responses when no draft exists.
+        }
+        if (isRichFillableDocumentTemplate(formData.document_template)) {
+          nextResponses = remapRichFillableAnswersToQuestionOrder(
+            formData.document_template ?? '',
+            questions,
+            nextResponses,
+          )
         }
         setStructuredResponses(nextResponses)
         setDraftRestored(restoredDraft)
@@ -212,6 +225,13 @@ export default function FormPage() {
     loadForm()
   }, [loadForm])
 
+  useEffect(() => {
+    if (!submitError || !highlightedQuestionKey) return
+    if (!isResponseAnswered(structuredResponses[highlightedQuestionKey])) return
+    setSubmitError(null)
+    setHighlightedQuestionKey(null)
+  }, [highlightedQuestionKey, structuredResponses, submitError])
+
   async function handleAcceptConsent() {
     if (!formId || !form?.consent_required) return
     if (!consentChecked) {
@@ -232,7 +252,9 @@ export default function FormPage() {
   }
 
   function validateResponses() {
-    const result = isDocumentMode && form?.document_template
+    const result = isRichFillableDocumentTemplate(form?.document_template)
+      ? validateQuestionResponses(roundQuestions, structuredResponses)
+      : isDocumentMode && form?.document_template
       ? validateDocumentTemplateResponses(form.document_template, structuredResponses)
       : validateQuestionResponses(roundQuestions, structuredResponses)
 
@@ -250,6 +272,13 @@ export default function FormPage() {
     return true
   }
 
+  function clearResolvedValidationError(key: string, value: StructuredResponse) {
+    if (highlightedQuestionKey !== key) return
+    if (!isResponseAnswered(value)) return
+    setHighlightedQuestionKey(null)
+    setSubmitError(null)
+  }
+
   async function handleSubmit() {
     if (!id) return
 
@@ -259,7 +288,7 @@ export default function FormPage() {
     setSubmitError(null)
 
     try {
-      await submitResponse(Number(id), structuredResponses)
+      await submitResponse(Number(id), normalizeAnswerRecord(structuredResponses))
 
       // Clear auto-save data on successful submit (local + server)
       roundQuestions.forEach((_, i) => {
@@ -445,6 +474,7 @@ export default function FormPage() {
             {isDocumentMode && form.document_template ? (
               <DocumentTemplateResponse
                 template={form.document_template}
+                questions={roundQuestions}
                 answers={structuredResponses}
                 highlightedQuestionKey={highlightedQuestionKey}
                 readOnly
@@ -473,10 +503,11 @@ export default function FormPage() {
             {isDocumentMode && form.document_template ? (
               <DocumentTemplateResponse
                 template={form.document_template}
+                questions={roundQuestions}
                 answers={structuredResponses}
                 highlightedQuestionKey={highlightedQuestionKey}
                 onChange={(key, val) => {
-                  if (highlightedQuestionKey === key) setHighlightedQuestionKey(null)
+                  clearResolvedValidationError(key, val)
                   setStructuredResponses(prev => {
                     const next = { ...prev, [key]: val }
                     scheduleDraftSave(next)
@@ -490,7 +521,7 @@ export default function FormPage() {
                 formId={id!}
                 responses={structuredResponses}
                 onChange={(key, val) => {
-                  if (highlightedQuestionKey === key) setHighlightedQuestionKey(null)
+                  clearResolvedValidationError(key, val)
                   setStructuredResponses(prev => {
                     const next = { ...prev, [key]: val }
                     scheduleDraftSave(next)

@@ -14,8 +14,15 @@ import SurveyQuestionList from './components/SurveyQuestionList';
 import Skeleton from './components/Skeleton';
 import type { StructuredResponse } from './types/structured-input';
 import { emptyStructuredResponse } from './types/structured-input';
-import { validateDocumentTemplateResponses, validateQuestionResponses } from './utils/responseValidation';
-import { buildInitialDocumentTemplateResponses, isDocumentTemplate, isEditableDocumentTemplate } from './utils/documentTemplate';
+import { normalizeAnswerRecord } from './utils/answers';
+import { isResponseAnswered, validateDocumentTemplateResponses, validateQuestionResponses } from './utils/responseValidation';
+import {
+  buildInitialDocumentTemplateResponses,
+  isDocumentTemplate,
+  isEditableDocumentTemplate,
+  isRichFillableDocumentTemplate,
+  remapRichFillableAnswersToQuestionOrder,
+} from './utils/documentTemplate';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 function PreviousSynthesisToggle({ content }: { content: string }) {
@@ -94,17 +101,7 @@ export default function PublicFormPage() {
   }, []);
 
   const legacyToStructured = useCallback((answers: Record<string, unknown>): Record<string, StructuredResponse> => {
-    const result: Record<string, StructuredResponse> = {};
-    for (const [key, val] of Object.entries(answers)) {
-      if (typeof val === 'string') {
-        result[key] = { ...emptyStructuredResponse(), position: val };
-      } else if (val && typeof val === 'object' && 'position' in val && typeof (val as StructuredResponse).position === 'string') {
-        result[key] = { ...emptyStructuredResponse(), ...(val as Partial<StructuredResponse>) };
-      } else {
-        result[key] = emptyStructuredResponse();
-      }
-    }
-    return result;
+    return normalizeAnswerRecord(answers);
   }, []);
 
   const scheduleDraftSave = useCallback((answers: Record<string, StructuredResponse>, name: string) => {
@@ -117,7 +114,7 @@ export default function PublicFormPage() {
         setDraftStatus('saving');
         await savePublicDraft(sessionToken, {
           participant_name: latestParticipantNameRef.current,
-          answers: latestResponsesRef.current,
+          answers: normalizeAnswerRecord(latestResponsesRef.current),
         });
         setDraftStatus('saved');
         setTimeout(() => setDraftStatus((current) => (current === 'saved' ? 'idle' : current)), 3000);
@@ -141,10 +138,17 @@ export default function PublicFormPage() {
       const data = await getPublicFormSession(sessionToken);
       setSession(data);
       setParticipantName(data.participant_name);
+      const loadedResponses = data.draft?.answers
+        ? legacyToStructured(data.draft.answers)
+        : buildEmptyResponses(data.form.questions, data.form.document_template);
       setStructuredResponses(
-        data.draft?.answers
-          ? legacyToStructured(data.draft.answers)
-          : buildEmptyResponses(data.form.questions, data.form.document_template),
+        isRichFillableDocumentTemplate(data.form.document_template)
+          ? remapRichFillableAnswersToQuestionOrder(
+              data.form.document_template ?? '',
+              data.form.questions,
+              loadedResponses,
+            )
+          : loadedResponses,
       );
       setMode(data.submitted ? 'submitted' : 'filling');
     } catch (err) {
@@ -158,9 +162,23 @@ export default function PublicFormPage() {
     loadSession();
   }, [loadSession]);
 
+  useEffect(() => {
+    if (!submitError) return;
+    if (submitError === 'Please enter your name before submitting.' && participantName.trim()) {
+      setSubmitError(null);
+      return;
+    }
+    if (!highlightedQuestionKey) return;
+    if (!isResponseAnswered(structuredResponses[highlightedQuestionKey])) return;
+    setSubmitError(null);
+    setHighlightedQuestionKey(null);
+  }, [highlightedQuestionKey, participantName, structuredResponses, submitError]);
+
   function validateResponses() {
     if (!session) return false;
-    const result = isDocumentTemplate(session.form.document_template)
+    const result = isRichFillableDocumentTemplate(session.form.document_template)
+      ? validateQuestionResponses(session.form.questions, structuredResponses)
+      : isDocumentTemplate(session.form.document_template)
       ? validateDocumentTemplateResponses(session.form.document_template ?? '', structuredResponses)
       : validateQuestionResponses(session.form.questions, structuredResponses);
 
@@ -183,6 +201,13 @@ export default function PublicFormPage() {
     return true;
   }
 
+  function clearResolvedValidationError(key: string, value: StructuredResponse) {
+    if (highlightedQuestionKey !== key) return;
+    if (!isResponseAnswered(value)) return;
+    setHighlightedQuestionKey(null);
+    setSubmitError(null);
+  }
+
   async function handleSubmit() {
     if (!sessionToken || !validateResponses()) return;
 
@@ -191,7 +216,7 @@ export default function PublicFormPage() {
     try {
       await submitPublicResponse(sessionToken, {
         participant_name: participantName.trim(),
-        answers: structuredResponses,
+        answers: normalizeAnswerRecord(structuredResponses),
       });
       setMode('submitted');
     } catch (err) {
@@ -302,10 +327,11 @@ export default function PublicFormPage() {
           {isDocumentMode && session.form.document_template ? (
             <DocumentTemplateResponse
               template={session.form.document_template}
+              questions={session.form.questions}
               answers={structuredResponses}
               highlightedQuestionKey={highlightedQuestionKey}
               onChange={(key, val) => {
-                if (highlightedQuestionKey === key) setHighlightedQuestionKey(null);
+                clearResolvedValidationError(key, val);
                 setStructuredResponses((prev) => {
                   const next = { ...prev, [key]: val };
                   scheduleDraftSave(next, participantName);
@@ -319,7 +345,7 @@ export default function PublicFormPage() {
               formId={`public-${session.form.id}`}
               responses={structuredResponses}
               onChange={(key, val) => {
-                if (highlightedQuestionKey === key) setHighlightedQuestionKey(null);
+                clearResolvedValidationError(key, val);
                 setStructuredResponses((prev) => {
                   const next = { ...prev, [key]: val };
                   scheduleDraftSave(next, participantName);
