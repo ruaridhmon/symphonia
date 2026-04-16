@@ -145,7 +145,14 @@ def _extract_answer_position(answer: Any) -> str:
             if item
         )
     if isinstance(answer, dict):
-        for key in ("position", "value", "answer", "selected", "selectedScore", "score"):
+        for key in (
+            "position",
+            "value",
+            "answer",
+            "selected",
+            "selectedScore",
+            "score",
+        ):
             if key not in answer:
                 continue
             position = _extract_answer_position(answer.get(key))
