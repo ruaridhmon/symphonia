@@ -366,8 +366,8 @@ Base.metadata.create_all(bind=engine)
 _ensure_schema_columns()
 
 with SessionLocal() as db:
-    admin_email = os.environ.get("ADMIN_EMAIL", "antreas@axiotic.ai")
-    admin_password = os.environ.get("ADMIN_PASSWORD", "test123")
+    admin_email = os.environ.get("ADMIN_EMAIL", "admin@admin")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
     admin = db.query(User).filter(User.email == admin_email).first()
     if not admin:
         db.add(
@@ -453,7 +453,7 @@ with SessionLocal() as db:
     print("=" * 60)
     print("🔐 Protected by Cloudflare Access")
     print("   Admin users:")
-    print("   • antreas@axiotic.ai")
+    print("   • admin@admin")
     print("   • samuel@axiotic.ai")
     print("   • ruaridh.mw@ed.ac.uk")
     print("   • d.birks@leeds.ac.uk")

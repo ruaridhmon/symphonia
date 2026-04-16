@@ -5,7 +5,7 @@ import { ADMIN_EMAIL, ADMIN_PASSWORD } from './helpers';
  * Full E2E journey tests — require the FastAPI backend serving the frontend.
  *
  * Default seed credentials:
- *   Admin:       antreas@axiotic.ai / test123
+ *   Admin:       admin@admin / admin
  */
 
 test.describe('Admin journey', () => {

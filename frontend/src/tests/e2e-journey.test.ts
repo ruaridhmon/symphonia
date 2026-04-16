@@ -2,7 +2,7 @@
  * E2E User Journey Test for Symphonia
  * 
  * This test simulates a complete user journey through the Symphonia platform:
- * 1. Login as admin (antreas@axiotic.ai / test123)
+ * 1. Login as admin (admin@admin / admin)
  * 2. Create a new form with 2 questions
  * 3. Submit a response as participant
  * 4. Generate AI synthesis
@@ -21,8 +21,8 @@ import { describe, it, expect, beforeAll } from 'vitest'; // or your testing fra
 
 // Configuration
 const API_BASE = 'http://localhost:8000';
-const ADMIN_EMAIL = 'antreas@axiotic.ai';
-const ADMIN_PASSWORD = 'test123';
+const ADMIN_EMAIL = 'admin@admin';
+const ADMIN_PASSWORD = 'admin';
 
 // Test state
 let accessToken: string;

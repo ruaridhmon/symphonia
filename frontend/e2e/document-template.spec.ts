@@ -5,8 +5,8 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
 
-const ADMIN_EMAIL = 'antreas@axiotic.ai';
-const ADMIN_PASSWORD = 'test123';
+const ADMIN_EMAIL = 'admin@admin';
+const ADMIN_PASSWORD = 'admin';
 
 type LoginPayload = {
   access_token: string;

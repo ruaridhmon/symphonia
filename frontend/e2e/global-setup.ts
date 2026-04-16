@@ -40,8 +40,8 @@ async function globalSetup(config: FullConfig) {
   try {
     // Login as admin
     await page.goto('/login', { timeout: 10_000 });
-    await page.fill('#login-email', 'antreas@axiotic.ai');
-    await page.fill('#login-password', 'test123');
+    await page.fill('#login-email', 'admin@admin');
+    await page.fill('#login-password', 'admin');
     await page.getByRole('button', { name: 'Sign In' }).click();
 
     // Wait for navigation away from login page

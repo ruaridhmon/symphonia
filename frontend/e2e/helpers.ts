@@ -4,7 +4,7 @@ import { type Page } from '@playwright/test';
  * Shared test helpers for Symphonia E2E tests.
  *
  * Default seed credentials:
- *   Admin:       antreas@axiotic.ai / test123
+ *   Admin:       admin@admin / admin
  *   Participant: participant@test.com / test123
  *
  * Auth note: The global setup (global-setup.ts) logs in as admin and stores
@@ -15,8 +15,8 @@ import { type Page } from '@playwright/test';
  * don't need it because they already have auth state.
  */
 
-export const ADMIN_EMAIL = 'antreas@axiotic.ai';
-export const ADMIN_PASSWORD = 'test123';
+export const ADMIN_EMAIL = 'admin@admin';
+export const ADMIN_PASSWORD = 'admin';
 export const AUTH_STORAGE_STATE = 'e2e/.auth/admin.json';
 
 /**

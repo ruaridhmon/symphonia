@@ -85,12 +85,12 @@ def client(test_db) -> Generator[TestClient, None, None]:
 
     # Seed admin users (mirrors main.py startup logic)
     db = TestingSessionLocal()
-    for email in ("antreas@axiotic.ai", "samuel@axiotic.ai"):
+    for email, password in (("admin@admin", "admin"), ("samuel@axiotic.ai", "test123")):
         if not db.query(User).filter(User.email == email).first():
             db.add(
                 User(
                     email=email,
-                    hashed_password=get_password_hash("test123"),
+                    hashed_password=get_password_hash(password),
                     role="platform_admin",
                 )
             )
@@ -113,7 +113,7 @@ def admin_token(client: TestClient) -> str:
     """Login as admin and return the bearer token."""
     resp = client.post(
         "/login",
-        data={"username": "antreas@axiotic.ai", "password": "test123"},
+        data={"username": "admin@admin", "password": "admin"},
     )
     assert resp.status_code == 200, f"Admin login failed: {resp.text}"
     return resp.json()["access_token"]

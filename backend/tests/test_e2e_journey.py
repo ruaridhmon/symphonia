@@ -41,7 +41,7 @@ class TestAdminFullFlow:
         resp = client.get("/me", headers=admin_headers)
         assert resp.status_code == 200
         data = resp.json()
-        assert data["email"] == "antreas@axiotic.ai"
+        assert data["email"] == "admin@admin"
         assert data["is_admin"] is True
 
     def test_02_create_form(self, client: TestClient, admin_headers: dict):
