@@ -115,7 +115,7 @@ async def get_current_user(
     the "session expired" loop where a valid Bearer token is ignored because
     an expired cookie is present.
     """
-    admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com")
+    admin_email = os.environ.get("ADMIN_EMAIL", "antreas@axiotic.ai")
 
     # Build candidate list: httpOnly cookie first (XSS-proof), then Bearer
     candidates: list[str] = []
