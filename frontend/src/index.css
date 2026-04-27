@@ -691,6 +691,27 @@ main,
   pointer-events: none;
 }
 
+.synthesis-editor-surface {
+  max-width: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--background);
+  overflow: hidden;
+}
+
+.synthesis-editor-surface .ProseMirror {
+  min-height: 18rem;
+  padding: 1rem;
+}
+
+.synthesis-editor-surface .ProseMirror:focus {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.synthesis-editor-prosemirror {
+  max-width: none;
+}
+
 /* Prose overrides for theme awareness */
 .prose {
   color: var(--foreground);

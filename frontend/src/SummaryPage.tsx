@@ -6,6 +6,10 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
 import { ChartNoAxesColumn, ChevronDown, ChevronRight, Download, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
@@ -194,6 +198,128 @@ function buildStructuredSummaryText(data: Record<string, any> | null): string {
 	return parts.join('\n');
 }
 
+function escapeEditorHtml(value: string): string {
+	return value
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
+}
+
+function renderInlineMarkdown(value: string): string {
+	return escapeEditorHtml(value)
+		.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+		.replace(/__([^_]+)__/g, '<strong>$1</strong>')
+		.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+		.replace(/_([^_]+)_/g, '<em>$1</em>');
+}
+
+function stripMarkdownParagraphWrapper(raw: string): string {
+	return raw
+		.trim()
+		.replace(/<br\s*\/?>/gi, '\n')
+		.replace(/<\/p>\s*<p>/gi, '\n\n')
+		.replace(/^<p>/i, '')
+		.replace(/<\/p>$/i, '');
+}
+
+function markdownToEditorHtml(markdown: string): string {
+	const lines = markdown.replace(/\r\n/g, '\n').split('\n');
+	const html: string[] = [];
+	let index = 0;
+
+	const isTableSeparator = (line: string) =>
+		/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+
+	while (index < lines.length) {
+		const line = lines[index];
+		const trimmed = line.trim();
+		if (!trimmed) {
+			index += 1;
+			continue;
+		}
+
+		const heading = trimmed.match(/^(#{1,6})\s+(.+)$/);
+		if (heading) {
+			const level = Math.min(heading[1].length, 4);
+			html.push(`<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`);
+			index += 1;
+			continue;
+		}
+
+		if (trimmed.startsWith('|') && lines[index + 1] && isTableSeparator(lines[index + 1])) {
+			const rows: string[][] = [];
+			rows.push(trimmed.split('|').map(cell => cell.trim()).filter(Boolean));
+			index += 2;
+			while (index < lines.length && lines[index].trim().startsWith('|')) {
+				rows.push(lines[index].trim().split('|').map(cell => cell.trim()).filter(Boolean));
+				index += 1;
+			}
+			const [header, ...body] = rows;
+			html.push('<table><thead><tr>');
+			for (const cell of header) html.push(`<th>${renderInlineMarkdown(cell)}</th>`);
+			html.push('</tr></thead><tbody>');
+			for (const row of body) {
+				html.push('<tr>');
+				for (const cell of row) html.push(`<td>${renderInlineMarkdown(cell)}</td>`);
+				html.push('</tr>');
+			}
+			html.push('</tbody></table>');
+			continue;
+		}
+
+		if (/^[-*+]\s+/.test(trimmed)) {
+			html.push('<ul>');
+			while (index < lines.length && /^[-*+]\s+/.test(lines[index].trim())) {
+				html.push(`<li>${renderInlineMarkdown(lines[index].trim().replace(/^[-*+]\s+/, ''))}</li>`);
+				index += 1;
+			}
+			html.push('</ul>');
+			continue;
+		}
+
+		if (/^\d+\.\s+/.test(trimmed)) {
+			html.push('<ol>');
+			while (index < lines.length && /^\d+\.\s+/.test(lines[index].trim())) {
+				html.push(`<li>${renderInlineMarkdown(lines[index].trim().replace(/^\d+\.\s+/, ''))}</li>`);
+				index += 1;
+			}
+			html.push('</ol>');
+			continue;
+		}
+
+		const paragraph: string[] = [trimmed];
+		index += 1;
+		while (
+			index < lines.length
+			&& lines[index].trim()
+			&& !/^(#{1,6})\s+/.test(lines[index].trim())
+			&& !/^[-*+]\s+/.test(lines[index].trim())
+			&& !/^\d+\.\s+/.test(lines[index].trim())
+			&& !(lines[index].trim().startsWith('|') && lines[index + 1] && isTableSeparator(lines[index + 1]))
+		) {
+			paragraph.push(lines[index].trim());
+			index += 1;
+		}
+		html.push(`<p>${renderInlineMarkdown(paragraph.join(' '))}</p>`);
+	}
+
+	return html.join('');
+}
+
+function normalizeSynthesisForEditor(raw: string): string {
+	const trimmed = (raw || '').trim();
+	if (!trimmed) return '';
+
+	const unwrapped = stripMarkdownParagraphWrapper(trimmed);
+	const hasMarkdownSyntax = /(?:^|\n)#{1,6}\s|(?:^|\n)\s*[-*+]\s+|\*\*|__|(?:^|\n)\s*\|.+\|/m.test(unwrapped);
+	const isHtml = /^\s*<[a-z][\s\S]*>/i.test(trimmed);
+
+	if (hasMarkdownSyntax) return markdownToEditorHtml(unwrapped);
+	if (isHtml) return trimmed;
+	return `<p>${renderInlineMarkdown(trimmed)}</p>`;
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function SummaryPage() {
@@ -379,9 +505,13 @@ export default function SummaryPage() {
 			StarterKit,
 			Underline,
 			Placeholder.configure({ placeholder: 'Write the synthesis for this round…' }),
+			Table.configure({ resizable: true }),
+			TableRow,
+			TableHeader,
+			TableCell,
 		],
 		content: '',
-		editorProps: { attributes: { class: 'prose prose-sm max-w-none focus:outline-none' } },
+		editorProps: { attributes: { class: 'markdown-body synthesis-editor-prosemirror focus:outline-none' } },
 	});
 
 	// ── Derived values ──
@@ -817,8 +947,8 @@ export default function SummaryPage() {
 
 	function resetEditorToSaved(synthesis: string) {
 		if (!editor) return;
-		editor.commands.setContent(synthesis || '');
-		setLastSavedSynthesis((synthesis || '').trim());
+		editor.commands.setContent(normalizeSynthesisForEditor(synthesis));
+		setLastSavedSynthesis(editor.getHTML().trim());
 		setIsSynthesisDirty(false);
 	}
 

@@ -136,7 +136,7 @@ export default function SynthesisEditorCard({
         </div>
       )}
       {synthesisViewMode === 'edit' ? (
-        <div className="prose max-w-none">
+        <div className="synthesis-editor-surface markdown-body">
           <EditorContent editor={editor} />
         </div>
       ) : (
