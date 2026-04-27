@@ -12,6 +12,10 @@ interface StructuredSynthesisProps {
   roundId?: number;
   token?: string;
   currentUserEmail?: string;
+  visibleSections?: Partial<
+    Record<'narrative' | 'agreements' | 'disagreements' | 'nuances' | 'probes', boolean>
+  >;
+  showOverview?: boolean;
 }
 
 // ─── Sub-components ──────────────────────────────────────
@@ -175,7 +179,17 @@ function getDimensionClass(label?: string): string {
   return '';
 }
 
-export default function StructuredSynthesis({ data, convergenceScore, expertLabels, formId, roundId, token, currentUserEmail }: StructuredSynthesisProps) {
+export default function StructuredSynthesis({
+  data,
+  convergenceScore,
+  expertLabels,
+  formId,
+  roundId,
+  token,
+  currentUserEmail,
+  visibleSections,
+  showOverview = true,
+}: StructuredSynthesisProps) {
   const { t } = useTranslation();
   const commentsEnabled = !!(formId && roundId && token);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -201,43 +215,52 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
     confidence_map: confidence = {} as Record<string, number>,
     narrative,
   } = data || {};
+  const sectionVisible = {
+    narrative: visibleSections?.narrative ?? true,
+    agreements: visibleSections?.agreements ?? true,
+    disagreements: visibleSections?.disagreements ?? true,
+    nuances: visibleSections?.nuances ?? true,
+    probes: visibleSections?.probes ?? true,
+  };
 
   return (
     <div className="structured-synthesis fade-in">
       {/* ── Overview Bar ── */}
-      <div className="structured-overview">
-        <div className="structured-overview-stats">
-          <div className="structured-stat">
-            <span className="structured-stat-value">{agreements.length}</span>
-            <span className="structured-stat-label">{t('synthesis.structured.agreements')}</span>
+      {showOverview && (
+        <div className="structured-overview">
+          <div className="structured-overview-stats">
+            <div className="structured-stat">
+              <span className="structured-stat-value">{agreements.length}</span>
+              <span className="structured-stat-label">{t('synthesis.structured.agreements')}</span>
+            </div>
+            <div className="structured-stat">
+              <span className="structured-stat-value">{disagreements.length}</span>
+              <span className="structured-stat-label">{t('synthesis.structured.disagreements')}</span>
+            </div>
+            <div className="structured-stat">
+              <span className="structured-stat-value">{nuances.length}</span>
+              <span className="structured-stat-label">{t('synthesis.structured.nuances')}</span>
+            </div>
+            <div className="structured-stat">
+              <span className="structured-stat-value">{probes.length}</span>
+              <span className="structured-stat-label">{t('synthesis.structured.followUpProbes')}</span>
+            </div>
           </div>
-          <div className="structured-stat">
-            <span className="structured-stat-value">{disagreements.length}</span>
-            <span className="structured-stat-label">{t('synthesis.structured.disagreements')}</span>
-          </div>
-          <div className="structured-stat">
-            <span className="structured-stat-value">{nuances.length}</span>
-            <span className="structured-stat-label">{t('synthesis.structured.nuances')}</span>
-          </div>
-          <div className="structured-stat">
-            <span className="structured-stat-value">{probes.length}</span>
-            <span className="structured-stat-label">{t('synthesis.structured.followUpProbes')}</span>
-          </div>
+          {convergenceScore != null && (
+            <div className="structured-convergence">
+              <ConfidenceBar value={convergenceScore} label={t('synthesis.structured.convergence')} />
+            </div>
+          )}
+          {confidence.overall != null && (
+            <div className="structured-convergence">
+              <ConfidenceBar value={confidence.overall} label={t('synthesis.structured.overallConfidence')} />
+            </div>
+          )}
         </div>
-        {convergenceScore != null && (
-          <div className="structured-convergence">
-            <ConfidenceBar value={convergenceScore} label={t('synthesis.structured.convergence')} />
-          </div>
-        )}
-        {confidence.overall != null && (
-          <div className="structured-convergence">
-            <ConfidenceBar value={confidence.overall} label={t('synthesis.structured.overallConfidence')} />
-          </div>
-        )}
-      </div>
+      )}
 
       {/* ── Narrative ── */}
-      {narrative && (
+      {sectionVisible.narrative && narrative && (
         <div className="structured-section">
           <SectionHeader
             title={t('synthesis.structured.narrativeSummary')}
@@ -263,7 +286,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       )}
 
       {/* ── Agreements ── */}
-      {agreements.length > 0 && (
+      {sectionVisible.agreements && agreements.length > 0 && (
         <div className="structured-section">
           <SectionHeader
             title={t('synthesis.structured.agreements')}
@@ -326,7 +349,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       )}
 
       {/* ── Disagreements ── */}
-      {disagreements.length > 0 && (
+      {sectionVisible.disagreements && disagreements.length > 0 && (
         <div className="structured-section">
           <SectionHeader
             title={t('synthesis.structured.disagreements')}
@@ -393,7 +416,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       )}
 
       {/* ── Nuances ── */}
-      {nuances.length > 0 && (
+      {sectionVisible.nuances && nuances.length > 0 && (
         <div className="structured-section">
           <SectionHeader
             title={t('synthesis.structured.nuances')}
@@ -436,7 +459,7 @@ export default function StructuredSynthesis({ data, convergenceScore, expertLabe
       )}
 
       {/* ── Follow-up Probes ── */}
-      {probes.length > 0 && (
+      {sectionVisible.probes && probes.length > 0 && (
         <div className="structured-section">
           <SectionHeader
             title={t('synthesis.structured.followUpProbes')}

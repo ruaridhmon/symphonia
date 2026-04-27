@@ -138,9 +138,9 @@ const SYNTHESIS_ANALYSTS = 3;
 const SYNTHESIS_RUN_TTL_MS = 30 * 60 * 1000;
 const SUMMARY_COMPOSITION_DEFAULTS = {
 	narrative: true,
-	agreements: true,
-	disagreements: true,
-	nuances: true,
+	agreements: false,
+	disagreements: false,
+	nuances: false,
 	consensusMap: false,
 	probes: false,
 };
@@ -581,6 +581,19 @@ export default function SummaryPage() {
 	const showSynthesisHeatmap = Boolean(
 		structuredSynthesisData?.summary_options?.consensusMap
 		|| summaryComposition.consensusMap
+	);
+	const showStructuredSynthesisSections = Boolean(
+		structuredSynthesisData
+		&& (
+			summaryComposition.agreements
+			|| summaryComposition.disagreements
+			|| summaryComposition.nuances
+			|| summaryComposition.probes
+		)
+	);
+	const showSynthesisTextPanel = Boolean(
+		(!selectedRound || selectedRound.is_active)
+		&& (summaryComposition.narrative || synthesisViewMode === 'edit' || !structuredSynthesisData)
 	);
 	const synthesisContextNote = useMemo(() => {
 		if (!activeRound || activeRound.round_number <= 1) return null;
@@ -1077,7 +1090,6 @@ export default function SummaryPage() {
 				strategy: synthesisMode,
 				n_analysts: SYNTHESIS_ANALYSTS,
 				mode: 'human_only',
-				summary_options: summaryComposition,
 			});
 
 			// ── Async path: synthesis running in the background ──
@@ -1346,7 +1358,7 @@ export default function SummaryPage() {
 									</SectionErrorBoundary>
 								)}
 
-								{(!selectedRound || selectedRound.is_active) && (
+								{showSynthesisTextPanel && (
 									<SynthesisEditorCard
 										activeRound={activeRound}
 										contextNote={synthesisContextNote}
@@ -1361,6 +1373,33 @@ export default function SummaryPage() {
 										onRevert={revertSynthesisEdits}
 										background={synthesisBackground}
 									/>
+								)}
+
+								{showStructuredSynthesisSections && structuredSynthesisData && (
+									<SectionErrorBoundary fallbackTitle="Failed to render synthesis sections">
+										<div className="card p-4">
+											<h3 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
+												<ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} /> Synthesis sections
+											</h3>
+											<StructuredSynthesis
+												data={structuredSynthesisData}
+												convergenceScore={displayRound?.convergence_score ?? undefined}
+												expertLabels={resolvedExpertLabels}
+												formId={formId}
+												roundId={displayRound?.id}
+												token={token}
+												currentUserEmail={email}
+												showOverview={false}
+												visibleSections={{
+													narrative: false,
+													agreements: summaryComposition.agreements,
+													disagreements: summaryComposition.disagreements,
+													nuances: summaryComposition.nuances,
+													probes: summaryComposition.probes,
+												}}
+											/>
+										</div>
+									</SectionErrorBoundary>
 								)}
 
 								{showSynthesisHeatmap && structuredSynthesisData && (

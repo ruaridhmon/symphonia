@@ -147,16 +147,22 @@ export default function AISynthesisPanel({
           >
             <span className="flex items-center gap-1.5">
               <ListChecks size={13} aria-hidden="true" />
-              Synthesis content
+              Show in synthesis
             </span>
             {contentOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </button>
           {contentOpen && (
             <div className="grid grid-cols-1 gap-1.5">
+              <p className="text-[11px] px-1" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
+                These change the page immediately. Generate only creates a new AI draft.
+              </p>
               {sectionOptions.map(([key, label]) => (
-                <label
+                <button
                   key={key}
-                  className="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs"
+                  type="button"
+                  className="flex items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-xs"
+                  onClick={() => onSummaryOptionChange(key)}
+                  aria-pressed={!!summaryOptions[key]}
                   style={{
                     border: '1px solid var(--border)',
                     backgroundColor: summaryOptions[key]
@@ -166,13 +172,25 @@ export default function AISynthesisPanel({
                     cursor: 'pointer',
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={!!summaryOptions[key]}
-                    onChange={() => onSummaryOptionChange(key)}
-                  />
                   <span>{label}</span>
-                </label>
+                  <span
+                    aria-hidden="true"
+                    className="inline-flex h-4 w-7 items-center rounded-full p-0.5"
+                    style={{
+                      backgroundColor: summaryOptions[key]
+                        ? 'var(--accent)'
+                        : 'color-mix(in srgb, var(--muted-foreground) 20%, var(--muted))',
+                    }}
+                  >
+                    <span
+                      className="block h-3 w-3 rounded-full transition-transform"
+                      style={{
+                        backgroundColor: 'white',
+                        transform: summaryOptions[key] ? 'translateX(0.75rem)' : 'translateX(0)',
+                      }}
+                    />
+                  </span>
+                </button>
               ))}
             </div>
           )}
@@ -259,23 +277,28 @@ export default function AISynthesisPanel({
           )}
         </div>
 
-        <LoadingButton
-          variant={canGenerate ? 'accent' : 'secondary'}
-          size="sm"
-          loading={isGenerating}
-          loadingText="Generating…"
-          onClick={onGenerate}
-          className="w-full font-semibold"
-          disabled={!canGenerate}
-          style={!canGenerate ? { opacity: 0.72 } : undefined}
-        >
-          Generate
-        </LoadingButton>
-        {!canGenerate && (
-          <p className="text-xs" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
-            Waiting for responses
-          </p>
-        )}
+        <div className="space-y-1.5 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
+            AI generation
+          </div>
+          <LoadingButton
+            variant={canGenerate ? 'accent' : 'secondary'}
+            size="sm"
+            loading={isGenerating}
+            loadingText="Generating…"
+            onClick={onGenerate}
+            className="w-full font-semibold"
+            disabled={!canGenerate}
+            style={!canGenerate ? { opacity: 0.72 } : undefined}
+          >
+            Generate new draft
+          </LoadingButton>
+          {!canGenerate && (
+            <p className="text-xs" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
+              Waiting for responses
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
