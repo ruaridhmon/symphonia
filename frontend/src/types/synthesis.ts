@@ -79,4 +79,6 @@ export interface SynthesisData {
   areas_of_disagreement?: string[];
   uncertainties?: string[];
   emergent_insights?: EmergentInsight[];
+  /** Facilitator-selected synthesis content options used when generating this version */
+  summary_options?: Record<string, boolean>;
 }

@@ -34,7 +34,7 @@ export default function AISynthesisPanel({
     ['agreements', 'Agreements'],
     ['disagreements', 'Disagreements'],
     ['nuances', 'Nuances'],
-    ['consensusMap', 'Consensus map'],
+    ['consensusMap', 'Consensus heatmap'],
     ['probes', 'Follow-up questions'],
   ] as const;
 

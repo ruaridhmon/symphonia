@@ -462,7 +462,7 @@ SUMMARY_OPTION_LABELS = {
     "agreements": "agreements",
     "disagreements": "disagreements",
     "nuances": "nuances",
-    "consensusMap": "consensus map",
+    "consensusMap": "consensus heatmap",
     "probes": "follow-up questions",
 }
 DEFAULT_SUMMARY_OPTIONS = {
@@ -505,7 +505,7 @@ def _format_summary_generation_guidance(options: dict[str, bool]) -> str:
     if options.get("consensusMap"):
         guidance += (
             " Pay particular attention to which themes show agreement, divergence, "
-            "and mixed or conditional views so they can be represented as a consensus map."
+            "and mixed or conditional views so they can be represented as a consensus heatmap."
         )
     return guidance
 
@@ -548,7 +548,7 @@ def _render_synthesis_text(result, summary_options: dict[str, bool] | None = Non
             )
     if options["consensusMap"] and (result.agreements or result.disagreements):
         text_parts.append(
-            "<h3>Consensus map</h3>"
+            "<h3>Consensus heatmap</h3>"
             "<table><thead><tr><th>Topic</th><th>Signal</th><th>Voices</th><th>Detail</th></tr></thead><tbody>"
         )
         for agreement in result.agreements:
@@ -2377,6 +2377,7 @@ async def _run_synthesis_job(
             return None
 
         synthesis_json_data = result.to_dict()
+        synthesis_json_data["summary_options"] = resolved_summary_options
         synthesis_text = _render_synthesis_text(result, resolved_summary_options)
 
         # ── Save to DB ──

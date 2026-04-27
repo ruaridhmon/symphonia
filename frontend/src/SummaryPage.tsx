@@ -435,6 +435,10 @@ export default function SummaryPage() {
 		if (displayRound?.synthesis?.trim()) return displayRound.synthesis;
 		return buildStructuredSummaryText(structuredSynthesisData as Record<string, any> | null);
 	}, [selectedVersion, displayRound, structuredSynthesisData]);
+	const showSynthesisHeatmap = Boolean(
+		structuredSynthesisData?.summary_options?.consensusMap
+		|| summaryComposition.consensusMap
+	);
 	const synthesisContextNote = useMemo(() => {
 		if (!activeRound || activeRound.round_number <= 1) return null;
 		const previous = rounds.find(r => r.round_number === activeRound.round_number - 1);
@@ -1191,6 +1195,21 @@ export default function SummaryPage() {
 										onSave={saveSynthesisEdits}
 										onRevert={revertSynthesisEdits}
 									/>
+								)}
+
+								{showSynthesisHeatmap && structuredSynthesisData && (
+									<SectionErrorBoundary fallbackTitle="Failed to render consensus heatmap">
+										<div className="card p-4">
+											<h3 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
+												<MapPin size={18} style={{ color: 'var(--accent)' }} /> Consensus heatmap
+											</h3>
+											<ConsensusHeatmap
+												structuredData={structuredSynthesisData}
+												resolvedExpertLabels={resolvedExpertLabels}
+												questions={displayRound?.questions}
+											/>
+										</div>
+									</SectionErrorBoundary>
 								)}
 
 								{displayRound?.is_active && (
