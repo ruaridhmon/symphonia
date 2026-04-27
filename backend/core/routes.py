@@ -457,19 +457,79 @@ async def _update_synthesis_job(
         return job
 
 
-def _render_synthesis_text(result) -> str:
+SUMMARY_OPTION_LABELS = {
+    "narrative": "text overview",
+    "agreements": "agreements",
+    "disagreements": "disagreements",
+    "nuances": "nuances",
+    "consensusMap": "consensus map",
+    "probes": "follow-up questions",
+}
+DEFAULT_SUMMARY_OPTIONS = {
+    "narrative": True,
+    "agreements": True,
+    "disagreements": True,
+    "nuances": True,
+    "consensusMap": False,
+    "probes": False,
+}
+
+
+def _normalise_summary_options(raw: dict[str, Any] | None) -> dict[str, bool]:
+    if not isinstance(raw, dict):
+        return DEFAULT_SUMMARY_OPTIONS.copy()
+    options = DEFAULT_SUMMARY_OPTIONS.copy()
+    for key in options:
+        if key in raw:
+            options[key] = bool(raw[key])
+    if not any(options.values()):
+        return DEFAULT_SUMMARY_OPTIONS.copy()
+    return options
+
+
+def _format_summary_generation_guidance(options: dict[str, bool]) -> str:
+    selected = [
+        label for key, label in SUMMARY_OPTION_LABELS.items() if options.get(key)
+    ]
+    omitted = [
+        label for key, label in SUMMARY_OPTION_LABELS.items() if not options.get(key)
+    ]
+    if not selected:
+        return ""
+    guidance = (
+        "Synthesis output preferences: prioritise these sections in the final "
+        f"synthesis: {', '.join(selected)}."
+    )
+    if omitted:
+        guidance += f" De-emphasise or omit: {', '.join(omitted)}."
+    if options.get("consensusMap"):
+        guidance += (
+            " Pay particular attention to which themes show agreement, divergence, "
+            "and mixed or conditional views so they can be represented as a consensus map."
+        )
+    return guidance
+
+
+def _render_expert_ids(ids: list[int] | None) -> str:
+    if not ids:
+        return "Not specified"
+    return ", ".join(f"Expert {id_}" for id_ in ids)
+
+
+def _render_synthesis_text(result, summary_options: dict[str, bool] | None = None) -> str:
     """Build the HTML synthesis summary used by round pages and exports."""
+    options = _normalise_summary_options(summary_options)
     text_parts: list[str] = []
-    if getattr(result, "narrative", ""):
+    if options["narrative"] and getattr(result, "narrative", ""):
         text_parts.append(f"<p>{result.narrative}</p>")
-    if result.agreements:
+    if options["agreements"] and result.agreements:
         text_parts.append("<h3>Agreements</h3>")
         for agreement in result.agreements:
             text_parts.append(
                 f"<p><strong>{agreement.claim}</strong> "
                 f"(confidence: {agreement.confidence:.0%}) — {agreement.evidence_summary}</p>"
             )
-    if result.disagreements:
+    if options["disagreements"] and result.disagreements:
         text_parts.append("<h3>Disagreements</h3>")
         for disagreement in result.disagreements:
             text_parts.append(
@@ -480,12 +540,57 @@ def _render_synthesis_text(result) -> str:
                     f"<li>{position.get('position', '')} — {position.get('evidence', '')}</li>"
                 )
             text_parts.append("</ul>")
-    if result.nuances:
+    if options["nuances"] and result.nuances:
         text_parts.append("<h3>Nuances</h3>")
         for nuance in result.nuances:
             text_parts.append(
                 f"<p><strong>{nuance.claim}</strong> — {nuance.context}</p>"
             )
+    if options["consensusMap"] and (result.agreements or result.disagreements):
+        text_parts.append(
+            "<h3>Consensus map</h3>"
+            "<table><thead><tr><th>Topic</th><th>Signal</th><th>Voices</th><th>Detail</th></tr></thead><tbody>"
+        )
+        for agreement in result.agreements:
+            text_parts.append(
+                "<tr>"
+                f"<td>{html.escape(agreement.claim)}</td>"
+                f"<td>Agreement ({agreement.confidence:.0%})</td>"
+                f"<td>{html.escape(_render_expert_ids(agreement.supporting_experts))}</td>"
+                f"<td>{html.escape(agreement.evidence_summary)}</td>"
+                "</tr>"
+            )
+        for disagreement in result.disagreements:
+            voices = sorted(
+                {
+                    expert_id
+                    for position in disagreement.positions
+                    for expert_id in position.get("experts", [])
+                }
+            )
+            detail = "; ".join(
+                position.get("position", "")
+                for position in disagreement.positions
+                if position.get("position")
+            )
+            text_parts.append(
+                "<tr>"
+                f"<td>{html.escape(disagreement.topic)}</td>"
+                f"<td>Divergence ({html.escape(disagreement.severity)})</td>"
+                f"<td>{html.escape(_render_expert_ids(voices))}</td>"
+                f"<td>{html.escape(detail)}</td>"
+                "</tr>"
+            )
+        text_parts.append("</tbody></table>")
+    if options["probes"] and result.follow_up_probes:
+        text_parts.append("<h3>Follow-up questions</h3><ul>")
+        for probe in result.follow_up_probes:
+            text_parts.append(
+                f"<li><strong>{html.escape(probe.question)}</strong>"
+                f" — {html.escape(probe.rationale)}"
+                f" <em>Suggested for: {html.escape(_render_expert_ids(probe.target_experts))}</em></li>"
+            )
+        text_parts.append("</ul>")
     return "".join(text_parts) if text_parts else "Synthesis complete."
 
 
@@ -2150,6 +2255,7 @@ async def _run_synthesis_job(
     n_analysts: int,
     mode_str: str,
     admin_email: str | None,
+    summary_options: dict[str, bool] | None = None,
     job_id: str | None = None,
 ):
     """Run a synthesis job and persist the resulting version.
@@ -2193,6 +2299,15 @@ async def _run_synthesis_job(
             flow_mode = FlowMode.HUMAN_ONLY
 
         resolved_model = _resolve_synthesis_model(db, model)
+        resolved_summary_options = _normalise_summary_options(summary_options)
+        summary_guidance = _format_summary_generation_guidance(resolved_summary_options)
+        synthesis_context = comments_context
+        if summary_guidance:
+            synthesis_context = (
+                f"{synthesis_context}\n\n{summary_guidance}"
+                if synthesis_context
+                else summary_guidance
+            )
         runtime_profile = _build_synthesis_runtime_profile(
             strategy,
             response_count=len(response_dicts),
@@ -2218,7 +2333,7 @@ async def _run_synthesis_job(
                 model=resolved_model,
                 mode=flow_mode,
                 progress_callback=progress_callback,
-                comments_context=comments_context,
+                comments_context=synthesis_context,
                 form_id=form_id,
                 round_id=round_id,
             )
@@ -2262,7 +2377,7 @@ async def _run_synthesis_job(
             return None
 
         synthesis_json_data = result.to_dict()
-        synthesis_text = _render_synthesis_text(result)
+        synthesis_text = _render_synthesis_text(result, resolved_summary_options)
 
         # ── Save to DB ──
         round_obj = db.query(RoundModel).filter(RoundModel.id == round_id).first()
@@ -2415,6 +2530,7 @@ class GenerateSynthesisVersionPayload(BaseModel):
     strategy: str = "simple"  # "simple" | "committee" | "ttd"
     n_analysts: int = 3
     mode: str = "human_only"
+    summary_options: dict[str, bool] | None = None
 
 
 @router.post(
@@ -2493,6 +2609,7 @@ async def generate_synthesis_for_round(
 
     synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
     api_key = os.getenv("OPENROUTER_API_KEY", "")
+    summary_options = _normalise_summary_options(payload.summary_options)
     estimated_seconds = _estimate_synthesis_duration_seconds(
         strategy,
         len(responses),
@@ -2520,6 +2637,7 @@ async def generate_synthesis_for_round(
             f"## Synthesis v{next_version} (Mock Mode)\n\n"
             f"**Round {round_number}** — {len(responses)} responses analysed.\n\n"
             f"*Strategy: {strategy} | Model: {payload.model}*\n\n"
+            f"*Sections: {', '.join(label for key, label in SUMMARY_OPTION_LABELS.items() if summary_options.get(key))}*\n\n"
             "This is a mock synthesis. Enable OPENROUTER_API_KEY for real LLM synthesis."
         )
 
@@ -2601,6 +2719,7 @@ async def generate_synthesis_for_round(
                     n_analysts=payload.n_analysts,
                     mode_str=payload.mode,
                     admin_email=user.email,
+                    summary_options=summary_options,
                 )
             )
             task.add_done_callback(lambda _task: None)
@@ -2625,6 +2744,7 @@ async def generate_synthesis_for_round(
         n_analysts=payload.n_analysts,
         mode_str=payload.mode,
         admin_email=user.email,
+        summary_options=summary_options,
         job_id=None,
     )
     if result is None:

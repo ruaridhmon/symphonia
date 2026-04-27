@@ -1,5 +1,5 @@
 import { LoadingButton, SynthesisModeSelector } from '../index';
-import { Cpu, Clock3, Layers3 } from 'lucide-react';
+import { Cpu, Clock3, Layers3, ListChecks } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -11,6 +11,8 @@ type Props = {
   responseCount: number;
   isGenerating: boolean;
   onGenerate: () => void;
+  summaryOptions: Record<string, boolean>;
+  onSummaryOptionChange: (option: string) => void;
 };
 
 export default function AISynthesisPanel({
@@ -23,8 +25,18 @@ export default function AISynthesisPanel({
   responseCount,
   isGenerating,
   onGenerate,
+  summaryOptions,
+  onSummaryOptionChange,
 }: Props) {
   const canGenerate = responseCount > 0;
+  const sectionOptions = [
+    ['narrative', 'Text overview'],
+    ['agreements', 'Agreements'],
+    ['disagreements', 'Disagreements'],
+    ['nuances', 'Nuances'],
+    ['consensusMap', 'Consensus map'],
+    ['probes', 'Follow-up questions'],
+  ] as const;
 
   return (
     <div
@@ -104,6 +116,36 @@ export default function AISynthesisPanel({
             but they take longer and use more compute.
           </p>
           <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} compact />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
+            <ListChecks size={13} aria-hidden="true" />
+            Synthesis content
+          </div>
+          <div className="grid grid-cols-1 gap-1.5">
+            {sectionOptions.map(([key, label]) => (
+              <label
+                key={key}
+                className="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs"
+                style={{
+                  border: '1px solid var(--border)',
+                  backgroundColor: summaryOptions[key]
+                    ? 'color-mix(in srgb, var(--accent) 8%, var(--card))'
+                    : 'var(--card)',
+                  color: 'var(--foreground)',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={!!summaryOptions[key]}
+                  onChange={() => onSummaryOptionChange(key)}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
         </div>
 
         <LoadingButton

@@ -20,6 +20,7 @@ export interface GenerateSynthesisPayload {
   strategy: string;
   n_analysts?: number;
   mode?: string;
+  summary_options?: Record<string, boolean>;
 }
 
 export interface GenerateSynthesisResult {

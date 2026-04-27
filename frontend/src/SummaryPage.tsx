@@ -6,7 +6,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
-import { ChartNoAxesColumn, ChevronDown, ChevronRight, Download, FileText, Globe, Link2, ListChecks, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
+import { ChartNoAxesColumn, ChevronDown, ChevronRight, Download, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -141,8 +141,6 @@ const SUMMARY_COMPOSITION_DEFAULTS = {
 	probes: false,
 };
 
-type SummaryCompositionOption = keyof typeof SUMMARY_COMPOSITION_DEFAULTS;
-
 interface StoredSynthesisRun {
 	formId: number;
 	roundId: number;
@@ -194,121 +192,6 @@ function buildStructuredSummaryText(data: Record<string, any> | null): string {
 		parts.push(`Nuance: ${n.claim} — ${n.context}`);
 	}
 	return parts.join('\n');
-}
-
-function formatPercent(value: number | null | undefined): string {
-	if (value == null || Number.isNaN(value)) return '';
-	return `${Math.round(value * 100)}%`;
-}
-
-function formatExpertList(ids: number[] | undefined, labels: Record<number, string>): string {
-	if (!ids?.length) return 'Not specified';
-	return ids.map(id => labels[id] || `Expert ${id}`).join(', ');
-}
-
-function cleanTableCell(value: string): string {
-	return value.replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim();
-}
-
-function buildCustomSummaryText(
-	data: Record<string, any> | null,
-	expertLabels: Record<number, string>,
-	options: Record<SummaryCompositionOption, boolean>,
-): string {
-	if (!data) return '';
-
-	const sections: string[] = ['# Synthesis'];
-
-	if (options.narrative && data.narrative) {
-		sections.push(data.narrative);
-	}
-
-	if (options.agreements && data.agreements?.length) {
-		const lines = ['## What people agree about'];
-		for (const agreement of data.agreements) {
-			const confidence = formatPercent(agreement.confidence);
-			const experts = formatExpertList(agreement.supporting_experts, expertLabels);
-			lines.push(`- **${agreement.claim}**${confidence ? ` (${confidence} confidence)` : ''}`);
-			if (agreement.evidence_summary) lines.push(`  ${agreement.evidence_summary}`);
-			lines.push(`  Supporting voices: ${experts}`);
-		}
-		sections.push(lines.join('\n'));
-	}
-
-	if (options.disagreements && data.disagreements?.length) {
-		const lines = ['## Where views diverge'];
-		for (const disagreement of data.disagreements) {
-			lines.push(`- **${disagreement.topic}**${disagreement.severity ? ` (${disagreement.severity} divergence)` : ''}`);
-			for (const position of disagreement.positions || []) {
-				const experts = formatExpertList(position.experts, expertLabels);
-				lines.push(`  - ${position.position}`);
-				if (position.evidence) lines.push(`    ${position.evidence}`);
-				lines.push(`    Voices: ${experts}`);
-			}
-		}
-		sections.push(lines.join('\n'));
-	}
-
-	if (options.nuances && data.nuances?.length) {
-		const lines = ['## Nuances and conditions'];
-		for (const nuance of data.nuances) {
-			const experts = formatExpertList(nuance.relevant_experts, expertLabels);
-			lines.push(`- **${nuance.claim}**`);
-			if (nuance.context) lines.push(`  ${nuance.context}`);
-			lines.push(`  Relevant voices: ${experts}`);
-		}
-		sections.push(lines.join('\n'));
-	}
-
-	if (options.consensusMap) {
-		const rows: string[] = [
-			'## Consensus map',
-			'| Topic | Signal | Voices | Detail |',
-			'| --- | --- | --- | --- |',
-		];
-
-		for (const agreement of data.agreements || []) {
-			rows.push([
-				cleanTableCell(agreement.claim),
-				`Agreement${agreement.confidence != null ? ` (${formatPercent(agreement.confidence)})` : ''}`,
-				cleanTableCell(formatExpertList(agreement.supporting_experts, expertLabels)),
-				cleanTableCell(agreement.evidence_summary || ''),
-			].join(' | ').replace(/^/, '| ').replace(/$/, ' |'));
-		}
-
-		for (const disagreement of data.disagreements || []) {
-			const voices = (disagreement.positions || [])
-				.flatMap((position: any) => position.experts || []);
-			const uniqueVoices = Array.from(new Set<number>(voices));
-			const detail = (disagreement.positions || [])
-				.map((position: any) => position.position)
-				.filter(Boolean)
-				.join('; ');
-			rows.push([
-				cleanTableCell(disagreement.topic),
-				`Divergence${disagreement.severity ? ` (${disagreement.severity})` : ''}`,
-				cleanTableCell(formatExpertList(uniqueVoices, expertLabels)),
-				cleanTableCell(detail),
-			].join(' | ').replace(/^/, '| ').replace(/$/, ' |'));
-		}
-
-		if (rows.length > 3) {
-			sections.push(rows.join('\n'));
-		}
-	}
-
-	if (options.probes && data.follow_up_probes?.length) {
-		const lines = ['## Follow-up questions'];
-		for (const probe of data.follow_up_probes) {
-			const targets = formatExpertList(probe.target_experts, expertLabels);
-			lines.push(`- **${probe.question}**`);
-			if (probe.rationale) lines.push(`  ${probe.rationale}`);
-			lines.push(`  Suggested for: ${targets}`);
-		}
-		sections.push(lines.join('\n'));
-	}
-
-	return sections.filter(Boolean).join('\n\n');
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -552,15 +435,6 @@ export default function SummaryPage() {
 		if (displayRound?.synthesis?.trim()) return displayRound.synthesis;
 		return buildStructuredSummaryText(structuredSynthesisData as Record<string, any> | null);
 	}, [selectedVersion, displayRound, structuredSynthesisData]);
-	const customSummaryDraft = useMemo(
-		() => buildCustomSummaryText(
-			structuredSynthesisData as Record<string, any> | null,
-			resolvedExpertLabels,
-			summaryComposition,
-		),
-		[resolvedExpertLabels, structuredSynthesisData, summaryComposition],
-	);
-
 	const synthesisContextNote = useMemo(() => {
 		if (!activeRound || activeRound.round_number <= 1) return null;
 		const previous = rounds.find(r => r.round_number === activeRound.round_number - 1);
@@ -925,26 +799,9 @@ export default function SummaryPage() {
 		setAiToolsOpen(v => !v);
 	}
 
-	function toggleSummaryCompositionOption(option: SummaryCompositionOption) {
+	function toggleSummaryCompositionOption(option: string) {
+		if (!(option in SUMMARY_COMPOSITION_DEFAULTS)) return;
 		setSummaryComposition(prev => ({ ...prev, [option]: !prev[option] }));
-	}
-
-	function applyCustomSummaryDraft() {
-		const targetRound = selectedRound || activeRound;
-		if (!targetRound?.is_active) {
-			toastWarning('Select the active round before changing the synthesis draft.');
-			return;
-		}
-		if (!editor || !customSummaryDraft.trim()) {
-			toastWarning('There is no structured analysis available to add to the synthesis.');
-			return;
-		}
-
-		editor.commands.setContent(customSummaryDraft);
-		setIsSynthesisDirty(customSummaryDraft.trim() !== lastSavedSynthesis.trim());
-		setSynthesisViewMode('edit');
-		setActiveWorkspaceTab('synthesis');
-		toastInfo('Custom summary draft added. Review it, then save when ready.');
 	}
 
 	async function handleWorkspaceTabChange(tab: 'synthesis' | 'responses' | 'analysis') {
@@ -1051,6 +908,7 @@ export default function SummaryPage() {
 				strategy: synthesisMode,
 				n_analysts: SYNTHESIS_ANALYSTS,
 				mode: 'human_only',
+				summary_options: summaryComposition,
 			});
 
 			// ── Async path: synthesis running in the background ──
@@ -1364,72 +1222,6 @@ export default function SummaryPage() {
 							<>
 								{structuredSynthesisData ? (
 									<>
-										<SectionErrorBoundary fallbackTitle="Failed to render summary builder">
-											<div className="card p-4">
-												<div className="flex items-start justify-between gap-4 flex-wrap">
-													<div>
-														<h2 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
-															<ListChecks size={20} style={{ color: 'var(--accent)' }} /> Custom summary builder
-														</h2>
-														<p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-															Choose which parts of the analysis should become the round synthesis draft.
-														</p>
-													</div>
-													<button
-														type="button"
-														onClick={applyCustomSummaryDraft}
-														disabled={!displayRound?.is_active || !customSummaryDraft.trim()}
-														className="rounded-lg px-3.5 py-2 text-sm font-semibold"
-														style={{
-															backgroundColor: displayRound?.is_active ? 'var(--accent)' : 'var(--muted)',
-															color: displayRound?.is_active ? 'white' : 'var(--muted-foreground)',
-															border: displayRound?.is_active ? '1px solid var(--accent)' : '1px solid var(--border)',
-															cursor: displayRound?.is_active ? 'pointer' : 'not-allowed',
-														}}
-													>
-														Use as synthesis draft
-													</button>
-												</div>
-
-												<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 mt-4">
-													{([
-														['narrative', 'Text overview'],
-														['agreements', 'Agreements'],
-														['disagreements', 'Disagreements'],
-														['nuances', 'Nuances'],
-														['consensusMap', 'Consensus map'],
-														['probes', 'Follow-up questions'],
-													] as [SummaryCompositionOption, string][]).map(([key, label]) => (
-														<label
-															key={key}
-															className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm"
-															style={{
-																border: '1px solid var(--border)',
-																backgroundColor: summaryComposition[key]
-																	? 'color-mix(in srgb, var(--accent) 9%, var(--card))'
-																	: 'var(--card)',
-																color: 'var(--foreground)',
-																cursor: 'pointer',
-															}}
-														>
-															<input
-																type="checkbox"
-																checked={summaryComposition[key]}
-																onChange={() => toggleSummaryCompositionOption(key)}
-															/>
-															<span>{label}</span>
-														</label>
-													))}
-												</div>
-
-												{summaryComposition.consensusMap && (
-													<p className="mt-3 text-xs" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-														The consensus map is added as a publishable table so exported summaries still show the agreement and divergence pattern.
-													</p>
-												)}
-											</div>
-										</SectionErrorBoundary>
-
 										<SectionErrorBoundary fallbackTitle="Failed to render structured analysis">
 											<div className="card p-4">
 												<div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
@@ -1647,6 +1439,8 @@ export default function SummaryPage() {
 							responseCount={responseCountForDisplay}
 							isGenerating={isGenerating}
 							onGenerate={generateSummary}
+							summaryOptions={summaryComposition}
+							onSummaryOptionChange={toggleSummaryCompositionOption}
 						/>
 
 						<div className="card p-3">
