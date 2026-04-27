@@ -223,6 +223,17 @@ function stripMarkdownParagraphWrapper(raw: string): string {
 		.replace(/<\/p>$/i, '');
 }
 
+function recoverMarkdownBlockBreaks(raw: string): string {
+	return raw
+		.replace(/\s+(#{1,6}\s)/g, '\n\n$1')
+		.replace(/\s+([-*+]\s)/g, '\n$1')
+		.replace(/\s+(\d+\.\s)/g, '\n$1')
+		.replace(/\s+(\|)/g, '\n$1')
+		.replace(/\s+(>{1,}\s)/g, '\n$1')
+		.replace(/\s+(---+|___+|\*\*\*+)/g, '\n\n$1')
+		.trim();
+}
+
 function markdownToEditorHtml(markdown: string): string {
 	const lines = markdown.replace(/\r\n/g, '\n').split('\n');
 	const html: string[] = [];
@@ -311,7 +322,7 @@ function normalizeSynthesisForEditor(raw: string): string {
 	const trimmed = (raw || '').trim();
 	if (!trimmed) return '';
 
-	const unwrapped = stripMarkdownParagraphWrapper(trimmed);
+	const unwrapped = recoverMarkdownBlockBreaks(stripMarkdownParagraphWrapper(trimmed));
 	const hasMarkdownSyntax = /(?:^|\n)#{1,6}\s|(?:^|\n)\s*[-*+]\s+|\*\*|__|(?:^|\n)\s*\|.+\|/m.test(unwrapped);
 	const isHtml = /^\s*<[a-z][\s\S]*>/i.test(trimmed);
 
@@ -1007,6 +1018,9 @@ export default function SummaryPage() {
 		if (mode === 'view' && synthesisViewMode === 'edit' && isSynthesisDirty) {
 			const saved = await saveSynthesisEdits();
 			if (!saved) return;
+		}
+		if (mode === 'edit' && synthesisViewMode !== 'edit') {
+			resetEditorToSaved(activeRound?.synthesis || '');
 		}
 		setSynthesisViewMode(mode);
 	}
