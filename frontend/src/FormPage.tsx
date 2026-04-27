@@ -10,6 +10,7 @@ import ConsentGate from './components/ConsentGate'
 import DocumentTemplateResponse from './components/DocumentTemplateResponse'
 import SurveyQuestionList from './components/SurveyQuestionList'
 import Skeleton, { SkeletonCard } from './components/Skeleton'
+import OwnResponseCard from './components/OwnResponseCard'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
@@ -36,6 +37,7 @@ export default function FormPage() {
   const [form, setForm] = useState<Form | null>(null)
   const [activeRound, setActiveRound] = useState<ActiveRound | null>(null)
   const [previousSynthesis, setPreviousSynthesis] = useState('')
+  const [previousOwnResponse, setPreviousOwnResponse] = useState<Record<string, unknown> | null>(null)
   const [roundQuestions, setRoundQuestions] = useState<(string | Record<string, unknown>)[]>([])
   const [structuredResponses, setStructuredResponses] = useState<Record<string, StructuredResponse>>({})
   const [hasSubmitted, setHasSubmitted] = useState(false)
@@ -207,6 +209,7 @@ export default function FormPage() {
       }
 
       setPreviousSynthesis(roundData?.previous_round_synthesis || '')
+      setPreviousOwnResponse(roundData?.previous_round_own_response || null)
     } catch (err) {
       if (err instanceof ApiError) {
         // Status 0 or 401 = handled by apiClient (CF redirect / session expiry)
@@ -289,6 +292,8 @@ export default function FormPage() {
 
     try {
       await submitResponse(Number(id), normalizeAnswerRecord(structuredResponses))
+      localStorage.setItem('last_result_form_id', id)
+      if (form?.title) localStorage.setItem('last_result_form_title', form.title)
 
       // Clear auto-save data on successful submit (local + server)
       roundQuestions.forEach((_, i) => {
@@ -572,6 +577,14 @@ export default function FormPage() {
           {/* Previous round synthesis — collapsible, secondary to questions */}
           {previousSynthesis && (
             <PreviousSynthesisToggle content={previousSynthesis} />
+          )}
+          {previousOwnResponse && (
+            <OwnResponseCard
+              answers={previousOwnResponse}
+              questions={roundQuestions}
+              title="Your previous response"
+              subtitle="Included here because the facilitator has enabled it for this synthesis."
+            />
           )}
         </div>
       </div>

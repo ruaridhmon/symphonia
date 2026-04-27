@@ -43,6 +43,7 @@ def _ensure_schema_columns() -> None:
         "forms": {
             "document_template": "ALTER TABLE forms ADD COLUMN document_template TEXT",
             "allow_public_responses": "ALTER TABLE forms ADD COLUMN allow_public_responses BOOLEAN NOT NULL DEFAULT FALSE",
+            "show_own_response_to_participants": "ALTER TABLE forms ADD COLUMN show_own_response_to_participants BOOLEAN NOT NULL DEFAULT FALSE",
             "public_require_consent": "ALTER TABLE forms ADD COLUMN public_require_consent BOOLEAN NOT NULL DEFAULT FALSE",
             "public_consent_text": "ALTER TABLE forms ADD COLUMN public_consent_text TEXT",
             "public_require_upload": "ALTER TABLE forms ADD COLUMN public_require_upload BOOLEAN NOT NULL DEFAULT FALSE",

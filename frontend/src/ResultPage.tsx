@@ -1,14 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getWebSocketUrl } from './api/ws';
 import { api } from './api/client';
 import { LoadingButton, SynthesisDisplay } from './components';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import Skeleton from './components/Skeleton';
+import OwnResponseCard from './components/OwnResponseCard';
+
+interface ResultState {
+  formId?: string;
+  formTitle?: string;
+}
 
 export default function ResultPage() {
   useDocumentTitle('Synthesis Results');
   const [html, setHtml] = useState('');
+  const [ownResponse, setOwnResponse] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,6 +27,10 @@ export default function ResultPage() {
   });
   const hadSummary = useRef(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = (location.state as ResultState) || {};
+  const resultFormId = state.formId || localStorage.getItem('last_result_form_id') || '';
+  const resultFormTitle = state.formTitle || localStorage.getItem('last_result_form_title') || '';
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -39,13 +50,20 @@ export default function ResultPage() {
           return;
         }
 
-        const summary = await api.get<{ summary: string }>('/summary_text');
+        const summary = resultFormId
+          ? await api.get<{
+              summary: string;
+              show_own_response_to_participants?: boolean;
+              own_response?: Record<string, unknown> | null;
+            }>(`/forms/${resultFormId}/summary_text`)
+          : await api.get<{ summary: string }>('/summary_text');
         if (!summary.summary?.trim()) {
           navigate('/waiting', { replace: true });
           return;
         }
 
         setHtml(summary.summary);
+        setOwnResponse('own_response' in summary ? summary.own_response || null : null);
         hadSummary.current = true;
       } catch {
         setError('Failed to load synthesis results. Please try again.');
@@ -55,7 +73,7 @@ export default function ResultPage() {
     };
 
     load();
-  }, [navigate]);
+  }, [navigate, resultFormId]);
 
   useEffect(() => {
     const ws = new WebSocket(getWebSocketUrl('/ws'));
@@ -133,7 +151,12 @@ export default function ResultPage() {
       <div className="max-w-3xl mx-auto bounce-in overflow-x-hidden">
         <SynthesisDisplay
           content={html}
-          title="Final Synthesis"
+          title={resultFormTitle ? `${resultFormTitle} synthesis` : 'Final Synthesis'}
+        />
+        <OwnResponseCard
+          answers={ownResponse}
+          title="Your response"
+          subtitle="Included because the facilitator has enabled this view."
         />
       </div>
 

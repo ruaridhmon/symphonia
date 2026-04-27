@@ -18,6 +18,7 @@ export type Form = {
   title: string;
   questions: (string | Record<string, unknown>)[];
   allow_join: boolean;
+  show_own_response_to_participants?: boolean;
   join_code: string;
 };
 

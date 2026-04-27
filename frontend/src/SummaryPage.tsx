@@ -15,7 +15,7 @@ import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
 import { getMe } from './api/auth';
-import { getForm as apiFetchForm } from './api/forms';
+import { getForm as apiFetchForm, updateParticipantVisibility } from './api/forms';
 import { getRounds, getRoundsWithResponses, nextRound as apiNextRound } from './api/rounds';
 import type { Round as ApiRound } from './api/rounds';
 import {
@@ -363,6 +363,7 @@ export default function SummaryPage() {
 	const [aiToolsOpen, setAiToolsOpen] = useState(false);
 	const [summaryComposition, setSummaryComposition] = useState(SUMMARY_COMPOSITION_DEFAULTS);
 	const [synthesisBackground, setSynthesisBackground] = useState<'default' | 'paper' | 'soft'>('default');
+	const [isSavingParticipantVisibility, setIsSavingParticipantVisibility] = useState(false);
 	const [selectedModel, setSelectedModel] = useState(MODELS[0]);
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [generationRun, setGenerationRun] = useState<StoredSynthesisRun | null>(null);
@@ -937,6 +938,24 @@ export default function SummaryPage() {
 	function toggleSummaryCompositionOption(option: string) {
 		if (!(option in SUMMARY_COMPOSITION_DEFAULTS)) return;
 		setSummaryComposition(prev => ({ ...prev, [option]: !prev[option] }));
+	}
+
+	async function handleParticipantOwnResponseVisibilityChange(enabled: boolean) {
+		if (!formId) return;
+		setIsSavingParticipantVisibility(true);
+		try {
+			const result = await updateParticipantVisibility(formId, enabled);
+			setForm(current => current
+				? {
+					...current,
+					show_own_response_to_participants: result.show_own_response_to_participants,
+				}
+				: current);
+		} catch {
+			toastError('Could not update participant visibility. Please try again.');
+		} finally {
+			setIsSavingParticipantVisibility(false);
+		}
 	}
 
 	async function handleWorkspaceTabChange(tab: 'synthesis' | 'responses' | 'analysis') {
@@ -1594,6 +1613,9 @@ export default function SummaryPage() {
 							onSummaryOptionChange={toggleSummaryCompositionOption}
 							synthesisBackground={synthesisBackground}
 							onSynthesisBackgroundChange={setSynthesisBackground}
+							showOwnResponseToParticipants={Boolean(form?.show_own_response_to_participants)}
+							onShowOwnResponseToParticipantsChange={handleParticipantOwnResponseVisibilityChange}
+							isSavingParticipantVisibility={isSavingParticipantVisibility}
 						/>
 
 						<div className="card p-3">

@@ -92,6 +92,9 @@ class FormModel(Base):
     allow_public_responses = Column(
         Boolean, nullable=False, default=False, server_default="0"
     )
+    show_own_response_to_participants = Column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
     public_require_consent = Column(
         Boolean, nullable=False, default=False, server_default="0"
     )

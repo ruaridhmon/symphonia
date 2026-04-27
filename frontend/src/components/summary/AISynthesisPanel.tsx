@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LoadingButton, SynthesisModeSelector } from '../index';
-import { ChevronDown, ChevronRight, Cpu, Clock3, Layers3, ListChecks, Palette } from 'lucide-react';
+import { ChevronDown, ChevronRight, Cpu, Clock3, Eye, Layers3, ListChecks, Palette } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -16,6 +16,9 @@ type Props = {
   onSummaryOptionChange: (option: string) => void;
   synthesisBackground: 'default' | 'paper' | 'soft';
   onSynthesisBackgroundChange: (background: 'default' | 'paper' | 'soft') => void;
+  showOwnResponseToParticipants: boolean;
+  onShowOwnResponseToParticipantsChange: (enabled: boolean) => void;
+  isSavingParticipantVisibility?: boolean;
 };
 
 export default function AISynthesisPanel({
@@ -32,10 +35,14 @@ export default function AISynthesisPanel({
   onSummaryOptionChange,
   synthesisBackground,
   onSynthesisBackgroundChange,
+  showOwnResponseToParticipants,
+  onShowOwnResponseToParticipantsChange,
+  isSavingParticipantVisibility = false,
 }: Props) {
   const canGenerate = responseCount > 0;
   const [contentOpen, setContentOpen] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
+  const [participantOpen, setParticipantOpen] = useState(false);
   const sectionOptions = [
     ['narrative', 'Text overview'],
     ['agreements', 'Agreements'],
@@ -168,6 +175,49 @@ export default function AISynthesisPanel({
                 </label>
               ))}
             </div>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <button
+            type="button"
+            onClick={() => setParticipantOpen(open => !open)}
+            className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-xs font-semibold"
+            style={{ border: '1px solid var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
+            aria-expanded={participantOpen}
+          >
+            <span className="flex items-center gap-1.5">
+              <Eye size={13} aria-hidden="true" />
+              Participant view
+            </span>
+            {participantOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          </button>
+          {participantOpen && (
+            <label
+              className="flex items-start gap-2 rounded-md px-2.5 py-2 text-xs"
+              style={{
+                border: '1px solid var(--border)',
+                backgroundColor: showOwnResponseToParticipants
+                  ? 'color-mix(in srgb, var(--accent) 8%, var(--card))'
+                  : 'var(--card)',
+                color: 'var(--foreground)',
+                cursor: isSavingParticipantVisibility ? 'wait' : 'pointer',
+                opacity: isSavingParticipantVisibility ? 0.75 : 1,
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={showOwnResponseToParticipants}
+                disabled={isSavingParticipantVisibility}
+                onChange={e => onShowOwnResponseToParticipantsChange(e.target.checked)}
+              />
+              <span>
+                <span className="block font-medium">Show people their own response</span>
+                <span className="block mt-0.5" style={{ color: 'var(--muted-foreground)' }}>
+                  Visible only to that participant in results and later rounds.
+                </span>
+              </span>
+            </label>
           )}
         </div>
 

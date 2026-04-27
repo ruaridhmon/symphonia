@@ -10,6 +10,7 @@ export interface Form {
   questions: QuestionInput[];
   document_template?: string | null;
   allow_join: boolean;
+  show_own_response_to_participants?: boolean;
   allow_public_responses?: boolean;
   consent_required?: boolean;
   consent_text?: string | null;
@@ -36,6 +37,7 @@ export interface CreateFormPayload {
   questions: QuestionInput[];
   document_template?: string | null;
   allow_join?: boolean;
+  show_own_response_to_participants?: boolean;
   allow_public_responses?: boolean;
   require_consent?: boolean;
   consent_text?: string | null;
@@ -52,6 +54,7 @@ export interface UpdateFormPayload {
   questions?: QuestionInput[];
   document_template?: string | null;
   allow_join?: boolean;
+  show_own_response_to_participants?: boolean;
   allow_public_responses?: boolean;
   require_consent?: boolean;
   consent_text?: string | null;
@@ -82,6 +85,13 @@ export function createForm(data: CreateFormPayload) {
 /** Admin: update a form */
 export function updateForm(formId: number, data: UpdateFormPayload) {
   return api.put<FormDetail>(`/forms/${formId}`, data);
+}
+
+export function updateParticipantVisibility(formId: number, showOwnResponse: boolean) {
+  return api.patch<{ form_id: number; show_own_response_to_participants: boolean }>(
+    `/forms/${formId}/participant_visibility`,
+    { show_own_response_to_participants: showOwnResponse }
+  );
 }
 
 export function acceptFormConsent(formId: number) {

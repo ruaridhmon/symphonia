@@ -32,7 +32,10 @@ export default function WaitingPage() {
       try {
         const msg = JSON.parse(e.data);
         if (msg.type === 'summary_updated') {
-          navigate('/result', { replace: true });
+          navigate('/result', {
+            replace: true,
+            state: { formId, formTitle, roundNumber },
+          });
         }
       } catch {
         // Ignore unparseable messages
@@ -43,7 +46,7 @@ export default function WaitingPage() {
       ws.close();
       wsRef.current = null;
     };
-  }, [navigate]);
+  }, [formId, formTitle, navigate, roundNumber]);
 
   return (
     <div className="flex-1 px-4 py-6 sm:py-8 max-w-6xl mx-auto flex justify-center items-center">

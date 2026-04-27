@@ -1521,6 +1521,17 @@ def get_my_response(
     return {"answers": response.answers}
 
 
+def _get_user_response_for_round(
+    db: Session, *, round_id: int, user_id: int
+) -> Response | None:
+    return (
+        db.query(Response)
+        .filter(Response.user_id == user_id, Response.round_id == round_id)
+        .order_by(Response.created_at.desc())
+        .first()
+    )
+
+
 # ---------------------------------------------------------
 # SERVER-SIDE DRAFTS (auto-save)
 # ---------------------------------------------------------
@@ -1741,6 +1752,66 @@ def all_feedback(
 # ---------------------------------------------------------
 # SUMMARY (SYNTHESIS)
 # ---------------------------------------------------------
+
+
+@router.get(
+    "/forms/{form_id}/summary_text",
+    tags=["Synthesis"],
+    summary="Get participant synthesis text for a form",
+)
+@limiter.limit(READ_LIMIT)
+def get_form_summary_text(
+    request: Request,
+    form_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    active_round = (
+        db.query(RoundModel)
+        .filter(RoundModel.form_id == form_id, RoundModel.is_active)
+        .first()
+    )
+    if not active_round:
+        return {
+            "summary": "",
+            "show_own_response_to_participants": form.show_own_response_to_participants,
+            "own_response": None,
+        }
+
+    own_response = None
+    if form.show_own_response_to_participants:
+        response = _get_user_response_for_round(
+            db, round_id=active_round.id, user_id=user.id
+        )
+        if response:
+            own_response = response.answers
+
+    return {
+        "summary": active_round.synthesis or "",
+        "show_own_response_to_participants": form.show_own_response_to_participants,
+        "own_response": own_response,
+    }
+
+
+@router.get(
+    "/summary_text",
+    tags=["Synthesis"],
+    summary="Get legacy cached synthesis text",
+)
+@limiter.limit(READ_LIMIT)
+def get_summary_text(
+    request: Request,
+    user: User = Depends(get_current_user),
+):
+    try:
+        with open("summary_cache.txt") as f:
+            return {"summary": f.read().strip()}
+    except FileNotFoundError:
+        return {"summary": ""}
 
 
 class SummaryPayload(BaseModel):
@@ -3452,6 +3523,10 @@ class FormUpdate(BaseModel):
     public_upload_prompt: str | None = None
 
 
+class ParticipantVisibilityPayload(BaseModel):
+    show_own_response_to_participants: bool
+
+
 DOCUMENT_PLACEHOLDER_PATTERN = re.compile(r"\{\{\s*([^{}]+?)\s*\}\}")
 RICH_DOCUMENT_FIELD_PATTERN = re.compile(
     r"<span\b[^>]*data-symphonia-field-key=(['\"])(?P<key>.*?)\1(?P<attrs>[^>]*)>",
@@ -4543,6 +4618,7 @@ class UserFormCreate(BaseModel):
     document_template: str | None = None
     allow_join: bool = True
     allow_public_responses: bool = False
+    show_own_response_to_participants: bool = False
     require_consent: bool = False
     consent_text: str | None = None
     consent_document: str | None = None
@@ -4599,6 +4675,7 @@ def user_create_form(
         document_template=document_template,
         allow_join=payload.allow_join,
         allow_public_responses=payload.allow_public_responses,
+        show_own_response_to_participants=payload.show_own_response_to_participants,
         require_consent=payload.require_consent or payload.public_require_consent,
         consent_text=consent_text or public_consent_text,
         consent_document=consent_document,
@@ -4636,6 +4713,7 @@ def user_create_form(
         "title": form.title,
         "join_code": form.join_code,
         "allow_join": form.allow_join,
+        "show_own_response_to_participants": form.show_own_response_to_participants,
         **_serialize_public_settings(form),
         **_serialize_consent_settings(form),
         "owner_id": form.owner_id,
@@ -4867,6 +4945,7 @@ def get_forms(
                 "questions": f.questions,
                 "document_template": f.document_template,
                 "allow_join": f.allow_join,
+                "show_own_response_to_participants": f.show_own_response_to_participants,
                 **_serialize_public_settings(f),
                 **_serialize_consent_settings(f),
                 "join_code": f.join_code,
@@ -4988,12 +5067,50 @@ def get_form(
         "questions": f.questions,
         "document_template": f.document_template,
         "allow_join": f.allow_join,
+        "show_own_response_to_participants": f.show_own_response_to_participants,
         **_serialize_public_settings(f),
         **_serialize_consent_settings(
             f, consent_completed=_user_has_completed_consent(f, user, unlock)
         ),
         "join_code": f.join_code,
         "expert_labels": f.expert_labels,
+    }
+
+
+@router.patch(
+    "/forms/{form_id}/participant_visibility",
+    tags=["Forms"],
+    summary="Update participant synthesis visibility settings",
+)
+@limiter.limit(CRUD_LIMIT)
+def update_participant_visibility(
+    form_id: int,
+    payload: ParticipantVisibilityPayload,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(form, user)
+
+    form.show_own_response_to_participants = payload.show_own_response_to_participants
+    audit_log(
+        db,
+        user=user,
+        action="update_participant_visibility",
+        resource_type="form",
+        resource_id=form_id,
+        detail={
+            "show_own_response_to_participants": form.show_own_response_to_participants
+        },
+        request=request,
+    )
+    db.commit()
+    return {
+        "form_id": form.id,
+        "show_own_response_to_participants": form.show_own_response_to_participants,
     }
 
 
@@ -5646,6 +5763,10 @@ def get_active_round(
     if not active:
         raise HTTPException(status_code=404, detail="No active round")
 
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
     prev = (
         db.query(RoundModel)
         .filter(
@@ -5656,12 +5777,19 @@ def get_active_round(
     )
 
     previous_round_synthesis = prev.synthesis if prev else ""
+    previous_round_own_response = None
+    if prev and form.show_own_response_to_participants:
+        response = _get_user_response_for_round(db, round_id=prev.id, user_id=user.id)
+        if response:
+            previous_round_own_response = response.answers
 
     return {
         "id": active.id,
         "round_number": active.round_number,
         "questions": active.questions or [],
         "previous_round_synthesis": previous_round_synthesis,
+        "show_own_response_to_participants": form.show_own_response_to_participants,
+        "previous_round_own_response": previous_round_own_response,
     }
 
 

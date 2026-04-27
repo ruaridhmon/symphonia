@@ -19,6 +19,8 @@ export interface ActiveRound {
   round_number: number;
   questions: string[];
   previous_round_synthesis: string;
+  show_own_response_to_participants?: boolean;
+  previous_round_own_response?: Record<string, unknown> | null;
 }
 
 export interface NextRoundResult {
