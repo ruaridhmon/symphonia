@@ -516,7 +516,9 @@ def _render_expert_ids(ids: list[int] | None) -> str:
     return ", ".join(f"Expert {id_}" for id_ in ids)
 
 
-def _render_synthesis_text(result, summary_options: dict[str, bool] | None = None) -> str:
+def _render_synthesis_text(
+    result, summary_options: dict[str, bool] | None = None
+) -> str:
     """Build the HTML synthesis summary used by round pages and exports."""
     options = _normalise_summary_options(summary_options)
     text_parts: list[str] = []

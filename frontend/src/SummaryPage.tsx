@@ -937,7 +937,8 @@ export default function SummaryPage() {
 
 	function toggleSummaryCompositionOption(option: string) {
 		if (!(option in SUMMARY_COMPOSITION_DEFAULTS)) return;
-		setSummaryComposition(prev => ({ ...prev, [option]: !prev[option] }));
+		const key = option as keyof typeof SUMMARY_COMPOSITION_DEFAULTS;
+		setSummaryComposition(prev => ({ ...prev, [key]: !prev[key] }));
 	}
 
 	async function handleParticipantOwnResponseVisibilityChange(enabled: boolean) {

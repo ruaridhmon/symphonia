@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ChevronDown, ClipboardList } from 'lucide-react';
-import type { StructuredResponse } from '../types/structured-input';
 
 type Question = string | Record<string, unknown>;
+type AnswerObject = Record<string, unknown>;
 
 type Props = {
   answers: Record<string, unknown> | null | undefined;
@@ -24,7 +24,7 @@ function answerText(value: unknown): string {
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
     return String(value);
   }
-  const structured = value as Partial<StructuredResponse>;
+  const structured = value as AnswerObject;
   if (typeof structured.text === 'string' && structured.text.trim()) return structured.text;
   if (typeof structured.value === 'string' || typeof structured.value === 'number') return String(structured.value);
   if (typeof structured.selectedScore === 'number') return String(structured.selectedScore);

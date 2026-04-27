@@ -50,7 +50,11 @@ export default function ResultPage() {
           return;
         }
 
-        const summary = resultFormId
+        const summary: {
+          summary: string;
+          show_own_response_to_participants?: boolean;
+          own_response?: Record<string, unknown> | null;
+        } = resultFormId
           ? await api.get<{
               summary: string;
               show_own_response_to_participants?: boolean;
