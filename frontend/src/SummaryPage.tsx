@@ -362,6 +362,7 @@ export default function SummaryPage() {
 	const [advancedAnalysisOpen, setAdvancedAnalysisOpen] = useState(false);
 	const [aiToolsOpen, setAiToolsOpen] = useState(false);
 	const [summaryComposition, setSummaryComposition] = useState(SUMMARY_COMPOSITION_DEFAULTS);
+	const [synthesisBackground, setSynthesisBackground] = useState<'default' | 'paper' | 'soft'>('default');
 	const [selectedModel, setSelectedModel] = useState(MODELS[0]);
 	const [isGenerating, setIsGenerating] = useState(false);
 	const [generationRun, setGenerationRun] = useState<StoredSynthesisRun | null>(null);
@@ -1324,6 +1325,7 @@ export default function SummaryPage() {
 										isSaving={isSavingSynthesis}
 										onSave={saveSynthesisEdits}
 										onRevert={revertSynthesisEdits}
+										background={synthesisBackground}
 									/>
 								)}
 
@@ -1590,6 +1592,8 @@ export default function SummaryPage() {
 							onGenerate={generateSummary}
 							summaryOptions={summaryComposition}
 							onSummaryOptionChange={toggleSummaryCompositionOption}
+							synthesisBackground={synthesisBackground}
+							onSynthesisBackgroundChange={setSynthesisBackground}
 						/>
 
 						<div className="card p-3">

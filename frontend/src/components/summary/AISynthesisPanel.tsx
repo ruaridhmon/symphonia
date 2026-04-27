@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { LoadingButton, SynthesisModeSelector } from '../index';
-import { Cpu, Clock3, Layers3, ListChecks } from 'lucide-react';
+import { ChevronDown, ChevronRight, Cpu, Clock3, Layers3, ListChecks, Palette } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -13,6 +14,8 @@ type Props = {
   onGenerate: () => void;
   summaryOptions: Record<string, boolean>;
   onSummaryOptionChange: (option: string) => void;
+  synthesisBackground: 'default' | 'paper' | 'soft';
+  onSynthesisBackgroundChange: (background: 'default' | 'paper' | 'soft') => void;
 };
 
 export default function AISynthesisPanel({
@@ -27,8 +30,12 @@ export default function AISynthesisPanel({
   onGenerate,
   summaryOptions,
   onSummaryOptionChange,
+  synthesisBackground,
+  onSynthesisBackgroundChange,
 }: Props) {
   const canGenerate = responseCount > 0;
+  const [contentOpen, setContentOpen] = useState(false);
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
   const sectionOptions = [
     ['narrative', 'Text overview'],
     ['agreements', 'Agreements'],
@@ -36,6 +43,11 @@ export default function AISynthesisPanel({
     ['nuances', 'Nuances'],
     ['consensusMap', 'Consensus heatmap'],
     ['probes', 'Follow-up questions'],
+  ] as const;
+  const backgroundOptions = [
+    ['default', 'Default'],
+    ['paper', 'White'],
+    ['soft', 'Soft'],
   ] as const;
 
   return (
@@ -118,34 +130,83 @@ export default function AISynthesisPanel({
           <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} compact />
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
-            <ListChecks size={13} aria-hidden="true" />
-            Synthesis content
-          </div>
-          <div className="grid grid-cols-1 gap-1.5">
-            {sectionOptions.map(([key, label]) => (
-              <label
-                key={key}
-                className="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs"
-                style={{
-                  border: '1px solid var(--border)',
-                  backgroundColor: summaryOptions[key]
-                    ? 'color-mix(in srgb, var(--accent) 8%, var(--card))'
-                    : 'var(--card)',
-                  color: 'var(--foreground)',
-                  cursor: 'pointer',
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={!!summaryOptions[key]}
-                  onChange={() => onSummaryOptionChange(key)}
-                />
-                <span>{label}</span>
-              </label>
-            ))}
-          </div>
+        <div className="space-y-1.5">
+          <button
+            type="button"
+            onClick={() => setContentOpen(open => !open)}
+            className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-xs font-semibold"
+            style={{ border: '1px solid var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
+            aria-expanded={contentOpen}
+          >
+            <span className="flex items-center gap-1.5">
+              <ListChecks size={13} aria-hidden="true" />
+              Synthesis content
+            </span>
+            {contentOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          </button>
+          {contentOpen && (
+            <div className="grid grid-cols-1 gap-1.5">
+              {sectionOptions.map(([key, label]) => (
+                <label
+                  key={key}
+                  className="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs"
+                  style={{
+                    border: '1px solid var(--border)',
+                    backgroundColor: summaryOptions[key]
+                      ? 'color-mix(in srgb, var(--accent) 8%, var(--card))'
+                      : 'var(--card)',
+                    color: 'var(--foreground)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={!!summaryOptions[key]}
+                    onChange={() => onSummaryOptionChange(key)}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <button
+            type="button"
+            onClick={() => setAppearanceOpen(open => !open)}
+            className="flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-xs font-semibold"
+            style={{ border: '1px solid var(--border)', background: 'var(--card)', color: 'var(--foreground)' }}
+            aria-expanded={appearanceOpen}
+          >
+            <span className="flex items-center gap-1.5">
+              <Palette size={13} aria-hidden="true" />
+              Appearance
+            </span>
+            {appearanceOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          </button>
+          {appearanceOpen && (
+            <div className="grid grid-cols-3 gap-1.5">
+              {backgroundOptions.map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => onSynthesisBackgroundChange(key)}
+                  className="rounded-md px-2 py-1.5 text-xs font-medium"
+                  style={{
+                    border: synthesisBackground === key ? '1px solid var(--accent)' : '1px solid var(--border)',
+                    backgroundColor: synthesisBackground === key
+                      ? 'color-mix(in srgb, var(--accent) 10%, var(--card))'
+                      : 'var(--card)',
+                    color: synthesisBackground === key ? 'var(--accent)' : 'var(--foreground)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <LoadingButton

@@ -1,4 +1,5 @@
 import { EditorContent, Editor } from '@tiptap/react';
+import type { CSSProperties } from 'react';
 import { Bot, SquarePen } from 'lucide-react';
 import { MarkdownRenderer } from '../index';
 import type { Round } from '../../types/summary';
@@ -15,6 +16,7 @@ type Props = {
   isSaving: boolean;
   onSave: () => void | Promise<void | boolean>;
   onRevert: () => void;
+  background?: 'default' | 'paper' | 'soft';
 };
 
 export default function SynthesisEditorCard({
@@ -29,14 +31,34 @@ export default function SynthesisEditorCard({
   isSaving,
   onSave,
   onRevert,
+  background = 'default',
 }: Props) {
   const synthesisText = activeRound?.synthesis || '';
   const hasSynthesis = synthesisText.trim().length > 0;
+  const backgroundStyle =
+    background === 'paper'
+      ? {
+          backgroundColor: '#ffffff',
+          color: '#0f172a',
+          borderColor: '#e2e8f0',
+          '--foreground': '#0f172a',
+          '--card': '#ffffff',
+          '--background': '#ffffff',
+          '--muted': '#f8fafc',
+          '--muted-foreground': '#64748b',
+          '--border': '#e2e8f0',
+        } as CSSProperties
+      : background === 'soft'
+        ? { backgroundColor: 'color-mix(in srgb, var(--muted) 35%, var(--card))' }
+        : {};
 
   return (
     <div
       className={`card p-4 sm:p-6 ${hasSynthesis || synthesisViewMode === 'edit' ? 'min-h-[200px] lg:min-h-[300px]' : 'min-h-[180px]'}`}
-      style={{ borderTop: '2px solid color-mix(in srgb, var(--accent) 72%, transparent)' }}
+      style={{
+        borderTop: '2px solid color-mix(in srgb, var(--accent) 72%, transparent)',
+        ...backgroundStyle,
+      }}
     >
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
         <div>
