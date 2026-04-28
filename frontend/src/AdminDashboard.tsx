@@ -137,12 +137,14 @@ export default function AdminDashboard() {
       {
         key: 'edit',
         label: t('adminDashboard.editSetup'),
+        shortLabel: 'Edit',
         icon: <Pencil size={15} aria-hidden="true" />,
         href: `/admin/form/${form.id}`,
       },
       {
         key: 'summary',
         label: t('adminDashboard.openSummary'),
+        shortLabel: 'Summary',
         icon: <FileText size={15} aria-hidden="true" />,
         href: `/admin/form/${form.id}/summary`,
         accent: true,
@@ -150,18 +152,21 @@ export default function AdminDashboard() {
       {
         key: 'download',
         label: t('adminDashboard.download'),
+        shortLabel: t('adminDashboard.download'),
         icon: <Download size={15} aria-hidden="true" />,
         onClick: () => setDownloadingForm({ id: form.id, title: form.title }),
       },
       {
         key: 'share',
         label: t('adminDashboard.share'),
+        shortLabel: t('adminDashboard.share'),
         icon: <Share2 size={15} aria-hidden="true" />,
         onClick: () => setSharingForm({ title: form.title, joinCode: form.join_code }),
       },
       {
         key: 'delete',
         label: 'Delete',
+        shortLabel: 'Delete',
         icon: <Trash2 size={15} aria-hidden="true" />,
         onClick: () => setPendingDeleteForm({ id: form.id, title: form.title }),
         danger: true,
@@ -190,7 +195,7 @@ export default function AdminDashboard() {
           const commonProps = {
             title: action.label,
             'aria-label': `${action.label} ${form.title}`,
-            className: 'inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+            className: 'inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
             style: {
               color,
               border,
@@ -219,6 +224,7 @@ export default function AdminDashboard() {
             return (
               <a key={action.key} href={action.href} {...commonProps}>
                 {action.icon}
+                <span>{action.shortLabel}</span>
               </a>
             );
           }
@@ -232,6 +238,7 @@ export default function AdminDashboard() {
               {...commonProps}
             >
               {action.icon}
+              <span>{action.shortLabel}</span>
             </button>
           );
         })}
@@ -469,7 +476,7 @@ export default function AdminDashboard() {
                       ))}
                       <th
                         scope="col"
-                        className="px-4 py-2.5 text-right min-w-[15rem]"
+                        className="px-4 py-2.5 text-right min-w-[27rem]"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.75rem',
@@ -532,7 +539,7 @@ export default function AdminDashboard() {
                             Round {f.current_round ?? 1}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-right min-w-[15rem]">
+                        <td className="px-4 py-4 text-right min-w-[27rem]">
                           {renderConsultationActions(f)}
                         </td>
                       </tr>
