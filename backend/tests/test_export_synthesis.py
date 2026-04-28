@@ -238,3 +238,11 @@ class TestExportSynthesisPdf:
             headers=admin_headers,
         )
         assert resp.content.startswith(b"%PDF")
+
+    def test_pdf_export_uses_bold_heading_font(self, client: TestClient, seeded_form):
+        form_id, admin_headers, _ = seeded_form
+        resp = client.get(
+            f"/forms/{form_id}/export_synthesis?format=pdf",
+            headers=admin_headers,
+        )
+        assert b"Helvetica-Bold" in resp.content

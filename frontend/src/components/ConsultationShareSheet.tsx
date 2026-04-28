@@ -79,7 +79,7 @@ export default function ConsultationShareSheet({
         inset: 0,
         zIndex: 9999,
         display: 'flex',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
         padding: '1rem',
       }}
@@ -103,7 +103,7 @@ export default function ConsultationShareSheet({
           maxWidth: 480,
           backgroundColor: 'var(--card)',
           border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-          borderRadius: 26,
+          borderRadius: 14,
           padding: '1rem',
           boxShadow: '0 24px 64px rgba(15, 23, 42, 0.18)',
         }}
@@ -124,7 +124,7 @@ export default function ConsultationShareSheet({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md"
             style={{
               color: 'var(--muted-foreground)',
               backgroundColor: 'color-mix(in srgb, var(--foreground) 4%, transparent)',
@@ -137,7 +137,7 @@ export default function ConsultationShareSheet({
         </div>
 
         <div
-          className="mt-4 rounded-[1.35rem] p-4"
+          className="mt-4 rounded-lg p-4"
           style={{
             backgroundColor: 'color-mix(in srgb, var(--background) 84%, var(--card) 16%)',
             border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
@@ -145,7 +145,7 @@ export default function ConsultationShareSheet({
         >
           <div className="flex items-start gap-3">
             <div
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
                 color: 'var(--accent)',
@@ -172,13 +172,13 @@ export default function ConsultationShareSheet({
               type="button"
               onClick={nativeShare}
               aria-label="More use device share"
-              className="flex w-full items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left transition-colors"
+              className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
               style={{
                 backgroundColor: 'var(--background)',
                 border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
               }}
             >
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}>
                 <Share2 size={18} />
               </div>
               <div className="min-w-0 flex-1">
@@ -196,7 +196,7 @@ export default function ConsultationShareSheet({
               target="_blank"
               rel="noreferrer"
               aria-label={`${option.label} ${option.hint}`}
-              className="flex items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left transition-colors"
+              className="flex items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
               style={{
                 backgroundColor: 'var(--background)',
                 border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
@@ -205,7 +205,7 @@ export default function ConsultationShareSheet({
               }}
             >
               <div
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl"
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
                 style={{ backgroundColor: option.iconBg, color: option.iconFg }}
               >
                 {option.icon}
@@ -223,7 +223,7 @@ export default function ConsultationShareSheet({
           <button
             type="button"
             onClick={() => copyValue('link', joinLink)}
-            className="inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 text-sm font-medium"
+            className="inline-flex items-center gap-2 rounded-md px-3.5 py-2.5 text-sm font-medium"
             style={{
               backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
               color: 'var(--accent)',
@@ -235,7 +235,7 @@ export default function ConsultationShareSheet({
           <button
             type="button"
             onClick={() => copyValue('code', joinCode)}
-            className="inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 text-sm font-medium"
+            className="inline-flex items-center gap-2 rounded-md px-3.5 py-2.5 text-sm font-medium"
             style={{
               backgroundColor: 'var(--background)',
               border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
@@ -249,7 +249,7 @@ export default function ConsultationShareSheet({
             href={joinLink}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center rounded-full px-3.5 py-2.5 text-sm font-medium text-center"
+            className="inline-flex items-center rounded-md px-3.5 py-2.5 text-sm font-medium text-center"
             style={{
               backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
               color: 'var(--accent)',

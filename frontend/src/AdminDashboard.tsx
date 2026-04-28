@@ -176,7 +176,7 @@ export default function AdminDashboard() {
 
     return (
       <div
-        className={`inline-flex flex-wrap items-center gap-1.5 ${align === 'end' ? 'justify-end' : 'justify-start'}`}
+        className={`inline-flex max-w-full flex-wrap items-center gap-1.5 ${align === 'end' ? 'justify-end' : 'justify-start'}`}
         aria-label={`Actions for ${form.title}`}
       >
         {actions.map((action) => {
@@ -195,7 +195,7 @@ export default function AdminDashboard() {
           const commonProps = {
             title: action.label,
             'aria-label': `${action.label} ${form.title}`,
-            className: 'inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+            className: 'inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
             style: {
               color,
               border,
@@ -447,9 +447,9 @@ export default function AdminDashboard() {
             )}
 
             {visibleForms.length > 0 && (
-              <div className="hidden sm:block overflow-x-auto px-3 sm:px-4 pt-3 pb-3">
+              <div className="hidden sm:block px-3 sm:px-4 pt-3 pb-3">
                 <table
-                  className="w-full text-sm text-left"
+                  className="w-full table-fixed text-sm text-left"
                   aria-label={t('adminDashboard.existingForms')}
                   style={{ borderCollapse: 'separate', borderSpacing: 0 }}
                 >
@@ -476,7 +476,7 @@ export default function AdminDashboard() {
                       ))}
                       <th
                         scope="col"
-                        className="px-4 py-2.5 text-right min-w-[27rem]"
+                        className="px-4 py-2.5 text-left w-[18rem]"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.75rem',
@@ -510,7 +510,6 @@ export default function AdminDashboard() {
                           className="px-4 py-4 font-medium text-sm"
                           style={{
                             color: 'var(--foreground)',
-                            maxWidth: '26rem',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap',
@@ -539,8 +538,8 @@ export default function AdminDashboard() {
                             Round {f.current_round ?? 1}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-right min-w-[27rem]">
-                          {renderConsultationActions(f)}
+                        <td className="px-4 py-4 text-left align-top w-[18rem]">
+                          {renderConsultationActions(f, 'start')}
                         </td>
                       </tr>
                     ))}
@@ -580,10 +579,8 @@ export default function AdminDashboard() {
                               <span>Round {f.current_round ?? 1}</span>
                             </div>
                           </div>
-                          <div className="shrink-0">
-                            {renderConsultationActions(f)}
-                          </div>
                         </div>
+                        <div>{renderConsultationActions(f, 'start')}</div>
                       </div>
                     </div>
                   );

@@ -491,7 +491,7 @@ export default function DownloadSheet({
         inset: 0,
         zIndex: 9999,
         display: visible ? 'flex' : 'none',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
         padding: '1rem',
       }}
@@ -515,7 +515,7 @@ export default function DownloadSheet({
           maxWidth: 520,
           backgroundColor: 'var(--card)',
           border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-          borderRadius: 26,
+          borderRadius: 14,
           padding: '1rem',
           boxShadow: '0 24px 64px rgba(15, 23, 42, 0.18)',
         }}
@@ -533,7 +533,7 @@ export default function DownloadSheet({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md"
             style={{
               color: 'var(--muted-foreground)',
               backgroundColor: 'color-mix(in srgb, var(--foreground) 4%, transparent)',
@@ -554,7 +554,7 @@ export default function DownloadSheet({
                 key={option.id}
                 type="button"
                 onClick={() => setSelectedScope(option.id)}
-                className="flex w-full items-center gap-3 rounded-[1.15rem] px-4 py-3 text-left transition-colors"
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
                 style={{
                   backgroundColor: active
                     ? 'color-mix(in srgb, var(--accent) 8%, var(--background))'
@@ -565,7 +565,7 @@ export default function DownloadSheet({
                 }}
               >
                 <div
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-2xl"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor: active
                       ? 'color-mix(in srgb, var(--accent) 12%, transparent)'
@@ -587,7 +587,7 @@ export default function DownloadSheet({
         </div>
 
         <div
-          className="mt-4 rounded-[1.25rem] p-4"
+          className="mt-4 rounded-lg p-4"
           style={{
             backgroundColor: 'color-mix(in srgb, var(--background) 84%, var(--card) 16%)',
             border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
@@ -601,7 +601,7 @@ export default function DownloadSheet({
               type="button"
               onClick={() => void handlePdfDownload()}
               disabled={busyAction !== null || loadingDetails || !form}
-              className="inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 text-sm font-medium"
+              className="inline-flex items-center gap-2 rounded-md px-3.5 py-2.5 text-sm font-medium"
               style={{
                 backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
                 color: 'var(--accent)',
@@ -615,7 +615,7 @@ export default function DownloadSheet({
               type="button"
               onClick={() => void handleWordDownload()}
               disabled={busyAction !== null || loadingDetails || !exportReady || !form}
-              className="inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 text-sm font-medium"
+              className="inline-flex items-center gap-2 rounded-md px-3.5 py-2.5 text-sm font-medium"
               style={{
                 backgroundColor: 'var(--background)',
                 border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',

@@ -1006,32 +1006,154 @@ blockquote {{
     try:
         from fpdf import FPDF
 
-        def _md_to_plain_text(md: str) -> list[str]:
-            lines: list[str] = []
-            for raw in md.splitlines():
-                line = re.sub(r"^#{1,6}\s*", "", raw)
-                line = re.sub(r"^\s*[-*+]\s+", "- ", line)
-                line = re.sub(r"^\s*\d+\.\s+", "", line)
-                line = re.sub(r"\*\*(.*?)\*\*", r"\1", line)
-                line = re.sub(r"\*(.*?)\*", r"\1", line)
-                line = re.sub(r"`(.*?)`", r"\1", line)
-                lines.append(line)
-            return lines
+        def _clean_md_text(value: str) -> str:
+            value = re.sub(r"\*\*(.*?)\*\*", r"\1", value)
+            value = re.sub(r"_(.*?)_", r"\1", value)
+            value = re.sub(r"\*(.*?)\*", r"\1", value)
+            value = re.sub(r"`(.*?)`", r"\1", value)
+            return value
+
+        def _safe_pdf_text(value: str) -> str:
+            return _clean_md_text(value).encode("latin-1", "replace").decode("latin-1")
 
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.set_margins(16, 16, 16)
         pdf.add_page()
-        pdf.set_font("Helvetica", size=11)
         writable_width = max(20, pdf.w - pdf.l_margin - pdf.r_margin)
 
-        for line in _md_to_plain_text(md_content):
+        def _write_line(
+            text: str,
+            *,
+            size: int = 11,
+            style: str = "",
+            line_height: float = 6,
+            spacing_after: float = 2,
+            text_color: tuple[int, int, int] = (23, 32, 51),
+            fill_color: tuple[int, int, int] | None = None,
+        ) -> None:
             pdf.set_x(pdf.l_margin)
-            if not line.strip():
-                pdf.ln(4)
+            pdf.set_text_color(*text_color)
+            pdf.set_font("Helvetica", style=style, size=size)
+            if fill_color:
+                pdf.set_fill_color(*fill_color)
+                pdf.multi_cell(
+                    writable_width,
+                    line_height,
+                    text=_safe_pdf_text(text),
+                    fill=True,
+                )
+            else:
+                pdf.multi_cell(writable_width, line_height, text=_safe_pdf_text(text))
+            if spacing_after:
+                pdf.ln(spacing_after)
+
+        for raw_line in md_content.splitlines():
+            line = raw_line.rstrip()
+            stripped = line.strip()
+
+            if not stripped:
+                pdf.ln(3)
                 continue
-            safe_line = line.encode("latin-1", "replace").decode("latin-1")
-            pdf.multi_cell(writable_width, 6, text=safe_line)
+
+            if re.fullmatch(r"-{3,}", stripped):
+                y = pdf.get_y() + 1
+                pdf.set_draw_color(208, 215, 226)
+                pdf.line(pdf.l_margin, y, pdf.w - pdf.r_margin, y)
+                pdf.ln(6)
+                continue
+
+            heading_match = re.match(r"^(#{1,6})\s+(.*)$", stripped)
+            if heading_match:
+                level = len(heading_match.group(1))
+                text = heading_match.group(2)
+                if level == 1:
+                    _write_line(
+                        text,
+                        size=18,
+                        style="B",
+                        line_height=9,
+                        spacing_after=5,
+                        text_color=(15, 47, 103),
+                    )
+                    continue
+                if level == 2:
+                    _write_line(
+                        text,
+                        size=15,
+                        style="B",
+                        line_height=8,
+                        spacing_after=4,
+                        text_color=(15, 47, 103),
+                    )
+                    continue
+                if level == 3:
+                    _write_line(
+                        text,
+                        size=13,
+                        style="B",
+                        line_height=7,
+                        spacing_after=3,
+                        text_color=(15, 47, 103),
+                    )
+                    continue
+                _write_line(
+                    text,
+                    size=11,
+                    style="B",
+                    line_height=6.5,
+                    spacing_after=2,
+                    text_color=(15, 47, 103),
+                    fill_color=(243, 246, 251) if level >= 5 else None,
+                )
+                continue
+
+            quote_match = re.match(r"^>\s?(.*)$", stripped)
+            if quote_match:
+                _write_line(
+                    quote_match.group(1),
+                    size=10,
+                    line_height=5.5,
+                    spacing_after=1,
+                    text_color=(71, 84, 103),
+                )
+                continue
+
+            ordered_match = re.match(r"^(\d+)\.\s+(.*)$", stripped)
+            bullet_match = re.match(r"^[-*+]\s+(.*)$", stripped)
+            if ordered_match:
+                _write_line(
+                    f"{ordered_match.group(1)}. {ordered_match.group(2)}",
+                    size=10,
+                    style="B" if "**" in ordered_match.group(2) else "",
+                    line_height=5.8,
+                    spacing_after=1,
+                )
+                continue
+            if bullet_match:
+                text = bullet_match.group(1)
+                _write_line(
+                    f"- {text}",
+                    size=10,
+                    style="B" if "**" in text else "",
+                    line_height=5.8,
+                    spacing_after=1,
+                )
+                continue
+
+            label_match = re.match(r"^\*\*([^*]+):\*\*(.*)$", stripped)
+            if label_match:
+                label = label_match.group(1).strip()
+                value = label_match.group(2).strip()
+                text = f"{label}: {value}" if value else f"{label}:"
+                _write_line(text, size=10, style="B", line_height=5.8, spacing_after=1)
+                continue
+
+            if stripped.startswith("**") and stripped.endswith("**"):
+                _write_line(stripped, size=10.5, style="B", line_height=6)
+                continue
+
+            _write_line(stripped, size=10.5, line_height=5.8, spacing_after=1)
 
         out = pdf.output()
         return bytes(
