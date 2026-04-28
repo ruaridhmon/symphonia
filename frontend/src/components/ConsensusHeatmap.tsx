@@ -354,7 +354,6 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
                     </span>
                     <span
                       className="consensus-heatmap-topic-label"
-                      title={topic.label}
                       tabIndex={0}
                       onMouseEnter={(e) => showTopicTooltip(e, topic)}
                       onMouseLeave={() => setTopicTooltip(null)}
