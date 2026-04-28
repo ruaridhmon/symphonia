@@ -1293,28 +1293,24 @@ export default function SummaryPage() {
 				enabled: summaryComposition.agreements,
 				label: 'Agreements',
 				aliases: ['Agreement', 'Areas of agreement', 'Areas of consensus', 'What people agree about'],
-				icon: <ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} />,
 			},
 			{
 				key: 'disagreements' as const,
 				enabled: summaryComposition.disagreements,
 				label: 'Disagreements',
 				aliases: ['Disagreement', 'Divergence', 'Tensions', 'Areas of disagreement', 'What people disagree about'],
-				icon: <ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} />,
 			},
 			{
 				key: 'nuances' as const,
 				enabled: summaryComposition.nuances,
 				label: 'Nuances',
 				aliases: ['Nuance', 'Uncertainties', 'Nuances & Uncertainties', 'Complexities'],
-				icon: <ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} />,
 			},
 			{
 				key: 'probes' as const,
 				enabled: summaryComposition.probes,
 				label: 'Follow-up questions',
 				aliases: ['Follow up questions', 'Follow-up probes', 'Questions for next round', 'Next round questions'],
-				icon: <ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} />,
 			},
 		];
 
@@ -1326,10 +1322,7 @@ export default function SummaryPage() {
 				aliases: block.aliases,
 				content: (
 					<SectionErrorBoundary fallbackTitle={`Failed to render ${block.label.toLowerCase()}`}>
-						<section className="space-y-3" aria-label={block.label}>
-							<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
-								{block.icon} {block.label}
-							</h3>
+						<section aria-label={block.label}>
 							<StructuredSynthesis
 								data={structuredSynthesisData}
 								convergenceScore={displayRound?.convergence_score ?? undefined}
@@ -1360,10 +1353,7 @@ export default function SummaryPage() {
 				aliases: ['Consensus map', 'Heatmap', 'Consensus matrix', 'Consensus'],
 				content: (
 					<SectionErrorBoundary fallbackTitle="Failed to render consensus heatmap">
-						<section className="space-y-3" aria-label="Consensus heatmap">
-							<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
-								<MapPin size={18} style={{ color: 'var(--accent)' }} /> Consensus heatmap
-							</h3>
+						<section aria-label="Consensus heatmap">
 							<ConsensusHeatmap
 								structuredData={structuredSynthesisData}
 								resolvedExpertLabels={resolvedExpertLabels}
