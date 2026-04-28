@@ -223,7 +223,7 @@ export default function AISynthesisPanel({
                             disabled={index === 0}
                             title="Move up"
                             aria-label={`Move ${sectionLabelMap[key]} up`}
-                            className="inline-flex h-6 w-6 items-center justify-center rounded"
+                            className="inline-flex h-6 items-center justify-center gap-1 rounded px-1.5 text-[11px] font-medium"
                             style={{
                               border: '1px solid var(--border)',
                               backgroundColor: 'var(--background)',
@@ -233,6 +233,7 @@ export default function AISynthesisPanel({
                             }}
                           >
                             <ArrowUp size={12} aria-hidden="true" />
+                            <span>Up</span>
                           </button>
                           <button
                             type="button"
@@ -240,7 +241,7 @@ export default function AISynthesisPanel({
                             disabled={index === selectedOrder.length - 1}
                             title="Move down"
                             aria-label={`Move ${sectionLabelMap[key]} down`}
-                            className="inline-flex h-6 w-6 items-center justify-center rounded"
+                            className="inline-flex h-6 items-center justify-center gap-1 rounded px-1.5 text-[11px] font-medium"
                             style={{
                               border: '1px solid var(--border)',
                               backgroundColor: 'var(--background)',
@@ -250,6 +251,7 @@ export default function AISynthesisPanel({
                             }}
                           >
                             <ArrowDown size={12} aria-hidden="true" />
+                            <span>Down</span>
                           </button>
                         </span>
                       </div>

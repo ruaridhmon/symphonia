@@ -35,91 +35,6 @@ type SynthesisFlowItem =
   | { type: 'text'; key: string; content: string }
   | { type: 'block'; key: string; block: SynthesisEmbeddedBlock };
 
-function normalizeBlockLabel(value: string): string {
-  return value
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&nbsp;/gi, ' ')
-    .toLowerCase()
-    .replace(/[^a-z0-9&]+/g, ' ')
-    .trim();
-}
-
-function blockMatchesHeading(headingText: string, block: SynthesisEmbeddedBlock): boolean {
-  const heading = normalizeBlockLabel(headingText);
-  if (!heading) return false;
-  return [block.label, ...(block.aliases || [])].some(alias => {
-    const normalizedAlias = normalizeBlockLabel(alias);
-    const paddedHeading = ` ${heading} `;
-    const paddedAlias = ` ${normalizedAlias} `;
-    return heading === normalizedAlias || paddedHeading.includes(paddedAlias);
-  });
-}
-
-function splitMarkdownSynthesis(content: string, blocks: SynthesisEmbeddedBlock[]): SynthesisFlowItem[] | null {
-  const lines = content.split(/\r?\n/);
-  const flow: SynthesisFlowItem[] = [];
-  const used = new Set<string>();
-  let current: string[] = [];
-
-  const flushText = () => {
-    const text = current.join('\n').trim();
-    if (text) flow.push({ type: 'text', key: `text-${flow.length}`, content: text });
-    current = [];
-  };
-
-  for (const line of lines) {
-    current.push(line);
-    const headingMatch = line.match(/^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/);
-    if (!headingMatch) continue;
-    const block = blocks.find(candidate => !used.has(candidate.key) && blockMatchesHeading(headingMatch[1], candidate));
-    if (!block) continue;
-    flushText();
-    flow.push({ type: 'block', key: block.key, block });
-    used.add(block.key);
-  }
-
-  flushText();
-  blocks.filter(block => !used.has(block.key)).forEach(block => {
-    flow.push({ type: 'block', key: block.key, block });
-  });
-
-  return used.size > 0 ? flow : null;
-}
-
-function splitHtmlSynthesis(content: string, blocks: SynthesisEmbeddedBlock[]): SynthesisFlowItem[] | null {
-  const headingPattern = /(<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>)/gi;
-  const parts = content.split(headingPattern).filter(part => part.length > 0);
-  if (parts.length <= 1) return null;
-
-  const flow: SynthesisFlowItem[] = [];
-  const used = new Set<string>();
-  let current = '';
-
-  const flushText = () => {
-    const text = current.trim();
-    if (text) flow.push({ type: 'text', key: `text-${flow.length}`, content: text });
-    current = '';
-  };
-
-  for (const part of parts) {
-    current += part;
-    if (!/^<h[1-6]\b/i.test(part)) continue;
-    const block = blocks.find(candidate => !used.has(candidate.key) && blockMatchesHeading(part, candidate));
-    if (!block) continue;
-    flushText();
-    flow.push({ type: 'block', key: block.key, block });
-    used.add(block.key);
-  }
-
-  flushText();
-  blocks.filter(block => !used.has(block.key)).forEach(block => {
-    flow.push({ type: 'block', key: block.key, block });
-  });
-
-  return used.size > 0 ? flow : null;
-}
-
 function buildOrderedFallbackFlow(
   content: string,
   blocks: SynthesisEmbeddedBlock[],
@@ -160,17 +75,9 @@ function buildSynthesisFlow(
   blocks: SynthesisEmbeddedBlock[],
   contentOrder: string[],
 ): SynthesisFlowItem[] {
-  if (!content.trim()) {
-    return buildOrderedFallbackFlow(content, blocks, contentOrder);
-  }
-
-  const isHtml = /^\s*<[a-z][\s\S]*>/i.test(content);
-  const splitFlow = isHtml
-    ? splitHtmlSynthesis(content, blocks)
-    : splitMarkdownSynthesis(content, blocks);
-
-  if (splitFlow) return splitFlow;
-
+  // The facilitator's selected order must be authoritative. Earlier versions
+  // tried to infer placement from generated headings such as "Agreements",
+  // which made the Up/Down controls appear broken whenever text headings won.
   return buildOrderedFallbackFlow(content, blocks, contentOrder);
 }
 
