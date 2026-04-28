@@ -55,6 +55,7 @@ import {
 	RoundHistoryCard,
 	SummaryLoadingSkeleton,
 	VersionCompare,
+	SurveyStatisticsPanel,
 } from './components/summary';
 import type { SynthesisEmbeddedBlock } from './components/summary/SynthesisEditorCard';
 
@@ -138,6 +139,7 @@ const MODELS = [
 const SYNTHESIS_ANALYSTS = 3;
 const SYNTHESIS_RUN_TTL_MS = 30 * 60 * 1000;
 const SUMMARY_COMPOSITION_DEFAULTS = {
+	statistics: true,
 	narrative: true,
 	agreements: false,
 	disagreements: false,
@@ -146,6 +148,7 @@ const SUMMARY_COMPOSITION_DEFAULTS = {
 	probes: false,
 };
 const SUMMARY_COMPOSITION_ORDER = [
+	'statistics',
 	'narrative',
 	'agreements',
 	'disagreements',
@@ -155,6 +158,7 @@ const SUMMARY_COMPOSITION_ORDER = [
 ] as const;
 type SummaryCompositionKey = keyof typeof SUMMARY_COMPOSITION_DEFAULTS;
 const SUMMARY_VIEW_LABELS: Record<keyof typeof SUMMARY_COMPOSITION_DEFAULTS, string> = {
+	statistics: 'Survey statistics',
 	narrative: 'Text overview',
 	agreements: 'Agreements',
 	disagreements: 'Disagreements',
@@ -619,10 +623,33 @@ export default function SummaryPage() {
 	const showMissingStructuredViewsNotice = Boolean(
 		!structuredSynthesisData && selectedStructuredViewLabels.length > 0
 	);
+	const currentRoundResponses = useMemo(
+		() => structuredRounds.find(round => round.id === displayRound?.id) || null,
+		[displayRound?.id, structuredRounds]
+	);
+	const currentRoundHasStatisticQuestions = useMemo(
+		() => Boolean(displayRound?.questions?.some(question => {
+			if (!question || typeof question !== 'object') return false;
+			const inputType = (question as Record<string, unknown>).inputType;
+			return inputType === 'slider'
+				|| inputType === 'likert'
+				|| inputType === 'single_select'
+				|| inputType === 'multi_select';
+		})),
+		[displayRound?.questions]
+	);
+	const showSurveyStatistics = Boolean(
+		summaryComposition.statistics
+		&& displayRound
+		&& currentRoundResponses
+		&& currentRoundResponses.responses.length > 0
+		&& currentRoundHasStatisticQuestions
+	);
 	const showSynthesisTextPanel = Boolean(
 		displayRound
 		&& (
-			summaryComposition.narrative
+			showSurveyStatistics
+			|| summaryComposition.narrative
 			|| synthesisViewMode === 'edit'
 			|| !structuredSynthesisData
 			|| showStructuredSynthesisSections
@@ -1282,6 +1309,22 @@ export default function SummaryPage() {
 						{selectedStructuredViewLabels.join(', ')} need saved structured synthesis data before they can be shown.
 					</p>
 				</div>
+			),
+		});
+	}
+
+	if (showSurveyStatistics && displayRound && currentRoundResponses) {
+		synthesisEmbeddedBlocks.push({
+			key: 'statistics',
+			label: 'Survey statistics',
+			aliases: ['Statistics', 'Stats', 'Survey stats', 'Quantitative results', 'Likert results'],
+			content: (
+				<SectionErrorBoundary fallbackTitle="Failed to render survey statistics">
+					<SurveyStatisticsPanel
+						questions={displayRound.questions || []}
+						roundResponses={currentRoundResponses}
+					/>
+				</SectionErrorBoundary>
 			),
 		});
 	}

@@ -50,6 +50,7 @@ export default function AISynthesisPanel({
   const [appearanceOpen, setAppearanceOpen] = useState(false);
   const [participantOpen, setParticipantOpen] = useState(false);
   const sectionOptions = [
+    ['statistics', 'Survey statistics'],
     ['narrative', 'Text overview'],
     ['agreements', 'Agreements'],
     ['disagreements', 'Disagreements'],
