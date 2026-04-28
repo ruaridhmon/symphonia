@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LoadingButton, SynthesisModeSelector } from '../index';
-import { ChevronDown, ChevronRight, Cpu, Clock3, Eye, Layers3, ListChecks, Palette } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, Cpu, Clock3, Eye, GripVertical, Layers3, ListChecks, Palette } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -14,6 +14,8 @@ type Props = {
   onGenerate: () => void;
   summaryOptions: Record<string, boolean>;
   onSummaryOptionChange: (option: string) => void;
+  summaryOrder?: string[];
+  onSummaryOptionMove?: (option: string, direction: 'up' | 'down') => void;
   synthesisBackground: 'default' | 'paper' | 'soft';
   onSynthesisBackgroundChange: (background: 'default' | 'paper' | 'soft') => void;
   showOwnResponseToParticipants: boolean;
@@ -33,6 +35,8 @@ export default function AISynthesisPanel({
   onGenerate,
   summaryOptions,
   onSummaryOptionChange,
+  summaryOrder,
+  onSummaryOptionMove,
   synthesisBackground,
   onSynthesisBackgroundChange,
   showOwnResponseToParticipants,
@@ -51,6 +55,9 @@ export default function AISynthesisPanel({
     ['consensusMap', 'Consensus heatmap'],
     ['probes', 'Follow-up questions'],
   ] as const;
+  const sectionLabelMap = Object.fromEntries(sectionOptions.map(([key, label]) => [key, label]));
+  const selectedOrder = (summaryOrder || sectionOptions.map(([key]) => key))
+    .filter(key => summaryOptions[key] && sectionLabelMap[key]);
   const backgroundOptions = [
     ['default', 'Default'],
     ['paper', 'White'],
@@ -192,6 +199,61 @@ export default function AISynthesisPanel({
                   </span>
                 </button>
               ))}
+              {selectedOrder.length > 1 && onSummaryOptionMove && (
+                <div className="mt-1 rounded-md p-2" style={{ border: '1px solid var(--border)', backgroundColor: 'var(--card)' }}>
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold" style={{ color: 'var(--muted-foreground)' }}>
+                    <GripVertical size={12} aria-hidden="true" />
+                    Order in synthesis
+                  </div>
+                  <div className="space-y-1">
+                    {selectedOrder.map((key, index) => (
+                      <div
+                        key={key}
+                        className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-xs"
+                        style={{ backgroundColor: 'color-mix(in srgb, var(--muted) 42%, var(--card))' }}
+                      >
+                        <span className="min-w-0 truncate">{sectionLabelMap[key]}</span>
+                        <span className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => onSummaryOptionMove(key, 'up')}
+                            disabled={index === 0}
+                            title="Move up"
+                            aria-label={`Move ${sectionLabelMap[key]} up`}
+                            className="inline-flex h-6 w-6 items-center justify-center rounded"
+                            style={{
+                              border: '1px solid var(--border)',
+                              backgroundColor: 'var(--background)',
+                              color: 'var(--foreground)',
+                              opacity: index === 0 ? 0.45 : 1,
+                              cursor: index === 0 ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            <ArrowUp size={12} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onSummaryOptionMove(key, 'down')}
+                            disabled={index === selectedOrder.length - 1}
+                            title="Move down"
+                            aria-label={`Move ${sectionLabelMap[key]} down`}
+                            className="inline-flex h-6 w-6 items-center justify-center rounded"
+                            style={{
+                              border: '1px solid var(--border)',
+                              backgroundColor: 'var(--background)',
+                              color: 'var(--foreground)',
+                              opacity: index === selectedOrder.length - 1 ? 0.45 : 1,
+                              cursor: index === selectedOrder.length - 1 ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            <ArrowDown size={12} aria-hidden="true" />
+                          </button>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

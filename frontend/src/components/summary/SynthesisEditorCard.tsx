@@ -17,8 +17,161 @@ type Props = {
   onSave: () => void | Promise<void | boolean>;
   onRevert: () => void;
   background?: 'default' | 'paper' | 'soft';
+  showText?: boolean;
+  embeddedBlocks?: SynthesisEmbeddedBlock[];
+  contentOrder?: string[];
   children?: ReactNode;
 };
+
+export type SynthesisEmbeddedBlock = {
+  key: string;
+  label: string;
+  aliases?: string[];
+  content: ReactNode;
+};
+
+type SynthesisFlowItem =
+  | { type: 'text'; key: string; content: string }
+  | { type: 'block'; key: string; block: SynthesisEmbeddedBlock };
+
+function normalizeBlockLabel(value: string): string {
+  return value
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&nbsp;/gi, ' ')
+    .toLowerCase()
+    .replace(/[^a-z0-9&]+/g, ' ')
+    .trim();
+}
+
+function blockMatchesHeading(headingText: string, block: SynthesisEmbeddedBlock): boolean {
+  const heading = normalizeBlockLabel(headingText);
+  if (!heading) return false;
+  return [block.label, ...(block.aliases || [])].some(alias => {
+    const normalizedAlias = normalizeBlockLabel(alias);
+    const paddedHeading = ` ${heading} `;
+    const paddedAlias = ` ${normalizedAlias} `;
+    return heading === normalizedAlias || paddedHeading.includes(paddedAlias);
+  });
+}
+
+function splitMarkdownSynthesis(content: string, blocks: SynthesisEmbeddedBlock[]): SynthesisFlowItem[] | null {
+  const lines = content.split(/\r?\n/);
+  const flow: SynthesisFlowItem[] = [];
+  const used = new Set<string>();
+  let current: string[] = [];
+
+  const flushText = () => {
+    const text = current.join('\n').trim();
+    if (text) flow.push({ type: 'text', key: `text-${flow.length}`, content: text });
+    current = [];
+  };
+
+  for (const line of lines) {
+    current.push(line);
+    const headingMatch = line.match(/^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$/);
+    if (!headingMatch) continue;
+    const block = blocks.find(candidate => !used.has(candidate.key) && blockMatchesHeading(headingMatch[1], candidate));
+    if (!block) continue;
+    flushText();
+    flow.push({ type: 'block', key: block.key, block });
+    used.add(block.key);
+  }
+
+  flushText();
+  blocks.filter(block => !used.has(block.key)).forEach(block => {
+    flow.push({ type: 'block', key: block.key, block });
+  });
+
+  return used.size > 0 ? flow : null;
+}
+
+function splitHtmlSynthesis(content: string, blocks: SynthesisEmbeddedBlock[]): SynthesisFlowItem[] | null {
+  const headingPattern = /(<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>)/gi;
+  const parts = content.split(headingPattern).filter(part => part.length > 0);
+  if (parts.length <= 1) return null;
+
+  const flow: SynthesisFlowItem[] = [];
+  const used = new Set<string>();
+  let current = '';
+
+  const flushText = () => {
+    const text = current.trim();
+    if (text) flow.push({ type: 'text', key: `text-${flow.length}`, content: text });
+    current = '';
+  };
+
+  for (const part of parts) {
+    current += part;
+    if (!/^<h[1-6]\b/i.test(part)) continue;
+    const block = blocks.find(candidate => !used.has(candidate.key) && blockMatchesHeading(part, candidate));
+    if (!block) continue;
+    flushText();
+    flow.push({ type: 'block', key: block.key, block });
+    used.add(block.key);
+  }
+
+  flushText();
+  blocks.filter(block => !used.has(block.key)).forEach(block => {
+    flow.push({ type: 'block', key: block.key, block });
+  });
+
+  return used.size > 0 ? flow : null;
+}
+
+function buildOrderedFallbackFlow(
+  content: string,
+  blocks: SynthesisEmbeddedBlock[],
+  contentOrder: string[],
+): SynthesisFlowItem[] {
+  const byKey = new Map(blocks.map(block => [block.key, block]));
+  const used = new Set<string>();
+  let textUsed = false;
+  const flow: SynthesisFlowItem[] = [];
+
+  const addText = () => {
+    if (textUsed || !content.trim()) return;
+    flow.push({ type: 'text', key: 'text-main', content });
+    textUsed = true;
+  };
+
+  for (const key of contentOrder) {
+    if (key === 'narrative') {
+      addText();
+      continue;
+    }
+    const block = byKey.get(key);
+    if (!block || used.has(block.key)) continue;
+    flow.push({ type: 'block', key: block.key, block });
+    used.add(block.key);
+  }
+
+  addText();
+  blocks.filter(block => !used.has(block.key)).forEach(block => {
+    flow.push({ type: 'block', key: block.key, block });
+  });
+
+  return flow;
+}
+
+function buildSynthesisFlow(
+  content: string,
+  blocks: SynthesisEmbeddedBlock[],
+  contentOrder: string[],
+): SynthesisFlowItem[] {
+  if (!content.trim()) {
+    return buildOrderedFallbackFlow(content, blocks, contentOrder);
+  }
+
+  const isHtml = /^\s*<[a-z][\s\S]*>/i.test(content);
+  const splitFlow = isHtml
+    ? splitHtmlSynthesis(content, blocks)
+    : splitMarkdownSynthesis(content, blocks);
+
+  if (splitFlow) return splitFlow;
+
+  return buildOrderedFallbackFlow(content, blocks, contentOrder);
+}
 
 export default function SynthesisEditorCard({
   activeRound,
@@ -33,11 +186,19 @@ export default function SynthesisEditorCard({
   onSave,
   onRevert,
   background = 'default',
+  showText = true,
+  embeddedBlocks = [],
+  contentOrder = [],
   children,
 }: Props) {
   const synthesisText = activeRound?.synthesis || '';
-  const hasSynthesis = synthesisText.trim().length > 0;
-  const hasEmbeddedContent = Boolean(children);
+  const hasSynthesis = showText && synthesisText.trim().length > 0;
+  const visibleEmbeddedBlocks = embeddedBlocks.filter(block => block.content);
+  const legacyChildrenBlock = children
+    ? [{ key: 'legacy-children', label: 'Additional synthesis content', content: children }]
+    : [];
+  const flow = buildSynthesisFlow(hasSynthesis ? synthesisText : '', [...legacyChildrenBlock, ...visibleEmbeddedBlocks], contentOrder);
+  const hasEmbeddedContent = flow.some(item => item.type === 'block');
   const backgroundStyle =
     background === 'paper'
       ? {
@@ -166,8 +327,16 @@ export default function SynthesisEditorCard({
         </div>
       ) : (
         <div className="space-y-5">
-          {hasSynthesis ? (
-            <MarkdownRenderer content={synthesisText} />
+          {hasSynthesis || hasEmbeddedContent ? (
+            <div className="synthesis-flow">
+              {flow.map(item => item.type === 'text' ? (
+                <MarkdownRenderer key={item.key} content={item.content} />
+              ) : (
+                <div key={item.key} className="synthesis-flow-block">
+                  {item.block.content}
+                </div>
+              ))}
+            </div>
           ) : !hasEmbeddedContent ? (
             <div
               className="rounded-lg p-6 text-center"
@@ -213,14 +382,6 @@ export default function SynthesisEditorCard({
               )}
             </div>
           ) : null}
-          {hasEmbeddedContent && (
-            <div
-              className={hasSynthesis ? 'pt-5 space-y-5' : 'space-y-5'}
-              style={hasSynthesis ? { borderTop: '1px solid var(--border)' } : undefined}
-            >
-              {children}
-            </div>
-          )}
         </div>
       )}
     </div>

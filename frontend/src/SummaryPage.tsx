@@ -56,6 +56,7 @@ import {
 	SummaryLoadingSkeleton,
 	VersionCompare,
 } from './components/summary';
+import type { SynthesisEmbeddedBlock } from './components/summary/SynthesisEditorCard';
 
 import { usePresence } from './hooks/usePresence';
 
@@ -144,6 +145,15 @@ const SUMMARY_COMPOSITION_DEFAULTS = {
 	consensusMap: false,
 	probes: false,
 };
+const SUMMARY_COMPOSITION_ORDER = [
+	'narrative',
+	'agreements',
+	'disagreements',
+	'nuances',
+	'consensusMap',
+	'probes',
+] as const;
+type SummaryCompositionKey = keyof typeof SUMMARY_COMPOSITION_DEFAULTS;
 const SUMMARY_VIEW_LABELS: Record<keyof typeof SUMMARY_COMPOSITION_DEFAULTS, string> = {
 	narrative: 'Text overview',
 	agreements: 'Agreements',
@@ -381,6 +391,7 @@ export default function SummaryPage() {
 	const [advancedAnalysisOpen, setAdvancedAnalysisOpen] = useState(false);
 	const [aiToolsOpen, setAiToolsOpen] = useState(false);
 	const [summaryComposition, setSummaryComposition] = useState(SUMMARY_COMPOSITION_DEFAULTS);
+	const [summaryCompositionOrder, setSummaryCompositionOrder] = useState<SummaryCompositionKey[]>([...SUMMARY_COMPOSITION_ORDER]);
 	const [synthesisBackground, setSynthesisBackground] = useState<'default' | 'paper' | 'soft'>('default');
 	const [isSavingParticipantVisibility, setIsSavingParticipantVisibility] = useState(false);
 	const [selectedModel, setSelectedModel] = useState(MODELS[0]);
@@ -985,8 +996,29 @@ export default function SummaryPage() {
 
 	function toggleSummaryCompositionOption(option: string) {
 		if (!(option in SUMMARY_COMPOSITION_DEFAULTS)) return;
-		const key = option as keyof typeof SUMMARY_COMPOSITION_DEFAULTS;
+		const key = option as SummaryCompositionKey;
 		setSummaryComposition(prev => ({ ...prev, [key]: !prev[key] }));
+		setSummaryCompositionOrder(prev => prev.includes(key) ? prev : [...prev, key]);
+		setActiveWorkspaceTab('synthesis');
+	}
+
+	function moveSummaryCompositionOption(option: string, direction: 'up' | 'down') {
+		if (!(option in SUMMARY_COMPOSITION_DEFAULTS)) return;
+		const key = option as SummaryCompositionKey;
+		setSummaryCompositionOrder(prev => {
+			const order = prev.filter(item => item in SUMMARY_COMPOSITION_DEFAULTS);
+			if (!order.includes(key)) order.push(key);
+			const selectedOrder = order.filter(item => summaryComposition[item]);
+			const selectedIndex = selectedOrder.indexOf(key);
+			const swapWithSelectedIndex = direction === 'up' ? selectedIndex - 1 : selectedIndex + 1;
+			const swapWith = selectedOrder[swapWithSelectedIndex];
+			if (!swapWith) return order;
+			const currentIndex = order.indexOf(key);
+			const targetIndex = order.indexOf(swapWith);
+			const next = [...order];
+			[next[currentIndex], next[targetIndex]] = [next[targetIndex], next[currentIndex]];
+			return next;
+		});
 		setActiveWorkspaceTab('synthesis');
 	}
 
@@ -1228,6 +1260,121 @@ export default function SummaryPage() {
 		);
 	}
 
+	const synthesisEmbeddedBlocks: SynthesisEmbeddedBlock[] = [];
+
+	if (showMissingStructuredViewsNotice) {
+		synthesisEmbeddedBlocks.push({
+			key: 'missing',
+			label: 'Selected view unavailable',
+			content: (
+				<div
+					className="rounded-lg p-4"
+					style={{
+						border: '1px solid color-mix(in srgb, var(--accent) 36%, var(--border))',
+						backgroundColor: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
+					}}
+				>
+					<h3 className="text-sm font-semibold text-foreground m-0">
+						Selected view unavailable for this round
+					</h3>
+					<p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
+						{selectedStructuredViewLabels.join(', ')} need saved structured synthesis data before they can be shown.
+					</p>
+				</div>
+			),
+		});
+	}
+
+	if (structuredSynthesisData) {
+		const structuredBlockConfig = [
+			{
+				key: 'agreements' as const,
+				enabled: summaryComposition.agreements,
+				label: 'Agreements',
+				aliases: ['Agreement', 'Areas of agreement', 'Areas of consensus', 'What people agree about'],
+				icon: <ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} />,
+			},
+			{
+				key: 'disagreements' as const,
+				enabled: summaryComposition.disagreements,
+				label: 'Disagreements',
+				aliases: ['Disagreement', 'Divergence', 'Tensions', 'Areas of disagreement', 'What people disagree about'],
+				icon: <ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} />,
+			},
+			{
+				key: 'nuances' as const,
+				enabled: summaryComposition.nuances,
+				label: 'Nuances',
+				aliases: ['Nuance', 'Uncertainties', 'Nuances & Uncertainties', 'Complexities'],
+				icon: <ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} />,
+			},
+			{
+				key: 'probes' as const,
+				enabled: summaryComposition.probes,
+				label: 'Follow-up questions',
+				aliases: ['Follow up questions', 'Follow-up probes', 'Questions for next round', 'Next round questions'],
+				icon: <ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} />,
+			},
+		];
+
+		for (const block of structuredBlockConfig) {
+			if (!block.enabled) continue;
+			synthesisEmbeddedBlocks.push({
+				key: block.key,
+				label: block.label,
+				aliases: block.aliases,
+				content: (
+					<SectionErrorBoundary fallbackTitle={`Failed to render ${block.label.toLowerCase()}`}>
+						<section className="space-y-3" aria-label={block.label}>
+							<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+								{block.icon} {block.label}
+							</h3>
+							<StructuredSynthesis
+								data={structuredSynthesisData}
+								convergenceScore={displayRound?.convergence_score ?? undefined}
+								expertLabels={resolvedExpertLabels}
+								formId={formId}
+								roundId={displayRound?.id}
+								token={token}
+								currentUserEmail={email}
+								showOverview={false}
+								visibleSections={{
+									narrative: false,
+									agreements: block.key === 'agreements',
+									disagreements: block.key === 'disagreements',
+									nuances: block.key === 'nuances',
+									probes: block.key === 'probes',
+								}}
+							/>
+						</section>
+					</SectionErrorBoundary>
+				),
+			});
+		}
+
+		if (showSynthesisHeatmap) {
+			synthesisEmbeddedBlocks.push({
+				key: 'consensusMap',
+				label: 'Consensus heatmap',
+				aliases: ['Consensus map', 'Heatmap', 'Consensus matrix', 'Consensus'],
+				content: (
+					<SectionErrorBoundary fallbackTitle="Failed to render consensus heatmap">
+						<section className="space-y-3" aria-label="Consensus heatmap">
+							<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+								<MapPin size={18} style={{ color: 'var(--accent)' }} /> Consensus heatmap
+							</h3>
+							<ConsensusHeatmap
+								structuredData={structuredSynthesisData}
+								resolvedExpertLabels={resolvedExpertLabels}
+								questions={displayRound?.questions}
+							/>
+						</section>
+					</SectionErrorBoundary>
+				),
+			});
+		}
+	}
+
 	// ─── Render ──────────────────────────────────────────────────────────────
 
 	if (loadError && !form) return (
@@ -1397,66 +1544,10 @@ export default function SummaryPage() {
 										onSave={saveSynthesisEdits}
 										onRevert={revertSynthesisEdits}
 										background={synthesisBackground}
-									>
-										{showMissingStructuredViewsNotice && (
-											<div
-												className="rounded-lg p-4"
-												style={{
-													border: '1px solid color-mix(in srgb, var(--accent) 36%, var(--border))',
-													backgroundColor: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
-												}}
-											>
-												<h3 className="text-sm font-semibold text-foreground m-0">
-													Selected view unavailable for this round
-												</h3>
-												<p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-													{selectedStructuredViewLabels.join(', ')} need saved structured synthesis data before they can be shown.
-												</p>
-											</div>
-										)}
-
-										{showStructuredSynthesisSections && structuredSynthesisData && (
-											<SectionErrorBoundary fallbackTitle="Failed to render synthesis sections">
-												<section className="space-y-3" aria-label="Selected synthesis sections">
-													<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
-														<ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} /> Synthesis sections
-													</h3>
-													<StructuredSynthesis
-														data={structuredSynthesisData}
-														convergenceScore={displayRound?.convergence_score ?? undefined}
-														expertLabels={resolvedExpertLabels}
-														formId={formId}
-														roundId={displayRound?.id}
-														token={token}
-														currentUserEmail={email}
-														showOverview={false}
-														visibleSections={{
-															narrative: false,
-															agreements: summaryComposition.agreements,
-															disagreements: summaryComposition.disagreements,
-															nuances: summaryComposition.nuances,
-															probes: summaryComposition.probes,
-														}}
-													/>
-												</section>
-											</SectionErrorBoundary>
-										)}
-
-										{showSynthesisHeatmap && structuredSynthesisData && (
-											<SectionErrorBoundary fallbackTitle="Failed to render consensus heatmap">
-												<section className="space-y-3" aria-label="Consensus heatmap">
-													<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
-														<MapPin size={18} style={{ color: 'var(--accent)' }} /> Consensus heatmap
-													</h3>
-													<ConsensusHeatmap
-														structuredData={structuredSynthesisData}
-														resolvedExpertLabels={resolvedExpertLabels}
-														questions={displayRound?.questions}
-													/>
-												</section>
-											</SectionErrorBoundary>
-										)}
-									</SynthesisEditorCard>
+										showText={summaryComposition.narrative}
+										embeddedBlocks={synthesisEmbeddedBlocks}
+										contentOrder={summaryCompositionOrder}
+									/>
 								)}
 
 								{displayRound?.is_active && (
@@ -1707,6 +1798,8 @@ export default function SummaryPage() {
 							onGenerate={generateSummary}
 							summaryOptions={summaryComposition}
 							onSummaryOptionChange={toggleSummaryCompositionOption}
+							summaryOrder={summaryCompositionOrder}
+							onSummaryOptionMove={moveSummaryCompositionOption}
 							synthesisBackground={synthesisBackground}
 							onSynthesisBackgroundChange={setSynthesisBackground}
 							showOwnResponseToParticipants={Boolean(form?.show_own_response_to_participants)}

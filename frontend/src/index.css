@@ -712,6 +712,25 @@ main,
   max-width: none;
 }
 
+.synthesis-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.synthesis-flow .markdown-body {
+  max-width: none;
+}
+
+.synthesis-flow-block {
+  max-width: none;
+  padding: 1rem 0;
+}
+
+.synthesis-flow-block + .synthesis-flow-block {
+  padding-top: 0.25rem;
+}
+
 /* Prose overrides for theme awareness */
 .prose {
   color: var(--foreground);
