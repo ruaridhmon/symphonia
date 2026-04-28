@@ -641,6 +641,144 @@ def _build_responses_export_payload(
     return payload
 
 
+def _question_export_label(question: Any, fallback: str) -> str:
+    if isinstance(question, str):
+        return question.strip() or fallback
+    if isinstance(question, dict):
+        for key in ("label", "text", "question", "title"):
+            value = question.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return fallback
+
+
+def _question_export_id(question: Any) -> str | None:
+    if not isinstance(question, dict):
+        return None
+    value = question.get("questionId")
+    return value.strip() if isinstance(value, str) and value.strip() else None
+
+
+def _question_is_simple_response(question: Any) -> bool:
+    if not isinstance(question, dict):
+        return False
+    input_type = str(question.get("inputType") or "").strip()
+    return input_type in {
+        "text",
+        "textarea",
+        "single_select",
+        "multi_select",
+        "slider",
+        "likert",
+        "document",
+    }
+
+
+def _response_question_lookup(questions: list[Any]) -> dict[str, Any]:
+    lookup: dict[str, Any] = {}
+    for index, question in enumerate(questions, start=1):
+        lookup[f"q{index}"] = question
+        question_id = _question_export_id(question)
+        if question_id:
+            lookup[question_id] = question
+    return lookup
+
+
+def _format_export_scalar(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return _html_to_plain_text(value).strip()
+    if isinstance(value, bool):
+        return "Yes" if value else "No"
+    if isinstance(value, (int, float)):
+        return str(value)
+    return str(value).strip()
+
+
+def _format_response_answer_for_export(
+    value: Any,
+    question: Any = None,
+) -> list[tuple[str, str]]:
+    """Return labelled, human-readable response fields for export documents."""
+    simple_response = _question_is_simple_response(question)
+
+    if value is None:
+        return [("Response", "No response provided")]
+
+    if isinstance(value, (str, int, float, bool)):
+        rendered = _format_export_scalar(value)
+        return [("Response", rendered or "No response provided")]
+
+    if isinstance(value, list):
+        rendered_items = [
+            _format_export_scalar(item) for item in value if _format_export_scalar(item)
+        ]
+        return [("Response", ", ".join(rendered_items) or "No response provided")]
+
+    if not isinstance(value, dict):
+        return [("Response", _format_export_scalar(value) or "No response provided")]
+
+    selected_options = value.get("selectedOptions")
+    if isinstance(selected_options, list):
+        selected = [
+            _format_export_scalar(item)
+            for item in selected_options
+            if _format_export_scalar(item)
+        ]
+        other_text = _format_export_scalar(value.get("otherText"))
+        if other_text:
+            selected.append(other_text)
+        if selected:
+            return [("Response", ", ".join(selected))]
+
+    position = _extract_answer_position(value).strip()
+    fields: list[tuple[str, str]] = []
+    if position:
+        fields.append(("Response" if simple_response else "Position", position))
+
+    if simple_response:
+        return fields or [("Response", "No response provided")]
+
+    for source_key, label in (
+        ("evidence", "Evidence"),
+        ("confidence", "Confidence"),
+        ("confidenceJustification", "Confidence rationale"),
+        ("counterarguments", "Counterarguments"),
+    ):
+        if source_key not in value:
+            continue
+        rendered = _format_export_scalar(value.get(source_key))
+        if not rendered:
+            continue
+        if source_key == "confidence" and rendered:
+            rendered = f"{rendered}/10"
+        fields.append((label, rendered))
+
+    for source_key, label in (
+        ("citations", "Citations"),
+        ("expertNominations", "Expert nominations"),
+    ):
+        items = value.get(source_key)
+        if not isinstance(items, list):
+            continue
+        rendered_items = [
+            _format_export_scalar(item) for item in items if _format_export_scalar(item)
+        ]
+        if rendered_items:
+            fields.append((label, ", ".join(rendered_items)))
+
+    if fields:
+        return fields
+
+    readable_pairs: list[tuple[str, str]] = []
+    for key, item in value.items():
+        rendered = _format_export_scalar(item)
+        if rendered:
+            readable_pairs.append((str(key).replace("_", " ").title(), rendered))
+    return readable_pairs or [("Response", "No response provided")]
+
+
 def _build_responses_markdown(
     form: FormModel,
     rounds_payload: list[dict[str, Any]],
@@ -685,10 +823,22 @@ def _build_responses_markdown(
             if timestamp:
                 lines.append(f"**Submitted:** {timestamp}")
                 lines.append("")
+            question_lookup = _response_question_lookup(
+                round_payload.get("questions") or []
+            )
             for key, value in (response.get("answers") or {}).items():
-                lines.append(f"**{key}**")
-                for wrapped_line in _format_value(value):
-                    lines.append(wrapped_line if wrapped_line else "")
+                question = question_lookup.get(key)
+                fallback_label = (
+                    key.replace("_", " ").upper() if key.startswith("q") else key
+                )
+                question_label = _question_export_label(question, fallback_label)
+                lines.append(f"**{question_label}**")
+                for label, answer_text in _format_response_answer_for_export(
+                    value, question
+                ):
+                    lines.append(f"- **{label}:**")
+                    for wrapped_line in _format_value(answer_text):
+                        lines.append(f"  {wrapped_line}" if wrapped_line else "")
                 lines.append("")
             lines.append("---")
             lines.append("")

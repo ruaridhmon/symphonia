@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { saveBackendExport } from '../api/exports';
 import { getRounds, getRoundsWithResponses } from '../api/rounds';
 import type { Form, Round, RoundWithResponses } from '../types/summary';
+import { extractQuestionText } from '../utils/questions';
 
 interface DownloadSheetProps {
   open: boolean;
@@ -57,6 +58,100 @@ function serializeAnswer(value: unknown): string {
   } catch {
     return String(value);
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function questionKey(question: unknown): string | null {
+  if (!isRecord(question)) return null;
+  const id = question.questionId;
+  return typeof id === 'string' && id.trim() ? id.trim() : null;
+}
+
+function isSimpleQuestion(question: unknown): boolean {
+  if (!isRecord(question)) return false;
+  return ['text', 'textarea', 'single_select', 'multi_select', 'slider', 'likert', 'document']
+    .includes(String(question.inputType || ''));
+}
+
+function questionLookup(questions: (string | Record<string, unknown>)[]) {
+  const lookup: Record<string, string | Record<string, unknown>> = {};
+  questions.forEach((question, index) => {
+    lookup[`q${index + 1}`] = question;
+    const id = questionKey(question);
+    if (id) lookup[id] = question;
+  });
+  return lookup;
+}
+
+function scalarText(value: unknown): string {
+  if (value == null) return '';
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  return String(value).trim();
+}
+
+function coerceAnswerPosition(value: unknown): string {
+  const scalar = scalarText(value);
+  if (scalar) return scalar;
+  if (Array.isArray(value)) {
+    return value.map(coerceAnswerPosition).filter(Boolean).join('\n');
+  }
+  if (!isRecord(value)) return '';
+  for (const key of ['position', 'value', 'answer', 'selected', 'selectedScore', 'score']) {
+    if (key in value) {
+      const next = coerceAnswerPosition(value[key]);
+      if (next.trim()) return next;
+    }
+  }
+  return '';
+}
+
+function formatAnswerFields(value: unknown, question: unknown): Array<{ label: string; value: string }> {
+  const simple = isSimpleQuestion(question);
+  if (value == null) return [{ label: 'Response', value: 'No response provided' }];
+  if (!isRecord(value)) return [{ label: 'Response', value: serializeAnswer(value) || 'No response provided' }];
+
+  if (Array.isArray(value.selectedOptions)) {
+    const selected = value.selectedOptions.map(scalarText).filter(Boolean);
+    const otherText = scalarText(value.otherText);
+    if (otherText) selected.push(otherText);
+    if (selected.length) return [{ label: 'Response', value: selected.join(', ') }];
+  }
+
+  const position = coerceAnswerPosition(value);
+  const fields: Array<{ label: string; value: string }> = [];
+  if (position) fields.push({ label: simple ? 'Response' : 'Position', value: position });
+  if (simple) return fields.length ? fields : [{ label: 'Response', value: 'No response provided' }];
+
+  const labelledKeys: Array<[string, string]> = [
+    ['evidence', 'Evidence'],
+    ['confidence', 'Confidence'],
+    ['confidenceJustification', 'Confidence rationale'],
+    ['counterarguments', 'Counterarguments'],
+  ];
+  labelledKeys.forEach(([key, label]) => {
+    if (!(key in value)) return;
+    let rendered = scalarText(value[key]);
+    if (!rendered) return;
+    if (key === 'confidence') rendered = `${rendered}/10`;
+    fields.push({ label, value: rendered });
+  });
+
+  ([
+    ['citations', 'Citations'],
+    ['expertNominations', 'Expert nominations'],
+  ] as const).forEach(([key, label]) => {
+    const items = value[key];
+    if (!Array.isArray(items)) return;
+    const rendered = items.map(scalarText).filter(Boolean);
+    if (rendered.length) fields.push({ label, value: rendered.join(', ') });
+  });
+
+  return fields.length ? fields : [{ label: 'Response', value: serializeAnswer(value) || 'No response provided' }];
 }
 
 function wrapExportText(value: string, lineLength = 88): string[] {
@@ -140,6 +235,38 @@ async function exportWordDocument(
       );
     });
   };
+  const pushQuestionAnswer = (
+    questionLabel: string,
+    fields: Array<{ label: string; value: string }>,
+  ) => {
+    children.push(
+      new Paragraph({
+        spacing: { before: 80, after: 50 },
+        keepNext: true,
+        children: [new TextRun({ text: questionLabel, bold: true, color: '0F2F67', size: 23 })],
+      }),
+    );
+    fields.forEach((field, fieldIndex) => {
+      const wrapped = wrapExportText(field.value || ' ');
+      children.push(
+        new Paragraph({
+          spacing: { before: fieldIndex === 0 ? 0 : 40, after: 20 },
+          indent: { left: 320 },
+          keepNext: true,
+          children: [new TextRun({ text: `${field.label}:`, bold: true, color: '344054' })],
+        }),
+      );
+      wrapped.forEach((line, index) => {
+        children.push(
+          new Paragraph({
+            spacing: { after: index === wrapped.length - 1 ? 90 : 20 },
+            indent: { left: 520 },
+            children: [new TextRun(line || ' ')],
+          }),
+        );
+      });
+    });
+  };
 
   pushHeading(form.title, HeadingLevel.TITLE);
   children.push(
@@ -173,6 +300,9 @@ async function exportWordDocument(
     pushHeading(scope === 'consultation' ? 'Responses' : 'All responses', HeadingLevel.HEADING_1);
     structuredRounds.forEach((round) => {
       pushHeading(`Round ${round.round_number}`, HeadingLevel.HEADING_2);
+      const sourceRound = rounds.find(item => item.id === round.id || item.round_number === round.round_number);
+      const questions = sourceRound?.questions || [];
+      const questionsByKey = questionLookup(questions);
       if (!round.responses.length) {
         pushText('No responses recorded.');
         return;
@@ -186,7 +316,10 @@ async function exportWordDocument(
           pushLabelValue('Submitted', formatDate(response.timestamp));
         }
         Object.entries(response.answers || {}).forEach(([key, value]) => {
-          pushLabelValue(key, serializeAnswer(value));
+          const question = questionsByKey[key];
+          const fallbackLabel = key.startsWith('q') ? key.toUpperCase() : key;
+          const questionLabel = extractQuestionText(question) || fallbackLabel;
+          pushQuestionAnswer(questionLabel, formatAnswerFields(value, question));
         });
         children.push(
           new Paragraph({
