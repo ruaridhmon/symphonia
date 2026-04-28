@@ -144,6 +144,14 @@ const SUMMARY_COMPOSITION_DEFAULTS = {
 	consensusMap: false,
 	probes: false,
 };
+const SUMMARY_VIEW_LABELS: Record<keyof typeof SUMMARY_COMPOSITION_DEFAULTS, string> = {
+	narrative: 'Text overview',
+	agreements: 'Agreements',
+	disagreements: 'Disagreements',
+	nuances: 'Nuances',
+	consensusMap: 'Consensus heatmap',
+	probes: 'Follow-up questions',
+};
 
 interface StoredSynthesisRun {
 	formId: number;
@@ -595,6 +603,15 @@ export default function SummaryPage() {
 		(!selectedRound || selectedRound.is_active)
 		&& (summaryComposition.narrative || synthesisViewMode === 'edit' || !structuredSynthesisData)
 	);
+	const selectedStructuredViewLabels = useMemo(
+		() => (['agreements', 'disagreements', 'nuances', 'consensusMap', 'probes'] as const)
+			.filter(key => summaryComposition[key])
+			.map(key => SUMMARY_VIEW_LABELS[key]),
+		[summaryComposition]
+	);
+	const showMissingStructuredViewsNotice = Boolean(
+		!structuredSynthesisData && selectedStructuredViewLabels.length > 0
+	);
 	const synthesisContextNote = useMemo(() => {
 		if (!activeRound || activeRound.round_number <= 1) return null;
 		const previous = rounds.find(r => r.round_number === activeRound.round_number - 1);
@@ -963,6 +980,7 @@ export default function SummaryPage() {
 		if (!(option in SUMMARY_COMPOSITION_DEFAULTS)) return;
 		const key = option as keyof typeof SUMMARY_COMPOSITION_DEFAULTS;
 		setSummaryComposition(prev => ({ ...prev, [key]: !prev[key] }));
+		setActiveWorkspaceTab('synthesis');
 	}
 
 	async function handleParticipantOwnResponseVisibilityChange(enabled: boolean) {
@@ -1373,6 +1391,23 @@ export default function SummaryPage() {
 										onRevert={revertSynthesisEdits}
 										background={synthesisBackground}
 									/>
+								)}
+
+								{showMissingStructuredViewsNotice && (
+									<div
+										className="card p-4"
+										style={{
+											borderColor: 'color-mix(in srgb, var(--accent) 36%, var(--border))',
+											backgroundColor: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
+										}}
+									>
+										<h3 className="text-sm font-semibold text-foreground m-0">
+											Selected view unavailable for this round
+										</h3>
+										<p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
+											{selectedStructuredViewLabels.join(', ')} need saved structured synthesis data before they can be shown.
+										</p>
+									</div>
 								)}
 
 								{showStructuredSynthesisSections && structuredSynthesisData && (
