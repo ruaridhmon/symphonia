@@ -3325,6 +3325,14 @@ main,
   max-width: min(520px, calc(100vw - 2rem));
 }
 
+.consensus-heatmap-topic-tooltip .consensus-heatmap-tooltip-topic {
+  border-left: 0;
+  padding-left: 0;
+  margin-bottom: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
 .consensus-heatmap-topic-tooltip-kicker {
   font-size: 0.625rem;
   font-weight: 700;
