@@ -59,6 +59,12 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
     topicLabel: string;
     expertLabel: string;
   } | null>(null);
+  const [topicTooltip, setTopicTooltip] = useState<{
+    x: number;
+    y: number;
+    label: string;
+    type: Topic['type'];
+  } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -268,6 +274,19 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
     });
   }
 
+  function showTopicTooltip(e: React.MouseEvent | React.FocusEvent, topic: Topic) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    if (!containerRect) return;
+
+    setTopicTooltip({
+      x: rect.left - containerRect.left + rect.width / 2,
+      y: rect.top - containerRect.top - 8,
+      label: topic.label,
+      type: topic.type,
+    });
+  }
+
   return (
     <div className="consensus-heatmap fade-in" ref={containerRef}>
       <div className="consensus-heatmap-title">
@@ -333,8 +352,16 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
                     >
                       {topic.type === 'agreement' ? '✓' : '⚡'}
                     </span>
-                    <span className="consensus-heatmap-topic-label" title={topic.label}>
-                      {truncate(topic.label, 50)}
+                    <span
+                      className="consensus-heatmap-topic-label"
+                      title={topic.label}
+                      tabIndex={0}
+                      onMouseEnter={(e) => showTopicTooltip(e, topic)}
+                      onMouseLeave={() => setTopicTooltip(null)}
+                      onFocus={(e) => showTopicTooltip(e, topic)}
+                      onBlur={() => setTopicTooltip(null)}
+                    >
+                      {topic.label}
                     </span>
                   </div>
                 </td>
@@ -416,6 +443,23 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
         </div>
       </div>
 
+      {topicTooltip && (
+        <div
+          className="consensus-heatmap-tooltip consensus-heatmap-topic-tooltip"
+          style={{
+            left: topicTooltip.x,
+            top: topicTooltip.y,
+          }}
+        >
+          <div className="consensus-heatmap-topic-tooltip-kicker">
+            {topicTooltip.type === 'agreement' ? 'Agreement statement' : 'Disagreement statement'}
+          </div>
+          <div className="consensus-heatmap-tooltip-topic">
+            {topicTooltip.label}
+          </div>
+        </div>
+      )}
+
       {/* Tooltip */}
       {tooltip && (
         <div
@@ -436,7 +480,7 @@ const ConsensusHeatmap = memo(function ConsensusHeatmap({
             </span>
           </div>
           <div className="consensus-heatmap-tooltip-topic">
-            {truncate(tooltip.topicLabel, 80)}
+            {tooltip.topicLabel}
           </div>
           <div
             className="consensus-heatmap-tooltip-status"

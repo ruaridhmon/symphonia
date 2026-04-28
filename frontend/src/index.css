@@ -3168,13 +3168,16 @@ main,
   background-color: var(--card);
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);
-  max-width: 16rem;
+  width: clamp(18rem, 34vw, 36rem);
+  min-width: 18rem;
+  max-width: 36rem;
 }
 
 .consensus-heatmap-topic {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .consensus-heatmap-topic-badge {
@@ -3205,10 +3208,34 @@ main,
 }
 
 .consensus-heatmap-topic-label {
+  display: block;
+  min-width: 0;
+  max-width: clamp(15rem, 30vw, 32rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--foreground);
   line-height: 1.3;
+  cursor: help;
+}
+
+.consensus-heatmap-topic-label:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .consensus-heatmap-header-row {
+    width: 18rem;
+    min-width: 18rem;
+  }
+
+  .consensus-heatmap-topic-label {
+    max-width: 15rem;
+  }
 }
 
 .consensus-heatmap-cell {
@@ -3292,6 +3319,19 @@ main,
   max-width: 320px;
   pointer-events: none;
   animation: fadeIn 0.15s ease-out;
+}
+
+.consensus-heatmap-topic-tooltip {
+  max-width: min(520px, calc(100vw - 2rem));
+}
+
+.consensus-heatmap-topic-tooltip-kicker {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.375rem;
+  text-transform: uppercase;
 }
 
 .consensus-heatmap-tooltip-header {
