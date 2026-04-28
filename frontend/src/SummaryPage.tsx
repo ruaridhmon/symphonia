@@ -1488,6 +1488,23 @@ export default function SummaryPage() {
 						</div>
 
 						<div className="w-full max-w-xl space-y-3 lg:max-w-sm">
+							<div className="flex justify-start lg:justify-end">
+								<button
+									type="button"
+									onClick={() => setDownloadSheetOpen(true)}
+									className="inline-flex h-9 items-center gap-2 rounded-full px-3 text-sm font-semibold transition-colors"
+									style={{
+										backgroundColor: 'color-mix(in srgb, var(--accent) 9%, transparent)',
+										border: '1px solid color-mix(in srgb, var(--accent) 28%, var(--border))',
+										color: 'var(--accent)',
+									}}
+									aria-label="Download consultation exports"
+									title="Download consultation exports"
+								>
+									<Download size={15} aria-hidden="true" />
+									<span>Download</span>
+								</button>
+							</div>
 							<RoundHistoryCard
 								rounds={rounds}
 								selectedRoundId={selectedRound?.id || null}
@@ -1843,26 +1860,6 @@ export default function SummaryPage() {
 							onShowOwnResponseToParticipantsChange={handleParticipantOwnResponseVisibilityChange}
 							isSavingParticipantVisibility={isSavingParticipantVisibility}
 						/>
-
-						<div className="card p-3">
-							<button
-								type="button"
-								onClick={() => setDownloadSheetOpen(true)}
-								className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-colors"
-								style={{
-									backgroundColor: 'var(--background)',
-									border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-								}}
-							>
-								<Download size={16} style={{ color: 'var(--accent)' }} />
-								<div className="min-w-0 flex-1">
-									<div className="text-sm font-semibold text-foreground">Download</div>
-									<div className="mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-										Export the consultation, the summary, or the responses.
-									</div>
-								</div>
-							</button>
-						</div>
 
 						{activeWorkspaceTab !== 'responses' && synthesisVersions.length > 0 && (
 							<SynthesisVersionPanel

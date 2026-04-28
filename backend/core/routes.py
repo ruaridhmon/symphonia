@@ -826,19 +826,24 @@ def _build_responses_markdown(
             question_lookup = _response_question_lookup(
                 round_payload.get("questions") or []
             )
-            for key, value in (response.get("answers") or {}).items():
+            for question_index, (key, value) in enumerate(
+                (response.get("answers") or {}).items(),
+                start=1,
+            ):
                 question = question_lookup.get(key)
                 fallback_label = (
                     key.replace("_", " ").upper() if key.startswith("q") else key
                 )
                 question_label = _question_export_label(question, fallback_label)
-                lines.append(f"**{question_label}**")
+                lines.append(f"##### Question {question_index}: {question_label}")
+                lines.append("")
                 for label, answer_text in _format_response_answer_for_export(
                     value, question
                 ):
-                    lines.append(f"- **{label}:**")
+                    lines.append(f"**{label}:**")
                     for wrapped_line in _format_value(answer_text):
-                        lines.append(f"  {wrapped_line}" if wrapped_line else "")
+                        lines.append(f"> {wrapped_line}" if wrapped_line else ">")
+                    lines.append("")
                 lines.append("")
             lines.append("---")
             lines.append("")
@@ -884,10 +889,11 @@ body {{
   overflow-wrap: anywhere;
   word-break: break-word;
 }}
-h1, h2, h3, h4 {{
+h1, h2, h3, h4, h5, h6 {{
   page-break-after: avoid;
   break-after: avoid-page;
   color: #0f2f67;
+  font-weight: 800;
   line-height: 1.25;
   margin-bottom: 0.35rem;
 }}
@@ -908,6 +914,19 @@ h3 {{
 h4 {{
   font-size: 11pt;
   margin-top: 0.16in;
+  color: #344054;
+}}
+h5 {{
+  font-size: 10.5pt;
+  margin: 0.18in 0 0.08in;
+  padding: 0.06in 0.08in;
+  background: #f3f6fb;
+  border-left: 3px solid #2563eb;
+  color: #0f2f67;
+}}
+h6 {{
+  font-size: 10pt;
+  margin-top: 0.14in;
   color: #344054;
 }}
 p, ul, ol, table, pre {{
@@ -3126,26 +3145,28 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
             if agreements:
                 lines.append("### Agreements")
                 lines.append("")
-                for a in agreements:
+                for index, a in enumerate(agreements, start=1):
                     conf = a.get("confidence", 0)
-                    lines.append(
-                        f"- **{a.get('claim', '')}** ({conf * 100:.0f}% confidence)"
-                    )
+                    lines.append(f"#### Agreement {index}")
+                    lines.append("")
+                    lines.append(f"**Claim:** {a.get('claim', '')}")
+                    lines.append(f"**Confidence:** {conf * 100:.0f}%")
                     experts = a.get("supporting_experts", [])
                     if experts:
                         lines.append(
-                            f"  - Supporting experts: {', '.join(f'Expert {e}' for e in experts)}"
+                            f"**Supporting experts:** {', '.join(f'Expert {e}' for e in experts)}"
                         )
                     if a.get("evidence_summary"):
-                        lines.append(f"  - Evidence: {a['evidence_summary']}")
+                        lines.append(f"**Evidence:** {a['evidence_summary']}")
                     excerpts = a.get("evidence_excerpts", [])
                     if excerpts:
-                        lines.append("  - **Supporting Excerpts:**")
+                        lines.append("**Supporting excerpts:**")
                         for ex in excerpts:
                             label = ex.get(
                                 "expert_label", f"Expert {ex.get('expert_id', '?')}"
                             )
-                            lines.append(f'    - _{label}_: "{ex.get("quote", "")}"')
+                            lines.append(f'- _{label}_: "{ex.get("quote", "")}"')
+                    lines.append("")
                 lines.append("")
 
             # Disagreements
@@ -3153,18 +3174,27 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
             if disagreements:
                 lines.append("### Disagreements")
                 lines.append("")
-                for d in disagreements:
+                for index, d in enumerate(disagreements, start=1):
                     sev = d.get("severity", "moderate")
-                    lines.append(f"- **{d.get('topic', '')}** (Severity: {sev})")
-                    for pos in d.get("positions", []):
+                    lines.append(f"#### Disagreement {index}")
+                    lines.append("")
+                    lines.append(f"**Topic:** {d.get('topic', '')}")
+                    lines.append(f"**Severity:** {sev}")
+                    positions = d.get("positions", [])
+                    if positions:
+                        lines.append("")
+                    for position_index, pos in enumerate(positions, start=1):
                         experts = pos.get("experts", [])
-                        lines.append(f"  - *{pos.get('position', '')}*")
+                        lines.append(
+                            f"**Position {position_index}:** {pos.get('position', '')}"
+                        )
                         if experts:
                             lines.append(
-                                f"    - Experts: {', '.join(f'Expert {e}' for e in experts)}"
+                                f"**Experts:** {', '.join(f'Expert {e}' for e in experts)}"
                             )
                         if pos.get("evidence"):
-                            lines.append(f"    - Evidence: {pos['evidence']}")
+                            lines.append(f"**Evidence:** {pos['evidence']}")
+                        lines.append("")
                 lines.append("")
 
             # Nuances
