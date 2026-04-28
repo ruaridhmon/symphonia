@@ -17,6 +17,7 @@ type Props = {
   onSave: () => void | Promise<void | boolean>;
   onRevert: () => void;
   background?: 'default' | 'paper' | 'soft';
+  canEdit?: boolean;
   showText?: boolean;
   embeddedBlocks?: SynthesisEmbeddedBlock[];
   contentOrder?: string[];
@@ -186,6 +187,7 @@ export default function SynthesisEditorCard({
   onSave,
   onRevert,
   background = 'default',
+  canEdit = true,
   showText = true,
   embeddedBlocks = [],
   contentOrder = [],
@@ -235,54 +237,56 @@ export default function SynthesisEditorCard({
             </p>
           )}
         </div>
-        <div
-          role="tablist"
-          aria-label="Synthesis view mode"
-          style={{
-            display: 'inline-flex',
-            borderRadius: '0.5rem',
-            overflow: 'hidden',
-            border: '1px solid var(--border)',
-            fontSize: '0.8125rem',
-            alignSelf: 'flex-start',
-          }}
-        >
-          <button
-            role="tab"
-            aria-selected={synthesisViewMode === 'view'}
-            onClick={() => onSetViewMode('view')}
+        {canEdit && (
+          <div
+            role="tablist"
+            aria-label="Synthesis view mode"
             style={{
-              padding: '0.375rem 0.75rem',
-              cursor: 'pointer',
-              border: 'none',
-              fontWeight: synthesisViewMode === 'view' ? 600 : 400,
-              backgroundColor: synthesisViewMode === 'view' ? 'var(--accent)' : 'var(--card)',
-              color: synthesisViewMode === 'view' ? 'white' : 'var(--muted-foreground)',
-              transition: 'all 0.15s ease',
+              display: 'inline-flex',
+              borderRadius: '0.5rem',
+              overflow: 'hidden',
+              border: '1px solid var(--border)',
+              fontSize: '0.8125rem',
+              alignSelf: 'flex-start',
             }}
           >
-            View
-          </button>
-          <button
-            role="tab"
-            aria-selected={synthesisViewMode === 'edit'}
-            onClick={() => onSetViewMode('edit')}
-            style={{
-              padding: '0.375rem 0.75rem',
-              cursor: 'pointer',
-              border: 'none',
-              borderLeft: '1px solid var(--border)',
-              fontWeight: synthesisViewMode === 'edit' ? 600 : 400,
-              backgroundColor: synthesisViewMode === 'edit' ? 'var(--accent)' : 'var(--card)',
-              color: synthesisViewMode === 'edit' ? 'white' : 'var(--muted-foreground)',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            Edit
-          </button>
-        </div>
+            <button
+              role="tab"
+              aria-selected={synthesisViewMode === 'view'}
+              onClick={() => onSetViewMode('view')}
+              style={{
+                padding: '0.375rem 0.75rem',
+                cursor: 'pointer',
+                border: 'none',
+                fontWeight: synthesisViewMode === 'view' ? 600 : 400,
+                backgroundColor: synthesisViewMode === 'view' ? 'var(--accent)' : 'var(--card)',
+                color: synthesisViewMode === 'view' ? 'white' : 'var(--muted-foreground)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              View
+            </button>
+            <button
+              role="tab"
+              aria-selected={synthesisViewMode === 'edit'}
+              onClick={() => onSetViewMode('edit')}
+              style={{
+                padding: '0.375rem 0.75rem',
+                cursor: 'pointer',
+                border: 'none',
+                borderLeft: '1px solid var(--border)',
+                fontWeight: synthesisViewMode === 'edit' ? 600 : 400,
+                backgroundColor: synthesisViewMode === 'edit' ? 'var(--accent)' : 'var(--card)',
+                color: synthesisViewMode === 'edit' ? 'white' : 'var(--muted-foreground)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              Edit
+            </button>
+          </div>
+        )}
       </div>
-      {synthesisViewMode === 'edit' && (
+      {canEdit && synthesisViewMode === 'edit' && (
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="text-xs" style={{ color: isDirty ? 'var(--accent)' : 'var(--muted-foreground)' }}>
             {isDirty ? 'Unsaved changes' : 'All changes saved'}
@@ -321,7 +325,7 @@ export default function SynthesisEditorCard({
           </div>
         </div>
       )}
-      {synthesisViewMode === 'edit' ? (
+      {canEdit && synthesisViewMode === 'edit' ? (
         <div className="synthesis-editor-surface markdown-body">
           <EditorContent editor={editor} />
         </div>

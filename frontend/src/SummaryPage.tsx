@@ -620,7 +620,7 @@ export default function SummaryPage() {
 		!structuredSynthesisData && selectedStructuredViewLabels.length > 0
 	);
 	const showSynthesisTextPanel = Boolean(
-		(!selectedRound || selectedRound.is_active)
+		displayRound
 		&& (
 			summaryComposition.narrative
 			|| synthesisViewMode === 'edit'
@@ -1234,6 +1234,7 @@ export default function SummaryPage() {
 	function handleSelectRound(round: Round) {
 		try {
 			setSelectedRound(round);
+			if (!round.is_active) setSynthesisViewMode('view');
 			setSearchParams(prev => {
 				const next = new URLSearchParams(prev);
 				next.set('round', String(round.id));
@@ -1526,17 +1527,18 @@ export default function SummaryPage() {
 										<RoundCard
 											round={selectedRound}
 											isCurrentRound={false}
+											showSynthesis={false}
 										/>
 									</SectionErrorBoundary>
 								)}
 
 								{showSynthesisTextPanel && (
 									<SynthesisEditorCard
-										activeRound={activeRound}
-										contextNote={synthesisContextNote}
+										activeRound={displayRound}
+										contextNote={displayRound?.is_active ? synthesisContextNote : null}
 										synthesisViewMode={synthesisViewMode}
 										onSetViewMode={handleSetSynthesisViewMode}
-										canGenerate={responseCountForDisplay > 0}
+										canGenerate={Boolean(displayRound?.is_active && responseCountForDisplay > 0)}
 										onGenerate={generateSummary}
 										editor={editor}
 										isDirty={isSynthesisDirty}
@@ -1544,6 +1546,7 @@ export default function SummaryPage() {
 										onSave={saveSynthesisEdits}
 										onRevert={revertSynthesisEdits}
 										background={synthesisBackground}
+										canEdit={Boolean(displayRound?.is_active)}
 										showText={summaryComposition.narrative}
 										embeddedBlocks={synthesisEmbeddedBlocks}
 										contentOrder={summaryCompositionOrder}
@@ -1794,6 +1797,7 @@ export default function SummaryPage() {
 							models={availableModels}
 							estimateLabel={synthesisEstimateLabel}
 							responseCount={responseCountForDisplay}
+							canGenerate={Boolean(displayRound?.is_active && responseCountForDisplay > 0)}
 							isGenerating={isGenerating}
 							onGenerate={generateSummary}
 							summaryOptions={summaryComposition}

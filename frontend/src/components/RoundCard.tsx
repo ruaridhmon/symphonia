@@ -8,9 +8,10 @@ import { extractQuestionText } from '../utils/questions';
 interface RoundCardProps {
   round: Round;
   isCurrentRound: boolean;
+  showSynthesis?: boolean;
 }
 
-const RoundCard = memo(function RoundCard({ round, isCurrentRound }: RoundCardProps) {
+const RoundCard = memo(function RoundCard({ round, isCurrentRound, showSynthesis = true }: RoundCardProps) {
   const { t } = useTranslation();
   const hasSynthesis = !!(round.synthesis && round.synthesis.trim());
 
@@ -100,7 +101,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound }: RoundCardPr
       )}
 
       {/* Synthesis content */}
-      {hasSynthesis && (
+      {showSynthesis && hasSynthesis && (
         <div className="round-detail-synthesis">
           <h4 className="round-detail-synthesis-title">{t('rounds.synthesisRound', { number: round.round_number })}</h4>
           <div className="round-detail-synthesis-body">
@@ -109,7 +110,7 @@ const RoundCard = memo(function RoundCard({ round, isCurrentRound }: RoundCardPr
         </div>
       )}
 
-      {!hasSynthesis && (
+      {showSynthesis && !hasSynthesis && (
         <div className="round-detail-empty">
           <div className="round-detail-empty-icon"><FileText size={24} style={{ color: 'var(--muted-foreground)' }} /></div>
           <p className="round-detail-empty-text">

@@ -10,6 +10,7 @@ type Props = {
   models: string[];
   estimateLabel: string | null;
   responseCount: number;
+  canGenerate?: boolean;
   isGenerating: boolean;
   onGenerate: () => void;
   summaryOptions: Record<string, boolean>;
@@ -31,6 +32,7 @@ export default function AISynthesisPanel({
   models,
   estimateLabel,
   responseCount,
+  canGenerate: canGenerateOverride,
   isGenerating,
   onGenerate,
   summaryOptions,
@@ -43,7 +45,7 @@ export default function AISynthesisPanel({
   onShowOwnResponseToParticipantsChange,
   isSavingParticipantVisibility = false,
 }: Props) {
-  const canGenerate = responseCount > 0;
+  const canGenerate = canGenerateOverride ?? responseCount > 0;
   const [contentOpen, setContentOpen] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
   const [participantOpen, setParticipantOpen] = useState(false);
