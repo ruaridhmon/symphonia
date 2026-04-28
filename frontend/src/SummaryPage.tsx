@@ -599,10 +599,6 @@ export default function SummaryPage() {
 			|| summaryComposition.probes
 		)
 	);
-	const showSynthesisTextPanel = Boolean(
-		(!selectedRound || selectedRound.is_active)
-		&& (summaryComposition.narrative || synthesisViewMode === 'edit' || !structuredSynthesisData)
-	);
 	const selectedStructuredViewLabels = useMemo(
 		() => (['agreements', 'disagreements', 'nuances', 'consensusMap', 'probes'] as const)
 			.filter(key => summaryComposition[key])
@@ -611,6 +607,17 @@ export default function SummaryPage() {
 	);
 	const showMissingStructuredViewsNotice = Boolean(
 		!structuredSynthesisData && selectedStructuredViewLabels.length > 0
+	);
+	const showSynthesisTextPanel = Boolean(
+		(!selectedRound || selectedRound.is_active)
+		&& (
+			summaryComposition.narrative
+			|| synthesisViewMode === 'edit'
+			|| !structuredSynthesisData
+			|| showStructuredSynthesisSections
+			|| showSynthesisHeatmap
+			|| showMissingStructuredViewsNotice
+		)
 	);
 	const synthesisContextNote = useMemo(() => {
 		if (!activeRound || activeRound.round_number <= 1) return null;
@@ -1390,66 +1397,66 @@ export default function SummaryPage() {
 										onSave={saveSynthesisEdits}
 										onRevert={revertSynthesisEdits}
 										background={synthesisBackground}
-									/>
-								)}
-
-								{showMissingStructuredViewsNotice && (
-									<div
-										className="card p-4"
-										style={{
-											borderColor: 'color-mix(in srgb, var(--accent) 36%, var(--border))',
-											backgroundColor: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
-										}}
 									>
-										<h3 className="text-sm font-semibold text-foreground m-0">
-											Selected view unavailable for this round
-										</h3>
-										<p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-											{selectedStructuredViewLabels.join(', ')} need saved structured synthesis data before they can be shown.
-										</p>
-									</div>
-								)}
-
-								{showStructuredSynthesisSections && structuredSynthesisData && (
-									<SectionErrorBoundary fallbackTitle="Failed to render synthesis sections">
-										<div className="card p-4">
-											<h3 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
-												<ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} /> Synthesis sections
-											</h3>
-											<StructuredSynthesis
-												data={structuredSynthesisData}
-												convergenceScore={displayRound?.convergence_score ?? undefined}
-												expertLabels={resolvedExpertLabels}
-												formId={formId}
-												roundId={displayRound?.id}
-												token={token}
-												currentUserEmail={email}
-												showOverview={false}
-												visibleSections={{
-													narrative: false,
-													agreements: summaryComposition.agreements,
-													disagreements: summaryComposition.disagreements,
-													nuances: summaryComposition.nuances,
-													probes: summaryComposition.probes,
+										{showMissingStructuredViewsNotice && (
+											<div
+												className="rounded-lg p-4"
+												style={{
+													border: '1px solid color-mix(in srgb, var(--accent) 36%, var(--border))',
+													backgroundColor: 'color-mix(in srgb, var(--accent) 5%, var(--card))',
 												}}
-											/>
-										</div>
-									</SectionErrorBoundary>
-								)}
+											>
+												<h3 className="text-sm font-semibold text-foreground m-0">
+													Selected view unavailable for this round
+												</h3>
+												<p className="mt-1 text-sm" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
+													{selectedStructuredViewLabels.join(', ')} need saved structured synthesis data before they can be shown.
+												</p>
+											</div>
+										)}
 
-								{showSynthesisHeatmap && structuredSynthesisData && (
-									<SectionErrorBoundary fallbackTitle="Failed to render consensus heatmap">
-										<div className="card p-4">
-											<h3 className="text-base font-semibold mb-2 text-foreground flex items-center gap-2">
-												<MapPin size={18} style={{ color: 'var(--accent)' }} /> Consensus heatmap
-											</h3>
-											<ConsensusHeatmap
-												structuredData={structuredSynthesisData}
-												resolvedExpertLabels={resolvedExpertLabels}
-												questions={displayRound?.questions}
-											/>
-										</div>
-									</SectionErrorBoundary>
+										{showStructuredSynthesisSections && structuredSynthesisData && (
+											<SectionErrorBoundary fallbackTitle="Failed to render synthesis sections">
+												<section className="space-y-3" aria-label="Selected synthesis sections">
+													<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+														<ChartNoAxesColumn size={18} style={{ color: 'var(--accent)' }} /> Synthesis sections
+													</h3>
+													<StructuredSynthesis
+														data={structuredSynthesisData}
+														convergenceScore={displayRound?.convergence_score ?? undefined}
+														expertLabels={resolvedExpertLabels}
+														formId={formId}
+														roundId={displayRound?.id}
+														token={token}
+														currentUserEmail={email}
+														showOverview={false}
+														visibleSections={{
+															narrative: false,
+															agreements: summaryComposition.agreements,
+															disagreements: summaryComposition.disagreements,
+															nuances: summaryComposition.nuances,
+															probes: summaryComposition.probes,
+														}}
+													/>
+												</section>
+											</SectionErrorBoundary>
+										)}
+
+										{showSynthesisHeatmap && structuredSynthesisData && (
+											<SectionErrorBoundary fallbackTitle="Failed to render consensus heatmap">
+												<section className="space-y-3" aria-label="Consensus heatmap">
+													<h3 className="text-base font-semibold text-foreground flex items-center gap-2 m-0">
+														<MapPin size={18} style={{ color: 'var(--accent)' }} /> Consensus heatmap
+													</h3>
+													<ConsensusHeatmap
+														structuredData={structuredSynthesisData}
+														resolvedExpertLabels={resolvedExpertLabels}
+														questions={displayRound?.questions}
+													/>
+												</section>
+											</SectionErrorBoundary>
+										)}
+									</SynthesisEditorCard>
 								)}
 
 								{displayRound?.is_active && (

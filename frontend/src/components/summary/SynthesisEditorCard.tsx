@@ -1,5 +1,5 @@
 import { EditorContent, Editor } from '@tiptap/react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Bot, SquarePen } from 'lucide-react';
 import { MarkdownRenderer } from '../index';
 import type { Round } from '../../types/summary';
@@ -17,6 +17,7 @@ type Props = {
   onSave: () => void | Promise<void | boolean>;
   onRevert: () => void;
   background?: 'default' | 'paper' | 'soft';
+  children?: ReactNode;
 };
 
 export default function SynthesisEditorCard({
@@ -32,9 +33,11 @@ export default function SynthesisEditorCard({
   onSave,
   onRevert,
   background = 'default',
+  children,
 }: Props) {
   const synthesisText = activeRound?.synthesis || '';
   const hasSynthesis = synthesisText.trim().length > 0;
+  const hasEmbeddedContent = Boolean(children);
   const backgroundStyle =
     background === 'paper'
       ? {
@@ -54,7 +57,7 @@ export default function SynthesisEditorCard({
 
   return (
     <div
-      className={`card p-4 sm:p-6 ${hasSynthesis || synthesisViewMode === 'edit' ? 'min-h-[200px] lg:min-h-[300px]' : 'min-h-[180px]'}`}
+      className={`card p-4 sm:p-6 ${hasSynthesis || hasEmbeddedContent || synthesisViewMode === 'edit' ? 'min-h-[200px] lg:min-h-[300px]' : 'min-h-[180px]'}`}
       style={{
         borderTop: '2px solid color-mix(in srgb, var(--accent) 72%, transparent)',
         ...backgroundStyle,
@@ -162,10 +165,10 @@ export default function SynthesisEditorCard({
           <EditorContent editor={editor} />
         </div>
       ) : (
-        <div>
+        <div className="space-y-5">
           {hasSynthesis ? (
             <MarkdownRenderer content={synthesisText} />
-          ) : (
+          ) : !hasEmbeddedContent ? (
             <div
               className="rounded-lg p-6 text-center"
               style={{
@@ -208,6 +211,14 @@ export default function SynthesisEditorCard({
                   Generate draft
                 </button>
               )}
+            </div>
+          ) : null}
+          {hasEmbeddedContent && (
+            <div
+              className={hasSynthesis ? 'pt-5 space-y-5' : 'space-y-5'}
+              style={hasSynthesis ? { borderTop: '1px solid var(--border)' } : undefined}
+            >
+              {children}
             </div>
           )}
         </div>
