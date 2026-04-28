@@ -81,4 +81,8 @@ export interface SynthesisData {
   emergent_insights?: EmergentInsight[];
   /** Facilitator-selected synthesis content options used when generating this version */
   summary_options?: Record<string, boolean>;
+  /** Facilitator-selected display order for synthesis content blocks */
+  summary_order?: string[];
+  /** Facilitator-selected visual treatment for the synthesis panel */
+  synthesis_background?: 'default' | 'paper' | 'soft' | string;
 }

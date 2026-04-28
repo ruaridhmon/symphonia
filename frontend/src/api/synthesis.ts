@@ -36,6 +36,17 @@ export interface GenerateSynthesisResult {
   estimate_label?: string;
 }
 
+export interface UpdateSynthesisDisplayPayload {
+  summary_options?: Record<string, boolean>;
+  summary_order?: string[];
+  synthesis_background?: 'default' | 'paper' | 'soft';
+}
+
+export interface UpdateSynthesisDisplayResult {
+  round_id: number;
+  synthesis_json: SynthesisData | null;
+}
+
 export interface SynthesisJobStatus {
   job_id?: string;
   form_id?: number;
@@ -88,6 +99,17 @@ export function generateSynthesis(
 export function getSynthesisJobStatus(formId: number, roundId: number) {
   return api.get<SynthesisJobStatus>(
     `/forms/${formId}/rounds/${roundId}/synthesis_job`
+  );
+}
+
+export function updateSynthesisDisplay(
+  formId: number,
+  roundId: number,
+  payload: UpdateSynthesisDisplayPayload,
+) {
+  return api.patch<UpdateSynthesisDisplayResult>(
+    `/forms/${formId}/rounds/${roundId}/synthesis_display`,
+    payload,
   );
 }
 

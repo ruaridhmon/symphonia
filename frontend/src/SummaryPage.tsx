@@ -1,4 +1,4 @@
-import { Component, useCallback, useEffect, useMemo, useState } from 'react';
+import { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -26,6 +26,7 @@ import {
 	generateSynthesis as apiGenerateSynthesis,
 	getSynthesisJobStatus as apiGetSynthesisJobStatus,
 	pushSummary as apiPushSummary,
+	updateSynthesisDisplay as apiUpdateSynthesisDisplay,
 } from './api/synthesis';
 
 import {
@@ -157,6 +158,8 @@ const SUMMARY_COMPOSITION_ORDER = [
 	'probes',
 ] as const;
 type SummaryCompositionKey = keyof typeof SUMMARY_COMPOSITION_DEFAULTS;
+type SummaryComposition = Record<SummaryCompositionKey, boolean>;
+type SynthesisBackground = 'default' | 'paper' | 'soft';
 const SUMMARY_VIEW_LABELS: Record<keyof typeof SUMMARY_COMPOSITION_DEFAULTS, string> = {
 	statistics: 'Survey statistics',
 	narrative: 'Text overview',
@@ -166,6 +169,41 @@ const SUMMARY_VIEW_LABELS: Record<keyof typeof SUMMARY_COMPOSITION_DEFAULTS, str
 	consensusMap: 'Consensus heatmap',
 	probes: 'Follow-up questions',
 };
+const SYNTHESIS_BACKGROUNDS = ['default', 'paper', 'soft'] as const;
+
+function normaliseSummaryComposition(raw: unknown): SummaryComposition {
+	const next = { ...SUMMARY_COMPOSITION_DEFAULTS };
+	if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+		for (const key of SUMMARY_COMPOSITION_ORDER) {
+			if (key in raw) {
+				next[key] = Boolean((raw as Record<string, unknown>)[key]);
+			}
+		}
+	}
+	return next;
+}
+
+function normaliseSummaryCompositionOrder(raw: unknown): SummaryCompositionKey[] {
+	const allowed = new Set<SummaryCompositionKey>(SUMMARY_COMPOSITION_ORDER);
+	const order: SummaryCompositionKey[] = [];
+	if (Array.isArray(raw)) {
+		for (const item of raw) {
+			if (typeof item === 'string' && allowed.has(item as SummaryCompositionKey) && !order.includes(item as SummaryCompositionKey)) {
+				order.push(item as SummaryCompositionKey);
+			}
+		}
+	}
+	for (const item of SUMMARY_COMPOSITION_ORDER) {
+		if (!order.includes(item)) order.push(item);
+	}
+	return order;
+}
+
+function normaliseSynthesisBackground(raw: unknown): SynthesisBackground {
+	return SYNTHESIS_BACKGROUNDS.includes(raw as SynthesisBackground)
+		? raw as SynthesisBackground
+		: 'default';
+}
 
 interface StoredSynthesisRun {
 	formId: number;
@@ -394,9 +432,9 @@ export default function SummaryPage() {
 	const [structuredSectionOpen, setStructuredSectionOpen] = useState(true);
 	const [advancedAnalysisOpen, setAdvancedAnalysisOpen] = useState(false);
 	const [aiToolsOpen, setAiToolsOpen] = useState(false);
-	const [summaryComposition, setSummaryComposition] = useState(SUMMARY_COMPOSITION_DEFAULTS);
+	const [summaryComposition, setSummaryComposition] = useState<SummaryComposition>({ ...SUMMARY_COMPOSITION_DEFAULTS });
 	const [summaryCompositionOrder, setSummaryCompositionOrder] = useState<SummaryCompositionKey[]>([...SUMMARY_COMPOSITION_ORDER]);
-	const [synthesisBackground, setSynthesisBackground] = useState<'default' | 'paper' | 'soft'>('default');
+	const [synthesisBackground, setSynthesisBackground] = useState<SynthesisBackground>('default');
 	const [isSavingParticipantVisibility, setIsSavingParticipantVisibility] = useState(false);
 	const [selectedModel, setSelectedModel] = useState(MODELS[0]);
 	const [isGenerating, setIsGenerating] = useState(false);
@@ -417,6 +455,7 @@ export default function SummaryPage() {
 		() => `summary:synthesis-run:${formId}`,
 		[formId]
 	);
+	const synthesisDisplaySaveQueue = useRef<Promise<void>>(Promise.resolve());
 
 	// ── WebSocket message handler (synthesis_complete auto-refresh) ──
 	const clearSynthesisRunState = useCallback(() => {
@@ -562,6 +601,65 @@ export default function SummaryPage() {
 	const structuredSynthesisData = displayRound?.synthesis_json || null;
 	const responseCountForDisplay = targetRoundForGeneration?.response_count ?? 0;
 
+	useEffect(() => {
+		if (!displayRound) return;
+		setSummaryComposition(normaliseSummaryComposition(displayRound.synthesis_json?.summary_options));
+		setSummaryCompositionOrder(normaliseSummaryCompositionOrder(displayRound.synthesis_json?.summary_order));
+		setSynthesisBackground(normaliseSynthesisBackground(displayRound.synthesis_json?.synthesis_background));
+	}, [displayRound?.id, displayRound?.synthesis_json]);
+
+	const applySynthesisDisplayLocally = useCallback((
+		roundId: number,
+		options: SummaryComposition,
+		order: SummaryCompositionKey[],
+		background: SynthesisBackground,
+	) => {
+		const updateRound = (round: Round): Round => {
+			if (round.id !== roundId) return round;
+			return {
+				...round,
+				synthesis_json: {
+					...(round.synthesis_json || {
+						agreements: [],
+						disagreements: [],
+						nuances: [],
+						confidence_map: {},
+						follow_up_probes: [],
+						meta_synthesis_reasoning: '',
+					}),
+					summary_options: options,
+					summary_order: order,
+					synthesis_background: background,
+				},
+			};
+		};
+		setRounds(prev => prev.map(updateRound));
+		setActiveRound(prev => prev ? updateRound(prev) : prev);
+		setSelectedRound(prev => prev ? updateRound(prev) : prev);
+	}, []);
+
+	const persistSynthesisDisplay = useCallback((
+		options: SummaryComposition,
+		order: SummaryCompositionKey[],
+		background: SynthesisBackground,
+	) => {
+		if (!formId || !displayRound) return;
+		const roundId = displayRound.id;
+		applySynthesisDisplayLocally(roundId, options, order, background);
+		synthesisDisplaySaveQueue.current = synthesisDisplaySaveQueue.current
+			.catch(() => {})
+			.then(async () => {
+				await apiUpdateSynthesisDisplay(formId, roundId, {
+					summary_options: options,
+					summary_order: order,
+					synthesis_background: background,
+				});
+			})
+			.catch((error) => {
+				toastError((error as Error).message || 'Failed to save synthesis display settings');
+			});
+	}, [applySynthesisDisplayLocally, displayRound, formId, toastError]);
+
 	const resolvedExpertLabels: Record<number, string> = useMemo(() => {
 		if (!structuredSynthesisData) return {};
 		const labels: Record<number, string> = {};
@@ -601,10 +699,7 @@ export default function SummaryPage() {
 		if (displayRound?.synthesis?.trim()) return displayRound.synthesis;
 		return buildStructuredSummaryText(structuredSynthesisData as Record<string, any> | null);
 	}, [selectedVersion, displayRound, structuredSynthesisData]);
-	const showSynthesisHeatmap = Boolean(
-		structuredSynthesisData?.summary_options?.consensusMap
-		|| summaryComposition.consensusMap
-	);
+	const showSynthesisHeatmap = Boolean(summaryComposition.consensusMap);
 	const showStructuredSynthesisSections = Boolean(
 		structuredSynthesisData
 		&& (
@@ -1024,29 +1119,38 @@ export default function SummaryPage() {
 	function toggleSummaryCompositionOption(option: string) {
 		if (!(option in SUMMARY_COMPOSITION_DEFAULTS)) return;
 		const key = option as SummaryCompositionKey;
-		setSummaryComposition(prev => ({ ...prev, [key]: !prev[key] }));
-		setSummaryCompositionOrder(prev => prev.includes(key) ? prev : [...prev, key]);
+		const nextComposition = { ...summaryComposition, [key]: !summaryComposition[key] };
+		const nextOrder = summaryCompositionOrder.includes(key)
+			? summaryCompositionOrder
+			: [...summaryCompositionOrder, key];
+		setSummaryComposition(nextComposition);
+		setSummaryCompositionOrder(nextOrder);
+		persistSynthesisDisplay(nextComposition, nextOrder, synthesisBackground);
 		setActiveWorkspaceTab('synthesis');
 	}
 
 	function moveSummaryCompositionOption(option: string, direction: 'up' | 'down') {
 		if (!(option in SUMMARY_COMPOSITION_DEFAULTS)) return;
 		const key = option as SummaryCompositionKey;
-		setSummaryCompositionOrder(prev => {
-			const order = prev.filter(item => item in SUMMARY_COMPOSITION_DEFAULTS);
-			if (!order.includes(key)) order.push(key);
-			const selectedOrder = order.filter(item => summaryComposition[item]);
-			const selectedIndex = selectedOrder.indexOf(key);
-			const swapWithSelectedIndex = direction === 'up' ? selectedIndex - 1 : selectedIndex + 1;
-			const swapWith = selectedOrder[swapWithSelectedIndex];
-			if (!swapWith) return order;
-			const currentIndex = order.indexOf(key);
-			const targetIndex = order.indexOf(swapWith);
-			const next = [...order];
-			[next[currentIndex], next[targetIndex]] = [next[targetIndex], next[currentIndex]];
-			return next;
-		});
+		const order = summaryCompositionOrder.filter(item => item in SUMMARY_COMPOSITION_DEFAULTS);
+		if (!order.includes(key)) order.push(key);
+		const selectedOrder = order.filter(item => summaryComposition[item]);
+		const selectedIndex = selectedOrder.indexOf(key);
+		const swapWithSelectedIndex = direction === 'up' ? selectedIndex - 1 : selectedIndex + 1;
+		const swapWith = selectedOrder[swapWithSelectedIndex];
+		if (!swapWith) return;
+		const currentIndex = order.indexOf(key);
+		const targetIndex = order.indexOf(swapWith);
+		const nextOrder = [...order];
+		[nextOrder[currentIndex], nextOrder[targetIndex]] = [nextOrder[targetIndex], nextOrder[currentIndex]];
+		setSummaryCompositionOrder(nextOrder);
+		persistSynthesisDisplay(summaryComposition, nextOrder, synthesisBackground);
 		setActiveWorkspaceTab('synthesis');
+	}
+
+	function handleSynthesisBackgroundChange(background: SynthesisBackground) {
+		setSynthesisBackground(background);
+		persistSynthesisDisplay(summaryComposition, summaryCompositionOrder, background);
 	}
 
 	async function handleParticipantOwnResponseVisibilityChange(enabled: boolean) {
@@ -1174,6 +1278,7 @@ export default function SummaryPage() {
 				strategy: synthesisMode,
 				n_analysts: SYNTHESIS_ANALYSTS,
 				mode: 'human_only',
+				summary_options: summaryComposition,
 			});
 
 			// ── Async path: synthesis running in the background ──
@@ -1855,7 +1960,7 @@ export default function SummaryPage() {
 							summaryOrder={summaryCompositionOrder}
 							onSummaryOptionMove={moveSummaryCompositionOption}
 							synthesisBackground={synthesisBackground}
-							onSynthesisBackgroundChange={setSynthesisBackground}
+							onSynthesisBackgroundChange={handleSynthesisBackgroundChange}
 							showOwnResponseToParticipants={Boolean(form?.show_own_response_to_participants)}
 							onShowOwnResponseToParticipantsChange={handleParticipantOwnResponseVisibilityChange}
 							isSavingParticipantVisibility={isSavingParticipantVisibility}

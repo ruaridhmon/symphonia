@@ -246,3 +246,61 @@ class TestExportSynthesisPdf:
             headers=admin_headers,
         )
         assert b"Helvetica-Bold" in resp.content
+
+
+class TestSynthesisDisplayPreferences:
+    """Test persisted synthesis display preferences."""
+
+    def test_display_preferences_are_saved_on_round_and_active_version(
+        self, client: TestClient, seeded_form
+    ):
+        form_id, admin_headers, _ = seeded_form
+        round_id = _get_active_round_id(client, form_id, admin_headers)
+
+        resp = client.patch(
+            f"/forms/{form_id}/rounds/{round_id}/synthesis_display",
+            headers=admin_headers,
+            json={
+                "summary_options": {
+                    "statistics": False,
+                    "narrative": True,
+                    "agreements": True,
+                    "disagreements": False,
+                    "nuances": True,
+                    "consensusMap": True,
+                    "probes": False,
+                },
+                "summary_order": [
+                    "narrative",
+                    "consensusMap",
+                    "agreements",
+                    "nuances",
+                ],
+                "synthesis_background": "paper",
+            },
+        )
+
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["synthesis_json"]["summary_options"]["consensusMap"] is True
+        assert body["synthesis_json"]["summary_options"]["statistics"] is False
+        assert body["synthesis_json"]["summary_order"][:4] == [
+            "narrative",
+            "consensusMap",
+            "agreements",
+            "nuances",
+        ]
+        assert body["synthesis_json"]["synthesis_background"] == "paper"
+
+        rounds_resp = client.get(f"/forms/{form_id}/rounds", headers=admin_headers)
+        assert rounds_resp.status_code == 200
+        saved_round = next(r for r in rounds_resp.json() if r["id"] == round_id)
+        assert saved_round["synthesis_json"]["summary_options"]["consensusMap"] is True
+
+        versions_resp = client.get(
+            f"/forms/{form_id}/rounds/{round_id}/synthesis_versions",
+            headers=admin_headers,
+        )
+        assert versions_resp.status_code == 200
+        active_version = next(v for v in versions_resp.json() if v["is_active"])
+        assert active_version["synthesis_json"]["synthesis_background"] == "paper"

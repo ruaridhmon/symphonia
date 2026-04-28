@@ -473,6 +473,25 @@ DEFAULT_SUMMARY_OPTIONS = {
     "consensusMap": False,
     "probes": False,
 }
+SUMMARY_DISPLAY_OPTION_DEFAULTS = {
+    "statistics": True,
+    "narrative": True,
+    "agreements": False,
+    "disagreements": False,
+    "nuances": False,
+    "consensusMap": False,
+    "probes": False,
+}
+SUMMARY_DISPLAY_ORDER_DEFAULTS = [
+    "statistics",
+    "narrative",
+    "agreements",
+    "disagreements",
+    "nuances",
+    "consensusMap",
+    "probes",
+]
+SUMMARY_BACKGROUND_OPTIONS = {"default", "paper", "soft"}
 
 
 def _normalise_summary_options(raw: dict[str, Any] | None) -> dict[str, bool]:
@@ -485,6 +504,55 @@ def _normalise_summary_options(raw: dict[str, Any] | None) -> dict[str, bool]:
     if not any(options.values()):
         return DEFAULT_SUMMARY_OPTIONS.copy()
     return options
+
+
+def _normalise_summary_display_options(
+    raw: dict[str, Any] | None,
+) -> dict[str, bool]:
+    options = SUMMARY_DISPLAY_OPTION_DEFAULTS.copy()
+    if not isinstance(raw, dict):
+        return options
+    for key in options:
+        if key in raw:
+            options[key] = bool(raw[key])
+    return options
+
+
+def _normalise_summary_display_order(raw: list[Any] | None) -> list[str]:
+    allowed = set(SUMMARY_DISPLAY_ORDER_DEFAULTS)
+    order: list[str] = []
+    if isinstance(raw, list):
+        for item in raw:
+            if isinstance(item, str) and item in allowed and item not in order:
+                order.append(item)
+    for item in SUMMARY_DISPLAY_ORDER_DEFAULTS:
+        if item not in order:
+            order.append(item)
+    return order
+
+
+def _merge_summary_display_preferences(
+    synthesis_json: dict[str, Any],
+    existing_json: Any,
+    incoming_options: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    existing = existing_json if isinstance(existing_json, dict) else {}
+    source_options = (
+        incoming_options
+        if isinstance(incoming_options, dict)
+        else existing.get("summary_options")
+    )
+    background = existing.get("synthesis_background")
+    synthesis_json["summary_options"] = _normalise_summary_display_options(
+        source_options
+    )
+    synthesis_json["summary_order"] = _normalise_summary_display_order(
+        existing.get("summary_order")
+    )
+    synthesis_json["synthesis_background"] = (
+        background if background in SUMMARY_BACKGROUND_OPTIONS else "default"
+    )
+    return synthesis_json
 
 
 def _format_summary_generation_guidance(options: dict[str, bool]) -> str:
@@ -2111,6 +2179,12 @@ class SummaryPayload(BaseModel):
     summary: str
 
 
+class SynthesisDisplayPayload(BaseModel):
+    summary_options: dict[str, bool] | None = None
+    summary_order: list[str] | None = None
+    synthesis_background: str | None = None
+
+
 @router.post(
     "/forms/{form_id}/push_summary",
     tags=["Synthesis"],
@@ -2146,6 +2220,79 @@ async def push_summary(
     await ws_manager.broadcast_summary(summary)
 
     return {"detail": "Summary pushed"}
+
+
+@router.patch(
+    "/forms/{form_id}/rounds/{round_id}/synthesis_display",
+    tags=["Synthesis"],
+    summary="Save synthesis display preferences",
+    description=(
+        "Persist facilitator choices for which synthesis sections are shown, "
+        "their order, and the visual background for a round. Admin only."
+    ),
+)
+@limiter.limit(CRUD_LIMIT)
+def update_synthesis_display(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    payload: SynthesisDisplayPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    synthesis_json = (
+        dict(round_obj.synthesis_json)
+        if isinstance(round_obj.synthesis_json, dict)
+        else {}
+    )
+
+    if payload.summary_options is not None:
+        synthesis_json["summary_options"] = _normalise_summary_display_options(
+            payload.summary_options
+        )
+    if payload.summary_order is not None:
+        synthesis_json["summary_order"] = _normalise_summary_display_order(
+            payload.summary_order
+        )
+    if payload.synthesis_background is not None:
+        synthesis_json["synthesis_background"] = (
+            payload.synthesis_background
+            if payload.synthesis_background in SUMMARY_BACKGROUND_OPTIONS
+            else "default"
+        )
+
+    round_obj.synthesis_json = synthesis_json
+
+    active_version = (
+        db.query(SynthesisVersion)
+        .filter(SynthesisVersion.round_id == round_obj.id, SynthesisVersion.is_active)
+        .first()
+    )
+    if active_version:
+        version_json = (
+            dict(active_version.synthesis_json)
+            if isinstance(active_version.synthesis_json, dict)
+            else {}
+        )
+        for key in ("summary_options", "summary_order", "synthesis_background"):
+            if key in synthesis_json:
+                version_json[key] = synthesis_json[key]
+        active_version.synthesis_json = version_json
+
+    db.commit()
+    db.refresh(round_obj)
+    return {
+        "round_id": round_obj.id,
+        "synthesis_json": round_obj.synthesis_json,
+    }
 
 
 class GenerateSummaryPayload(BaseModel):
@@ -2457,6 +2604,10 @@ async def synthesise_committee(
 
     # Store results on the round
     result_dict = result.to_dict()
+    result_dict = _merge_summary_display_preferences(
+        result_dict,
+        active_round.synthesis_json,
+    )
     active_round.synthesis_json = result_dict
     active_round.provenance = result.provenance
     active_round.flow_mode = payload.mode
@@ -2741,7 +2892,6 @@ async def _run_synthesis_job(
             return None
 
         synthesis_json_data = result.to_dict()
-        synthesis_json_data["summary_options"] = resolved_summary_options
         synthesis_text = _render_synthesis_text(result, resolved_summary_options)
 
         # ── Save to DB ──
@@ -2760,6 +2910,12 @@ async def _run_synthesis_job(
                 form_id, round_id, "Round not found after synthesis completed"
             )
             return None
+
+        synthesis_json_data = _merge_summary_display_preferences(
+            synthesis_json_data,
+            round_obj.synthesis_json,
+            summary_options,
+        )
 
         # Deactivate existing versions
         db.query(SynthesisVersion).filter(
@@ -2974,7 +3130,8 @@ async def generate_synthesis_for_round(
 
     synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
     api_key = os.getenv("OPENROUTER_API_KEY", "")
-    summary_options = _normalise_summary_options(payload.summary_options)
+    summary_options = payload.summary_options
+    generation_summary_options = _normalise_summary_options(payload.summary_options)
     estimated_seconds = _estimate_synthesis_duration_seconds(
         strategy,
         len(responses),
@@ -3002,8 +3159,13 @@ async def generate_synthesis_for_round(
             f"## Synthesis v{next_version} (Mock Mode)\n\n"
             f"**Round {round_number}** — {len(responses)} responses analysed.\n\n"
             f"*Strategy: {strategy} | Model: {payload.model}*\n\n"
-            f"*Sections: {', '.join(label for key, label in SUMMARY_OPTION_LABELS.items() if summary_options.get(key))}*\n\n"
+            f"*Sections: {', '.join(label for key, label in SUMMARY_OPTION_LABELS.items() if generation_summary_options.get(key))}*\n\n"
             "This is a mock synthesis. Enable OPENROUTER_API_KEY for real LLM synthesis."
+        )
+        synthesis_json_data = _merge_summary_display_preferences(
+            {},
+            round_obj.synthesis_json,
+            summary_options,
         )
 
         db.query(SynthesisVersion).filter(
@@ -3014,14 +3176,14 @@ async def generate_synthesis_for_round(
             round_id=round_id,
             version=next_version,
             synthesis=synthesis_text,
-            synthesis_json=None,
+            synthesis_json=synthesis_json_data,
             model_used=payload.model,
             strategy=strategy,
             is_active=True,
         )
         db.add(new_version)
         round_obj.synthesis = synthesis_text
-        round_obj.synthesis_json = None
+        round_obj.synthesis_json = synthesis_json_data
         db.commit()
         db.refresh(new_version)
 
@@ -3036,7 +3198,7 @@ async def generate_synthesis_for_round(
                         "form_id": form_id,
                         "round_id": round_id,
                         "version_id": new_version.id,
-                        "synthesis_json": None,
+                        "synthesis_json": synthesis_json_data,
                     }
                 )
             except Exception:
