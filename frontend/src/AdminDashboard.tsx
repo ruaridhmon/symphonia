@@ -361,7 +361,7 @@ export default function AdminDashboard() {
                       ))}
                       <th
                         scope="col"
-                        className="px-4 py-2.5 text-right"
+                        className="px-4 py-2.5 text-right min-w-[27rem]"
                         style={{
                           color: 'var(--muted-foreground)',
                           fontSize: '0.75rem',
@@ -424,15 +424,16 @@ export default function AdminDashboard() {
                             Round {f.current_round ?? 1}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-right">
-                          <div className="inline-flex items-center gap-1.5">
+                        <td className="px-4 py-4 text-right min-w-[27rem]">
+                          <div className="inline-flex flex-wrap items-center justify-end gap-1.5">
                             <a
                               href={`/admin/form/${f.id}`}
-                              aria-label={`${t('adminDashboard.edit')} ${f.title}`}
-                              title={t('adminDashboard.edit')}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                              aria-label={`${t('adminDashboard.editSetup')} ${f.title}`}
+                              title={t('adminDashboard.editSetup')}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
                               style={{
                                 color: 'var(--muted-foreground)',
+                                border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
                               }}
                               onMouseEnter={e => {
                                 e.currentTarget.style.color = 'var(--foreground)';
@@ -444,14 +445,16 @@ export default function AdminDashboard() {
                               }}
                             >
                               <Pencil size={15} aria-hidden="true" />
+                              <span>{t('adminDashboard.editSetup')}</span>
                             </a>
                             <a
                               href={`/admin/form/${f.id}/summary`}
-                              aria-label={`${t('adminDashboard.summary')} ${f.title}`}
-                              title={t('adminDashboard.summary')}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                              aria-label={`${t('adminDashboard.openSummary')} ${f.title}`}
+                              title={t('adminDashboard.openSummary')}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
                               style={{
                                 color: 'var(--muted-foreground)',
+                                border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
                               }}
                               onMouseEnter={e => {
                                 e.currentTarget.style.color = 'var(--foreground)';
@@ -463,13 +466,17 @@ export default function AdminDashboard() {
                               }}
                             >
                               <FileText size={15} aria-hidden="true" />
+                              <span>{t('adminDashboard.openSummary')}</span>
                             </a>
                             <button
                               type="button"
-                              aria-label={`Download ${f.title}`}
-                              title="Download"
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
-                              style={{ color: 'var(--muted-foreground)' }}
+                              aria-label={`${t('adminDashboard.download')} ${f.title}`}
+                              title={t('adminDashboard.download')}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
+                              style={{
+                                color: 'var(--muted-foreground)',
+                                border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
+                              }}
                               onClick={() => setDownloadingForm({ id: f.id, title: f.title })}
                               onMouseEnter={e => {
                                 e.currentTarget.style.color = 'var(--foreground)';
@@ -481,13 +488,17 @@ export default function AdminDashboard() {
                               }}
                             >
                               <Download size={15} aria-hidden="true" />
+                              <span>{t('adminDashboard.download')}</span>
                             </button>
                             <button
                               type="button"
-                              aria-label={`Share ${f.title}`}
-                              title="Share"
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
-                              style={{ color: 'var(--muted-foreground)' }}
+                              aria-label={`${t('adminDashboard.share')} ${f.title}`}
+                              title={t('adminDashboard.share')}
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
+                              style={{
+                                color: 'var(--muted-foreground)',
+                                border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
+                              }}
                               onClick={() => setSharingForm({ title: f.title, joinCode: f.join_code })}
                               onMouseEnter={e => {
                                 e.currentTarget.style.color = 'var(--foreground)';
@@ -499,16 +510,18 @@ export default function AdminDashboard() {
                               }}
                             >
                               <Share2 size={15} aria-hidden="true" />
+                              <span>{t('adminDashboard.share')}</span>
                             </button>
                             <button
                               type="button"
                               disabled={deletingFormId === f.id}
                               aria-label={`Delete ${f.title}`}
                               title="Delete"
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
                               style={{
                                 color: deletingFormId === f.id ? 'var(--muted-foreground)' : 'var(--destructive)',
                                 opacity: deletingFormId === f.id ? 0.65 : 1,
+                                border: '1px solid color-mix(in srgb, var(--destructive) 25%, var(--border))',
                               }}
                               onClick={() => setPendingDeleteForm({ id: f.id, title: f.title })}
                               onMouseEnter={e => {
@@ -519,6 +532,7 @@ export default function AdminDashboard() {
                               }}
                             >
                               <Trash2 size={15} aria-hidden="true" />
+                              <span>Delete</span>
                             </button>
                           </div>
                         </td>
@@ -543,7 +557,7 @@ export default function AdminDashboard() {
                         border: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
                       }}
                     >
-                      <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col gap-3">
                         <div className="min-w-0">
                           <div
                             className="font-semibold text-sm leading-snug"
@@ -559,13 +573,16 @@ export default function AdminDashboard() {
                             <span>Round {f.current_round ?? 1}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           <a
                             href={`/admin/form/${f.id}`}
-                            aria-label={`${t('adminDashboard.edit')} ${f.title}`}
-                            title={t('adminDashboard.edit')}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
-                            style={{ color: 'var(--muted-foreground)' }}
+                            aria-label={`${t('adminDashboard.editSetup')} ${f.title}`}
+                            title={t('adminDashboard.editSetup')}
+                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
+                            style={{
+                              color: 'var(--muted-foreground)',
+                              border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
+                            }}
                             onMouseEnter={e => {
                               e.currentTarget.style.color = 'var(--foreground)';
                               e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--foreground) 6%, transparent)';
@@ -576,13 +593,17 @@ export default function AdminDashboard() {
                             }}
                           >
                             <Pencil size={15} aria-hidden="true" />
+                            <span>{t('adminDashboard.editSetup')}</span>
                           </a>
                           <a
                             href={`/admin/form/${f.id}/summary`}
-                            aria-label={`${t('adminDashboard.summary')} ${f.title}`}
-                            title={t('adminDashboard.summary')}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
-                            style={{ color: 'var(--muted-foreground)' }}
+                            aria-label={`${t('adminDashboard.openSummary')} ${f.title}`}
+                            title={t('adminDashboard.openSummary')}
+                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
+                            style={{
+                              color: 'var(--muted-foreground)',
+                              border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
+                            }}
                             onMouseEnter={e => {
                               e.currentTarget.style.color = 'var(--foreground)';
                               e.currentTarget.style.backgroundColor = 'color-mix(in srgb, var(--accent) 7%, transparent)';
@@ -593,40 +614,51 @@ export default function AdminDashboard() {
                             }}
                           >
                             <FileText size={15} aria-hidden="true" />
+                            <span>{t('adminDashboard.openSummary')}</span>
                           </a>
                           <button
                             type="button"
-                            aria-label={`Download ${f.title}`}
-                            title="Download"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
-                            style={{ color: 'var(--muted-foreground)' }}
+                            aria-label={`${t('adminDashboard.download')} ${f.title}`}
+                            title={t('adminDashboard.download')}
+                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
+                            style={{
+                              color: 'var(--muted-foreground)',
+                              border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
+                            }}
                             onClick={() => setDownloadingForm({ id: f.id, title: f.title })}
                           >
                             <Download size={15} aria-hidden="true" />
+                            <span>{t('adminDashboard.download')}</span>
                           </button>
                           <button
                             type="button"
-                            aria-label={`Share ${f.title}`}
-                            title="Share"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
-                            style={{ color: 'var(--muted-foreground)' }}
+                            aria-label={`${t('adminDashboard.share')} ${f.title}`}
+                            title={t('adminDashboard.share')}
+                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
+                            style={{
+                              color: 'var(--muted-foreground)',
+                              border: '1px solid color-mix(in srgb, var(--border) 50%, transparent)',
+                            }}
                             onClick={() => setSharingForm({ title: f.title, joinCode: f.join_code })}
                           >
                             <Share2 size={15} aria-hidden="true" />
+                            <span>{t('adminDashboard.share')}</span>
                           </button>
                           <button
                             type="button"
                             disabled={deletingFormId === f.id}
                             aria-label={`Delete ${f.title}`}
                             title="Delete"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150"
+                            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors duration-150"
                             style={{
                               color: deletingFormId === f.id ? 'var(--muted-foreground)' : 'var(--destructive)',
                               opacity: deletingFormId === f.id ? 0.65 : 1,
+                              border: '1px solid color-mix(in srgb, var(--destructive) 25%, var(--border))',
                             }}
                             onClick={() => setPendingDeleteForm({ id: f.id, title: f.title })}
                           >
                             <Trash2 size={15} aria-hidden="true" />
+                            <span>Delete</span>
                           </button>
                         </div>
                       </div>
