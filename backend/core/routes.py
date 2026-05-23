@@ -6395,7 +6395,7 @@ def _build_previous_round_statistics(
         items.append(
             {
                 "key": question_id or q_key,
-                "label": _question_export_label(question) or f"Question {index + 1}",
+                "label": _question_export_label(question, f"Question {index + 1}"),
                 "dimension_label": question.get("sectionTitle")
                 if isinstance(question, dict)
                 else None,
