@@ -288,6 +288,12 @@ function getShortPageTitle(title: string, index: number) {
   return `Section ${index + 1}`;
 }
 
+function getSelectPageTitle(title: string, index: number) {
+  const shortTitle = getShortPageTitle(title, index);
+  if (shortTitle === title) return title;
+  return `${shortTitle}: ${title}`;
+}
+
 export default function DocumentTemplateResponse({
   template,
   answers,
@@ -454,8 +460,29 @@ export default function DocumentTemplateResponse({
                 backgroundColor: 'color-mix(in srgb, var(--background) 72%, white)',
               }}
             >
-              <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
-                Round 2 sections
+              <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+                  Round 2 sections
+                </div>
+                <label className="sr-only" htmlFor="round-section-jump">Jump to section</label>
+                <select
+                  id="round-section-jump"
+                  value={currentPage}
+                  onChange={(event) => void changePage(Number(event.target.value))}
+                  disabled={isChangingPage}
+                  className="w-full rounded-md px-3 py-2 text-sm font-medium sm:w-[15rem]"
+                  style={{
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                  }}
+                >
+                  {pages.map((page, index) => (
+                    <option key={`${page.title}-option-${index}`} value={index}>
+                      {getSelectPageTitle(page.title, index)}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Round 2 sections">
                 {pages.map((page, index) => {
