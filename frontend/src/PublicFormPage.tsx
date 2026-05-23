@@ -354,11 +354,11 @@ export default function PublicFormPage() {
 
           <div className="mb-2">
             <h2 className="text-lg font-semibold text-foreground">
-              {isDocumentMode ? 'Document Template' : 'Questions'}
+              {isDocumentMode ? 'Round 2 briefing and questions' : 'Questions'}
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {isDocumentMode
-                ? 'Complete each marked section in the template below.'
+                ? 'Review the Round 2 summary and recommendations, then complete the questions.'
                 : 'Please complete each required question before submitting.'}
             </p>
           </div>

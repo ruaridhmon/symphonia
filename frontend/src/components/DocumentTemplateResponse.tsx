@@ -280,6 +280,7 @@ function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
 }
 
 function getShortPageTitle(title: string, index: number) {
+  if (index === 0) return 'Summary';
   if (/summary/i.test(title)) return 'Summary';
   if (/conclusion/i.test(title)) return 'Conclusion';
   const recommendationMatch = title.match(/Recommendation\s+(\d+)/i);
