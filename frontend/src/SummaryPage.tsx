@@ -10,7 +10,7 @@ import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
-import { ChartNoAxesColumn, CheckCircle2, ChevronDown, ChevronRight, Download, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
+import { Bot, ChartNoAxesColumn, CheckCircle2, ChevronDown, ChevronRight, Download, FileText, Globe, Link2, MapPin, MessageSquareText, PanelLeft, Save, SendHorizontal, Sparkles, Terminal, X } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
@@ -23,11 +23,13 @@ import {
 	activateVersion as apiActivateVersion,
 	estimateSynthesisDurationSeconds,
 	formatSynthesisDurationEstimate,
+	codexSummaryEdit as apiCodexSummaryEdit,
 	generateSynthesis as apiGenerateSynthesis,
 	getSynthesisJobStatus as apiGetSynthesisJobStatus,
 	pushSummary as apiPushSummary,
 	updateSynthesisDisplay as apiUpdateSynthesisDisplay,
 } from './api/synthesis';
+import type { CodexSummaryMessage } from './api/synthesis';
 
 import {
 	RoundCard,
@@ -593,6 +595,12 @@ export default function SummaryPage() {
 	const [isSavingSynthesis, setIsSavingSynthesis] = useState(false);
 	const [isSynthesisDirty, setIsSynthesisDirty] = useState(false);
 	const [lastSavedSynthesis, setLastSavedSynthesis] = useState('');
+	const [codexWorkspaceOpen, setCodexWorkspaceOpen] = useState(false);
+	const [codexDraftHtml, setCodexDraftHtml] = useState('');
+	const [codexMessages, setCodexMessages] = useState<CodexSummaryMessage[]>([]);
+	const [codexInput, setCodexInput] = useState('');
+	const [isCodexThinking, setIsCodexThinking] = useState(false);
+	const codexMessagesEndRef = useRef<HTMLDivElement | null>(null);
 
 	// ── Synthesis versioning ──
 	const [synthesisVersions, setSynthesisVersions] = useState<SynthesisVersion[]>([]);
@@ -741,6 +749,10 @@ export default function SummaryPage() {
 		content: '',
 		editorProps: { attributes: { class: 'markdown-body synthesis-editor-prosemirror focus:outline-none' } },
 	});
+
+	useEffect(() => {
+		codexMessagesEndRef.current?.scrollIntoView({ block: 'end' });
+	}, [codexMessages, isCodexThinking]);
 
 	// ── Derived values ──
 	const requestedRoundId = useMemo(() => {
@@ -1335,6 +1347,107 @@ export default function SummaryPage() {
 		}
 	}
 
+	function currentSynthesisHtmlForEditing() {
+		const editorHtml = editor?.getHTML().trim();
+		if (editorHtml && editorHtml !== '<p></p>') return editorHtml;
+		return displayRound?.synthesis || '';
+	}
+
+	function openCodexWorkspace() {
+		if (!displayRound) {
+			toastWarning('Select a round before opening the Codex workspace.');
+			return;
+		}
+		const scaffold = buildOpenSynthesisScaffold(
+			form?.title?.trim() || 'Consultation',
+			displayRound.round_number,
+		);
+		setCodexDraftHtml(currentSynthesisHtmlForEditing() || normalizeSynthesisForEditor(scaffold));
+		setCodexMessages([
+			{
+				role: 'assistant',
+				content: 'Tell me how you want the summary changed. I can rewrite the structure, tighten the language, add sections, or turn the round responses into a more polished synthesis.',
+			},
+		]);
+		setCodexInput('');
+		setCodexWorkspaceOpen(true);
+		setActiveWorkspaceTab('synthesis');
+	}
+
+	async function sendCodexInstruction() {
+		const instruction = codexInput.trim();
+		if (!instruction || !displayRound) return;
+		const userMessage: CodexSummaryMessage = { role: 'user', content: instruction };
+		const previousMessages = codexMessages.slice(-10);
+		setCodexMessages(prev => [...prev, userMessage]);
+		setCodexInput('');
+		setIsCodexThinking(true);
+		try {
+			const result = await apiCodexSummaryEdit(formId, displayRound.id, {
+				instruction,
+				current_summary_html: codexDraftHtml || currentSynthesisHtmlForEditing(),
+				history: previousMessages,
+				model: selectedModel,
+			});
+			setCodexDraftHtml(result.summary_html);
+			setCodexMessages(prev => [
+				...prev,
+				{
+					role: 'assistant',
+					content: result.message || 'I updated the summary draft.',
+				},
+			]);
+		} catch (error) {
+			const message = (error as Error).message || 'Codex workspace failed to update the summary.';
+			toastError(message);
+			setCodexMessages(prev => [
+				...prev,
+				{
+					role: 'assistant',
+					content: `I could not update the draft: ${message}`,
+				},
+			]);
+		} finally {
+			setIsCodexThinking(false);
+		}
+	}
+
+	function applyCodexDraftToEditor() {
+		if (!editor || !codexDraftHtml.trim()) return;
+		editor.commands.setContent(codexDraftHtml);
+		setSynthesisViewMode('edit');
+		setActiveWorkspaceTab('synthesis');
+		setIsSynthesisDirty(true);
+		setCodexWorkspaceOpen(false);
+		toastSuccess('Codex draft applied. Review it, then save.');
+	}
+
+	async function saveCodexDraft() {
+		if (!displayRound?.is_active || !codexDraftHtml.trim()) return;
+		setIsSavingSynthesis(true);
+		try {
+			await apiPushSummary(formId, codexDraftHtml.trim());
+			const updatedRound = { ...displayRound, synthesis: codexDraftHtml.trim() };
+			setRounds(prev => prev.map(r => (r.id === displayRound.id ? updatedRound : r)));
+			if (activeRound?.id === displayRound.id) setActiveRound(updatedRound);
+			if (selectedRound?.id === displayRound.id) setSelectedRound(updatedRound);
+			if (editor) {
+				editor.commands.setContent(codexDraftHtml.trim());
+				setLastSavedSynthesis(editor.getHTML().trim());
+			} else {
+				setLastSavedSynthesis(codexDraftHtml.trim());
+			}
+			setIsSynthesisDirty(false);
+			setCodexWorkspaceOpen(false);
+			setSynthesisViewMode('view');
+			toastSuccess('Codex summary saved.');
+		} catch (error) {
+			toastError((error as Error).message || 'Failed to save Codex summary');
+		} finally {
+			setIsSavingSynthesis(false);
+		}
+	}
+
 	async function copyOpenSynthesisKit() {
 		if (!openSynthesisKit.trim()) {
 			toastWarning('Responses are still loading. Try again in a moment.');
@@ -1802,6 +1915,9 @@ export default function SummaryPage() {
 			});
 		}
 	}
+	const codexPreviewQuestions = displayRound?.questions?.length
+		? displayRound.questions
+		: form?.questions || [];
 
 	// ─── Render ──────────────────────────────────────────────────────────────
 
@@ -1835,6 +1951,208 @@ export default function SummaryPage() {
 				rounds={rounds}
 				structuredRounds={structuredRounds}
 			/>
+			{codexWorkspaceOpen && displayRound && (
+				<div className="fixed inset-0 z-[80] bg-black/55 p-3 sm:p-5">
+					<div
+						className="mx-auto flex h-full max-w-7xl flex-col overflow-hidden rounded-xl"
+						style={{
+							backgroundColor: 'var(--background)',
+							border: '1px solid color-mix(in srgb, var(--border) 70%, transparent)',
+							boxShadow: '0 28px 80px rgba(0, 0, 0, 0.32)',
+						}}
+					>
+						<div
+							className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+							style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'var(--card)' }}
+						>
+							<div className="flex min-w-0 items-center gap-2">
+								<span
+									className="inline-flex h-8 w-8 items-center justify-center rounded-lg"
+									style={{
+										backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+										color: 'var(--accent)',
+									}}
+								>
+									<Terminal size={16} aria-hidden="true" />
+								</span>
+								<div className="min-w-0">
+									<h2 className="truncate text-sm font-semibold" style={{ margin: 0, color: 'var(--foreground)' }}>
+										Codex workspace
+									</h2>
+									<p className="truncate text-xs" style={{ margin: 0, color: 'var(--muted-foreground)' }}>
+										Round {displayRound.round_number} summary editor
+									</p>
+								</div>
+							</div>
+							<div className="flex flex-wrap items-center gap-2">
+								<button
+									type="button"
+									onClick={applyCodexDraftToEditor}
+									disabled={!codexDraftHtml.trim()}
+									className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-xs font-semibold"
+									style={{
+										border: '1px solid var(--border)',
+										backgroundColor: 'var(--card)',
+										color: 'var(--foreground)',
+										cursor: codexDraftHtml.trim() ? 'pointer' : 'not-allowed',
+										opacity: codexDraftHtml.trim() ? 1 : 0.6,
+									}}
+								>
+									<PanelLeft size={14} aria-hidden="true" />
+									Apply
+								</button>
+								<button
+									type="button"
+									onClick={saveCodexDraft}
+									disabled={!codexDraftHtml.trim() || isSavingSynthesis}
+									className="inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-xs font-semibold"
+									style={{
+										border: '1px solid var(--accent)',
+										backgroundColor: 'var(--accent)',
+										color: 'white',
+										cursor: codexDraftHtml.trim() && !isSavingSynthesis ? 'pointer' : 'not-allowed',
+										opacity: codexDraftHtml.trim() && !isSavingSynthesis ? 1 : 0.6,
+									}}
+								>
+									<Save size={14} aria-hidden="true" />
+									{isSavingSynthesis ? 'Saving...' : 'Save summary'}
+								</button>
+								<button
+									type="button"
+									onClick={() => setCodexWorkspaceOpen(false)}
+									className="inline-flex h-9 w-9 items-center justify-center rounded-md"
+									style={{
+										border: '1px solid var(--border)',
+										backgroundColor: 'var(--card)',
+										color: 'var(--muted-foreground)',
+									}}
+									aria-label="Close Codex workspace"
+								>
+									<X size={16} aria-hidden="true" />
+								</button>
+							</div>
+						</div>
+
+						<div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,1.08fr)_minmax(22rem,0.92fr)]">
+							<section className="min-h-0 overflow-auto p-4 sm:p-5" style={{ borderRight: '1px solid var(--border)' }}>
+								<div className="mb-3 flex items-center justify-between gap-2">
+									<div>
+										<h3 className="text-sm font-semibold" style={{ margin: 0, color: 'var(--foreground)' }}>
+											Live summary preview
+										</h3>
+										<p className="text-xs" style={{ margin: 0, color: 'var(--muted-foreground)' }}>
+											This is the draft Codex will keep rewriting until you apply or save it.
+										</p>
+									</div>
+									<span
+										className="rounded-full px-2.5 py-1 text-[11px] font-medium"
+										style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}
+									>
+										{currentRoundResponses?.responses.length || 0} responses
+									</span>
+								</div>
+								<div
+									className="markdown-body min-h-[18rem] rounded-lg p-4"
+									style={{
+										backgroundColor: 'var(--card)',
+										border: '1px solid var(--border)',
+									}}
+									dangerouslySetInnerHTML={{ __html: codexDraftHtml || '<p>No draft yet. Ask Codex to create one from the round responses.</p>' }}
+								/>
+								<div
+									className="mt-4 rounded-lg p-4"
+									style={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)' }}
+								>
+									<h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+										<FileText size={14} aria-hidden="true" />
+										Round questions
+									</h3>
+									<ol className="space-y-2 pl-5 text-sm" style={{ color: 'var(--muted-foreground)' }}>
+										{codexPreviewQuestions.map((question, index) => (
+											<li key={`${index}-${extractQuestionText(question)}`}>
+												{extractQuestionText(question) || `Question ${index + 1}`}
+											</li>
+										))}
+										{!codexPreviewQuestions.length && (
+											<li>No questions configured for this round.</li>
+										)}
+									</ol>
+								</div>
+							</section>
+
+							<section className="flex min-h-0 flex-col bg-[#0f172a] text-slate-100">
+								<div className="flex items-center gap-2 border-b border-slate-700 px-4 py-3">
+									<Bot size={16} className="text-emerald-300" aria-hidden="true" />
+									<div>
+										<h3 className="text-sm font-semibold" style={{ margin: 0 }}>
+											Terminal
+										</h3>
+										<p className="text-xs text-slate-400" style={{ margin: 0 }}>
+											Ask for edits; Codex returns updated summary HTML.
+										</p>
+									</div>
+								</div>
+								<div className="min-h-0 flex-1 space-y-3 overflow-auto px-4 py-4 font-mono text-xs">
+									{codexMessages.map((message, index) => (
+										<div key={`${message.role}-${index}`} className="space-y-1">
+											<div className={message.role === 'user' ? 'text-sky-300' : 'text-emerald-300'}>
+												{message.role === 'user' ? 'facilitator$' : 'codex>'}
+											</div>
+											<div className="whitespace-pre-wrap rounded-md bg-slate-900/72 px-3 py-2 leading-relaxed text-slate-100">
+												{message.content}
+											</div>
+										</div>
+									))}
+									{isCodexThinking && (
+										<div className="space-y-1">
+											<div className="text-emerald-300">codex&gt;</div>
+											<div className="rounded-md bg-slate-900/72 px-3 py-2 text-slate-300">
+												rewriting summary...
+											</div>
+										</div>
+									)}
+									<div ref={codexMessagesEndRef} />
+								</div>
+								<div className="border-t border-slate-700 p-3">
+									<div className="flex gap-2">
+										<textarea
+											value={codexInput}
+											onChange={event => setCodexInput(event.target.value)}
+											onKeyDown={event => {
+												if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+													event.preventDefault();
+													void sendCodexInstruction();
+												}
+											}}
+											placeholder="e.g. Make this more like a professional Round 2 report, split it into clear sections, and add next-round questions."
+											className="min-h-[5.5rem] flex-1 resize-none rounded-md px-3 py-2 font-mono text-xs outline-none"
+											style={{
+												backgroundColor: '#020617',
+												border: '1px solid #334155',
+												color: '#f8fafc',
+											}}
+										/>
+										<button
+											type="button"
+											onClick={() => { void sendCodexInstruction(); }}
+											disabled={!codexInput.trim() || isCodexThinking}
+											className="inline-flex w-11 items-center justify-center rounded-md"
+											style={{
+												backgroundColor: codexInput.trim() && !isCodexThinking ? '#10b981' : '#334155',
+												color: '#ffffff',
+												cursor: codexInput.trim() && !isCodexThinking ? 'pointer' : 'not-allowed',
+											}}
+											aria-label="Send instruction to Codex"
+										>
+											<SendHorizontal size={17} aria-hidden="true" />
+										</button>
+									</div>
+								</div>
+							</section>
+						</div>
+					</div>
+				</div>
+			)}
 			<a href="#main-content" className="skip-to-main">
 				{t('common.skipToMainContent')}
 			</a>
@@ -2272,6 +2590,7 @@ export default function SummaryPage() {
 							onCopyOpenSynthesisKit={copyOpenSynthesisKit}
 							onDownloadOpenSynthesisKit={downloadOpenSynthesisKit}
 							onStartOpenSynthesisDraft={startOpenSynthesisDraft}
+							onOpenCodexWorkspace={displayRound?.is_active ? openCodexWorkspace : undefined}
 						/>
 
 						{activeWorkspaceTab !== 'responses' && synthesisVersions.length > 0 && (

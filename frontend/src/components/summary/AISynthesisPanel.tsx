@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LoadingButton, SynthesisModeSelector } from '../index';
-import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ClipboardCopy, Cpu, Clock3, Eye, FileDown, GripVertical, Layers3, ListChecks, Palette, PencilLine } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ClipboardCopy, Cpu, Clock3, Eye, FileDown, GripVertical, Layers3, ListChecks, Palette, PencilLine, Terminal } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -26,6 +26,7 @@ type Props = {
   onCopyOpenSynthesisKit?: () => void;
   onDownloadOpenSynthesisKit?: () => void;
   onStartOpenSynthesisDraft?: () => void;
+  onOpenCodexWorkspace?: () => void;
 };
 
 export default function AISynthesisPanel({
@@ -52,6 +53,7 @@ export default function AISynthesisPanel({
   onCopyOpenSynthesisKit,
   onDownloadOpenSynthesisKit,
   onStartOpenSynthesisDraft,
+  onOpenCodexWorkspace,
 }: Props) {
   const canGenerate = canGenerateOverride ?? responseCount > 0;
   const [contentOpen, setContentOpen] = useState(false);
@@ -378,12 +380,28 @@ export default function AISynthesisPanel({
         <div className="space-y-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
           <div>
             <div className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
-              Open synthesis kit
+              Codex workspace
             </div>
             <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-              Copy anonymised questions and responses for an approved LLM, then paste the generated synthesis back here.
+              Chat with the assistant while editing the summary HTML beside a live preview.
             </p>
           </div>
+          <button
+            type="button"
+            onClick={onOpenCodexWorkspace}
+            disabled={!onOpenCodexWorkspace}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold"
+            style={{
+              border: '1px solid var(--accent)',
+              backgroundColor: 'var(--accent)',
+              color: 'white',
+              cursor: onOpenCodexWorkspace ? 'pointer' : 'not-allowed',
+              opacity: onOpenCodexWorkspace ? 1 : 0.62,
+            }}
+          >
+            <Terminal size={13} aria-hidden="true" />
+            Open Codex workspace
+          </button>
           <div className="grid grid-cols-2 gap-1.5">
             <button
               type="button"
@@ -415,7 +433,7 @@ export default function AISynthesisPanel({
               }}
             >
               <FileDown size={13} aria-hidden="true" />
-              Download
+              Export
             </button>
           </div>
           <button
@@ -432,7 +450,7 @@ export default function AISynthesisPanel({
             }}
           >
             <PencilLine size={13} aria-hidden="true" />
-            Start editable draft
+            Start blank draft
           </button>
           {!openSynthesisKitAvailable && (
             <p className="text-xs" style={{ color: 'var(--muted-foreground)', margin: 0 }}>

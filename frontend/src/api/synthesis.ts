@@ -47,6 +47,24 @@ export interface UpdateSynthesisDisplayResult {
   synthesis_json: SynthesisData | null;
 }
 
+export interface CodexSummaryMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface CodexSummaryPayload {
+  instruction: string;
+  current_summary_html?: string;
+  history?: CodexSummaryMessage[];
+  model?: string | null;
+}
+
+export interface CodexSummaryResult {
+  message: string;
+  summary_html: string;
+  model: string;
+}
+
 export interface SynthesisJobStatus {
   job_id?: string;
   form_id?: number;
@@ -109,6 +127,17 @@ export function updateSynthesisDisplay(
 ) {
   return api.patch<UpdateSynthesisDisplayResult>(
     `/forms/${formId}/rounds/${roundId}/synthesis_display`,
+    payload,
+  );
+}
+
+export function codexSummaryEdit(
+  formId: number,
+  roundId: number,
+  payload: CodexSummaryPayload,
+) {
+  return api.post<CodexSummaryResult>(
+    `/forms/${formId}/rounds/${roundId}/codex_summary`,
     payload,
   );
 }

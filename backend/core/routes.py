@@ -2179,6 +2179,18 @@ class SummaryPayload(BaseModel):
     summary: str
 
 
+class CodexSummaryMessage(BaseModel):
+    role: str
+    content: str
+
+
+class CodexSummaryPayload(BaseModel):
+    instruction: str
+    current_summary_html: str | None = ""
+    history: list[CodexSummaryMessage] | None = None
+    model: str | None = None
+
+
 class SynthesisDisplayPayload(BaseModel):
     summary_options: dict[str, bool] | None = None
     summary_order: list[str] | None = None
@@ -2220,6 +2232,231 @@ async def push_summary(
     await ws_manager.broadcast_summary(summary)
 
     return {"detail": "Summary pushed"}
+
+
+def _sanitize_llm_summary_html(value: str) -> str:
+    cleaned = value or ""
+    cleaned = re.sub(
+        r"<\s*(script|style|iframe|object|embed|link|meta)[^>]*>[\s\S]*?<\s*/\s*\1\s*>",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r"<\s*(script|style|iframe|object|embed|link|meta)[^>]*?/?>",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r"\s+on[a-z]+\s*=\s*(\"[^\"]*\"|'[^']*'|[^\s>]+)",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    cleaned = re.sub(
+        r"\s+(href|src)\s*=\s*(['\"])\s*javascript:[\s\S]*?\2",
+        "",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+    return cleaned.strip()
+
+
+def _build_codex_round_context(
+    form: FormModel,
+    round_obj: RoundModel,
+    responses: list[Response],
+) -> str:
+    questions = round_obj.questions or form.questions or []
+    lines: list[str] = [
+        f"Consultation: {form.title}",
+        f"Round: {round_obj.round_number}",
+        f"Responses: {len(responses)}",
+        "",
+        "Questions:",
+    ]
+    if questions:
+        for index, question in enumerate(questions, start=1):
+            lines.append(
+                f"{index}. {_question_export_label(question, f'Question {index}')}"
+            )
+    else:
+        lines.append("No explicit questions found.")
+    lines.extend(["", "Participant responses:"])
+    if not responses:
+        lines.append("No responses recorded for this round.")
+        return "\n".join(lines)
+
+    question_lookup = _response_question_lookup(questions)
+    for response_index, response in enumerate(responses, start=1):
+        lines.extend(["", f"Response {response_index}:"])
+        answers = (
+            response.answers
+            if isinstance(response.answers, dict)
+            else json.loads(response.answers)
+            if response.answers
+            else {}
+        )
+        if not isinstance(answers, dict) or not answers:
+            lines.append("  No answers recorded.")
+            continue
+        for answer_index, (key, value) in enumerate(answers.items(), start=1):
+            question = question_lookup.get(key)
+            label = _question_export_label(question, f"Question {answer_index}")
+            lines.append(f"  Q: {label}")
+            rendered_parts = _format_response_answer_for_export(value, question)
+            for part_label, answer_text in rendered_parts:
+                lines.append(f"  {part_label}: {answer_text}")
+    return "\n".join(lines)
+
+
+def _parse_codex_summary_response(raw_output: str) -> dict[str, str]:
+    cleaned = (raw_output or "").strip()
+    if cleaned.startswith("```"):
+        lines = [
+            line for line in cleaned.splitlines() if not line.strip().startswith("```")
+        ]
+        cleaned = "\n".join(lines).strip()
+    parsed = json.loads(cleaned)
+    if not isinstance(parsed, dict):
+        raise ValueError("Response was not a JSON object")
+    message = str(
+        parsed.get("message") or parsed.get("assistant_message") or ""
+    ).strip()
+    summary_html = str(parsed.get("summary_html") or parsed.get("html") or "").strip()
+    return {
+        "message": message,
+        "summary_html": _sanitize_llm_summary_html(summary_html),
+    }
+
+
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/codex_summary",
+    tags=["AI Tools"],
+    summary="Chat-edit a round synthesis",
+    description=(
+        "Use the configured synthesis model as an interactive editing assistant. "
+        "The assistant receives the round questions, anonymised responses, current "
+        "summary HTML, and the facilitator's instruction, then returns revised "
+        "summary HTML for review. Admin only."
+    ),
+)
+@limiter.limit(SYNTHESIS_LIMIT)
+def codex_summary_edit(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    payload: CodexSummaryPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    instruction = payload.instruction.strip()
+    if not instruction:
+        raise HTTPException(status_code=400, detail="Instruction is required")
+
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    responses = (
+        db.query(Response)
+        .filter(Response.round_id == round_id)
+        .order_by(Response.created_at.asc())
+        .all()
+    )
+    current_summary_html = _sanitize_llm_summary_html(
+        payload.current_summary_html or round_obj.synthesis or ""
+    )
+    context = _build_codex_round_context(form, round_obj, responses)
+    history_lines: list[str] = []
+    for message in payload.history or []:
+        role = "Facilitator" if message.role == "user" else "Assistant"
+        content = message.content.strip()
+        if content:
+            history_lines.append(f"{role}: {content[:1600]}")
+
+    prompt = f"""You are Codex inside Symphonia, helping a facilitator rewrite the round synthesis.
+
+You can edit the summary HTML. Use only the consultation material below. Do not invent participant claims or evidence.
+
+Return ONLY valid JSON with this exact shape:
+{{
+  "message": "Briefly explain what you changed or ask a concise follow-up if you cannot safely make the edit.",
+  "summary_html": "<h2>...</h2><p>...</p>"
+}}
+
+HTML rules:
+- Return complete replacement HTML for the summary, not a patch.
+- Use clean semantic HTML only: h2, h3, p, ul, ol, li, strong, em, blockquote, table, thead, tbody, tr, th, td.
+- Do not use script, style, iframe, external images, inline event handlers, markdown fences, or CSS.
+- Keep the structure professional and easy to scan.
+
+Current summary HTML:
+{current_summary_html or "<p>No summary has been drafted yet.</p>"}
+
+Conversation so far:
+{chr(10).join(history_lines) if history_lines else "No previous messages."}
+
+Facilitator instruction:
+{instruction}
+
+Consultation material:
+{context}
+"""
+
+    resolved_model = _resolve_synthesis_model(db, payload.model)
+    openai_client = get_openai_client()
+    if not openai_client:
+        raise HTTPException(
+            status_code=503,
+            detail="Synthesis is not configured. Please add an OpenRouter API key in Settings.",
+        )
+
+    try:
+        completion = openai_client.chat.completions.create(
+            model=resolved_model,
+            max_tokens=8192,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an expert synthesis editor embedded in Symphonia. "
+                        "You rewrite consultation summaries from evidence, preserve "
+                        "uncertainty and disagreement, and always return strict JSON."
+                    ),
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+        raw_output = completion.choices[0].message.content or ""
+        parsed = _parse_codex_summary_response(raw_output)
+        if not parsed["summary_html"]:
+            raise ValueError("Missing summary_html")
+        return {
+            "message": parsed["message"] or "I updated the synthesis draft.",
+            "summary_html": parsed["summary_html"],
+            "model": resolved_model,
+        }
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=500,
+            detail="The assistant returned invalid JSON. Try a shorter, more specific instruction.",
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to edit synthesis with Codex workspace: {e}",
+        )
 
 
 @router.patch(
