@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LoadingButton, SynthesisModeSelector } from '../index';
-import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, Cpu, Clock3, Eye, GripVertical, Layers3, ListChecks, Palette } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ClipboardCopy, Cpu, Clock3, Eye, FileDown, GripVertical, Layers3, ListChecks, Palette, PencilLine } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'simple' | 'committee' | 'ttd';
@@ -22,6 +22,10 @@ type Props = {
   showOwnResponseToParticipants: boolean;
   onShowOwnResponseToParticipantsChange: (enabled: boolean) => void;
   isSavingParticipantVisibility?: boolean;
+  openSynthesisKitAvailable?: boolean;
+  onCopyOpenSynthesisKit?: () => void;
+  onDownloadOpenSynthesisKit?: () => void;
+  onStartOpenSynthesisDraft?: () => void;
 };
 
 export default function AISynthesisPanel({
@@ -44,6 +48,10 @@ export default function AISynthesisPanel({
   showOwnResponseToParticipants,
   onShowOwnResponseToParticipantsChange,
   isSavingParticipantVisibility = false,
+  openSynthesisKitAvailable = false,
+  onCopyOpenSynthesisKit,
+  onDownloadOpenSynthesisKit,
+  onStartOpenSynthesisDraft,
 }: Props) {
   const canGenerate = canGenerateOverride ?? responseCount > 0;
   const [contentOpen, setContentOpen] = useState(false);
@@ -363,6 +371,72 @@ export default function AISynthesisPanel({
           {!canGenerate && (
             <p className="text-xs" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
               Waiting for responses
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+          <div>
+            <div className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
+              Open synthesis kit
+            </div>
+            <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
+              Copy anonymised questions and responses for an approved LLM, then paste the generated synthesis back here.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            <button
+              type="button"
+              onClick={onCopyOpenSynthesisKit}
+              disabled={!openSynthesisKitAvailable || !onCopyOpenSynthesisKit}
+              className="inline-flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium"
+              style={{
+                border: '1px solid var(--border)',
+                backgroundColor: 'var(--card)',
+                color: 'var(--foreground)',
+                cursor: openSynthesisKitAvailable ? 'pointer' : 'not-allowed',
+                opacity: openSynthesisKitAvailable ? 1 : 0.62,
+              }}
+            >
+              <ClipboardCopy size={13} aria-hidden="true" />
+              Copy
+            </button>
+            <button
+              type="button"
+              onClick={onDownloadOpenSynthesisKit}
+              disabled={!openSynthesisKitAvailable || !onDownloadOpenSynthesisKit}
+              className="inline-flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium"
+              style={{
+                border: '1px solid var(--border)',
+                backgroundColor: 'var(--card)',
+                color: 'var(--foreground)',
+                cursor: openSynthesisKitAvailable ? 'pointer' : 'not-allowed',
+                opacity: openSynthesisKitAvailable ? 1 : 0.62,
+              }}
+            >
+              <FileDown size={13} aria-hidden="true" />
+              Download
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={onStartOpenSynthesisDraft}
+            disabled={!onStartOpenSynthesisDraft}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold"
+            style={{
+              border: '1px solid color-mix(in srgb, var(--accent) 35%, var(--border))',
+              backgroundColor: 'color-mix(in srgb, var(--accent) 7%, var(--card))',
+              color: 'var(--foreground)',
+              cursor: onStartOpenSynthesisDraft ? 'pointer' : 'not-allowed',
+              opacity: onStartOpenSynthesisDraft ? 1 : 0.62,
+            }}
+          >
+            <PencilLine size={13} aria-hidden="true" />
+            Start editable draft
+          </button>
+          {!openSynthesisKitAvailable && (
+            <p className="text-xs" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
+              Waiting for response data
             </p>
           )}
         </div>

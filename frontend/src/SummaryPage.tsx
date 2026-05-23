@@ -61,6 +61,7 @@ import {
 import type { SynthesisEmbeddedBlock } from './components/summary/SynthesisEditorCard';
 
 import { usePresence } from './hooks/usePresence';
+import { formatAnswerForDisplay } from './utils/answers';
 
 import type {
 	Round,
@@ -238,6 +239,148 @@ function extractQuestionText(q: unknown): string {
 		return String(obj.text || obj.label || obj.question || '');
 	}
 	return '';
+}
+
+function questionAnswerKeys(q: unknown, index: number): string[] {
+	const keys = [`q${index + 1}`];
+	if (q && typeof q === 'object') {
+		const obj = q as Record<string, unknown>;
+		for (const value of [obj.id, obj.questionId, obj.key, obj.name]) {
+			if (typeof value === 'string' && value.trim() && !keys.includes(value.trim())) {
+				keys.push(value.trim());
+			}
+		}
+	}
+	return keys;
+}
+
+function findAnswerForQuestion(
+	answers: Record<string, unknown>,
+	question: unknown,
+	index: number,
+): { key: string; value: unknown } | null {
+	for (const key of questionAnswerKeys(question, index)) {
+		if (Object.prototype.hasOwnProperty.call(answers, key)) {
+			return { key, value: answers[key] };
+		}
+	}
+	return null;
+}
+
+function safeFilename(value: string): string {
+	return value
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '')
+		.slice(0, 72) || 'consultation';
+}
+
+function buildOpenSynthesisKit(args: {
+	form: Form | null;
+	round: Round | null;
+	roundResponses: RoundWithResponses | null;
+}): string {
+	const { form, round, roundResponses } = args;
+	if (!round || !roundResponses) return '';
+	const questions = Array.isArray(round.questions) && round.questions.length
+		? round.questions
+		: form?.questions || [];
+	const title = form?.title?.trim() || 'Consultation';
+	const responses = roundResponses.responses || [];
+	const lines: string[] = [
+		`# Open synthesis kit: ${title} - Round ${round.round_number}`,
+		'',
+		'Use this material to draft an independent synthesis for the consultation facilitator. Work from the evidence below only.',
+		'',
+		'## Synthesis instructions',
+		'',
+		'- Identify areas of broad agreement, disagreement, nuance, uncertainty, and practical implications.',
+		'- Preserve minority or dissenting views when they are substantively different.',
+		'- Do not invent consensus, quotations, participants, or evidence that is not present in the responses.',
+		'- Flag important gaps, ambiguities, or weak evidence.',
+		'- Write in a professional style suitable for pasting back into Symphonia as the round summary.',
+		'- If you use an external tool, use an approved environment for the consultation data.',
+		'',
+		'## Suggested output structure',
+		'',
+		'1. Executive summary',
+		'2. Areas of agreement',
+		'3. Areas of disagreement or tension',
+		'4. Nuances, caveats, and missing evidence',
+		'5. Implications and recommended next steps',
+		'6. Suggested next-round questions',
+		'',
+		'## Round context',
+		'',
+		`- Consultation: ${title}`,
+		`- Round: ${round.round_number}`,
+		`- Responses included: ${responses.length}`,
+		'',
+		'## Questions',
+		'',
+	];
+
+	if (questions.length) {
+		questions.forEach((question, index) => {
+			lines.push(`${index + 1}. ${extractQuestionText(question) || `Question ${index + 1}`}`);
+		});
+	} else {
+		lines.push('No explicit question list was available for this round.');
+	}
+
+	lines.push('', '## Responses', '');
+
+	if (!responses.length) {
+		lines.push('No responses are available yet.');
+		return lines.join('\n');
+	}
+
+	responses.forEach((response, responseIndex) => {
+		const participant = `Participant ${responseIndex + 1}`;
+		const answers = response.answers || {};
+		const usedKeys = new Set<string>();
+		lines.push(`### Response ${responseIndex + 1}: ${participant}`, '');
+		if (questions.length) {
+			questions.forEach((question, questionIndex) => {
+				const label = extractQuestionText(question) || `Question ${questionIndex + 1}`;
+				const answer = findAnswerForQuestion(answers, question, questionIndex);
+				if (answer) usedKeys.add(answer.key);
+				const formatted = answer ? formatAnswerForDisplay(answer.value).trim() : '';
+				lines.push(`#### Q${questionIndex + 1}. ${label}`, '');
+				lines.push(formatted || 'No answer provided.');
+				lines.push('');
+			});
+		}
+
+		const extraEntries = Object.entries(answers).filter(([key]) => !usedKeys.has(key));
+		if (extraEntries.length) {
+			lines.push('#### Additional answer fields', '');
+			extraEntries.forEach(([key, value]) => {
+				lines.push(`- ${key}: ${formatAnswerForDisplay(value).trim() || 'No answer provided.'}`);
+			});
+			lines.push('');
+		}
+	});
+
+	return lines.join('\n').trimEnd() + '\n';
+}
+
+function buildOpenSynthesisScaffold(title: string, roundNumber: number): string {
+	return [
+		`# ${title} - Round ${roundNumber} synthesis`,
+		'',
+		'## Executive summary',
+		'',
+		'## Areas of agreement',
+		'',
+		'## Areas of disagreement or tension',
+		'',
+		'## Nuances, caveats, and missing evidence',
+		'',
+		'## Implications and recommended next steps',
+		'',
+		'## Suggested next-round questions',
+	].join('\n');
 }
 
 function extractProbeQuestions(data: SynthesisData | null | undefined): string[] {
@@ -732,6 +875,10 @@ export default function SummaryPage() {
 		() => structuredRounds.find(round => round.id === displayRound?.id) || null,
 		[displayRound?.id, structuredRounds]
 	);
+	const openSynthesisKit = useMemo(
+		() => buildOpenSynthesisKit({ form, round: displayRound, roundResponses: currentRoundResponses }),
+		[form, displayRound, currentRoundResponses]
+	);
 	const currentRoundHasStatisticQuestions = useMemo(
 		() => Boolean(displayRound?.questions?.some(question => {
 			if (!question || typeof question !== 'object') return false;
@@ -1186,6 +1333,55 @@ export default function SummaryPage() {
 		} finally {
 			setIsSavingParticipantVisibility(false);
 		}
+	}
+
+	async function copyOpenSynthesisKit() {
+		if (!openSynthesisKit.trim()) {
+			toastWarning('Responses are still loading. Try again in a moment.');
+			return;
+		}
+		try {
+			await navigator.clipboard.writeText(openSynthesisKit);
+			toastSuccess('Open synthesis kit copied.');
+		} catch {
+			toastError('Could not copy the open synthesis kit.');
+		}
+	}
+
+	function downloadOpenSynthesisKit() {
+		if (!openSynthesisKit.trim()) {
+			toastWarning('Responses are still loading. Try again in a moment.');
+			return;
+		}
+		const blob = new Blob([openSynthesisKit], { type: 'text/markdown;charset=utf-8' });
+		const url = URL.createObjectURL(blob);
+		const anchor = document.createElement('a');
+		anchor.href = url;
+		anchor.download = `${safeFilename(form?.title || 'consultation')}-round-${displayRound?.round_number || 'x'}-open-synthesis-kit.md`;
+		document.body.appendChild(anchor);
+		anchor.click();
+		anchor.remove();
+		URL.revokeObjectURL(url);
+		toastSuccess('Open synthesis kit downloaded.');
+	}
+
+	function startOpenSynthesisDraft() {
+		if (!editor || !displayRound) return;
+		if (
+			isSynthesisDirty
+			&& !window.confirm('Replace the unsaved synthesis draft with an open synthesis scaffold?')
+		) {
+			return;
+		}
+		const scaffold = buildOpenSynthesisScaffold(
+			form?.title?.trim() || 'Consultation',
+			displayRound.round_number,
+		);
+		editor.commands.setContent(normalizeSynthesisForEditor(scaffold));
+		setSynthesisViewMode('edit');
+		setActiveWorkspaceTab('synthesis');
+		setIsSynthesisDirty(true);
+		toastSuccess('Open synthesis draft started. Paste in your generated synthesis, then save.');
 	}
 
 	async function handleWorkspaceTabChange(tab: 'synthesis' | 'responses' | 'analysis') {
@@ -2072,6 +2268,10 @@ export default function SummaryPage() {
 							showOwnResponseToParticipants={Boolean(form?.show_own_response_to_participants)}
 							onShowOwnResponseToParticipantsChange={handleParticipantOwnResponseVisibilityChange}
 							isSavingParticipantVisibility={isSavingParticipantVisibility}
+							openSynthesisKitAvailable={Boolean(openSynthesisKit.trim() && currentRoundResponses?.responses.length)}
+							onCopyOpenSynthesisKit={copyOpenSynthesisKit}
+							onDownloadOpenSynthesisKit={downloadOpenSynthesisKit}
+							onStartOpenSynthesisDraft={startOpenSynthesisDraft}
 						/>
 
 						{activeWorkspaceTab !== 'responses' && synthesisVersions.length > 0 && (
