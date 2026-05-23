@@ -189,4 +189,55 @@ describe('FormPage draft initialization', () => {
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
   });
+
+  it('does not show previous-round statistics on document-template forms', async () => {
+    const question = {
+      label: 'Should this recommendation remain in the final set?',
+      inputType: 'single_select',
+      options: ['Yes', 'No'],
+    };
+
+    mocks.getForm.mockResolvedValue({
+      title: 'Round 2 recommendations',
+      questions: [question],
+      consent_required: false,
+      consent_completed: true,
+      document_template: 'Round 2 briefing {{single_select:Should this recommendation remain in the final set?}}',
+    });
+    mocks.getActiveRound.mockResolvedValue({
+      round_number: 2,
+      questions: [question],
+      previous_round_synthesis: 'Previous synthesis text',
+      previous_round_statistics: {
+        round_number: 1,
+        response_count: 12,
+        items: [
+          {
+            key: 'q10',
+            label: 'Q10. Which five recommendations are most important for government to act on first?',
+            count: 12,
+            distribution: [{ label: 'Selected', count: 12, percent: 100 }],
+          },
+        ],
+      },
+      previous_round_own_response: {
+        q10: { selectedOptions: ['Old recommendation'] },
+      },
+    });
+    mocks.hasSubmitted.mockResolvedValue({ submitted: false });
+    mocks.getDraft.mockResolvedValue({ draft: null });
+
+    render(
+      <MemoryRouter initialEntries={['/form/38']}>
+        <Routes>
+          <Route path="/form/:id" element={<FormPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByTestId('document-template-response')).toBeInTheDocument();
+    expect(screen.queryByText('Previous round statistics')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Which five recommendations are most important/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Your previous response')).not.toBeInTheDocument();
+  });
 });

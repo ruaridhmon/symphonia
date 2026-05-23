@@ -411,6 +411,7 @@ export default function FormPage() {
   }
 
   const isDocumentMode = isDocumentTemplate(form.document_template)
+  const showPreviousRoundExtras = !isDocumentMode
   const needsConsent = Boolean(form.consent_required && !form.consent_completed && !hasSubmitted)
 
   if (needsConsent) {
@@ -482,7 +483,7 @@ export default function FormPage() {
           body={activeRound?.context_settings?.intro_body}
         />
 
-        {previousStatistics && (
+        {showPreviousRoundExtras && previousStatistics && (
           <PreviousRoundStatisticsPanel statistics={previousStatistics} />
         )}
 
@@ -613,7 +614,7 @@ export default function FormPage() {
           {previousSynthesis && (
             <PreviousSynthesisToggle content={previousSynthesis} />
           )}
-          {previousOwnResponse && (
+          {showPreviousRoundExtras && previousOwnResponse && (
             <OwnResponseCard
               answers={previousOwnResponse}
               questions={roundQuestions}
