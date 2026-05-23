@@ -1,4 +1,5 @@
-import { createElement, type CSSProperties, type ReactNode } from 'react';
+import { createElement, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { emptyStructuredResponse, type StructuredResponse } from '../types/structured-input';
 import AnswerStateBadge from './AnswerStateBadge';
 import RichDocumentEditor from './RichDocumentEditor';
@@ -28,6 +29,15 @@ interface DocumentTemplateResponseProps {
   editablePlaceholder?: string;
   editableMinHeight?: string;
   questions?: QuestionInput[];
+  paginate?: boolean;
+  initialPage?: number;
+  onBeforePageChange?: () => void | Promise<void>;
+  onPaginationChange?: (state: { currentPage: number; totalPages: number; isLastPage: boolean }) => void;
+}
+
+interface RichTemplatePage {
+  title: string;
+  nodes: ChildNode[];
 }
 
 function parseInlineStyle(styleValue: string | null): CSSProperties | undefined {
@@ -190,6 +200,76 @@ function renderRichTemplateNode({
   );
 }
 
+function getNodeText(node: ChildNode): string {
+  return node.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+}
+
+function hasRichField(node: ChildNode, fieldKey: string): boolean {
+  if (node.nodeType !== Node.ELEMENT_NODE) return false;
+  const element = node as HTMLElement;
+  if (element.getAttribute('data-symphonia-field-key') === fieldKey) return true;
+  return Boolean(element.querySelector(`[data-symphonia-field-key="${CSS.escape(fieldKey)}"]`));
+}
+
+function hasAnyRichField(nodes: ChildNode[]): boolean {
+  return nodes.some((node) => {
+    if (node.nodeType !== Node.ELEMENT_NODE) return false;
+    const element = node as HTMLElement;
+    return Boolean(
+      element.getAttribute('data-symphonia-field-key') ||
+      element.querySelector('[data-symphonia-field-key]'),
+    );
+  });
+}
+
+function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
+  const pages: RichTemplatePage[] = [];
+  let current: RichTemplatePage = { title: 'Start', nodes: [] };
+  let currentSection = '';
+
+  const pushCurrent = () => {
+    if (current.nodes.length === 0) return;
+    pages.push(current);
+  };
+
+  nodes.forEach((node) => {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      current.nodes.push(node);
+      return;
+    }
+
+    const element = node as HTMLElement;
+    const tagName = element.tagName.toLowerCase();
+    const headingText = getNodeText(node);
+    const startsSection = tagName === 'h2';
+    const startsRecommendationPage =
+      tagName === 'h3' && /recommendation-by-recommendation/i.test(currentSection);
+
+    if (startsRecommendationPage && !hasAnyRichField(current.nodes)) {
+      current = {
+        title: headingText || 'Recommendation',
+        nodes: [...current.nodes, node],
+      };
+      return;
+    }
+
+    if (startsSection || startsRecommendationPage) {
+      pushCurrent();
+      currentSection = startsSection ? headingText : currentSection;
+      current = {
+        title: headingText || (startsSection ? 'Section' : 'Recommendation'),
+        nodes: [node],
+      };
+      return;
+    }
+
+    current.nodes.push(node);
+  });
+
+  pushCurrent();
+  return pages.length > 0 ? pages : [{ title: 'Questions', nodes }];
+}
+
 export default function DocumentTemplateResponse({
   template,
   answers,
@@ -202,6 +282,10 @@ export default function DocumentTemplateResponse({
   editablePlaceholder = 'Write the document here…',
   editableMinHeight,
   questions,
+  paginate = false,
+  initialPage = 1,
+  onBeforePageChange,
+  onPaginationChange,
 }: DocumentTemplateResponseProps) {
   if (isEditableDocumentTemplate(template)) {
     const key = 'q1';
@@ -246,7 +330,14 @@ export default function DocumentTemplateResponse({
     const document = parser.parseFromString(getRichFillableTemplateContent(template) || '<p></p>', 'text/html');
     const fieldMap = buildRichDocumentTemplateFieldMap(template, answers, questions);
     const orderedEntries = Array.from(fieldMap.values());
-    const content = Array.from(document.body.childNodes).map((node, index) =>
+    const allNodes = Array.from(document.body.childNodes);
+    const pages = useMemo(() => splitRichTemplatePages(allNodes), [template]);
+    const [currentPage, setCurrentPage] = useState(() => Math.max(0, initialPage - 1));
+    const [isChangingPage, setIsChangingPage] = useState(false);
+    const shouldPaginate = paginate && pages.length > 1 && !readOnly;
+    const selectedPage = shouldPaginate ? pages[Math.min(currentPage, pages.length - 1)] : null;
+    const visibleNodes = selectedPage?.nodes ?? allNodes;
+    const content = visibleNodes.map((node, index) =>
       renderRichTemplateNode({
         node,
         fieldMap,
@@ -257,6 +348,50 @@ export default function DocumentTemplateResponse({
         keyPrefix: `rich-${index}`,
       }),
     );
+
+    useEffect(() => {
+      if (!shouldPaginate) {
+        onPaginationChange?.({ currentPage: 1, totalPages: 1, isLastPage: true });
+        return;
+      }
+      onPaginationChange?.({
+        currentPage: currentPage + 1,
+        totalPages: pages.length,
+        isLastPage: currentPage >= pages.length - 1,
+      });
+    }, [currentPage, onPaginationChange, pages.length, shouldPaginate]);
+
+    useEffect(() => {
+      if (!shouldPaginate) return;
+      if (currentPage >= pages.length) {
+        setCurrentPage(Math.max(0, pages.length - 1));
+      }
+    }, [currentPage, pages.length, shouldPaginate]);
+
+    async function changePage(nextPage: number) {
+      if (isChangingPage) return;
+      const boundedPage = Math.max(0, Math.min(pages.length - 1, nextPage));
+      if (boundedPage === currentPage) return;
+      setIsChangingPage(true);
+      try {
+        await onBeforePageChange?.();
+        setCurrentPage(boundedPage);
+      } finally {
+        setIsChangingPage(false);
+      }
+    }
+
+    useEffect(() => {
+      if (!shouldPaginate || !highlightedQuestionKey) return;
+      const entry = orderedEntries.find(({ field }) => field.questionKey === highlightedQuestionKey);
+      if (!entry) return;
+      const pageIndex = pages.findIndex((page) =>
+        page.nodes.some((node) => hasRichField(node, entry.field.key)),
+      );
+      if (pageIndex >= 0 && pageIndex !== currentPage) {
+        setCurrentPage(pageIndex);
+      }
+    }, [currentPage, highlightedQuestionKey, orderedEntries, pages, shouldPaginate]);
 
     return (
       <div
@@ -294,6 +429,49 @@ export default function DocumentTemplateResponse({
           }}
         >
           <div className="symphonia-rich-template space-y-3">{content}</div>
+          {shouldPaginate ? (
+            <div
+              className="mt-6 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
+              style={{ borderColor: 'color-mix(in srgb, var(--border) 76%, transparent)' }}
+            >
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--accent)' }}>
+                  Section {currentPage + 1} of {pages.length}
+                </div>
+                <div className="mt-1 text-sm font-medium text-foreground">{selectedPage?.title}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void changePage(currentPage - 1)}
+                  disabled={currentPage === 0 || isChangingPage}
+                  className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-45"
+                  style={{
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                  }}
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void changePage(currentPage + 1)}
+                  disabled={currentPage >= pages.length - 1 || isChangingPage}
+                  className="inline-flex min-w-[8.25rem] items-center justify-center gap-1 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-45"
+                  style={{
+                    border: '1px solid color-mix(in srgb, var(--accent) 34%, var(--border))',
+                    backgroundColor: 'color-mix(in srgb, var(--accent) 10%, var(--background))',
+                    color: 'var(--accent)',
+                  }}
+                >
+                  {isChangingPage ? 'Saving...' : 'Save & Next'}
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     );

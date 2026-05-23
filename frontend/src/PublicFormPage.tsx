@@ -69,6 +69,15 @@ function PreviousSynthesisToggle({ content }: { content: string }) {
   );
 }
 
+function templatePageStorageKey(sessionToken: string, documentTemplate?: string | null) {
+  let hash = 0;
+  const source = documentTemplate || '';
+  for (let index = 0; index < source.length; index += 1) {
+    hash = (hash * 31 + source.charCodeAt(index)) >>> 0;
+  }
+  return `symphonia-public-session-page:${sessionToken}:${hash.toString(36)}`;
+}
+
 export default function PublicFormPage() {
   useDocumentTitle('Public Form');
   const { sessionToken } = useParams<{ sessionToken: string }>();
@@ -83,6 +92,8 @@ export default function PublicFormPage() {
   const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [highlightedQuestionKey, setHighlightedQuestionKey] = useState<string | null>(null);
+  const [templatePagination, setTemplatePagination] = useState({ currentPage: 1, totalPages: 1, isLastPage: true });
+  const [initialTemplatePage, setInitialTemplatePage] = useState(1);
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestResponsesRef = useRef<Record<string, StructuredResponse>>({});
   const latestParticipantNameRef = useRef('');
@@ -124,6 +135,26 @@ export default function PublicFormPage() {
     }, 1500);
   }, [sessionToken]);
 
+  const saveDraftNow = useCallback(async () => {
+    if (!sessionToken) return;
+    if (draftTimerRef.current) {
+      clearTimeout(draftTimerRef.current);
+      draftTimerRef.current = null;
+    }
+    try {
+      setDraftStatus('saving');
+      await savePublicDraft(sessionToken, {
+        participant_name: latestParticipantNameRef.current,
+        answers: normalizeAnswerRecord(latestResponsesRef.current),
+      });
+      setDraftStatus('saved');
+      setTimeout(() => setDraftStatus((current) => (current === 'saved' ? 'idle' : current)), 3000);
+    } catch {
+      setDraftStatus('error');
+      throw new Error('Draft save failed');
+    }
+  }, [sessionToken]);
+
   useEffect(() => {
     return () => {
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
@@ -138,18 +169,23 @@ export default function PublicFormPage() {
       const data = await getPublicFormSession(sessionToken);
       setSession(data);
       setParticipantName(data.participant_name);
+      const pageKey = templatePageStorageKey(sessionToken, data.form.document_template);
+      const storedPage = Number(window.localStorage.getItem(pageKey));
+      setInitialTemplatePage(Number.isFinite(storedPage) && storedPage > 0 ? storedPage : 1);
       const loadedResponses = data.draft?.answers
         ? legacyToStructured(data.draft.answers)
         : buildEmptyResponses(data.form.questions, data.form.document_template);
-      setStructuredResponses(
+      const normalizedResponses =
         isRichFillableDocumentTemplate(data.form.document_template)
           ? remapRichFillableAnswersToQuestionOrder(
               data.form.document_template ?? '',
               data.form.questions,
               loadedResponses,
             )
-          : loadedResponses,
-      );
+          : loadedResponses;
+      setStructuredResponses(normalizedResponses);
+      latestResponsesRef.current = normalizedResponses;
+      latestParticipantNameRef.current = data.participant_name;
       setMode(data.submitted ? 'submitted' : 'filling');
     } catch (err) {
       const detail = getApiErrorDetail(err);
@@ -218,6 +254,9 @@ export default function PublicFormPage() {
         participant_name: participantName.trim(),
         answers: normalizeAnswerRecord(structuredResponses),
       });
+      if (session) {
+        window.localStorage.removeItem(templatePageStorageKey(sessionToken, session.form.document_template));
+      }
       setMode('submitted');
     } catch (err) {
       const detail = getApiErrorDetail(err);
@@ -330,6 +369,18 @@ export default function PublicFormPage() {
               questions={session.form.questions}
               answers={structuredResponses}
               highlightedQuestionKey={highlightedQuestionKey}
+              paginate
+              initialPage={initialTemplatePage}
+              onBeforePageChange={saveDraftNow}
+              onPaginationChange={(state) => {
+                setTemplatePagination(state);
+                if (sessionToken) {
+                  window.localStorage.setItem(
+                    templatePageStorageKey(sessionToken, session.form.document_template),
+                    String(state.currentPage),
+                  );
+                }
+              }}
               onChange={(key, val) => {
                 clearResolvedValidationError(key, val);
                 setStructuredResponses((prev) => {
@@ -356,16 +407,18 @@ export default function PublicFormPage() {
             />
           )}
 
-          <LoadingButton
-            variant="accent"
-            size="lg"
-            className="w-full"
-            loading={isSubmitting}
-            loadingText="Submitting…"
-            onClick={handleSubmit}
-          >
-            Submit
-          </LoadingButton>
+          {isDocumentMode && !templatePagination.isLastPage ? null : (
+            <LoadingButton
+              variant="accent"
+              size="lg"
+              className="w-full"
+              loading={isSubmitting}
+              loadingText="Submitting…"
+              onClick={handleSubmit}
+            >
+              Submit
+            </LoadingButton>
+          )}
 
           <div className="mt-2 px-1">
             <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
