@@ -6311,9 +6311,7 @@ def _survey_answer_selections(answer: Any, input_type: str) -> list[str]:
     position = _extract_answer_position(answer)
     if isinstance(answer, dict) and isinstance(answer.get("selectedOptions"), list):
         values = [
-            str(item).strip()
-            for item in answer["selectedOptions"]
-            if str(item).strip()
+            str(item).strip() for item in answer["selectedOptions"] if str(item).strip()
         ]
         if values:
             return values
@@ -6326,11 +6324,7 @@ def _survey_answer_selections(answer: Any, input_type: str) -> list[str]:
 
 def _survey_question_options(question: Any) -> list[str]:
     if isinstance(question, dict) and isinstance(question.get("options"), list):
-        return [
-            str(item).strip()
-            for item in question["options"]
-            if str(item).strip()
-        ]
+        return [str(item).strip() for item in question["options"] if str(item).strip()]
     return []
 
 
@@ -6364,7 +6358,8 @@ def _build_previous_round_statistics(
         q_key = f"q{index + 1}"
         question_id = (
             question.get("questionId")
-            if isinstance(question, dict) and isinstance(question.get("questionId"), str)
+            if isinstance(question, dict)
+            and isinstance(question.get("questionId"), str)
             else None
         )
         keys = [q_key] + ([question_id] if question_id else [])
