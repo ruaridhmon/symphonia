@@ -146,6 +146,7 @@ class RoundModel(Base):
     synthesis = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     questions = Column(JSON, nullable=True)
+    context_settings = Column(JSON, nullable=True)
 
     # Committee synthesis fields
     synthesis_json = Column(JSON, nullable=True)

@@ -59,6 +59,9 @@ def _ensure_schema_columns() -> None:
             "consent_given": "ALTER TABLE user_form_unlocks ADD COLUMN consent_given BOOLEAN NOT NULL DEFAULT FALSE",
             "consented_at": "ALTER TABLE user_form_unlocks ADD COLUMN consented_at TIMESTAMP",
         },
+        "rounds": {
+            "context_settings": "ALTER TABLE rounds ADD COLUMN context_settings JSON",
+        },
     }
 
     for table_name, updates in schema_updates.items():

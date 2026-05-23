@@ -6303,7 +6303,117 @@ def put_expert_labels(
 
 
 class RoundConfig(BaseModel):
-    questions: list[str] | None = None
+    questions: list[Any] | None = None
+    context_settings: dict[str, Any] | None = None
+
+
+def _survey_answer_selections(answer: Any, input_type: str) -> list[str]:
+    position = _extract_answer_position(answer)
+    if isinstance(answer, dict) and isinstance(answer.get("selectedOptions"), list):
+        values = [
+            str(item).strip()
+            for item in answer["selectedOptions"]
+            if str(item).strip()
+        ]
+        if values:
+            return values
+    if not position:
+        return []
+    if input_type == "multi_select":
+        return [item.strip() for item in re.split(r"\n|,", position) if item.strip()]
+    return [position.strip()]
+
+
+def _survey_question_options(question: Any) -> list[str]:
+    if isinstance(question, dict) and isinstance(question.get("options"), list):
+        return [
+            str(item).strip()
+            for item in question["options"]
+            if str(item).strip()
+        ]
+    return []
+
+
+def _build_previous_round_statistics(
+    db: Session, round_obj: RoundModel | None
+) -> dict[str, Any] | None:
+    if not round_obj:
+        return None
+    questions = round_obj.questions or []
+    if not isinstance(questions, list):
+        return None
+    responses = (
+        db.query(Response)
+        .filter(Response.round_id == round_obj.id)
+        .order_by(Response.created_at.asc())
+        .all()
+    )
+    if not responses:
+        return {
+            "round_number": round_obj.round_number,
+            "response_count": 0,
+            "items": [],
+        }
+
+    items: list[dict[str, Any]] = []
+    for index, question in enumerate(questions):
+        input_type = question.get("inputType", "") if isinstance(question, dict) else ""
+        selectable = input_type in {"slider", "likert", "single_select", "multi_select"}
+        if not selectable:
+            continue
+        q_key = f"q{index + 1}"
+        question_id = (
+            question.get("questionId")
+            if isinstance(question, dict) and isinstance(question.get("questionId"), str)
+            else None
+        )
+        keys = [q_key] + ([question_id] if question_id else [])
+        selections: list[str] = []
+        for response in responses:
+            answers = response.answers or {}
+            answer_key = next((key for key in keys if key in answers), None)
+            if answer_key:
+                selections.extend(
+                    _survey_answer_selections(answers.get(answer_key), input_type)
+                )
+        if not selections:
+            continue
+
+        options = _survey_question_options(question)
+        labels = options + [item for item in selections if item not in options]
+        if not labels:
+            labels = list(dict.fromkeys(selections))
+        distribution = []
+        for label_index, label in enumerate(dict.fromkeys(labels), 1):
+            count = selections.count(label)
+            distribution.append(
+                {
+                    "label": label,
+                    "count": count,
+                    "percent": round((count / len(selections)) * 100)
+                    if selections
+                    else 0,
+                    "scaleIndex": label_index,
+                }
+            )
+
+        items.append(
+            {
+                "key": question_id or q_key,
+                "label": _question_export_label(question) or f"Question {index + 1}",
+                "dimension_label": question.get("sectionTitle")
+                if isinstance(question, dict)
+                else None,
+                "count": len(selections),
+                "distribution": distribution,
+            }
+        )
+
+    return {
+        "round_number": round_obj.round_number,
+        "response_count": len(responses),
+        "items": items,
+    }
 
 
 @router.get(
@@ -6353,7 +6463,9 @@ def get_active_round(
         "id": active.id,
         "round_number": active.round_number,
         "questions": active.questions or [],
+        "context_settings": active.context_settings or {},
         "previous_round_synthesis": previous_round_synthesis,
+        "previous_round_statistics": _build_previous_round_statistics(db, prev),
         "show_own_response_to_participants": form.show_own_response_to_participants,
         "previous_round_own_response": previous_round_own_response,
     }
@@ -6410,6 +6522,7 @@ def open_next_round(
         round_number=next_number,
         is_active=True,
         questions=questions,
+        context_settings=payload.context_settings if payload else None,
         synthesis=previous_synthesis,
     )
     db.add(new)
@@ -6417,6 +6530,78 @@ def open_next_round(
     db.refresh(new)
 
     return {"id": new.id, "round_number": new.round_number, "questions": new.questions}
+
+
+@router.patch(
+    "/forms/{form_id}/rounds/{round_id}",
+    tags=["Rounds"],
+    summary="Update round setup",
+    description="Update a round's participant questions and optional intro/context settings. Admin-only.",
+)
+@limiter.limit(CRUD_LIMIT)
+def update_round_setup(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    payload: RoundConfig,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+    if payload.questions is not None:
+        round_obj.questions = payload.questions
+    if payload.context_settings is not None:
+        round_obj.context_settings = payload.context_settings
+    db.commit()
+    db.refresh(round_obj)
+    return {
+        "id": round_obj.id,
+        "round_number": round_obj.round_number,
+        "questions": round_obj.questions or [],
+        "context_settings": round_obj.context_settings or {},
+    }
+
+
+@router.post(
+    "/forms/{form_id}/rounds/{round_id}/activate",
+    tags=["Rounds"],
+    summary="Set active round",
+    description="Make an existing round the live participant round. Admin-only.",
+)
+@limiter.limit(CRUD_LIMIT)
+def activate_round(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    round_obj = (
+        db.query(RoundModel)
+        .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
+        .first()
+    )
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+    db.query(RoundModel).filter(RoundModel.form_id == form_id).update(
+        {"is_active": False}
+    )
+    round_obj.is_active = True
+    db.commit()
+    db.refresh(round_obj)
+    return {
+        "id": round_obj.id,
+        "round_number": round_obj.round_number,
+        "is_active": round_obj.is_active,
+        "questions": round_obj.questions or [],
+        "context_settings": round_obj.context_settings or {},
+    }
 
 
 @router.get(
@@ -6444,6 +6629,7 @@ def get_rounds(
     result = []
     for r in rounds:
         response_count = db.query(Response).filter(Response.round_id == r.id).count()
+        draft_count = db.query(Draft).filter(Draft.round_id == r.id).count()
         result.append(
             {
                 "id": r.id,
@@ -6452,8 +6638,10 @@ def get_rounds(
                 "synthesis_json": r.synthesis_json,
                 "is_active": r.is_active,
                 "questions": r.questions or [],
+                "context_settings": r.context_settings or {},
                 "convergence_score": r.convergence_score,
                 "response_count": response_count,
+                "draft_count": draft_count,
             }
         )
 

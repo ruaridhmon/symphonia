@@ -2,6 +2,7 @@ import { BarChart3 } from 'lucide-react';
 import { coerceAnswerPosition } from '../../utils/answers';
 import { extractQuestionText } from '../../utils/questions';
 import type { RoundWithResponses } from '../../types/summary';
+import DistributionSplitBar from '../DistributionSplitBar';
 
 type Question = string | Record<string, unknown>;
 
@@ -10,7 +11,8 @@ type StatisticRow = {
   label: string;
   count: number;
   numericValues: number[];
-  distribution: Array<{ label: string; count: number; percent: number }>;
+  sectionTitle?: string | null;
+  distribution: Array<{ label: string; count: number; percent: number; scaleIndex?: number }>;
 };
 
 type Props = {
@@ -36,6 +38,12 @@ function questionType(question: Question): string {
 function configuredOptions(question: Question): string[] {
   if (!isRecord(question) || !Array.isArray(question.options)) return [];
   return question.options.filter((option): option is string => typeof option === 'string' && option.trim().length > 0);
+}
+
+function sectionTitle(question: Question): string | null {
+  if (!isRecord(question)) return null;
+  const value = question.sectionTitle;
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
 function parseNumeric(value: string): number | null {
@@ -103,12 +111,13 @@ function buildStatistics(questions: Question[], roundResponses: RoundWithRespons
         ? [...optionOrder, ...selections.filter(item => !optionOrder.includes(item))]
         : Array.from(new Set(selections));
       const distribution = labels
-        .map(label => {
+        .map((label, labelIndex) => {
           const count = selections.filter(item => item === label).length;
           return {
             label,
             count,
             percent: selections.length ? Math.round((count / selections.length) * 100) : 0,
+            scaleIndex: labelIndex + 1,
           };
         })
         .filter(item => item.count > 0);
@@ -118,6 +127,7 @@ function buildStatistics(questions: Question[], roundResponses: RoundWithRespons
         label: extractQuestionText(question) || `Question ${index + 1}`,
         count: selections.length,
         numericValues,
+        sectionTitle: sectionTitle(question),
         distribution,
       };
     })
@@ -127,6 +137,15 @@ function buildStatistics(questions: Question[], roundResponses: RoundWithRespons
 export default function SurveyStatisticsPanel({ questions, roundResponses }: Props) {
   const rows = buildStatistics(questions, roundResponses);
   if (!rows.length) return null;
+  const groups = rows.reduce<Array<{ title: string | null; rows: StatisticRow[] }>>((acc, row) => {
+    const last = acc[acc.length - 1];
+    if (last && last.title === row.sectionTitle) {
+      last.rows.push(row);
+    } else {
+      acc.push({ title: row.sectionTitle ?? null, rows: [row] });
+    }
+    return acc;
+  }, []);
 
   return (
     <section className="space-y-3" aria-label="Survey statistics">
@@ -140,65 +159,46 @@ export default function SurveyStatisticsPanel({ questions, roundResponses }: Pro
         </span>
       </div>
 
-      <div className="grid gap-3">
-        {rows.map(row => {
-          const avg = row.numericValues.length
-            ? row.numericValues.reduce((sum, value) => sum + value, 0) / row.numericValues.length
-            : null;
-          const min = row.numericValues.length ? Math.min(...row.numericValues) : null;
-          const max = row.numericValues.length ? Math.max(...row.numericValues) : null;
-          const med = median(row.numericValues);
+      <div className="grid gap-4">
+        {groups.map(group => (
+          <div key={group.title ?? 'ungrouped'} className="grid gap-3">
+            {group.title ? (
+              <h4 className="m-0 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                {group.title}
+              </h4>
+            ) : null}
+            {group.rows.map(row => {
+              const avg = row.numericValues.length
+                ? row.numericValues.reduce((sum, value) => sum + value, 0) / row.numericValues.length
+                : null;
+              const min = row.numericValues.length ? Math.min(...row.numericValues) : null;
+              const max = row.numericValues.length ? Math.max(...row.numericValues) : null;
+              const med = median(row.numericValues);
 
-          return (
-            <article
-              key={row.key}
-              className="rounded-lg p-3 sm:p-4"
-              style={{
-                border: '1px solid var(--border)',
-                backgroundColor: 'color-mix(in srgb, var(--muted) 24%, var(--card))',
-              }}
-            >
-              <div className="text-sm font-semibold leading-snug" style={{ color: 'var(--foreground)' }}>
-                {row.label}
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Metric label="Responses" value={String(row.count)} />
-                {avg != null && <Metric label="Average" value={formatNumber(avg)} />}
-                {med != null && <Metric label="Median" value={formatNumber(med)} />}
-                {min != null && max != null && <Metric label="Range" value={`${formatNumber(min)} - ${formatNumber(max)}`} />}
-              </div>
-              {row.distribution.length > 0 && (
-                <div className="mt-3 space-y-1.5">
-                  {row.distribution.map(item => (
-                    <div key={item.label} className="grid grid-cols-[minmax(0,1fr)_3rem] items-center gap-2 text-xs">
-                      <div className="min-w-0">
-                        <div className="mb-1 flex items-center justify-between gap-2">
-                          <span className="truncate" style={{ color: 'var(--foreground)' }}>{item.label}</span>
-                          <span style={{ color: 'var(--muted-foreground)' }}>{item.count}</span>
-                        </div>
-                        <div
-                          className="h-2 overflow-hidden rounded-full"
-                          style={{ backgroundColor: 'color-mix(in srgb, var(--muted-foreground) 14%, var(--muted))' }}
-                        >
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${item.percent}%`,
-                              backgroundColor: 'color-mix(in srgb, var(--accent) 72%, var(--foreground))',
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className="text-right font-medium" style={{ color: 'var(--muted-foreground)' }}>
-                        {item.percent}%
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </article>
-          );
-        })}
+              return (
+                <article
+                  key={row.key}
+                  className="rounded-lg p-3 sm:p-4"
+                  style={{
+                    border: '1px solid var(--border)',
+                    backgroundColor: 'color-mix(in srgb, var(--muted) 24%, var(--card))',
+                  }}
+                >
+                  <div className="text-sm font-semibold leading-snug" style={{ color: 'var(--foreground)' }}>
+                    {row.label}
+                  </div>
+                  <DistributionSplitBar distribution={row.distribution} total={row.count} />
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Metric label="Responses" value={String(row.count)} />
+                    {avg != null && <Metric label="Average" value={formatNumber(avg)} />}
+                    {med != null && <Metric label="Median" value={formatNumber(med)} />}
+                    {min != null && max != null && <Metric label="Range" value={`${formatNumber(min)} - ${formatNumber(max)}`} />}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </section>
   );

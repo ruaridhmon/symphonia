@@ -9,8 +9,13 @@ export type Round = {
   synthesis_json?: SynthesisData | null;
   is_active: boolean;
   questions: (string | Record<string, unknown>)[];
+  context_settings?: {
+    intro_title?: string;
+    intro_body?: string;
+  };
   convergence_score?: number | null;
   response_count?: number;
+  draft_count?: number;
 };
 
 export type Form = {

@@ -11,6 +11,7 @@ import DocumentTemplateResponse from './components/DocumentTemplateResponse'
 import SurveyQuestionList from './components/SurveyQuestionList'
 import Skeleton, { SkeletonCard } from './components/Skeleton'
 import OwnResponseCard from './components/OwnResponseCard'
+import { PreviousRoundStatisticsPanel, RoundIntroCard, type PreviousRoundStatistics } from './components/RoundIntroCard'
 import { usePresence } from './hooks/usePresence'
 import type { StructuredResponse } from './types/structured-input'
 import { emptyStructuredResponse, autoSaveKey } from './types/structured-input'
@@ -37,6 +38,7 @@ export default function FormPage() {
   const [form, setForm] = useState<Form | null>(null)
   const [activeRound, setActiveRound] = useState<ActiveRound | null>(null)
   const [previousSynthesis, setPreviousSynthesis] = useState('')
+  const [previousStatistics, setPreviousStatistics] = useState<PreviousRoundStatistics | null>(null)
   const [previousOwnResponse, setPreviousOwnResponse] = useState<Record<string, unknown> | null>(null)
   const [roundQuestions, setRoundQuestions] = useState<(string | Record<string, unknown>)[]>([])
   const [structuredResponses, setStructuredResponses] = useState<Record<string, StructuredResponse>>({})
@@ -209,6 +211,7 @@ export default function FormPage() {
       }
 
       setPreviousSynthesis(roundData?.previous_round_synthesis || '')
+      setPreviousStatistics(roundData?.previous_round_statistics || null)
       setPreviousOwnResponse(roundData?.previous_round_own_response || null)
     } catch (err) {
       if (err instanceof ApiError) {
@@ -454,6 +457,15 @@ export default function FormPage() {
               ×
             </button>
           </div>
+        )}
+
+        <RoundIntroCard
+          title={activeRound?.context_settings?.intro_title}
+          body={activeRound?.context_settings?.intro_body}
+        />
+
+        {previousStatistics && (
+          <PreviousRoundStatisticsPanel statistics={previousStatistics} />
         )}
 
         {/* Questions section header */}

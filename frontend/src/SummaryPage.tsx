@@ -16,7 +16,7 @@ import { useAuth } from './AuthContext';
 import { api } from './api/client';
 import { getMe } from './api/auth';
 import { getForm as apiFetchForm, updateParticipantVisibility } from './api/forms';
-import { getRounds, getRoundsWithResponses, nextRound as apiNextRound } from './api/rounds';
+import { getRounds, getRoundsWithResponses, nextRound as apiNextRound, updateRound as apiUpdateRound } from './api/rounds';
 import type { Round as ApiRound } from './api/rounds';
 import {
 	getSynthesisVersions as apiGetSynthesisVersions,
@@ -459,6 +459,7 @@ export default function SummaryPage() {
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
+	const [isSavingRoundSetup, setIsSavingRoundSetup] = useState(false);
 	const synthesisRunStorageKey = useMemo(
 		() => `summary:synthesis-run:${formId}`,
 		[formId]
@@ -946,8 +947,10 @@ export default function SummaryPage() {
 				synthesis_json: x.synthesis_json || null,
 				is_active: !!x.is_active,
 				questions: Array.isArray(x.questions) ? x.questions : [],
+				context_settings: x.context_settings || {},
 				convergence_score: x.convergence_score ?? null,
 				response_count: x.response_count ?? 0,
+				draft_count: x.draft_count ?? 0,
 			}));
 			setRounds(mapped);
 
@@ -1239,6 +1242,32 @@ export default function SummaryPage() {
 		setSynthesisViewMode(mode);
 	}
 
+	function questionsForRoundSetupSave(
+		sourceQuestions: (string | Record<string, unknown>)[] | undefined,
+		labels: string[],
+	): (string | Record<string, unknown>)[] {
+		const source = Array.isArray(sourceQuestions) ? sourceQuestions : [];
+		const canPreserveStructuredQuestions =
+			source.length === labels.length &&
+			source.some(question => question && typeof question === 'object');
+		if (!canPreserveStructuredQuestions) return labels;
+
+		return source.map((question, index) => {
+			if (!question || typeof question !== 'object') return labels[index];
+			const nextQuestion = { ...question };
+			if (typeof nextQuestion.label === 'string') {
+				nextQuestion.label = labels[index];
+			} else if (typeof nextQuestion.text === 'string') {
+				nextQuestion.text = labels[index];
+			} else if (typeof nextQuestion.question === 'string') {
+				nextQuestion.question = labels[index];
+			} else {
+				nextQuestion.label = labels[index];
+			}
+			return nextQuestion;
+		});
+	}
+
 	async function startNextRound() {
 		if (!formId) return;
 		const cleaned = nextRoundQuestions.map(q => q.trim()).filter(q => q.length > 0);
@@ -1261,6 +1290,34 @@ export default function SummaryPage() {
 			toastError((err as Error).message || 'Failed to start next round');
 		} finally {
 			setLoading(false);
+		}
+	}
+
+	async function saveCurrentRoundSetup() {
+		const targetRound = displayRound;
+		if (!formId || !targetRound) return;
+		const cleaned = nextRoundQuestions.map(q => q.trim()).filter(q => q.length > 0);
+		if (!cleaned.length) {
+			toastWarning('Add at least one question before saving.');
+			return;
+		}
+		setIsSavingRoundSetup(true);
+		try {
+			const questions = questionsForRoundSetupSave(targetRound.questions, cleaned);
+			const updated = await apiUpdateRound(formId, targetRound.id, { questions });
+			const nextRound = {
+				...targetRound,
+				questions: updated.questions || questions,
+				context_settings: updated.context_settings || targetRound.context_settings || {},
+			};
+			setRounds(prev => prev.map(round => round.id === targetRound.id ? nextRound : round));
+			if (activeRound?.id === targetRound.id) setActiveRound(nextRound);
+			if (selectedRound?.id === targetRound.id) setSelectedRound(nextRound);
+			toastSuccess(`Round ${targetRound.round_number} setup saved.`);
+		} catch (error) {
+			toastError((error as Error).message || 'Failed to save round setup');
+		} finally {
+			setIsSavingRoundSetup(false);
 		}
 	}
 
@@ -1727,8 +1784,10 @@ export default function SummaryPage() {
 										onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
 										onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
 										onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
+										onSaveCurrentRound={saveCurrentRoundSetup}
 										onStartNextRound={startNextRound}
 										loading={loading}
+										saving={isSavingRoundSetup}
 									/>
 								)}
 							</>
