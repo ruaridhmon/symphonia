@@ -26,8 +26,6 @@ services:
   backend:
     build:
       context: ./backend
-      args:
-        GITHUB_TOKEN: ${GITHUB_TOKEN:-}
     restart: unless-stopped
     ports:
       - "${BACKEND_PORT:-8000}:8000"

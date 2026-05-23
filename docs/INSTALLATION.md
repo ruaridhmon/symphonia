@@ -213,13 +213,22 @@ Placed at `backend/.env`. Overrides root `.env` values for the backend process o
 
 ### Synthesis model
 
-The AI synthesis model is set via the consensus library's environment variable:
+The AI synthesis model is configured in Admin Settings or via:
 
 ```dotenv
-CONSENSUS_MODEL="anthropic/claude-sonnet-4"
+SYNTHESIS_MODEL="anthropic/claude-opus-4-6"
 ```
 
-If not set, the backend uses the OpenRouter default. Models are referenced by their OpenRouter identifier — see [openrouter.ai/models](https://openrouter.ai/models).
+The default install supports built-in simple synthesis with OpenRouter and does not require any private GitHub token.
+
+Advanced TTD/committee synthesis uses the optional consensus package. Install it only if you have repository access:
+
+```bash
+cd backend
+pip install -r requirements-consensus.txt
+```
+
+Models are referenced by their OpenRouter identifier — see [openrouter.ai/models](https://openrouter.ai/models).
 
 ---
 

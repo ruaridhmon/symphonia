@@ -1,25 +1,16 @@
 # Consensus Library Sync
 #
-# Keeps the pinned consensus library in sync with axiotic-ai/consensus@main.
-# Triggered by:
-#   1. repository_dispatch from the consensus repo (webhook/GitHub Action)
-#   2. Daily schedule as fallback (06:00 UTC)
-#   3. Manual workflow_dispatch
+# Optional workflow for maintainers with access to the private consensus repo.
+# It is manual-only so public forks/clones do not fail on missing GH_TOKEN.
 #
 # When the consensus library has changed, this workflow:
 #   - Installs the latest version
-#   - Checks if requirements.txt hash changed (the git+ ref is always @main,
-#     so we detect changes via the installed package version)
+#   - Checks the optional requirements-consensus.txt path
 #   - Opens a PR to bump/verify the dependency
 
 name: Consensus Sync
 
 on:
-  repository_dispatch:
-    types: [consensus-update]
-  schedule:
-    # Daily at 06:00 UTC
-    - cron: "0 6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -64,8 +55,8 @@ jobs:
 
       - name: Install all backend deps (compatibility check)
         run: |
-          sed "s|git+https://github.com/axiotic-ai/consensus.git@main|git+https://x-access-token:${GIT_AUTH_TOKEN}@github.com/axiotic-ai/consensus.git@main|g" \
-            backend/requirements.txt > /tmp/backend-requirements.txt
+          sed "s|git+https://github.com/axiotic-ai/consensus.git@symphonia-integration|git+https://x-access-token:${GIT_AUTH_TOKEN}@github.com/axiotic-ai/consensus.git@symphonia-integration|g" \
+            backend/requirements-consensus.txt > /tmp/backend-requirements.txt
           pip install -r /tmp/backend-requirements.txt
         env:
           GIT_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}

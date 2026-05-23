@@ -42,9 +42,8 @@ Open **http://localhost:3000** — log in with the admin credentials you set in 
 - Follow-up questions auto-generated from the previous round's synthesis
 
 **AI synthesis engine**
-- Powered by the [axiotic-ai/consensus](https://github.com/axiotic-ai/consensus) library
-- Committee synthesis with multiple AI perspectives
-- Diffusion-based iterative refinement
+- Built-in open-source simple synthesis with OpenRouter
+- Optional advanced consensus engine for committee synthesis and diffusion-based iterative refinement
 - Convergence scoring — know when experts actually agree
 
 **Rich analysis**
@@ -78,7 +77,7 @@ Open **http://localhost:3000** — log in with the admin credentials you set in 
 | Frontend | React 18, Vite, TypeScript, Tailwind CSS, Tiptap |
 | Backend | Python, FastAPI, SQLAlchemy |
 | Database | PostgreSQL 15 |
-| AI | OpenRouter API + axiotic-ai/consensus |
+| AI | OpenRouter API; optional consensus package for advanced modes |
 | Real-time | WebSockets |
 | Deployment | Docker Compose, Nginx |
 
@@ -128,6 +127,17 @@ cp .env.example .env
 | `ADMIN_PASSWORD` | No | Admin account password (default: `change-me-now`) |
 
 > See [docs/INSTALLATION.md](docs/INSTALLATION.md) for the full configuration reference and non-Docker setup.
+
+### Optional Advanced Consensus Engine
+
+The default install is token-free and works from a public clone. It does not install the private `axiotic-ai/consensus` package.
+
+If you have access to that repository and want the advanced TTD/committee modes, install:
+
+```bash
+cd backend
+pip install -r requirements-consensus.txt
+```
 
 ---
 

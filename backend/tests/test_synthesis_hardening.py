@@ -489,11 +489,14 @@ class TestConsensusLibraryUnavailable:
     """Test graceful handling when the consensus library is not installed."""
 
     @pytest.mark.asyncio
-    async def test_adapter_raises_config_error_on_import_failure(self):
-        """When consensus library isn't installed, SynthesisConfigError is raised."""
-        from core.synthesis import ConsensusLibraryAdapter, SynthesisConfigError
+    async def test_simple_adapter_uses_open_source_fallback_on_import_failure(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
+        """Simple synthesis remains available when consensus is not installed."""
+        from core.synthesis import ConsensusLibraryAdapter, OpenSourceSimpleSynthesis
 
         adapter = ConsensusLibraryAdapter(strategy="simple")
+        monkeypatch.setenv("OPENROUTER_API_KEY", "sk-test")
 
         # Mock the import to fail
         with patch.dict("sys.modules", {"consensus": None, "consensus.config": None}):
@@ -501,11 +504,9 @@ class TestConsensusLibraryUnavailable:
             adapter._strategy_instance = None
             adapter._llm_client = None
 
-            with pytest.raises(SynthesisConfigError):
-                await adapter.run(
-                    questions=[{"label": "Q?"}],
-                    responses=[{"answers": {"q1": "A"}}],
-                )
+            adapter._lazy_init()
+
+        assert isinstance(adapter._fallback_simple, OpenSourceSimpleSynthesis)
 
     def test_get_synthesiser_unknown_mode_message(self):
         """get_synthesiser with unknown mode gives helpful error message."""

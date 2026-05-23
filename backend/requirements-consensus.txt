@@ -1,0 +1,9 @@
+-r requirements.txt
+
+# Optional advanced synthesis engine.
+#
+# The default Symphonia install deliberately does not require this private
+# dependency, so public clones can install and run without a GitHub token.
+# Install this file only if you have access to the consensus repository and
+# want to enable TTD/committee synthesis modes.
+consensus @ git+https://github.com/axiotic-ai/consensus.git@symphonia-integration

@@ -435,6 +435,209 @@ class MockSynthesis:
         )
 
 
+class OpenSourceSimpleSynthesis:
+    """Single-prompt synthesis that only needs the OpenAI SDK/OpenRouter.
+
+    This keeps Symphonia usable from a public clone without installing the
+    optional private consensus package. The structured consensus engine can
+    still be installed separately for TTD/committee workflows.
+    """
+
+    def __init__(self, model: str, timeout_seconds: float = 120.0) -> None:
+        self.model = model
+        self.timeout_seconds = timeout_seconds
+
+    @staticmethod
+    def _question_text(question: Any, fallback: str) -> str:
+        if isinstance(question, str):
+            return question.strip() or fallback
+        if isinstance(question, dict):
+            for key in ("label", "text", "question", "title"):
+                value = question.get(key)
+                if isinstance(value, str) and value.strip():
+                    return value.strip()
+        return fallback
+
+    @staticmethod
+    def _answer_text(value: Any) -> str:
+        if value is None:
+            return ""
+        if isinstance(value, (str, int, float, bool)):
+            return str(value)
+        if isinstance(value, list):
+            return "\n".join(
+                item
+                for item in (
+                    OpenSourceSimpleSynthesis._answer_text(candidate).strip()
+                    for candidate in value
+                )
+                if item
+            )
+        if isinstance(value, dict):
+            parts: list[str] = []
+            for key, label in (
+                ("position", "Answer"),
+                ("value", "Answer"),
+                ("answer", "Answer"),
+                ("selected", "Selected"),
+                ("selectedScore", "Score"),
+                ("score", "Score"),
+                ("evidence", "Evidence"),
+                ("confidence", "Confidence"),
+                ("confidenceJustification", "Confidence rationale"),
+                ("counterarguments", "Counterarguments"),
+            ):
+                if key not in value:
+                    continue
+                text = OpenSourceSimpleSynthesis._answer_text(value.get(key)).strip()
+                if text:
+                    parts.append(f"{label}: {text}")
+            if parts:
+                return "\n".join(parts)
+            try:
+                return json.dumps(value, ensure_ascii=False, indent=2)
+            except TypeError:
+                return str(value)
+        return str(value)
+
+    @classmethod
+    def _format_responses(
+        cls,
+        questions: List[Any],
+        responses: List[Dict[str, Any]],
+    ) -> str:
+        question_labels = [
+            cls._question_text(question, f"Question {index + 1}")
+            for index, question in enumerate(questions)
+        ]
+        blocks: list[str] = []
+        for response_index, response in enumerate(responses, 1):
+            answers = response.get("answers") or {}
+            if isinstance(answers, str):
+                try:
+                    answers = json.loads(answers)
+                except json.JSONDecodeError:
+                    answers = {}
+            if not isinstance(answers, dict):
+                answers = {}
+            email = response.get("email") or f"Expert {response_index}"
+            blocks.append(f"## Response {response_index} ({email})")
+            for question_index, question_label in enumerate(question_labels, 1):
+                answer = cls._answer_text(answers.get(f"q{question_index}")).strip()
+                blocks.append(
+                    f"Q{question_index}. {question_label}\nA: {answer or 'No answer'}"
+                )
+        return "\n\n".join(blocks)
+
+    async def run(
+        self,
+        questions: List[Dict[str, Any]],
+        responses: List[Dict[str, Any]],
+        model: Optional[str] = None,
+        mode: FlowMode = FlowMode.HUMAN_ONLY,
+        progress_callback: ProgressCallback = None,
+        comments_context: str = "",
+        form_id: Optional[int] = None,
+        round_id: Optional[int] = None,
+    ) -> SynthesisResult:
+        if not responses:
+            raise SynthesisResponseError("Cannot synthesise zero responses")
+
+        api_key = os.getenv("OPENROUTER_API_KEY", "")
+        if not api_key:
+            raise SynthesisConfigError(
+                "OPENROUTER_API_KEY is required for open-source simple synthesis. "
+                "Set SYNTHESIS_MODE=mock for local UI testing without API calls."
+            )
+
+        if progress_callback:
+            await progress_callback("preparing", 1, 4)
+
+        question_text = "\n".join(
+            f"{index + 1}. {self._question_text(question, f'Question {index + 1}')}"
+            for index, question in enumerate(questions)
+        )
+        response_text = self._format_responses(questions, responses)
+        comments_section = f"\n\nDiscussion comments:\n{comments_context}" if comments_context else ""
+        prompt = f"""You are helping a facilitator synthesise a Delphi-style consultation.
+
+Create a clear, practical synthesis from the responses below. Preserve disagreement and uncertainty. Do not invent consensus. Structure the output with:
+
+1. Executive summary
+2. Main points of agreement
+3. Main disagreements or tensions
+4. Nuances, caveats, and missing evidence
+5. Suggested next-round questions
+
+Questions:
+{question_text}
+
+Responses:
+{response_text}{comments_section}
+"""
+
+        if progress_callback:
+            await progress_callback("open_source_synthesis", 2, 4)
+
+        try:
+            from openai import OpenAI
+
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=api_key,
+            )
+
+            completion = await asyncio.wait_for(
+                asyncio.to_thread(
+                    client.chat.completions.create,
+                    model=model or self.model,
+                    max_tokens=8192,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are an expert facilitator writing concise, "
+                                "balanced syntheses of consultation responses."
+                            ),
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                ),
+                timeout=self.timeout_seconds,
+            )
+            narrative = completion.choices[0].message.content or ""
+        except asyncio.TimeoutError as exc:
+            raise SynthesisTimeoutError(
+                f"Open-source simple synthesis timed out after {self.timeout_seconds}s"
+            ) from exc
+        except Exception as exc:
+            raise SynthesisLibraryError(
+                f"Open-source simple synthesis failed: {type(exc).__name__}: {exc}"
+            ) from exc
+
+        if progress_callback:
+            await progress_callback("complete", 4, 4)
+
+        return SynthesisResult(
+            agreements=[],
+            disagreements=[],
+            nuances=[],
+            confidence_map={"overall": 0.5},
+            follow_up_probes=[],
+            provenance={
+                "mode": "open_source_simple",
+                "model": model or self.model,
+                "form_id": form_id,
+                "round_id": round_id,
+            },
+            analyst_reports=[],
+            meta_synthesis_reasoning=(
+                "Generated by Symphonia's built-in open-source simple synthesis path."
+            ),
+            narrative=narrative.strip(),
+        )
+
+
 # =============================================================================
 # LIBRARY ADAPTER
 # =============================================================================
@@ -492,12 +695,13 @@ class ConsensusLibraryAdapter:
         # Lazily initialised
         self._strategy_instance: Any = None
         self._llm_client: Any = None
+        self._fallback_simple: OpenSourceSimpleSynthesis | None = None
 
     # ------------------------------------------------------------------ init
 
     def _lazy_init(self) -> None:
         """Lazy-initialise the library strategy (import + construct)."""
-        if self._strategy_instance is not None:
+        if self._strategy_instance is not None or self._fallback_simple is not None:
             return
 
         try:
@@ -511,8 +715,19 @@ class ConsensusLibraryAdapter:
             from consensus.diffusion.runner import TTDConfig
             from consensus.llm.cost_tracker import CostTracker
         except ImportError as exc:
+            if self._effective_strategy == "simple":
+                logger.info(
+                    "Consensus package not installed; using built-in open-source simple synthesis."
+                )
+                self._fallback_simple = OpenSourceSimpleSynthesis(
+                    model=self.model,
+                    timeout_seconds=self.timeout_seconds,
+                )
+                return
             raise SynthesisConfigError(
-                f"Failed to import consensus library. Is it installed? {exc}"
+                "The optional consensus package is not installed. "
+                "Use the built-in 'simple' synthesis mode, or install "
+                "backend/requirements-consensus.txt to enable TTD/committee modes."
             ) from exc
 
         api_key = os.getenv("OPENROUTER_API_KEY")
@@ -781,6 +996,19 @@ class ConsensusLibraryAdapter:
 
         if progress_callback:
             await progress_callback("preparing", 1, 4)
+
+        fallback_simple = getattr(self, "_fallback_simple", None)
+        if fallback_simple is not None:
+            return await fallback_simple.run(
+                questions=questions,
+                responses=responses,
+                model=model or self.model,
+                mode=mode,
+                progress_callback=progress_callback,
+                comments_context=comments_context,
+                form_id=form_id,
+                round_id=round_id,
+            )
 
         prose_responses = self._build_prose_responses(responses)
         question_text = self._build_question_text(questions)

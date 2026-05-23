@@ -4,20 +4,16 @@ substitutions:
   _AR_REPO: cloud-run-source-deploy
   _IMAGE_NAMESPACE: symphonia
   _IMAGE_NAME: symphonia-api
-  _GITHUB_TOKEN_SECRET: GITHUB_TOKEN
 
 steps:
   - name: gcr.io/cloud-builders/docker
     id: Build
     entrypoint: bash
-    secretEnv:
-      - GITHUB_TOKEN
     args:
       - -ceu
       - |
         IMAGE="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE_NAMESPACE}/${_IMAGE_NAME}:${COMMIT_SHA}"
         docker build --no-cache \
-          --build-arg GITHUB_TOKEN="$$GITHUB_TOKEN" \
           -t "$$IMAGE" \
           backend -f backend/Dockerfile
 
@@ -52,11 +48,6 @@ steps:
       - --to-latest
       - --region=${_REGION}
       - --quiet
-
-availableSecrets:
-  secretManager:
-    - versionName: projects/$PROJECT_ID/secrets/${_GITHUB_TOKEN_SECRET}/versions/latest
-      env: GITHUB_TOKEN
 
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE_NAMESPACE}/${_IMAGE_NAME}:${COMMIT_SHA}
