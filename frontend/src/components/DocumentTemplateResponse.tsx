@@ -253,6 +253,15 @@ function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
       return;
     }
 
+    if (startsSection && pages.length === 0 && !hasAnyRichField(current.nodes)) {
+      currentSection = headingText;
+      current = {
+        title: headingText || 'Section',
+        nodes: [...current.nodes, node],
+      };
+      return;
+    }
+
     if (startsSection || startsRecommendationPage) {
       pushCurrent();
       currentSection = startsSection ? headingText : currentSection;
