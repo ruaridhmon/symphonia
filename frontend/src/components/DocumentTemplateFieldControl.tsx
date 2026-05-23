@@ -77,7 +77,7 @@ export default function DocumentTemplateFieldControl({
 
   return (
     <span
-      className={`${usesWideControl ? 'flex w-full' : 'inline-flex max-w-full'} flex-col gap-1 rounded-[1.15rem] px-3 py-2 align-middle`}
+      className={`${usesWideControl ? 'flex w-full' : 'inline-flex max-w-full'} flex-col gap-2 rounded-lg px-3.5 py-3 align-middle`}
       data-question-key={field.questionKey}
       onClick={() => onSelect?.()}
       style={{
@@ -90,7 +90,7 @@ export default function DocumentTemplateFieldControl({
           : answered
             ? '1px solid color-mix(in srgb, #138a52 24%, transparent)'
             : '1px solid color-mix(in srgb, var(--border) 88%, transparent)',
-        boxShadow: '0 10px 24px -24px rgba(15, 23, 42, 0.24)',
+        boxShadow: '0 8px 20px -22px rgba(15, 23, 42, 0.2)',
         scrollMarginTop: '6rem',
         cursor: onSelect ? 'pointer' : 'default',
       }}
@@ -125,7 +125,10 @@ export default function DocumentTemplateFieldControl({
         </span>
       ) : (
         <span className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+          <span
+            className="text-sm font-semibold leading-snug"
+            style={{ color: 'color-mix(in srgb, var(--foreground) 82%, var(--muted-foreground))', letterSpacing: 0 }}
+          >
             {label}
           </span>
           {readOnly ? (

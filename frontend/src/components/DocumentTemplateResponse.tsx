@@ -430,12 +430,41 @@ export default function DocumentTemplateResponse({
         <style>{`
           .symphonia-rich-template {
             color: var(--foreground);
+            font-family: var(--font-family);
+            font-size: 0.96rem;
+            letter-spacing: 0;
+            max-width: 68ch;
           }
-          .symphonia-rich-template h1 { font-size: 1.9rem; line-height: 1.15; margin: 0 0 1rem; font-weight: 700; color: #10223e; }
-          .symphonia-rich-template h2 { font-size: 1.3rem; line-height: 1.2; margin: 1.15rem 0 0.7rem; font-weight: 650; color: #183153; }
-          .symphonia-rich-template h3 { font-size: 1.08rem; line-height: 1.3; margin: 1rem 0 0.55rem; font-weight: 650; color: #1f3557; }
-          .symphonia-rich-template p, .symphonia-rich-template li { line-height: 1.8; }
-          .symphonia-rich-template ul, .symphonia-rich-template ol { padding-left: 1.35rem; margin: 0.7rem 0; }
+          .symphonia-rich-template h1 {
+            font-size: 1.55rem;
+            line-height: 1.22;
+            margin: 0 0 1rem;
+            font-weight: 650;
+            letter-spacing: 0;
+            color: #10223e;
+          }
+          .symphonia-rich-template h2 {
+            font-size: 1.18rem;
+            line-height: 1.28;
+            margin: 1.1rem 0 0.65rem;
+            font-weight: 650;
+            letter-spacing: 0;
+            color: #183153;
+          }
+          .symphonia-rich-template h3 {
+            font-size: 1.03rem;
+            line-height: 1.38;
+            margin: 1rem 0 0.55rem;
+            font-weight: 650;
+            letter-spacing: 0;
+            color: #1f3557;
+          }
+          .symphonia-rich-template p, .symphonia-rich-template li {
+            line-height: 1.72;
+            letter-spacing: 0;
+            color: color-mix(in srgb, var(--foreground) 88%, #334155);
+          }
+          .symphonia-rich-template ul, .symphonia-rich-template ol { padding-left: 1.35rem; margin: 0.75rem 0; }
           .symphonia-rich-template blockquote {
             margin: 0.9rem 0;
             padding: 0.75rem 1rem;
@@ -461,7 +490,7 @@ export default function DocumentTemplateResponse({
               }}
             >
               <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+                <div className="text-xs font-semibold" style={{ color: 'var(--muted-foreground)', letterSpacing: 0 }}>
                   Round 2 sections
                 </div>
                 <label className="sr-only" htmlFor="round-section-jump">Jump to section</label>
@@ -520,7 +549,7 @@ export default function DocumentTemplateResponse({
               style={{ borderColor: 'color-mix(in srgb, var(--border) 76%, transparent)' }}
             >
               <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--accent)' }}>
+                <div className="text-xs font-semibold" style={{ color: 'var(--accent)', letterSpacing: 0 }}>
                   Section {currentPage + 1} of {pages.length}
                 </div>
                 <div className="mt-1 text-sm font-medium text-foreground">{selectedPage?.title}</div>
