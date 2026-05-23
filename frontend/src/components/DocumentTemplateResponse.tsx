@@ -279,6 +279,14 @@ function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
   return pages.length > 0 ? pages : [{ title: 'Questions', nodes }];
 }
 
+function getShortPageTitle(title: string, index: number) {
+  if (/summary/i.test(title)) return 'Summary';
+  if (/conclusion/i.test(title)) return 'Conclusion';
+  const recommendationMatch = title.match(/Recommendation\s+(\d+)/i);
+  if (recommendationMatch) return `Rec. ${recommendationMatch[1]}`;
+  return `Section ${index + 1}`;
+}
+
 export default function DocumentTemplateResponse({
   template,
   answers,
@@ -437,6 +445,46 @@ export default function DocumentTemplateResponse({
             boxShadow: compact ? 'none' : '0 10px 24px -20px rgba(15, 23, 42, 0.38)',
           }}
         >
+          {shouldPaginate ? (
+            <div
+              className="mb-5 rounded-xl p-3"
+              style={{
+                border: '1px solid color-mix(in srgb, var(--border) 78%, transparent)',
+                backgroundColor: 'color-mix(in srgb, var(--background) 72%, white)',
+              }}
+            >
+              <div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
+                Round 2 sections
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Round 2 sections">
+                {pages.map((page, index) => {
+                  const isActive = index === currentPage;
+                  return (
+                    <button
+                      key={`${page.title}-${index}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => void changePage(index)}
+                      disabled={isChangingPage}
+                      className="inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55"
+                      style={{
+                        border: isActive
+                          ? '1px solid color-mix(in srgb, var(--accent) 56%, var(--border))'
+                          : '1px solid color-mix(in srgb, var(--border) 82%, transparent)',
+                        backgroundColor: isActive
+                          ? 'color-mix(in srgb, var(--accent) 12%, var(--background))'
+                          : 'var(--background)',
+                        color: isActive ? 'var(--accent)' : 'var(--foreground)',
+                      }}
+                    >
+                      {getShortPageTitle(page.title, index)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
           <div className="symphonia-rich-template space-y-3">{content}</div>
           {shouldPaginate ? (
             <div

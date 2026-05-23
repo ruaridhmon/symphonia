@@ -5,10 +5,16 @@ import type { ConfigurableQuestion } from '../utils/questions';
 import type { RenderableDocumentTemplateField } from '../utils/documentTemplate';
 import { isResponseAnswered } from '../utils/responseValidation';
 
+function formatParticipantLabel(label: string) {
+  return label
+    .replace(/^(?:R\d+_Q\d+[a-z]?|Q\d+[a-z]?)\s*[:.)-]?\s*/i, '')
+    .trim();
+}
+
 function toQuestion(field: RenderableDocumentTemplateField): ConfigurableQuestion {
   return {
     questionId: field.questionId ?? field.questionKey,
-    label: field.label,
+    label: formatParticipantLabel(field.label),
     requireEvidence: false,
     requireCounterarguments: false,
     requireConfidence: false,
@@ -53,6 +59,7 @@ export default function DocumentTemplateFieldControl({
 }: DocumentTemplateFieldControlProps) {
   const value = response.position || '';
   const answered = isResponseAnswered(response);
+  const label = formatParticipantLabel(field.label);
   const usesInlineTextField = field.fieldType === 'short' || field.fieldType === 'long';
   const usesWideControl =
     usesInlineTextField ||
@@ -119,7 +126,7 @@ export default function DocumentTemplateFieldControl({
       ) : (
         <span className="flex flex-wrap items-center gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
-            {field.label}
+            {label}
           </span>
           {readOnly ? (
             <AnswerStateBadge
