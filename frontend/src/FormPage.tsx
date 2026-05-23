@@ -53,6 +53,7 @@ export default function FormPage() {
   const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [draftRestored, setDraftRestored] = useState(false)
   const [highlightedQuestionKey, setHighlightedQuestionKey] = useState<string | null>(null)
+  const [templatePagination, setTemplatePagination] = useState({ currentPage: 1, totalPages: 1, isLastPage: true })
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latestResponsesRef = useRef<Record<string, StructuredResponse>>({})
 
@@ -98,6 +99,23 @@ export default function FormPage() {
         setDraftStatus('error')
       }
     }, 2000)
+  }, [formId])
+
+  const saveDraftNow = useCallback(async () => {
+    if (!formId) return
+    if (draftTimerRef.current) {
+      clearTimeout(draftTimerRef.current)
+      draftTimerRef.current = null
+    }
+    try {
+      setDraftStatus('saving')
+      await saveDraft(formId, latestResponsesRef.current)
+      setDraftStatus('saved')
+      setTimeout(() => setDraftStatus((s) => s === 'saved' ? 'idle' : s), 3000)
+    } catch {
+      setDraftStatus('error')
+      throw new Error('Draft save failed')
+    }
   }, [formId])
 
   // Clean up timer on unmount
@@ -473,7 +491,7 @@ export default function FormPage() {
           <h2 className="text-lg font-semibold text-foreground">
             {mode === 'reviewing'
               ? (isDocumentMode ? 'Your Submitted Document' : 'Your Submitted Answers')
-              : (isDocumentMode ? 'Document Template' : 'Questions')}
+              : (isDocumentMode ? 'Round 2 briefing and questions' : 'Questions')}
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
             {mode === 'reviewing'
@@ -481,7 +499,7 @@ export default function FormPage() {
                 ? 'Review the completed template below.'
                 : 'Review your submitted responses below.')
               : (isDocumentMode
-                ? 'Complete each marked section in the template below.'
+                ? 'Review the Round 2 summary and recommendations, then complete the questions.'
                 : 'Please provide your expert input for each question below.')}
           </p>
         </div>
@@ -523,6 +541,9 @@ export default function FormPage() {
                 questions={roundQuestions}
                 answers={structuredResponses}
                 highlightedQuestionKey={highlightedQuestionKey}
+                paginate
+                onBeforePageChange={saveDraftNow}
+                onPaginationChange={setTemplatePagination}
                 onChange={(key, val) => {
                   clearResolvedValidationError(key, val)
                   setStructuredResponses(prev => {
@@ -548,16 +569,18 @@ export default function FormPage() {
                 highlightedQuestionKey={highlightedQuestionKey}
               />
             )}
-            <LoadingButton
-              variant="accent"
-              size="lg"
-              className="w-full"
-              loading={isSubmitting}
-              loadingText="Submitting…"
-              onClick={handleSubmit}
-            >
-              {hasSubmitted ? 'Update Response' : 'Submit'}
-            </LoadingButton>
+            {isDocumentMode && !templatePagination.isLastPage ? null : (
+              <LoadingButton
+                variant="accent"
+                size="lg"
+                className="w-full"
+                loading={isSubmitting}
+                loadingText="Submitting…"
+                onClick={handleSubmit}
+              >
+                {hasSubmitted ? 'Update Response' : 'Submit'}
+              </LoadingButton>
+            )}
 
             <div className="mt-2 px-1">
               <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
