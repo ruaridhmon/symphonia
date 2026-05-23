@@ -10,13 +10,13 @@ import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
-import { ChartNoAxesColumn, ChevronDown, ChevronRight, Download, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
+import { ChartNoAxesColumn, CheckCircle2, ChevronDown, ChevronRight, Download, FileText, Globe, Link2, MapPin, MessageSquareText, Sparkles } from 'lucide-react';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useAuth } from './AuthContext';
 import { api } from './api/client';
 import { getMe } from './api/auth';
 import { getForm as apiFetchForm, updateParticipantVisibility } from './api/forms';
-import { getRounds, getRoundsWithResponses, nextRound as apiNextRound, updateRound as apiUpdateRound } from './api/rounds';
+import { activateRound as apiActivateRound, getRounds, getRoundsWithResponses, nextRound as apiNextRound, updateRound as apiUpdateRound } from './api/rounds';
 import type { Round as ApiRound } from './api/rounds';
 import {
 	getSynthesisVersions as apiGetSynthesisVersions,
@@ -460,6 +460,7 @@ export default function SummaryPage() {
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
 	const [isSavingRoundSetup, setIsSavingRoundSetup] = useState(false);
+	const [isActivatingRound, setIsActivatingRound] = useState(false);
 	const synthesisRunStorageKey = useMemo(
 		() => `summary:synthesis-run:${formId}`,
 		[formId]
@@ -1321,6 +1322,28 @@ export default function SummaryPage() {
 		}
 	}
 
+	async function makeSelectedRoundLive() {
+		const targetRound = displayRound;
+		if (!formId || !targetRound || targetRound.is_active) return;
+		setIsActivatingRound(true);
+		try {
+			await apiActivateRound(formId, targetRound.id);
+			await loadAll();
+			await loadResponses();
+			setSelectedRound(null);
+			setSearchParams(prev => {
+				const next = new URLSearchParams(prev);
+				next.delete('round');
+				return next;
+			}, { replace: true });
+			toastSuccess(`Round ${targetRound.round_number} is now live.`);
+		} catch (error) {
+			toastError((error as Error).message || 'Failed to make round live');
+		} finally {
+			setIsActivatingRound(false);
+		}
+	}
+
 	async function generateSummary() {
 		const targetRound = targetRoundForGeneration;
 		const modelToUse = sanitizeModel(selectedModel);
@@ -1663,7 +1686,20 @@ export default function SummaryPage() {
 						</div>
 
 						<div className="w-full max-w-xl space-y-3 lg:max-w-sm">
-							<div className="flex justify-start lg:justify-end">
+							<div className="flex flex-wrap justify-start gap-2 lg:justify-end">
+								{displayRound && !displayRound.is_active && (
+									<LoadingButton
+										type="button"
+										variant="success"
+										size="sm"
+										onClick={makeSelectedRoundLive}
+										loading={isActivatingRound}
+										loadingText="Making live..."
+										icon={<CheckCircle2 size={15} aria-hidden="true" />}
+									>
+										Make live
+									</LoadingButton>
+								)}
 								<button
 									type="button"
 									onClick={() => setDownloadSheetOpen(true)}
