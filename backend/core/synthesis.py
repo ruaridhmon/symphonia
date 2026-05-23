@@ -558,7 +558,9 @@ class OpenSourceSimpleSynthesis:
             for index, question in enumerate(questions)
         )
         response_text = self._format_responses(questions, responses)
-        comments_section = f"\n\nDiscussion comments:\n{comments_context}" if comments_context else ""
+        comments_section = (
+            f"\n\nDiscussion comments:\n{comments_context}" if comments_context else ""
+        )
         prompt = f"""You are helping a facilitator synthesise a Delphi-style consultation.
 
 Create a clear, practical synthesis from the responses below. Preserve disagreement and uncertainty. Do not invent consensus. Structure the output with:
