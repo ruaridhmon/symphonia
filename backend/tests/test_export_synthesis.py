@@ -8,6 +8,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from tests.conftest import create_form, submit_response
+from tests.conftest import TestingSessionLocal
+from core.models import RoundModel
 
 
 # ── Module-scoped fixtures ────────────────────────────────────────────────────
@@ -60,6 +62,37 @@ def _get_active_round_id(client: TestClient, form_id: int, headers: dict) -> int
     return resp.json()["id"]
 
 
+def _seed_round_two_probe(form_id: int) -> None:
+    db = TestingSessionLocal()
+    try:
+        round_obj = (
+            db.query(RoundModel)
+            .filter(RoundModel.form_id == form_id, RoundModel.round_number == 1)
+            .first()
+        )
+        assert round_obj is not None
+        round_obj.synthesis = (
+            "Below is a synthesis you can use as the Round 1 feedback report "
+            "and as the basis for Round 2. Participants agreed on the main risk."
+        )
+        round_obj.synthesis_json = {
+            "narrative": (
+                "Below is a synthesis you can use as the Round 1 feedback report "
+                "and as the basis for Round 2. Participants agreed on the main risk."
+            ),
+            "follow_up_probes": [
+                {
+                    "question": "Can you elaborate on the specific risks of the aggressive timeline?",
+                    "target_experts": [1],
+                    "rationale": "Clarify trade-offs between speed and quality",
+                }
+            ],
+        }
+        db.commit()
+    finally:
+        db.close()
+
+
 # ── Tests ─────────────────────────────────────────────────────────────────────
 
 
@@ -99,6 +132,21 @@ class TestExportSynthesisMarkdown:
         )
         body = resp.text
         assert "## Round 1" in body
+
+    def test_markdown_export_formats_round_two_questions(
+        self, client: TestClient, seeded_form
+    ):
+        form_id, admin_headers, _ = seeded_form
+        _seed_round_two_probe(form_id)
+        resp = client.get(
+            f"/forms/{form_id}/export_synthesis?format=markdown",
+            headers=admin_headers,
+        )
+        body = resp.text
+        assert "## Round 1 Feedback Report" in body
+        assert "### Proposed Questions for Round 2" in body
+        assert "Can you elaborate on the specific risks" in body
+        assert "Below is a synthesis you can use" not in body
 
     def test_markdown_export_has_content_disposition(
         self, client: TestClient, seeded_form
@@ -156,6 +204,20 @@ class TestExportSynthesisJson:
         round_data = data["rounds"][0]
         assert "round_number" in round_data
         assert "questions" in round_data
+
+    def test_json_export_has_next_round_questions(
+        self, client: TestClient, seeded_form
+    ):
+        form_id, admin_headers, _ = seeded_form
+        _seed_round_two_probe(form_id)
+        resp = client.get(
+            f"/forms/{form_id}/export_synthesis?format=json",
+            headers=admin_headers,
+        )
+        data = json.loads(resp.text)
+        assert data["rounds"][0]["next_round_questions"] == [
+            "Can you elaborate on the specific risks of the aggressive timeline?"
+        ]
 
     def test_json_export_content_disposition(self, client: TestClient, seeded_form):
         form_id, admin_headers, _ = seeded_form

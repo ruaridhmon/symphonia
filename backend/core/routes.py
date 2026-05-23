@@ -3379,6 +3379,105 @@ def get_synthesis_version(
 # ---------------------------------------------------------
 
 
+_ROUND_FEEDBACK_PREAMBLE_RE = re.compile(
+    r"^\s*below is a synthesis you can use as the round\s+1 feedback report "
+    r"and as the basis for round\s+2\.?\s*",
+    re.IGNORECASE,
+)
+
+
+def _clean_synthesis_export_text(value: str | None) -> str:
+    if not value:
+        return ""
+    return _ROUND_FEEDBACK_PREAMBLE_RE.sub("", value, count=1).strip()
+
+
+def _export_question_text(question: Any) -> str:
+    if isinstance(question, str):
+        return question.strip()
+    if isinstance(question, dict):
+        for key in ("label", "text", "question", "title"):
+            value = question.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return str(question).strip()
+
+
+def _round_question_texts(round_obj: RoundModel | None) -> list[str]:
+    if not round_obj or not isinstance(round_obj.questions, list):
+        return []
+    return [
+        text
+        for question in round_obj.questions
+        if (text := _export_question_text(question))
+    ]
+
+
+def _synthesis_probe_questions(
+    synthesis_json: Any,
+) -> list[dict[str, Any]]:
+    if not isinstance(synthesis_json, dict):
+        return []
+    probes = synthesis_json.get("follow_up_probes")
+    if not isinstance(probes, list):
+        return []
+    result: list[dict[str, Any]] = []
+    for probe in probes:
+        if not isinstance(probe, dict):
+            continue
+        question = probe.get("question")
+        if isinstance(question, str) and question.strip():
+            result.append(
+                {
+                    "question": question.strip(),
+                    "rationale": probe.get("rationale"),
+                    "target_experts": probe.get("target_experts"),
+                }
+            )
+    return result
+
+
+def _append_next_round_questions(
+    lines: list[str],
+    round_obj: RoundModel,
+    next_round: RoundModel | None,
+) -> bool:
+    next_round_number = round_obj.round_number + 1
+    configured_questions = _round_question_texts(next_round)
+    probe_questions = _synthesis_probe_questions(round_obj.synthesis_json)
+
+    if configured_questions:
+        lines.append(f"### Questions for Round {next_round_number}")
+        lines.append("")
+        lines.append("These are the questions currently configured for the next round.")
+        lines.append("")
+        for index, question in enumerate(configured_questions, 1):
+            lines.append(f"{index}. {question}")
+        lines.append("")
+        return True
+
+    if not probe_questions:
+        return False
+
+    lines.append(f"### Proposed Questions for Round {next_round_number}")
+    lines.append("")
+    lines.append("Use these questions to turn the synthesis into a focused next round.")
+    lines.append("")
+    for index, probe in enumerate(probe_questions, 1):
+        lines.append(f"{index}. {probe['question']}")
+        rationale = probe.get("rationale")
+        if isinstance(rationale, str) and rationale.strip():
+            lines.append(f"   - Rationale: {rationale.strip()}")
+        target = probe.get("target_experts")
+        if isinstance(target, list) and target:
+            lines.append(
+                "   - Target experts: "
+                + ", ".join(f"Expert {expert}" for expert in target)
+            )
+    lines.append("")
+    return True
+
+
 def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) -> str:
     """Build a comprehensive markdown document from all rounds' synthesis data."""
     lines: list[str] = []
@@ -3392,8 +3491,12 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
     lines.append("---")
     lines.append("")
 
-    for rnd in rounds_list:
-        lines.append(f"## Round {rnd.round_number}")
+    for round_index, rnd in enumerate(rounds_list):
+        next_round = (
+            rounds_list[round_index + 1] if round_index + 1 < len(rounds_list) else None
+        )
+        heading_suffix = " Feedback Report" if rnd.round_number == 1 else ""
+        lines.append(f"## Round {rnd.round_number}{heading_suffix}")
         lines.append("")
 
         if rnd.convergence_score is not None:
@@ -3402,16 +3505,10 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
 
         questions = rnd.questions or []
         if questions:
-            lines.append("### Questions")
+            lines.append(f"### Round {rnd.round_number} Questions")
             lines.append("")
             for i, q in enumerate(questions, 1):
-                q_text = (
-                    q
-                    if isinstance(q, str)
-                    else q.get("label", q.get("text", str(q)))
-                    if isinstance(q, dict)
-                    else str(q)
-                )
+                q_text = _export_question_text(q)
                 lines.append(f"{i}. {q_text}")
             lines.append("")
 
@@ -3421,7 +3518,7 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
             if sj.get("narrative"):
                 lines.append("### Narrative")
                 lines.append("")
-                lines.append(sj["narrative"])
+                lines.append(_clean_synthesis_export_text(sj["narrative"]))
                 lines.append("")
 
             # Agreements
@@ -3496,21 +3593,7 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
                         )
                 lines.append("")
 
-            # Follow-up Probes
-            probes = sj.get("follow_up_probes", [])
-            if probes:
-                lines.append("### Follow-up Probes")
-                lines.append("")
-                for p in probes:
-                    lines.append(f"- **{p.get('question', '')}**")
-                    target = p.get("target_experts", [])
-                    if target:
-                        lines.append(
-                            f"  - Target experts: {', '.join(f'Expert {e}' for e in target)}"
-                        )
-                    if p.get("rationale"):
-                        lines.append(f"  - Rationale: {p['rationale']}")
-                lines.append("")
+            _append_next_round_questions(lines, rnd, next_round)
 
             # Confidence Map
             conf_map = sj.get("confidence_map", {})
@@ -3531,8 +3614,9 @@ def _build_synthesis_markdown(form: FormModel, rounds_list: list[RoundModel]) ->
         elif rnd.synthesis:
             lines.append("### Synthesis")
             lines.append("")
-            lines.append(rnd.synthesis)
+            lines.append(_clean_synthesis_export_text(rnd.synthesis))
             lines.append("")
+            _append_next_round_questions(lines, rnd, next_round)
 
         lines.append("---")
         lines.append("")
@@ -3586,8 +3670,16 @@ def export_synthesis(
                     "synthesis_json": rnd.synthesis_json,
                     "synthesis_text": rnd.synthesis,
                     "questions": rnd.questions,
+                    "next_round_questions": (
+                        _round_question_texts(rounds_list[index + 1])
+                        if index + 1 < len(rounds_list)
+                        else [
+                            probe["question"]
+                            for probe in _synthesis_probe_questions(rnd.synthesis_json)
+                        ]
+                    ),
                 }
-                for rnd in rounds_list
+                for index, rnd in enumerate(rounds_list)
             ],
         }
         return FastAPIResponse(
@@ -3724,8 +3816,16 @@ def export_consultation(
                     "synthesis_json": rnd.synthesis_json,
                     "synthesis_text": rnd.synthesis,
                     "questions": rnd.questions,
+                    "next_round_questions": (
+                        _round_question_texts(rounds_list[index + 1])
+                        if index + 1 < len(rounds_list)
+                        else [
+                            probe["question"]
+                            for probe in _synthesis_probe_questions(rnd.synthesis_json)
+                        ]
+                    ),
                 }
-                for rnd in rounds_list
+                for index, rnd in enumerate(rounds_list)
             ],
             "responses": responses_payload,
         }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { saveBackendExport } from '../api/exports';
 import { getRounds, getRoundsWithResponses } from '../api/rounds';
 import type { Form, Round, RoundWithResponses } from '../types/summary';
+import type { Probe } from '../types/synthesis';
 import { extractQuestionText } from '../utils/questions';
 
 interface DownloadSheetProps {
@@ -154,6 +155,43 @@ function formatAnswerFields(value: unknown, question: unknown): Array<{ label: s
   return fields.length ? fields : [{ label: 'Response', value: serializeAnswer(value) || 'No response provided' }];
 }
 
+const ROUND_FEEDBACK_PREAMBLE_RE = /^\s*below is a synthesis you can use as the round\s+1 feedback report and as the basis for round\s+2\.?\s*/i;
+
+function cleanSynthesisText(value: string | null | undefined): string {
+  return (value || '').replace(ROUND_FEEDBACK_PREAMBLE_RE, '').trim();
+}
+
+function getProbeQuestions(round: Round): Probe[] {
+  const probes = round.synthesis_json?.follow_up_probes;
+  if (!Array.isArray(probes)) return [];
+  return probes.filter((probe): probe is Probe => typeof probe?.question === 'string' && probe.question.trim().length > 0);
+}
+
+function getNextRoundQuestionRows(round: Round, nextRound: Round | undefined) {
+  const configuredQuestions = (nextRound?.questions || [])
+    .map((question) => extractQuestionText(question).trim())
+    .filter(Boolean);
+  if (configuredQuestions.length) {
+    return {
+      title: `Questions for Round ${round.round_number + 1}`,
+      intro: 'These are the questions currently configured for the next round.',
+      rows: configuredQuestions.map((question) => ({ question, rationale: undefined, targetExperts: [] as number[] })),
+    };
+  }
+
+  const probes = getProbeQuestions(round);
+  if (!probes.length) return null;
+  return {
+    title: `Proposed questions for Round ${round.round_number + 1}`,
+    intro: 'Use these questions to turn the synthesis into a focused next round.',
+    rows: probes.map((probe) => ({
+      question: probe.question.trim(),
+      rationale: probe.rationale?.trim(),
+      targetExperts: Array.isArray(probe.target_experts) ? probe.target_experts : [],
+    })),
+  };
+}
+
 function wrapExportText(value: string, lineLength = 88): string[] {
   const lines: string[] = [];
 
@@ -286,12 +324,25 @@ async function exportWordDocument(
 
   if (scope === 'synthesis' || scope === 'consultation') {
     pushHeading('Summary', HeadingLevel.HEADING_1);
-    rounds.forEach((round) => {
-      pushHeading(`Round ${round.round_number}`, HeadingLevel.HEADING_2);
-      if (round.synthesis) {
-        round.synthesis.split('\n').forEach((line) => pushText(line));
+    rounds.forEach((round, index) => {
+      pushHeading(`Round ${round.round_number}${round.round_number === 1 ? ' feedback report' : ''}`, HeadingLevel.HEADING_2);
+      const synthesisText = cleanSynthesisText(round.synthesis);
+      if (synthesisText) {
+        synthesisText.split('\n').forEach((line) => pushText(line));
       } else {
         pushText('No summary available.');
+      }
+      const nextQuestions = getNextRoundQuestionRows(round, rounds[index + 1]);
+      if (nextQuestions) {
+        pushHeading(nextQuestions.title, HeadingLevel.HEADING_3);
+        pushText(nextQuestions.intro);
+        nextQuestions.rows.forEach((row, rowIndex) => {
+          pushLabelValue(`${rowIndex + 1}.`, row.question);
+          if (row.rationale) pushLabelValue('Rationale', row.rationale);
+          if (row.targetExperts?.length) {
+            pushLabelValue('Target experts', row.targetExperts.map((expert) => `Expert ${expert}`).join(', '));
+          }
+        });
       }
     });
   }

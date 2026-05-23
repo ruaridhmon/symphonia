@@ -68,6 +68,7 @@ import type {
 	RoundWithResponses,
 	SynthesisVersion,
 } from './types/summary';
+import type { SynthesisData } from './types/synthesis';
 
 // ─── Error Boundary ──────────────────────────────────────────────────────────
 
@@ -237,6 +238,13 @@ function extractQuestionText(q: unknown): string {
 		return String(obj.text || obj.label || obj.question || '');
 	}
 	return '';
+}
+
+function extractProbeQuestions(data: SynthesisData | null | undefined): string[] {
+	const probes = Array.isArray(data?.follow_up_probes) ? data.follow_up_probes : [];
+	return probes
+		.map((probe) => probe?.question?.trim() || '')
+		.filter(Boolean);
 }
 
 function buildStructuredSummaryText(data: Record<string, any> | null): string {
@@ -968,8 +976,13 @@ export default function SummaryPage() {
 
 			if (active && editor) {
 				resetEditorToSaved(active.synthesis || '');
-				const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
-				setNextRoundQuestions((qs || []).map(extractQuestionText));
+				const probeQuestions = extractProbeQuestions(active.synthesis_json);
+				if (probeQuestions.length) {
+					setNextRoundQuestions(probeQuestions);
+				} else {
+					const qs = active.questions?.length ? active.questions : (Array.isArray((f as Form).questions) ? (f as Form).questions : []);
+					setNextRoundQuestions((qs || []).map(extractQuestionText));
+				}
 			} else if (f && Array.isArray((f as Form).questions)) {
 				setNextRoundQuestions((f as Form).questions.map(extractQuestionText));
 			}
