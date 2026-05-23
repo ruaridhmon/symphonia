@@ -6,9 +6,14 @@ import type { RenderableDocumentTemplateField } from '../utils/documentTemplate'
 import { isResponseAnswered } from '../utils/responseValidation';
 
 function formatParticipantLabel(label: string) {
-  return label
+  const cleaned = label
     .replace(/^(?:R\d+_Q\d+[a-z]?|Q\d+[a-z]?)\s*[:.)-]?\s*/i, '')
+    .replace(/\s*\((?:yes\s*\/\s*no|slider|optional\s+text|free\s*text|text\s*box|textarea|single\s*select|multi\s*select|multiple\s*choice|select)\)\s*$/i, '')
+    .replace(/^optional\s*:\s*/i, '')
+    .replace(/\s+([?.!])/g, '$1')
+    .replace(/\s+\.$/, '.')
     .trim();
+  return cleaned ? `${cleaned.charAt(0).toUpperCase()}${cleaned.slice(1)}` : cleaned;
 }
 
 function toQuestion(field: RenderableDocumentTemplateField): ConfigurableQuestion {
