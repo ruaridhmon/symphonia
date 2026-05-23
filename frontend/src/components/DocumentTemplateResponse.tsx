@@ -222,6 +222,24 @@ function hasAnyRichField(nodes: ChildNode[]): boolean {
   });
 }
 
+function cloneNarrativeNode(node: ChildNode): ChildNode | null {
+  const clone = node.cloneNode(true) as ChildNode;
+  if (clone.nodeType === Node.ELEMENT_NODE) {
+    const element = clone as HTMLElement;
+    if (element.getAttribute('data-symphonia-field-key')) return null;
+    element.querySelectorAll('[data-symphonia-field-key]').forEach((fieldElement) => fieldElement.remove());
+    if (!getNodeText(element) && element.querySelectorAll('br, hr').length === 0) return null;
+  }
+  if (clone.nodeType === Node.TEXT_NODE && !clone.textContent?.trim()) return null;
+  return clone;
+}
+
+function buildFullNarrativePage(nodes: ChildNode[]): ChildNode[] {
+  return nodes
+    .map((node) => cloneNarrativeNode(node))
+    .filter((node): node is ChildNode => Boolean(node));
+}
+
 function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
   const pages: RichTemplatePage[] = [];
   let current: RichTemplatePage = { title: 'Start', nodes: [] };
@@ -289,6 +307,7 @@ function getShortPageTitle(title: string, index: number) {
 }
 
 function getSelectPageTitle(title: string, index: number) {
+  if (index === 0) return 'Summary: full briefing';
   const shortTitle = getShortPageTitle(title, index);
   if (shortTitle === title) return title;
   return `${shortTitle}: ${title}`;
@@ -356,11 +375,14 @@ export default function DocumentTemplateResponse({
     const orderedEntries = Array.from(fieldMap.values());
     const allNodes = Array.from(document.body.childNodes);
     const pages = useMemo(() => splitRichTemplatePages(allNodes), [template]);
+    const fullNarrativeNodes = useMemo(() => buildFullNarrativePage(allNodes), [template]);
     const [currentPage, setCurrentPage] = useState(() => Math.max(0, initialPage - 1));
     const [isChangingPage, setIsChangingPage] = useState(false);
     const shouldPaginate = paginate && pages.length > 1 && !readOnly;
     const selectedPage = shouldPaginate ? pages[Math.min(currentPage, pages.length - 1)] : null;
-    const visibleNodes = selectedPage?.nodes ?? allNodes;
+    const visibleNodes = shouldPaginate && currentPage === 0
+      ? fullNarrativeNodes
+      : selectedPage?.nodes ?? allNodes;
     const content = visibleNodes.map((node, index) =>
       renderRichTemplateNode({
         node,
@@ -481,39 +503,47 @@ export default function DocumentTemplateResponse({
             boxShadow: compact ? 'none' : '0 10px 24px -20px rgba(15, 23, 42, 0.38)',
           }}
         >
+          <div className="symphonia-rich-template space-y-3">{content}</div>
           {shouldPaginate ? (
             <div
-              className="mb-5 rounded-xl p-3"
+              className="mt-7 rounded-xl p-3"
               style={{
                 border: '1px solid color-mix(in srgb, var(--border) 78%, transparent)',
                 backgroundColor: 'color-mix(in srgb, var(--background) 72%, white)',
               }}
             >
-              <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-xs font-semibold" style={{ color: 'var(--muted-foreground)', letterSpacing: 0 }}>
-                  Round 2 sections
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="text-xs font-semibold" style={{ color: 'var(--accent)', letterSpacing: 0 }}>
+                    Section {currentPage + 1} of {pages.length}
+                  </div>
+                  <div className="mt-1 text-sm font-medium text-foreground">{selectedPage?.title}</div>
                 </div>
-                <label className="sr-only" htmlFor="round-section-jump">Jump to section</label>
-                <select
-                  id="round-section-jump"
-                  value={currentPage}
-                  onChange={(event) => void changePage(Number(event.target.value))}
-                  disabled={isChangingPage}
-                  className="w-full rounded-md px-3 py-2 text-sm font-medium sm:w-[15rem]"
-                  style={{
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'var(--background)',
-                    color: 'var(--foreground)',
-                  }}
-                >
-                  {pages.map((page, index) => (
-                    <option key={`${page.title}-option-${index}`} value={index}>
-                      {getSelectPageTitle(page.title, index)}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-col gap-2 sm:min-w-[18rem]">
+                  <label className="text-xs font-medium" htmlFor="round-section-jump" style={{ color: 'var(--muted-foreground)' }}>
+                    Jump to section
+                  </label>
+                  <select
+                    id="round-section-jump"
+                    value={currentPage}
+                    onChange={(event) => void changePage(Number(event.target.value))}
+                    disabled={isChangingPage}
+                    className="w-full rounded-md px-3 py-2 text-sm font-medium"
+                    style={{
+                      border: '1px solid var(--border)',
+                      backgroundColor: 'var(--background)',
+                      color: 'var(--foreground)',
+                    }}
+                  >
+                    {pages.map((page, index) => (
+                      <option key={`${page.title}-option-${index}`} value={index}>
+                        {getSelectPageTitle(page.title, index)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Round 2 sections">
+              <div className="mt-3 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Round 2 sections">
                 {pages.map((page, index) => {
                   const isActive = index === currentPage;
                   return (
@@ -540,21 +570,7 @@ export default function DocumentTemplateResponse({
                   );
                 })}
               </div>
-            </div>
-          ) : null}
-          <div className="symphonia-rich-template space-y-3">{content}</div>
-          {shouldPaginate ? (
-            <div
-              className="mt-6 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
-              style={{ borderColor: 'color-mix(in srgb, var(--border) 76%, transparent)' }}
-            >
-              <div>
-                <div className="text-xs font-semibold" style={{ color: 'var(--accent)', letterSpacing: 0 }}>
-                  Section {currentPage + 1} of {pages.length}
-                </div>
-                <div className="mt-1 text-sm font-medium text-foreground">{selectedPage?.title}</div>
-              </div>
-              <div className="flex items-center gap-2">
+              <div className="mt-3 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => void changePage(currentPage - 1)}
