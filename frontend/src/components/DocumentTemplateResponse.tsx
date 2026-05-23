@@ -222,24 +222,6 @@ function hasAnyRichField(nodes: ChildNode[]): boolean {
   });
 }
 
-function cloneNarrativeNode(node: ChildNode): ChildNode | null {
-  const clone = node.cloneNode(true) as ChildNode;
-  if (clone.nodeType === Node.ELEMENT_NODE) {
-    const element = clone as HTMLElement;
-    if (element.getAttribute('data-symphonia-field-key')) return null;
-    element.querySelectorAll('[data-symphonia-field-key]').forEach((fieldElement) => fieldElement.remove());
-    if (!getNodeText(element) && element.querySelectorAll('br, hr').length === 0) return null;
-  }
-  if (clone.nodeType === Node.TEXT_NODE && !clone.textContent?.trim()) return null;
-  return clone;
-}
-
-function buildFullNarrativePage(nodes: ChildNode[]): ChildNode[] {
-  return nodes
-    .map((node) => cloneNarrativeNode(node))
-    .filter((node): node is ChildNode => Boolean(node));
-}
-
 function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
   const pages: RichTemplatePage[] = [];
   let current: RichTemplatePage = { title: 'Start', nodes: [] };
@@ -306,13 +288,6 @@ function getShortPageTitle(title: string, index: number) {
   return `Section ${index + 1}`;
 }
 
-function getSelectPageTitle(title: string, index: number) {
-  if (index === 0) return 'Summary: full briefing';
-  const shortTitle = getShortPageTitle(title, index);
-  if (shortTitle === title) return title;
-  return `${shortTitle}: ${title}`;
-}
-
 export default function DocumentTemplateResponse({
   template,
   answers,
@@ -375,14 +350,11 @@ export default function DocumentTemplateResponse({
     const orderedEntries = Array.from(fieldMap.values());
     const allNodes = Array.from(document.body.childNodes);
     const pages = useMemo(() => splitRichTemplatePages(allNodes), [template]);
-    const fullNarrativeNodes = useMemo(() => buildFullNarrativePage(allNodes), [template]);
     const [currentPage, setCurrentPage] = useState(() => Math.max(0, initialPage - 1));
     const [isChangingPage, setIsChangingPage] = useState(false);
     const shouldPaginate = paginate && pages.length > 1 && !readOnly;
     const selectedPage = shouldPaginate ? pages[Math.min(currentPage, pages.length - 1)] : null;
-    const visibleNodes = shouldPaginate && currentPage === 0
-      ? fullNarrativeNodes
-      : selectedPage?.nodes ?? allNodes;
+    const visibleNodes = selectedPage?.nodes ?? allNodes;
     const content = visibleNodes.map((node, index) =>
       renderRichTemplateNode({
         node,
@@ -503,74 +475,52 @@ export default function DocumentTemplateResponse({
             boxShadow: compact ? 'none' : '0 10px 24px -20px rgba(15, 23, 42, 0.38)',
           }}
         >
+          {shouldPaginate ? (
+            <div
+              className="mb-5 flex gap-2 overflow-x-auto pb-1"
+              role="tablist"
+              aria-label="Round 2 sections"
+            >
+              {pages.map((page, index) => {
+                const isActive = index === currentPage;
+                return (
+                  <button
+                    key={`${page.title}-${index}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => void changePage(index)}
+                    disabled={isChangingPage}
+                    className="inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55"
+                    style={{
+                      border: isActive
+                        ? '1px solid color-mix(in srgb, var(--accent) 56%, var(--border))'
+                        : '1px solid color-mix(in srgb, var(--border) 82%, transparent)',
+                      backgroundColor: isActive
+                        ? 'color-mix(in srgb, var(--accent) 12%, var(--background))'
+                        : 'var(--background)',
+                      color: isActive ? 'var(--accent)' : 'var(--foreground)',
+                    }}
+                  >
+                    {getShortPageTitle(page.title, index)}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
           <div className="symphonia-rich-template space-y-3">{content}</div>
           {shouldPaginate ? (
             <div
-              className="mt-7 rounded-xl p-3"
-              style={{
-                border: '1px solid color-mix(in srgb, var(--border) 78%, transparent)',
-                backgroundColor: 'color-mix(in srgb, var(--background) 72%, white)',
-              }}
+              className="mt-6 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
+              style={{ borderColor: 'color-mix(in srgb, var(--border) 76%, transparent)' }}
             >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <div className="text-xs font-semibold" style={{ color: 'var(--accent)', letterSpacing: 0 }}>
-                    Section {currentPage + 1} of {pages.length}
-                  </div>
-                  <div className="mt-1 text-sm font-medium text-foreground">{selectedPage?.title}</div>
+              <div>
+                <div className="text-xs font-semibold" style={{ color: 'var(--accent)', letterSpacing: 0 }}>
+                  Section {currentPage + 1} of {pages.length}
                 </div>
-                <div className="flex flex-col gap-2 sm:min-w-[18rem]">
-                  <label className="text-xs font-medium" htmlFor="round-section-jump" style={{ color: 'var(--muted-foreground)' }}>
-                    Jump to section
-                  </label>
-                  <select
-                    id="round-section-jump"
-                    value={currentPage}
-                    onChange={(event) => void changePage(Number(event.target.value))}
-                    disabled={isChangingPage}
-                    className="w-full rounded-md px-3 py-2 text-sm font-medium"
-                    style={{
-                      border: '1px solid var(--border)',
-                      backgroundColor: 'var(--background)',
-                      color: 'var(--foreground)',
-                    }}
-                  >
-                    {pages.map((page, index) => (
-                      <option key={`${page.title}-option-${index}`} value={index}>
-                        {getSelectPageTitle(page.title, index)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <div className="mt-1 text-sm font-medium text-foreground">{selectedPage?.title}</div>
               </div>
-              <div className="mt-3 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Round 2 sections">
-                {pages.map((page, index) => {
-                  const isActive = index === currentPage;
-                  return (
-                    <button
-                      key={`${page.title}-${index}`}
-                      type="button"
-                      role="tab"
-                      aria-selected={isActive}
-                      onClick={() => void changePage(index)}
-                      disabled={isChangingPage}
-                      className="inline-flex shrink-0 items-center justify-center rounded-md px-3 py-2 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-55"
-                      style={{
-                        border: isActive
-                          ? '1px solid color-mix(in srgb, var(--accent) 56%, var(--border))'
-                          : '1px solid color-mix(in srgb, var(--border) 82%, transparent)',
-                        backgroundColor: isActive
-                          ? 'color-mix(in srgb, var(--accent) 12%, var(--background))'
-                          : 'var(--background)',
-                        color: isActive ? 'var(--accent)' : 'var(--foreground)',
-                      }}
-                    >
-                      {getShortPageTitle(page.title, index)}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="mt-3 flex items-center justify-end gap-2">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => void changePage(currentPage - 1)}
