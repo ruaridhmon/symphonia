@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { AlertCircle, ChevronDown, ClipboardList } from 'lucide-react';
 import { ApiError, getApiErrorDetail } from './api/client';
 import {
@@ -81,7 +81,6 @@ function templatePageStorageKey(sessionToken: string, documentTemplate?: string 
 export default function PublicFormPage() {
   useDocumentTitle('Public Form');
   const { sessionToken } = useParams<{ sessionToken: string }>();
-  const navigate = useNavigate();
 
   const [session, setSession] = useState<PublicSessionDetail | null>(null);
   const [structuredResponses, setStructuredResponses] = useState<Record<string, StructuredResponse>>({});
@@ -294,6 +293,10 @@ export default function PublicFormPage() {
   }
 
   const isDocumentMode = isDocumentTemplate(session.form.document_template);
+  const sharePagePath = `/share/${encodeURIComponent(session.form.join_code)}`;
+  const goToSharePage = () => {
+    window.location.assign(sharePagePath);
+  };
 
   if (mode === 'submitted') {
     return (
@@ -303,7 +306,7 @@ export default function PublicFormPage() {
           <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
             Your response for {session.form.title} has been recorded.
           </p>
-          <LoadingButton variant="accent" size="md" onClick={() => navigate(`/share/${session.form.join_code}`)}>
+          <LoadingButton variant="accent" size="md" onClick={goToSharePage}>
             Return to share page
           </LoadingButton>
         </div>
@@ -314,7 +317,7 @@ export default function PublicFormPage() {
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:py-8">
       <div className="max-w-3xl mx-auto">
-        <BackLink to={`/share/${session.form.join_code}`} label="Share Page" className="mb-4" />
+        <BackLink onClick={goToSharePage} label="Share Page" className="mb-4" />
 
         <div className="card-lg p-6 sm:p-8">
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{session.form.title}</h1>
