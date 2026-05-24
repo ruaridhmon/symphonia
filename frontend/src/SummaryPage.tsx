@@ -1426,7 +1426,7 @@ export default function SummaryPage() {
 		if (!displayRound?.is_active || !codexDraftHtml.trim()) return;
 		setIsSavingSynthesis(true);
 		try {
-			await apiPushSummary(formId, codexDraftHtml.trim());
+			const result = await apiPushSummary(formId, codexDraftHtml.trim());
 			const updatedRound = { ...displayRound, synthesis: codexDraftHtml.trim() };
 			setRounds(prev => prev.map(r => (r.id === displayRound.id ? updatedRound : r)));
 			if (activeRound?.id === displayRound.id) setActiveRound(updatedRound);
@@ -1440,7 +1440,7 @@ export default function SummaryPage() {
 			setIsSynthesisDirty(false);
 			setCodexWorkspaceOpen(false);
 			setSynthesisViewMode('view');
-			toastSuccess('Codex summary saved.');
+			toastSuccess(result.survey_template_synced ? 'Codex summary saved and survey updated.' : 'Codex summary saved.');
 		} catch (error) {
 			toastError((error as Error).message || 'Failed to save Codex summary');
 		} finally {
@@ -1519,14 +1519,14 @@ export default function SummaryPage() {
 
 		setIsSavingSynthesis(true);
 		try {
-			await apiPushSummary(formId, nextContent);
+			const result = await apiPushSummary(formId, nextContent);
 			const updatedRound = { ...targetRound, synthesis: nextContent };
 			setRounds(prev => prev.map(r => (r.id === targetRound.id ? updatedRound : r)));
 			if (activeRound?.id === targetRound.id) setActiveRound(updatedRound);
 			if (selectedRound?.id === targetRound.id) setSelectedRound(updatedRound);
 			setLastSavedSynthesis(nextContent);
 			setIsSynthesisDirty(false);
-			toastSuccess('Synthesis saved.');
+			toastSuccess(result.survey_template_synced ? 'Synthesis saved and survey updated.' : 'Synthesis saved.');
 			return true;
 		} catch (error) {
 			toastError((error as Error).message || 'Failed to save synthesis');

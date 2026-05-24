@@ -2213,6 +2213,7 @@ async def push_summary(
     user: User = Depends(require_platform_admin),
 ):
     summary = payload.summary.strip()
+    survey_template_synced = False
 
     active_round = (
         db.query(RoundModel)
@@ -2223,7 +2224,16 @@ async def push_summary(
     if not active_round:
         raise HTTPException(status_code=400, detail="No active round")
 
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
     active_round.synthesis = summary
+    synced_template = (
+        _sync_rich_document_template_from_summary(form.document_template, summary)
+        if form
+        else None
+    )
+    if form and synced_template and synced_template != form.document_template:
+        form.document_template = synced_template
+        survey_template_synced = True
     db.commit()
 
     with open("summary_cache.txt", "w") as f:
@@ -2231,7 +2241,10 @@ async def push_summary(
 
     await ws_manager.broadcast_summary(summary)
 
-    return {"detail": "Summary pushed"}
+    return {
+        "detail": "Summary pushed",
+        "survey_template_synced": survey_template_synced,
+    }
 
 
 def _sanitize_llm_summary_html(value: str) -> str:
@@ -4335,6 +4348,10 @@ RICH_DOCUMENT_FIELD_PATTERN = re.compile(
     r"<span\b[^>]*data-symphonia-field-key=(['\"])(?P<key>.*?)\1(?P<attrs>[^>]*)>",
     re.IGNORECASE | re.DOTALL,
 )
+HTML_HEADING_PATTERN = re.compile(
+    r"<h(?P<level>[1-6])\b[^>]*>[\s\S]*?</h(?P=level)>",
+    re.IGNORECASE,
+)
 WORDPROCESSINGML_NS = {
     "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 }
@@ -4370,6 +4387,208 @@ def _strip_document_template_prefix(template: str | None) -> str:
     if _is_rich_fillable_document_template(template):
         return template.replace(RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX, "", 1).strip()
     return template
+
+
+def _split_html_heading_sections(markup: str) -> list[dict[str, Any]]:
+    sections: list[dict[str, Any]] = []
+    matches = list(HTML_HEADING_PATTERN.finditer(markup))
+    if not matches:
+        if markup.strip():
+            sections.append(
+                {
+                    "raw": markup.strip(),
+                    "heading": "",
+                    "heading_text": "",
+                    "heading_level": 0,
+                }
+            )
+        return sections
+
+    if matches[0].start() > 0:
+        prefix = markup[: matches[0].start()].strip()
+        if prefix:
+            sections.append(
+                {
+                    "raw": prefix,
+                    "heading": "",
+                    "heading_text": "",
+                    "heading_level": 0,
+                }
+            )
+
+    for index, match in enumerate(matches):
+        next_start = (
+            matches[index + 1].start() if index + 1 < len(matches) else len(markup)
+        )
+        raw = markup[match.start() : next_start].strip()
+        heading = match.group(0)
+        sections.append(
+            {
+                "raw": raw,
+                "heading": heading,
+                "heading_text": _html_to_plain_text(heading),
+                "heading_level": int(match.group("level")),
+            }
+        )
+    return sections
+
+
+def _recommendation_heading_number(text: str) -> int | None:
+    normalized = re.sub(r"\s+", " ", text or "").strip()
+    match = re.search(r"\brecommendation\s+(\d{1,2})\b", normalized, re.IGNORECASE)
+    if not match:
+        match = re.match(r"^(\d{1,2})[\.\)]\s+\S", normalized)
+    if not match:
+        return None
+    number = int(match.group(1))
+    return number if 1 <= number <= 50 else None
+
+
+def _is_survey_control_heading(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", text or "").strip().casefold()
+    return normalized in {
+        "delphi round 2 questions",
+        "overall questions",
+        "opening questions",
+        "each recommendation",
+        "recommendation-by-recommendation",
+        "recommendation by recommendation",
+    }
+
+
+def _is_recommendation_wrapper_heading(text: str) -> bool:
+    normalized = re.sub(r"\s+", " ", text or "").strip().casefold()
+    return normalized in {
+        "recommendations",
+        "recommendations for round 2",
+        "revised recommendations",
+        "recommendations for review",
+    }
+
+
+def _strip_rich_field_spans(markup: str) -> str:
+    return re.sub(
+        r"<span\b[^>]*data-symphonia-field-key[\s\S]*?</span>",
+        "",
+        markup or "",
+        flags=re.IGNORECASE,
+    ).strip()
+
+
+def _coerce_first_heading_level(markup: str, level: int) -> str:
+    if level < 1 or level > 6:
+        return markup
+    if not HTML_HEADING_PATTERN.search(markup):
+        return markup
+    coerced = re.sub(
+        r"<h[1-6](\b[^>]*)>",
+        rf"<h{level}\1>",
+        markup,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+    return re.sub(r"</h[1-6]>", f"</h{level}>", coerced, count=1, flags=re.IGNORECASE)
+
+
+def _replace_rich_section_text_preserving_fields(
+    template_section: dict[str, Any],
+    replacement_markup: str,
+) -> str:
+    replacement = _strip_rich_field_spans(replacement_markup)
+    replacement = _coerce_first_heading_level(
+        replacement, int(template_section.get("heading_level") or 0)
+    ).strip()
+    if not replacement:
+        return str(template_section["raw"])
+
+    field_match = RICH_DOCUMENT_FIELD_PATTERN.search(str(template_section["raw"]))
+    if not field_match:
+        return replacement
+    field_suffix = str(template_section["raw"])[field_match.start() :].lstrip()
+    return f"{replacement}\n{field_suffix}"
+
+
+def _sync_rich_document_template_from_summary(
+    template: str | None,
+    summary_html: str,
+) -> str | None:
+    if not _is_rich_fillable_document_template(template):
+        return None
+
+    template_body = _strip_document_template_prefix(template)
+    template_sections = _split_html_heading_sections(template_body)
+    if not template_sections:
+        return None
+
+    summary_body = _sanitize_llm_summary_html(summary_html)
+    source_sections = _split_html_heading_sections(summary_body)
+    if not source_sections:
+        return None
+
+    source_recommendations: dict[int, str] = {}
+    source_conclusion: str | None = None
+    intro_parts: list[str] = []
+    seen_recommendation = False
+
+    for section in source_sections:
+        heading_text = str(section.get("heading_text") or "")
+        rec_number = _recommendation_heading_number(heading_text)
+        if rec_number is not None:
+            seen_recommendation = True
+            source_recommendations[rec_number] = str(section["raw"])
+            continue
+        if "conclusion" in heading_text.casefold():
+            source_conclusion = str(section["raw"])
+            continue
+        if (
+            not seen_recommendation
+            and not _is_survey_control_heading(heading_text)
+            and not _is_recommendation_wrapper_heading(heading_text)
+        ):
+            intro_parts.append(str(section["raw"]))
+
+    intro_markup = "\n".join(intro_parts).strip()
+    if not intro_markup and not source_recommendations and not source_conclusion:
+        return None
+
+    changed = False
+    intro_applied = False
+    next_sections: list[str] = []
+    for index, section in enumerate(template_sections):
+        heading_text = str(section.get("heading_text") or "")
+        rec_number = _recommendation_heading_number(heading_text)
+        next_raw = str(section["raw"])
+
+        if rec_number is not None and rec_number in source_recommendations:
+            next_raw = _replace_rich_section_text_preserving_fields(
+                section, source_recommendations[rec_number]
+            )
+        elif "conclusion" in heading_text.casefold() and source_conclusion:
+            next_raw = _replace_rich_section_text_preserving_fields(
+                section, source_conclusion
+            )
+        elif (
+            index == 0
+            and intro_markup
+            and not intro_applied
+            and not _is_survey_control_heading(heading_text)
+        ):
+            next_raw = _replace_rich_section_text_preserving_fields(
+                section, intro_markup
+            )
+            intro_applied = True
+
+        if next_raw != section["raw"]:
+            changed = True
+        next_sections.append(next_raw)
+
+    if not changed:
+        return None
+
+    next_body = "\n".join(next_sections)
+    return _normalize_document_template(
+        f"{RICH_FILLABLE_DOCUMENT_TEMPLATE_PREFIX}\n{next_body}"
+    )
 
 
 def _parse_bool_attr(value: str | None) -> bool:

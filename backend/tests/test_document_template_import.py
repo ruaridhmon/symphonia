@@ -342,3 +342,65 @@ def test_update_form_preserves_rich_template_when_edit_payload_drops_template(
     updated = updated_response.json()
     assert updated["document_template"] == existing["document_template"]
     assert updated["questions"] == existing["questions"]
+
+
+def test_push_summary_updates_rich_template_text_without_dropping_fields(
+    client: TestClient, admin_headers: dict
+):
+    template = """
+    <!-- symphonia-document-mode: fillable-rich -->
+    <h1>Round 2 Recommendations</h1>
+    <p>Old introductory text.</p>
+    <h2>Delphi Round 2 Questions</h2>
+    <span data-symphonia-field-key="overall" data-symphonia-question-id="Q1" data-symphonia-field-label="Overall question" data-symphonia-field-type="single_select" data-symphonia-input-type="single_select" data-symphonia-options="[&quot;Yes&quot;,&quot;No&quot;]"></span>
+    <h3>Recommendation 1. Old recommendation title</h3>
+    <p>Old recommendation body.</p>
+    <span data-symphonia-field-key="rec1" data-symphonia-question-id="R1_Q1" data-symphonia-field-label="Should recommendation 1 remain?" data-symphonia-field-type="single_select" data-symphonia-input-type="single_select" data-symphonia-options="[&quot;Yes&quot;,&quot;No&quot;]"></span>
+    <h2>Conclusion for reference</h2>
+    <p>Old conclusion.</p>
+    """.strip()
+    summary = """
+    <h1>Round 2 Recommendations</h1>
+    <p>New introductory text for participants.</p>
+    <h2>Recommendations for Round 2</h2>
+    <h2>Recommendation 1. New recommendation title</h2>
+    <p>New recommendation body.</p>
+    <h2>Conclusion for reference</h2>
+    <p>New conclusion text.</p>
+    """.strip()
+
+    create_response = client.post(
+        "/forms/create",
+        headers=admin_headers,
+        json={
+            "title": "Summary sync rich template",
+            "questions": [],
+            "document_template": template,
+            "allow_public_responses": True,
+        },
+    )
+    assert create_response.status_code == 201, create_response.text
+    form_id = create_response.json()["id"]
+
+    push_response = client.post(
+        f"/forms/{form_id}/push_summary",
+        headers=admin_headers,
+        json={"summary": summary},
+    )
+    assert push_response.status_code == 200, push_response.text
+    assert push_response.json()["survey_template_synced"] is True
+
+    detail_response = client.get(f"/forms/{form_id}", headers=admin_headers)
+    assert detail_response.status_code == 200, detail_response.text
+    updated_template = detail_response.json()["document_template"]
+    assert "New introductory text for participants." in updated_template
+    assert "New recommendation title" in updated_template
+    assert "New recommendation body." in updated_template
+    assert "New conclusion text." in updated_template
+    assert "Old introductory text." not in updated_template
+    assert "Old recommendation body." not in updated_template
+    assert "Old conclusion." not in updated_template
+    assert 'data-symphonia-field-key="overall"' in updated_template
+    assert 'data-symphonia-field-key="rec1"' in updated_template
+    assert "<h3>Recommendation 1. New recommendation title</h3>" in updated_template
+    assert "Recommendations for Round 2" not in updated_template

@@ -207,7 +207,7 @@ export function formatSynthesisDurationEstimate(seconds: number) {
 
 /** Save/push the editor synthesis content */
 export function pushSummary(formId: number, summary: string) {
-  return api.post<{ ok: boolean }>(`/forms/${formId}/push_summary`, {
+  return api.post<{ ok?: boolean; detail?: string; survey_template_synced?: boolean }>(`/forms/${formId}/push_summary`, {
     summary,
   });
 }
