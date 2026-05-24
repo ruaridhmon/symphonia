@@ -236,9 +236,24 @@ function isNumberedRecommendationHeading(text: string): boolean {
   return /^recommendation\s+\d+\b/i.test(text.trim());
 }
 
+function isRecommendationIntroPage(nodes: ChildNode[]): boolean {
+  const fullText = nodes.map(getNodeText).join(' ').replace(/\s+/g, ' ').trim();
+  if (!fullText || fullText.length > 360) return false;
+  const firstContentNode = nodes.find((node) => Boolean(getNodeText(node)));
+  if (!firstContentNode || firstContentNode.nodeType !== Node.ELEMENT_NODE) return false;
+  const firstElement = firstContentNode as HTMLElement;
+  if (firstElement.tagName.toLowerCase() !== 'h2') return false;
+  return nodes.some((node) => {
+    if (node.nodeType !== Node.ELEMENT_NODE) return false;
+    const element = node as HTMLElement;
+    if (element.tagName.toLowerCase() !== 'h2') return false;
+    return /^(each recommendation|recommendations for round 2|recommendation-by-recommendation)$/i.test(getNodeText(node));
+  });
+}
+
 export function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
   const pages: RichTemplatePage[] = [];
-  let current: RichTemplatePage = { title: 'Start', nodes: [] };
+  let current: RichTemplatePage = { title: 'Summary', nodes: [] };
   let currentSection = '';
 
   const pushCurrent = () => {
@@ -263,7 +278,11 @@ export function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
         isNumberedRecommendationHeading(headingText)
       );
 
-    if (startsRecommendationPage && !hasAnyRichField(current.nodes) && !hasBodyText(current.nodes)) {
+    if (
+      startsRecommendationPage &&
+      !hasAnyRichField(current.nodes) &&
+      (!hasBodyText(current.nodes) || isRecommendationIntroPage(current.nodes))
+    ) {
       current = {
         title: headingText || 'Recommendation',
         nodes: [...current.nodes, node],
@@ -271,7 +290,7 @@ export function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
       return;
     }
 
-    if (startsSection && pages.length === 0 && !hasAnyRichField(current.nodes)) {
+    if (startsSection && pages.length === 0 && !hasAnyRichField(current.nodes) && !hasBodyText(current.nodes)) {
       currentSection = headingText;
       current = {
         title: headingText || 'Section',
@@ -294,7 +313,19 @@ export function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
   });
 
   pushCurrent();
-  return pages.length > 0 ? pages : [{ title: 'Questions', nodes }];
+  if (pages.length === 0) return [{ title: 'Questions', nodes }];
+
+  return pages.reduce<RichTemplatePage[]>((mergedPages, page, index) => {
+    if (index < pages.length - 1 && !hasAnyRichField(page.nodes) && isRecommendationIntroPage(page.nodes)) {
+      pages[index + 1] = {
+        ...pages[index + 1],
+        nodes: [...page.nodes, ...pages[index + 1].nodes],
+      };
+      return mergedPages;
+    }
+    mergedPages.push(page);
+    return mergedPages;
+  }, []);
 }
 
 function getShortPageTitle(title: string, index: number) {

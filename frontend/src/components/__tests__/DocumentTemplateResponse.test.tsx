@@ -12,6 +12,8 @@ describe('splitRichTemplatePages', () => {
       <h1>Round 2 Recommendations</h1>
       <p>The UK needs to adopt a national model for connected data.</p>
       <h2>Recommendations for Round 2</h2>
+      <h2>Each recommendation</h2>
+      <p>For each revised recommendation, answer the two required questions.</p>
       <h3>Recommendation 1. Give local systems a clear national mandate</h3>
       <p>Recommendation 1 context.</p>
       <span data-symphonia-field-key="recommendation_1_rating"></span>
@@ -23,7 +25,7 @@ describe('splitRichTemplatePages', () => {
     `));
 
     expect(pages.map((page) => page.title)).toEqual([
-      'Recommendations for Round 2',
+      'Summary',
       'Recommendation 1. Give local systems a clear national mandate',
       'Recommendation 2. Establish a national Connected ICB programme',
       'Conclusions',
