@@ -4475,6 +4475,61 @@ def _strip_rich_field_spans(markup: str) -> str:
     ).strip()
 
 
+def _section_body_markup(section: dict[str, Any]) -> str:
+    raw = str(section.get("raw") or "")
+    heading = str(section.get("heading") or "")
+    if heading and raw.startswith(heading):
+        return raw[len(heading) :].strip()
+    return raw.strip()
+
+
+def _section_body_plain_text(section: dict[str, Any]) -> str:
+    return _html_to_plain_text(_section_body_markup(section))
+
+
+def _extract_recommendation_list_sections(markup: str) -> dict[int, str]:
+    recommendations: dict[int, str] = {}
+    list_items = re.findall(
+        r"<li\b[^>]*>([\s\S]*?)</li>", markup or "", flags=re.IGNORECASE
+    )
+    for index, item_markup in enumerate(list_items, start=1):
+        strong_match = re.search(
+            r"<strong\b[^>]*>([\s\S]*?)</strong>",
+            item_markup,
+            flags=re.IGNORECASE,
+        )
+        paragraph_match = re.search(
+            r"<p\b[^>]*>([\s\S]*?)</p>", item_markup, flags=re.IGNORECASE
+        )
+        title_source = (
+            strong_match.group(1)
+            if strong_match
+            else paragraph_match.group(1)
+            if paragraph_match
+            else ""
+        )
+        title = _html_to_plain_text(title_source)
+        if not title:
+            continue
+
+        body_markup = item_markup
+        if strong_match:
+            body_markup = re.sub(
+                r"<p\b[^>]*>\s*<strong\b[^>]*>[\s\S]*?</strong>\s*</p>",
+                "",
+                body_markup,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+        elif paragraph_match:
+            body_markup = body_markup.replace(paragraph_match.group(0), "", 1)
+        recommendations[index] = (
+            f"<h3>Recommendation {index}. {html.escape(title)}</h3>\n"
+            f"{body_markup.strip()}"
+        ).strip()
+    return recommendations
+
+
 def _coerce_first_heading_level(markup: str, level: int) -> str:
     if level < 1 or level > 6:
         return markup
@@ -4537,13 +4592,24 @@ def _sync_rich_document_template_from_summary(
             seen_recommendation = True
             source_recommendations[rec_number] = str(section["raw"])
             continue
+        if _is_recommendation_wrapper_heading(heading_text):
+            list_recommendations = _extract_recommendation_list_sections(
+                str(section["raw"])
+            )
+            if list_recommendations:
+                seen_recommendation = True
+                source_recommendations.update(list_recommendations)
+                continue
         if "conclusion" in heading_text.casefold():
             source_conclusion = str(section["raw"])
             continue
         if (
             not seen_recommendation
             and not _is_survey_control_heading(heading_text)
-            and not _is_recommendation_wrapper_heading(heading_text)
+            and (
+                not _is_recommendation_wrapper_heading(heading_text)
+                or _section_body_plain_text(section)
+            )
         ):
             intro_parts.append(str(section["raw"]))
 

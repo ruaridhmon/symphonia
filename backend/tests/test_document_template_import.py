@@ -360,11 +360,15 @@ def test_push_summary_updates_rich_template_text_without_dropping_fields(
     <p>Old conclusion.</p>
     """.strip()
     summary = """
-    <h1>Round 2 Recommendations</h1>
+    <h1>Recommendations</h1>
     <p>New introductory text for participants.</p>
     <h2>Recommendations for Round 2</h2>
-    <h2>Recommendation 1. New recommendation title</h2>
-    <p>New recommendation body.</p>
+    <ol>
+      <li>
+        <p><strong>New recommendation title</strong></p>
+        <p>New recommendation body.</p>
+      </li>
+    </ol>
     <h2>Conclusion for reference</h2>
     <p>New conclusion text.</p>
     """.strip()
