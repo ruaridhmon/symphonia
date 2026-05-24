@@ -1,5 +1,6 @@
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { splitRichTemplatePages } from '../DocumentTemplateResponse';
+import DocumentTemplateResponse, { splitRichTemplatePages } from '../DocumentTemplateResponse';
 
 function parseTemplateNodes(html: string): ChildNode[] {
   const document = new DOMParser().parseFromString(html, 'text/html');
@@ -30,5 +31,35 @@ describe('splitRichTemplatePages', () => {
       'Recommendation 2. Establish a national Connected ICB programme',
       'Conclusions',
     ]);
+  });
+});
+
+describe('DocumentTemplateResponse pagination', () => {
+  it('keeps section tabs and next controls in read-only review mode', () => {
+    render(
+      <DocumentTemplateResponse
+        template={`<!-- symphonia-document-mode: fillable-rich -->
+          <h1>Round 2 Recommendations</h1>
+          <p>Summary text.</p>
+          <h3>Recommendation 1. First recommendation</h3>
+          <p>Recommendation 1 context.</p>
+          <span data-symphonia-field-key="rec1"></span>
+          <h3>Recommendation 2. Second recommendation</h3>
+          <p>Recommendation 2 context.</p>
+          <span data-symphonia-field-key="rec2"></span>
+        `}
+        answers={{}}
+        questions={[]}
+        readOnly
+        paginate
+      />,
+    );
+
+    expect(screen.getByRole('tab', { name: 'Summary' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Rec. 1' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Rec. 2' })).toBeInTheDocument();
+    expect(screen.getByText('Section 1 of 3')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Next/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Save & Next/i })).not.toBeInTheDocument();
   });
 });

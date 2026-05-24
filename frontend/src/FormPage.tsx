@@ -514,6 +514,8 @@ export default function FormPage() {
                 answers={structuredResponses}
                 highlightedQuestionKey={highlightedQuestionKey}
                 readOnly
+                paginate
+                onPaginationChange={setTemplatePagination}
               />
             ) : (
               <SurveyQuestionList

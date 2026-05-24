@@ -402,7 +402,7 @@ export default function DocumentTemplateResponse({
     const pages = useMemo(() => splitRichTemplatePages(allNodes), [template]);
     const [currentPage, setCurrentPage] = useState(() => Math.max(0, initialPage - 1));
     const [isChangingPage, setIsChangingPage] = useState(false);
-    const shouldPaginate = paginate && pages.length > 1 && !readOnly;
+    const shouldPaginate = paginate && pages.length > 1;
     const selectedPage = shouldPaginate ? pages[Math.min(currentPage, pages.length - 1)] : null;
     const visibleNodes = selectedPage?.nodes ?? allNodes;
     const content = visibleNodes.map((node, index) =>
@@ -442,7 +442,9 @@ export default function DocumentTemplateResponse({
       if (boundedPage === currentPage) return;
       setIsChangingPage(true);
       try {
-        await onBeforePageChange?.();
+        if (!readOnly) {
+          await onBeforePageChange?.();
+        }
         setCurrentPage(boundedPage);
       } finally {
         setIsChangingPage(false);
@@ -596,7 +598,7 @@ export default function DocumentTemplateResponse({
                     color: 'var(--accent)',
                   }}
                 >
-                  {isChangingPage ? 'Saving...' : 'Save & Next'}
+                  {isChangingPage ? 'Saving...' : readOnly ? 'Next' : 'Save & Next'}
                   <ChevronRight size={16} />
                 </button>
               </div>
