@@ -35,7 +35,7 @@ interface DocumentTemplateResponseProps {
   onPaginationChange?: (state: { currentPage: number; totalPages: number; isLastPage: boolean }) => void;
 }
 
-interface RichTemplatePage {
+export interface RichTemplatePage {
   title: string;
   nodes: ChildNode[];
 }
@@ -222,7 +222,21 @@ function hasAnyRichField(nodes: ChildNode[]): boolean {
   });
 }
 
-function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
+function hasBodyText(nodes: ChildNode[]): boolean {
+  return nodes.some((node) => {
+    const text = getNodeText(node);
+    if (!text) return false;
+    if (node.nodeType !== Node.ELEMENT_NODE) return true;
+    const tagName = (node as HTMLElement).tagName.toLowerCase();
+    return !['h1', 'h2', 'h3'].includes(tagName);
+  });
+}
+
+function isNumberedRecommendationHeading(text: string): boolean {
+  return /^recommendation\s+\d+\b/i.test(text.trim());
+}
+
+export function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
   const pages: RichTemplatePage[] = [];
   let current: RichTemplatePage = { title: 'Start', nodes: [] };
   let currentSection = '';
@@ -243,9 +257,13 @@ function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
     const headingText = getNodeText(node);
     const startsSection = tagName === 'h2';
     const startsRecommendationPage =
-      tagName === 'h3' && /recommendation-by-recommendation/i.test(currentSection);
+      tagName === 'h3' &&
+      (
+        /recommendation-by-recommendation/i.test(currentSection) ||
+        isNumberedRecommendationHeading(headingText)
+      );
 
-    if (startsRecommendationPage && !hasAnyRichField(current.nodes)) {
+    if (startsRecommendationPage && !hasAnyRichField(current.nodes) && !hasBodyText(current.nodes)) {
       current = {
         title: headingText || 'Recommendation',
         nodes: [...current.nodes, node],
