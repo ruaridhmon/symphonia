@@ -4818,6 +4818,78 @@ def _validate_document_template(template: str | None) -> list[str | dict[str, ob
     return normalized_questions
 
 
+def _question_preserve_signature(question: Any) -> dict[str, Any]:
+    if isinstance(question, QuestionConfig):
+        question = question.model_dump()
+    if isinstance(question, str):
+        return {
+            "label": question.strip(),
+            "questionId": None,
+            "inputType": None,
+            "fieldType": None,
+            "optional": False,
+        }
+    if not isinstance(question, dict):
+        return {
+            "label": str(question).strip(),
+            "questionId": None,
+            "inputType": None,
+            "fieldType": None,
+            "optional": False,
+        }
+    return {
+        "label": str(
+            question.get("label")
+            or question.get("text")
+            or question.get("question")
+            or ""
+        ).strip(),
+        "questionId": question.get("questionId"),
+        "inputType": question.get("inputType"),
+        "fieldType": question.get("fieldType"),
+        "optional": bool(question.get("optional", False)),
+        "options": question.get("options"),
+        "minValue": question.get("minValue"),
+        "maxValue": question.get("maxValue"),
+    }
+
+
+def _questions_match_document_template(
+    questions: list[str | QuestionConfig],
+    template_questions: list[str | dict[str, object]],
+) -> bool:
+    payload_signature = [
+        _question_preserve_signature(question) for question in questions
+    ]
+    template_signature = [
+        _question_preserve_signature(question) for question in template_questions
+    ]
+    return payload_signature == template_signature
+
+
+def _resolve_update_document_template(
+    current_template: str | None,
+    payload: FormUpdate,
+) -> str | None:
+    next_template = _normalize_document_template(payload.document_template)
+    if next_template is not None or not current_template:
+        return next_template
+
+    # The edit form can submit a null/blank document_template while still
+    # sending the derived questions from the existing template. Treat that as a
+    # stale/partial edit payload and preserve the rich template; otherwise an
+    # unrelated save can collapse a paginated document survey into a flat list.
+    try:
+        existing_template_questions = _validate_document_template(current_template)
+    except HTTPException:
+        return next_template
+    if _questions_match_document_template(
+        payload.questions, existing_template_questions
+    ):
+        return current_template
+    return next_template
+
+
 def _extract_text_from_docx_bytes(blob: bytes) -> str:
     def _extract_paragraph_fragments(paragraph: ET.Element) -> list[str]:
         pieces: list[str] = []
@@ -5631,7 +5703,7 @@ def update_form(
     assert_form_owner_or_facilitator(f, user)
 
     old_title = f.title
-    document_template = _normalize_document_template(payload.document_template)
+    document_template = _resolve_update_document_template(f.document_template, payload)
     public_consent_text = (
         payload.public_consent_text.strip() if payload.public_consent_text else None
     )

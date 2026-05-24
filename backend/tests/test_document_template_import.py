@@ -286,3 +286,59 @@ def test_create_form_accepts_unprefixed_rich_fillable_document_template(
     assert payload["document_template"].startswith(
         "<!-- symphonia-document-mode: fillable-rich -->"
     )
+
+
+def test_update_form_preserves_rich_template_when_edit_payload_drops_template(
+    client: TestClient, admin_headers: dict
+):
+    template = """
+    <!-- symphonia-document-mode: fillable-rich -->
+    <h2>Recommendation 1</h2>
+    <p>Review this section before answering.</p>
+    <span
+      data-symphonia-field-key="rec1_status"
+      data-symphonia-question-id="REC1_STATUS"
+      data-symphonia-field-label="Should recommendation 1 remain?"
+      data-symphonia-field-type="single_select"
+      data-symphonia-input-type="single_select"
+      data-symphonia-optional="false"
+      data-symphonia-options="[&quot;Yes&quot;, &quot;No&quot;]"
+    ></span>
+    """.strip()
+
+    create_response = client.post(
+        "/forms/create",
+        headers=admin_headers,
+        json={
+            "title": "Preserve rich template",
+            "questions": [],
+            "document_template": template,
+            "allow_public_responses": True,
+        },
+    )
+    assert create_response.status_code == 201, create_response.text
+    form_id = create_response.json()["id"]
+
+    detail_response = client.get(f"/forms/{form_id}", headers=admin_headers)
+    assert detail_response.status_code == 200, detail_response.text
+    existing = detail_response.json()
+    assert existing["document_template"]
+
+    update_response = client.put(
+        f"/forms/{form_id}",
+        headers=admin_headers,
+        json={
+            "title": "Preserve rich template after title edit",
+            "questions": existing["questions"],
+            "document_template": None,
+            "allow_public_responses": True,
+            "require_consent": False,
+        },
+    )
+    assert update_response.status_code == 200, update_response.text
+
+    updated_response = client.get(f"/forms/{form_id}", headers=admin_headers)
+    assert updated_response.status_code == 200, updated_response.text
+    updated = updated_response.json()
+    assert updated["document_template"] == existing["document_template"]
+    assert updated["questions"] == existing["questions"]

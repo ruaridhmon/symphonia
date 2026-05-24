@@ -79,6 +79,8 @@ export default function FormEditor() {
   const [questions, setQuestions] = useState<ConfigurableQuestion[]>([createBlankQuestion()]);
   const [documentTemplate, setDocumentTemplate] = useState('');
   const documentTemplateRef = useRef('');
+  const loadedDocumentTemplateRef = useRef('');
+  const documentTemplateRemovalRequestedRef = useRef(false);
   const [importSummary, setImportSummary] = useState<QuestionnaireImportResult | null>(null);
   const [joinCode, setJoinCode] = useState('');
   const [previewResponses, setPreviewResponses] = useState<Record<string, StructuredResponse>>({});
@@ -119,8 +121,13 @@ export default function FormEditor() {
   const questionModeLabel = isDocumentMode ? 'Document template' : (isSurveyMode ? 'Survey' : 'Consensus');
   const consultationHeading = title.trim() || 'Untitled Consultation';
 
-  function updateDocumentTemplate(nextValue: string) {
+  function updateDocumentTemplate(nextValue: string, options?: { allowRemoval?: boolean }) {
     documentTemplateRef.current = nextValue;
+    if (nextValue.trim()) {
+      documentTemplateRemovalRequestedRef.current = false;
+    } else if (options?.allowRemoval) {
+      documentTemplateRemovalRequestedRef.current = true;
+    }
     setDocumentTemplate(nextValue);
   }
 
@@ -139,6 +146,8 @@ export default function FormEditor() {
             ? form.questions.map((question) => normalizeQuestion(question))
             : [createBlankQuestion()],
         );
+        loadedDocumentTemplateRef.current = form.document_template ?? '';
+        documentTemplateRemovalRequestedRef.current = false;
         updateDocumentTemplate(form.document_template ?? '');
         setJoinCode(form.join_code);
         setAllowPublicResponses(Boolean(form.allow_public_responses));
@@ -195,8 +204,14 @@ export default function FormEditor() {
 
     const validQuestions = questions.filter((q) => q.label.trim() !== '');
     const trimmedDocumentTemplate = documentTemplateRef.current.trim();
+    const documentTemplateForSave = trimmedDocumentTemplate
+      || (
+        loadedDocumentTemplateRef.current.trim() && !documentTemplateRemovalRequestedRef.current
+          ? loadedDocumentTemplateRef.current.trim()
+          : null
+      );
 
-    if (!trimmedDocumentTemplate && validQuestions.length === 0) {
+    if (!documentTemplateForSave && validQuestions.length === 0) {
       toastError('Please add at least one question');
       return;
     }
@@ -206,7 +221,7 @@ export default function FormEditor() {
       await api.put(`/forms/${id}`, {
         title: title.trim(),
         questions: validQuestions,
-        document_template: trimmedDocumentTemplate || null,
+        document_template: documentTemplateForSave,
         allow_public_responses: allowPublicResponses,
         require_consent: requireConsent,
         consent_text: requireConsent ? consentText.trim() : null,
@@ -216,6 +231,8 @@ export default function FormEditor() {
         public_require_upload: false,
         public_upload_prompt: null,
       });
+      loadedDocumentTemplateRef.current = documentTemplateForSave || '';
+      documentTemplateRemovalRequestedRef.current = false;
       toastSuccess('Consultation saved');
     } catch (error) {
       toastError(getApiErrorDetail(error) || 'Failed to save edits');
@@ -265,7 +282,7 @@ export default function FormEditor() {
   }
 
   function switchToQuestionMode() {
-    updateDocumentTemplate('');
+    updateDocumentTemplate('', { allowRemoval: true });
     if (questions.length === 0) {
       setQuestions([createBlankQuestion()]);
     }
@@ -439,7 +456,7 @@ export default function FormEditor() {
                       <QuestionnaireImporter
                         onQuestionsImported={(importedQuestions) => {
                           setQuestions(importedQuestions);
-                          updateDocumentTemplate('');
+                          updateDocumentTemplate('', { allowRemoval: true });
                         }}
                         onImported={(result) => setImportSummary(result)}
                       />
