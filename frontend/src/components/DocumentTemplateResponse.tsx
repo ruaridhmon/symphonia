@@ -331,6 +331,7 @@ export function splitRichTemplatePages(nodes: ChildNode[]): RichTemplatePage[] {
 function getShortPageTitle(title: string, index: number) {
   if (index === 0) return 'Summary';
   if (/summary/i.test(title)) return 'Summary';
+  if (/delphi round 2 questions|overall questions|opening questions/i.test(title)) return 'Overall';
   if (/conclusion/i.test(title)) return 'Conclusion';
   const recommendationMatch = title.match(/Recommendation\s+(\d+)/i);
   if (recommendationMatch) return `Rec. ${recommendationMatch[1]}`;
