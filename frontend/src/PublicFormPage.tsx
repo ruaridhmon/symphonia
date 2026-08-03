@@ -15,7 +15,11 @@ import Skeleton from './components/Skeleton';
 import type { StructuredResponse } from './types/structured-input';
 import { emptyStructuredResponse } from './types/structured-input';
 import { normalizeAnswerRecord } from './utils/answers';
-import { isResponseAnswered, validateDocumentTemplateResponses, validateQuestionResponses } from './utils/responseValidation';
+import {
+  isResponseAnswered,
+  validateDocumentTemplateResponses,
+  validateQuestionResponses,
+} from './utils/responseValidation';
 import {
   buildInitialDocumentTemplateResponses,
   isDocumentTemplate,
@@ -24,6 +28,7 @@ import {
   remapRichFillableAnswersToQuestionOrder,
 } from './utils/documentTemplate';
 import { useDocumentTitle } from './hooks/useDocumentTitle';
+import { normalizeQuestion } from './utils/questions';
 
 function PreviousSynthesisToggle({ content }: { content: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,6 +74,14 @@ function PreviousSynthesisToggle({ content }: { content: string }) {
   );
 }
 
+function isDiagnosticLikertDemo(session: PublicSessionDetail | null): boolean {
+  return session?.form.join_code === 'SYM-LKRT-2026' || session?.form.title === 'Likert Demo: Digital Wellbeing Diagnostic';
+}
+
+function publicQuestionIndexKey(sessionToken: string): string {
+  return `symphonia-public-session-question:${sessionToken}`;
+}
+
 export default function PublicFormPage() {
   useDocumentTitle('Public Form');
   const { sessionToken } = useParams<{ sessionToken: string }>();
@@ -83,6 +96,7 @@ export default function PublicFormPage() {
   const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [highlightedQuestionKey, setHighlightedQuestionKey] = useState<string | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latestResponsesRef = useRef<Record<string, StructuredResponse>>({});
   const latestParticipantNameRef = useRef('');
@@ -150,6 +164,15 @@ export default function PublicFormPage() {
             )
           : loadedResponses,
       );
+      if (isDiagnosticLikertDemo(data) && !data.submitted) {
+        const storedIndex = Number(window.localStorage.getItem(publicQuestionIndexKey(sessionToken)));
+        const maxIndex = data.form.questions
+          .map((question) => normalizeQuestion(question))
+          .filter((question) => question.label.trim()).length - 1;
+        if (Number.isFinite(storedIndex) && storedIndex >= 0) {
+          setCurrentQuestionIndex(Math.min(storedIndex, Math.max(0, maxIndex)));
+        }
+      }
       setMode(data.submitted ? 'submitted' : 'filling');
     } catch (err) {
       const detail = getApiErrorDetail(err);
@@ -161,6 +184,15 @@ export default function PublicFormPage() {
   useEffect(() => {
     loadSession();
   }, [loadSession]);
+
+  useEffect(() => {
+    if (!sessionToken || !isDiagnosticLikertDemo(session) || mode !== 'filling') return;
+    try {
+      window.localStorage.setItem(publicQuestionIndexKey(sessionToken), String(currentQuestionIndex));
+    } catch {
+      // Ignore storage failures; the survey remains usable without refresh restore.
+    }
+  }, [currentQuestionIndex, mode, session, sessionToken]);
 
   useEffect(() => {
     if (!submitError) return;
@@ -218,6 +250,11 @@ export default function PublicFormPage() {
         participant_name: participantName.trim(),
         answers: normalizeAnswerRecord(structuredResponses),
       });
+      try {
+        window.localStorage.removeItem(publicQuestionIndexKey(sessionToken));
+      } catch {
+        // Ignore storage failures during submit cleanup.
+      }
       setMode('submitted');
     } catch (err) {
       const detail = getApiErrorDetail(err);
@@ -255,6 +292,7 @@ export default function PublicFormPage() {
   }
 
   const isDocumentMode = isDocumentTemplate(session.form.document_template);
+  const isDiagnosticLikert = isDiagnosticLikertDemo(session);
 
   if (mode === 'submitted') {
     return (
@@ -273,12 +311,23 @@ export default function PublicFormPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 py-6 sm:py-8">
-      <div className="max-w-3xl mx-auto">
+    <div className={`min-h-screen bg-background py-4 sm:py-8 ${isDiagnosticLikert ? 'px-2 sm:px-4' : 'px-4'}`}>
+      <div className={`${isDiagnosticLikert ? 'max-w-4xl' : 'max-w-3xl'} mx-auto`}>
         <BackLink to={`/share/${session.form.join_code}`} label="Share Page" className="mb-4" />
 
-        <div className="card-lg p-6 sm:p-8">
+        <div className={`card-lg ${isDiagnosticLikert ? 'p-3 sm:p-7' : 'p-6 sm:p-8'}`}>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">{session.form.title}</h1>
+          {isDiagnosticLikert && session.form.selected_round_number ? (
+            <div
+              className="mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                color: 'var(--accent)',
+              }}
+            >
+              Round {session.form.selected_round_number}
+            </div>
+          ) : null}
           {session.form.description ? (
             <p className="mt-2 text-sm" style={{ color: 'var(--muted-foreground)' }}>
               {session.form.description}
@@ -313,6 +362,7 @@ export default function PublicFormPage() {
             ) : null}
           </div>
 
+          {!isDiagnosticLikert ? (
           <div className="mb-2">
             <h2 className="text-lg font-semibold text-foreground">
               {isDocumentMode ? 'Document Template' : 'Questions'}
@@ -323,6 +373,7 @@ export default function PublicFormPage() {
                 : 'Please complete each required question before submitting.'}
             </p>
           </div>
+          ) : null}
 
           {isDocumentMode && session.form.document_template ? (
             <DocumentTemplateResponse
@@ -353,9 +404,17 @@ export default function PublicFormPage() {
                 });
               }}
               highlightedQuestionKey={highlightedQuestionKey}
+              presentation={isDiagnosticLikert ? 'diagnosticLikert' : 'default'}
+              diagnosticMode={isDiagnosticLikert ? 'single' : undefined}
+              currentQuestionIndex={isDiagnosticLikert ? currentQuestionIndex : undefined}
+              onQuestionIndexChange={isDiagnosticLikert ? setCurrentQuestionIndex : undefined}
+              onSubmit={isDiagnosticLikert ? handleSubmit : undefined}
+              submitLoading={isSubmitting}
+              submitLoadingLabel="Submitting..."
             />
           )}
 
+          {isDiagnosticLikert ? null : (
           <LoadingButton
             variant="accent"
             size="lg"
@@ -366,6 +425,7 @@ export default function PublicFormPage() {
           >
             Submit
           </LoadingButton>
+          )}
 
           <div className="mt-2 px-1">
             <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>

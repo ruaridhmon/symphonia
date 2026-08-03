@@ -1,7 +1,12 @@
 import { Mic, MicOff } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { StructuredResponse } from '../types/structured-input';
-import { DEFAULT_LIKERT_OPTIONS, type ConfigurableQuestion } from '../utils/questions';
+import {
+  DEFAULT_DIAGNOSTIC_CRITERIA,
+  DEFAULT_LIKERT_OPTIONS,
+  type ConfigurableQuestion,
+  type DiagnosticLikertCriterion,
+} from '../utils/questions';
 
 interface SurveyQuestionInputProps {
   question: ConfigurableQuestion;
@@ -88,6 +93,34 @@ function getLikertOptions(question: ConfigurableQuestion): string[] {
   return question.options && question.options.length >= 2
     ? question.options
     : [...DEFAULT_LIKERT_OPTIONS];
+}
+
+function getDiagnosticCriteria(question: ConfigurableQuestion): DiagnosticLikertCriterion[] {
+  return question.criteria && question.criteria.length > 0
+    ? question.criteria
+    : DEFAULT_DIAGNOSTIC_CRITERIA;
+}
+
+function decodeDiagnosticRatings(position: string): Record<string, string> {
+  if (!position.trim()) return {};
+  try {
+    const parsed = JSON.parse(position);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    return Object.fromEntries(
+      Object.entries(parsed).filter(
+        (entry): entry is [string, string] => typeof entry[0] === 'string' && typeof entry[1] === 'string',
+      ),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function encodeDiagnosticRatings(ratings: Record<string, string>): string {
+  const filled = Object.fromEntries(
+    Object.entries(ratings).filter(([, rating]) => rating.trim() !== ''),
+  );
+  return Object.keys(filled).length > 0 ? JSON.stringify(filled) : '';
 }
 
 function renderHelpText(helpText: string | null | undefined) {
@@ -504,6 +537,95 @@ export default function SurveyQuestionInput({
             <span className="max-w-[46%]">{likertOptions[0]}</span>
             <span className="max-w-[46%] text-right">{likertOptions[likertOptions.length - 1]}</span>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (inputType === 'diagnostic_likert') {
+    const criteria = getDiagnosticCriteria(question);
+    const ratingOptions = question.options && question.options.length >= 2
+      ? question.options
+      : [...DEFAULT_LIKERT_OPTIONS];
+    const ratings = decodeDiagnosticRatings(value.position);
+
+    function updateRating(key: string, rating: string) {
+      onChange(updatePosition(value, encodeDiagnosticRatings({ ...ratings, [key]: rating })));
+    }
+
+    return (
+      <div style={previewOnly ? { pointerEvents: 'none' } : undefined}>
+        {renderHelpText(question.helpText)}
+        <div className="space-y-2">
+          {criteria.map((criterion) => (
+            <div
+              key={criterion.key}
+              className="rounded-lg px-2.5 py-2.5 sm:px-3"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--foreground) 3%, var(--background))',
+                border: '1px solid color-mix(in srgb, var(--border) 74%, transparent)',
+              }}
+            >
+              <div className="mb-2">
+                <div className="text-sm font-semibold leading-5" style={{ color: criterion.color ?? 'var(--accent)' }}>
+                  {criterion.label}
+                </div>
+                {criterion.prompt ? (
+                  <div className="mb-1.5 text-[11px] font-medium leading-4" style={{ color: 'var(--muted-foreground)' }}>
+                    {criterion.prompt}
+                  </div>
+                ) : null}
+              </div>
+              <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-5" role="radiogroup" aria-label={`${question.label} - ${criterion.label}`}>
+                {ratingOptions.map((option) => {
+                  const selected = ratings[criterion.key] === option;
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      disabled={readOnly}
+                      onClick={() => updateRating(criterion.key, option)}
+                      className="min-h-[2.75rem] rounded-md px-2.5 py-2 text-center text-sm font-semibold leading-5 transition-colors"
+                      style={{
+                        backgroundColor: selected
+                          ? 'color-mix(in srgb, var(--accent) 12%, var(--background))'
+                          : 'var(--background)',
+                        border: selected
+                          ? '1px solid color-mix(in srgb, var(--accent) 40%, var(--border))'
+                          : '1px solid color-mix(in srgb, var(--border) 82%, transparent)',
+                        color: selected ? 'var(--accent)' : 'var(--foreground)',
+                        cursor: readOnly ? 'default' : 'pointer',
+                      }}
+                      aria-pressed={selected}
+                    >
+                      <span className="block font-medium">{option}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {question.allowUnsure ? (
+                <button
+                  type="button"
+                  disabled={readOnly}
+                  onClick={() => updateRating(criterion.key, "Don't know / unsure")}
+                  className="mt-1.5 w-full rounded-md px-2.5 py-2 text-center text-sm font-medium leading-5 transition-colors"
+                  style={{
+                    backgroundColor: ratings[criterion.key] === "Don't know / unsure"
+                      ? 'color-mix(in srgb, var(--accent) 9%, var(--background))'
+                      : 'var(--background)',
+                    border: ratings[criterion.key] === "Don't know / unsure"
+                      ? '1px solid color-mix(in srgb, var(--accent) 36%, var(--border))'
+                      : '1px dashed color-mix(in srgb, var(--border) 90%, transparent)',
+                    color: ratings[criterion.key] === "Don't know / unsure" ? 'var(--accent)' : 'var(--muted-foreground)',
+                    cursor: readOnly ? 'default' : 'pointer',
+                  }}
+                  aria-pressed={ratings[criterion.key] === "Don't know / unsure"}
+                >
+                  Don't know / unsure
+                </button>
+              ) : null}
+            </div>
+          ))}
         </div>
       </div>
     );

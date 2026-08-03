@@ -10,7 +10,8 @@ export type SurveyInputType =
   | 'single_select'
   | 'multi_select'
   | 'slider'
-  | 'likert';
+  | 'likert'
+  | 'diagnostic_likert';
 
 export const DEFAULT_LIKERT_OPTIONS = [
   'Unimportant',
@@ -42,7 +43,37 @@ export interface ConfigurableQuestion extends QuestionOptions {
   fieldType?: 'short' | 'long' | null;
   rows?: number | null;
   placeholder?: string | null;
+  criteria?: DiagnosticLikertCriterion[] | null;
+  previousRoundSynthesis?: string | null;
 }
+
+export interface DiagnosticLikertCriterion {
+  key: string;
+  label: string;
+  prompt?: string | null;
+  color?: string | null;
+}
+
+export const DEFAULT_DIAGNOSTIC_CRITERIA: DiagnosticLikertCriterion[] = [
+  {
+    key: 'diagnostic_validity',
+    label: 'Diagnostic validity',
+    prompt: 'Important in the manifestation of the condition?',
+    color: '#168bd1',
+  },
+  {
+    key: 'clinical_utility',
+    label: 'Clinical utility',
+    prompt: 'Useful for distinguishing clinically relevant cases?',
+    color: '#3f8f24',
+  },
+  {
+    key: 'prognostic_value',
+    label: 'Prognostic value',
+    prompt: 'Useful for predicting persistence, relapse, or future risk?',
+    color: '#b76612',
+  },
+];
 
 /** Question type that accepts both strings and structured objects */
 export type QuestionInput = string | Record<string, unknown>;
@@ -117,8 +148,11 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
         obj.inputType === 'single_select' ||
         obj.inputType === 'multi_select' ||
         obj.inputType === 'slider' ||
-        obj.inputType === 'likert')
-        ? obj.inputType
+        obj.inputType === 'likert' ||
+        obj.inputType === 'diagnostic_likert')
+        ? obj.inputType === 'textarea'
+          ? 'text'
+          : obj.inputType
         : null,
     options:
       obj && Array.isArray(obj.options)
@@ -141,15 +175,35 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
         : null,
     rows: obj && typeof obj.rows === 'number' ? obj.rows : null,
     placeholder: obj && typeof obj.placeholder === 'string' ? obj.placeholder : null,
+    criteria:
+      obj && Array.isArray(obj.criteria)
+        ? obj.criteria
+            .map((criterion): DiagnosticLikertCriterion | null => {
+              if (!criterion || typeof criterion !== 'object') return null;
+              const candidate = criterion as Record<string, unknown>;
+              if (typeof candidate.key !== 'string' || typeof candidate.label !== 'string') return null;
+              return {
+                key: candidate.key,
+                label: candidate.label,
+                prompt: typeof candidate.prompt === 'string' ? candidate.prompt : null,
+                color: typeof candidate.color === 'string' ? candidate.color : null,
+              };
+            })
+            .filter((criterion): criterion is DiagnosticLikertCriterion => criterion !== null)
+        : null,
+    previousRoundSynthesis:
+      obj && typeof obj.previousRoundSynthesis === 'string'
+        ? obj.previousRoundSynthesis
+        : obj && typeof obj.previous_round_synthesis === 'string'
+          ? obj.previous_round_synthesis
+          : obj && typeof obj.previousRoundResultsSummary === 'string'
+            ? obj.previousRoundResultsSummary
+            : null,
   };
 }
 
-export function isSurveyQuestion(question: QuestionOptions): boolean {
-  return (
-    !question.requireEvidence &&
-    !question.requireCounterarguments &&
-    !question.requireConfidence
-  );
+export function isSurveyQuestion(question: QuestionOptions | ConfigurableQuestion): boolean {
+  return !!('inputType' in question && question.inputType);
 }
 
 export function isTypedSurveyQuestion(question: ConfigurableQuestion): boolean {
