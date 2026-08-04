@@ -11,6 +11,7 @@ import {
   DEFAULT_DIAGNOSTIC_CRITERIA,
   extractQuestionText,
   normalizeQuestion,
+  type ConfigurableQuestion,
   type QuestionInput,
 } from './questions';
 
@@ -103,11 +104,15 @@ export function isResponseAnswered(answer: StructuredResponse | undefined | null
   return getAnswerPosition(answer ?? undefined).length > 0;
 }
 
+function isConfigurableQuestion(question: QuestionInput | ConfigurableQuestion): question is ConfigurableQuestion {
+  return typeof question !== 'string' && question !== null && typeof question === 'object' && 'label' in question;
+}
+
 export function isQuestionResponseComplete(
-  question: QuestionInput | ReturnType<typeof normalizeQuestion>,
+  question: QuestionInput | ConfigurableQuestion,
   answer: StructuredResponse | undefined | null,
 ): boolean {
-  const normalized = normalizeQuestion(question);
+  const normalized = isConfigurableQuestion(question) ? question : normalizeQuestion(question);
   const position = getAnswerPosition(answer ?? undefined);
   if (!position) return false;
 
