@@ -7,13 +7,7 @@ import {
   type DocumentTemplateField,
 } from './documentTemplate';
 import { coerceAnswerPosition } from './answers';
-import {
-  DEFAULT_DIAGNOSTIC_CRITERIA,
-  extractQuestionText,
-  normalizeQuestion,
-  type ConfigurableQuestion,
-  type QuestionInput,
-} from './questions';
+import { extractQuestionText, normalizeQuestion, type QuestionInput } from './questions';
 
 function getAnswerPosition(answer: unknown): string {
   return htmlToPlainText(coerceAnswerPosition(answer));
@@ -89,7 +83,7 @@ export function validateQuestionResponses(
   const missingQuestion = normalized.find(({ key, question }) => {
     if (question.optional) return false;
     if (!isVisible(question)) return false;
-    return !isQuestionResponseComplete(question, answers[key]);
+    return !getAnswerPosition(answers[key]);
   });
 
   if (!missingQuestion) return { ok: true };
@@ -102,47 +96,4 @@ export function validateQuestionResponses(
 
 export function isResponseAnswered(answer: StructuredResponse | undefined | null): boolean {
   return getAnswerPosition(answer ?? undefined).length > 0;
-}
-
-function isConfigurableQuestion(question: QuestionInput | ConfigurableQuestion): question is ConfigurableQuestion {
-  return typeof question !== 'string' && question !== null && typeof question === 'object' && 'label' in question;
-}
-
-export function isQuestionResponseComplete(
-  question: QuestionInput | ConfigurableQuestion,
-  answer: StructuredResponse | undefined | null,
-): boolean {
-  const normalized = isConfigurableQuestion(question) ? question : normalizeQuestion(question);
-  const position = getAnswerPosition(answer ?? undefined);
-  if (!position) return false;
-
-  if (normalized.inputType === 'diagnostic_likert') {
-    try {
-      const ratings = JSON.parse(position || '{}');
-      if (!ratings || typeof ratings !== 'object' || Array.isArray(ratings)) return false;
-      const criteria = normalized.criteria && normalized.criteria.length > 0
-        ? normalized.criteria
-        : DEFAULT_DIAGNOSTIC_CRITERIA;
-      const allowedOptions = new Set([
-        ...(normalized.options ?? []),
-        ...(normalized.allowUnsure ? ["Don't know / unsure"] : []),
-      ]);
-      return criteria.every((criterion) => {
-        const selected = ratings[criterion.key];
-        return typeof selected === 'string' && selected.trim() !== '' && (
-          allowedOptions.size === 0 || allowedOptions.has(selected)
-        );
-      });
-    } catch {
-      return false;
-    }
-  }
-
-  if (normalized.inputType) return true;
-
-  const structured = answer ?? undefined;
-  if (normalized.requireEvidence && !structured?.evidence?.trim()) return false;
-  if (normalized.requireCounterarguments && !structured?.counterarguments?.trim()) return false;
-  if (normalized.requireConfidence && typeof structured?.confidence !== 'number') return false;
-  return true;
 }

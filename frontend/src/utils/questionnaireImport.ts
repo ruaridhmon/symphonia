@@ -636,9 +636,7 @@ function questionToDocumentField(question: ConfigurableQuestion, fallbackKey: st
       ? 'short'
       : inputType === 'textarea'
         ? 'long'
-        : inputType === 'diagnostic_likert'
-          ? 'likert'
-          : inputType;
+        : inputType;
 
   return {
     key: slugifyDocumentFieldKey(question.questionId?.trim() || fallbackKey),
