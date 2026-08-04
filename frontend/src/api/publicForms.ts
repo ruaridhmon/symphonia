@@ -7,7 +7,6 @@ export interface PublicFormDetail {
   questions: Array<string | Record<string, unknown>>;
   document_template?: string | null;
   join_code: string;
-  selected_round_number?: number | null;
   previous_round_synthesis?: string;
   allow_public_responses: boolean;
   consent_required: boolean;
