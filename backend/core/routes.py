@@ -3435,6 +3435,38 @@ def _format_custom_synthesis_material(
     return "\n".join(lines)
 
 
+def _dedupe_custom_claim_bullets(markdown: str) -> str:
+    """Remove repeated custom-synthesis claim bullets and their detail lines."""
+    seen: set[str] = set()
+    output: list[str] = []
+    skipping_duplicate = False
+
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- **Claim:**"):
+            claim_key = stripped.removeprefix("- **Claim:**").strip().lower()
+            claim_key = re.sub(r"\s+", " ", claim_key)
+            if claim_key in seen:
+                skipping_duplicate = True
+                continue
+            seen.add(claim_key)
+            skipping_duplicate = False
+            output.append(line)
+            continue
+
+        if skipping_duplicate:
+            if stripped.startswith("- **Claim:**") or stripped.startswith("### ") or stripped.startswith("## "):
+                skipping_duplicate = False
+            else:
+                continue
+
+        output.append(line)
+
+    cleaned = "\n".join(output).strip()
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned
+
+
 async def _run_custom_synthesis(
     *,
     form_id: int,
@@ -3516,7 +3548,9 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             detail=f"Custom synthesis failed: {_sanitize_error_message(str(exc))}",
         ) from exc
 
-    synthesis_text = (completion.choices[0].message.content or "").strip()
+    synthesis_text = _dedupe_custom_claim_bullets(
+        completion.choices[0].message.content or ""
+    )
     synthesis_json_data = _merge_summary_display_preferences(
         {
             "narrative": synthesis_text,
