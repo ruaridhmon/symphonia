@@ -577,7 +577,8 @@ export default function SummaryPage() {
 	const [synthesisStage, setSynthesisStage] = useState('preparing');
 	const [synthesisStep, setSynthesisStep] = useState(0);
 	const [synthesisTotalSteps, setSynthesisTotalSteps] = useState(4);
-	const [synthesisMode, setSynthesisMode] = useState<'simple' | 'committee' | 'ttd'>('simple');
+	const [synthesisMode, setSynthesisMode] = useState<'custom' | 'simple' | 'committee' | 'ttd'>('simple');
+	const [customSynthesisPrompt, setCustomSynthesisPrompt] = useState('');
 	const [synthesisStartedAtMs, setSynthesisStartedAtMs] = useState<number | null>(null);
 	const [synthesisElapsedSeconds, setSynthesisElapsedSeconds] = useState(0);
 	const [synthesisEstimateSeconds, setSynthesisEstimateSeconds] = useState<number | null>(null);
@@ -1681,6 +1682,7 @@ export default function SummaryPage() {
 				n_analysts: SYNTHESIS_ANALYSTS,
 				mode: 'human_only',
 				summary_options: summaryComposition,
+				prompt: synthesisMode === 'custom' ? customSynthesisPrompt.trim() : undefined,
 			});
 
 			// ── Async path: synthesis running in the background ──
@@ -2569,6 +2571,8 @@ export default function SummaryPage() {
 						<AISynthesisPanel
 							synthesisMode={synthesisMode}
 							onModeChange={setSynthesisMode}
+							customPrompt={customSynthesisPrompt}
+							onCustomPromptChange={setCustomSynthesisPrompt}
 							selectedModel={selectedModel}
 							onModelChange={setSelectedModel}
 							models={availableModels}

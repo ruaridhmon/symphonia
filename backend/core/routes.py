@@ -3298,10 +3298,261 @@ async def _launch_synthesis_job(task_job_id: str, **job_kwargs: Any) -> None:
 
 class GenerateSynthesisVersionPayload(BaseModel):
     model: str = "openai/gpt-4o"
-    strategy: str = "simple"  # "simple" | "committee" | "ttd"
+    strategy: str = "simple"  # "simple" | "committee" | "ttd" | "custom"
     n_analysts: int = 3
     mode: str = "human_only"
     summary_options: dict[str, bool] | None = None
+    prompt: str | None = None
+
+
+def _stringify_custom_synthesis_answer(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, (str, int, float, bool)):
+        return str(value)
+    if isinstance(value, list):
+        return "\n".join(
+            item
+            for item in (
+                _stringify_custom_synthesis_answer(candidate).strip()
+                for candidate in value
+            )
+            if item
+        )
+    if isinstance(value, dict):
+        parts: list[str] = []
+        for key, label in (
+            ("position", "Answer"),
+            ("value", "Answer"),
+            ("answer", "Answer"),
+            ("selected", "Selected"),
+            ("selectedScore", "Score"),
+            ("score", "Score"),
+            ("evidence", "Evidence"),
+            ("confidence", "Confidence"),
+            ("confidenceJustification", "Confidence rationale"),
+            ("counterarguments", "Counterarguments"),
+        ):
+            if key not in value:
+                continue
+            text = _stringify_custom_synthesis_answer(value.get(key)).strip()
+            if text:
+                parts.append(f"{label}: {text}")
+        if parts:
+            return "\n".join(parts)
+        try:
+            return json.dumps(value, ensure_ascii=False, indent=2)
+        except TypeError:
+            return str(value)
+    return str(value)
+
+
+def _question_label_for_custom_synthesis(question: Any, fallback: str) -> str:
+    if isinstance(question, str):
+        return question.strip() or fallback
+    if isinstance(question, dict):
+        for key in ("label", "text", "question", "title"):
+            value = question.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return fallback
+
+
+def _format_custom_synthesis_material(
+    questions: list[Any],
+    response_dicts: list[dict[str, Any]],
+) -> str:
+    labels = [
+        _question_label_for_custom_synthesis(question, f"Question {index + 1}")
+        for index, question in enumerate(questions)
+    ]
+    lines: list[str] = ["Questions:"]
+    for index, label in enumerate(labels, start=1):
+        lines.append(f"{index}. {label}")
+    lines.append("")
+    lines.append("Responses:")
+    for response_index, response in enumerate(response_dicts, start=1):
+        lines.append("")
+        lines.append(f"Response {response_index} ({response.get('email') or f'Expert {response_index}'}):")
+        answers = response.get("answers") or {}
+        if isinstance(answers, str):
+            try:
+                answers = json.loads(answers)
+            except json.JSONDecodeError:
+                answers = {}
+        if not isinstance(answers, dict):
+            answers = {}
+        for question_index, label in enumerate(labels, start=1):
+            answer = _stringify_custom_synthesis_answer(
+                answers.get(f"q{question_index}")
+            ).strip()
+            lines.append(f"Q{question_index}. {label}")
+            lines.append(f"A: {answer or 'No answer'}")
+    return "\n".join(lines)
+
+
+async def _run_custom_synthesis(
+    *,
+    form_id: int,
+    round_id: int,
+    round_number: int,
+    questions: list[Any],
+    response_dicts: list[dict[str, Any]],
+    comments_context: str,
+    next_version: int,
+    model: str,
+    custom_prompt: str,
+    summary_options: dict[str, bool] | None,
+    db: Session,
+) -> dict[str, Any]:
+    resolved_model = _resolve_synthesis_model(db, model)
+    prompt = custom_prompt.strip()
+    if not prompt:
+        raise HTTPException(
+            status_code=400,
+            detail="Enter a custom synthesis prompt before generating.",
+        )
+
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    if not api_key:
+        raise HTTPException(
+            status_code=500,
+            detail="Synthesis is not configured. Please add an OpenRouter API key.",
+        )
+
+    material = _format_custom_synthesis_material(questions, response_dicts)
+    summary_guidance = _format_summary_generation_guidance(
+        _normalise_summary_options(summary_options)
+    )
+    comments_section = (
+        f"\n\nDiscussion comments:\n{comments_context.strip()}"
+        if comments_context.strip()
+        else ""
+    )
+    guidance_section = f"\n\n{summary_guidance}" if summary_guidance else ""
+    user_prompt = f"""Custom facilitator instruction:
+{prompt}
+
+Use only the consultation material below. Preserve disagreement and uncertainty. Do not invent evidence or consensus.
+{guidance_section}
+
+{material}{comments_section}
+"""
+
+    try:
+        client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
+        completion = await asyncio.wait_for(
+            asyncio.to_thread(
+                client.chat.completions.create,
+                model=resolved_model,
+                max_tokens=8192,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "You are an expert facilitator writing custom "
+                            "syntheses of structured consultation responses."
+                        ),
+                    },
+                    {"role": "user", "content": user_prompt},
+                ],
+            ),
+            timeout=180,
+        )
+    except asyncio.TimeoutError as exc:
+        raise HTTPException(
+            status_code=504,
+            detail="Custom synthesis timed out. Try a shorter prompt or a faster model.",
+        ) from exc
+    except Exception as exc:
+        logger.exception("Custom synthesis failed for round %d", round_id)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Custom synthesis failed: {_sanitize_error_message(str(exc))}",
+        ) from exc
+
+    synthesis_text = (completion.choices[0].message.content or "").strip()
+    synthesis_json_data = _merge_summary_display_preferences(
+        {
+            "narrative": synthesis_text,
+            "confidence_map": {"overall": 0.5},
+            "agreements": [],
+            "disagreements": [],
+            "nuances": [],
+            "follow_up_probes": [],
+            "analyst_reports": [],
+            "meta_synthesis_reasoning": (
+                "Generated with a facilitator-provided custom synthesis prompt."
+            ),
+            "provenance": {
+                "mode": "custom",
+                "model": resolved_model,
+                "form_id": form_id,
+                "round_id": round_id,
+                "round_number": round_number,
+                "custom_prompt": prompt,
+            },
+        },
+        None,
+        summary_options,
+    )
+
+    round_obj = db.query(RoundModel).filter(RoundModel.id == round_id).first()
+    if not round_obj:
+        raise HTTPException(status_code=404, detail="Round not found")
+
+    synthesis_json_data = _merge_summary_display_preferences(
+        synthesis_json_data,
+        round_obj.synthesis_json,
+        summary_options,
+    )
+    db.query(SynthesisVersion).filter(
+        SynthesisVersion.round_id == round_id,
+    ).update({"is_active": False})
+    new_version = SynthesisVersion(
+        round_id=round_id,
+        version=next_version,
+        synthesis=synthesis_text,
+        synthesis_json=synthesis_json_data,
+        model_used=resolved_model,
+        strategy="custom",
+        is_active=True,
+    )
+    db.add(new_version)
+    round_obj.synthesis = synthesis_text
+    round_obj.synthesis_json = synthesis_json_data
+    db.commit()
+    db.refresh(new_version)
+
+    if synthesis_text:
+        await ws_manager.broadcast_summary(synthesis_text)
+    for conn in ws_manager.active_connections.copy():
+        try:
+            await conn.send_json(
+                {
+                    "type": "synthesis_complete",
+                    "form_id": form_id,
+                    "round_id": round_id,
+                    "version_id": new_version.id,
+                    "synthesis_json": synthesis_json_data,
+                }
+            )
+        except Exception:
+            ws_manager.disconnect(conn)
+
+    return {
+        "id": new_version.id,
+        "round_id": new_version.round_id,
+        "version": new_version.version,
+        "synthesis": new_version.synthesis,
+        "synthesis_json": new_version.synthesis_json,
+        "model_used": new_version.model_used,
+        "strategy": new_version.strategy,
+        "created_at": new_version.created_at.isoformat()
+        if new_version.created_at
+        else None,
+        "is_active": new_version.is_active,
+    }
 
 
 @router.post(
@@ -3310,7 +3561,7 @@ class GenerateSynthesisVersionPayload(BaseModel):
     summary="Generate synthesis for any round",
     description=(
         "Generate a new synthesis version for ANY round (not just active). Supports "
-        "'simple', 'committee', and 'ttd' strategies. Long-running strategies are "
+        "'simple', 'committee', 'ttd', and 'custom' strategies. Long-running strategies are "
         "queued as background jobs so the website does not time out while they run. "
         "Progress is broadcast via WebSocket and can also be polled via the synthesis "
         "job status endpoint. Admin only."
@@ -3372,11 +3623,13 @@ async def generate_synthesis_for_round(
     next_version = (max_version[0] + 1) if max_version else 1
 
     strategy = payload.strategy.lower()
-    if strategy not in {"simple", "committee", "ttd"}:
+    if strategy not in {"simple", "committee", "ttd", "custom", "question_summaries"}:
         raise HTTPException(
             status_code=400,
-            detail="Invalid synthesis strategy. Use 'simple', 'committee', or 'ttd'.",
+            detail="Invalid synthesis strategy. Use 'custom', 'simple', 'committee', or 'ttd'.",
         )
+    if strategy == "question_summaries":
+        strategy = "custom"
 
     synthesis_mode_env = os.getenv("SYNTHESIS_MODE", "").lower()
     api_key = os.getenv("OPENROUTER_API_KEY", "")
@@ -3403,13 +3656,37 @@ async def generate_synthesis_for_round(
     ]
     round_number = round_obj.round_number
 
+    if strategy == "custom" and synthesis_mode_env != "mock" and api_key:
+        return await _run_custom_synthesis(
+            form_id=form_id,
+            round_id=round_id,
+            round_number=round_number,
+            questions=list(questions),
+            response_dicts=response_dicts,
+            comments_context=round_comments_context,
+            next_version=next_version,
+            model=payload.model,
+            custom_prompt=payload.prompt or "",
+            summary_options=summary_options,
+            db=db,
+        )
+
     # ── 3a. Mock mode → return synchronously (instant, no LLM call) ──
     if synthesis_mode_env == "mock" or not api_key:
+        custom_note = ""
+        if strategy == "custom":
+            prompt_preview = (payload.prompt or "").strip()
+            custom_note = (
+                f"\n\n*Custom prompt:* {prompt_preview[:500]}"
+                if prompt_preview
+                else "\n\n*Custom prompt:* Not provided"
+            )
         synthesis_text = (
             f"## Synthesis v{next_version} (Mock Mode)\n\n"
             f"**Round {round_number}** — {len(responses)} responses analysed.\n\n"
             f"*Strategy: {strategy} | Model: {payload.model}*\n\n"
             f"*Sections: {', '.join(label for key, label in SUMMARY_OPTION_LABELS.items() if generation_summary_options.get(key))}*\n\n"
+            f"{custom_note}\n\n"
             "This is a mock synthesis. Enable OPENROUTER_API_KEY for real LLM synthesis."
         )
         synthesis_json_data = _merge_summary_display_preferences(

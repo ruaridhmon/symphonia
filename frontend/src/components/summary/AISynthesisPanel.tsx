@@ -3,8 +3,10 @@ import { LoadingButton, SynthesisModeSelector } from '../index';
 import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ClipboardCopy, Cpu, Clock3, Eye, FileDown, GripVertical, Layers3, ListChecks, Palette, PencilLine, Terminal } from 'lucide-react';
 
 type Props = {
-  synthesisMode: 'simple' | 'committee' | 'ttd';
-  onModeChange: (mode: 'simple' | 'committee' | 'ttd') => void;
+  synthesisMode: 'custom' | 'simple' | 'committee' | 'ttd';
+  onModeChange: (mode: 'custom' | 'simple' | 'committee' | 'ttd') => void;
+  customPrompt: string;
+  onCustomPromptChange: (prompt: string) => void;
   selectedModel: string;
   onModelChange: (model: string) => void;
   models: string[];
@@ -32,6 +34,8 @@ type Props = {
 export default function AISynthesisPanel({
   synthesisMode,
   onModeChange,
+  customPrompt,
+  onCustomPromptChange,
   selectedModel,
   onModelChange,
   models,
@@ -155,6 +159,29 @@ export default function AISynthesisPanel({
             but they take longer and use more compute.
           </p>
           <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} compact />
+          {synthesisMode === 'custom' && (
+            <label className="block">
+              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
+                Custom prompt
+              </span>
+              <textarea
+                value={customPrompt}
+                onChange={event => onCustomPromptChange(event.target.value)}
+                rows={5}
+                className="w-full resize-y rounded-lg px-3 py-2.5 text-sm leading-6 outline-none"
+                placeholder="Tell the model exactly how to synthesise this round..."
+                style={{
+                  border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+                  backgroundColor: 'var(--background)',
+                  color: 'var(--foreground)',
+                  minHeight: '7rem',
+                }}
+              />
+              <span className="mt-1 block text-xs leading-5" style={{ color: 'var(--muted-foreground)' }}>
+                The prompt is combined with the round questions, responses, and comments.
+              </span>
+            </label>
+          )}
         </div>
 
         <div className="space-y-1.5">

@@ -57,6 +57,10 @@
   },
   "synthesis": {
     "modes": {
+      "custom": "Custom",
+      "customDesc": "Use your own prompt",
+      "customDetail": "Write the instruction the model should follow. Symphonia adds the round questions, responses, comments, and selected output sections automatically.",
+      "customBestFor": "Special report formats, client-specific framing, experimental synthesis styles",
       "simple": "Simple",
       "simpleDesc": "Quick one-shot summary",
       "simpleDetail": "A single AI pass that reads all expert responses and generates a unified summary. Fast and cost-effective, but may miss nuanced disagreements or minority positions.",

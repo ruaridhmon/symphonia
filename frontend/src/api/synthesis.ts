@@ -21,6 +21,7 @@ export interface GenerateSynthesisPayload {
   n_analysts?: number;
   mode?: string;
   summary_options?: Record<string, boolean>;
+  prompt?: string;
 }
 
 export interface GenerateSynthesisResult {

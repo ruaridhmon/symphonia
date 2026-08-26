@@ -1,21 +1,22 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Zap, Users, Microscope, Info } from 'lucide-react';
+import { PencilLine, Zap, Users, Microscope, Info } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 interface SynthesisModeSelectorProps {
-  mode: 'simple' | 'committee' | 'ttd';
-  onModeChange: (mode: 'simple' | 'committee' | 'ttd') => void;
+  mode: 'custom' | 'simple' | 'committee' | 'ttd';
+  onModeChange: (mode: 'custom' | 'simple' | 'committee' | 'ttd') => void;
   compact?: boolean;
 }
 
 const modeIcons: Record<string, ReactNode> = {
+  custom: <PencilLine size={16} style={{ color: 'var(--accent)' }} />,
   simple: <Zap size={16} style={{ color: 'var(--warning)' }} />,
   committee: <Users size={16} style={{ color: 'var(--accent)' }} />,
   ttd: <Microscope size={16} style={{ color: 'var(--accent)' }} />,
 };
 
-const modeIds: ('simple' | 'committee' | 'ttd')[] = ['simple', 'committee', 'ttd'];
+const modeIds: ('custom' | 'simple' | 'committee' | 'ttd')[] = ['custom', 'simple', 'committee', 'ttd'];
 
 export default function SynthesisModeSelector({
   mode,
@@ -31,7 +32,7 @@ export default function SynthesisModeSelector({
     description: t(`synthesis.modes.${id}Desc`),
     detail: t(`synthesis.modes.${id}Detail`),
     icon: modeIcons[id],
-    speed: t(`synthesis.modes.speed${id === 'simple' ? 'Fast' : id === 'committee' ? 'Moderate' : 'Thorough'}`),
+    speed: t(`synthesis.modes.speed${id === 'custom' || id === 'simple' ? 'Fast' : id === 'committee' ? 'Moderate' : 'Thorough'}`),
     bestFor: t(`synthesis.modes.${id}BestFor`),
   }));
 
