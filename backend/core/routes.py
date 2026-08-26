@@ -3309,39 +3309,38 @@ class GenerateSynthesisVersionPayload(BaseModel):
     prompt: str | None = None
 
 
-CUSTOM_SYNTHESIS_BASELINE_PROMPT = """Create a concise text synthesis as claim bullets.
+CUSTOM_SYNTHESIS_BASELINE_PROMPT = """Create a terse claim list. No waffle.
 
 Output Markdown only, using this exact structure:
 
-## Claim synthesis
+## Claims
 
-### Agreements
+### Agreement claims
 - **Claim:** ...
-  - **Who/evidence:** Expert 1, Expert 3 ...
+  - **Confidence:** High/Medium/Low
 
-### Disagreements
+### Disagreement claims
 - **Claim:** ...
-  - **Position A:** ...
-  - **Position B:** ...
-  - **What would resolve it:** ...
+  - **Confidence:** High/Medium/Low
 
-### Mixed, uncertain, or conditional claims
+### Uncertain or conditional claims
 - **Claim:** ...
-  - **Condition or uncertainty:** ...
+  - **Confidence:** High/Medium/Low
 
 ### Isolated claims
 - **Claim:** ...
-  - **Source:** ...
-
-### Possible next-round questions
-- ...
+  - **Confidence:** High/Medium/Low
 
 Rules:
-- Extract the actual claims made in the responses; do not write a generic essay.
-- Prefer short bullets over paragraphs.
-- Mark whether each claim is agreement, disagreement, mixed/uncertain, or isolated.
-- Include materially different claims even if only one expert made them.
-- Do not invent evidence, consensus, or expert positions.
+- Output claims and confidence only.
+- Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
+- Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
+- Each bullet must be one sentence claim plus one confidence line.
+- Maximum 12 claims total.
+- Keep each claim under 22 words.
+- Confidence means confidence that the claim is supported by the responses, not whether the claim is true.
+- Use High only when support is broad and clear; Medium for mixed or partial support; Low for isolated or weak support.
+- Do not invent claims, evidence, consensus, or expert positions.
 """
 
 

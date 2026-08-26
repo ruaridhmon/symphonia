@@ -178,7 +178,7 @@ export default function AISynthesisPanel({
                 }}
               />
               <span className="mt-1 block text-xs leading-5" style={{ color: 'var(--muted-foreground)' }}>
-                The prompt is combined with the round questions, responses, and comments.
+                Default output is claim bullets with confidence only. Your prompt is added on top.
               </span>
             </label>
           )}
