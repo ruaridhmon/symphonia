@@ -1669,8 +1669,8 @@ export default function SummaryPage() {
 		}
 
 		setIsGenerating(true);
-		setSynthesisStage('preparing');
-		setSynthesisStep(0);
+		setSynthesisStage(synthesisMode === 'custom' ? 'generating' : 'preparing');
+		setSynthesisStep(synthesisMode === 'custom' ? 2 : 0);
 		setSynthesisTotalSteps(4);
 		setSynthesisStartedAtMs(Date.now());
 		setSynthesisElapsedSeconds(0);

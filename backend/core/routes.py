@@ -243,6 +243,10 @@ def _estimate_synthesis_duration_seconds(
     analysts = int(profile["n_analysts"])
     latency = _estimate_model_latency_multiplier(model)
 
+    if strategy == "custom":
+        base = 8 + count * 2
+        return min(round(35 * latency), round(base * latency))
+
     if strategy == "simple":
         return round(float(profile["timeout_seconds"]) * 0.7 * latency)
 
@@ -299,7 +303,7 @@ def _build_synthesis_runtime_profile(
 
     return {
         "n_analysts": analysts,
-        "timeout_seconds": 180.0,
+        "timeout_seconds": 45.0,
         "n_denoise_steps": 1,
     }
 
@@ -3305,6 +3309,42 @@ class GenerateSynthesisVersionPayload(BaseModel):
     prompt: str | None = None
 
 
+CUSTOM_SYNTHESIS_BASELINE_PROMPT = """Create a concise text synthesis as claim bullets.
+
+Output Markdown only, using this exact structure:
+
+## Claim synthesis
+
+### Agreements
+- **Claim:** ...
+  - **Who/evidence:** Expert 1, Expert 3 ...
+
+### Disagreements
+- **Claim:** ...
+  - **Position A:** ...
+  - **Position B:** ...
+  - **What would resolve it:** ...
+
+### Mixed, uncertain, or conditional claims
+- **Claim:** ...
+  - **Condition or uncertainty:** ...
+
+### Isolated claims
+- **Claim:** ...
+  - **Source:** ...
+
+### Possible next-round questions
+- ...
+
+Rules:
+- Extract the actual claims made in the responses; do not write a generic essay.
+- Prefer short bullets over paragraphs.
+- Mark whether each claim is agreement, disagreement, mixed/uncertain, or isolated.
+- Include materially different claims even if only one expert made them.
+- Do not invent evidence, consensus, or expert positions.
+"""
+
+
 def _stringify_custom_synthesis_answer(value: Any) -> str:
     if value is None:
         return ""
@@ -3407,11 +3447,6 @@ async def _run_custom_synthesis(
 ) -> dict[str, Any]:
     resolved_model = _resolve_synthesis_model(db, model)
     prompt = custom_prompt.strip()
-    if not prompt:
-        raise HTTPException(
-            status_code=400,
-            detail="Enter a custom synthesis prompt before generating.",
-        )
 
     api_key = os.getenv("OPENROUTER_API_KEY", "")
     if not api_key:
@@ -3430,8 +3465,13 @@ async def _run_custom_synthesis(
         else ""
     )
     guidance_section = f"\n\n{summary_guidance}" if summary_guidance else ""
-    user_prompt = f"""Custom facilitator instruction:
-{prompt}
+    facilitator_instruction = (
+        f"{CUSTOM_SYNTHESIS_BASELINE_PROMPT}\n\nAdditional facilitator instruction:\n{prompt}"
+        if prompt
+        else CUSTOM_SYNTHESIS_BASELINE_PROMPT
+    )
+    user_prompt = f"""Synthesis instruction:
+{facilitator_instruction}
 
 Use only the consultation material below. Preserve disagreement and uncertainty. Do not invent evidence or consensus.
 {guidance_section}
@@ -3445,7 +3485,8 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             asyncio.to_thread(
                 client.chat.completions.create,
                 model=resolved_model,
-                max_tokens=8192,
+                max_tokens=2500,
+                temperature=0.2,
                 messages=[
                     {
                         "role": "system",
@@ -3457,7 +3498,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                     {"role": "user", "content": user_prompt},
                 ],
             ),
-            timeout=180,
+            timeout=45,
         )
     except asyncio.TimeoutError as exc:
         raise HTTPException(
@@ -3491,6 +3532,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                 "round_id": round_id,
                 "round_number": round_number,
                 "custom_prompt": prompt,
+                "baseline_prompt": CUSTOM_SYNTHESIS_BASELINE_PROMPT,
             },
         },
         None,

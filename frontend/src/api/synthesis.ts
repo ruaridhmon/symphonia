@@ -167,7 +167,7 @@ export function estimateSynthesisDurationSeconds(
   })();
   const count = Math.max(1, responseCount);
   const analysts = Math.max(1, nAnalysts);
-  const effectiveAnalysts = strategy === 'simple'
+  const effectiveAnalysts = strategy === 'custom' || strategy === 'simple'
     ? 1
     : strategy === 'committee'
       ? Math.min(3, analysts)
@@ -175,6 +175,13 @@ export function estimateSynthesisDurationSeconds(
         ? Math.min(2, analysts)
         : analysts;
 
+  if (strategy === 'custom') {
+    const base = 8 + count * 2;
+    return Math.min(
+      Math.round(35 * latencyMultiplier),
+      Math.round(base * latencyMultiplier),
+    );
+  }
   if (strategy === 'simple') {
     const timeout = Math.min(120, Math.max(45, 30 + count * 8));
     return Math.round(timeout * 0.7 * latencyMultiplier);
