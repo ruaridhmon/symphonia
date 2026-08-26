@@ -3337,6 +3337,11 @@ Rules:
 - Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
 - Each bullet must be one sentence claim plus one confidence line.
 - Maximum 12 claims total.
+- Each claim may appear once only. Do not repeat the same claim under different headings.
+- Agreement claims must have broad positive support and no substantial opposition.
+- Disagreement claims must capture contested claims where response positions conflict.
+- Uncertain or conditional claims must capture claims whose support depends on conditions or is mostly neutral/mixed.
+- Isolated claims must be materially distinct minority claims, not weaker repeats of agreement/disagreement claims.
 - Keep each claim under 22 words.
 - Confidence means confidence that the claim is supported by the responses, not whether the claim is true.
 - Use High only when support is broad and clear; Medium for mixed or partial support; Low for isolated or weak support.
