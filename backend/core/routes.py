@@ -3338,6 +3338,7 @@ Rules:
 - Use Clear disagreement when there are opposing response positions.
 - For Clear disagreement, write the opposing views as a short contrast, not a long explanation.
 - For Uncontested or Questionable, use Opposing views: None unless there is a real opposing view.
+- Opposing views must be a short phrase, never just "Agree" or "Disagree".
 - Put a blank line between every claim.
 - Maximum 12 claims total.
 - Each claim may appear once only. Do not repeat the same claim under different headings.
@@ -3434,18 +3435,18 @@ def _format_custom_synthesis_material(
 
 def _format_custom_claim_list(markdown: str) -> str:
     """Render custom claim bullets as simple HTML so line breaks are preserved."""
-    def status_style(status: str) -> tuple[str, str, str]:
+    def status_style(status: str) -> tuple[str, str, str, str]:
         normalised = status.strip().lower()
         if "clear" in normalised and "disagreement" in normalised:
-            return ("#dc2626", "#fef2f2", "Clear disagreement")
+            return ("#dc2626", "#fef2f2", "Clear disagreement", "🟥")
         if "question" in normalised or "mixed" in normalised or "uncertain" in normalised:
-            return ("#d97706", "#fffbeb", "Questionable")
-        return ("#16a34a", "#f0fdf4", "Uncontested")
+            return ("#d97706", "#fffbeb", "Questionable", "🟨")
+        return ("#16a34a", "#f0fdf4", "Uncontested", "🟩")
 
     def render_structured_claims(claims: list[dict[str, str]]) -> str:
         output = ["<h2>Claims</h2>", '<ol style="margin: 0; padding-left: 1.25rem;">']
         for index, item in enumerate(claims, start=1):
-            colour, background, label = status_style(item.get("status", "Questionable"))
+            colour, background, label, marker = status_style(item.get("status", "Questionable"))
             claim_text = html.escape(item.get("text", "").strip())
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
@@ -3454,10 +3455,10 @@ def _format_custom_claim_list(markdown: str) -> str:
                 'style="margin: 0 0 1rem 0; padding: 0.85rem 1rem; '
                 f'border-left: 5px solid {colour}; background: {background}; '
                 'border-radius: 0.45rem;">'
-                f'<p style="margin: 0 0 0.45rem 0;"><strong>Claim {index}:</strong> {claim_text}</p>'
+                f'<p style="margin: 0 0 0.45rem 0;"><strong>{marker} Claim {index} - {label}:</strong> {claim_text}</p>'
                 f'<p style="margin: 0 0 0.35rem 0;"><strong>People making this claim:</strong> {people}</p>'
                 f'<p style="margin: 0;"><strong>Status:</strong> '
-                f'<span style="color: {colour}; font-weight: 700;">{label}</span></p>'
+                f'<span style="color: {colour}; font-weight: 700;">{marker} {label}</span></p>'
             )
             if opposing and opposing.lower() not in {"none", "n/a", "not applicable", "no opposing views"}:
                 output.append(
