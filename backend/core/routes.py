@@ -3460,7 +3460,7 @@ def _format_custom_claim_list(markdown: str) -> str:
 
     def flush_pending() -> None:
         nonlocal pending_claim, pending_confidence
-        if not current_section or not pending_claim:
+        if not current_section or pending_claim is None:
             pending_claim = None
             pending_confidence = "Medium"
             return
@@ -3494,14 +3494,28 @@ def _format_custom_claim_list(markdown: str) -> str:
             flush_pending()
             pending_claim = stripped.removeprefix("- **Claim**").strip()
             continue
+        if stripped.startswith("- Claim:"):
+            flush_pending()
+            pending_claim = stripped.removeprefix("- Claim:").strip()
+            continue
+        if stripped.startswith("Claim:"):
+            flush_pending()
+            pending_claim = stripped.removeprefix("Claim:").strip()
+            continue
         if stripped.startswith("**Confidence:**"):
             pending_confidence = stripped.removeprefix("**Confidence:**").strip() or "Medium"
             continue
         if stripped.startswith("- **Confidence:**"):
             pending_confidence = stripped.removeprefix("- **Confidence:**").strip() or "Medium"
             continue
-        if pending_claim and stripped and not stripped.startswith("#"):
-            pending_claim = f"{pending_claim} {stripped}"
+        if stripped.startswith("Confidence:"):
+            pending_confidence = stripped.removeprefix("Confidence:").strip() or "Medium"
+            continue
+        if stripped.startswith("- Confidence:"):
+            pending_confidence = stripped.removeprefix("- Confidence:").strip() or "Medium"
+            continue
+        if pending_claim is not None and stripped and not stripped.startswith("#"):
+            pending_claim = f"{pending_claim} {stripped}".strip()
 
     flush_pending()
 
