@@ -107,11 +107,11 @@
         }
       })();
     </script>
-    <script type="module" crossorigin src="/assets/index-HJquNmhn.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-react-D3EY6NCv.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-markdown-B7eG3c64.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-zcuq_YZz.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-C77QhKGx-mobilefix2.css">
+    <script type="module" crossorigin src="/assets/index-B_MCO2Uf.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-Di_Vzd_F.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-markdown-YiB4v9cZ.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-CyLGjnJm.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-Bnn3-0jk.css">
   </head>
   <body>
     <div id="root">
@@ -180,66 +180,5 @@
         <div class="symphonia-loader__text">Loading Symphonia</div>
       </div>
     </div>
-    <script>
-      (function () {
-        if (!/^\/public\/session\//.test(window.location.pathname)) return;
-
-        var key = 'symphonia-public-session-question:' + window.location.pathname;
-        var saved = Number(window.localStorage.getItem(key));
-        var restoreTarget = Number.isFinite(saved) && saved > 0 ? saved : null;
-        var restoring = restoreTarget !== null;
-        var attempts = 0;
-
-        function currentQuestionIndex() {
-          var text = document.body ? document.body.innerText : '';
-          var match = text.match(/\bQuestion\s+(\d+)\s+of\s+24\b/);
-          return match ? Number(match[1]) - 1 : null;
-        }
-
-        function clickQuestion(index) {
-          var label = 'Question ' + (index + 1);
-          var direct = Array.prototype.find.call(document.querySelectorAll('button[aria-label]'), function (button) {
-            return button.getAttribute('aria-label').indexOf(label) === 0 && !button.disabled;
-          });
-          if (direct) {
-            direct.click();
-            return true;
-          }
-
-          var next = document.querySelector('button[aria-label="Next question"]:not(:disabled)');
-          if (next) {
-            next.click();
-            return true;
-          }
-          return false;
-        }
-
-        function syncQuestion() {
-          var current = currentQuestionIndex();
-          if (current === null) return;
-
-          if (restoring && current < restoreTarget && attempts < 40) {
-            attempts += 1;
-            clickQuestion(restoreTarget);
-            window.setTimeout(syncQuestion, 120);
-            return;
-          }
-
-          restoring = false;
-          window.localStorage.setItem(key, String(current));
-        }
-
-        var observer = new MutationObserver(function () {
-          window.clearTimeout(observer._timer);
-          observer._timer = window.setTimeout(syncQuestion, 80);
-        });
-
-        if (document.body) {
-          observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-          window.setTimeout(syncQuestion, 250);
-          window.setTimeout(syncQuestion, 1000);
-        }
-      })();
-    </script>
   </body>
 </html>
