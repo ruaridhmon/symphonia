@@ -3316,26 +3316,35 @@ Output Markdown only, using this exact structure:
 ## Claims
 
 ### Agreement claims
-- **Claim:** ...
-  - **Confidence:** High/Medium/Low
+- **Claim**  
+  ...
+
+  **Confidence:** High/Medium/Low
 
 ### Disagreement claims
-- **Claim:** ...
-  - **Confidence:** High/Medium/Low
+- **Claim**  
+  ...
+
+  **Confidence:** High/Medium/Low
 
 ### Uncertain or conditional claims
-- **Claim:** ...
-  - **Confidence:** High/Medium/Low
+- **Claim**  
+  ...
+
+  **Confidence:** High/Medium/Low
 
 ### Isolated claims
-- **Claim:** ...
-  - **Confidence:** High/Medium/Low
+- **Claim**  
+  ...
+
+  **Confidence:** High/Medium/Low
 
 Rules:
 - Output claims and confidence only.
 - Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
 - Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
 - Each bullet must be one sentence claim plus one confidence line.
+- Put a blank line between every claim bullet.
 - Maximum 12 claims total.
 - Each claim may appear once only. Do not repeat the same claim under different headings.
 - Agreement claims must have broad positive support and no substantial opposition.
@@ -3435,36 +3444,85 @@ def _format_custom_synthesis_material(
     return "\n".join(lines)
 
 
-def _dedupe_custom_claim_bullets(markdown: str) -> str:
-    """Remove repeated custom-synthesis claim bullets and their detail lines."""
+def _format_custom_claim_list(markdown: str) -> str:
+    """Render custom claim bullets as clean, spaced Markdown blocks."""
+    section_order = [
+        "### Agreement claims",
+        "### Disagreement claims",
+        "### Uncertain or conditional claims",
+        "### Isolated claims",
+    ]
+    sections: dict[str, list[tuple[str, str]]] = {heading: [] for heading in section_order}
     seen: set[str] = set()
-    output: list[str] = []
-    skipping_duplicate = False
+    current_section: str | None = None
+    pending_claim: str | None = None
+    pending_confidence = "Medium"
+
+    def flush_pending() -> None:
+        nonlocal pending_claim, pending_confidence
+        if not current_section or not pending_claim:
+            pending_claim = None
+            pending_confidence = "Medium"
+            return
+        claim = pending_claim.strip().rstrip(".")
+        if claim:
+            claim = f"{claim}."
+        claim_key = re.sub(r"\s+", " ", claim.lower())
+        if claim and claim_key not in seen:
+            seen.add(claim_key)
+            sections[current_section].append((claim, pending_confidence))
+        pending_claim = None
+        pending_confidence = "Medium"
 
     for line in markdown.splitlines():
         stripped = line.strip()
-        if stripped.startswith("- **Claim:**"):
-            claim_key = stripped.removeprefix("- **Claim:**").strip().lower()
-            claim_key = re.sub(r"\s+", " ", claim_key)
-            if claim_key in seen:
-                skipping_duplicate = True
-                continue
-            seen.add(claim_key)
-            skipping_duplicate = False
-            output.append(line)
+        if stripped.startswith("### "):
+            flush_pending()
+            current_section = stripped
+            if current_section not in sections:
+                sections[current_section] = []
             continue
 
-        if skipping_duplicate:
-            if stripped.startswith("- **Claim:**") or stripped.startswith("### ") or stripped.startswith("## "):
-                skipping_duplicate = False
-            else:
-                continue
+        if not current_section:
+            continue
 
-        output.append(line)
+        if stripped.startswith("- **Claim:**"):
+            flush_pending()
+            pending_claim = stripped.removeprefix("- **Claim:**").strip()
+            continue
+        if stripped.startswith("- **Claim**"):
+            flush_pending()
+            pending_claim = stripped.removeprefix("- **Claim**").strip()
+            continue
+        if stripped.startswith("**Confidence:**"):
+            pending_confidence = stripped.removeprefix("**Confidence:**").strip() or "Medium"
+            continue
+        if stripped.startswith("- **Confidence:**"):
+            pending_confidence = stripped.removeprefix("- **Confidence:**").strip() or "Medium"
+            continue
+        if pending_claim and stripped and not stripped.startswith("#"):
+            pending_claim = f"{pending_claim} {stripped}"
 
-    cleaned = "\n".join(output).strip()
-    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
-    return cleaned
+    flush_pending()
+
+    output: list[str] = ["## Claims"]
+    for heading in section_order:
+        claims = sections.get(heading) or []
+        if not claims:
+            continue
+        output.extend(["", heading, ""])
+        for claim, confidence in claims:
+            output.extend(
+                [
+                    "- **Claim**  ",
+                    f"  {claim}",
+                    "",
+                    f"  **Confidence:** {confidence}",
+                    "",
+                ]
+            )
+
+    return "\n".join(output).strip()
 
 
 async def _run_custom_synthesis(
@@ -3548,7 +3606,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             detail=f"Custom synthesis failed: {_sanitize_error_message(str(exc))}",
         ) from exc
 
-    synthesis_text = _dedupe_custom_claim_bullets(
+    synthesis_text = _format_custom_claim_list(
         completion.choices[0].message.content or ""
     )
     synthesis_json_data = _merge_summary_display_preferences(
