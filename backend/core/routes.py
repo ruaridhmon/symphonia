@@ -3444,30 +3444,20 @@ def _format_custom_claim_list(markdown: str) -> str:
         return ("#16a34a", "#f0fdf4", "Uncontested", "🟩")
 
     def render_structured_claims(claims: list[dict[str, str]]) -> str:
-        output = ["<h2>Claims</h2>", '<ol style="margin: 0; padding-left: 1.25rem;">']
+        output = ["<h2>Claims</h2>"]
         for index, item in enumerate(claims, start=1):
-            colour, _background, label, marker = status_style(item.get("status", "Questionable"))
-            block_colour = "#16a34a"
-            block_background = "#f0fdf4"
+            _colour, _background, label, _marker = status_style(item.get("status", "Questionable"))
             claim_text = html.escape(item.get("text", "").strip())
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
-            output.append(
-                "<li "
-                'style="margin: 0 0 1rem 0; padding: 0.85rem 1rem; '
-                f'border-left: 5px solid {block_colour}; background: {block_background}; '
-                'border-radius: 0.45rem;">'
-                f'<p style="margin: 0 0 0.45rem 0;"><strong>{marker} Claim {index} - {label}:</strong> {claim_text}</p>'
-                f'<p style="margin: 0 0 0.35rem 0;"><strong>People making this claim:</strong> {people}</p>'
-                f'<p style="margin: 0;"><strong>Status:</strong> '
-                f'<span style="color: {colour}; font-weight: 700;">{marker} {label}</span></p>'
-            )
+            if index > 1:
+                output.append("<hr>")
+            output.append(f"<h3>🟩 Claim {index} - {html.escape(label)}</h3>")
+            output.append(f"<p>{claim_text}</p>")
+            output.append(f"<p><strong>People making this claim:</strong> {people}</p>")
+            output.append(f"<p><strong>Status:</strong> {html.escape(label)}</p>")
             if opposing and opposing.lower() not in {"none", "n/a", "not applicable", "no opposing views"}:
-                output.append(
-                    f'<p style="margin: 0.45rem 0 0 0;"><strong>Opposing views:</strong> {html.escape(opposing)}</p>'
-                )
-            output.append("</li>")
-        output.append("</ol>")
+                output.append(f"<p><strong>Opposing views:</strong> {html.escape(opposing)}</p>")
         return "\n".join(output)
 
     structured_claims: list[dict[str, str]] = []
