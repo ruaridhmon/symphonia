@@ -3484,6 +3484,11 @@ def _format_custom_claim_list(markdown: str) -> str:
             flush_pending()
             current_section = normalise_heading(stripped) or current_section
             continue
+        plain_heading = normalise_heading(stripped)
+        if plain_heading and not stripped.startswith("-"):
+            flush_pending()
+            current_section = plain_heading
+            continue
 
         if not current_section:
             if "claim" in stripped.lower():
@@ -3507,6 +3512,11 @@ def _format_custom_claim_list(markdown: str) -> str:
         if stripped.startswith("- Claim:"):
             flush_pending()
             pending_claim = stripped.removeprefix("- Claim:").strip()
+            continue
+        generic_bullet_match = re.match(r"[-*+]\s+(.+)$", stripped)
+        if generic_bullet_match and not generic_bullet_match.group(1).lower().startswith("confidence:"):
+            flush_pending()
+            pending_claim = generic_bullet_match.group(1).strip()
             continue
         if stripped.startswith("Claim:"):
             flush_pending()
