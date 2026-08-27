@@ -3451,7 +3451,9 @@ def _format_custom_claim_list(markdown: str) -> str:
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
             if index > 1:
+                output.append("<p>&nbsp;</p>")
                 output.append("<hr>")
+                output.append("<p>&nbsp;</p>")
             output.append(
                 "<div "
                 f'style="margin: 0 0 1.15rem 0; padding: 0.95rem 1rem; '
