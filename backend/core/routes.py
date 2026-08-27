@@ -3311,33 +3311,25 @@ class GenerateSynthesisVersionPayload(BaseModel):
 
 CUSTOM_SYNTHESIS_BASELINE_PROMPT = """Create a terse claim list. No waffle.
 
-Output Markdown only, using this exact structure:
+Output plain text only, using this exact structure:
 
-## Claims
+Claims
 
-### Agreement claims
-- **Claim**  
-  ...
+Agreement claims
+- ...
+  Confidence: High/Medium/Low
 
-  **Confidence:** High/Medium/Low
+Disagreement claims
+- ...
+  Confidence: High/Medium/Low
 
-### Disagreement claims
-- **Claim**  
-  ...
+Uncertain or conditional claims
+- ...
+  Confidence: High/Medium/Low
 
-  **Confidence:** High/Medium/Low
-
-### Uncertain or conditional claims
-- **Claim**  
-  ...
-
-  **Confidence:** High/Medium/Low
-
-### Isolated claims
-- **Claim**  
-  ...
-
-  **Confidence:** High/Medium/Low
+Isolated claims
+- ...
+  Confidence: High/Medium/Low
 
 Rules:
 - Output claims and confidence only.
@@ -3537,19 +3529,18 @@ def _format_custom_claim_list(markdown: str) -> str:
 
     flush_pending()
 
-    output: list[str] = ["## Claims"]
+    output: list[str] = ["Claims"]
     for heading in section_order:
         claims = sections.get(heading) or []
         if not claims:
             continue
-        output.extend(["", heading, ""])
+        section_title = heading.removeprefix("### ").strip()
+        output.extend(["", section_title, ""])
         for claim, confidence in claims:
             output.extend(
                 [
-                    "- **Claim**  ",
-                    f"  {claim}",
-                    "",
-                    f"  **Confidence:** {confidence}",
+                    f"- {claim}",
+                    f"  Confidence: {confidence}",
                     "",
                 ]
             )
