@@ -3458,6 +3458,18 @@ def _format_custom_claim_list(markdown: str) -> str:
     pending_claim: str | None = None
     pending_confidence = "Medium"
 
+    def normalise_heading(value: str) -> str | None:
+        heading = value.lstrip("#").strip().lower()
+        if "disagreement" in heading or "contested" in heading or "conflict" in heading:
+            return "### Disagreement claims"
+        if "uncertain" in heading or "conditional" in heading or "mixed" in heading:
+            return "### Uncertain or conditional claims"
+        if "isolated" in heading or "minority" in heading:
+            return "### Isolated claims"
+        if "agreement" in heading or "consensus" in heading or "supported" in heading:
+            return "### Agreement claims"
+        return None
+
     def flush_pending() -> None:
         nonlocal pending_claim, pending_confidence
         if not current_section or pending_claim is None:
@@ -3476,15 +3488,16 @@ def _format_custom_claim_list(markdown: str) -> str:
 
     for line in markdown.splitlines():
         stripped = line.strip()
-        if stripped.startswith("### "):
+        if stripped.startswith("#"):
             flush_pending()
-            current_section = stripped
-            if current_section not in sections:
-                sections[current_section] = []
+            current_section = normalise_heading(stripped) or current_section
             continue
 
         if not current_section:
-            continue
+            if "claim" in stripped.lower():
+                current_section = "### Uncertain or conditional claims"
+            else:
+                continue
 
         if stripped.startswith("- **Claim:**"):
             flush_pending()
@@ -3536,7 +3549,8 @@ def _format_custom_claim_list(markdown: str) -> str:
                 ]
             )
 
-    return "\n".join(output).strip()
+    formatted = "\n".join(output).strip()
+    return formatted if any(sections.get(heading) for heading in section_order) else markdown.strip()
 
 
 async def _run_custom_synthesis(
