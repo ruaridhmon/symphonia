@@ -3460,10 +3460,10 @@ def _format_custom_claim_list(markdown: str) -> str:
                 f'border-left: 5px solid {colour}; background: {background}; '
                 'border-radius: 0.45rem;">'
             )
-            output.append(f"<p><strong>{marker} Claim {index}:</strong> {claim_text}</p>")
-            output.append(f"<p><strong>People making this claim:</strong> {people}</p>")
+            output.append(f"<p>{marker} Claim {index}: <strong>{claim_text}</strong></p>")
+            output.append(f"<p>People making this claim: <strong>{people}</strong></p>")
             if opposing and opposing.lower() not in {"none", "n/a", "not applicable", "no opposing views"}:
-                output.append(f"<p><strong>Opposing views:</strong> {html.escape(opposing)}</p>")
+                output.append(f"<p>Opposing views: <strong>{html.escape(opposing)}</strong></p>")
             output.append("</div>")
         return "\n".join(output)
 
