@@ -3507,6 +3507,11 @@ def _format_custom_claim_list(markdown: str) -> str:
             flush_pending()
             pending_claim = stripped.removeprefix("- **Claim**").strip()
             continue
+        bold_bullet_match = re.match(r"-\s+\*\*(.+?)\*\*\s*$", stripped)
+        if bold_bullet_match and not bold_bullet_match.group(1).lower().startswith("confidence:"):
+            flush_pending()
+            pending_claim = bold_bullet_match.group(1).strip()
+            continue
         if stripped.startswith("- Claim:"):
             flush_pending()
             pending_claim = stripped.removeprefix("- Claim:").strip()
