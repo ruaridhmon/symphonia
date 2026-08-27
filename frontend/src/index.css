@@ -712,6 +712,33 @@ main,
   max-width: none;
 }
 
+.synthesis-editor-surface .ProseMirror ol {
+  list-style: none;
+  padding-left: 0;
+  margin: 1rem 0;
+}
+
+.synthesis-editor-surface .ProseMirror ol > li {
+  margin: 0 0 1.1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, #16a34a 28%, var(--border));
+  border-left: 5px solid #16a34a;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, #16a34a 9%, var(--card));
+}
+
+.synthesis-editor-surface .ProseMirror ol > li > p {
+  margin: 0.35rem 0;
+}
+
+.synthesis-editor-surface .ProseMirror ol > li > p:first-child {
+  margin-top: 0;
+}
+
+.synthesis-editor-surface .ProseMirror ol > li > p:last-child {
+  margin-bottom: 0;
+}
+
 .synthesis-flow {
   display: flex;
   flex-direction: column;
