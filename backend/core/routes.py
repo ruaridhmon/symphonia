@@ -3320,19 +3320,33 @@ Status: Uncontested / Questionable / Clear disagreement
 People: X of N
 Text: ...
 Opposing views: None / ...
+Supporting statements:
+- Response N: ...
+- Response N: ...
+Opposing statements:
+- Response N: ... / None
 
 Claim 2
 Status: Uncontested / Questionable / Clear disagreement
 People: X of N
 Text: ...
 Opposing views: None / ...
+Supporting statements:
+- Response N: ...
+- Response N: ...
+Opposing statements:
+- Response N: ... / None
 
 Rules:
-- Output claims, status, people count, and opposing views only.
+- Output claims, status, people count, opposing views, supporting statements, and opposing statements only.
 - Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
 - Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
-- Each claim must have exactly one status line, one people count line, one text line, and one opposing views line.
+- Each claim must have exactly one status line, one people count line, one text line, one opposing views line, one supporting statements list, and one opposing statements list.
 - People means the number of submitted responses that make or support the claim, as X of N.
+- Supporting statements must be raw or near-raw excerpts from the submitted responses, labelled with their Response number.
+- Include 2-4 supporting statements per claim where available.
+- Opposing statements must be raw or near-raw excerpts from responses that conflict with the claim, labelled with their Response number.
+- For Uncontested claims, use Opposing statements: None unless a real opposing statement exists.
 - Use Uncontested when most relevant responses point the same way and there is no meaningful opposition.
 - Use Questionable when support is mixed, weak, conditional, or uncertain.
 - Use Clear disagreement when there are opposing response positions.
@@ -3443,13 +3457,39 @@ def _format_custom_claim_list(markdown: str) -> str:
             return ("#d97706", "#fffbeb", "Questionable", "🟨")
         return ("#16a34a", "#f0fdf4", "Uncontested", "🟩")
 
-    def render_structured_claims(claims: list[dict[str, str]]) -> str:
+    def normalise_statement(value: str) -> str:
+        return re.sub(r"^[-*+]\s*", "", value).strip()
+
+    def has_statement_values(values: list[str]) -> bool:
+        return any(
+            value.strip()
+            and value.strip().lower() not in {"none", "n/a", "not applicable", "no opposing statements"}
+            for value in values
+        )
+
+    def render_statement_details(title: str, statements: list[str]) -> str:
+        filtered = [
+            normalise_statement(statement)
+            for statement in statements
+            if normalise_statement(statement).lower() not in {"none", "n/a", "not applicable", "no opposing statements"}
+        ]
+        if not filtered:
+            return ""
+        output = [f"<details><summary>{html.escape(title)}</summary>", "<ul>"]
+        for statement in filtered[:5]:
+            output.append(f"<li>{html.escape(statement)}</li>")
+        output.extend(["</ul>", "</details>"])
+        return "\n".join(output)
+
+    def render_structured_claims(claims: list[dict[str, Any]]) -> str:
         output = ["<h2>Claims</h2>"]
         for index, item in enumerate(claims, start=1):
             colour, background, _label, marker = status_style(item.get("status", "Questionable"))
             claim_text = html.escape(item.get("text", "").strip())
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
+            supporting_statements = item.get("supporting_statements", [])
+            opposing_statements = item.get("opposing_statements", [])
             if index > 1:
                 output.append("<p>&nbsp;</p>")
                 output.append("<hr>")
@@ -3464,11 +3504,19 @@ def _format_custom_claim_list(markdown: str) -> str:
             output.append(f"<p>People making this claim: <strong>{people}</strong></p>")
             if opposing and opposing.lower() not in {"none", "n/a", "not applicable", "no opposing views"}:
                 output.append(f"<p>Opposing views: <strong>{html.escape(opposing)}</strong></p>")
+            supporting_details = render_statement_details("Show supporting statements", supporting_statements)
+            if supporting_details:
+                output.append(supporting_details)
+            if has_statement_values(opposing_statements):
+                opposing_details = render_statement_details("Show opposing statements", opposing_statements)
+                if opposing_details:
+                    output.append(opposing_details)
             output.append("</div>")
         return "\n".join(output)
 
-    structured_claims: list[dict[str, str]] = []
-    current_claim: dict[str, str] | None = None
+    structured_claims: list[dict[str, Any]] = []
+    current_claim: dict[str, Any] | None = None
+    current_statement_key: str | None = None
     for raw_line in markdown.splitlines():
         stripped = raw_line.strip()
         if not stripped:
@@ -3476,34 +3524,55 @@ def _format_custom_claim_list(markdown: str) -> str:
         if re.match(r"^claim\s+\d+\b", stripped, re.IGNORECASE):
             if current_claim and current_claim.get("text"):
                 structured_claims.append(current_claim)
-            current_claim = {"status": "Questionable", "people": "", "text": "", "opposing": ""}
+            current_claim = {
+                "status": "Questionable",
+                "people": "",
+                "text": "",
+                "opposing": "",
+                "supporting_statements": [],
+                "opposing_statements": [],
+            }
+            current_statement_key = None
             inline_text = re.sub(r"^claim\s+\d+\s*[:\-–—]?\s*", "", stripped, flags=re.IGNORECASE).strip()
             if inline_text:
                 current_claim["text"] = inline_text
             continue
         if current_claim is None:
             continue
-        match = re.match(r"^(status|people|text|opposing views?)\s*:\s*(.+)$", stripped, re.IGNORECASE)
+        match = re.match(r"^(status|people|text|opposing views?|supporting statements?|opposing statements?)\s*:\s*(.*)$", stripped, re.IGNORECASE)
         if not match:
-            if current_claim.get("text"):
+            if current_statement_key and re.match(r"^[-*+]\s+", stripped):
+                current_claim[current_statement_key].append(normalise_statement(stripped))
+            elif current_statement_key and current_claim[current_statement_key]:
+                current_claim[current_statement_key][-1] = f"{current_claim[current_statement_key][-1]} {stripped}".strip()
+            elif current_claim.get("text"):
                 current_claim["text"] = f"{current_claim['text']} {stripped}".strip()
             continue
         key = match.group(1).lower()
         value = match.group(2).strip()
+        current_statement_key = None
         if key == "status":
             current_claim["status"] = value
         elif key == "people":
             current_claim["people"] = value
         elif key == "text":
             current_claim["text"] = value
-        else:
+        elif key.startswith("opposing view"):
             current_claim["opposing"] = value
+        elif key.startswith("supporting statement"):
+            current_statement_key = "supporting_statements"
+            if value:
+                current_claim[current_statement_key].append(normalise_statement(value))
+        else:
+            current_statement_key = "opposing_statements"
+            if value:
+                current_claim[current_statement_key].append(normalise_statement(value))
     if current_claim and current_claim.get("text"):
         structured_claims.append(current_claim)
 
     if structured_claims:
         seen_structured: set[str] = set()
-        deduped_structured: list[dict[str, str]] = []
+        deduped_structured: list[dict[str, Any]] = []
         for item in structured_claims:
             claim_key = re.sub(r"\s+", " ", item.get("text", "").strip().lower())
             if not claim_key or claim_key in seen_structured:
