@@ -2,7 +2,6 @@ import { Component, useCallback, useEffect, useMemo, useRef, useState } from 're
 import type { ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Node, mergeAttributes } from '@tiptap/core';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -175,46 +174,6 @@ const SUMMARY_VIEW_LABELS: Record<keyof typeof SUMMARY_COMPOSITION_DEFAULTS, str
 	probes: 'Follow-up questions',
 };
 const SYNTHESIS_BACKGROUNDS = ['default', 'paper', 'soft'] as const;
-
-const Details = Node.create({
-	name: 'details',
-	group: 'block',
-	content: 'summary block*',
-	defining: true,
-	addAttributes() {
-		return {
-			class: {
-				default: null,
-				parseHTML: (element: HTMLElement) => element.getAttribute('class'),
-				renderHTML: attributes => attributes.class ? { class: attributes.class } : {},
-			},
-			open: {
-				default: null,
-				parseHTML: (element: HTMLElement) => element.hasAttribute('open') ? 'open' : null,
-				renderHTML: attributes => attributes.open ? { open: '' } : {},
-			},
-		};
-	},
-	parseHTML() {
-		return [{ tag: 'details' }];
-	},
-	renderHTML({ HTMLAttributes }) {
-		return ['details', mergeAttributes(HTMLAttributes), 0];
-	},
-});
-
-const Summary = Node.create({
-	name: 'summary',
-	group: 'block',
-	content: 'inline*',
-	defining: true,
-	parseHTML() {
-		return [{ tag: 'summary' }];
-	},
-	renderHTML({ HTMLAttributes }) {
-		return ['summary', mergeAttributes(HTMLAttributes), 0];
-	},
-});
 
 function normaliseSummaryComposition(raw: unknown): SummaryComposition {
 	const next = { ...SUMMARY_COMPOSITION_DEFAULTS };
@@ -782,8 +741,6 @@ export default function SummaryPage() {
 		extensions: [
 			StarterKit,
 			Underline,
-			Details,
-			Summary,
 			Placeholder.configure({ placeholder: 'Write the synthesis for this round…' }),
 			Table.configure({ resizable: true }),
 			TableRow,

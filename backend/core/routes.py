@@ -3343,12 +3343,12 @@ Rules:
 - Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
 - Each claim must have exactly one status line, one people count line, one text line, one opposing views line, one supporting statements list, and one opposing statements list.
 - People means the number of submitted responses that make or support the claim, as X of N.
-- Supporting statements must be exact free-text sentences from the submitted responses, labelled with their Response number.
+- Supporting statements must be raw or near-raw excerpts from the submitted responses, labelled with their Response number.
 - Supporting statements must be actual free-text sentences written by respondents.
 - Never use Likert/select/rating labels such as "Agree", "Strongly agree", "Disagree", "Neither agree nor disagree", scores, or option labels as supporting statements.
 - If the source response has no written sentence for a claim, use Supporting statements: None.
 - Include 2-4 supporting statements per claim where available.
-- Opposing statements must be exact free-text sentences from responses that conflict with the claim, labelled with their Response number.
+- Opposing statements must be raw or near-raw excerpts from responses that conflict with the claim, labelled with their Response number.
 - Opposing statements must also be actual free-text sentences, not Likert/select/rating labels.
 - For Uncontested claims, use Opposing statements: None unless a real opposing statement exists.
 - Use Uncontested when most relevant responses point the same way and there is no meaningful opposition.
@@ -3499,7 +3499,7 @@ def _format_custom_claim_list(markdown: str) -> str:
         ]
         if not filtered:
             return ""
-        output = [f'<details class="custom-claim-evidence"><summary>{html.escape(title)}</summary>', "<ul>"]
+        output = [f"<details><summary>{html.escape(title)}</summary>", "<ul>"]
         for statement in filtered[:5]:
             output.append(f"<li>{html.escape(statement)}</li>")
         output.extend(["</ul>", "</details>"])
