@@ -100,12 +100,12 @@ function parseClaimMarkdown(raw: string): ParsedClaimSection[] | null {
 
   const sections: ParsedClaimSection[] = [];
   let current: ParsedClaimSection | null = null;
-  let pendingClaim = '';
+  let pendingClaim: string | null = null;
   let pendingConfidence = '';
 
   const flushClaim = () => {
-    if (!current || !pendingClaim.trim()) {
-      pendingClaim = '';
+    if (!current || pendingClaim === null || !pendingClaim.trim()) {
+      pendingClaim = null;
       pendingConfidence = '';
       return;
     }
@@ -113,7 +113,7 @@ function parseClaimMarkdown(raw: string): ParsedClaimSection[] | null {
       claim: stripMarkdownEmphasis(pendingClaim).replace(/\.$/, '') + '.',
       confidence: stripMarkdownEmphasis(pendingConfidence || 'Medium').replace(/^Confidence:\s*/i, ''),
     });
-    pendingClaim = '';
+    pendingClaim = null;
     pendingConfidence = '';
   };
 
@@ -157,7 +157,7 @@ function parseClaimMarkdown(raw: string): ParsedClaimSection[] | null {
       pendingConfidence = confidence[1].trim();
       continue;
     }
-    if (pendingClaim) {
+    if (pendingClaim !== null) {
       pendingClaim = `${pendingClaim} ${trimmed}`.trim();
     }
   }
