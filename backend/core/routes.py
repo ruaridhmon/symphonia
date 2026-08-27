@@ -3344,8 +3344,12 @@ Rules:
 - Each claim must have exactly one status line, one people count line, one text line, one opposing views line, one supporting statements list, and one opposing statements list.
 - People means the number of submitted responses that make or support the claim, as X of N.
 - Supporting statements must be raw or near-raw excerpts from the submitted responses, labelled with their Response number.
+- Supporting statements must be actual free-text sentences written by respondents.
+- Never use Likert/select/rating labels such as "Agree", "Strongly agree", "Disagree", "Neither agree nor disagree", scores, or option labels as supporting statements.
+- If the source response has no written sentence for a claim, use Supporting statements: None.
 - Include 2-4 supporting statements per claim where available.
 - Opposing statements must be raw or near-raw excerpts from responses that conflict with the claim, labelled with their Response number.
+- Opposing statements must also be actual free-text sentences, not Likert/select/rating labels.
 - For Uncontested claims, use Opposing statements: None unless a real opposing statement exists.
 - Use Uncontested when most relevant responses point the same way and there is no meaningful opposition.
 - Use Questionable when support is mixed, weak, conditional, or uncertain.
@@ -3460,10 +3464,29 @@ def _format_custom_claim_list(markdown: str) -> str:
     def normalise_statement(value: str) -> str:
         return re.sub(r"^[-*+]\s*", "", value).strip()
 
+    def is_likert_only_statement(value: str) -> bool:
+        text = normalise_statement(value)
+        text = re.sub(r"^response\s+\d+\s*:\s*", "", text, flags=re.IGNORECASE)
+        text = text.strip().strip('"“”').lower()
+        likert_values = {
+            "strongly agree",
+            "agree",
+            "neither agree nor disagree",
+            "neither agree or disagree",
+            "disagree",
+            "strongly disagree",
+            "don't know",
+            "dont know",
+            "unsure",
+            "not sure",
+        }
+        return text in likert_values or bool(re.fullmatch(r"\d+(?:\.\d+)?", text))
+
     def has_statement_values(values: list[str]) -> bool:
         return any(
             value.strip()
             and value.strip().lower() not in {"none", "n/a", "not applicable", "no opposing statements"}
+            and not is_likert_only_statement(value)
             for value in values
         )
 
@@ -3472,6 +3495,7 @@ def _format_custom_claim_list(markdown: str) -> str:
             normalise_statement(statement)
             for statement in statements
             if normalise_statement(statement).lower() not in {"none", "n/a", "not applicable", "no opposing statements"}
+            and not is_likert_only_statement(statement)
         ]
         if not filtered:
             return ""
