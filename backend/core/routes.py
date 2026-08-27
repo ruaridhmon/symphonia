@@ -3315,37 +3315,33 @@ Output plain text only, using this exact structure:
 
 Claims
 
-Agreement claims
-- ...
-  Confidence: High/Medium/Low
+Claim 1
+Status: Uncontested / Questionable / Clear disagreement
+People: X of N
+Text: ...
+Opposing views: None / ...
 
-Disagreement claims
-- ...
-  Confidence: High/Medium/Low
-
-Uncertain or conditional claims
-- ...
-  Confidence: High/Medium/Low
-
-Isolated claims
-- ...
-  Confidence: High/Medium/Low
+Claim 2
+Status: Uncontested / Questionable / Clear disagreement
+People: X of N
+Text: ...
+Opposing views: None / ...
 
 Rules:
-- Output claims and confidence only.
+- Output claims, status, people count, and opposing views only.
 - Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
 - Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
-- Each bullet must be one sentence claim plus one confidence line.
-- Put a blank line between every claim bullet.
+- Each claim must have exactly one status line, one people count line, one text line, and one opposing views line.
+- People means the number of submitted responses that make or support the claim, as X of N.
+- Use Uncontested when most relevant responses point the same way and there is no meaningful opposition.
+- Use Questionable when support is mixed, weak, conditional, or uncertain.
+- Use Clear disagreement when there are opposing response positions.
+- For Clear disagreement, write the opposing views as a short contrast, not a long explanation.
+- For Uncontested or Questionable, use Opposing views: None unless there is a real opposing view.
+- Put a blank line between every claim.
 - Maximum 12 claims total.
 - Each claim may appear once only. Do not repeat the same claim under different headings.
-- Agreement claims must have broad positive support and no substantial opposition.
-- Disagreement claims must capture contested claims where response positions conflict.
-- Uncertain or conditional claims must capture claims whose support depends on conditions or is mostly neutral/mixed.
-- Isolated claims must be materially distinct minority claims, not weaker repeats of agreement/disagreement claims.
 - Keep each claim under 22 words.
-- Confidence means confidence that the claim is supported by the responses, not whether the claim is true.
-- Use High only when support is broad and clear; Medium for mixed or partial support; Low for isolated or weak support.
 - Do not invent claims, evidence, consensus, or expert positions.
 """
 
@@ -3438,6 +3434,84 @@ def _format_custom_synthesis_material(
 
 def _format_custom_claim_list(markdown: str) -> str:
     """Render custom claim bullets as simple HTML so line breaks are preserved."""
+    def status_style(status: str) -> tuple[str, str, str]:
+        normalised = status.strip().lower()
+        if "clear" in normalised and "disagreement" in normalised:
+            return ("#dc2626", "#fef2f2", "Clear disagreement")
+        if "question" in normalised or "mixed" in normalised or "uncertain" in normalised:
+            return ("#d97706", "#fffbeb", "Questionable")
+        return ("#16a34a", "#f0fdf4", "Uncontested")
+
+    def render_structured_claims(claims: list[dict[str, str]]) -> str:
+        output = ["<h2>Claims</h2>", '<ol style="margin: 0; padding-left: 1.25rem;">']
+        for index, item in enumerate(claims, start=1):
+            colour, background, label = status_style(item.get("status", "Questionable"))
+            claim_text = html.escape(item.get("text", "").strip())
+            people = html.escape(item.get("people", "").strip() or "Not counted")
+            opposing = item.get("opposing", "").strip()
+            output.append(
+                "<li "
+                'style="margin: 0 0 1rem 0; padding: 0.85rem 1rem; '
+                f'border-left: 5px solid {colour}; background: {background}; '
+                'border-radius: 0.45rem;">'
+                f'<p style="margin: 0 0 0.45rem 0;"><strong>Claim {index}:</strong> {claim_text}</p>'
+                f'<p style="margin: 0 0 0.35rem 0;"><strong>People making this claim:</strong> {people}</p>'
+                f'<p style="margin: 0;"><strong>Status:</strong> '
+                f'<span style="color: {colour}; font-weight: 700;">{label}</span></p>'
+            )
+            if opposing and opposing.lower() not in {"none", "n/a", "not applicable", "no opposing views"}:
+                output.append(
+                    f'<p style="margin: 0.45rem 0 0 0;"><strong>Opposing views:</strong> {html.escape(opposing)}</p>'
+                )
+            output.append("</li>")
+        output.append("</ol>")
+        return "\n".join(output)
+
+    structured_claims: list[dict[str, str]] = []
+    current_claim: dict[str, str] | None = None
+    for raw_line in markdown.splitlines():
+        stripped = raw_line.strip()
+        if not stripped:
+            continue
+        if re.match(r"^claim\s+\d+\b", stripped, re.IGNORECASE):
+            if current_claim and current_claim.get("text"):
+                structured_claims.append(current_claim)
+            current_claim = {"status": "Questionable", "people": "", "text": "", "opposing": ""}
+            inline_text = re.sub(r"^claim\s+\d+\s*[:\-–—]?\s*", "", stripped, flags=re.IGNORECASE).strip()
+            if inline_text:
+                current_claim["text"] = inline_text
+            continue
+        if current_claim is None:
+            continue
+        match = re.match(r"^(status|people|text|opposing views?)\s*:\s*(.+)$", stripped, re.IGNORECASE)
+        if not match:
+            if current_claim.get("text"):
+                current_claim["text"] = f"{current_claim['text']} {stripped}".strip()
+            continue
+        key = match.group(1).lower()
+        value = match.group(2).strip()
+        if key == "status":
+            current_claim["status"] = value
+        elif key == "people":
+            current_claim["people"] = value
+        elif key == "text":
+            current_claim["text"] = value
+        else:
+            current_claim["opposing"] = value
+    if current_claim and current_claim.get("text"):
+        structured_claims.append(current_claim)
+
+    if structured_claims:
+        seen_structured: set[str] = set()
+        deduped_structured: list[dict[str, str]] = []
+        for item in structured_claims:
+            claim_key = re.sub(r"\s+", " ", item.get("text", "").strip().lower())
+            if not claim_key or claim_key in seen_structured:
+                continue
+            seen_structured.add(claim_key)
+            deduped_structured.append(item)
+        return render_structured_claims(deduped_structured[:12])
+
     section_order = [
         "### Agreement claims",
         "### Disagreement claims",
