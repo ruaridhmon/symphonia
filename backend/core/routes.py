@@ -3446,16 +3446,15 @@ def _format_custom_claim_list(markdown: str) -> str:
     def render_structured_claims(claims: list[dict[str, str]]) -> str:
         output = ["<h2>Claims</h2>"]
         for index, item in enumerate(claims, start=1):
-            _colour, _background, label, _marker = status_style(item.get("status", "Questionable"))
+            _colour, _background, label, marker = status_style(item.get("status", "Questionable"))
             claim_text = html.escape(item.get("text", "").strip())
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
             if index > 1:
                 output.append("<hr>")
-            output.append(f"<h3>🟩 Claim {index} - {html.escape(label)}</h3>")
+            output.append(f"<h3>{marker} Claim {index}</h3>")
             output.append(f"<p>{claim_text}</p>")
             output.append(f"<p><strong>People making this claim:</strong> {people}</p>")
-            output.append(f"<p><strong>Status:</strong> {html.escape(label)}</p>")
             if opposing and opposing.lower() not in {"none", "n/a", "not applicable", "no opposing views"}:
                 output.append(f"<p><strong>Opposing views:</strong> {html.escape(opposing)}</p>")
         return "\n".join(output)
