@@ -3437,7 +3437,7 @@ def _format_custom_synthesis_material(
 
 
 def _format_custom_claim_list(markdown: str) -> str:
-    """Render custom claim bullets as clean, spaced Markdown blocks."""
+    """Render custom claim bullets as simple HTML so line breaks are preserved."""
     section_order = [
         "### Agreement claims",
         "### Disagreement claims",
@@ -3539,21 +3539,23 @@ def _format_custom_claim_list(markdown: str) -> str:
 
     flush_pending()
 
-    output: list[str] = ["Claims"]
+    output: list[str] = ["<h2>Claims</h2>"]
     for heading in section_order:
         claims = sections.get(heading) or []
         if not claims:
             continue
         section_title = heading.removeprefix("### ").strip()
-        output.extend(["", section_title, ""])
+        output.append(f"<h3>{html.escape(section_title)}</h3>")
+        output.append("<ul>")
         for claim, confidence in claims:
-            output.extend(
-                [
-                    f"- {claim}",
-                    f"  Confidence: {confidence}",
-                    "",
-                ]
+            output.append(
+                "<li>"
+                f"{html.escape(claim)}"
+                "<br>"
+                f"<strong>Confidence:</strong> {html.escape(confidence)}"
+                "</li>"
             )
+        output.append("</ul>")
 
     formatted = "\n".join(output).strip()
     return formatted if any(sections.get(heading) for heading in section_order) else markdown.strip()
