@@ -8,6 +8,19 @@ interface MarkdownRendererProps {
   className?: string;
 }
 
+type ClaimSectionTone = 'agreement' | 'uncertain' | 'disagreement' | 'isolated';
+
+type ParsedClaim = {
+  claim: string;
+  confidence: string;
+};
+
+type ParsedClaimSection = {
+  title: string;
+  tone: ClaimSectionTone;
+  claims: ParsedClaim[];
+};
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /** Props for custom markdown component overrides (react-markdown component signatures) */
 type MdProps = { children?: ReactNode } & Record<string, any>;
@@ -59,6 +72,125 @@ function preprocessContent(raw: string): { text: string; forceMarkdown: boolean 
   return { text, forceMarkdown: false };
 }
 
+function claimSectionTone(title: string): ClaimSectionTone {
+  const normalised = title.toLowerCase();
+  if (normalised.includes('disagreement') || normalised.includes('contested')) return 'disagreement';
+  if (normalised.includes('uncertain') || normalised.includes('conditional') || normalised.includes('mixed')) return 'uncertain';
+  if (normalised.includes('isolated') || normalised.includes('minority')) return 'isolated';
+  return 'agreement';
+}
+
+function stripMarkdownEmphasis(value: string): string {
+  return value
+    .replace(/^[-*+]\s+/, '')
+    .replace(/\*\*/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function parseClaimMarkdown(raw: string): ParsedClaimSection[] | null {
+  const text = raw
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p>/gi, '\n\n')
+    .replace(/^<p>/i, '')
+    .replace(/<\/p>$/i, '')
+    .trim();
+
+  if (!/^##\s+Claims\b/im.test(text) || !/\bConfidence:/i.test(text)) return null;
+
+  const sections: ParsedClaimSection[] = [];
+  let current: ParsedClaimSection | null = null;
+  let pendingClaim = '';
+  let pendingConfidence = '';
+
+  const flushClaim = () => {
+    if (!current || !pendingClaim.trim()) {
+      pendingClaim = '';
+      pendingConfidence = '';
+      return;
+    }
+    current.claims.push({
+      claim: stripMarkdownEmphasis(pendingClaim).replace(/\.$/, '') + '.',
+      confidence: stripMarkdownEmphasis(pendingConfidence || 'Medium').replace(/^Confidence:\s*/i, ''),
+    });
+    pendingClaim = '';
+    pendingConfidence = '';
+  };
+
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const heading = trimmed.match(/^#{2,4}\s+(.+)$/);
+    if (heading) {
+      flushClaim();
+      if (/^claims$/i.test(heading[1].trim())) continue;
+      current = {
+        title: heading[1].trim(),
+        tone: claimSectionTone(heading[1]),
+        claims: [],
+      };
+      sections.push(current);
+      continue;
+    }
+
+    if (!current) continue;
+
+    const claimLabel = trimmed.match(/^[-*+]\s+\*\*Claim\*\*\s*(.*)$/i)
+      || trimmed.match(/^[-*+]\s+\*\*Claim:\*\*\s*(.*)$/i)
+      || trimmed.match(/^[-*+]\s+Claim:\s*(.*)$/i);
+    const boldOnlyClaim = trimmed.match(/^[-*+]\s+\*\*(.+?)\*\*\s*$/);
+    const confidence = trimmed.match(/^(?:[-*+]\s+)?\*\*Confidence:\*\*\s*(.+)$/i)
+      || trimmed.match(/^(?:[-*+]\s+)?Confidence:\s*(.+)$/i);
+
+    if (claimLabel) {
+      flushClaim();
+      pendingClaim = claimLabel[1].trim();
+      continue;
+    }
+    if (boldOnlyClaim && !/^confidence:/i.test(boldOnlyClaim[1])) {
+      flushClaim();
+      pendingClaim = boldOnlyClaim[1].trim();
+      continue;
+    }
+    if (confidence) {
+      pendingConfidence = confidence[1].trim();
+      continue;
+    }
+    if (pendingClaim) {
+      pendingClaim = `${pendingClaim} ${trimmed}`.trim();
+    }
+  }
+
+  flushClaim();
+
+  const populated = sections.filter(section => section.claims.length > 0);
+  return populated.length > 0 ? populated : null;
+}
+
+function ClaimMarkdownRenderer({ sections, className }: { sections: ParsedClaimSection[]; className: string }) {
+  return (
+    <div className={`claim-summary ${className}`}>
+      <h2 className="claim-summary-title">Claims</h2>
+      <div className="claim-summary-sections">
+        {sections.map(section => (
+          <section key={section.title} className={`claim-summary-section claim-summary-section-${section.tone}`}>
+            <h3 className="claim-summary-section-title">{section.title}</h3>
+            <ul className="claim-summary-list">
+              {section.claims.map((item, index) => (
+                <li key={`${section.title}-${index}`} className="claim-summary-item">
+                  <p className="claim-summary-claim">{item.claim}</p>
+                  <p className="claim-summary-confidence">Confidence: {item.confidence}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /**
  * Renders markdown (or raw HTML) with full theme-aware styling.
  * Supports GFM (tables, strikethrough, task lists) and raw HTML passthrough.
@@ -70,6 +202,11 @@ function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   if (!content) return null;
 
   const { text, forceMarkdown } = preprocessContent(content);
+  const claimSections = parseClaimMarkdown(text);
+
+  if (claimSections) {
+    return <ClaimMarkdownRenderer sections={claimSections} className={className} />;
+  }
 
   // If preprocessing recovered markdown, always use ReactMarkdown
   if (forceMarkdown) {
