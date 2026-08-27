@@ -3446,14 +3446,16 @@ def _format_custom_claim_list(markdown: str) -> str:
     def render_structured_claims(claims: list[dict[str, str]]) -> str:
         output = ["<h2>Claims</h2>", '<ol style="margin: 0; padding-left: 1.25rem;">']
         for index, item in enumerate(claims, start=1):
-            colour, background, label, marker = status_style(item.get("status", "Questionable"))
+            colour, _background, label, marker = status_style(item.get("status", "Questionable"))
+            block_colour = "#16a34a"
+            block_background = "#f0fdf4"
             claim_text = html.escape(item.get("text", "").strip())
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
             output.append(
                 "<li "
                 'style="margin: 0 0 1rem 0; padding: 0.85rem 1rem; '
-                f'border-left: 5px solid {colour}; background: {background}; '
+                f'border-left: 5px solid {block_colour}; background: {block_background}; '
                 'border-radius: 0.45rem;">'
                 f'<p style="margin: 0 0 0.45rem 0;"><strong>{marker} Claim {index} - {label}:</strong> {claim_text}</p>'
                 f'<p style="margin: 0 0 0.35rem 0;"><strong>People making this claim:</strong> {people}</p>'
