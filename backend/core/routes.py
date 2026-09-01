@@ -3425,6 +3425,40 @@ def _format_custom_synthesis_material(
     lines: list[str] = ["Questions:"]
     for index, label in enumerate(labels, start=1):
         lines.append(f"{index}. {label}")
+        question = questions[index - 1]
+        if isinstance(question, dict):
+            source_statements = (
+                question.get("source_statements")
+                or question.get("original_statements")
+                or question.get("evidence_excerpts")
+                or []
+            )
+            if isinstance(source_statements, list) and source_statements:
+                lines.append("   Original expert statements retained for this claim:")
+                for statement in source_statements[:12]:
+                    if isinstance(statement, str):
+                        quote = statement.strip()
+                        expert = ""
+                        stance = "supporting"
+                    elif isinstance(statement, dict):
+                        quote = str(
+                            statement.get("quote")
+                            or statement.get("text")
+                            or statement.get("statement")
+                            or ""
+                        ).strip()
+                        expert = str(
+                            statement.get("expert_label")
+                            or statement.get("expert")
+                            or statement.get("response")
+                            or ""
+                        ).strip()
+                        stance = str(statement.get("stance") or "supporting").strip()
+                    else:
+                        continue
+                    if quote:
+                        attribution = f"{expert}: " if expert else ""
+                        lines.append(f"   - [{stance}] {attribution}{quote}")
     lines.append("")
     lines.append("Responses:")
     for response_index, response in enumerate(response_dicts, start=1):
@@ -3831,7 +3865,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             asyncio.to_thread(
                 client.chat.completions.create,
                 model=resolved_model,
-                max_tokens=2500,
+                max_tokens=1600,
                 temperature=0.1,
                 response_format={"type": "json_object"},
                 messages=[
@@ -3845,7 +3879,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                     {"role": "user", "content": user_prompt},
                 ],
             ),
-            timeout=45,
+            timeout=35,
         )
     except asyncio.TimeoutError as exc:
         raise HTTPException(
@@ -3859,9 +3893,20 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             detail=f"Custom synthesis failed: {_sanitize_error_message(str(exc))}",
         ) from exc
 
-    synthesis_text = _format_custom_claim_list(
-        completion.choices[0].message.content or ""
-    )
+    raw_custom_output = completion.choices[0].message.content or ""
+    synthesis_text = _format_custom_claim_list(raw_custom_output)
+    try:
+        parsed_custom_output = json.loads(raw_custom_output)
+        custom_claims = (
+            parsed_custom_output.get("claims", [])
+            if isinstance(parsed_custom_output, dict)
+            else []
+        )
+        if not isinstance(custom_claims, list):
+            custom_claims = []
+    except (json.JSONDecodeError, TypeError):
+        custom_claims = []
+
     synthesis_json_data = _merge_summary_display_preferences(
         {
             "narrative": synthesis_text,
@@ -3882,6 +3927,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                 "round_number": round_number,
                 "custom_prompt": prompt,
                 "baseline_prompt": CUSTOM_SYNTHESIS_BASELINE_PROMPT,
+                "custom_claims": custom_claims[:12],
             },
         },
         None,
