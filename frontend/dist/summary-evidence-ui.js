@@ -235,11 +235,27 @@
     rebuildTimer = window.setTimeout(scan, 120);
   });
 
+  function scheduleScans(delays) {
+    delays.forEach(function (delay) {
+      window.setTimeout(scan, delay);
+    });
+  }
+
   function start() {
     scan();
-    window.setTimeout(scan, 250);
-    window.setTimeout(scan, 1000);
-    window.setTimeout(scan, 2500);
+    scheduleScans([250, 1000, 2500]);
+    document.addEventListener('click', function (event) {
+      var button = event.target && event.target.closest
+        ? event.target.closest('button')
+        : null;
+      if (!button) return;
+      var label = text(button);
+      if (label === 'Generate') {
+        scheduleScans([500, 1500, 3000, 6000, 10000, 20000, 30000, 45000]);
+      } else if (/^v\d+$/i.test(label) || /^Version\s+\d+/i.test(label)) {
+        scheduleScans([250, 1000, 2500]);
+      }
+    });
     observer.observe(document.body, {
       childList: true,
       subtree: true,
