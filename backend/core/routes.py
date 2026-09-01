@@ -3653,6 +3653,9 @@ def _format_custom_claim_list(
             claim["uncertain_experts"] = []
             for group, position in positions:
                 claim[group].append(position)
+            claim["people"] = (
+                f"{len(claim['supporting_experts'])} of {len(positions)}"
+            )
 
     def render_structured_claims(claims: list[dict[str, Any]]) -> str:
         output = ["<h2>Claims</h2>"]
