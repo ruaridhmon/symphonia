@@ -7,7 +7,7 @@ import DistributionSplitBar from '../DistributionSplitBar';
 type Question = string | Record<string, unknown>;
 
 type OriginalResponse = {
-  key: number;
+  key: string;
   expert: string;
   rating: string;
   text: string;
@@ -97,6 +97,39 @@ function originalResponseText(answer: unknown): string {
   ).join('\n\n');
 }
 
+function questionOriginalStatements(question: Question): OriginalResponse[] {
+  if (!isRecord(question)) return [];
+  const candidates = question.source_statements
+    || question.original_statements
+    || question.evidence_excerpts;
+  if (!Array.isArray(candidates)) return [];
+
+  return candidates.flatMap((candidate, index) => {
+    if (typeof candidate === 'string') {
+      const text = candidate.trim();
+      return text ? [{
+        key: `source-${index}`,
+        expert: `Expert statement ${index + 1}`,
+        rating: '',
+        text,
+      }] : [];
+    }
+    if (!isRecord(candidate)) return [];
+    const text = String(candidate.quote || candidate.text || candidate.statement || '').trim();
+    if (!text) return [];
+    const expert = String(
+      candidate.expert_label || candidate.expert || candidate.response || `Expert statement ${index + 1}`,
+    ).trim();
+    const stance = String(candidate.stance || '').trim();
+    return [{
+      key: `source-${index}`,
+      expert,
+      rating: stance,
+      text,
+    }];
+  });
+}
+
 function answerSelections(answer: unknown, inputType: string): string[] {
   if (isRecord(answer) && Array.isArray(answer.selectedOptions)) {
     return answer.selectedOptions
@@ -131,16 +164,19 @@ function buildStatistics(questions: Question[], roundResponses: RoundWithRespons
       });
       const selections = matchedAnswers.flatMap(({ answer }) => answerSelections(answer, inputType));
       const originalResponses = inputType === 'likert'
-        ? matchedAnswers.flatMap(({ response, answer }) => {
-            const text = originalResponseText(answer);
-            if (!text) return [];
-            return [{
-              key: response.id,
-              expert: response.email || 'Anonymous',
-              rating: coerceAnswerPosition(answer).trim(),
-              text,
-            }];
-          })
+        ? [
+            ...questionOriginalStatements(question),
+            ...matchedAnswers.flatMap(({ response, answer }) => {
+              const text = originalResponseText(answer);
+              if (!text) return [];
+              return [{
+                key: `response-${response.id}`,
+                expert: response.email || 'Anonymous',
+                rating: coerceAnswerPosition(answer).trim(),
+                text,
+              }];
+            }),
+          ]
         : [];
 
       if (!selections.length) return null;
@@ -247,7 +283,7 @@ export default function SurveyStatisticsPanel({ questions, roundResponses }: Pro
                         className="cursor-pointer px-3 py-2 text-sm font-medium"
                         style={{ color: 'var(--foreground)' }}
                       >
-                        Show original responses ({row.originalResponses.length})
+                        Show original expert statements ({row.originalResponses.length})
                       </summary>
                       <div className="space-y-3 px-3 pb-3">
                         {row.originalResponses.map(response => (
