@@ -66,7 +66,7 @@ describe('SurveyStatisticsPanel', () => {
           email: null,
           timestamp: '2026-04-28T00:00:00Z',
           version: 1,
-          answers: { q1: { position: 'Agree' } },
+          answers: { q1: { position: 'Agree', evidence: 'Virtual wards reduced avoidable admissions in our trust.' } },
         },
         {
           id: 2,
@@ -99,5 +99,7 @@ describe('SurveyStatisticsPanel', () => {
     expect(screen.getByText('Disagree')).toBeInTheDocument();
     expect(screen.getByText('67%')).toBeInTheDocument();
     expect(screen.getByText('33%')).toBeInTheDocument();
+    expect(screen.getByText('Show original responses (1)')).toBeInTheDocument();
+    expect(screen.getByText('Virtual wards reduced avoidable admissions in our trust.')).toBeInTheDocument();
   });
 });
