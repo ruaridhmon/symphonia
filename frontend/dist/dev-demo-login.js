@@ -60,6 +60,37 @@
     return true;
   }
 
+  function installFastDevModel() {
+    if (window.location.pathname.indexOf('/summary') === -1) return true;
+    var select = document.getElementById('model-select');
+    if (!select) return false;
+
+    var fastModel = 'google/gemini-2.5-flash-lite';
+    var active = true;
+    var timer = null;
+
+    function stop() {
+      active = false;
+      if (timer) window.clearInterval(timer);
+    }
+
+    function applyDefault() {
+      if (!active || select.value === fastModel) return;
+      var descriptor = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+      if (descriptor && descriptor.set) descriptor.set.call(select, fastModel);
+      else select.value = fastModel;
+      select.dispatchEvent(new Event('input', { bubbles: true }));
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    select.addEventListener('pointerdown', stop, { once: true });
+    select.addEventListener('keydown', stop, { once: true });
+    applyDefault();
+    timer = window.setInterval(applyDefault, 250);
+    window.setTimeout(stop, 5000);
+    return true;
+  }
+
   function installWhenAvailable(installer) {
     if (installer()) return;
     var observer = new MutationObserver(function () {
@@ -71,4 +102,5 @@
   }
 
   installWhenAvailable(installDemoLogin);
+  installWhenAvailable(installFastDevModel);
 })();
