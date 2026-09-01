@@ -254,7 +254,13 @@ async def add_security_headers(request: Request, call_next):
 # CSRF protection — validates X-CSRF-Token header on state-changing requests
 # Uses double-submit cookie pattern: csrf_token cookie (JS-readable) must
 # match the X-CSRF-Token header sent by the frontend.
-_CSRF_EXEMPT_BASE_PATHS = {"/login", "/register", "/logout", "/ws"}
+_CSRF_EXEMPT_BASE_PATHS = {
+    "/login",
+    "/register",
+    "/logout",
+    "/dev/demo-login",
+    "/ws",
+}
 CSRF_EXEMPT_PATHS = _CSRF_EXEMPT_BASE_PATHS | {
     f"/api{path}" for path in _CSRF_EXEMPT_BASE_PATHS
 }
