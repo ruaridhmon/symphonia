@@ -237,11 +237,15 @@ export default function ClaimEvidenceView({ content }: { content: string }) {
               <h4 className="m-0 text-base font-semibold leading-6 sm:text-lg">{claim.title}</h4>
               {claim.opposingView && <p className="m-0 mt-2 text-sm leading-5" style={{ color: 'var(--muted-foreground)' }}><strong>Opposing view:</strong> {claim.opposingView}</p>}
             </header>
-            {(claim.supporting.length > 0 || claim.opposing.length > 0) && (
+            {(claim.supporting.length > 0 || claim.opposing.length > 0) ? (
               <div className="grid gap-2 border-t p-2 sm:p-3" style={{ borderColor: 'var(--border)' }}>
                 <EvidenceGroup kind="supporting" excerpts={claim.supporting} expanded={expanded.has(`${claim.id}-supporting`)} onToggle={() => toggle(`${claim.id}-supporting`)} />
                 <EvidenceGroup kind="opposing" excerpts={claim.opposing} expanded={expanded.has(`${claim.id}-opposing`)} onToggle={() => toggle(`${claim.id}-opposing`)} />
               </div>
+            ) : (
+              <p className="m-0 border-t px-3 py-3 text-sm sm:px-4" style={{ borderColor: 'var(--border)', color: 'var(--muted-foreground)' }}>
+                No original free-text expert excerpts were submitted for this claim.
+              </p>
             )}
           </article>
         );
