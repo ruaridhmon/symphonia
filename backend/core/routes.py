@@ -3311,37 +3311,29 @@ class GenerateSynthesisVersionPayload(BaseModel):
 
 CUSTOM_SYNTHESIS_BASELINE_PROMPT = """Create a terse claim list. No waffle.
 
-Output plain text only, using this exact structure:
+Output one compact JSON object only, with this structure:
 
-Claims
-
-Claim 1
-Status: Uncontested / Questionable / Clear disagreement
-People: X of N
-Text: ...
-Opposing views: None / ...
-Supporting statements:
-- Response N: ...
-- Response N: ...
-Opposing statements:
-- Response N: ... / None
-
-Claim 2
-Status: Uncontested / Questionable / Clear disagreement
-People: X of N
-Text: ...
-Opposing views: None / ...
-Supporting statements:
-- Response N: ...
-- Response N: ...
-Opposing statements:
-- Response N: ... / None
+{
+  "claims": [
+    {
+      "status": "Uncontested | Questionable | Clear disagreement",
+      "people": "X of N",
+      "text": "claim text",
+      "opposing_views": "None or a short contrast",
+      "supporting_statements": [
+        {"response": 1, "quote": "exact source sentence"}
+      ],
+      "opposing_statements": [
+        {"response": 2, "quote": "exact source sentence"}
+      ]
+    }
+  ]
+}
 
 Rules:
-- Output claims, status, people count, opposing views, supporting statements, and opposing statements only.
+- Output valid JSON only. Do not wrap it in Markdown fences.
+- Every claim object must contain status, people, text, opposing_views, supporting_statements, and opposing_statements.
 - Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
-- Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
-- Each claim must have exactly one status line, one people count line, one text line, one opposing views line, one supporting statements list, and one opposing statements list.
 - People means the number of submitted responses that make or support the claim, as X of N.
 - Supporting statements must be exact free-text sentences from the submitted responses, labelled with their Response number.
 - For every claim, extract the specific respondent sentences that make or support that claim whenever any such free-text sentence exists.
@@ -3513,7 +3505,8 @@ def _format_custom_claim_list(markdown: str) -> str:
         output = ["<h2>Claims</h2>"]
         for index, item in enumerate(claims, start=1):
             colour, background, _label, marker = status_style(item.get("status", "Questionable"))
-            claim_text = html.escape(item.get("text", "").strip())
+            raw_claim_text = re.sub(r"^\*\*(.*?)\*\*$", r"\1", item.get("text", "").strip())
+            claim_text = html.escape(raw_claim_text)
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
             supporting_statements = item.get("supporting_statements", [])
@@ -3541,6 +3534,58 @@ def _format_custom_claim_list(markdown: str) -> str:
                     output.append(opposing_details)
             output.append("</div>")
         return "\n".join(output)
+
+    def normalise_json_statements(values: Any) -> list[str]:
+        if not isinstance(values, list):
+            return []
+        statements: list[str] = []
+        for value in values:
+            if isinstance(value, str):
+                statement = value.strip()
+            elif isinstance(value, dict):
+                quote = str(value.get("quote") or "").strip()
+                response_number = value.get("response")
+                statement = (
+                    f"Response {response_number}: {quote}"
+                    if quote and response_number not in (None, "")
+                    else quote
+                )
+            else:
+                statement = ""
+            if statement:
+                statements.append(statement)
+        return statements
+
+    json_text = markdown.strip()
+    if json_text.startswith("```"):
+        json_text = re.sub(r"^\`\`\`(?:json)?\s*", "", json_text, flags=re.IGNORECASE)
+        json_text = re.sub(r"\s*\`\`\`$", "", json_text)
+    try:
+        parsed_json = json.loads(json_text)
+    except (json.JSONDecodeError, TypeError):
+        parsed_json = None
+    json_claims = parsed_json.get("claims") if isinstance(parsed_json, dict) else None
+    if isinstance(json_claims, list):
+        structured_json_claims: list[dict[str, Any]] = []
+        for item in json_claims:
+            if not isinstance(item, dict) or not str(item.get("text") or "").strip():
+                continue
+            structured_json_claims.append(
+                {
+                    "status": str(item.get("status") or "Questionable"),
+                    "people": str(item.get("people") or ""),
+                    "text": str(item.get("text") or ""),
+                    "opposing": str(item.get("opposing_views") or ""),
+                    "supporting_statements": normalise_json_statements(
+                        item.get("supporting_statements")
+                    ),
+                    "opposing_statements": normalise_json_statements(
+                        item.get("opposing_statements")
+                    ),
+                }
+            )
+        if structured_json_claims:
+            return render_structured_claims(structured_json_claims[:12])
 
     structured_claims: list[dict[str, Any]] = []
     current_claim: dict[str, Any] | None = None
@@ -3787,7 +3832,8 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                 client.chat.completions.create,
                 model=resolved_model,
                 max_tokens=2500,
-                temperature=0.2,
+                temperature=0.1,
+                response_format={"type": "json_object"},
                 messages=[
                     {
                         "role": "system",
