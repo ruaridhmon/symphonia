@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var ROOT_SELECTOR = '.synthesis-editor-prosemirror';
+  var ROOT_SELECTOR = '.ProseMirror';
   var PANEL_CLASS = 'claim-evidence-preview';
   var editing = false;
   var rebuildTimer = 0;
