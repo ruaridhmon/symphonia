@@ -214,10 +214,17 @@
     buildPreview(root);
   }
 
+  function mutationTouchesEditor(mutation) {
+    if (mutation.target.closest && mutation.target.closest(ROOT_SELECTOR)) return true;
+    return Array.prototype.some.call(mutation.addedNodes || [], function (node) {
+      return node.nodeType === 1
+        && ((node.matches && node.matches(ROOT_SELECTOR))
+          || (node.querySelector && node.querySelector(ROOT_SELECTOR)));
+    });
+  }
+
   var observer = new MutationObserver(function (mutations) {
-    if (!mutations.some(function (mutation) {
-      return mutation.target.closest && mutation.target.closest(ROOT_SELECTOR);
-    })) return;
+    if (!mutations.some(mutationTouchesEditor)) return;
     window.clearTimeout(rebuildTimer);
     rebuildTimer = window.setTimeout(scan, 120);
   });
