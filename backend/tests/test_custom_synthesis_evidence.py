@@ -52,7 +52,7 @@ def test_custom_claim_list_replaces_incomplete_model_positions_with_all_response
 
 Claim 1
 Status: Clear disagreement
-People: 2 of 4
+People: 1 of 4
 Text: Virtual wards are ready for wider NHS rollout.
 Opposing views: One expert disagrees.
 Supporting experts:
@@ -74,6 +74,7 @@ Opposing statements:
     assert "Response 2 (Dr B): Agree" in rendered
     assert "Response 3 (Dr C): Disagree" in rendered
     assert "Response 4 (Dr D): Neither agree nor disagree" in rendered
+    assert "People making this claim: <strong>2 of 4</strong>" in rendered
 
 
 def test_custom_claim_list_never_labels_a_named_likert_option_as_an_excerpt():
