@@ -18,7 +18,7 @@
     button.id = 'dev-demo-login';
     button.type = 'button';
     button.className = submit.className;
-    button.textContent = 'Demo sign in';
+    button.textContent = 'Open demo';
     button.style.marginTop = '0.75rem';
     button.style.background = 'var(--muted)';
     button.style.color = 'var(--foreground)';
@@ -41,7 +41,7 @@
           credentials: 'include',
           headers: { Accept: 'application/json' },
         });
-        if (!response.ok) throw new Error('Demo sign in is unavailable.');
+        if (!response.ok) throw new Error('Open demo is unavailable.');
         var data = await response.json();
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('email', data.email);
@@ -49,9 +49,9 @@
         localStorage.setItem('role', data.role || (data.is_admin ? 'platform_admin' : 'expert'));
         window.location.assign('/');
       } catch (error) {
-        status.textContent = error instanceof Error ? error.message : 'Demo sign in failed.';
+        status.textContent = error instanceof Error ? error.message : 'Open demo failed.';
         button.disabled = false;
-        button.textContent = 'Demo sign in';
+        button.textContent = 'Open demo';
       }
     });
 
