@@ -141,7 +141,7 @@
         if (!text(currentNode)) continue;
 
         if ((currentNode.tagName === 'P' || currentNode.tagName === 'SUMMARY')
-          && /^Show\\s+(supporting|opposing|uncertain)\\s+(statements|experts)$/i.test(text(currentNode))) {
+          && /^Show\s+(supporting|opposing|uncertain)\s+(statements|experts)$/i.test(text(currentNode))) {
           var group = evidenceGroup(currentNode, nodes[index + 1]);
           if (group) {
             evidenceCount += 1;
