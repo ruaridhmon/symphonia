@@ -1645,6 +1645,58 @@ def login(
 
 
 @router.post(
+    "/dev/demo-login",
+    tags=["Authentication"],
+    summary="Create the development demo session",
+    include_in_schema=False,
+)
+@limiter.limit(AUTH_LIMIT)
+def dev_demo_login(
+    request: Request,
+    response: FastAPIResponse,
+    db: Session = Depends(get_db),
+):
+    """Sign in the shared demo user on the development Cloud Run service only."""
+    if os.getenv("K_SERVICE", "").strip() != "symphonia-dev":
+        raise HTTPException(status_code=404, detail="Not found")
+
+    user = db.query(User).filter(User.email == "test@test").first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Demo account is unavailable")
+
+    token = create_access_token(data={"sub": str(user.id), "role": user.role})
+    csrf_token = generate_csrf_token()
+    response.set_cookie(
+        key=AUTH_COOKIE_NAME,
+        value=token,
+        max_age=COOKIE_MAX_AGE,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        path="/",
+        domain=AUTH_COOKIE_DOMAIN,
+    )
+    response.set_cookie(
+        key=CSRF_COOKIE_NAME,
+        value=csrf_token,
+        max_age=COOKIE_MAX_AGE,
+        httponly=False,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        path="/",
+        domain=CSRF_COOKIE_DOMAIN,
+    )
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "is_admin": user.role == UserRole.PLATFORM_ADMIN.value,
+        "role": user.role,
+        "email": user.email,
+        "csrf_token": csrf_token,
+    }
+
+
+@router.post(
     "/logout",
     tags=["Authentication"],
     summary="Log out and clear session",
