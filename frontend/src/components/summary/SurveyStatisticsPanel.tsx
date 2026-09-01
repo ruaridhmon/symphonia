@@ -6,12 +6,20 @@ import DistributionSplitBar from '../DistributionSplitBar';
 
 type Question = string | Record<string, unknown>;
 
+type OriginalResponse = {
+  key: number;
+  expert: string;
+  rating: string;
+  text: string;
+};
+
 type StatisticRow = {
   key: string;
   label: string;
   count: number;
   numericValues: number[];
   sectionTitle?: string | null;
+  originalResponses: OriginalResponse[];
   distribution: Array<{ label: string; count: number; percent: number; scaleIndex?: number }>;
 };
 
@@ -64,6 +72,31 @@ function formatNumber(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.?0+$/, '');
 }
 
+function originalResponseText(answer: unknown): string {
+  if (!isRecord(answer)) return '';
+
+  const fields = [
+    answer.evidence,
+    answer.reasoning,
+    answer.explanation,
+    answer.comment,
+    answer.comments,
+    answer.freeText,
+    answer.text,
+    answer.confidenceJustification,
+    answer.counterarguments,
+  ];
+
+  return Array.from(
+    new Set(
+      fields
+        .filter((value): value is string => typeof value === 'string')
+        .map(value => value.trim())
+        .filter(Boolean),
+    ),
+  ).join('\n\n');
+}
+
 function answerSelections(answer: unknown, inputType: string): string[] {
   if (isRecord(answer) && Array.isArray(answer.selectedOptions)) {
     return answer.selectedOptions
@@ -92,10 +125,23 @@ function buildStatistics(questions: Question[], roundResponses: RoundWithRespons
       const inputType = questionType(question);
       const id = questionId(question);
       const answerKeys = [`q${index + 1}`, ...(id ? [id] : [])];
-      const selections = roundResponses.responses.flatMap(response => {
+      const matchedAnswers = roundResponses.responses.flatMap(response => {
         const answerKey = answerKeys.find(key => response.answers && key in response.answers);
-        return answerKey ? answerSelections(response.answers[answerKey], inputType) : [];
+        return answerKey ? [{ response, answer: response.answers[answerKey] }] : [];
       });
+      const selections = matchedAnswers.flatMap(({ answer }) => answerSelections(answer, inputType));
+      const originalResponses = inputType === 'likert'
+        ? matchedAnswers.flatMap(({ response, answer }) => {
+            const text = originalResponseText(answer);
+            if (!text) return [];
+            return [{
+              key: response.id,
+              expert: response.email || 'Anonymous',
+              rating: coerceAnswerPosition(answer).trim(),
+              text,
+            }];
+          })
+        : [];
 
       if (!selections.length) return null;
 
@@ -128,6 +174,7 @@ function buildStatistics(questions: Question[], roundResponses: RoundWithRespons
         count: selections.length,
         numericValues,
         sectionTitle: sectionTitle(question),
+        originalResponses,
         distribution,
       };
     })
@@ -188,6 +235,41 @@ export default function SurveyStatisticsPanel({ questions, roundResponses }: Pro
                     {row.label}
                   </div>
                   <DistributionSplitBar distribution={row.distribution} total={row.count} />
+                  {row.originalResponses.length > 0 ? (
+                    <details
+                      className="mt-3 rounded-md"
+                      style={{
+                        border: '1px solid color-mix(in srgb, var(--border) 70%, transparent)',
+                        backgroundColor: 'var(--card)',
+                      }}
+                    >
+                      <summary
+                        className="cursor-pointer px-3 py-2 text-sm font-medium"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        Show original responses ({row.originalResponses.length})
+                      </summary>
+                      <div className="space-y-3 px-3 pb-3">
+                        {row.originalResponses.map(response => (
+                          <div
+                            key={response.key}
+                            className="rounded-md p-3"
+                            style={{
+                              border: '1px solid var(--border)',
+                              backgroundColor: 'color-mix(in srgb, var(--muted) 24%, var(--card))',
+                            }}
+                          >
+                            <div className="mb-1 text-xs font-semibold" style={{ color: 'var(--muted-foreground)' }}>
+                              {response.expert}{response.rating ? ` · ${response.rating}` : ''}
+                            </div>
+                            <div className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--foreground)' }}>
+                              {response.text}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  ) : null}
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Metric label="Responses" value={String(row.count)} />
                     {avg != null && <Metric label="Average" value={formatNumber(avg)} />}
