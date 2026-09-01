@@ -74,3 +74,29 @@ Opposing statements:
     assert "Response 2 (Dr B): Agree" in rendered
     assert "Response 3 (Dr C): Disagree" in rendered
     assert "Response 4 (Dr D): Neither agree nor disagree" in rendered
+
+
+def test_custom_claim_list_never_labels_a_named_likert_option_as_an_excerpt():
+    rendered = _format_custom_claim_list(
+        """Claims
+
+Claim 1
+Status: Clear disagreement
+People: 0 of 1
+Text: Remote monitoring can expand without worsening inequalities.
+Opposing views: One expert disagrees.
+Supporting experts:
+- None
+Opposing experts:
+- Response 1 (Healthwatch patient advocate): Strongly disagree
+Uncertain experts:
+- None
+Supporting statements:
+- None
+Opposing statements:
+- Response 1 (Healthwatch patient advocate): Strongly disagree
+"""
+    )
+
+    assert "Show opposing experts" in rendered
+    assert "Show opposing statements" not in rendered
