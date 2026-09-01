@@ -127,6 +127,16 @@ body.claim-evidence-view-active .ProseMirror { display: none !important; }
   line-height: 1.55;
 }
 
+.claim-evidence-empty {
+  margin: .2rem .85rem .75rem;
+  padding: .7rem .8rem;
+  border: 1px dashed var(--border);
+  border-radius: .65rem;
+  color: var(--muted-foreground);
+  font-size: .85rem;
+  line-height: 1.45;
+}
+
 @media (max-width: 640px) {
   .claim-evidence-toolbar { align-items: stretch; }
   .claim-evidence-toolbar span { width: 100%; margin: 0 0 .15rem; }
