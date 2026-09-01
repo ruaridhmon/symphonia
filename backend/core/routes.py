@@ -3311,29 +3311,37 @@ class GenerateSynthesisVersionPayload(BaseModel):
 
 CUSTOM_SYNTHESIS_BASELINE_PROMPT = """Create a terse claim list. No waffle.
 
-Output one compact JSON object only, with this structure:
+Output plain text only, using this exact structure:
 
-{
-  "claims": [
-    {
-      "status": "Uncontested | Questionable | Clear disagreement",
-      "people": "X of N",
-      "text": "claim text",
-      "opposing_views": "None or a short contrast",
-      "supporting_statements": [
-        {"response": 1, "quote": "exact source sentence"}
-      ],
-      "opposing_statements": [
-        {"response": 2, "quote": "exact source sentence"}
-      ]
-    }
-  ]
-}
+Claims
+
+Claim 1
+Status: Uncontested / Questionable / Clear disagreement
+People: X of N
+Text: ...
+Opposing views: None / ...
+Supporting statements:
+- Response N: ...
+- Response N: ...
+Opposing statements:
+- Response N: ... / None
+
+Claim 2
+Status: Uncontested / Questionable / Clear disagreement
+People: X of N
+Text: ...
+Opposing views: None / ...
+Supporting statements:
+- Response N: ...
+- Response N: ...
+Opposing statements:
+- Response N: ... / None
 
 Rules:
-- Output valid JSON only. Do not wrap it in Markdown fences.
-- Every claim object must contain status, people, text, opposing_views, supporting_statements, and opposing_statements.
+- Output claims, status, people count, opposing views, supporting statements, and opposing statements only.
 - Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
+- Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
+- Each claim must have exactly one status line, one people count line, one text line, one opposing views line, one supporting statements list, and one opposing statements list.
 - People means the number of submitted responses that make or support the claim, as X of N.
 - Supporting statements must be exact free-text sentences from the submitted responses, labelled with their Response number.
 - For every claim, extract the specific respondent sentences that make or support that claim whenever any such free-text sentence exists.
@@ -3425,40 +3433,6 @@ def _format_custom_synthesis_material(
     lines: list[str] = ["Questions:"]
     for index, label in enumerate(labels, start=1):
         lines.append(f"{index}. {label}")
-        question = questions[index - 1]
-        if isinstance(question, dict):
-            source_statements = (
-                question.get("source_statements")
-                or question.get("original_statements")
-                or question.get("evidence_excerpts")
-                or []
-            )
-            if isinstance(source_statements, list) and source_statements:
-                lines.append("   Original expert statements retained for this claim:")
-                for statement in source_statements[:12]:
-                    if isinstance(statement, str):
-                        quote = statement.strip()
-                        expert = ""
-                        stance = "supporting"
-                    elif isinstance(statement, dict):
-                        quote = str(
-                            statement.get("quote")
-                            or statement.get("text")
-                            or statement.get("statement")
-                            or ""
-                        ).strip()
-                        expert = str(
-                            statement.get("expert_label")
-                            or statement.get("expert")
-                            or statement.get("response")
-                            or ""
-                        ).strip()
-                        stance = str(statement.get("stance") or "supporting").strip()
-                    else:
-                        continue
-                    if quote:
-                        attribution = f"{expert}: " if expert else ""
-                        lines.append(f"   - [{stance}] {attribution}{quote}")
     lines.append("")
     lines.append("Responses:")
     for response_index, response in enumerate(response_dicts, start=1):
@@ -3529,7 +3503,7 @@ def _format_custom_claim_list(markdown: str) -> str:
         ]
         if not filtered:
             return ""
-        output = [f'<details class="custom-claim-evidence"><summary>{html.escape(title)}</summary>', "<ul>"]
+        output = [f"<details><summary>{html.escape(title)}</summary>", "<ul>"]
         for statement in filtered[:5]:
             output.append(f"<li>{html.escape(statement)}</li>")
         output.extend(["</ul>", "</details>"])
@@ -3539,8 +3513,7 @@ def _format_custom_claim_list(markdown: str) -> str:
         output = ["<h2>Claims</h2>"]
         for index, item in enumerate(claims, start=1):
             colour, background, _label, marker = status_style(item.get("status", "Questionable"))
-            raw_claim_text = re.sub(r"^\*\*(.*?)\*\*$", r"\1", item.get("text", "").strip())
-            claim_text = html.escape(raw_claim_text)
+            claim_text = html.escape(item.get("text", "").strip())
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
             supporting_statements = item.get("supporting_statements", [])
@@ -3568,58 +3541,6 @@ def _format_custom_claim_list(markdown: str) -> str:
                     output.append(opposing_details)
             output.append("</div>")
         return "\n".join(output)
-
-    def normalise_json_statements(values: Any) -> list[str]:
-        if not isinstance(values, list):
-            return []
-        statements: list[str] = []
-        for value in values:
-            if isinstance(value, str):
-                statement = value.strip()
-            elif isinstance(value, dict):
-                quote = str(value.get("quote") or "").strip()
-                response_number = value.get("response")
-                statement = (
-                    f"Response {response_number}: {quote}"
-                    if quote and response_number not in (None, "")
-                    else quote
-                )
-            else:
-                statement = ""
-            if statement:
-                statements.append(statement)
-        return statements
-
-    json_text = markdown.strip()
-    if json_text.startswith("```"):
-        json_text = re.sub(r"^\`\`\`(?:json)?\s*", "", json_text, flags=re.IGNORECASE)
-        json_text = re.sub(r"\s*\`\`\`$", "", json_text)
-    try:
-        parsed_json = json.loads(json_text)
-    except (json.JSONDecodeError, TypeError):
-        parsed_json = None
-    json_claims = parsed_json.get("claims") if isinstance(parsed_json, dict) else None
-    if isinstance(json_claims, list):
-        structured_json_claims: list[dict[str, Any]] = []
-        for item in json_claims:
-            if not isinstance(item, dict) or not str(item.get("text") or "").strip():
-                continue
-            structured_json_claims.append(
-                {
-                    "status": str(item.get("status") or "Questionable"),
-                    "people": str(item.get("people") or ""),
-                    "text": str(item.get("text") or ""),
-                    "opposing": str(item.get("opposing_views") or ""),
-                    "supporting_statements": normalise_json_statements(
-                        item.get("supporting_statements")
-                    ),
-                    "opposing_statements": normalise_json_statements(
-                        item.get("opposing_statements")
-                    ),
-                }
-            )
-        if structured_json_claims:
-            return render_structured_claims(structured_json_claims[:12])
 
     structured_claims: list[dict[str, Any]] = []
     current_claim: dict[str, Any] | None = None
@@ -3811,92 +3732,6 @@ def _format_custom_claim_list(markdown: str) -> str:
     return formatted if any(sections.get(heading) for heading in section_order) else markdown.strip()
 
 
-def _add_synthetic_demo_evidence(
-    parsed_output: dict[str, Any],
-    questions: list[Any],
-    response_dicts: list[dict[str, Any]],
-) -> dict[str, Any]:
-    """Guarantee clearly labelled illustrative evidence for rating-only demos."""
-    claims = parsed_output.get("claims")
-    if not isinstance(claims, list):
-        return parsed_output
-
-    total = len(response_dicts)
-    for claim_index, claim in enumerate(claims[: len(questions)]):
-        if not isinstance(claim, dict):
-            continue
-        claim_text = str(claim.get("text") or "").strip()
-        if not claim_text:
-            continue
-
-        supporting: list[dict[str, Any]] = []
-        opposing: list[dict[str, Any]] = []
-        uncertain: list[dict[str, Any]] = []
-        for response_index, response in enumerate(response_dicts, start=1):
-            answers = response.get("answers") or {}
-            if isinstance(answers, str):
-                try:
-                    answers = json.loads(answers)
-                except json.JSONDecodeError:
-                    answers = {}
-            answer = answers.get(f"q{claim_index + 1}") if isinstance(answers, dict) else ""
-            rating = _stringify_custom_synthesis_answer(answer).lower()
-            raw_label = str(response.get("email") or "")
-            role_match = re.search(r",\s*([^\[]+?)(?:\s*\[|$)", raw_label)
-            role = role_match.group(1).strip() if role_match else "NHS professional"
-            label = f"Synthetic expert {response_index} ({role})"
-
-            if "disagree" in rating:
-                opposing.append(
-                    {
-                        "response": label,
-                        "quote": (
-                            "Illustrative synthetic view: I would challenge this claim "
-                            "because important implementation risks remain unresolved."
-                        ),
-                    }
-                )
-            elif "agree" in rating:
-                supporting.append(
-                    {
-                        "response": label,
-                        "quote": (
-                            "Illustrative synthetic view: From my professional perspective, "
-                            f"I support the claim that {claim_text.rstrip('.').lower()}."
-                        ),
-                    }
-                )
-            else:
-                uncertain.append(
-                    {
-                        "response": label,
-                        "quote": (
-                            "Illustrative synthetic view: I would need stronger evidence "
-                            "before taking a firm position on this claim."
-                        ),
-                    }
-                )
-
-        claim["people"] = f"{len(supporting)} of {total}"
-        if supporting and opposing:
-            claim["status"] = "Clear disagreement"
-        elif uncertain:
-            claim["status"] = "Questionable"
-        else:
-            claim["status"] = "Uncontested"
-        claim["supporting_statements"] = supporting[:2]
-        claim["opposing_statements"] = (opposing or uncertain)[:1]
-        if opposing:
-            claim["opposing_views"] = "Some synthetic experts challenge this claim."
-        elif uncertain:
-            claim["opposing_views"] = "Some synthetic experts remain uncertain."
-        else:
-            claim["opposing_views"] = "None"
-
-    parsed_output["claims"] = claims[: len(questions)]
-    return parsed_output
-
-
 async def _run_custom_synthesis(
     *,
     form_id: int,
@@ -3913,7 +3748,6 @@ async def _run_custom_synthesis(
 ) -> dict[str, Any]:
     resolved_model = _resolve_synthesis_model(db, model)
     prompt = custom_prompt.strip()
-    allow_synthetic_demo_evidence = "synthetic expert" in prompt.lower()
 
     api_key = os.getenv("OPENROUTER_API_KEY", "")
     if not api_key:
@@ -3932,43 +3766,15 @@ async def _run_custom_synthesis(
         else ""
     )
     guidance_section = f"\n\n{summary_guidance}" if summary_guidance else ""
-    synthetic_evidence_instruction = (
-        """
-This is an explicitly labelled demo. Produce exactly one claim for each survey question.
-When a response has only a rating, create a concise illustrative quotation consistent with
-that rating and the respondent's professional label. Every generated statement object must
-use a string label such as "Synthetic expert 1 (respiratory consultant)" in its response
-field. Include exactly two supporting statements per claim when support exists and at most
-one opposing statement. Never call these verbatim, original, or real responses. Keep all
-people counts grounded in the submitted ratings. Do not create inverse or duplicate claims."""
-        if allow_synthetic_demo_evidence
-        else ""
-    )
-    baseline_prompt = (
-        CUSTOM_SYNTHESIS_BASELINE_PROMPT.replace(
-            "- Do not invent claims, evidence, consensus, or expert positions.",
-            "- Synthetic evidence is permitted only under the explicit demo rules below.",
-        )
-        if allow_synthetic_demo_evidence
-        else CUSTOM_SYNTHESIS_BASELINE_PROMPT
-    )
     facilitator_instruction = (
-        f"{baseline_prompt}\n\nAdditional facilitator instruction:\n{prompt}"
+        f"{CUSTOM_SYNTHESIS_BASELINE_PROMPT}\n\nAdditional facilitator instruction:\n{prompt}"
         if prompt
-        else baseline_prompt
-    )
-    facilitator_instruction = f"{facilitator_instruction}\n{synthetic_evidence_instruction}".strip()
-    evidence_constraint = (
-        "Use the consultation ratings for counts. Synthetic quotations are permitted only "
-        "because this is an explicitly labelled demo; label every generated quotation synthetic."
-        if allow_synthetic_demo_evidence
-        else "Use only the consultation material below. Preserve disagreement and uncertainty. "
-        "Do not invent evidence or consensus."
+        else CUSTOM_SYNTHESIS_BASELINE_PROMPT
     )
     user_prompt = f"""Synthesis instruction:
 {facilitator_instruction}
 
-{evidence_constraint}
+Use only the consultation material below. Preserve disagreement and uncertainty. Do not invent evidence or consensus.
 {guidance_section}
 
 {material}{comments_section}
@@ -3980,9 +3786,8 @@ people counts grounded in the submitted ratings. Do not create inverse or duplic
             asyncio.to_thread(
                 client.chat.completions.create,
                 model=resolved_model,
-                max_tokens=2400 if allow_synthetic_demo_evidence else 1600,
-                temperature=0.1,
-                response_format={"type": "json_object"},
+                max_tokens=2500,
+                temperature=0.2,
                 messages=[
                     {
                         "role": "system",
@@ -3994,7 +3799,7 @@ people counts grounded in the submitted ratings. Do not create inverse or duplic
                     {"role": "user", "content": user_prompt},
                 ],
             ),
-            timeout=35,
+            timeout=45,
         )
     except asyncio.TimeoutError as exc:
         raise HTTPException(
@@ -4008,27 +3813,9 @@ people counts grounded in the submitted ratings. Do not create inverse or duplic
             detail=f"Custom synthesis failed: {_sanitize_error_message(str(exc))}",
         ) from exc
 
-    raw_custom_output = completion.choices[0].message.content or ""
-    try:
-        parsed_custom_output = json.loads(raw_custom_output)
-        if not isinstance(parsed_custom_output, dict):
-            parsed_custom_output = {}
-    except (json.JSONDecodeError, TypeError):
-        parsed_custom_output = {}
-
-    if allow_synthetic_demo_evidence and parsed_custom_output:
-        parsed_custom_output = _add_synthetic_demo_evidence(
-            parsed_custom_output,
-            questions,
-            response_dicts,
-        )
-        raw_custom_output = json.dumps(parsed_custom_output, ensure_ascii=False)
-
-    synthesis_text = _format_custom_claim_list(raw_custom_output)
-    custom_claims = parsed_custom_output.get("claims", [])
-    if not isinstance(custom_claims, list):
-        custom_claims = []
-
+    synthesis_text = _format_custom_claim_list(
+        completion.choices[0].message.content or ""
+    )
     synthesis_json_data = _merge_summary_display_preferences(
         {
             "narrative": synthesis_text,
@@ -4049,7 +3836,6 @@ people counts grounded in the submitted ratings. Do not create inverse or duplic
                 "round_number": round_number,
                 "custom_prompt": prompt,
                 "baseline_prompt": CUSTOM_SYNTHESIS_BASELINE_PROMPT,
-                "custom_claims": custom_claims[:12],
             },
         },
         None,
