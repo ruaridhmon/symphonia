@@ -1,7 +1,7 @@
 import { EditorContent, Editor } from '@tiptap/react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Bot, SquarePen } from 'lucide-react';
-import { MarkdownRenderer } from '../index';
+import ClaimEvidenceView from './ClaimEvidenceView';
 import type { Round } from '../../types/summary';
 
 type Props = {
@@ -241,7 +241,7 @@ export default function SynthesisEditorCard({
           {hasSynthesis || hasEmbeddedContent ? (
             <div className="synthesis-flow">
               {flow.map(item => item.type === 'text' ? (
-                <MarkdownRenderer key={item.key} content={item.content} />
+                <ClaimEvidenceView key={item.key} content={item.content} />
               ) : (
                 <div key={item.key} className="synthesis-flow-block">
                   {item.block.content}
