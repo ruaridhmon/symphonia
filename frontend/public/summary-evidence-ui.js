@@ -231,7 +231,16 @@
 
   function start() {
     scan();
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    window.setTimeout(scan, 250);
+    window.setTimeout(scan, 1000);
+    window.setTimeout(scan, 2500);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['class', 'contenteditable'],
+    });
   }
 
   if (document.readyState === 'loading') {
