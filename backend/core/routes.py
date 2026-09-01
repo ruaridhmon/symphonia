@@ -1475,9 +1475,14 @@ async def _broadcast_synthesis_error(
 
 
 def _resolve_synthesis_model(db: Session, payload_model: str | None = None) -> str:
-    """Resolve synthesis model: payload → DB settings → env var → default."""
+    """Resolve synthesis model: payload → dev default → DB/env default."""
     if payload_model and payload_model.strip():
         return payload_model.strip()
+    if os.getenv("K_SERVICE", "").strip() == "symphonia-dev":
+        return os.getenv(
+            "DEV_SYNTHESIS_MODEL",
+            "google/gemini-2.5-flash-lite",
+        ).strip()
     db_setting = db.query(Setting).filter(Setting.key == "synthesis_model").first()
     if db_setting and db_setting.value:
         return db_setting.value
