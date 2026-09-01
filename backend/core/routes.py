@@ -3827,6 +3827,7 @@ async def _run_custom_synthesis(
 ) -> dict[str, Any]:
     resolved_model = _resolve_synthesis_model(db, model)
     prompt = custom_prompt.strip()
+    allow_synthetic_demo_evidence = "synthetic expert" in prompt.lower()
 
     api_key = os.getenv("OPENROUTER_API_KEY", "")
     if not api_key:
@@ -3845,15 +3846,33 @@ async def _run_custom_synthesis(
         else ""
     )
     guidance_section = f"\n\n{summary_guidance}" if summary_guidance else ""
+    synthetic_evidence_instruction = (
+        """
+For this explicitly labelled demo only, the facilitator has requested synthetic expert evidence.
+When a response has only a rating, create one concise illustrative quotation consistent with
+that response's rating and professional label. Set the response field to
+"Synthetic expert N" and never present the quotation as verbatim or real evidence.
+Keep people counts grounded in the submitted ratings."""
+        if allow_synthetic_demo_evidence
+        else ""
+    )
     facilitator_instruction = (
         f"{CUSTOM_SYNTHESIS_BASELINE_PROMPT}\n\nAdditional facilitator instruction:\n{prompt}"
         if prompt
         else CUSTOM_SYNTHESIS_BASELINE_PROMPT
     )
+    facilitator_instruction = f"{facilitator_instruction}\n{synthetic_evidence_instruction}".strip()
+    evidence_constraint = (
+        "Use the consultation ratings for counts. Synthetic quotations are permitted only "
+        "because this is an explicitly labelled demo; label every generated quotation synthetic."
+        if allow_synthetic_demo_evidence
+        else "Use only the consultation material below. Preserve disagreement and uncertainty. "
+        "Do not invent evidence or consensus."
+    )
     user_prompt = f"""Synthesis instruction:
 {facilitator_instruction}
 
-Use only the consultation material below. Preserve disagreement and uncertainty. Do not invent evidence or consensus.
+{evidence_constraint}
 {guidance_section}
 
 {material}{comments_section}
