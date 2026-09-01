@@ -60,10 +60,31 @@
     return true;
   }
 
-  if (installDemoLogin()) return;
-  var observer = new MutationObserver(function () {
-    if (!installDemoLogin()) return;
-    observer.disconnect();
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  function installFastCustomModel() {
+    var option = document.querySelector(
+      'select option[value="google/gemini-2.5-flash-lite"]'
+    );
+    if (!option || !option.parentElement) return false;
+    var select = option.parentElement;
+    if (select.dataset.devFastModelInstalled === 'true') return true;
+    select.dataset.devFastModelInstalled = 'true';
+    if (select.value === option.value) return true;
+    select.value = option.value;
+    select.dispatchEvent(new Event('input', { bubbles: true }));
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
+  }
+
+  function installWhenAvailable(installer) {
+    if (installer()) return;
+    var observer = new MutationObserver(function () {
+      if (!installer()) return;
+      observer.disconnect();
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    window.setTimeout(function () { observer.disconnect(); }, 10000);
+  }
+
+  installWhenAvailable(installDemoLogin);
+  installWhenAvailable(installFastCustomModel);
 })();
