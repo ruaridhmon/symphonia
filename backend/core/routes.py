@@ -3811,6 +3811,92 @@ def _format_custom_claim_list(markdown: str) -> str:
     return formatted if any(sections.get(heading) for heading in section_order) else markdown.strip()
 
 
+def _add_synthetic_demo_evidence(
+    parsed_output: dict[str, Any],
+    questions: list[Any],
+    response_dicts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Guarantee clearly labelled illustrative evidence for rating-only demos."""
+    claims = parsed_output.get("claims")
+    if not isinstance(claims, list):
+        return parsed_output
+
+    total = len(response_dicts)
+    for claim_index, claim in enumerate(claims[: len(questions)]):
+        if not isinstance(claim, dict):
+            continue
+        claim_text = str(claim.get("text") or "").strip()
+        if not claim_text:
+            continue
+
+        supporting: list[dict[str, Any]] = []
+        opposing: list[dict[str, Any]] = []
+        uncertain: list[dict[str, Any]] = []
+        for response_index, response in enumerate(response_dicts, start=1):
+            answers = response.get("answers") or {}
+            if isinstance(answers, str):
+                try:
+                    answers = json.loads(answers)
+                except json.JSONDecodeError:
+                    answers = {}
+            answer = answers.get(f"q{claim_index + 1}") if isinstance(answers, dict) else ""
+            rating = _stringify_custom_synthesis_answer(answer).lower()
+            raw_label = str(response.get("email") or "")
+            role_match = re.search(r",\s*([^\[]+?)(?:\s*\[|$)", raw_label)
+            role = role_match.group(1).strip() if role_match else "NHS professional"
+            label = f"Synthetic expert {response_index} ({role})"
+
+            if "disagree" in rating:
+                opposing.append(
+                    {
+                        "response": label,
+                        "quote": (
+                            "Illustrative synthetic view: I would challenge this claim "
+                            "because important implementation risks remain unresolved."
+                        ),
+                    }
+                )
+            elif "agree" in rating:
+                supporting.append(
+                    {
+                        "response": label,
+                        "quote": (
+                            "Illustrative synthetic view: From my professional perspective, "
+                            f"I support the claim that {claim_text.rstrip('.').lower()}."
+                        ),
+                    }
+                )
+            else:
+                uncertain.append(
+                    {
+                        "response": label,
+                        "quote": (
+                            "Illustrative synthetic view: I would need stronger evidence "
+                            "before taking a firm position on this claim."
+                        ),
+                    }
+                )
+
+        claim["people"] = f"{len(supporting)} of {total}"
+        if supporting and opposing:
+            claim["status"] = "Clear disagreement"
+        elif uncertain:
+            claim["status"] = "Questionable"
+        else:
+            claim["status"] = "Uncontested"
+        claim["supporting_statements"] = supporting[:2]
+        claim["opposing_statements"] = (opposing or uncertain)[:1]
+        if opposing:
+            claim["opposing_views"] = "Some synthetic experts challenge this claim."
+        elif uncertain:
+            claim["opposing_views"] = "Some synthetic experts remain uncertain."
+        else:
+            claim["opposing_views"] = "None"
+
+    parsed_output["claims"] = claims[: len(questions)]
+    return parsed_output
+
+
 async def _run_custom_synthesis(
     *,
     form_id: int,
@@ -3923,17 +4009,24 @@ people counts grounded in the submitted ratings. Do not create inverse or duplic
         ) from exc
 
     raw_custom_output = completion.choices[0].message.content or ""
-    synthesis_text = _format_custom_claim_list(raw_custom_output)
     try:
         parsed_custom_output = json.loads(raw_custom_output)
-        custom_claims = (
-            parsed_custom_output.get("claims", [])
-            if isinstance(parsed_custom_output, dict)
-            else []
-        )
-        if not isinstance(custom_claims, list):
-            custom_claims = []
+        if not isinstance(parsed_custom_output, dict):
+            parsed_custom_output = {}
     except (json.JSONDecodeError, TypeError):
+        parsed_custom_output = {}
+
+    if allow_synthetic_demo_evidence and parsed_custom_output:
+        parsed_custom_output = _add_synthetic_demo_evidence(
+            parsed_custom_output,
+            questions,
+            response_dicts,
+        )
+        raw_custom_output = json.dumps(parsed_custom_output, ensure_ascii=False)
+
+    synthesis_text = _format_custom_claim_list(raw_custom_output)
+    custom_claims = parsed_custom_output.get("claims", [])
+    if not isinstance(custom_claims, list):
         custom_claims = []
 
     synthesis_json_data = _merge_summary_display_preferences(
