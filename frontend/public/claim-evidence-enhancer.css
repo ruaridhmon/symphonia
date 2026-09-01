@@ -29,7 +29,7 @@
   color: var(--accent);
 }
 
-body.claim-evidence-view-active .synthesis-editor-prosemirror { display: none !important; }
+body.claim-evidence-view-active .ProseMirror { display: none !important; }
 
 .claim-evidence-preview {
   display: grid;
