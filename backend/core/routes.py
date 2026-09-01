@@ -3848,18 +3848,28 @@ async def _run_custom_synthesis(
     guidance_section = f"\n\n{summary_guidance}" if summary_guidance else ""
     synthetic_evidence_instruction = (
         """
-For this explicitly labelled demo only, the facilitator has requested synthetic expert evidence.
-When a response has only a rating, create one concise illustrative quotation consistent with
-that response's rating and professional label. Set the response field to
-"Synthetic expert N" and never present the quotation as verbatim or real evidence.
-Keep people counts grounded in the submitted ratings."""
+This is an explicitly labelled demo. Produce exactly one claim for each survey question.
+When a response has only a rating, create a concise illustrative quotation consistent with
+that rating and the respondent's professional label. Every generated statement object must
+use a string label such as "Synthetic expert 1 (respiratory consultant)" in its response
+field. Include exactly two supporting statements per claim when support exists and at most
+one opposing statement. Never call these verbatim, original, or real responses. Keep all
+people counts grounded in the submitted ratings. Do not create inverse or duplicate claims."""
         if allow_synthetic_demo_evidence
         else ""
     )
-    facilitator_instruction = (
-        f"{CUSTOM_SYNTHESIS_BASELINE_PROMPT}\n\nAdditional facilitator instruction:\n{prompt}"
-        if prompt
+    baseline_prompt = (
+        CUSTOM_SYNTHESIS_BASELINE_PROMPT.replace(
+            "- Do not invent claims, evidence, consensus, or expert positions.",
+            "- Synthetic evidence is permitted only under the explicit demo rules below.",
+        )
+        if allow_synthetic_demo_evidence
         else CUSTOM_SYNTHESIS_BASELINE_PROMPT
+    )
+    facilitator_instruction = (
+        f"{baseline_prompt}\n\nAdditional facilitator instruction:\n{prompt}"
+        if prompt
+        else baseline_prompt
     )
     facilitator_instruction = f"{facilitator_instruction}\n{synthetic_evidence_instruction}".strip()
     evidence_constraint = (
@@ -3884,7 +3894,7 @@ Keep people counts grounded in the submitted ratings."""
             asyncio.to_thread(
                 client.chat.completions.create,
                 model=resolved_model,
-                max_tokens=1600,
+                max_tokens=2400 if allow_synthetic_demo_evidence else 1600,
                 temperature=0.1,
                 response_format={"type": "json_object"},
                 messages=[
