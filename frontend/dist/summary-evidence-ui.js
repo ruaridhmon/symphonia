@@ -39,7 +39,7 @@
       var raw = text(item);
       var normalizedRaw = raw.replace(/\s+/g, ' ').trim();
       var responseSplit = normalizedRaw.match(/^(Response\s+[^:]+):\s*([\s\S]*)$/i);
-      var guestSplit = normalizedRaw.match(/^\d+\s*\(Guest\s+(.+?)\s*\[[^\]]+\]\)?\s*:\s*([\s\S]*)$/i);
+      var guestSplit = normalizedRaw.match(/^Response\s+\d+\s*\(Guest:\s*(.+?)\s*\[[^\]]+\]\)\s*:\s*([\s\S]*)$/i);
       var expertName = guestSplit
         ? guestSplit[1]
         : responseSplit
