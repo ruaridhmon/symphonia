@@ -12,7 +12,7 @@
 
   function evidenceGroup(labelNode, listNode) {
     var kindMatch = text(labelNode).match(/^Show\s+(supporting|opposing)\s+statements$/i);
-    if (!kindMatch || !listNode || listNode.tagName !== 'UL') return null;
+    if (!kindMatch || !listNode || (listNode.tagName !== 'UL' && listNode.tagName !== 'OL')) return null;
     var kind = kindMatch[1].toLowerCase();
     var items = Array.prototype.slice.call(listNode.querySelectorAll(':scope > li'));
     if (!items.length) return null;
@@ -46,6 +46,50 @@
     return details;
   }
 
+  function flattenClaimContainer(container) {
+    var nodes = [];
+    Array.prototype.forEach.call(container.children, function (child) {
+      if (child.tagName === 'DETAILS') {
+        var summary = child.querySelector(':scope > summary');
+        var list = child.querySelector(':scope > ul, :scope > ol');
+        if (summary) nodes.push(summary);
+        if (list) nodes.push(list);
+        return;
+      }
+      nodes.push(child);
+    });
+    return nodes;
+  }
+
+  function claimBlocks(root) {
+    var blocks = [];
+    var current = [];
+    Array.prototype.forEach.call(root.children, function (child) {
+      var wrappedHeading = child.tagName === 'DIV'
+        ? child.querySelector(':scope > p')
+        : null;
+      if (wrappedHeading && /^[🟥🟨🟩]\s*Claim\s+\d+:/i.test(text(wrappedHeading))) {
+        if (current.length) blocks.push(current);
+        current = [];
+        blocks.push(flattenClaimContainer(child));
+        return;
+      }
+      if (child.tagName === 'P' && /^[🟥🟨🟩]\s*Claim\s+\d+:/i.test(text(child))) {
+        if (current.length) blocks.push(current);
+        current = [child];
+        return;
+      }
+      if (child.tagName === 'HR') {
+        if (current.length) blocks.push(current);
+        current = [];
+        return;
+      }
+      if (current.length) current.push(child);
+    });
+    if (current.length) blocks.push(current);
+    return blocks;
+  }
+
   function buildPreview(root) {
     if (!root || !root.parentElement) return;
     var existing = root.parentElement.querySelector(':scope > .' + PANEL_CLASS);
@@ -53,8 +97,8 @@
     if (existing) existing.remove();
     if (toolbar) toolbar.remove();
 
-    var nodes = Array.prototype.slice.call(root.children);
-    if (!nodes.some(function (node) { return /^Claims$/i.test(text(node)); })) {
+    var blocks = claimBlocks(root);
+    if (!blocks.length) {
       document.body.classList.remove('claim-evidence-view-active');
       return;
     }
@@ -65,52 +109,60 @@
 
     var title = document.createElement('div');
     title.className = 'claim-evidence-preview-title';
-    title.innerHTML = '<h2>Claims</h2><p>Expand a claim’s evidence to inspect the available expert excerpts.</p>';
+    title.innerHTML = '<h2>Claims</h2><p>Open a section to inspect the original expert excerpts attached to each claim.</p>';
     preview.appendChild(title);
 
-    for (var i = 0; i < nodes.length; i += 1) {
-      var node = nodes[i];
-      if (node.tagName !== 'P' || !/^[🟥🟨🟩]\s*Claim\s+\d+:/i.test(text(node))) continue;
+    blocks.forEach(function (nodes) {
+      var headingNode = nodes.find(function (node) {
+        return node.tagName === 'P' && /^[🟥🟨🟩]\s*Claim\s+\d+:/i.test(text(node));
+      });
+      if (!headingNode) return;
 
       var card = document.createElement('article');
       card.className = 'claim-evidence-claim';
-      if (text(node).indexOf('🟥') === 0) card.dataset.status = 'disagreement';
-      if (text(node).indexOf('🟨') === 0) card.dataset.status = 'uncertain';
-      if (text(node).indexOf('🟩') === 0) card.dataset.status = 'agreement';
+      if (text(headingNode).indexOf('🟥') === 0) card.dataset.status = 'disagreement';
+      if (text(headingNode).indexOf('🟨') === 0) card.dataset.status = 'uncertain';
+      if (text(headingNode).indexOf('🟩') === 0) card.dataset.status = 'agreement';
 
       var heading = document.createElement('div');
       heading.className = 'claim-evidence-claim-heading';
-      heading.innerHTML = node.innerHTML;
+      heading.innerHTML = headingNode.innerHTML;
       card.appendChild(heading);
 
-      for (i += 1; i < nodes.length; i += 1) {
-        var current = nodes[i];
-        if (current.tagName === 'HR' || (current.tagName === 'P' && /^[🟥🟨🟩]\s*Claim\s+\d+:/i.test(text(current)))) {
-          if (current.tagName === 'P') i -= 1;
-          break;
-        }
-        if (!text(current)) continue;
+      var evidenceCount = 0;
+      for (var index = nodes.indexOf(headingNode) + 1; index < nodes.length; index += 1) {
+        var currentNode = nodes[index];
+        if (!text(currentNode)) continue;
 
-        if (current.tagName === 'P' && /^Show\s+(supporting|opposing)\s+statements$/i.test(text(current))) {
-          var group = evidenceGroup(current, nodes[i + 1]);
+        if ((currentNode.tagName === 'P' || currentNode.tagName === 'SUMMARY')
+          && /^Show\s+(supporting|opposing)\s+statements$/i.test(text(currentNode))) {
+          var group = evidenceGroup(currentNode, nodes[index + 1]);
           if (group) {
+            evidenceCount += 1;
             card.appendChild(group);
-            i += 1;
+            index += 1;
           }
           continue;
         }
 
-        if (current.tagName === 'P') {
+        if (currentNode.tagName === 'P') {
           var meta = document.createElement('div');
-          meta.className = /^People making/i.test(text(current))
+          meta.className = /^People making/i.test(text(currentNode))
             ? 'claim-evidence-meta claim-evidence-people'
             : 'claim-evidence-meta claim-evidence-opposition';
-          meta.innerHTML = current.innerHTML;
+          meta.innerHTML = currentNode.innerHTML;
           card.appendChild(meta);
         }
       }
+
+      if (!evidenceCount) {
+        var empty = document.createElement('div');
+        empty.className = 'claim-evidence-empty';
+        empty.textContent = 'No original free-text expert excerpts were submitted for this claim.';
+        card.appendChild(empty);
+      }
       preview.appendChild(card);
-    }
+    });
 
     if (!preview.querySelector('.claim-evidence-claim')) return;
 
@@ -162,10 +214,17 @@
     buildPreview(root);
   }
 
+  function mutationTouchesEditor(mutation) {
+    if (mutation.target.closest && mutation.target.closest(ROOT_SELECTOR)) return true;
+    return Array.prototype.some.call(mutation.addedNodes || [], function (node) {
+      return node.nodeType === 1
+        && ((node.matches && node.matches(ROOT_SELECTOR))
+          || (node.querySelector && node.querySelector(ROOT_SELECTOR)));
+    });
+  }
+
   var observer = new MutationObserver(function (mutations) {
-    if (!mutations.some(function (mutation) {
-      return mutation.target.closest && mutation.target.closest(ROOT_SELECTOR);
-    })) return;
+    if (!mutations.some(mutationTouchesEditor)) return;
     window.clearTimeout(rebuildTimer);
     rebuildTimer = window.setTimeout(scan, 120);
   });
