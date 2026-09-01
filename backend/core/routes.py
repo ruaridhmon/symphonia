@@ -3512,7 +3512,7 @@ def _format_custom_claim_list(
 
     def is_likert_only_statement(value: str) -> bool:
         text = normalise_statement(value)
-        text = re.sub(r"^response\s+\d+\s*:\s*", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"^response\s+[^:]+\s*:\s*", "", text, flags=re.IGNORECASE)
         text = text.strip().strip('"“”').lower()
         likert_values = {
             "strongly agree",
