@@ -46,15 +46,32 @@ type Token = { type: 'text' | 'list'; text: string; items?: string[] };
 function tokensFromHtml(content: string): Token[] {
   const document = new DOMParser().parseFromString(content, 'text/html');
   const tokens: Token[] = [];
-  Array.from(document.body.children).forEach(node => {
-    if (node.tagName === 'UL' || node.tagName === 'OL') {
-      const items = Array.from(node.querySelectorAll(':scope > li')).map(item => cleanText(item.textContent || '')).filter(Boolean);
-      tokens.push({ type: 'list', text: '', items });
-      return;
-    }
-    const text = cleanText(node.textContent || '');
-    if (text) tokens.push({ type: 'text', text });
-  });
+
+  const visit = (container: Element): void => {
+    Array.from(container.children).forEach(node => {
+      if (node.tagName === 'UL' || node.tagName === 'OL') {
+        const items = Array.from(node.querySelectorAll(':scope > li'))
+          .map(item => cleanText(item.textContent || ''))
+          .filter(Boolean);
+        tokens.push({ type: 'list', text: '', items });
+        return;
+      }
+
+      if (/^(H[1-6]|P|SUMMARY)$/.test(node.tagName)) {
+        const text = cleanText(node.textContent || '');
+        if (text) tokens.push({ type: 'text', text });
+        return;
+      }
+
+      // Saved syntheses wrap each claim in a styled div and each evidence
+      // list in details/summary. Recurse through those structural wrappers
+      // without also emitting their flattened text, which would merge the
+      // whole claim into a single token.
+      visit(node);
+    });
+  };
+
+  visit(document.body);
   return tokens;
 }
 
