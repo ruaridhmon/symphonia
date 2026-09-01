@@ -3320,52 +3320,38 @@ Status: Uncontested / Questionable / Clear disagreement
 People: X of N
 Text: ...
 Opposing views: None / ...
+Supporting experts:
+- Response N (expert label): Agree
+Opposing experts:
+- Response N (expert label): Disagree
+Uncertain experts:
+- Response N (expert label): Neither agree nor disagree
 Supporting statements:
-- Response N: ...
-- Response N: ...
+- Response N (expert label): exact source sentence / None
 Opposing statements:
-- Response N: ... / None
-
-Claim 2
-Status: Uncontested / Questionable / Clear disagreement
-People: X of N
-Text: ...
-Opposing views: None / ...
-Supporting statements:
-- Response N: ...
-- Response N: ...
-Opposing statements:
-- Response N: ... / None
+- Response N (expert label): exact source sentence / None
 
 Rules:
-- Output claims, status, people count, opposing views, supporting statements, and opposing statements only.
+- Output claims, status, people count, opposing views, expert-position lists, and statement lists only.
 - Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
-- Do not include "who/evidence", "position A/B", "what would resolve it", explanations, or paragraphs.
-- Each claim must have exactly one status line, one people count line, one text line, one opposing views line, one supporting statements list, and one opposing statements list.
+- Each claim must have exactly one status, people, text, opposing views, supporting experts, opposing experts, uncertain experts, supporting statements, and opposing statements section.
 - People means the number of submitted responses that make or support the claim, as X of N.
-- Supporting statements must be exact free-text sentences from the submitted responses, labelled with their Response number.
-- For every claim, extract the specific respondent sentences that make or support that claim whenever any such free-text sentence exists.
-- Do not paraphrase supporting statements. Copy the relevant source sentence exactly, apart from trimming whitespace.
-- Supporting statements must be actual free-text sentences written by respondents, not your summary of their view.
-- Never use Likert/select/rating labels such as "Agree", "Strongly agree", "Disagree", "Neither agree nor disagree", scores, or option labels as supporting statements.
-- If the source response has no written sentence for a claim, use Supporting statements: None.
-- Include every distinct relevant supporting statement available, with at most one excerpt per respondent per claim.
-- Opposing statements must be exact free-text sentences from responses that conflict with the claim, labelled with their Response number.
-- For contested claims, extract the specific respondent sentences that oppose or qualify the claim whenever any such free-text sentence exists.
-- Do not paraphrase opposing statements. Copy the relevant source sentence exactly, apart from trimming whitespace.
-- Opposing statements must also be actual free-text sentences, not Likert/select/rating labels.
-- For Uncontested claims, use Opposing statements: None unless a real opposing statement exists.
+- For a claim that directly restates a rating/Likert question, classify every submitted response exactly once: supportive answers under Supporting experts, conflicting answers under Opposing experts, and neutral/unsure answers under Uncertain experts.
+- Copy each Response number, expert label, and recorded option exactly. Never invent or omit an expert position.
+- Use None for an expert-position section with no members.
+- Supporting and opposing statements are only verbatim free-text sentences from submitted responses.
+- Include every distinct relevant free-text statement available, with at most one excerpt per respondent per claim.
+- Do not paraphrase statements. Copy the relevant source sentence exactly, apart from trimming whitespace.
+- Never present Likert/select/rating labels, scores, or option labels as statements.
+- If no written sentence exists for a statement section, use None.
 - Use Uncontested when most relevant responses point the same way and there is no meaningful opposition.
 - Use Questionable when support is mixed, weak, conditional, or uncertain.
 - Use Clear disagreement when there are opposing response positions.
-- For Clear disagreement, write the opposing views as a short contrast, not a long explanation.
-- For Uncontested or Questionable, use Opposing views: None unless there is a real opposing view.
-- Opposing views must be a short phrase, never just "Agree" or "Disagree".
+- Opposing views must be a short contrast, never just an option label.
 - Put a blank line between every claim.
-- Maximum 12 claims total.
-- Each claim may appear once only. Do not repeat the same claim under different headings.
+- Maximum 12 claims total. Each claim may appear once only.
 - Keep each claim under 22 words.
-- Do not invent claims, evidence, consensus, or expert positions.
+- Do not invent claims, evidence, consensus, expert positions, or quotations.
 """
 
 
@@ -3509,6 +3495,20 @@ def _format_custom_claim_list(markdown: str) -> str:
         output.extend(["</ul>", "</details>"])
         return "\n".join(output)
 
+    def render_expert_details(title: str, experts: list[str]) -> str:
+        filtered = [
+            normalise_statement(expert)
+            for expert in experts
+            if normalise_statement(expert).lower() not in {"none", "n/a", "not applicable"}
+        ]
+        if not filtered:
+            return ""
+        output = [f"<details><summary>{html.escape(title)}</summary>", "<ul>"]
+        for expert in dict.fromkeys(filtered):
+            output.append(f"<li>{html.escape(expert)}</li>")
+        output.extend(["</ul>", "</details>"])
+        return "\n".join(output)
+
     def render_structured_claims(claims: list[dict[str, Any]]) -> str:
         output = ["<h2>Claims</h2>"]
         for index, item in enumerate(claims, start=1):
@@ -3516,6 +3516,9 @@ def _format_custom_claim_list(markdown: str) -> str:
             claim_text = html.escape(item.get("text", "").strip())
             people = html.escape(item.get("people", "").strip() or "Not counted")
             opposing = item.get("opposing", "").strip()
+            supporting_experts = item.get("supporting_experts", [])
+            opposing_experts = item.get("opposing_experts", [])
+            uncertain_experts = item.get("uncertain_experts", [])
             supporting_statements = item.get("supporting_statements", [])
             opposing_statements = item.get("opposing_statements", [])
             if index > 1:
@@ -3532,6 +3535,14 @@ def _format_custom_claim_list(markdown: str) -> str:
             output.append(f"<p>People making this claim: <strong>{people}</strong></p>")
             if opposing and opposing.lower() not in {"none", "n/a", "not applicable", "no opposing views"}:
                 output.append(f"<p>Opposing views: <strong>{html.escape(opposing)}</strong></p>")
+            for title, experts in (
+                ("Show supporting experts", supporting_experts),
+                ("Show opposing experts", opposing_experts),
+                ("Show uncertain experts", uncertain_experts),
+            ):
+                expert_details = render_expert_details(title, experts)
+                if expert_details:
+                    output.append(expert_details)
             supporting_details = render_statement_details("Show supporting statements", supporting_statements)
             if supporting_details:
                 output.append(supporting_details)
@@ -3557,6 +3568,9 @@ def _format_custom_claim_list(markdown: str) -> str:
                 "people": "",
                 "text": "",
                 "opposing": "",
+                "supporting_experts": [],
+                "opposing_experts": [],
+                "uncertain_experts": [],
                 "supporting_statements": [],
                 "opposing_statements": [],
             }
@@ -3567,7 +3581,7 @@ def _format_custom_claim_list(markdown: str) -> str:
             continue
         if current_claim is None:
             continue
-        match = re.match(r"^(status|people|text|opposing views?|supporting statements?|opposing statements?)\s*:\s*(.*)$", stripped, re.IGNORECASE)
+        match = re.match(r"^(status|people|text|opposing views?|supporting experts?|opposing experts?|uncertain experts?|supporting statements?|opposing statements?)\s*:\s*(.*)$", stripped, re.IGNORECASE)
         if not match:
             if current_statement_key and re.match(r"^[-*+]\s+", stripped):
                 current_claim[current_statement_key].append(normalise_statement(stripped))
@@ -3587,6 +3601,18 @@ def _format_custom_claim_list(markdown: str) -> str:
             current_claim["text"] = value
         elif key.startswith("opposing view"):
             current_claim["opposing"] = value
+        elif key.startswith("supporting expert"):
+            current_statement_key = "supporting_experts"
+            if value:
+                current_claim[current_statement_key].append(normalise_statement(value))
+        elif key.startswith("opposing expert"):
+            current_statement_key = "opposing_experts"
+            if value:
+                current_claim[current_statement_key].append(normalise_statement(value))
+        elif key.startswith("uncertain expert"):
+            current_statement_key = "uncertain_experts"
+            if value:
+                current_claim[current_statement_key].append(normalise_statement(value))
         elif key.startswith("supporting statement"):
             current_statement_key = "supporting_statements"
             if value:
