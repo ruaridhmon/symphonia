@@ -137,9 +137,15 @@ class SectionErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
+const DEV_FAST_MODEL = 'google/gemini-2.5-flash-lite';
+
 const MODELS = [
-	'openai/gpt-4o',
-	'openai/gpt-4o-mini',
+	DEV_FAST_MODEL,
+	'openai/gpt-5.6-terra',
+	'anthropic/claude-sonnet-5',
+	'google/gemini-2.5-pro',
+	'deepseek/deepseek-v3.2',
+	'openai/gpt-oss-120b',
 ];
 const SYNTHESIS_ANALYSTS = 3;
 const SYNTHESIS_RUN_TTL_MS = 30 * 60 * 1000;
@@ -227,7 +233,16 @@ function isBlockedModel(model: string): boolean {
 	return model.startsWith('anthropic/');
 }
 
+function isDevelopmentHost(): boolean {
+	if (typeof window === 'undefined') return false;
+	return window.location.hostname === 'symphonia-dev-488613.web.app'
+		|| window.location.hostname === 'localhost'
+		|| window.location.hostname === '127.0.0.1';
+}
+
 function sanitizeModel(model: string | null | undefined): string {
+	// Keep the development site fast even when the shared admin setting is slower.
+	if (isDevelopmentHost()) return DEV_FAST_MODEL;
 	if (!model || isBlockedModel(model)) return MODELS[0];
 	return model;
 }
