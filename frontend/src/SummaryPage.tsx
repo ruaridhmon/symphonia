@@ -2,7 +2,6 @@ import { Component, useCallback, useEffect, useMemo, useRef, useState } from 're
 import type { ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { Node, mergeAttributes } from '@tiptap/core';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -176,38 +175,6 @@ const SUMMARY_VIEW_LABELS: Record<keyof typeof SUMMARY_COMPOSITION_DEFAULTS, str
 };
 const SYNTHESIS_BACKGROUNDS = ['default', 'paper', 'soft'] as const;
 
-const DetailsSummaryNode = Node.create({
-	name: 'detailsSummary',
-	group: 'block',
-	content: 'inline*',
-	defining: true,
-	parseHTML: () => [{ tag: 'summary' }],
-	renderHTML: ({ HTMLAttributes }) => ['summary', mergeAttributes(HTMLAttributes), 0],
-});
-
-const DetailsNode = Node.create({
-	name: 'details',
-	group: 'block',
-	content: 'detailsSummary block*',
-	defining: true,
-	addAttributes() {
-		return {
-			class: {
-				default: null,
-				parseHTML: (element: HTMLElement) => element.getAttribute('class'),
-				renderHTML: attributes => attributes.class ? { class: attributes.class } : {},
-			},
-			open: {
-				default: false,
-				parseHTML: (element: HTMLElement) => element.hasAttribute('open'),
-				renderHTML: attributes => attributes.open ? { open: '' } : {},
-			},
-		};
-	},
-	parseHTML: () => [{ tag: 'details' }],
-	renderHTML: ({ HTMLAttributes }) => ['details', mergeAttributes(HTMLAttributes), 0],
-});
-
 function normaliseSummaryComposition(raw: unknown): SummaryComposition {
 	const next = { ...SUMMARY_COMPOSITION_DEFAULTS };
 	if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
@@ -246,7 +213,7 @@ interface StoredSynthesisRun {
 	formId: number;
 	roundId: number;
 	jobId: string | null;
-	mode: 'custom' | 'simple' | 'committee' | 'ttd';
+	mode: 'simple' | 'committee' | 'ttd';
 	model: string;
 	stage: string;
 	step: number;
@@ -774,8 +741,6 @@ export default function SummaryPage() {
 		extensions: [
 			StarterKit,
 			Underline,
-			DetailsNode,
-			DetailsSummaryNode,
 			Placeholder.configure({ placeholder: 'Write the synthesis for this round…' }),
 			Table.configure({ resizable: true }),
 			TableRow,
