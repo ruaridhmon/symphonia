@@ -140,7 +140,7 @@
 
     var title = document.createElement('div');
     title.className = 'claim-evidence-preview-title';
-    title.innerHTML = '<h2>Claims</h2><p>Open a section to inspect every expert position and any original written excerpts.</p>';
+    title.innerHTML = '<h2>Claims</h2><p>Open a section to see each expert rating and its claim-linked sentence. Submitted written excerpts are quoted exactly when available.</p>';
     preview.appendChild(title);
 
     blocks.forEach(function (nodes) {
