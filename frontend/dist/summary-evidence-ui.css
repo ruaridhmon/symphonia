@@ -73,6 +73,7 @@ body.claim-evidence-view-active .ProseMirror { display: none !important; }
 }
 .claim-evidence-group--supporting { border-left: 4px solid #16a34a; }
 .claim-evidence-group--opposing { border-left: 4px solid #dc2626; }
+.claim-evidence-group--uncertain { border-left: 4px solid #d97706; }
 .claim-evidence-group summary {
   display: flex;
   align-items: center;
@@ -125,6 +126,17 @@ body.claim-evidence-view-active .ProseMirror { display: none !important; }
   color: var(--foreground);
   font-size: .9rem;
   line-height: 1.55;
+}
+.claim-evidence-position {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: .82rem;
+  font-weight: 750;
 }
 
 .claim-evidence-empty {
