@@ -67,12 +67,19 @@
     if (!option || !option.parentElement) return false;
     var select = option.parentElement;
     if (select.dataset.devFastModelInstalled === 'true') return true;
-    select.dataset.devFastModelInstalled = 'true';
-    if (select.value === option.value) return true;
-    select.value = option.value;
+    if (select.value === option.value) {
+      select.dataset.devFastModelInstalled = 'true';
+      return true;
+    }
+    var valueSetter = Object.getOwnPropertyDescriptor(
+      HTMLSelectElement.prototype,
+      'value'
+    ).set;
+    valueSetter.call(select, option.value);
     select.dispatchEvent(new Event('input', { bubbles: true }));
     select.dispatchEvent(new Event('change', { bubbles: true }));
-    return true;
+    select.dataset.devFastModelInstalled = 'true';
+    return select.value === option.value;
   }
 
   function installWhenAvailable(installer) {
