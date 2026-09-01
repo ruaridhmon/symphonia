@@ -12,7 +12,7 @@
     return (node && node.textContent ? node.textContent : '').replace(/\u00a0/g, ' ').trim();
   }
 
-  function evidenceGroup(labelNode, listNode) {
+  function evidenceGroup(labelNode, listNode, context) {
     var groupMatch = text(labelNode).match(/^Show\s+(supporting|opposing|uncertain)\s+(statements|experts)$/i);
     if (!groupMatch || !listNode || (listNode.tagName !== 'UL' && listNode.tagName !== 'OL')) return null;
     var kind = groupMatch[1].toLowerCase();
@@ -46,6 +46,31 @@
       value.textContent = split ? split[2] : raw;
       card.appendChild(expert);
       card.appendChild(value);
+
+      if (contentType === 'positions' && context && context.claim) {
+        var stance = (split ? split[2] : raw).toLowerCase();
+        var linkLabel = 'Supports';
+        var linkedSentence = context.claim;
+        if (/strongly disagree|disagree|oppose|challenge/.test(stance)) {
+          linkLabel = 'Challenges';
+          linkedSentence = context.opposition || context.claim;
+        } else if (/uncertain|unsure|neither|don't know|do not know/.test(stance)) {
+          linkLabel = 'Uncertain about';
+        }
+
+        var association = document.createElement('div');
+        association.className = 'claim-evidence-association';
+        var associationLabel = document.createElement('span');
+        associationLabel.className = 'claim-evidence-association-label';
+        associationLabel.textContent = 'Claim link · derived from rating';
+        var associationText = document.createElement('div');
+        associationText.className = 'claim-evidence-association-text';
+        associationText.textContent = linkLabel + ': “' + linkedSentence + '”';
+        association.appendChild(associationLabel);
+        association.appendChild(associationText);
+        card.appendChild(association);
+      }
+
       list.appendChild(card);
     });
     details.appendChild(list);
@@ -115,7 +140,7 @@
 
     var title = document.createElement('div');
     title.className = 'claim-evidence-preview-title';
-    title.innerHTML = '<h2>Claims</h2><p>Open a section to inspect every expert position and any original written excerpts.</p>';
+    title.innerHTML = '<h2>Claims</h2><p>Open a section to see each expert rating and its claim-linked sentence. Submitted written excerpts are quoted exactly when available.</p>';
     preview.appendChild(title);
 
     blocks.forEach(function (nodes) {
@@ -123,6 +148,16 @@
         return node.tagName === 'P' && /^(?:🟥|🟨|🟩)\s*Claim\s+\d+:/i.test(text(node));
       });
       if (!headingNode) return;
+
+      var claimText = text(headingNode)
+        .replace(/^(?:🟥|🟨|🟩)\s*Claim\s+\d+:\s*/i, '')
+        .trim();
+      var opposingNode = nodes.find(function (node) {
+        return node.tagName === 'P' && /^Opposing views:/i.test(text(node));
+      });
+      var opposingText = opposingNode
+        ? text(opposingNode).replace(/^Opposing views:\s*/i, '').trim()
+        : '';
 
       var card = document.createElement('article');
       card.className = 'claim-evidence-claim';
@@ -142,7 +177,10 @@
 
         if ((currentNode.tagName === 'P' || currentNode.tagName === 'SUMMARY')
           && /^Show\s+(supporting|opposing|uncertain)\s+(statements|experts)$/i.test(text(currentNode))) {
-          var group = evidenceGroup(currentNode, nodes[index + 1]);
+          var group = evidenceGroup(currentNode, nodes[index + 1], {
+            claim: claimText,
+            opposition: opposingText,
+          });
           if (group) {
             evidenceCount += 1;
             card.appendChild(group);
@@ -241,7 +279,20 @@
     });
   }
 
+  function installAssociationStyles() {
+    if (document.getElementById('claim-evidence-association-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'claim-evidence-association-styles';
+    style.textContent = [
+      '.claim-evidence-association{margin-top:.65rem;padding:.65rem .75rem;border-left:3px solid color-mix(in srgb,var(--accent) 55%,var(--border));border-radius:.35rem;background:color-mix(in srgb,var(--highlight) 55%,transparent)}',
+      '.claim-evidence-association-label{display:block;margin-bottom:.25rem;color:var(--muted-foreground);font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}',
+      '.claim-evidence-association-text{color:var(--foreground);font-size:.9rem;line-height:1.5}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
   function start() {
+    installAssociationStyles();
     scan();
     scheduleScans([250, 1000, 2500]);
     document.addEventListener('click', function (event) {
