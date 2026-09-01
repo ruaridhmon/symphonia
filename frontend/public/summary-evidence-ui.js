@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  document.documentElement.setAttribute('data-claim-evidence-enhancer', 'loaded');
+
   var ROOT_SELECTOR = '.ProseMirror';
   var PANEL_CLASS = 'claim-evidence-preview';
   var editing = false;
