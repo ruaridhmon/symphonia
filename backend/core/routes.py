@@ -3493,7 +3493,11 @@ def _format_custom_synthesis_material(
     return "\n".join(lines)
 
 
-def _format_custom_claim_list(markdown: str) -> str:
+def _format_custom_claim_list(
+    markdown: str,
+    questions: list[Any] | None = None,
+    response_dicts: list[dict[str, Any]] | None = None,
+) -> str:
     """Render custom claim bullets as simple HTML so line breaks are preserved."""
     def status_style(status: str) -> tuple[str, str, str, str]:
         normalised = status.strip().lower()
@@ -3560,6 +3564,95 @@ def _format_custom_claim_list(markdown: str) -> str:
             output.append(f"<li>{html.escape(expert)}</li>")
         output.extend(["</ul>", "</details>"])
         return "\n".join(output)
+
+    def enrich_expert_positions(claims: list[dict[str, Any]]) -> None:
+        if not questions or not response_dicts:
+            return
+
+        stop_words = {
+            "a", "an", "and", "are", "be", "can", "for", "if", "in", "is",
+            "of", "on", "or", "the", "to", "with",
+        }
+
+        def tokens(value: str) -> set[str]:
+            return {
+                token
+                for token in re.findall(r"[a-z0-9]+", value.lower())
+                if token not in stop_words
+            }
+
+        question_labels = [
+            _question_label_for_custom_synthesis(question, f"Question {index + 1}")
+            for index, question in enumerate(questions)
+        ]
+        question_tokens = [tokens(label) for label in question_labels]
+        supportive = {"strongly agree", "agree", "yes", "support", "supported", "true"}
+        opposing = {"strongly disagree", "disagree", "no", "oppose", "opposed", "false"}
+        uncertain = {
+            "neither agree nor disagree", "neither agree or disagree", "unsure",
+            "not sure", "don't know", "dont know", "no answer",
+        }
+
+        for claim in claims:
+            claim_tokens = tokens(claim.get("text", ""))
+            if not claim_tokens:
+                continue
+            scores = [
+                len(claim_tokens & candidate) / max(1, len(claim_tokens))
+                for candidate in question_tokens
+            ]
+            question_index = max(range(len(scores)), key=scores.__getitem__)
+            if scores[question_index] < 0.35:
+                continue
+
+            positions: list[tuple[str, str]] = []
+            recognised = 0
+            for response_index, response in enumerate(response_dicts, start=1):
+                answers = response.get("answers") or {}
+                if isinstance(answers, str):
+                    try:
+                        answers = json.loads(answers)
+                    except json.JSONDecodeError:
+                        answers = {}
+                if not isinstance(answers, dict):
+                    answers = {}
+                raw_answer = _stringify_custom_synthesis_answer(
+                    answers.get(f"q{question_index + 1}")
+                ).strip()
+                first_line = (raw_answer.splitlines() or ["No answer"])[0].strip()
+                answer = re.sub(
+                    r"^(?:answer|selected)\s*:\s*",
+                    "",
+                    first_line,
+                    flags=re.IGNORECASE,
+                ).strip() or "No answer"
+                normalised = answer.lower()
+                if normalised in supportive:
+                    group = "supporting_experts"
+                    recognised += 1
+                elif normalised in opposing:
+                    group = "opposing_experts"
+                    recognised += 1
+                elif normalised in uncertain:
+                    group = "uncertain_experts"
+                    recognised += 1
+                else:
+                    group = "uncertain_experts"
+                expert_label = response.get("email") or f"Expert {response_index}"
+                positions.append(
+                    (
+                        group,
+                        f"Response {response_index} ({expert_label}): {answer}",
+                    )
+                )
+
+            if recognised < max(2, len(positions) // 2):
+                continue
+            claim["supporting_experts"] = []
+            claim["opposing_experts"] = []
+            claim["uncertain_experts"] = []
+            for group, position in positions:
+                claim[group].append(position)
 
     def render_structured_claims(claims: list[dict[str, Any]]) -> str:
         output = ["<h2>Claims</h2>"]
@@ -3677,6 +3770,7 @@ def _format_custom_claim_list(markdown: str) -> str:
         structured_claims.append(current_claim)
 
     if structured_claims:
+        enrich_expert_positions(structured_claims)
         seen_structured: set[str] = set()
         deduped_structured: list[dict[str, Any]] = []
         for item in structured_claims:
@@ -3892,7 +3986,9 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         ) from exc
 
     synthesis_text = _format_custom_claim_list(
-        completion.choices[0].message.content or ""
+        completion.choices[0].message.content or "",
+        questions=questions,
+        response_dicts=response_dicts,
     )
     synthesis_json_data = _merge_summary_display_preferences(
         {
