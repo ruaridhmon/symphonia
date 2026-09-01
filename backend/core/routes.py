@@ -3503,7 +3503,7 @@ def _format_custom_claim_list(markdown: str) -> str:
         ]
         if not filtered:
             return ""
-        output = [f"<details><summary>{html.escape(title)}</summary>", "<ul>"]
+        output = [f'<details class="custom-claim-evidence"><summary>{html.escape(title)}</summary>', "<ul>"]
         for statement in filtered[:5]:
             output.append(f"<li>{html.escape(statement)}</li>")
         output.extend(["</ul>", "</details>"])

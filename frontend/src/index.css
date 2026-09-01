@@ -2050,6 +2050,24 @@ main,
   color: var(--foreground);
 }
 
+.custom-claim-evidence,
+.ProseMirror .custom-claim-evidence {
+  margin-top: 0.625rem;
+}
+
+.custom-claim-evidence summary,
+.ProseMirror .custom-claim-evidence summary {
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.custom-claim-evidence ul,
+.ProseMirror .custom-claim-evidence ul {
+  margin: 0.5rem 0 0;
+}
+
 /* ------------------------------------------------------------------ */
 /* Waiting animation                                                   */
 /* ------------------------------------------------------------------ */
