@@ -37,18 +37,30 @@
       var card = document.createElement(contentType === 'excerpts' ? 'blockquote' : 'div');
       card.className = 'claim-evidence-card claim-evidence-card--' + contentType;
       var raw = text(item);
-      var split = raw.match(/^(Response\s+[^:]+):\s*([\s\S]*)$/i);
+      var normalizedRaw = raw.replace(/\s+/g, ' ').trim();
+      var responseSplit = normalizedRaw.match(/^(Response\s+[^:]+):\s*([\s\S]*)$/i);
+      var guestSplit = normalizedRaw.match(/^\d+\s*\(Guest\s+(.+?)\s*\[[^\]]+\]\)?\s*:\s*([\s\S]*)$/i);
+      var expertName = guestSplit
+        ? guestSplit[1]
+        : responseSplit
+          ? responseSplit[1].replace(/^Response\s+/i, '')
+          : 'Expert ' + (index + 1);
+      var responseValue = guestSplit
+        ? guestSplit[2]
+        : responseSplit
+          ? responseSplit[2]
+          : normalizedRaw;
       var expert = document.createElement('div');
       expert.className = 'claim-evidence-expert';
-      expert.textContent = split ? split[1].replace(/^Response\s+/i, '') : 'Expert ' + (index + 1);
+      expert.textContent = expertName;
       var value = document.createElement('div');
       value.className = contentType === 'excerpts' ? 'claim-evidence-quote' : 'claim-evidence-position';
-      value.textContent = split ? split[2] : raw;
+      value.textContent = responseValue;
       card.appendChild(expert);
       card.appendChild(value);
 
       if (contentType === 'positions' && context && context.claim) {
-        var stance = (split ? split[2] : raw).toLowerCase();
+        var stance = responseValue.toLowerCase();
         var linkLabel = 'Supports';
         var linkedSentence = context.claim;
         if (/strongly disagree|disagree|oppose|challenge/.test(stance)) {
