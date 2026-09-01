@@ -3349,7 +3349,7 @@ Rules:
 - Supporting statements must be actual free-text sentences written by respondents, not your summary of their view.
 - Never use Likert/select/rating labels such as "Agree", "Strongly agree", "Disagree", "Neither agree nor disagree", scores, or option labels as supporting statements.
 - If the source response has no written sentence for a claim, use Supporting statements: None.
-- Include 2-4 supporting statements per claim where available.
+- Include every distinct relevant supporting statement available, with at most one excerpt per respondent per claim.
 - Opposing statements must be exact free-text sentences from responses that conflict with the claim, labelled with their Response number.
 - For contested claims, extract the specific respondent sentences that oppose or qualify the claim whenever any such free-text sentence exists.
 - Do not paraphrase opposing statements. Copy the relevant source sentence exactly, apart from trimming whitespace.
@@ -3504,7 +3504,7 @@ def _format_custom_claim_list(markdown: str) -> str:
         if not filtered:
             return ""
         output = [f"<details><summary>{html.escape(title)}</summary>", "<ul>"]
-        for statement in filtered[:5]:
+        for statement in dict.fromkeys(filtered):
             output.append(f"<li>{html.escape(statement)}</li>")
         output.extend(["</ul>", "</details>"])
         return "\n".join(output)
