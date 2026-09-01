@@ -60,28 +60,6 @@
     return true;
   }
 
-  function installFastCustomModel() {
-    var option = document.querySelector(
-      'select option[value="google/gemini-2.5-flash-lite"]'
-    );
-    if (!option || !option.parentElement) return false;
-    var select = option.parentElement;
-    if (select.dataset.devFastModelInstalled === 'true') return true;
-    if (select.value === option.value) {
-      select.dataset.devFastModelInstalled = 'true';
-      return true;
-    }
-    var valueSetter = Object.getOwnPropertyDescriptor(
-      HTMLSelectElement.prototype,
-      'value'
-    ).set;
-    valueSetter.call(select, option.value);
-    select.dispatchEvent(new Event('input', { bubbles: true }));
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-    select.dataset.devFastModelInstalled = 'true';
-    return select.value === option.value;
-  }
-
   function installWhenAvailable(installer) {
     if (installer()) return;
     var observer = new MutationObserver(function () {
@@ -93,5 +71,4 @@
   }
 
   installWhenAvailable(installDemoLogin);
-  installWhenAvailable(installFastCustomModel);
 })();
