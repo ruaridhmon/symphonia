@@ -13,35 +13,39 @@
   }
 
   function evidenceGroup(labelNode, listNode) {
-    var kindMatch = text(labelNode).match(/^Show\s+(supporting|opposing)\s+statements$/i);
-    if (!kindMatch || !listNode || (listNode.tagName !== 'UL' && listNode.tagName !== 'OL')) return null;
-    var kind = kindMatch[1].toLowerCase();
+    var groupMatch = text(labelNode).match(/^Show\s+(supporting|opposing|uncertain)\s+(statements|experts)$/i);
+    if (!groupMatch || !listNode || (listNode.tagName !== 'UL' && listNode.tagName !== 'OL')) return null;
+    var kind = groupMatch[1].toLowerCase();
+    var contentType = groupMatch[2].toLowerCase() === 'experts' ? 'positions' : 'excerpts';
     var items = Array.prototype.slice.call(listNode.querySelectorAll(':scope > li'));
     if (!items.length) return null;
 
     var details = document.createElement('details');
-    details.className = 'claim-evidence-group claim-evidence-group--' + kind;
+    details.className = 'claim-evidence-group claim-evidence-group--' + kind +
+      ' claim-evidence-group--' + contentType;
 
+    var label = kind.charAt(0).toUpperCase() + kind.slice(1);
+    label += contentType === 'positions' ? ' expert positions' : ' original excerpts';
     var summary = document.createElement('summary');
-    summary.innerHTML = '<span>' + (kind === 'supporting' ? 'Supporting' : 'Opposing') +
-      ' expert excerpts</span><span class="claim-evidence-count">' + items.length + '</span>';
+    summary.innerHTML = '<span>' + label +
+      '</span><span class="claim-evidence-count">' + items.length + '</span>';
     details.appendChild(summary);
 
     var list = document.createElement('div');
     list.className = 'claim-evidence-cards';
     items.forEach(function (item, index) {
-      var card = document.createElement('blockquote');
-      card.className = 'claim-evidence-card';
+      var card = document.createElement(contentType === 'excerpts' ? 'blockquote' : 'div');
+      card.className = 'claim-evidence-card claim-evidence-card--' + contentType;
       var raw = text(item);
       var split = raw.match(/^(Response\s+[^:]+):\s*([\s\S]*)$/i);
       var expert = document.createElement('div');
       expert.className = 'claim-evidence-expert';
-      expert.textContent = split ? split[1].replace(/^Response\s+/i, '') : 'Expert excerpt ' + (index + 1);
-      var quote = document.createElement('div');
-      quote.className = 'claim-evidence-quote';
-      quote.textContent = split ? split[2] : raw;
+      expert.textContent = split ? split[1].replace(/^Response\s+/i, '') : 'Expert ' + (index + 1);
+      var value = document.createElement('div');
+      value.className = contentType === 'excerpts' ? 'claim-evidence-quote' : 'claim-evidence-position';
+      value.textContent = split ? split[2] : raw;
       card.appendChild(expert);
-      card.appendChild(quote);
+      card.appendChild(value);
       list.appendChild(card);
     });
     details.appendChild(list);
@@ -107,11 +111,11 @@
 
     var preview = document.createElement('section');
     preview.className = PANEL_CLASS;
-    preview.setAttribute('aria-label', 'Claims and expert excerpts');
+    preview.setAttribute('aria-label', 'Claims and expert evidence');
 
     var title = document.createElement('div');
     title.className = 'claim-evidence-preview-title';
-    title.innerHTML = '<h2>Claims</h2><p>Open a section to inspect the original expert excerpts attached to each claim.</p>';
+    title.innerHTML = '<h2>Claims</h2><p>Open a section to inspect every expert position and any original written excerpts.</p>';
     preview.appendChild(title);
 
     blocks.forEach(function (nodes) {
@@ -137,7 +141,7 @@
         if (!text(currentNode)) continue;
 
         if ((currentNode.tagName === 'P' || currentNode.tagName === 'SUMMARY')
-          && /^Show\s+(supporting|opposing)\s+statements$/i.test(text(currentNode))) {
+          && /^Show\s+(supporting|opposing|uncertain)\s+(statements|experts)$/i.test(text(currentNode))) {
           var group = evidenceGroup(currentNode, nodes[index + 1]);
           if (group) {
             evidenceCount += 1;
@@ -170,10 +174,10 @@
 
     var controls = document.createElement('div');
     controls.className = 'claim-evidence-toolbar';
-    controls.setAttribute('aria-label', 'Expert excerpt controls');
+    controls.setAttribute('aria-label', 'Expert evidence controls');
 
     var note = document.createElement('span');
-    note.textContent = 'Expert excerpts are collapsed by default';
+    note.textContent = 'Expert evidence is collapsed by default';
     controls.appendChild(note);
 
     var expand = document.createElement('button');
