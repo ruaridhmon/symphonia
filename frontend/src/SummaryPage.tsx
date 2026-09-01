@@ -213,7 +213,7 @@ interface StoredSynthesisRun {
 	formId: number;
 	roundId: number;
 	jobId: string | null;
-	mode: 'simple' | 'committee' | 'ttd';
+	mode: 'custom' | 'simple' | 'committee' | 'ttd';
 	model: string;
 	stage: string;
 	step: number;
