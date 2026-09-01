@@ -70,13 +70,13 @@
       var wrappedHeading = child.tagName === 'DIV'
         ? child.querySelector(':scope > p')
         : null;
-      if (wrappedHeading && /^[🟥🟨🟩]\s*Claim\s+\d+:/i.test(text(wrappedHeading))) {
+      if (wrappedHeading && /^(?:🟥|🟨|🟩)\s*Claim\s+\d+:/i.test(text(wrappedHeading))) {
         if (current.length) blocks.push(current);
         current = [];
         blocks.push(flattenClaimContainer(child));
         return;
       }
-      if (child.tagName === 'P' && /^[🟥🟨🟩]\s*Claim\s+\d+:/i.test(text(child))) {
+      if (child.tagName === 'P' && /^(?:🟥|🟨|🟩)\s*Claim\s+\d+:/i.test(text(child))) {
         if (current.length) blocks.push(current);
         current = [child];
         return;
@@ -116,7 +116,7 @@
 
     blocks.forEach(function (nodes) {
       var headingNode = nodes.find(function (node) {
-        return node.tagName === 'P' && /^[🟥🟨🟩]\s*Claim\s+\d+:/i.test(text(node));
+        return node.tagName === 'P' && /^(?:🟥|🟨|🟩)\s*Claim\s+\d+:/i.test(text(node));
       });
       if (!headingNode) return;
 
