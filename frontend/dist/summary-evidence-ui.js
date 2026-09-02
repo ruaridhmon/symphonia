@@ -163,7 +163,7 @@
 
       var hasOriginalExcerpts = nodes.some(function (node, nodeIndex) {
         if ((node.tagName !== 'P' && node.tagName !== 'SUMMARY')
-          || !/^Show\s+(supporting|opposing)\s+statements$/i.test(text(node))) return false;
+          || !/^Show\s+(supporting|opposing|uncertain)\s+statements$/i.test(text(node))) return false;
         var listNode = nodes[nodeIndex + 1];
         return Boolean(listNode
           && (listNode.tagName === 'UL' || listNode.tagName === 'OL')
@@ -181,7 +181,7 @@
         : '';
 
       var stanceCounts = { supporting: 0, opposing: 0, uncertain: 0 };
-      var statementCounts = { supporting: 0, opposing: 0 };
+      var statementCounts = { supporting: 0, opposing: 0, uncertain: 0 };
       nodes.forEach(function (node, nodeIndex) {
         if (node.tagName !== 'P' && node.tagName !== 'SUMMARY') return;
         var countMatch = text(node).match(
@@ -194,12 +194,13 @@
         var kind = countMatch[1].toLowerCase();
         if (countMatch[2].toLowerCase() === 'experts') {
           stanceCounts[kind] = count;
-        } else if (kind !== 'uncertain') {
+        } else {
           statementCounts[kind] = count;
         }
       });
       if (!stanceCounts.supporting) stanceCounts.supporting = statementCounts.supporting;
       if (!stanceCounts.opposing) stanceCounts.opposing = statementCounts.opposing;
+      if (!stanceCounts.uncertain) stanceCounts.uncertain = statementCounts.uncertain;
 
       var peopleNode = nodes.find(function (node) {
         return node.tagName === 'P' && /^People making/i.test(text(node));
@@ -267,11 +268,9 @@
           continue;
         }
 
-        if (currentNode.tagName === 'P') {
+        if (currentNode.tagName === 'P' && /^People making/i.test(text(currentNode))) {
           var meta = document.createElement('div');
-          meta.className = /^People making/i.test(text(currentNode))
-            ? 'claim-evidence-meta claim-evidence-people'
-            : 'claim-evidence-meta claim-evidence-opposition';
+          meta.className = 'claim-evidence-meta claim-evidence-people';
           meta.innerHTML = currentNode.innerHTML;
           card.appendChild(meta);
         }
