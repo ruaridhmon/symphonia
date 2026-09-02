@@ -246,8 +246,15 @@
   }
 
   function isRoundTwo() {
-    return /\bRound\s*2\b/i.test(clean(document.body && document.body.innerText)) &&
-      sectionButtons().length > 1;
+    var text = clean(document.body && document.body.innerText);
+    var buttons = sectionButtons();
+    var generatedClaimReview = buttons.length > 1 &&
+      buttons.every(function (button) {
+        return /^Claim\s+\d+\s*:/i.test(clean(button.textContent));
+      }) &&
+      /Having reviewed the group feedback/i.test(text);
+    return buttons.length > 1 &&
+      (/\bRound\s*2\b/i.test(text) || generatedClaimReview);
   }
 
   function installStyles() {
