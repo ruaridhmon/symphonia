@@ -227,7 +227,14 @@
 
   function sectionButtons() {
     var nav = document.querySelector('nav[aria-label="Question sections"]');
-    return nav ? Array.prototype.slice.call(nav.querySelectorAll('button')) : [];
+    var buttons = nav
+      ? Array.prototype.slice.call(nav.querySelectorAll('button'))
+      : Array.prototype.filter.call(document.querySelectorAll('button'), function (button) {
+          return /^Claim\s+\d+\s*:/i.test(clean(button.textContent));
+        });
+    return buttons.filter(function (button) {
+      return /^Claim\s+\d+\s*:/i.test(clean(button.textContent));
+    });
   }
 
   function currentIndex(buttons) {
@@ -248,13 +255,14 @@
   function isRoundTwo() {
     var text = clean(document.body && document.body.innerText);
     var buttons = sectionButtons();
-    var generatedClaimReview = buttons.length > 1 &&
-      buttons.every(function (button) {
-        return /^Claim\s+\d+\s*:/i.test(clean(button.textContent));
-      }) &&
-      /Having reviewed the group feedback/i.test(text);
+    var reviewQuestion = Array.prototype.some.call(
+      document.querySelectorAll('[data-question-key]'),
+      function (question) {
+        return /Having reviewed the group feedback/i.test(clean(question.textContent));
+      }
+    );
     return buttons.length > 1 &&
-      (/\bRound\s*2\b/i.test(text) || generatedClaimReview);
+      (/\bRound\s*2\b/i.test(text) || reviewQuestion);
   }
 
   function installStyles() {
