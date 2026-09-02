@@ -30,60 +30,26 @@
   }
 
   function questionsFor(claims) {
-    var ratingOptions = [
-      'Strongly disagree',
-      'Disagree',
-      'Neither agree nor disagree',
-      'Agree',
-      'Strongly agree',
-    ];
+    var responseOptions = ['Agree', 'Partly agree', 'Disagree', 'Unsure / need more evidence'];
     return claims.reduce(function (questions, claim) {
       var prefix = 'claim_' + claim.number;
       var sectionTitle = 'Claim ' + claim.number + ': ' + claim.title;
-      var groupPrompt = (claim.counts ? 'Round 1: ' + claim.counts + '. ' : '') +
-        'Review the original excerpts before re-rating. Consensus is not required.';
       return questions.concat([
         baseQuestion({
-          label: 'Having reviewed the group feedback, how far do you agree with this claim?',
-          questionId: prefix + '_rating',
+          label: 'Your response',
+          questionId: prefix + '_response',
           sectionTitle: sectionTitle,
-          groupPrompt: groupPrompt,
-          inputType: 'likert',
-          options: ratingOptions,
-          allowUnsure: true,
+          inputType: 'single_select',
+          options: responseOptions,
           optional: false,
         }),
         baseQuestion({
-          label: 'If you disagree or are uncertain, what is the main reason?',
-          questionId: prefix + '_reason',
-          sectionTitle: sectionTitle,
-          inputType: 'single_select',
-          options: [
-            'Evidence or interpretation',
-            'Wording of the claim',
-            'Practical feasibility',
-            'Values or priorities',
-            'Missing conditions or assumptions',
-            'Other',
-          ],
-          optional: true,
-        }),
-        baseQuestion({
-          label: 'If you disagree or are uncertain, explain precisely what needs clarification, evidence, or change.',
-          questionId: prefix + '_explanation',
+          label: 'Comments or clarification',
+          questionId: prefix + '_comment',
           sectionTitle: sectionTitle,
           inputType: 'textarea',
-          rows: 4,
-          placeholder: 'Explain the precise point of disagreement or uncertainty',
-          optional: true,
-        }),
-        baseQuestion({
-          label: 'If helpful, suggest revised wording for this claim.',
-          questionId: prefix + '_revision',
-          sectionTitle: sectionTitle,
-          inputType: 'textarea',
-          rows: 3,
-          placeholder: 'Optional revised wording',
+          rows: 2,
+          placeholder: 'Optional',
           optional: true,
         }),
       ]);
@@ -119,11 +85,11 @@
       '<div style="display:flex;justify-content:space-between;gap:1rem;padding:1rem 1.1rem;border-bottom:1px solid var(--border)">' +
         '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.05rem">Prepare Delphi Round 2</h2>' +
         '<p style="margin:.35rem 0 0;color:var(--muted-foreground);font-size:.85rem">' +
-          claims.length + ' claims · ' + (claims.length * 4) + ' structured prompts</p></div>' +
+          claims.length + ' claims · ' + (claims.length * 2) + ' quick responses</p></div>' +
         '<button type="button" data-close aria-label="Close" style="height:36px;width:36px;border:1px solid var(--border);border-radius:9px;background:var(--background);color:var(--foreground);font-size:1.25rem">×</button>' +
       '</div>' +
       '<div style="padding:1rem 1.1rem">' +
-        '<p style="margin:0 0 .8rem;font-size:.9rem;line-height:1.5">Each claim asks experts to re-rate it. Experts who disagree or remain uncertain can identify the reason, explain the precise issue, and propose revised wording.</p>' +
+        '<p style="margin:0 0 .8rem;font-size:.9rem;line-height:1.5">Each claim asks for one position and an optional clarification.</p>' +
         '<div data-claims style="display:grid;gap:.5rem"></div>' +
       '</div>' +
       '<div style="display:flex;justify-content:flex-end;gap:.65rem;padding:1rem 1.1rem;border-top:1px solid var(--border)">' +
@@ -145,7 +111,7 @@
     });
     dialog.querySelector('[data-start]').addEventListener('click', async function (event) {
       var button = event.currentTarget;
-      if (!window.confirm('Start Round 2 with ' + claims.length + ' claims and ' + (claims.length * 4) + ' prompts? Round 1 will remain available.')) return;
+      if (!window.confirm('Start Round 2 with ' + claims.length + ' claims? Round 1 will remain available.')) return;
       button.disabled = true;
       button.textContent = 'Starting Round 2…';
       var formId = window.location.pathname.match(/\/admin\/form\/(\d+)\/summary/)?.[1];
@@ -164,7 +130,7 @@
             questions: questionsFor(claims),
             context_settings: {
               intro_title: 'Round 2: Review and refine the claims',
-              intro_body: 'Review the Round 1 group result and original excerpts, then re-rate each claim. Explain disagreement or uncertainty so the precise issue can be resolved.',
+              intro_body: 'Review each claim, choose your position, and add an optional clarification.',
               show_previous_response: true,
             },
           }),
@@ -255,14 +221,15 @@
   function isRoundTwo() {
     var text = clean(document.body && document.body.innerText);
     var buttons = sectionButtons();
-    var reviewQuestion = Array.prototype.some.call(
+    var prompts = Array.prototype.map.call(
       document.querySelectorAll('[data-question-key]'),
-      function (question) {
-        return /Having reviewed the group feedback/i.test(clean(question.textContent));
-      }
-    );
+      function (question) { return clean(question.textContent); }
+    ).join(' ');
+    var roundTwoQuestions =
+      /Having reviewed the group feedback/i.test(prompts) ||
+      (/Your response/i.test(prompts) && /Comments or clarification/i.test(prompts));
     return buttons.length > 1 &&
-      (/\bRound\s*2\b/i.test(text) || reviewQuestion);
+      (/\bRound\s*2\b/i.test(text) || roundTwoQuestions);
   }
 
   function installStyles() {
