@@ -3674,8 +3674,16 @@ def _format_custom_claim_list(
         }
 
         def response_number(value: str) -> int | None:
-            match = re.match(r"^Response\\s+(\\d+)\\b", normalise_statement(value), re.IGNORECASE)
-            return int(match.group(1)) if match else None
+            text = normalise_statement(value)
+            match = re.match(r"^Response\\s+(\\d+)\\b", text, re.IGNORECASE)
+            if match:
+                return int(match.group(1))
+            lowered = text.lower()
+            for response_index, response in enumerate(response_dicts, start=1):
+                label = str(response.get("email") or "").strip().lower()
+                if label and label in lowered:
+                    return response_index
+            return None
 
         def meaningful_tokens(value: str) -> set[str]:
             return {
@@ -3744,11 +3752,14 @@ def _format_custom_claim_list(
                 grounded_statements: dict[int, str] = {}
                 for statement in claim.get(statements_key, []):
                     response_index = response_number(statement)
-                    if (
-                        response_index in expert_entries
-                        and relevance(statement, target) > 0
-                    ):
+                    if response_index is not None and relevance(statement, target) > 0:
                         grounded_statements[response_index] = normalise_statement(statement)
+                        if response_index not in expert_entries:
+                            label = response_dicts[response_index - 1].get("email") or f"Expert {response_index}"
+                            stance = "Agree" if experts_key == "supporting_experts" else "Disagree"
+                            expert_entries[response_index] = (
+                                f"Response {response_index} ({label}): {stance}"
+                            )
 
                 for response_index in expert_entries:
                     if response_index in grounded_statements:
