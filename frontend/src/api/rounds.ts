@@ -23,6 +23,7 @@ export interface ActiveRound {
   questions: (string | Record<string, unknown>)[];
   context_settings?: RoundContextSettings;
   previous_round_synthesis: string;
+  previous_round_questions?: (string | Record<string, unknown>)[];
   previous_round_statistics?: PreviousRoundStatistics | null;
   show_own_response_to_participants?: boolean;
   previous_round_own_response?: Record<string, unknown> | null;
@@ -43,6 +44,7 @@ export interface RoundConfig {
 export interface RoundContextSettings {
   intro_title?: string;
   intro_body?: string;
+  show_previous_response?: boolean;
 }
 
 /* ── API calls ── */

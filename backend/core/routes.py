@@ -2200,7 +2200,7 @@ def get_form_summary_text(
     if not active_round:
         return {
             "summary": "",
-            "show_own_response_to_participants": form.show_own_response_to_participants,
+            "show_own_response_to_participants": show_previous_response,
             "own_response": None,
         }
 
@@ -3772,11 +3772,10 @@ def _format_custom_claim_list(
                         f"Response {response_index} ({label}): {sentence}"
                     )
 
-                claim[experts_key] = [
-                    expert_entries[index]
-                    for index in expert_entries
-                    if index in grounded_statements
-                ]
+                # Classification and quotation are separate evidence layers.
+                # Keep every grounded expert position even when that respondent did
+                # not supply a verbatim sentence relevant to this claim.
+                claim[experts_key] = list(expert_entries.values())
                 claim[statements_key] = list(grounded_statements.values())
 
             supporting_ids = {
@@ -7970,8 +7969,13 @@ def get_active_round(
     )
 
     previous_round_synthesis = prev.synthesis if prev else ""
+    context_settings = active.context_settings or {}
+    show_previous_response = bool(
+        form.show_own_response_to_participants
+        or context_settings.get("show_previous_response")
+    )
     previous_round_own_response = None
-    if prev and form.show_own_response_to_participants:
+    if prev and show_previous_response:
         response = _get_user_response_for_round(db, round_id=prev.id, user_id=user.id)
         if response:
             previous_round_own_response = response.answers
@@ -7982,6 +7986,7 @@ def get_active_round(
         "questions": active.questions or [],
         "context_settings": active.context_settings or {},
         "previous_round_synthesis": previous_round_synthesis,
+        "previous_round_questions": prev.questions or [] if prev else [],
         "previous_round_statistics": _build_previous_round_statistics(db, prev),
         "show_own_response_to_participants": form.show_own_response_to_participants,
         "previous_round_own_response": previous_round_own_response,

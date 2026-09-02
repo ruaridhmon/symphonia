@@ -70,14 +70,19 @@ export function validateQuestionResponses(
   }));
 
   const isVisible = (question: ReturnType<typeof normalizeQuestion>) => {
-    if (!question.conditionalOnQuestionId || !question.conditionalOnOption) return true;
+    const allowedOptions = question.conditionalOnOptions?.length
+      ? question.conditionalOnOptions
+      : question.conditionalOnOption
+        ? [question.conditionalOnOption]
+        : [];
+    if (!question.conditionalOnQuestionId || !allowedOptions.length) return true;
     const controlling = normalized.find((item) => item.question.questionId === question.conditionalOnQuestionId);
     if (!controlling) return false;
     const selected = getAnswerPosition(answers[controlling.key])
       .split('\n')
       .map((item) => item.trim())
       .filter(Boolean);
-    return selected.includes(question.conditionalOnOption);
+    return allowedOptions.some((option) => selected.includes(option));
   };
 
   const missingQuestion = normalized.find(({ key, question }) => {

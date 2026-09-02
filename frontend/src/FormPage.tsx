@@ -38,6 +38,7 @@ export default function FormPage() {
   const [form, setForm] = useState<Form | null>(null)
   const [activeRound, setActiveRound] = useState<ActiveRound | null>(null)
   const [previousSynthesis, setPreviousSynthesis] = useState('')
+  const [previousRoundQuestions, setPreviousRoundQuestions] = useState<(string | Record<string, unknown>)[]>([])
   const [previousStatistics, setPreviousStatistics] = useState<PreviousRoundStatistics | null>(null)
   const [previousOwnResponse, setPreviousOwnResponse] = useState<Record<string, unknown> | null>(null)
   const [roundQuestions, setRoundQuestions] = useState<(string | Record<string, unknown>)[]>([])
@@ -229,6 +230,7 @@ export default function FormPage() {
       }
 
       setPreviousSynthesis(roundData?.previous_round_synthesis || '')
+      setPreviousRoundQuestions(roundData?.previous_round_questions || [])
       setPreviousStatistics(roundData?.previous_round_statistics || null)
       setPreviousOwnResponse(roundData?.previous_round_own_response || null)
     } catch (err) {
@@ -487,6 +489,18 @@ export default function FormPage() {
           <PreviousRoundStatisticsPanel statistics={previousStatistics} />
         )}
 
+        {previousSynthesis && (
+          <PreviousSynthesisToggle content={previousSynthesis} />
+        )}
+        {showPreviousRoundExtras && previousOwnResponse && (
+          <OwnResponseCard
+            answers={previousOwnResponse}
+            questions={previousRoundQuestions}
+            title="Your previous response"
+            subtitle="Compare your earlier view with the anonymous group feedback before re-rating."
+          />
+        )}
+
         {/* Questions section header */}
         <div className="mb-2">
           <h2 className="text-lg font-semibold text-foreground">
@@ -612,18 +626,6 @@ export default function FormPage() {
           </>
         )}
 
-          {/* Previous round synthesis — collapsible, secondary to questions */}
-          {previousSynthesis && (
-            <PreviousSynthesisToggle content={previousSynthesis} />
-          )}
-          {showPreviousRoundExtras && previousOwnResponse && (
-            <OwnResponseCard
-              answers={previousOwnResponse}
-              questions={roundQuestions}
-              title="Your previous response"
-              subtitle="Included here because the facilitator has enabled it for this synthesis."
-            />
-          )}
         </div>
       </div>
     </div>
@@ -638,7 +640,7 @@ function PreviousSynthesisToggle({ content }: { content: string }) {
 
   return (
     <div
-      className="mt-6 rounded-lg overflow-hidden transition-all"
+      className="mb-5 rounded-lg overflow-hidden transition-all"
       style={{
         border: '1px solid var(--border)',
         backgroundColor: 'var(--muted)',
