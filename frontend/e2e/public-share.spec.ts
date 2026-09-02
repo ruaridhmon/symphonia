@@ -139,6 +139,7 @@ test.describe('Public share links', () => {
       await page.getByRole('button', { name: /continue to form/i }).click();
 
       await expect(page.getByText('Questions')).toBeVisible();
+      await expect(page.getByRole('button', { name: /^submit$/i })).toHaveCount(1);
       await page.getByLabel('Your name').fill('Playwright Guest');
       await page.getByPlaceholder('Write your response here').fill('The public guest flow works.');
       await page.getByRole('button', { name: /^submit$/i }).click();
