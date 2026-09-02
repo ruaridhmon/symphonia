@@ -64,6 +64,7 @@ import type { SynthesisEmbeddedBlock } from './components/summary/SynthesisEdito
 
 import { usePresence } from './hooks/usePresence';
 import { formatAnswerForDisplay } from './utils/answers';
+import { buildDelphiRoundTwoQuestions, extractDelphiClaims } from './utils/delphiRoundTwo';
 
 import type {
 	Round,
@@ -626,6 +627,7 @@ export default function SummaryPage() {
 
 	// ── Next round questions ──
 	const [nextRoundQuestions, setNextRoundQuestions] = useState<string[]>([]);
+	const [preparedDelphiQuestions, setPreparedDelphiQuestions] = useState<(string | Record<string, unknown>)[] | null>(null);
 	const [isSavingRoundSetup, setIsSavingRoundSetup] = useState(false);
 	const [isActivatingRound, setIsActivatingRound] = useState(false);
 	const synthesisRunStorageKey = useMemo(
@@ -781,6 +783,10 @@ export default function SummaryPage() {
 	const targetRoundForGeneration = selectedRound || activeRound;
 	const structuredSynthesisData = displayRound?.synthesis_json || null;
 	const responseCountForDisplay = targetRoundForGeneration?.response_count ?? 0;
+	const delphiClaims = useMemo(
+		() => extractDelphiClaims(displayRound?.synthesis || ''),
+		[displayRound?.synthesis],
+	);
 
 	useEffect(() => {
 		if (!displayRound) return;
@@ -1594,16 +1600,34 @@ export default function SummaryPage() {
 		});
 	}
 
+	function prepareDelphiRoundTwo() {
+		const questions = buildDelphiRoundTwoQuestions(displayRound?.synthesis || '');
+		if (!questions.length) {
+			toastWarning('No structured claims were found in this synthesis.');
+			return;
+		}
+		setPreparedDelphiQuestions(questions);
+		toastSuccess(`Round 2 prepared from ${delphiClaims.length} claims.`);
+	}
+
 	async function startNextRound() {
 		if (!formId) return;
 		const cleaned = nextRoundQuestions.map(q => q.trim()).filter(q => q.length > 0);
-		if (!cleaned.length) {
+		const questions = preparedDelphiQuestions || cleaned;
+		if (!questions.length) {
 			toastWarning('Add at least one question for the next round.');
 			return;
 		}
 		setLoading(true);
 		try {
-			await apiNextRound(formId, { questions: cleaned });
+			await apiNextRound(formId, {
+				questions,
+				context_settings: preparedDelphiQuestions ? {
+					intro_title: 'Delphi Round 2: review and re-rate',
+					intro_body: 'Review the anonymous Round 1 feedback and your previous response, then re-rate every claim. If you disagree or remain uncertain, explain the precise issue. Consensus is not required.',
+				} : undefined,
+			});
+			setPreparedDelphiQuestions(null);
 			await loadAll();
 			await loadResponses();
 			setSelectedRound(null);
@@ -2348,11 +2372,24 @@ export default function SummaryPage() {
 								{displayRound?.is_active && (
 									<NextRoundQuestionsCard
 										questions={nextRoundQuestions}
-										onUpdateQuestion={(i, v) => setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; })}
-										onAddQuestion={() => setNextRoundQuestions(prev => [...prev, ''])}
-										onRemoveQuestion={i => setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i))}
+										onUpdateQuestion={(i, v) => {
+											setPreparedDelphiQuestions(null);
+											setNextRoundQuestions(prev => { const c = [...prev]; c[i] = v; return c; });
+										}}
+										onAddQuestion={() => {
+											setPreparedDelphiQuestions(null);
+											setNextRoundQuestions(prev => [...prev, '']);
+										}}
+										onRemoveQuestion={i => {
+											setPreparedDelphiQuestions(null);
+											setNextRoundQuestions(prev => prev.filter((_, idx) => idx !== i));
+										}}
 										onSaveCurrentRound={saveCurrentRoundSetup}
 										onStartNextRound={startNextRound}
+										delphiClaimCount={delphiClaims.length}
+										preparedQuestionCount={preparedDelphiQuestions?.length || 0}
+										onPrepareDelphiRoundTwo={prepareDelphiRoundTwo}
+										onClearDelphiRoundTwo={() => setPreparedDelphiQuestions(null)}
 										loading={loading}
 										saving={isSavingRoundSetup}
 									/>
