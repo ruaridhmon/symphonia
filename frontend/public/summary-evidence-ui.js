@@ -115,7 +115,7 @@
 
     var title = document.createElement('div');
     title.className = 'claim-evidence-preview-title';
-    title.innerHTML = '<h2>Claims</h2><p>Open a section to inspect every expert position and any original written excerpts.</p>';
+    title.innerHTML = '<h2>Claims</h2><p>Open a section to read each expert's original words. Rating-only claims show recorded positions instead.</p>';
     preview.appendChild(title);
 
     blocks.forEach(function (nodes) {
@@ -123,6 +123,15 @@
         return node.tagName === 'P' && /^(?:🟥|🟨|🟩)\s*Claim\s+\d+:/i.test(text(node));
       });
       if (!headingNode) return;
+
+      var hasOriginalExcerpts = nodes.some(function (node, nodeIndex) {
+        if ((node.tagName !== 'P' && node.tagName !== 'SUMMARY')
+          || !/^Show\s+(supporting|opposing)\s+statements$/i.test(text(node))) return false;
+        var listNode = nodes[nodeIndex + 1];
+        return Boolean(listNode
+          && (listNode.tagName === 'UL' || listNode.tagName === 'OL')
+          && listNode.querySelector(':scope > li'));
+      });
 
       var card = document.createElement('article');
       card.className = 'claim-evidence-claim';
@@ -142,6 +151,14 @@
 
         if ((currentNode.tagName === 'P' || currentNode.tagName === 'SUMMARY')
           && /^Show\s+(supporting|opposing|uncertain)\s+(statements|experts)$/i.test(text(currentNode))) {
+          var parsedGroup = text(currentNode).match(
+            /^Show\s+(supporting|opposing|uncertain)\s+(statements|experts)$/i
+          );
+          if (hasOriginalExcerpts && parsedGroup && parsedGroup[2].toLowerCase() === 'experts') {
+            index += 1;
+            continue;
+          }
+
           var group = evidenceGroup(currentNode, nodes[index + 1]);
           if (group) {
             evidenceCount += 1;
