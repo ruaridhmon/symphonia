@@ -115,7 +115,7 @@
 
     var title = document.createElement('div');
     title.className = 'claim-evidence-preview-title';
-    title.innerHTML = '<h2>Claims</h2><p>Open a section to read each expert\'s original words. Rating-only claims show recorded positions instead.</p>';
+    title.innerHTML = '<h2>Claims</h2><p>Open a section to read each expert\'s original words.</p>';
     preview.appendChild(title);
 
     blocks.forEach(function (nodes) {
