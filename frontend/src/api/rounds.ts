@@ -44,6 +44,7 @@ export interface RoundConfig {
 export interface RoundContextSettings {
   intro_title?: string;
   intro_body?: string;
+  show_previous_response?: boolean;
 }
 
 /* ── API calls ── */
