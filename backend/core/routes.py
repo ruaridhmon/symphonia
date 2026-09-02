@@ -2200,7 +2200,7 @@ def get_form_summary_text(
     if not active_round:
         return {
             "summary": "",
-            "show_own_response_to_participants": form.show_own_response_to_participants,
+            "show_own_response_to_participants": show_previous_response,
             "own_response": None,
         }
 
@@ -7970,8 +7970,13 @@ def get_active_round(
     )
 
     previous_round_synthesis = prev.synthesis if prev else ""
+    context_settings = active.context_settings or {}
+    show_previous_response = bool(
+        form.show_own_response_to_participants
+        or context_settings.get("show_previous_response")
+    )
     previous_round_own_response = None
-    if prev and form.show_own_response_to_participants:
+    if prev and show_previous_response:
         response = _get_user_response_for_round(db, round_id=prev.id, user_id=user.id)
         if response:
             previous_round_own_response = response.answers
