@@ -42,7 +42,12 @@ export default function SurveyQuestionList({
   const groups = groupQuestionsBySection(items);
 
   function isQuestionVisible(question: ReturnType<typeof normalizeQuestion>) {
-    if (!question.conditionalOnQuestionId || !question.conditionalOnOption) return true;
+    const allowedOptions = question.conditionalOnOptions?.length
+      ? question.conditionalOnOptions
+      : question.conditionalOnOption
+        ? [question.conditionalOnOption]
+        : [];
+    if (!question.conditionalOnQuestionId || !allowedOptions.length) return true;
     const controllingIndex = items.find(
       (item) => item.question.questionId === question.conditionalOnQuestionId,
     );
@@ -52,7 +57,7 @@ export default function SurveyQuestionList({
       .split('\n')
       .map((item) => item.trim())
       .filter(Boolean);
-    return selected.includes(question.conditionalOnOption);
+    return allowedOptions.some((option) => selected.includes(option));
   }
 
   return (
