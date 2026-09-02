@@ -209,3 +209,165 @@
   window.setTimeout(attach, 1200);
   window.setTimeout(attach, 2500);
 })();
+
+
+(function () {
+  'use strict';
+
+  if (!/^\/public\/session\/[^/]+\/?$/.test(window.location.pathname)) return;
+
+  var ROOT_CLASS = 'delphi-round-two-participant';
+  var HEADER_ID = 'delphi-round-two-progress';
+  var ACTIONS_ID = 'delphi-round-two-actions';
+  var timer = 0;
+
+  function clean(value) {
+    return (value || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function sectionButtons() {
+    var nav = document.querySelector('nav[aria-label="Question sections"]');
+    return nav ? Array.prototype.slice.call(nav.querySelectorAll('button')) : [];
+  }
+
+  function currentIndex(buttons) {
+    var index = buttons.findIndex(function (button) {
+      return button.getAttribute('aria-current') === 'step';
+    });
+    return index < 0 ? 0 : index;
+  }
+
+  function nativeSubmit() {
+    return Array.prototype.find.call(document.querySelectorAll('button'), function (button) {
+      return button.id !== 'delphi-round-two-next' &&
+        clean(button.textContent) === 'Submit' &&
+        button.offsetParent !== null;
+    }) || null;
+  }
+
+  function isRoundTwo() {
+    return /\bRound\s*2\b/i.test(clean(document.body && document.body.innerText)) &&
+      sectionButtons().length > 1;
+  }
+
+  function installStyles() {
+    if (document.getElementById('delphi-round-two-participant-styles')) return;
+    var style = document.createElement('style');
+    style.id = 'delphi-round-two-participant-styles';
+    style.textContent = [
+      'body.' + ROOT_CLASS + ' nav[aria-label="Question sections"]{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}',
+      'body.' + ROOT_CLASS + ' .card-lg{overflow:visible}',
+      'body.' + ROOT_CLASS + ' [data-question-key]{animation:delphi-r2-enter .22s ease-out}',
+      'body.' + ROOT_CLASS + ' [data-question-key] label{border-width:2px!important;border-radius:14px!important;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease,background-color .12s ease}',
+      'body.' + ROOT_CLASS + ' [data-question-key] label:has(input:checked){border-color:#58cc02!important;background:color-mix(in srgb,#58cc02 8%,var(--background))!important;box-shadow:0 3px 0 color-mix(in srgb,#58cc02 72%,#2f7d00)!important;transform:translateY(-1px)}',
+      'body.' + ROOT_CLASS + ' [data-question-key] input[type="radio"]{accent-color:#58cc02!important;width:18px;height:18px;margin-top:1px}',
+      'body.' + ROOT_CLASS + ' [data-question-key] textarea:focus{outline:none!important;border-color:#58cc02!important;box-shadow:0 0 0 3px color-mix(in srgb,#58cc02 16%,transparent)!important}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-native-submit{display:none!important}',
+      '#' + HEADER_ID + '{margin:1rem 0 1.15rem}',
+      '.delphi-r2-progress-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.55rem;font-size:.82rem;font-weight:800}',
+      '.delphi-r2-progress-label{color:var(--foreground)}',
+      '.delphi-r2-progress-count{color:var(--muted-foreground)}',
+      '.delphi-r2-track{height:12px;border-radius:999px;background:color-mix(in srgb,var(--foreground) 9%,transparent);overflow:hidden}',
+      '.delphi-r2-fill{height:100%;border-radius:inherit;background:#58cc02;box-shadow:inset 0 -2px 0 rgba(47,125,0,.22);transition:width .24s ease}',
+      '#' + ACTIONS_ID + '{position:sticky;bottom:0;z-index:20;display:grid;grid-template-columns:minmax(90px,.34fr) minmax(170px,1fr);gap:.65rem;margin:1.25rem -1rem -1rem;padding:.85rem 1rem calc(.85rem + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--card) 94%,transparent);border-top:1px solid var(--border);backdrop-filter:blur(12px)}',
+      '#' + ACTIONS_ID + ' button{min-height:50px;border-radius:14px;padding:.75rem 1rem;font:inherit;font-weight:850;cursor:pointer;transition:transform .1s ease,box-shadow .1s ease}',
+      '#delphi-round-two-back{border:2px solid var(--border);background:var(--background);color:var(--foreground);box-shadow:0 3px 0 color-mix(in srgb,var(--border) 78%,var(--foreground))}',
+      '#delphi-round-two-next{border:2px solid #58cc02;background:#58cc02;color:#102800;box-shadow:0 4px 0 #46a302}',
+      '#' + ACTIONS_ID + ' button:active:not(:disabled){transform:translateY(3px);box-shadow:none}',
+      '#' + ACTIONS_ID + ' button:disabled{cursor:not-allowed;opacity:.42;box-shadow:none}',
+      '@keyframes delphi-r2-enter{from{opacity:.55;transform:translateX(8px)}to{opacity:1;transform:none}}',
+      '@media (min-width:640px){#' + ACTIONS_ID + '{margin-left:0;margin-right:0;margin-bottom:0;border:1px solid var(--border);border-radius:16px}}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  function ensureUi() {
+    if (!isRoundTwo()) return;
+
+    var buttons = sectionButtons();
+    if (!buttons.length) return;
+    var index = currentIndex(buttons);
+    var nav = buttons[0].closest('nav');
+    var title = clean(buttons[index] && buttons[index].textContent)
+      .replace(/^Claim\s+\d+\s*:\s*/i, '');
+
+    document.body.classList.add(ROOT_CLASS);
+    installStyles();
+
+    var header = document.getElementById(HEADER_ID);
+    if (!header) {
+      header = document.createElement('section');
+      header.id = HEADER_ID;
+      header.setAttribute('aria-label', 'Round 2 progress');
+      header.innerHTML =
+        '<div class="delphi-r2-progress-row">' +
+          '<span class="delphi-r2-progress-label"></span>' +
+          '<span class="delphi-r2-progress-count"></span>' +
+        '</div>' +
+        '<div class="delphi-r2-track" role="progressbar" aria-valuemin="1">' +
+          '<div class="delphi-r2-fill"></div>' +
+        '</div>';
+      nav.parentElement.insertBefore(header, nav);
+    }
+
+    header.querySelector('.delphi-r2-progress-label').textContent =
+      title ? 'Claim ' + (index + 1) + ': ' + title : 'Claim ' + (index + 1);
+    header.querySelector('.delphi-r2-progress-count').textContent =
+      (index + 1) + ' of ' + buttons.length;
+    var track = header.querySelector('.delphi-r2-track');
+    track.setAttribute('aria-valuemax', String(buttons.length));
+    track.setAttribute('aria-valuenow', String(index + 1));
+    header.querySelector('.delphi-r2-fill').style.width =
+      (((index + 1) / buttons.length) * 100) + '%';
+
+    var submit = nativeSubmit();
+    if (submit) submit.classList.add('delphi-r2-native-submit');
+
+    var actions = document.getElementById(ACTIONS_ID);
+    if (!actions) {
+      actions = document.createElement('div');
+      actions.id = ACTIONS_ID;
+      actions.innerHTML =
+        '<button type="button" id="delphi-round-two-back">Back</button>' +
+        '<button type="button" id="delphi-round-two-next">Continue</button>';
+      var anchor = submit || nav.parentElement.lastElementChild;
+      if (anchor && anchor.parentElement) anchor.parentElement.insertBefore(actions, anchor);
+      else nav.parentElement.appendChild(actions);
+
+      actions.querySelector('#delphi-round-two-back').addEventListener('click', function () {
+        var current = sectionButtons();
+        var active = currentIndex(current);
+        if (active > 0) current[active - 1].click();
+      });
+      actions.querySelector('#delphi-round-two-next').addEventListener('click', function () {
+        var current = sectionButtons();
+        var active = currentIndex(current);
+        if (active < current.length - 1) {
+          current[active + 1].click();
+        } else {
+          var finalSubmit = document.querySelector('.delphi-r2-native-submit');
+          if (finalSubmit) finalSubmit.click();
+        }
+      });
+    }
+
+    var back = actions.querySelector('#delphi-round-two-back');
+    var next = actions.querySelector('#delphi-round-two-next');
+    back.disabled = index === 0;
+    next.textContent = index === buttons.length - 1 ? 'Submit response' : 'Continue';
+  }
+
+  var observer = new MutationObserver(function () {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(ensureUi, 80);
+  });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['aria-current']
+  });
+  window.setTimeout(ensureUi, 250);
+  window.setTimeout(ensureUi, 900);
+  window.setTimeout(ensureUi, 1800);
+})();
