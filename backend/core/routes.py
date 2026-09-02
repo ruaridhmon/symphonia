@@ -3675,7 +3675,7 @@ def _format_custom_claim_list(
 
         def response_number(value: str) -> int | None:
             text = normalise_statement(value)
-            match = re.match(r"^Response\\s+(\\d+)\\b", text, re.IGNORECASE)
+            match = re.match(r"^Response\s+(\d+)\b", text, re.IGNORECASE)
             if match:
                 return int(match.group(1))
             lowered = text.lower()
@@ -3695,7 +3695,7 @@ def _format_custom_claim_list(
         def statement_body(value: str) -> str:
             text = normalise_statement(value)
             text = re.sub(
-                r"^Response\\s+\\d+(?:\\s+\\([^)]*\\))?\\s*:\\s*",
+                r"^Response\s+\d+(?:\s+\([^)]*\))?\s*:\s*",
                 "",
                 text,
                 flags=re.IGNORECASE,
@@ -3721,12 +3721,12 @@ def _format_custom_claim_list(
                 raw = _stringify_custom_synthesis_answer(value).strip()
                 for line in raw.splitlines():
                     line = re.sub(
-                        r"^(?:Answer|Selected|Evidence|Confidence(?: rationale)?)\\s*:\\s*",
+                        r"^(?:Answer|Selected|Evidence|Confidence(?: rationale)?)\s*:\s*",
                         "",
                         line.strip(),
                         flags=re.IGNORECASE,
                     )
-                    for sentence in re.split(r"(?<=[.!?])\\s+", line):
+                    for sentence in re.split(r"(?<=[.!?])\s+", line):
                         sentence = sentence.strip()
                         if len(sentence) >= 12:
                             result.append(sentence)
