@@ -3387,16 +3387,18 @@ Supporting statements:
 - Response N (expert label): exact source sentence / None
 Opposing statements:
 - Response N (expert label): exact source sentence / None
+Uncertain statements:
+- Response N (expert label): exact source sentence / None
 
 Rules:
 - Output claims, status, people count, opposing views, expert-position lists, and statement lists only.
 - Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
-- Each claim must have exactly one status, people, text, opposing views, supporting experts, opposing experts, uncertain experts, supporting statements, and opposing statements section.
+- Each claim must have exactly one status, people, text, supporting experts, opposing experts, uncertain experts, supporting statements, opposing statements, and uncertain statements section.
 - People means the number of submitted responses that make or support the claim, as X of N. It must exactly equal the number of unique entries under Supporting experts.
 - For a claim that directly restates a rating/Likert question, classify every submitted response exactly once: supportive answers under Supporting experts, conflicting answers under Opposing experts, and neutral/unsure answers under Uncertain experts.
 - Copy each Response number, expert label, and recorded option exactly. Never invent or omit an expert position.
 - Use None for an expert-position section with no members.
-- Supporting and opposing statements are only verbatim free-text sentences from submitted responses.
+- Supporting, opposing, and uncertain statements are only verbatim free-text sentences from submitted responses.
 - Include every distinct relevant free-text statement available, with at most one excerpt per respondent per claim.
 - Do not paraphrase statements. Copy the relevant source sentence exactly, apart from trimming whitespace.
 - Never present Likert/select/rating labels, scores, or option labels as statements.
@@ -3742,7 +3744,8 @@ def _format_custom_claim_list(
         for claim in claims:
             for experts_key, statements_key, target in (
                 ("supporting_experts", "supporting_statements", claim.get("text", "")),
-                ("opposing_experts", "opposing_statements", claim.get("opposing", "")),
+                ("opposing_experts", "opposing_statements", claim.get("opposing", "") or claim.get("text", "")),
+                ("uncertain_experts", "uncertain_statements", claim.get("text", "")),
             ):
                 expert_entries = {
                     response_number(value): value
@@ -3756,7 +3759,13 @@ def _format_custom_claim_list(
                         grounded_statements[response_index] = normalise_statement(statement)
                         if response_index not in expert_entries:
                             label = response_dicts[response_index - 1].get("email") or f"Expert {response_index}"
-                            stance = "Agree" if experts_key == "supporting_experts" else "Disagree"
+                            stance = (
+                                "Agree"
+                                if experts_key == "supporting_experts"
+                                else "Disagree"
+                                if experts_key == "opposing_experts"
+                                else "Neither agree nor disagree"
+                            )
                             expert_entries[response_index] = (
                                 f"Response {response_index} ({label}): {stance}"
                             )
@@ -3796,6 +3805,7 @@ def _format_custom_claim_list(
             uncertain_experts = item.get("uncertain_experts", [])
             supporting_statements = item.get("supporting_statements", [])
             opposing_statements = item.get("opposing_statements", [])
+            uncertain_statements = item.get("uncertain_statements", [])
             if index > 1:
                 output.append("<p>&nbsp;</p>")
                 output.append("<hr>")
@@ -3808,8 +3818,6 @@ def _format_custom_claim_list(
             )
             output.append(f"<p>{marker} Claim {index}: <strong>{claim_text}</strong></p>")
             output.append(f"<p>People making this claim: <strong>{people}</strong></p>")
-            if opposing and opposing.lower() not in {"none", "n/a", "not applicable", "no opposing views"}:
-                output.append(f"<p>Opposing views: <strong>{html.escape(opposing)}</strong></p>")
             for title, experts in (
                 ("Show supporting experts", supporting_experts),
                 ("Show opposing experts", opposing_experts),
@@ -3825,6 +3833,10 @@ def _format_custom_claim_list(
                 opposing_details = render_statement_details("Show opposing statements", opposing_statements)
                 if opposing_details:
                     output.append(opposing_details)
+            if has_statement_values(uncertain_statements):
+                uncertain_details = render_statement_details("Show uncertain statements", uncertain_statements)
+                if uncertain_details:
+                    output.append(uncertain_details)
             output.append("</div>")
         return "\n".join(output)
 
@@ -3848,6 +3860,7 @@ def _format_custom_claim_list(
                 "uncertain_experts": [],
                 "supporting_statements": [],
                 "opposing_statements": [],
+                "uncertain_statements": [],
             }
             current_statement_key = None
             inline_text = re.sub(r"^claim\s+\d+\s*[:\-–—]?\s*", "", stripped, flags=re.IGNORECASE).strip()
@@ -3856,7 +3869,7 @@ def _format_custom_claim_list(
             continue
         if current_claim is None:
             continue
-        match = re.match(r"^(status|people|text|opposing views?|supporting experts?|opposing experts?|uncertain experts?|supporting statements?|opposing statements?)\s*:\s*(.*)$", stripped, re.IGNORECASE)
+        match = re.match(r"^(status|people|text|opposing views?|supporting experts?|opposing experts?|uncertain experts?|supporting statements?|opposing statements?|uncertain statements?)\s*:\s*(.*)$", stripped, re.IGNORECASE)
         if not match:
             if current_statement_key and re.match(r"^[-*+]\s+", stripped):
                 current_claim[current_statement_key].append(normalise_statement(stripped))
@@ -3892,8 +3905,12 @@ def _format_custom_claim_list(
             current_statement_key = "supporting_statements"
             if value:
                 current_claim[current_statement_key].append(normalise_statement(value))
-        else:
+        elif key.startswith("opposing statement"):
             current_statement_key = "opposing_statements"
+            if value:
+                current_claim[current_statement_key].append(normalise_statement(value))
+        else:
+            current_statement_key = "uncertain_statements"
             if value:
                 current_claim[current_statement_key].append(normalise_statement(value))
     if current_claim and current_claim.get("text"):
