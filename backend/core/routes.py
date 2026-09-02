@@ -3392,7 +3392,7 @@ Rules:
 - Output claims, status, people count, opposing views, expert-position lists, and statement lists only.
 - Do not include introductions, conclusions, caveats, methodology, evidence notes, next steps, or recommendations.
 - Each claim must have exactly one status, people, text, opposing views, supporting experts, opposing experts, uncertain experts, supporting statements, and opposing statements section.
-- People means the number of submitted responses that make or support the claim, as X of N.
+- People means the number of submitted responses that make or support the claim, as X of N. It must exactly equal the number of unique entries under Supporting experts.
 - For a claim that directly restates a rating/Likert question, classify every submitted response exactly once: supportive answers under Supporting experts, conflicting answers under Opposing experts, and neutral/unsure answers under Uncertain experts.
 - Copy each Response number, expert label, and recorded option exactly. Never invent or omit an expert position.
 - Use None for an expert-position section with no members.
@@ -3662,6 +3662,87 @@ def _format_custom_claim_list(
                 f"{len(claim['supporting_experts'])} of {len(positions)}"
             )
 
+    def complete_written_evidence(claims: list[dict[str, Any]]) -> None:
+        """Backfill missing verbatim excerpts from respondents already classified by the model."""
+        if not response_dicts:
+            return
+
+        def response_number(value: str) -> int | None:
+            match = re.match(r"^Response\\s+(\\d+)\\b", normalise_statement(value), re.IGNORECASE)
+            return int(match.group(1)) if match else None
+
+        def response_sentences(response_index: int) -> list[str]:
+            if response_index < 1 or response_index > len(response_dicts):
+                return []
+            answers = response_dicts[response_index - 1].get("answers") or {}
+            if isinstance(answers, str):
+                try:
+                    answers = json.loads(answers)
+                except json.JSONDecodeError:
+                    answers = {}
+            if not isinstance(answers, dict):
+                return []
+            result: list[str] = []
+            for value in answers.values():
+                raw = _stringify_custom_synthesis_answer(value).strip()
+                for line in raw.splitlines():
+                    line = re.sub(
+                        r"^(?:Answer|Selected|Evidence|Confidence(?: rationale)?)\\s*:\\s*",
+                        "",
+                        line.strip(),
+                        flags=re.IGNORECASE,
+                    )
+                    for sentence in re.split(r"(?<=[.!?])\\s+", line):
+                        sentence = sentence.strip()
+                        if len(sentence) >= 12:
+                            result.append(sentence)
+            return list(dict.fromkeys(result))
+
+        def best_sentence(response_index: int, target: str) -> str:
+            candidates = response_sentences(response_index)
+            if not candidates:
+                return ""
+            target_tokens = {
+                token for token in re.findall(r"[a-z0-9]+", target.lower())
+                if len(token) > 2
+            }
+            return max(
+                candidates,
+                key=lambda sentence: (
+                    len(target_tokens & set(re.findall(r"[a-z0-9]+", sentence.lower()))),
+                    -len(sentence),
+                ),
+            )
+
+        for claim in claims:
+            supporting_ids = {
+                response_number(value)
+                for value in claim.get("supporting_experts", [])
+            } - {None}
+            if supporting_ids:
+                claim["people"] = f"{len(supporting_ids)} of {len(response_dicts)}"
+
+            for experts_key, statements_key, target in (
+                ("supporting_experts", "supporting_statements", claim.get("text", "")),
+                ("opposing_experts", "opposing_statements", claim.get("opposing", "")),
+            ):
+                statement_ids = {
+                    response_number(value)
+                    for value in claim.get(statements_key, [])
+                } - {None}
+                for expert in claim.get(experts_key, []):
+                    response_index = response_number(expert)
+                    if response_index is None or response_index in statement_ids:
+                        continue
+                    sentence = best_sentence(response_index, target)
+                    if not sentence:
+                        continue
+                    label = response_dicts[response_index - 1].get("email") or f"Expert {response_index}"
+                    claim[statements_key].append(
+                        f"Response {response_index} ({label}): {sentence}"
+                    )
+                    statement_ids.add(response_index)
+
     def render_structured_claims(claims: list[dict[str, Any]]) -> str:
         output = ["<h2>Claims</h2>"]
         for index, item in enumerate(claims, start=1):
@@ -3779,6 +3860,7 @@ def _format_custom_claim_list(
 
     if structured_claims:
         enrich_expert_positions(structured_claims)
+        complete_written_evidence(structured_claims)
         seen_structured: set[str] = set()
         deduped_structured: list[dict[str, Any]] = []
         for item in structured_claims:
