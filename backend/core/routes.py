@@ -3663,13 +3663,39 @@ def _format_custom_claim_list(
             )
 
     def complete_written_evidence(claims: list[dict[str, Any]]) -> None:
-        """Backfill missing verbatim excerpts from respondents already classified by the model."""
+        """Keep only grounded classifications and backfill exact submitted sentences."""
         if not response_dicts:
             return
+
+        stop_words = {
+            "a", "an", "and", "are", "be", "for", "from", "has", "have", "in",
+            "is", "it", "of", "on", "or", "should", "that", "the", "this", "to",
+            "with",
+        }
 
         def response_number(value: str) -> int | None:
             match = re.match(r"^Response\\s+(\\d+)\\b", normalise_statement(value), re.IGNORECASE)
             return int(match.group(1)) if match else None
+
+        def meaningful_tokens(value: str) -> set[str]:
+            return {
+                token
+                for token in re.findall(r"[a-z0-9]+", value.lower())
+                if len(token) > 2 and token not in stop_words
+            }
+
+        def statement_body(value: str) -> str:
+            text = normalise_statement(value)
+            text = re.sub(
+                r"^Response\\s+\\d+(?:\\s+\\([^)]*\\))?\\s*:\\s*",
+                "",
+                text,
+                flags=re.IGNORECASE,
+            )
+            return text.strip().strip('"“”')
+
+        def relevance(value: str, target: str) -> int:
+            return len(meaningful_tokens(statement_body(value)) & meaningful_tokens(target))
 
         def response_sentences(response_index: int) -> list[str]:
             if response_index < 1 or response_index > len(response_dicts):
@@ -3702,46 +3728,51 @@ def _format_custom_claim_list(
             candidates = response_sentences(response_index)
             if not candidates:
                 return ""
-            target_tokens = {
-                token for token in re.findall(r"[a-z0-9]+", target.lower())
-                if len(token) > 2
-            }
-            return max(
-                candidates,
-                key=lambda sentence: (
-                    len(target_tokens & set(re.findall(r"[a-z0-9]+", sentence.lower()))),
-                    -len(sentence),
-                ),
-            )
+            best = max(candidates, key=lambda sentence: (relevance(sentence, target), -len(sentence)))
+            return best if relevance(best, target) > 0 else ""
 
         for claim in claims:
-            supporting_ids = {
-                response_number(value)
-                for value in claim.get("supporting_experts", [])
-            } - {None}
-            if supporting_ids:
-                claim["people"] = f"{len(supporting_ids)} of {len(response_dicts)}"
-
             for experts_key, statements_key, target in (
                 ("supporting_experts", "supporting_statements", claim.get("text", "")),
                 ("opposing_experts", "opposing_statements", claim.get("opposing", "")),
             ):
-                statement_ids = {
-                    response_number(value)
-                    for value in claim.get(statements_key, [])
-                } - {None}
-                for expert in claim.get(experts_key, []):
-                    response_index = response_number(expert)
-                    if response_index is None or response_index in statement_ids:
+                expert_entries = {
+                    response_number(value): value
+                    for value in claim.get(experts_key, [])
+                    if response_number(value) is not None
+                }
+                grounded_statements: dict[int, str] = {}
+                for statement in claim.get(statements_key, []):
+                    response_index = response_number(statement)
+                    if (
+                        response_index in expert_entries
+                        and relevance(statement, target) > 0
+                    ):
+                        grounded_statements[response_index] = normalise_statement(statement)
+
+                for response_index in expert_entries:
+                    if response_index in grounded_statements:
                         continue
                     sentence = best_sentence(response_index, target)
                     if not sentence:
                         continue
                     label = response_dicts[response_index - 1].get("email") or f"Expert {response_index}"
-                    claim[statements_key].append(
+                    grounded_statements[response_index] = (
                         f"Response {response_index} ({label}): {sentence}"
                     )
-                    statement_ids.add(response_index)
+
+                claim[experts_key] = [
+                    expert_entries[index]
+                    for index in expert_entries
+                    if index in grounded_statements
+                ]
+                claim[statements_key] = list(grounded_statements.values())
+
+            supporting_ids = {
+                response_number(value)
+                for value in claim.get("supporting_experts", [])
+            } - {None}
+            claim["people"] = f"{len(supporting_ids)} of {len(response_dicts)}"
 
     def render_structured_claims(claims: list[dict[str, Any]]) -> str:
         output = ["<h2>Claims</h2>"]
