@@ -3,9 +3,8 @@
 
   document.documentElement.setAttribute('data-claim-evidence-enhancer', 'loaded');
 
-  var ROOT_SELECTOR = '.ProseMirror';
+  var ROOT_SELECTOR = '.synthesis-flow .markdown-body';
   var PANEL_CLASS = 'claim-evidence-preview';
-  var editing = false;
   var rebuildTimer = 0;
 
   function text(node) {
@@ -105,7 +104,7 @@
 
     var blocks = claimBlocks(root);
     if (!blocks.length) {
-      document.body.classList.remove('claim-evidence-view-active');
+      root.classList.remove('claim-evidence-source-hidden');
       return;
     }
 
@@ -262,22 +261,9 @@
     });
     controls.appendChild(collapse);
 
-    var edit = document.createElement('button');
-    edit.type = 'button';
-    edit.className = 'claim-evidence-edit-toggle';
-    edit.textContent = editing ? 'Preview evidence' : 'Edit synthesis text';
-    edit.addEventListener('click', function () {
-      editing = !editing;
-      document.body.classList.toggle('claim-evidence-view-active', !editing);
-      preview.hidden = editing;
-      edit.textContent = editing ? 'Preview evidence' : 'Edit synthesis text';
-    });
-    controls.appendChild(edit);
-
     root.parentElement.insertBefore(controls, root);
     root.parentElement.insertBefore(preview, root);
-    document.body.classList.toggle('claim-evidence-view-active', !editing);
-    preview.hidden = editing;
+    root.classList.add('claim-evidence-source-hidden');
   }
 
   function scan() {
@@ -316,7 +302,7 @@
         : null;
       if (!button) return;
       var label = text(button);
-      if (label === 'Generate') {
+      if (/^Generate/i.test(label)) {
         scheduleScans([500, 1500, 3000, 6000, 10000, 20000, 30000, 45000]);
       } else if (/^v\d+$/i.test(label) || /^Version\s+\d+/i.test(label)) {
         scheduleScans([250, 1000, 2500]);
