@@ -3772,11 +3772,10 @@ def _format_custom_claim_list(
                         f"Response {response_index} ({label}): {sentence}"
                     )
 
-                claim[experts_key] = [
-                    expert_entries[index]
-                    for index in expert_entries
-                    if index in grounded_statements
-                ]
+                # Classification and quotation are separate evidence layers.
+                # Keep every grounded expert position even when that respondent did
+                # not supply a verbatim sentence relevant to this claim.
+                claim[experts_key] = list(expert_entries.values())
                 claim[statements_key] = list(grounded_statements.values())
 
             supporting_ids = {
