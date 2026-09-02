@@ -1,4 +1,4 @@
-import { ArrowRight, CircleHelp, Plus, Save, X } from 'lucide-react';
+import { ArrowRight, CircleHelp, Plus, RotateCcw, Save, Sparkles, X } from 'lucide-react';
 import { LoadingButton } from '../index';
 
 type Props = {
@@ -10,6 +10,10 @@ type Props = {
   onStartNextRound: () => void;
   loading: boolean;
   saving?: boolean;
+  delphiClaimCount?: number;
+  preparedQuestionCount?: number;
+  onPrepareDelphiRoundTwo?: () => void;
+  onClearDelphiRoundTwo?: () => void;
 };
 
 export default function NextRoundQuestionsCard({
@@ -21,8 +25,12 @@ export default function NextRoundQuestionsCard({
   onStartNextRound,
   loading,
   saving = false,
+  delphiClaimCount = 0,
+  preparedQuestionCount = 0,
+  onPrepareDelphiRoundTwo,
+  onClearDelphiRoundTwo,
 }: Props) {
-  const hasQuestions = questions.some(q => q.trim().length > 0);
+  const hasQuestions = preparedQuestionCount > 0 || questions.some(q => q.trim().length > 0);
 
   return (
     <div
@@ -48,9 +56,55 @@ export default function NextRoundQuestionsCard({
             color: 'var(--accent)',
           }}
         >
-          {questions.length} question{questions.length === 1 ? '' : 's'}
+          {preparedQuestionCount || questions.length} question{(preparedQuestionCount || questions.length) === 1 ? '' : 's'}
         </span>
       </div>
+
+      {onPrepareDelphiRoundTwo && delphiClaimCount > 0 ? (
+        <div
+          className="mt-4 rounded-xl p-4"
+          style={{
+            border: '1px solid color-mix(in srgb, var(--accent) 24%, var(--border))',
+            backgroundColor: 'color-mix(in srgb, var(--accent) 5%, var(--background))',
+          }}
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-foreground">Delphi Round 2</div>
+              <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
+                Re-rate each claim after group feedback. Disagreement and uncertainty open required clarification questions; revised wording stays optional.
+              </p>
+            </div>
+            {preparedQuestionCount > 0 ? (
+              <LoadingButton
+                variant="secondary"
+                size="sm"
+                onClick={onClearDelphiRoundTwo}
+                icon={<RotateCcw size={14} aria-hidden="true" />}
+              >
+                Use manual prompts
+              </LoadingButton>
+            ) : (
+              <LoadingButton
+                variant="accent"
+                size="sm"
+                onClick={onPrepareDelphiRoundTwo}
+                icon={<Sparkles size={14} aria-hidden="true" />}
+              >
+                Prepare from {delphiClaimCount} claim{delphiClaimCount === 1 ? '' : 's'}
+              </LoadingButton>
+            )}
+          </div>
+          {preparedQuestionCount > 0 ? (
+            <div
+              className="mt-3 rounded-lg px-3 py-2 text-xs font-medium"
+              style={{ backgroundColor: 'var(--background)', color: 'var(--accent)' }}
+            >
+              Ready: {delphiClaimCount} claims · {preparedQuestionCount} structured prompts
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="space-y-2.5 mt-4">
         {questions.map((q, index) => (
@@ -128,7 +182,7 @@ export default function NextRoundQuestionsCard({
             className="sm:self-auto"
             icon={<ArrowRight size={14} aria-hidden="true" />}
           >
-            {hasQuestions ? 'Start next round' : 'Add a question first'}
+            {preparedQuestionCount > 0 ? 'Start Delphi Round 2' : hasQuestions ? 'Start next round' : 'Add a question first'}
           </LoadingButton>
         </div>
       </div>
