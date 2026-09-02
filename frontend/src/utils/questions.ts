@@ -29,6 +29,7 @@ export interface ConfigurableQuestion extends QuestionOptions {
   optional?: boolean | null;
   conditionalOnQuestionId?: string | null;
   conditionalOnOption?: string | null;
+  conditionalOnOptions?: string[] | null;
   inputType?: SurveyInputType | null;
   options?: string[] | null;
   allowUnsure?: boolean | null;
@@ -110,6 +111,10 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
       obj && typeof obj.conditionalOnQuestionId === 'string' ? obj.conditionalOnQuestionId : null,
     conditionalOnOption:
       obj && typeof obj.conditionalOnOption === 'string' ? obj.conditionalOnOption : null,
+    conditionalOnOptions:
+      obj && Array.isArray(obj.conditionalOnOptions)
+        ? obj.conditionalOnOptions.filter((option): option is string => typeof option === 'string')
+        : null,
     inputType:
       obj &&
       (obj.inputType === 'text' ||
