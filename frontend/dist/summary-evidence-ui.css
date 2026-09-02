@@ -159,3 +159,43 @@ body.claim-evidence-view-active .ProseMirror { display: none !important; }
   .claim-evidence-group { margin-left: .65rem; margin-right: .65rem; }
   .claim-evidence-card { padding: .7rem; }
 }
+
+.claim-evidence-overview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.65rem 0 0.8rem;
+}
+
+.claim-evidence-overview-item {
+  border: 1px solid #d8dee8;
+  border-radius: 999px;
+  background: #f7f9fc;
+  color: #344054;
+  font-size: 0.82rem;
+  line-height: 1;
+  padding: 0.42rem 0.62rem;
+}
+
+.claim-evidence-overview-item--supporting {
+  border-color: #a7d7b5;
+  background: #edf9f0;
+  color: #176b35;
+}
+
+.claim-evidence-overview-item--opposing {
+  border-color: #f1b4b4;
+  background: #fff1f1;
+  color: #a12828;
+}
+
+.claim-evidence-overview-item--uncertain {
+  border-color: #efd08b;
+  background: #fff8e6;
+  color: #8a5a00;
+}
+
+.claim-evidence-overview-item--unclassified {
+  color: #596579;
+}
+

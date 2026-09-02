@@ -133,6 +133,39 @@
           && listNode.querySelector(':scope > li'));
       });
 
+      var stanceCounts = { supporting: 0, opposing: 0, uncertain: 0 };
+      var statementCounts = { supporting: 0, opposing: 0 };
+      nodes.forEach(function (node, nodeIndex) {
+        if (node.tagName !== 'P' && node.tagName !== 'SUMMARY') return;
+        var countMatch = text(node).match(
+          /^Show\s+(supporting|opposing|uncertain)\s+(statements|experts)$/i
+        );
+        if (!countMatch) return;
+        var listNode = nodes[nodeIndex + 1];
+        if (!listNode || (listNode.tagName !== 'UL' && listNode.tagName !== 'OL')) return;
+        var count = listNode.querySelectorAll(':scope > li').length;
+        var kind = countMatch[1].toLowerCase();
+        if (countMatch[2].toLowerCase() === 'experts') {
+          stanceCounts[kind] = count;
+        } else if (kind !== 'uncertain') {
+          statementCounts[kind] = count;
+        }
+      });
+      if (!stanceCounts.supporting) stanceCounts.supporting = statementCounts.supporting;
+      if (!stanceCounts.opposing) stanceCounts.opposing = statementCounts.opposing;
+
+      var peopleNode = nodes.find(function (node) {
+        return node.tagName === 'P' && /^People making/i.test(text(node));
+      });
+      var peopleMatch = peopleNode && text(peopleNode).match(/(\d+)\s+of\s+(\d+)/i);
+      var totalExperts = peopleMatch ? Number(peopleMatch[2]) : (
+        stanceCounts.supporting + stanceCounts.opposing + stanceCounts.uncertain
+      );
+      var notClassified = Math.max(
+        0,
+        totalExperts - stanceCounts.supporting - stanceCounts.opposing - stanceCounts.uncertain
+      );
+
       var card = document.createElement('article');
       card.className = 'claim-evidence-claim';
       if (text(headingNode).indexOf('🟥') === 0) card.dataset.status = 'disagreement';
@@ -143,6 +176,22 @@
       heading.className = 'claim-evidence-claim-heading';
       heading.innerHTML = headingNode.innerHTML;
       card.appendChild(heading);
+
+      var overview = document.createElement('div');
+      overview.className = 'claim-evidence-overview';
+      overview.setAttribute('aria-label', 'Expert position overview');
+      [
+        ['supporting', 'Support', stanceCounts.supporting],
+        ['opposing', 'Oppose', stanceCounts.opposing],
+        ['uncertain', 'Uncertain', stanceCounts.uncertain],
+        ['unclassified', 'Not classified', notClassified],
+      ].forEach(function (item) {
+        var badge = document.createElement('span');
+        badge.className = 'claim-evidence-overview-item claim-evidence-overview-item--' + item[0];
+        badge.innerHTML = '<strong>' + item[2] + '</strong> ' + item[1];
+        overview.appendChild(badge);
+      });
+      card.appendChild(overview);
 
       var evidenceCount = 0;
       for (var index = nodes.indexOf(headingNode) + 1; index < nodes.length; index += 1) {
