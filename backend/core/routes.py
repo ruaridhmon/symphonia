@@ -7982,6 +7982,7 @@ def get_active_round(
         "questions": active.questions or [],
         "context_settings": active.context_settings or {},
         "previous_round_synthesis": previous_round_synthesis,
+        "previous_round_questions": prev.questions or [] if prev else [],
         "previous_round_statistics": _build_previous_round_statistics(db, prev),
         "show_own_response_to_participants": form.show_own_response_to_participants,
         "previous_round_own_response": previous_round_own_response,
