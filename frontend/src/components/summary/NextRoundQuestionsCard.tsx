@@ -106,60 +106,66 @@ export default function NextRoundQuestionsCard({
         </div>
       ) : null}
 
-      <div className="space-y-2.5 mt-4">
-        {questions.map((q, index) => (
-          <div
-            key={index}
-            className="group grid gap-2 rounded-xl p-3 sm:grid-cols-[2rem_minmax(0,1fr)_auto] sm:items-start"
-            style={{
-              backgroundColor: 'var(--background)',
-              border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
-            }}
-          >
-            <span
-              className="text-xs font-semibold shrink-0 w-8 h-8 flex items-center justify-center rounded-md"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                color: 'var(--accent)',
-              }}
-            >
-              Q{index + 1}
-            </span>
-            <textarea
-              rows={2}
-              className="min-w-0 resize-y rounded-lg px-3 py-2 text-sm leading-6"
-              value={q}
-              onChange={e => onUpdateQuestion(index, e.target.value)}
-              placeholder={`Question ${index + 1}`}
-              style={{ minHeight: '3.25rem' }}
-            />
-            <LoadingButton
-              variant="secondary"
-              size="sm"
-              onClick={() => onRemoveQuestion(index)}
-              aria-label={`Remove question ${index + 1}`}
-              style={{ opacity: 0.55, transition: 'opacity 0.15s ease', minWidth: 0, paddingInline: '0.65rem' }}
-              className="group-hover:!opacity-100"
-              icon={<X size={14} aria-hidden="true" />}
-            >Remove</LoadingButton>
-          </div>
-        ))}
-      </div>
-      <LoadingButton
-        variant="secondary"
-        size="sm"
-        onClick={onAddQuestion}
-        className="mt-3"
-        icon={<Plus size={14} aria-hidden="true" />}
-      >
-        Add Question
-      </LoadingButton>
+      {preparedQuestionCount === 0 ? (
+        <>
+                <div className="space-y-2.5 mt-4">
+                  {questions.map((q, index) => (
+                    <div
+                      key={index}
+                      className="group grid gap-2 rounded-xl p-3 sm:grid-cols-[2rem_minmax(0,1fr)_auto] sm:items-start"
+                      style={{
+                        backgroundColor: 'var(--background)',
+                        border: '1px solid color-mix(in srgb, var(--border) 72%, transparent)',
+                      }}
+                    >
+                      <span
+                        className="text-xs font-semibold shrink-0 w-8 h-8 flex items-center justify-center rounded-md"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                          color: 'var(--accent)',
+                        }}
+                      >
+                        Q{index + 1}
+                      </span>
+                      <textarea
+                        rows={2}
+                        className="min-w-0 resize-y rounded-lg px-3 py-2 text-sm leading-6"
+                        value={q}
+                        onChange={e => onUpdateQuestion(index, e.target.value)}
+                        placeholder={`Question ${index + 1}`}
+                        style={{ minHeight: '3.25rem' }}
+                      />
+                      <LoadingButton
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => onRemoveQuestion(index)}
+                        aria-label={`Remove question ${index + 1}`}
+                        style={{ opacity: 0.55, transition: 'opacity 0.15s ease', minWidth: 0, paddingInline: '0.65rem' }}
+                        className="group-hover:!opacity-100"
+                        icon={<X size={14} aria-hidden="true" />}
+                      >Remove</LoadingButton>
+                    </div>
+                  ))}
+                </div>
+                <LoadingButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={onAddQuestion}
+                  className="mt-3"
+                  icon={<Plus size={14} aria-hidden="true" />}
+                >
+                  Add Question
+                </LoadingButton>
+                  </>
+      ) : null}
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
-          Save the current setup, or open a new round with these prompts.
+          {preparedQuestionCount > 0
+            ? 'The prepared package will open as the new live participant round.'
+            : 'Save the current setup, or open a new round with these prompts.'}
         </p>
         <div className="flex flex-wrap gap-2">
-          {onSaveCurrentRound ? (
+          {onSaveCurrentRound && preparedQuestionCount === 0 ? (
             <LoadingButton
               variant="secondary"
               size="sm"
