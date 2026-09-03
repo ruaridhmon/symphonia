@@ -251,6 +251,14 @@
       'body.' + ROOT_CLASS + ' [data-question-key] label:has(input:checked){border-color:#58cc02!important;background:color-mix(in srgb,#58cc02 8%,var(--background))!important;box-shadow:0 3px 0 color-mix(in srgb,#58cc02 72%,#2f7d00)!important;transform:translateY(-1px)}',
       'body.' + ROOT_CLASS + ' [data-question-key] input[type="radio"]{accent-color:#58cc02!important;width:18px;height:18px;margin-top:1px}',
       'body.' + ROOT_CLASS + ' [data-question-key] textarea:focus{outline:none!important;border-color:#58cc02!important;box-shadow:0 0 0 3px color-mix(in srgb,#58cc02 16%,transparent)!important}',
+      'body.' + ROOT_CLASS + ' input,body.' + ROOT_CLASS + ' textarea,body.' + ROOT_CLASS + ' select{font-size:16px!important}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-comment-native-heading{display:none!important}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-comment-toggle{display:inline-flex;align-items:center;gap:.45rem;margin:.35rem 0 .15rem;padding:.6rem .15rem;border:0;background:transparent;color:var(--accent);font:inherit;font-size:.95rem;font-weight:800;cursor:pointer}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-comment-toggle::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:2px solid currentColor;border-radius:50%;font-size:1.05rem;line-height:1}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-comment-open .delphi-r2-comment-toggle::before{content:"−"}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-comment-collapsed textarea{display:none!important}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-comment-open textarea{min-height:96px!important;margin-top:.35rem;animation:delphi-r2-comment-in .18s ease-out}',
+      'body.' + ROOT_CLASS + '.delphi-r2-commenting #' + ACTIONS_ID + '{display:none!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-native-submit{display:none!important}',
       '#' + HEADER_ID + '{margin:.7rem 0 1rem}',
       '.delphi-r2-progress-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.55rem;font-size:.82rem;font-weight:800}',
@@ -265,9 +273,64 @@
       '#' + ACTIONS_ID + ' button:active:not(:disabled){transform:translateY(3px);box-shadow:none}',
       '#' + ACTIONS_ID + ' button:disabled{cursor:not-allowed;opacity:.42;box-shadow:none}',
       '@keyframes delphi-r2-enter{from{opacity:.55;transform:translateX(8px)}to{opacity:1;transform:none}}',
+      '@keyframes delphi-r2-comment-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}',
       '@media (min-width:640px){#' + ACTIONS_ID + '{bottom:14px;border:1px solid var(--border);border-radius:16px}}'
     ].join('');
     document.head.appendChild(style);
+  }
+
+  function enhanceComment(question) {
+    if (question.dataset.delphiCommentReady === 'true') return;
+    if (!/Comments or clarification/i.test(clean(question.textContent))) return;
+
+    var textarea = question.querySelector('textarea');
+    if (!textarea) return;
+
+    var label = Array.prototype.find.call(question.querySelectorAll('*'), function (element) {
+      return element.children.length === 0 &&
+        clean(element.textContent) === 'Comments or clarification';
+    });
+    if (label) {
+      var heading = label;
+      while (heading.parentElement &&
+             heading.parentElement !== question &&
+             !heading.parentElement.querySelector('textarea')) {
+        heading = heading.parentElement;
+      }
+      heading.classList.add('delphi-r2-comment-native-heading');
+    }
+
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'delphi-r2-comment-toggle';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.textContent = 'Add a comment (optional)';
+    question.insertBefore(toggle, question.firstChild);
+
+    function setOpen(open, focus) {
+      question.classList.toggle('delphi-r2-comment-open', open);
+      question.classList.toggle('delphi-r2-comment-collapsed', !open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.textContent = open ? 'Hide comment' : 'Add a comment (optional)';
+      if (open && focus) {
+        window.setTimeout(function () { textarea.focus(); }, 40);
+      }
+    }
+
+    toggle.addEventListener('click', function () {
+      setOpen(!question.classList.contains('delphi-r2-comment-open'), true);
+    });
+    textarea.addEventListener('focus', function () {
+      document.body.classList.add('delphi-r2-commenting');
+    });
+    textarea.addEventListener('blur', function () {
+      window.setTimeout(function () {
+        document.body.classList.remove('delphi-r2-commenting');
+      }, 120);
+    });
+
+    question.dataset.delphiCommentReady = 'true';
+    setOpen(Boolean(textarea.value.trim()), false);
   }
 
   function ensureUi() {
@@ -282,6 +345,10 @@
 
     document.body.classList.add(ROOT_CLASS);
     installStyles();
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-question-key]'),
+      enhanceComment
+    );
 
     var card = nav.closest('.card-lg');
     if (card) {
