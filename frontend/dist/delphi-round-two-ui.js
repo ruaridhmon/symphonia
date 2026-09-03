@@ -30,7 +30,7 @@
   }
 
   function questionsFor(claims) {
-    var responseOptions = ['Agree', 'Partly agree', 'Disagree', 'Unsure / need more evidence'];
+    var responseOptions = ['Strongly agree', 'Agree', 'Neither agree nor disagree', 'Disagree', 'Strongly disagree', 'Unable to judge — need more information'];
     return claims.reduce(function (questions, claim) {
       var prefix = 'claim_' + claim.number;
       var sectionTitle = 'Claim ' + claim.number + ': ' + claim.title;
@@ -248,7 +248,7 @@
       'body.' + ROOT_CLASS + ' [data-question-key] label{min-height:54px!important;padding:.65rem .85rem!important;border-width:2px!important;border-radius:13px!important;align-items:center!important;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease,background-color .12s ease}',
       'body.' + ROOT_CLASS + ' [data-question-key] label span{font-size:1rem!important;line-height:1.35!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-meta,body.' + ROOT_CLASS + ' .delphi-r2-selected,body.' + ROOT_CLASS + ' .delphi-r2-helper{display:none!important}',
-      'body.' + ROOT_CLASS + ' [data-question-key] label:has(input:checked){border-color:#58cc02!important;background:color-mix(in srgb,#58cc02 8%,var(--background))!important;box-shadow:0 3px 0 color-mix(in srgb,#58cc02 72%,#2f7d00)!important;transform:translateY(-1px)}',
+      'body.' + ROOT_CLASS + ' [data-question-key] label:has(input:checked){border-color:#58cc02!important;background:color-mix(in srgb,#58cc02 8%,var(--background))!important;box-shadow:inset 0 0 0 1px #58cc02!important;transform:none!important}',
       'body.' + ROOT_CLASS + ' [data-question-key] input[type="radio"]{accent-color:#58cc02!important;width:18px;height:18px;margin-top:1px}',
       'body.' + ROOT_CLASS + ' [data-question-key] textarea:focus{outline:none!important;border-color:#58cc02!important;box-shadow:0 0 0 3px color-mix(in srgb,#58cc02 16%,transparent)!important}',
       'body.' + ROOT_CLASS + ' input,body.' + ROOT_CLASS + ' textarea,body.' + ROOT_CLASS + ' select{font-size:16px!important}',
@@ -256,8 +256,9 @@
       'body.' + ROOT_CLASS + ' .delphi-r2-comment-toggle{display:inline-flex;align-items:center;gap:.45rem;margin:.35rem 0 .15rem;padding:.6rem .15rem;border:0;background:transparent;color:var(--accent);font:inherit;font-size:.95rem;font-weight:800;cursor:pointer}',
       'body.' + ROOT_CLASS + ' .delphi-r2-comment-toggle::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:2px solid currentColor;border-radius:50%;font-size:1.05rem;line-height:1}',
       'body.' + ROOT_CLASS + ' .delphi-r2-comment-open .delphi-r2-comment-toggle::before{content:"−"}',
+      'body.' + ROOT_CLASS + ' [data-question-key] textarea{display:none!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-comment-collapsed textarea{display:none!important}',
-      'body.' + ROOT_CLASS + ' .delphi-r2-comment-open textarea{min-height:96px!important;margin-top:.35rem;animation:delphi-r2-comment-in .18s ease-out}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-comment-open textarea{display:block!important;min-height:96px!important;margin-top:.35rem;animation:delphi-r2-comment-in .18s ease-out}',
       'body.' + ROOT_CLASS + '.delphi-r2-commenting #' + ACTIONS_ID + '{display:none!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-native-submit{display:none!important}',
       '#' + HEADER_ID + '{margin:.7rem 0 1rem}',
@@ -440,8 +441,7 @@
   }
 
   var observer = new MutationObserver(function () {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(ensureUi, 80);
+    ensureUi();
   });
   observer.observe(document.body, {
     childList: true,
