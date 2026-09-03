@@ -7436,6 +7436,20 @@ def get_public_form_session(
         )
         .first()
     )
+
+    # A facilitator may simplify a later-round questionnaire after participants
+    # have already autosaved it. Positional answer keys from the longer schema
+    # must not be loaded into different questions in the replacement schema.
+    questions = active_round.questions or form.questions or []
+    draft_answers = draft.answers if draft else None
+    if active_round.round_number > 1 and isinstance(draft_answers, dict):
+        question_count = len(questions)
+        for key in draft_answers:
+            match = re.fullmatch(r"q(\d+)", str(key))
+            if match and int(match.group(1)) > question_count:
+                draft_answers = None
+                break
+
     submitted = (
         db.query(Response)
         .filter(
@@ -7454,7 +7468,7 @@ def get_public_form_session(
             "id": form.id,
             "title": form.title,
             "description": form.description,
-            "questions": active_round.questions or form.questions,
+            "questions": questions,
             "document_template": form.document_template,
             "join_code": form.join_code,
             "previous_round_synthesis": previous_round.synthesis
@@ -7466,12 +7480,12 @@ def get_public_form_session(
             ),
         },
         "draft": {
-            "answers": draft.answers,
+            "answers": draft_answers,
             "updated_at": draft.updated_at.isoformat()
             if draft and draft.updated_at
             else None,
         }
-        if draft
+        if draft_answers is not None
         else None,
     }
 
