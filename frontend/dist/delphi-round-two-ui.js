@@ -246,7 +246,7 @@
       'body.' + ROOT_CLASS + ' [data-question-key]{padding:.35rem 0!important}',
       'body.' + ROOT_CLASS + ' [data-question-key] label{min-height:54px!important;padding:.65rem .85rem!important;border-width:2px!important;border-radius:13px!important;align-items:center!important;transition:box-shadow .12s ease,border-color .12s ease,background-color .12s ease}',
       'body.' + ROOT_CLASS + ' [data-question-key] label span{font-size:1rem!important;line-height:1.35!important}',
-      'body.' + ROOT_CLASS + ' .delphi-r2-meta,body.' + ROOT_CLASS + ' .delphi-r2-selected,body.' + ROOT_CLASS + ' .delphi-r2-helper{display:none!important}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-meta,body.' + ROOT_CLASS + ' .delphi-r2-selected,body.' + ROOT_CLASS + ' .delphi-r2-helper,body.' + ROOT_CLASS + ' .delphi-r2-empty-selection,body.' + ROOT_CLASS + ' .delphi-r2-extra-explanation{display:none!important}',
       'body.' + ROOT_CLASS + ' [data-question-key] label:has(input:checked){border-color:#58cc02!important;background:color-mix(in srgb,#58cc02 8%,var(--background))!important;box-shadow:inset 0 0 0 1px #58cc02!important;transform:none!important}',
       'body.' + ROOT_CLASS + ' [data-question-key] input[type="radio"]{accent-color:#58cc02!important;width:18px;height:18px;margin-top:1px}',
       'body.' + ROOT_CLASS + ' [data-question-key] textarea:focus{outline:none!important;border-color:#58cc02!important;box-shadow:0 0 0 3px color-mix(in srgb,#58cc02 16%,transparent)!important}',
@@ -379,6 +379,23 @@
         element.classList.add('delphi-r2-helper');
       }
       if (value === 'Selected') element.classList.add('delphi-r2-selected');
+      if (/^No option selected yet\.?$/i.test(value)) {
+        element.classList.add('delphi-r2-empty-selection');
+      }
+      if (/^Further explanation(?:\s*\(optional\))?$/i.test(value)) {
+        var explanation = element.parentElement;
+        while (
+          explanation &&
+          explanation.parentElement &&
+          explanation.parentElement.closest('[data-question-key]') &&
+          !explanation.querySelector('textarea')
+        ) {
+          explanation = explanation.parentElement;
+        }
+        if (explanation && explanation.querySelector('textarea')) {
+          explanation.classList.add('delphi-r2-extra-explanation');
+        }
+      }
       if (value === 'Required' && element.parentElement) {
         element.parentElement.classList.add('delphi-r2-meta');
       }
