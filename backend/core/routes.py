@@ -7272,6 +7272,18 @@ def _get_public_session(
     return session
 
 
+_PUBLIC_DRAFT_SCHEMA_KEY = "__question_schema_ids"
+
+
+def _question_schema_ids(questions: list[Any]) -> list[str]:
+    return [
+        str(question.get("questionId") or f"q{index + 1}")
+        if isinstance(question, dict)
+        else f"q{index + 1}"
+        for index, question in enumerate(questions)
+    ]
+
+
 @router.get(
     "/public/forms/{join_code}",
     tags=["Forms"],
@@ -7437,18 +7449,19 @@ def get_public_form_session(
         .first()
     )
 
-    # A facilitator may simplify a later-round questionnaire after participants
-    # have already autosaved it. Positional answer keys from the longer schema
-    # must not be loaded into different questions in the replacement schema.
+    # Later-round questions can be replaced after participants have autosaved.
+    # Only restore a draft that was saved against this exact question schema;
+    # otherwise positional q1/q2 answers could be shown under different prompts.
     questions = active_round.questions or form.questions or []
-    draft_answers = draft.answers if draft else None
-    if active_round.round_number > 1 and isinstance(draft_answers, dict):
-        question_count = len(questions)
-        for key in draft_answers:
-            match = re.fullmatch(r"q(\d+)", str(key))
-            if match and int(match.group(1)) > question_count:
-                draft_answers = None
-                break
+    draft_answers = (
+        dict(draft.answers)
+        if draft and isinstance(draft.answers, dict)
+        else None
+    )
+    if active_round.round_number > 1 and draft_answers is not None:
+        saved_schema = draft_answers.pop(_PUBLIC_DRAFT_SCHEMA_KEY, None)
+        if saved_schema != _question_schema_ids(questions):
+            draft_answers = None
 
     submitted = (
         db.query(Response)
@@ -7540,15 +7553,21 @@ def save_public_form_draft(
         )
         .first()
     )
+    stored_answers = dict(payload.answers)
+    if active_round.round_number > 1:
+        stored_answers[_PUBLIC_DRAFT_SCHEMA_KEY] = _question_schema_ids(
+            active_round.questions or form.questions or []
+        )
+
     if draft:
-        draft.answers = payload.answers
+        draft.answers = stored_answers
         draft.updated_at = datetime.now(timezone.utc)
     else:
         draft = Draft(
             user_id=session.user_id,
             form_id=form.id,
             round_id=active_round.id,
-            answers=payload.answers,
+            answers=stored_answers,
         )
         db.add(draft)
 

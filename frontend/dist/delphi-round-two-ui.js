@@ -243,9 +243,8 @@
       'body.' + ROOT_CLASS + ' .delphi-r2-form-title{font-size:1.05rem!important;line-height:1.35!important;font-weight:750!important;color:var(--muted-foreground)!important;margin:0 0 .25rem!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-form-description{display:none!important}',
       'body.' + ROOT_CLASS + ' section[aria-label^="Claim "]{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}',
-      'body.' + ROOT_CLASS + ' [data-question-key]{animation:delphi-r2-enter .22s ease-out}',
       'body.' + ROOT_CLASS + ' [data-question-key]{padding:.35rem 0!important}',
-      'body.' + ROOT_CLASS + ' [data-question-key] label{min-height:54px!important;padding:.65rem .85rem!important;border-width:2px!important;border-radius:13px!important;align-items:center!important;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease,background-color .12s ease}',
+      'body.' + ROOT_CLASS + ' [data-question-key] label{min-height:54px!important;padding:.65rem .85rem!important;border-width:2px!important;border-radius:13px!important;align-items:center!important;transition:box-shadow .12s ease,border-color .12s ease,background-color .12s ease}',
       'body.' + ROOT_CLASS + ' [data-question-key] label span{font-size:1rem!important;line-height:1.35!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-meta,body.' + ROOT_CLASS + ' .delphi-r2-selected,body.' + ROOT_CLASS + ' .delphi-r2-helper{display:none!important}',
       'body.' + ROOT_CLASS + ' [data-question-key] label:has(input:checked){border-color:#58cc02!important;background:color-mix(in srgb,#58cc02 8%,var(--background))!important;box-shadow:inset 0 0 0 1px #58cc02!important;transform:none!important}',
@@ -273,7 +272,6 @@
       '#delphi-round-two-next{border:2px solid #58cc02;background:#58cc02;color:#102800;box-shadow:0 4px 0 #46a302}',
       '#' + ACTIONS_ID + ' button:active:not(:disabled){transform:translateY(3px);box-shadow:none}',
       '#' + ACTIONS_ID + ' button:disabled{cursor:not-allowed;opacity:.42;box-shadow:none}',
-      '@keyframes delphi-r2-enter{from{opacity:.55;transform:translateX(8px)}to{opacity:1;transform:none}}',
       '@keyframes delphi-r2-comment-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}',
       '@media (min-width:640px){#' + ACTIONS_ID + '{bottom:14px;border:1px solid var(--border);border-radius:16px}}'
     ].join('');
@@ -332,6 +330,15 @@
 
     question.dataset.delphiCommentReady = 'true';
     setOpen(Boolean(textarea.value.trim()), false);
+  }
+
+  function currentClaimAnswered() {
+    return Array.prototype.some.call(
+      document.querySelectorAll('input[type="radio"]'),
+      function (input) {
+        return input.checked && input.offsetParent !== null;
+      }
+    );
   }
 
   function ensureUi() {
@@ -423,6 +430,7 @@
         if (active > 0) current[active - 1].click();
       });
       actions.querySelector('#delphi-round-two-next').addEventListener('click', function () {
+        if (!currentClaimAnswered()) return;
         var current = sectionButtons();
         var active = currentIndex(current);
         if (active < current.length - 1) {
@@ -437,8 +445,15 @@
     var back = actions.querySelector('#delphi-round-two-back');
     var next = actions.querySelector('#delphi-round-two-next');
     back.disabled = index === 0;
+    next.disabled = !currentClaimAnswered();
     next.textContent = index === buttons.length - 1 ? 'Submit response' : 'Continue';
   }
+
+  document.addEventListener('change', function (event) {
+    if (event.target && event.target.matches('input[type="radio"]')) {
+      ensureUi();
+    }
+  }, true);
 
   var observer = new MutationObserver(function () {
     ensureUi();
