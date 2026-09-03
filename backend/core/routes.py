@@ -7453,7 +7453,11 @@ def get_public_form_session(
     # Only restore a draft that was saved against this exact question schema;
     # otherwise positional q1/q2 answers could be shown under different prompts.
     questions = active_round.questions or form.questions or []
-    draft_answers = dict(draft.answers) if draft and isinstance(draft.answers, dict) else None
+    draft_answers = (
+        dict(draft.answers)
+        if draft and isinstance(draft.answers, dict)
+        else None
+    )
     if active_round.round_number > 1 and draft_answers is not None:
         saved_schema = draft_answers.pop(_PUBLIC_DRAFT_SCHEMA_KEY, None)
         if saved_schema != _question_schema_ids(questions):
