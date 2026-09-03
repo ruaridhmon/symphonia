@@ -185,7 +185,34 @@
   var ROOT_CLASS = 'delphi-round-two-participant';
   var HEADER_ID = 'delphi-round-two-progress';
   var ACTIONS_ID = 'delphi-round-two-actions';
+  var LOADING_ID = 'delphi-round-two-loading';
   var timer = 0;
+
+  function updateLoadingState() {
+    var existing = document.getElementById(LOADING_ID);
+    var card = document.querySelector('.card-lg');
+    var loaded = Boolean(
+      document.querySelector('[data-question-key]') ||
+      (card && card.querySelector('h1')) ||
+      /Unable to load form|Response submitted/i.test(document.body?.innerText || '')
+    );
+
+    if (loaded || !card) {
+      if (existing) existing.remove();
+      return;
+    }
+    if (existing) return;
+
+    var status = document.createElement('p');
+    status.id = LOADING_ID;
+    status.setAttribute('role', 'status');
+    status.textContent = 'Loading survey…';
+    status.style.cssText =
+      'margin:0 0 1rem;padding:.8rem 1rem;border-radius:10px;' +
+      'background:color-mix(in srgb,var(--accent) 7%,var(--background));' +
+      'color:var(--muted-foreground);font-size:.95rem;font-weight:650;';
+    card.insertBefore(status, card.firstChild);
+  }
 
   function clean(value) {
     return (value || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
@@ -342,6 +369,7 @@
   }
 
   function ensureUi() {
+    updateLoadingState();
     if (!isRoundTwo()) return;
 
     var buttons = sectionButtons();
