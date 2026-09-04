@@ -218,6 +218,12 @@
     return (value || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
+  function setText(element, value) {
+    if (element && element.textContent !== value) {
+      element.textContent = value;
+    }
+  }
+
   function sectionButtons() {
     var nav = document.querySelector('nav[aria-label="Question sections"]');
     var buttons = nav
@@ -445,10 +451,14 @@
       nav.parentElement.insertBefore(header, nav);
     }
 
-    header.querySelector('.delphi-r2-progress-label').textContent =
-      title ? 'Claim ' + (index + 1) + ': ' + title : 'Claim ' + (index + 1);
-    header.querySelector('.delphi-r2-progress-count').textContent =
-      (index + 1) + ' of ' + buttons.length;
+    setText(
+      header.querySelector('.delphi-r2-progress-label'),
+      title ? 'Claim ' + (index + 1) + ': ' + title : 'Claim ' + (index + 1)
+    );
+    setText(
+      header.querySelector('.delphi-r2-progress-count'),
+      (index + 1) + ' of ' + buttons.length
+    );
     var track = header.querySelector('.delphi-r2-track');
     track.setAttribute('aria-valuemax', String(buttons.length));
     track.setAttribute('aria-valuenow', String(index + 1));
@@ -491,7 +501,10 @@
     var next = actions.querySelector('#delphi-round-two-next');
     back.disabled = index === 0;
     next.disabled = !currentClaimAnswered();
-    next.textContent = index === buttons.length - 1 ? 'Submit response' : 'Continue';
+    setText(
+      next,
+      index === buttons.length - 1 ? 'Submit response' : 'Continue'
+    );
   }
 
   document.addEventListener('change', function (event) {
@@ -500,8 +513,14 @@
     }
   }, true);
 
+  var updateScheduled = false;
   var observer = new MutationObserver(function () {
-    ensureUi();
+    if (updateScheduled) return;
+    updateScheduled = true;
+    window.requestAnimationFrame(function () {
+      updateScheduled = false;
+      ensureUi();
+    });
   });
   observer.observe(document.body, {
     childList: true,
