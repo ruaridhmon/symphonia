@@ -7463,19 +7463,25 @@ def get_public_form_session(
         if saved_schema != _question_schema_ids(questions):
             draft_answers = None
 
-    submitted = (
+    submitted_response = (
         db.query(Response)
         .filter(
-            Response.user_id == session.user_id, Response.round_id == active_round.id
+            Response.user_id == session.user_id,
+            Response.round_id == active_round.id,
         )
         .first()
-        is not None
     )
+    if draft_answers is None and submitted_response:
+        draft_answers = (
+            dict(submitted_response.answers)
+            if isinstance(submitted_response.answers, dict)
+            else {}
+        )
 
     return {
         "session_token": session.session_token,
         "participant_name": session.participant_name,
-        "submitted": submitted or session.submitted_at is not None,
+        "submitted": submitted_response is not None or session.submitted_at is not None,
         "upload_filename": session.upload_filename,
         "form": {
             "id": form.id,
