@@ -80,21 +80,30 @@
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
     dialog.setAttribute('aria-labelledby', 'delphi-round-two-title');
-    dialog.style.cssText = 'max-width:680px;margin:3vh auto;background:var(--card);color:var(--foreground);border:1px solid var(--border);border-radius:14px;box-shadow:0 24px 80px rgba(15,23,42,.3);overflow:hidden;';
+    dialog.style.cssText = 'max-width:640px;max-height:94vh;margin:2vh auto;background:var(--card);color:var(--foreground);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 80px rgba(15,23,42,.3);overflow:auto;';
     dialog.innerHTML =
       '<div style="display:flex;justify-content:space-between;gap:1rem;padding:1rem 1.1rem;border-bottom:1px solid var(--border)">' +
-        '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.05rem">Prepare Delphi Round 2</h2>' +
-        '<p style="margin:.35rem 0 0;color:var(--muted-foreground);font-size:.85rem">' +
-          claims.length + ' claims · ' + (claims.length * 2) + ' quick responses</p></div>' +
-        '<button type="button" data-close aria-label="Close" style="height:36px;width:36px;border:1px solid var(--border);border-radius:9px;background:var(--background);color:var(--foreground);font-size:1.25rem">×</button>' +
+        '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.1rem">Set up Delphi Round 2</h2>' +
+        '<p style="margin:.3rem 0 0;color:var(--muted-foreground);font-size:.85rem">' +
+          claims.length + ' claims ready to review</p></div>' +
+        '<button type="button" data-close aria-label="Close" style="flex:0 0 auto;height:36px;width:36px;border:1px solid var(--border);border-radius:9px;background:var(--background);color:var(--foreground);font-size:1.25rem">×</button>' +
       '</div>' +
-      '<div style="padding:1rem 1.1rem">' +
-        '<p style="margin:0 0 .8rem;font-size:.9rem;line-height:1.5">Each claim asks for one position and an optional clarification.</p>' +
-        '<div data-claims style="display:grid;gap:.5rem"></div>' +
+      '<div style="display:grid;gap:1rem;padding:1rem 1.1rem">' +
+        '<label style="display:grid;gap:.4rem;font-size:.86rem;font-weight:750">Optional introduction' +
+          '<textarea data-intro rows="3" placeholder="Add a short message for participants" style="width:100%;box-sizing:border-box;resize:vertical;padding:.7rem .8rem;border:1px solid var(--border);border-radius:10px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px;line-height:1.45"></textarea>' +
+        '</label>' +
+        '<div>' +
+          '<div style="margin-bottom:.45rem;font-size:.86rem;font-weight:750">Claims included</div>' +
+          '<div data-claims style="display:grid;gap:.45rem;max-height:260px;overflow:auto"></div>' +
+        '</div>' +
+        '<div style="display:grid;gap:.45rem;padding:.8rem;border:1px solid var(--border);border-radius:11px;background:var(--background);font-size:.84rem;line-height:1.45">' +
+          '<div><strong>Response scale</strong><br><span style="color:var(--muted-foreground)">Strongly agree to strongly disagree, plus unable to judge.</span></div>' +
+          '<div><strong>Optional comments</strong><br><span style="color:var(--muted-foreground)">Participants can clarify their response to each claim.</span></div>' +
+        '</div>' +
       '</div>' +
       '<div style="display:flex;justify-content:flex-end;gap:.65rem;padding:1rem 1.1rem;border-top:1px solid var(--border)">' +
-        '<button type="button" data-close style="padding:.65rem .9rem;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--foreground);font-weight:700">Cancel</button>' +
-        '<button type="button" data-start style="padding:.65rem .95rem;border:1px solid var(--accent);border-radius:9px;background:var(--accent);color:white;font-weight:800">Start Delphi Round 2</button>' +
+        '<button type="button" data-close style="padding:.65rem .9rem;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--foreground);font-weight:700">Cancel</button>' +
+        '<button type="button" data-start style="padding:.65rem .95rem;border:1px solid var(--accent);border-radius:10px;background:var(--accent);color:white;font-weight:800">Open Round Two</button>' +
       '</div>';
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
@@ -102,7 +111,7 @@
     var list = dialog.querySelector('[data-claims]');
     claims.forEach(function (claim) {
       var item = document.createElement('div');
-      item.style.cssText = 'padding:.7rem .8rem;border:1px solid var(--border);border-radius:9px;background:var(--background);font-size:.86rem;line-height:1.4;';
+      item.style.cssText = 'padding:.65rem .75rem;border:1px solid var(--border);border-radius:9px;background:var(--background);font-size:.84rem;line-height:1.4;';
       item.textContent = 'Claim ' + claim.number + ': ' + claim.title;
       list.appendChild(item);
     });
@@ -111,9 +120,9 @@
     });
     dialog.querySelector('[data-start]').addEventListener('click', async function (event) {
       var button = event.currentTarget;
-      if (!window.confirm('Start Round 2 with ' + claims.length + ' claims? Round 1 will remain available.')) return;
+      var intro = clean(dialog.querySelector('[data-intro]')?.value || '');
       button.disabled = true;
-      button.textContent = 'Starting Round 2…';
+      button.textContent = 'Opening Round Two…';
       var formId = window.location.pathname.match(/\/admin\/form\/(\d+)\/summary/)?.[1];
       try {
         var token = localStorage.getItem('access_token') || '';
@@ -129,18 +138,18 @@
           body: JSON.stringify({
             questions: questionsFor(claims),
             context_settings: {
-              intro_title: 'Round 2: Review and refine the claims',
-              intro_body: 'Review each claim, choose your position, and add an optional clarification.',
+              intro_title: 'Round 2: Review the claims',
+              intro_body: intro,
               show_previous_response: true,
             },
           }),
         });
-        if (!response.ok) throw new Error((await response.text()) || 'Unable to start Round 2');
+        if (!response.ok) throw new Error((await response.text()) || 'Unable to open Round Two');
         window.location.reload();
       } catch (error) {
         button.disabled = false;
-        button.textContent = 'Start Delphi Round 2';
-        window.alert(error instanceof Error ? error.message : 'Unable to start Round 2');
+        button.textContent = 'Open Round Two';
+        window.alert(error instanceof Error ? error.message : 'Unable to open Round Two');
       }
     });
   }
@@ -151,18 +160,19 @@
     var roundButtons = Array.prototype.filter.call(document.querySelectorAll('button'), function (button) {
       return clean(button.textContent) === 'Round setup';
     });
-    var roundButton = roundButtons.find(function (button) {
-      return button.offsetParent !== null;
+    var button = roundButtons.find(function (candidate) {
+      return candidate.offsetParent !== null;
     }) || roundButtons[0];
-    if (!roundButton || !roundButton.parentElement) return;
+    if (!button) return;
 
-    var button = document.createElement('button');
     button.id = BUTTON_ID;
-    button.type = 'button';
-    button.textContent = 'Prepare Delphi Round 2';
-    button.style.cssText = 'margin-top:.55rem;width:100%;min-height:42px;padding:.65rem .8rem;border:1px solid var(--accent);border-radius:10px;background:color-mix(in srgb,var(--accent) 8%,var(--card));color:var(--accent);font:inherit;font-size:.86rem;font-weight:800;cursor:pointer;';
-    button.addEventListener('click', openModal);
-    roundButton.parentElement.appendChild(button);
+    button.textContent = 'Set up Delphi Round 2';
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      openModal();
+    }, true);
   }
 
   var timer = 0;
