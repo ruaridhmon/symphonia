@@ -180,7 +180,9 @@
 (function () {
   'use strict';
 
-  if (!/^\/public\/session\/[^/]+\/?$/.test(window.location.pathname)) return;
+  function isPublicSessionPath() {
+    return /^\/public\/session\/[^/]+\/?$/.test(window.location.pathname);
+  }
 
   var ROOT_CLASS = 'delphi-round-two-participant';
   var HEADER_ID = 'delphi-round-two-progress';
@@ -374,7 +376,21 @@
     );
   }
 
+  function cleanupUi() {
+    document.body.classList.remove(ROOT_CLASS, 'delphi-r2-commenting');
+    var header = document.getElementById(HEADER_ID);
+    var actions = document.getElementById(ACTIONS_ID);
+    var loading = document.getElementById(LOADING_ID);
+    if (header) header.remove();
+    if (actions) actions.remove();
+    if (loading) loading.remove();
+  }
+
   function ensureUi() {
+    if (!isPublicSessionPath()) {
+      cleanupUi();
+      return;
+    }
     updateLoadingState();
     if (!isRoundTwo()) return;
 
@@ -528,6 +544,8 @@
     attributes: true,
     attributeFilter: ['aria-current']
   });
+  window.addEventListener('popstate', ensureUi);
+  window.addEventListener('pageshow', ensureUi);
   window.setTimeout(ensureUi, 250);
   window.setTimeout(ensureUi, 900);
   window.setTimeout(ensureUi, 1800);
