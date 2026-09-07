@@ -1,3 +1,4 @@
+import './claim-workspace.css'
 import './legacy/usability'
 import './usability.css'
 import './legacy/delphiDemo'
