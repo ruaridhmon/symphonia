@@ -11,7 +11,8 @@ let selected=3;
 function draw(root:HTMLElement) {
   root.replaceChildren();
   const top=el('div','','demo-topline');top.append(el('span','SYNTHETIC DELPHI · 8 FICTIONAL EXPERTS','di-eyebrow'));
-  const back=el('a','Back to consultation') as HTMLAnchorElement;back.href=location.pathname;top.append(back);root.append(top);
+  const standalone=location.pathname.startsWith('/examples/');
+  const back=el('a',standalone?'Dashboard':'Back to consultation') as HTMLAnchorElement;back.href=standalone?'/':location.pathname;top.append(back);root.append(top);
   root.append(el('h2',example.fixture.title,'demo-title'));
   root.append(el('p','1. Share ideas · 2. Rate the claims · 3. Review and rate again. The claims stay the same; the reasoning can develop.','demo-deck'));
   const provenance=el('details','','demo-protocol');provenance.append(el('summary','About this simulation'));
@@ -45,7 +46,10 @@ function draw(root:HTMLElement) {
   }
   const footer=el('div','','demo-footer');if(selected>1)footer.append(btn('Previous round',()=>{selected--;draw(root);}));if(selected<3)footer.append(btn('Continue to next round',()=>{selected++;draw(root);}));root.append(footer);
 }
+export function mountResearchExample(root:HTMLElement){example=research as unknown as Example;selected=3;draw(root);}
 function sync() {
+  if(location.pathname.startsWith('/examples/'))return;
+  if(new URLSearchParams(location.search).get('demo')==='research-ai'){location.replace('/examples/research-ai.html');return;}
   // Repair missing accessible names on the existing settings controls without changing values.
   for(const [id,label] of [['toggle-public-share','Public share link'],['toggle-consent-step','Consent step']]){
     const control=document.getElementById(id);if(control&&!control.getAttribute('aria-label'))control.setAttribute('aria-label',label);
@@ -76,11 +80,11 @@ function sync() {
   }
   const researchRoute=/^\/admin\/form\/18(?:\/summary)?\/?$/.test(location.pathname);
   if(!researchRoute || requested)document.getElementById('research-example-link')?.remove();
-  if(researchRoute&&!requested&&main&&!document.getElementById('research-example-link')){const link=el('a','Explore the completed synthetic example →','demo-dashboard-link') as HTMLAnchorElement;link.id='research-example-link';link.href='/admin/form/18/summary?demo=research-ai';main.prepend(link);}
+  if(researchRoute&&!requested&&main&&!document.getElementById('research-example-link')){const link=el('a','Explore the completed synthetic example →','demo-dashboard-link') as HTMLAnchorElement;link.id='research-example-link';link.href='/examples/research-ai.html';main.prepend(link);}
   const dashboard=location.pathname==='/'&&Array.from(main?.querySelectorAll('h1')||[]).some(h=>h.textContent==='Consultations');
   if(!dashboard)document.getElementById('delphi-demo-link')?.remove();
   if(dashboard&&!document.getElementById('delphi-demo-link')){
-    const link=el('a','','demo-dashboard-link') as HTMLAnchorElement;link.id='delphi-demo-link';link.href='/admin/form/18/summary?demo=research-ai';
+    const link=el('a','','demo-dashboard-link') as HTMLAnchorElement;link.id='delphi-demo-link';link.href='/examples/research-ai.html';
     link.append(el('strong','Example: AI in university research'),el('span','8 fictional experts · 3 rounds · explore the completed example →'));main!.prepend(link);
   }
 }
