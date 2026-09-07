@@ -7,6 +7,7 @@ let cache: { rounds: Round[]; responses: RoundWithResponses[] } | null = null;
 let pending = false;
 let lastFetch = 0;
 let failed = false;
+let revision = 0;
 function el(tag: string, text?: string, className?: string) {
   const node = document.createElement(tag);
   if (text) node.textContent = text;
@@ -28,14 +29,14 @@ function render() {
     const deployedApi = '/assets/rounds-CU08geHs.js';
     import(/* @vite-ignore */ deployedApi).then(async api => {
       const [rounds, responses] = await Promise.all([api.g(Number(requested)), api.a(Number(requested))]);
-      if (key === requested) { cache = { rounds, responses }; failed = false; }
+      if (key === requested) { cache = { rounds, responses }; revision += 1; failed = false; }
     }).catch(() => { if (key === requested) failed = true; }).finally(() => { pending = false; render(); });
   }
   const card = heading.closest('.card');
   if (!card) return;
   const roundNumber = Number(heading.textContent?.match(/Round (\d+)/)?.[1]);
   const round = cache?.rounds.find(r => r.round_number === roundNumber);
-  const signature = JSON.stringify([key, roundNumber, cache, failed]);
+  const signature = JSON.stringify([key, roundNumber, revision, failed]);
   let panel = document.getElementById('delphi-recorded-progress');
   if (panel?.dataset.signature === signature) return;
   if (!panel) { panel = el('section', '', 'card'); panel.id = 'delphi-recorded-progress'; card.before(panel); }
@@ -43,6 +44,11 @@ function render() {
   panel.setAttribute('aria-label', 'Delphi round progress');
   panel.style.cssText = 'padding:20px;margin-bottom:16px;';
   panel.replaceChildren(el('h2', 'Round progress'));
+  const refresh = el('button', 'Refresh results');
+  refresh.setAttribute('type', 'button');
+  refresh.style.cssText = 'font-size:12px;color:var(--accent);margin:4px 0 8px;';
+  refresh.addEventListener('click', () => { lastFetch = 0; render(); });
+  panel.append(refresh);
   if (!round || !cache) { panel.append(el('p', failed ? 'Recorded response data could not be loaded.' : 'Loading recorded responses…')); return; }
   const strip = el('div');
   strip.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;';
@@ -76,3 +82,5 @@ let timer: ReturnType<typeof setTimeout>;
 new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(render, 150); }).observe(document.body, { childList:true, subtree:true, characterData:true });
 window.addEventListener('focus', () => { lastFetch = 0; render(); });
 render();
+
+setInterval(() => { if (document.visibilityState === 'visible') render(); }, 30000);
