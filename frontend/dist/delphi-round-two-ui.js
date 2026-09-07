@@ -165,7 +165,8 @@
     if (document.getElementById(BUTTON_ID)) return;
     if (!claimData().length) return;
     var roundButtons = Array.prototype.filter.call(document.querySelectorAll('button'), function (button) {
-      return /^Round setup(?:\s|$)/.test(clean(button.textContent));
+      return button.getAttribute('aria-controls') === 'summary-round-setup' ||
+        clean(button.textContent) === 'Round setup';
     });
     var button = roundButtons.find(function (candidate) {
       return candidate.offsetParent !== null;

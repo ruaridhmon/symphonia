@@ -2240,6 +2240,58 @@ class SummaryPayload(BaseModel):
     summary: str
 
 
+@router.put("/forms/{form_id}/rounds/{round_id}/synthesis", tags=["Synthesis"])
+@limiter.limit(CRUD_LIMIT)
+def save_round_synthesis(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    payload: SummaryPayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    """Save the round-specific editor used by the deployed participant workflow."""
+    round_obj = db.query(RoundModel).filter(
+        RoundModel.id == round_id, RoundModel.form_id == form_id
+    ).first()
+    if round_obj is None:
+        raise HTTPException(status_code=404, detail="Round not found")
+    if not round_obj.is_active:
+        raise HTTPException(status_code=409, detail="Only the active round can be edited")
+    summary = _sanitize_llm_summary_html(payload.summary.strip())
+    if summary != (round_obj.synthesis or ""):
+        versions = db.query(SynthesisVersion).filter(
+            SynthesisVersion.round_id == round_id
+        ).all()
+        next_version = max((version.version for version in versions), default=0) + 1
+        for version in versions:
+            version.is_active = False
+        # Edited HTML is authoritative; old model-generated claim metadata is stale.
+        display = {
+            key: value for key, value in (round_obj.synthesis_json or {}).items()
+            if key in {"summary_options", "summary_order", "synthesis_background"}
+        } if isinstance(round_obj.synthesis_json, dict) else {}
+        round_obj.synthesis = summary
+        round_obj.synthesis_json = display
+        db.add(SynthesisVersion(
+            round_id=round_id, version=next_version, synthesis=summary,
+            synthesis_json=display, strategy="manual", is_active=True,
+        ))
+        db.commit()
+    return {
+        "id": round_obj.id,
+        "round_number": round_obj.round_number,
+        "is_active": round_obj.is_active,
+        "synthesis": round_obj.synthesis,
+        "synthesis_json": round_obj.synthesis_json,
+        "questions": round_obj.questions or [],
+        "context_settings": round_obj.context_settings or {},
+        "convergence_score": round_obj.convergence_score,
+        "response_count": db.query(Response).filter(Response.round_id == round_id).count(),
+    }
+
+
+
 class CodexSummaryMessage(BaseModel):
     role: str
     content: str

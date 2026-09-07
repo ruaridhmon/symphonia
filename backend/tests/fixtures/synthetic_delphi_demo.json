@@ -1,0 +1,240 @@
+{
+  "synthetic": true,
+  "form_id": 15,
+  "topic": "UK citizens assemblies",
+  "panel": [
+    {
+      "name": "Synthetic 01 — Constitutional lawyer",
+      "text": "Citizens’ assemblies should advise Parliament, not make binding law. Random selection can broaden whose views are heard, but a small panel cannot inherit the mandate of an election. Stratified recruitment is appropriate if its limits are published. Parliament should publish a reasoned response within six months, while retaining the right to reject recommendations. Pay participants and cover caring costs so participation is possible for people without spare income."
+    },
+    {
+      "name": "Synthetic 02 — Community organiser",
+      "text": "Advice alone is too easy for ministers to ignore. A citizens’ assembly should be able to trigger a parliamentary debate, although it should not legislate directly. A reasoned government response within six months would be a minimum safeguard. Recruitment must actively reach people who distrust institutions; a mailed lottery by itself will miss them. Pay for time, childcare and interpreters, and allow community groups to challenge gaps in the panel."
+    },
+    {
+      "name": "Synthetic 03 — Sampling statistician",
+      "text": "Use a stratified civic lottery, publish recruitment and dropout rates, and report uncertainty rather than claiming a miniature nation has spoken. I cannot judge whether six months is the right response deadline without evidence about the workload. Paying participants is essential to reduce selection bias, but money alone does not solve nonresponse. Recommendations should remain advisory. The public should see the minority reasons as well as the final vote totals."
+    },
+    {
+      "name": "Synthetic 04 — Disability access researcher",
+      "text": "An assembly is not representative if disabled citizens cannot participate in its meetings. Fund accessible venues, personal assistance, transport, communication support and caring costs, alongside payment for time. Hybrid attendance should be an option, never the only route. I support a guaranteed parliamentary debate, but I am undecided about binding powers because process accessibility does not by itself establish democratic authority. Publish accessibility outcomes and provide an independent complaints route."
+    },
+    {
+      "name": "Synthetic 05 — Local government practitioner",
+      "text": "Start with local planning and service trade-offs where participants can see the consequences of their advice. Councils should publish a response within six months, but a mandatory Westminster debate for every local assembly would be disproportionate. Recommendations should be advisory, with elected councillors responsible for budgets. Pay expenses and a modest attendance allowance. Recruitment should combine a civic lottery with targeted follow-up to fill missing neighbourhood and age groups."
+    },
+    {
+      "name": "Synthetic 06 — Public finance analyst",
+      "text": "I am not convinced that every participant should receive an attendance payment in addition to expenses; test whether targeted income replacement improves inclusion at reasonable cost. Assemblies should remain advisory and should not compel a parliamentary debate. A six-month reasoned response is a practical accountability rule. Publish the full cost per participant, alternative consultation costs and independent evaluations before creating a permanent national programme."
+    },
+    {
+      "name": "Synthetic 07 — Climate policy campaigner",
+      "text": "Climate assemblies need more influence than optional advice. A sufficiently supported recommendation should trigger a parliamentary debate and a public response within six months. I would consider binding authority over a limited, pre-agreed local spending pot, but not a power to rewrite national law. Pay all participants and their access costs. Provide balanced evidence without pretending that unsupported scientific claims deserve equal weight, and publish dissenting reasons."
+    },
+    {
+      "name": "Synthetic 08 — Rural services advocate",
+      "text": "A national panel can overlook distance, unreliable transport and seasonal work. Stratify recruitment by geography and deprivation, cover travel and replacement caring costs, and pay for participants’ time. Keep recommendations advisory; a compulsory parliamentary debate may reward headline topics over rural priorities. I am unsure whether six months is feasible for every proposal. Require a public timetable instead, with explanations when ministers need longer."
+    },
+    {
+      "name": "Synthetic 09 — Small business representative",
+      "text": "Assemblies should advise elected decision-makers, not exercise binding powers or automatically command parliamentary time. Participants need access to evidence about jobs, tax and implementation costs as well as campaign arguments. I support a six-month written response and targeted compensation for lost earnings rather than an identical payment to everyone. Publish recruitment methods and conflicts of interest so organised interests cannot dominate the discussion."
+    },
+    {
+      "name": "Synthetic 10 — Parliamentary scrutiny researcher",
+      "text": "An assembly should have the right to a committee hearing rather than automatically triggering a full parliamentary debate. Its recommendations should remain advisory, with a reasoned government response within six months and explicit explanations for rejection. A stratified lottery, published evidence and minority reports would make scrutiny more credible. Pay participants and cover access needs. After an initial pilot, evaluate whether recommendations actually improve decisions before expanding the programme."
+    }
+  ],
+  "audited_claims": [
+    {
+      "title": "Citizens’ assemblies should remain advisory rather than have binding powers.",
+      "groups": {
+        "supporting": [
+          [
+            1,
+            "Citizens’ assemblies"
+          ],
+          [
+            2,
+            "A citizens’ assembly"
+          ],
+          [
+            3,
+            "Recommendations should"
+          ],
+          [
+            5,
+            "Recommendations should"
+          ],
+          [
+            6,
+            "Assemblies should"
+          ],
+          [
+            8,
+            "Keep recommendations"
+          ],
+          [
+            9,
+            "Assemblies should"
+          ],
+          [
+            10,
+            "Its recommendations"
+          ]
+        ],
+        "opposing": [
+          [
+            7,
+            "I would consider"
+          ]
+        ],
+        "uncertain": [
+          [
+            4,
+            "I support a guaranteed"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "Citizens’ assemblies should trigger a guaranteed parliamentary debate.",
+      "groups": {
+        "supporting": [
+          [
+            2,
+            "A citizens’ assembly"
+          ],
+          [
+            4,
+            "I support a guaranteed"
+          ],
+          [
+            7,
+            "A sufficiently"
+          ]
+        ],
+        "opposing": [
+          [
+            5,
+            "Councils should"
+          ],
+          [
+            6,
+            "Assemblies should"
+          ],
+          [
+            8,
+            "Keep recommendations"
+          ],
+          [
+            9,
+            "Assemblies should"
+          ],
+          [
+            10,
+            "An assembly should"
+          ]
+        ],
+        "uncertain": []
+      }
+    },
+    {
+      "title": "Elected bodies should publish a reasoned response within six months.",
+      "groups": {
+        "supporting": [
+          [
+            1,
+            "Parliament should"
+          ],
+          [
+            2,
+            "A reasoned"
+          ],
+          [
+            5,
+            "Councils should"
+          ],
+          [
+            6,
+            "A six-month"
+          ],
+          [
+            7,
+            "A sufficiently"
+          ],
+          [
+            9,
+            "I support a six-month"
+          ],
+          [
+            10,
+            "Its recommendations"
+          ]
+        ],
+        "opposing": [],
+        "uncertain": [
+          [
+            3,
+            "I cannot judge"
+          ],
+          [
+            8,
+            "I am unsure"
+          ]
+        ]
+      }
+    },
+    {
+      "title": "All participants should receive payment for their time.",
+      "groups": {
+        "supporting": [
+          [
+            1,
+            "Pay participants"
+          ],
+          [
+            2,
+            "Pay for time"
+          ],
+          [
+            3,
+            "Paying participants"
+          ],
+          [
+            4,
+            "Fund accessible"
+          ],
+          [
+            5,
+            "Pay expenses"
+          ],
+          [
+            7,
+            "Pay all"
+          ],
+          [
+            8,
+            "Stratify recruitment"
+          ],
+          [
+            10,
+            "Pay participants"
+          ]
+        ],
+        "opposing": [
+          [
+            6,
+            "I am not convinced"
+          ],
+          [
+            9,
+            "I support a six-month"
+          ]
+        ],
+        "uncertain": []
+      }
+    }
+  ],
+  "round_one_curated_html": "<h2>Claims</h2><p>🟩 Claim 1: <strong>Citizens’ assemblies should remain advisory rather than have binding powers.</strong></p><p>People making this claim: <strong>8 of 10</strong></p><p>Show supporting experts</p><ul><li>Response 1 (Synthetic 01 — Constitutional lawyer): Agree</li><li>Response 2 (Synthetic 02 — Community organiser): Agree</li><li>Response 3 (Synthetic 03 — Sampling statistician): Agree</li><li>Response 5 (Synthetic 05 — Local government practitioner): Agree</li><li>Response 6 (Synthetic 06 — Public finance analyst): Agree</li><li>Response 8 (Synthetic 08 — Rural services advocate): Agree</li><li>Response 9 (Synthetic 09 — Small business representative): Agree</li><li>Response 10 (Synthetic 10 — Parliamentary scrutiny researcher): Agree</li></ul><p>Show supporting statements</p><ul><li>Response 1 (Synthetic 01 — Constitutional lawyer): Citizens’ assemblies should advise Parliament, not make binding law.</li><li>Response 2 (Synthetic 02 — Community organiser): A citizens’ assembly should be able to trigger a parliamentary debate, although it should not legislate directly.</li><li>Response 3 (Synthetic 03 — Sampling statistician): Recommendations should remain advisory.</li><li>Response 5 (Synthetic 05 — Local government practitioner): Recommendations should be advisory, with elected councillors responsible for budgets.</li><li>Response 6 (Synthetic 06 — Public finance analyst): Assemblies should remain advisory and should not compel a parliamentary debate.</li><li>Response 8 (Synthetic 08 — Rural services advocate): Keep recommendations advisory; a compulsory parliamentary debate may reward headline topics over rural priorities.</li><li>Response 9 (Synthetic 09 — Small business representative): Assemblies should advise elected decision-makers, not exercise binding powers or automatically command parliamentary time.</li><li>Response 10 (Synthetic 10 — Parliamentary scrutiny researcher): Its recommendations should remain advisory, with a reasoned government response within six months and explicit explanations for rejection.</li></ul><p>Show opposing experts</p><ul><li>Response 7 (Synthetic 07 — Climate policy campaigner): Disagree</li></ul><p>Show opposing statements</p><ul><li>Response 7 (Synthetic 07 — Climate policy campaigner): I would consider binding authority over a limited, pre-agreed local spending pot, but not a power to rewrite national law.</li></ul><p>Show uncertain experts</p><ul><li>Response 4 (Synthetic 04 — Disability access researcher): Unable to judge</li></ul><p>Show uncertain statements</p><ul><li>Response 4 (Synthetic 04 — Disability access researcher): I support a guaranteed parliamentary debate, but I am undecided about binding powers because process accessibility does not by itself establish democratic authority.</li></ul><p>🟥 Claim 2: <strong>Citizens’ assemblies should trigger a guaranteed parliamentary debate.</strong></p><p>People making this claim: <strong>3 of 10</strong></p><p>Show supporting experts</p><ul><li>Response 2 (Synthetic 02 — Community organiser): Agree</li><li>Response 4 (Synthetic 04 — Disability access researcher): Agree</li><li>Response 7 (Synthetic 07 — Climate policy campaigner): Agree</li></ul><p>Show supporting statements</p><ul><li>Response 2 (Synthetic 02 — Community organiser): A citizens’ assembly should be able to trigger a parliamentary debate, although it should not legislate directly.</li><li>Response 4 (Synthetic 04 — Disability access researcher): I support a guaranteed parliamentary debate, but I am undecided about binding powers because process accessibility does not by itself establish democratic authority.</li><li>Response 7 (Synthetic 07 — Climate policy campaigner): A sufficiently supported recommendation should trigger a parliamentary debate and a public response within six months.</li></ul><p>Show opposing experts</p><ul><li>Response 5 (Synthetic 05 — Local government practitioner): Disagree</li><li>Response 6 (Synthetic 06 — Public finance analyst): Disagree</li><li>Response 8 (Synthetic 08 — Rural services advocate): Disagree</li><li>Response 9 (Synthetic 09 — Small business representative): Disagree</li><li>Response 10 (Synthetic 10 — Parliamentary scrutiny researcher): Disagree</li></ul><p>Show opposing statements</p><ul><li>Response 5 (Synthetic 05 — Local government practitioner): Councils should publish a response within six months, but a mandatory Westminster debate for every local assembly would be disproportionate.</li><li>Response 6 (Synthetic 06 — Public finance analyst): Assemblies should remain advisory and should not compel a parliamentary debate.</li><li>Response 8 (Synthetic 08 — Rural services advocate): Keep recommendations advisory; a compulsory parliamentary debate may reward headline topics over rural priorities.</li><li>Response 9 (Synthetic 09 — Small business representative): Assemblies should advise elected decision-makers, not exercise binding powers or automatically command parliamentary time.</li><li>Response 10 (Synthetic 10 — Parliamentary scrutiny researcher): An assembly should have the right to a committee hearing rather than automatically triggering a full parliamentary debate.</li></ul><p>🟩 Claim 3: <strong>Elected bodies should publish a reasoned response within six months.</strong></p><p>People making this claim: <strong>7 of 10</strong></p><p>Show supporting experts</p><ul><li>Response 1 (Synthetic 01 — Constitutional lawyer): Agree</li><li>Response 2 (Synthetic 02 — Community organiser): Agree</li><li>Response 5 (Synthetic 05 — Local government practitioner): Agree</li><li>Response 6 (Synthetic 06 — Public finance analyst): Agree</li><li>Response 7 (Synthetic 07 — Climate policy campaigner): Agree</li><li>Response 9 (Synthetic 09 — Small business representative): Agree</li><li>Response 10 (Synthetic 10 — Parliamentary scrutiny researcher): Agree</li></ul><p>Show supporting statements</p><ul><li>Response 1 (Synthetic 01 — Constitutional lawyer): Parliament should publish a reasoned response within six months, while retaining the right to reject recommendations.</li><li>Response 2 (Synthetic 02 — Community organiser): A reasoned government response within six months would be a minimum safeguard.</li><li>Response 5 (Synthetic 05 — Local government practitioner): Councils should publish a response within six months, but a mandatory Westminster debate for every local assembly would be disproportionate.</li><li>Response 6 (Synthetic 06 — Public finance analyst): A six-month reasoned response is a practical accountability rule.</li><li>Response 7 (Synthetic 07 — Climate policy campaigner): A sufficiently supported recommendation should trigger a parliamentary debate and a public response within six months.</li><li>Response 9 (Synthetic 09 — Small business representative): I support a six-month written response and targeted compensation for lost earnings rather than an identical payment to everyone.</li><li>Response 10 (Synthetic 10 — Parliamentary scrutiny researcher): Its recommendations should remain advisory, with a reasoned government response within six months and explicit explanations for rejection.</li></ul><p>Show uncertain experts</p><ul><li>Response 3 (Synthetic 03 — Sampling statistician): Unable to judge</li><li>Response 8 (Synthetic 08 — Rural services advocate): Unable to judge</li></ul><p>Show uncertain statements</p><ul><li>Response 3 (Synthetic 03 — Sampling statistician): I cannot judge whether six months is the right response deadline without evidence about the workload.</li><li>Response 8 (Synthetic 08 — Rural services advocate): I am unsure whether six months is feasible for every proposal.</li></ul><p>🟩 Claim 4: <strong>All participants should receive payment for their time.</strong></p><p>People making this claim: <strong>8 of 10</strong></p><p>Show supporting experts</p><ul><li>Response 1 (Synthetic 01 — Constitutional lawyer): Agree</li><li>Response 2 (Synthetic 02 — Community organiser): Agree</li><li>Response 3 (Synthetic 03 — Sampling statistician): Agree</li><li>Response 4 (Synthetic 04 — Disability access researcher): Agree</li><li>Response 5 (Synthetic 05 — Local government practitioner): Agree</li><li>Response 7 (Synthetic 07 — Climate policy campaigner): Agree</li><li>Response 8 (Synthetic 08 — Rural services advocate): Agree</li><li>Response 10 (Synthetic 10 — Parliamentary scrutiny researcher): Agree</li></ul><p>Show supporting statements</p><ul><li>Response 1 (Synthetic 01 — Constitutional lawyer): Pay participants and cover caring costs so participation is possible for people without spare income.</li><li>Response 2 (Synthetic 02 — Community organiser): Pay for time, childcare and interpreters, and allow community groups to challenge gaps in the panel.</li><li>Response 3 (Synthetic 03 — Sampling statistician): Paying participants is essential to reduce selection bias, but money alone does not solve nonresponse.</li><li>Response 4 (Synthetic 04 — Disability access researcher): Fund accessible venues, personal assistance, transport, communication support and caring costs, alongside payment for time.</li><li>Response 5 (Synthetic 05 — Local government practitioner): Pay expenses and a modest attendance allowance.</li><li>Response 7 (Synthetic 07 — Climate policy campaigner): Pay all participants and their access costs.</li><li>Response 8 (Synthetic 08 — Rural services advocate): Stratify recruitment by geography and deprivation, cover travel and replacement caring costs, and pay for participants’ time.</li><li>Response 10 (Synthetic 10 — Parliamentary scrutiny researcher): Pay participants and cover access needs.</li></ul><p>Show opposing experts</p><ul><li>Response 6 (Synthetic 06 — Public finance analyst): Disagree</li><li>Response 9 (Synthetic 09 — Small business representative): Disagree</li></ul><p>Show opposing statements</p><ul><li>Response 6 (Synthetic 06 — Public finance analyst): I am not convinced that every participant should receive an attendance payment in addition to expenses; test whether targeted income replacement improves inclusion at reasonable cost.</li><li>Response 9 (Synthetic 09 — Small business representative): I support a six-month written response and targeted compensation for lost earnings rather than an identical payment to everyone.</li></ul>",
+  "status": "Ten round-one responses submitted. Curated synthesis not yet saved: live round-scoped save endpoint returns 404. Rounds two and three not run."
+}
