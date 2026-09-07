@@ -3011,6 +3011,7 @@ async def synthesise_committee(
 
     # Also store a text synthesis for backwards compatibility
     active_round.synthesis = _render_synthesis_text(result)
+    active_round.context_settings = {**(active_round.context_settings or {}), "synthesis_published": False}
 
     # If AI-assisted, store generated probes as FollowUp records
     if flow_mode == FlowMode.AI_ASSISTED and result.follow_up_probes:
@@ -3326,6 +3327,7 @@ async def _run_synthesis_job(
         db.add(new_version)
 
         round_obj.synthesis = synthesis_text
+        round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
         round_obj.synthesis_json = synthesis_json_data
 
         db.commit()
@@ -4157,6 +4159,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     )
     db.add(new_version)
     round_obj.synthesis = synthesis_text
+    round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
     round_obj.synthesis_json = synthesis_json_data
     db.commit()
     db.refresh(new_version)
@@ -4347,6 +4350,7 @@ async def generate_synthesis_for_round(
         )
         db.add(new_version)
         round_obj.synthesis = synthesis_text
+        round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
         round_obj.synthesis_json = synthesis_json_data
         db.commit()
         db.refresh(new_version)
@@ -4491,6 +4495,7 @@ def activate_synthesis_version(
     round_obj = db.query(RoundModel).filter(RoundModel.id == version.round_id).first()
     if round_obj:
         round_obj.synthesis = version.synthesis
+        round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
         round_obj.synthesis_json = version.synthesis_json
 
     db.commit()

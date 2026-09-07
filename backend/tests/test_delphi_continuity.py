@@ -74,6 +74,6 @@ def test_publication_is_explicit_and_admin_only(client, admin_headers, participa
         db.get(FormModel, form['id']).allow_public_responses = True
         db.commit()
     assert client.post(f'/forms/{form["id"]}/next_round', json={}, headers=admin_headers).status_code == 200
-    assert client.get('/public/forms/PUBLISHDELPHI').json()['previous_round_synthesis'] == ''
+    assert client.get(f'/public/forms/{form["join_code"]}').json()['previous_round_synthesis'] == ''
     client.post(base + '/synthesis_publication', json={'published':True}, headers=admin_headers)
-    assert client.get('/public/forms/PUBLISHDELPHI').json()['previous_round_synthesis'] == '<p>Reviewed evidence</p>'
+    assert client.get(f'/public/forms/{form["join_code"]}').json()['previous_round_synthesis'] == '<p>Reviewed evidence</p>'

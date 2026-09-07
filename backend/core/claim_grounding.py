@@ -40,3 +40,6 @@ def ground_claim(claim, sources, labels):
         claim[group + '_experts'] = [members.get(index, f'Response {index} ({labels[index - 1]}): {stance}') for index in unique]
         claim[group + '_statements'] = list(dict.fromkeys(value for index in unique for value in quotes.get(index, [])))
     claim['people'] = f"{len(claim['supporting_experts'])} of {len(sources)}"
+    claim['status'] = ('Clear disagreement' if claim['opposing_experts'] else
+                       'Uncontested' if claim['supporting_experts'] and not claim['uncertain_experts'] else
+                       'Questionable')
