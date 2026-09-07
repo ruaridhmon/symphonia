@@ -412,6 +412,16 @@
       return;
     }
     updateLoadingState();
+    // Keep legacy participant pagination wording consistent without changing saving.
+    Array.prototype.forEach.call(document.querySelectorAll('main button'), function (button) {
+      var value = clean(button.textContent);
+      if (value !== 'Save & Next' && value !== 'Previous') return;
+      Array.prototype.forEach.call(button.childNodes, function (node) {
+        if (node.nodeType === 3 && clean(node.textContent) === value) {
+          node.textContent = value === 'Previous' ? 'Back' : 'Continue';
+        }
+      });
+    });
     if (!isRoundTwo()) {
       cleanupUi();
       return;

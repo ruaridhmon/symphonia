@@ -6,6 +6,22 @@ import { JSDOM } from 'jsdom';
 const script = readFileSync(new URL('../dist/delphi-round-two-ui.js', import.meta.url), 'utf8');
 const settle = () => new Promise(resolve => setTimeout(resolve, 180));
 
+test('legacy participant navigation says Back and Continue without replacing controls', async () => {
+  const dom = page('/public/session/legacy');
+  try {
+    dom.window.document.body.innerHTML = '<main><button><svg></svg>Previous</button><button>Save &amp; Next</button></main>';
+    const buttons = [...dom.window.document.querySelectorAll('button')];
+    let clicks = 0;
+    buttons[1].addEventListener('click', () => clicks++);
+    await settle();
+    assert.equal(buttons[0].textContent, 'Back');
+    assert.equal(buttons[1].textContent, 'Continue');
+    assert.ok(buttons[0].querySelector('svg'));
+    buttons[1].click();
+    assert.equal(clicks, 1);
+  } finally { dom.window.close(); }
+});
+
 test('submitted responses show saved comments, not an add-comment input or submit action', async () => {
   const dom = page('/public/session/submitted');
   try {
