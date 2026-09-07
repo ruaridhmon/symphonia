@@ -24,7 +24,7 @@ function draw(root:HTMLElement) {
   if(selected===1){narrative.append(el('h3','Different starting points'),el('p','Eight roles bring different priorities: capacity, fairness, worker protection, fiscal flexibility and public accountability. Four candidate claims are distilled from their proposals; no agreement percentage is inferred from these paragraphs.'));}
   if(selected===2){narrative.append(el('h3','The first ratings reveal the fault lines'),el('p','Human appeals have broad support. The staffing earmark splits the panel evenly. Five respondents favour universal model disclosure, while others question whether it is the right route to accountability.'));}
   if(selected===3){narrative.append(el('h3','Common ground, with questions still open'),el('p','All eight support human appeal; seven reject universal model disclosure. Routine automation gains support but remains below the threshold. The staffing earmark stays split 4–4: protecting staff versus keeping budgets flexible.'));
-    const proposed=el('details','','demo-proposal');proposed.append(el('summary','A new proposal to test next'),el('p','Require independent model inspection, public evaluation reports and accessible explanations, with justified exceptions to public release of weights.'),el('p','Proposed from the discussion, not rated. It must receive a new claim identifier and a fresh baseline; the rejected claim’s votes cannot be transferred to it.'));narrative.append(proposed);
+
   }root.append(narrative);
   if(selected===3) {
     const matrix=el('details','','demo-matrix');matrix.append(el('summary','See the eight perspectives side by side'));

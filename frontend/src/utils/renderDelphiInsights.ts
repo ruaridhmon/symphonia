@@ -14,7 +14,7 @@ function category(row:Row) {
   if(row.votes[1]/row.answered>.5) return 'Leaning disagree';
   return 'Divided';
 }
-export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round[], responses:RoundWithResponses[], refresh?:()=>void, publish?: (questions:Record<string,unknown>[])=>Promise<void>) {
+export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round[], responses:RoundWithResponses[], refresh?:()=>void, publish?: (questions:(string|Record<string,unknown>)[])=>Promise<void>) {
   const rows=ratingProgress(round,rounds,responses);
   const priorOpen=new Set(Array.from(root.querySelectorAll('details[open]')).map(d=>(d as HTMLElement).dataset.key));
   const filter=root.dataset.filter || 'All claims';

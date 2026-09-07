@@ -53,7 +53,8 @@ function page(path = '/') {
   };
   const close = dom.window.close.bind(dom.window);
   dom.window.close = () => { observers.forEach(observer => observer.disconnect()); close(); };
-  dom.window.eval(script);
+  dom.window.__roundApi = {g:async()=>[{round_number:1,questions:[]}]};
+  dom.window.eval(script.replace("import('/assets/rounds-CU08geHs.js')", 'Promise.resolve(window.__roundApi)'));
   return dom;
 }
 
@@ -84,7 +85,7 @@ test('activates after SPA navigation; comment is a single accessible growing inp
     about.open = true;
     const input = window.document.querySelector('textarea');
     assert.equal(input.rows, 1);
-    assert.equal(input.getAttribute('aria-label'), 'Comments or clarification (optional)');
+    assert.equal(input.getAttribute('aria-label'), 'Justify your position (optional)');
     assert.equal(window.document.querySelectorAll('.delphi-r2-comment-toggle').length, 0);
     input.focus();
     assert.notEqual(window.getComputedStyle(window.document.querySelector('#delphi-round-two-actions')).display, 'none');
@@ -130,10 +131,11 @@ test('setup activates on internal navigation and creates exactly two fields per 
       return { ok: false, text: async () => 'Test: not opening a live round' };
     };
     window.history.pushState({}, '', '/admin/form/14/summary');
-    window.document.body.innerHTML = '<p>Round 2 of 2</p><button aria-controls="summary-round-setup"><div>Round setup</div><div>Open the next-round editor.</div></button>' +
+    window.document.body.innerHTML = '<p>Round 1 of 1</p><button aria-controls="summary-round-setup"><div>Round setup</div><div>Open the next-round editor.</div></button>' +
       [1, 2].map(n => `<div class="claim-evidence-claim"><h3 class="claim-evidence-claim-heading">🟩 Claim ${n}: Synthetic claim ${n}</h3></div>`).join('');
     await settle();
     window.document.querySelector('button').click();
+    await settle();
     const modal = window.document.querySelector('[role="dialog"]');
     assert.ok(modal);
     assert.match(modal.textContent, /Set up next Delphi round/);
@@ -146,7 +148,7 @@ test('setup activates on internal navigation and creates exactly two fields per 
     modal.querySelector('[data-start]').click();
     await settle();
     assert.equal(request.url, '/api/forms/14/next_round');
-    assert.equal(request.body.expected_round_number, 2);
+    assert.equal(request.body.expected_round_number, 1);
     assert.equal(request.body.questions.length, 4);
     assert.equal(request.body.questions[0].options.length, 6);
     assert.equal(request.body.questions[1].optional, true);

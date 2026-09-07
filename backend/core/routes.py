@@ -7892,6 +7892,12 @@ def put_expert_labels(
 # ---------------------------------------------------------
 
 
+def _delphi_claim_signature(questions):
+    return [(q.get("questionId"), q.get("sectionTitle"), q.get("label"), q.get("inputType"), q.get("options"))
+            for q in (questions or []) if isinstance(q, dict)
+            and str(q.get("questionId", "")).startswith("claim_") and isinstance(q.get("options"), list)]
+
+
 class RoundConfig(BaseModel):
     expected_round_number: int | None = None
     questions: list[Any] | None = None
@@ -8111,6 +8117,14 @@ def open_next_round(
     else:
         questions = base
 
+    baseline = db.query(RoundModel).filter_by(form_id=form_id, round_number=2).first()
+    fixed_claims = _delphi_claim_signature(baseline.questions) if baseline else []
+    delphi = bool(fixed_claims or _delphi_claim_signature(questions))
+    if delphi and next_number > 3:
+        raise HTTPException(status_code=409, detail="This Delphi ends after round 3.")
+    if fixed_claims and _delphi_claim_signature(questions) != fixed_claims:
+        raise HTTPException(status_code=409, detail="Round 3 must use the identical claims and rating options from round 2.")
+
     previous_synthesis = last.synthesis if last and last.synthesis else ""
 
     new = RoundModel(
@@ -8151,6 +8165,9 @@ def update_round_setup(
     if not round_obj:
         raise HTTPException(status_code=404, detail="Round not found")
     if payload.questions is not None:
+        fixed = _delphi_claim_signature(round_obj.questions)
+        if round_obj.round_number >= 2 and fixed and _delphi_claim_signature(payload.questions) != fixed:
+            raise HTTPException(status_code=409, detail="The Delphi claim set is fixed after round 1.")
         round_obj.questions = payload.questions
     if payload.context_settings is not None:
         round_obj.context_settings = payload.context_settings

@@ -93,3 +93,18 @@ def test_repeated_open_does_not_skip_a_round(client, admin_headers):
     reloaded = client.get(f'/forms/{form["id"]}/rounds', headers=admin_headers).json()
     assert reloaded[0]['is_active'] is True
     assert reloaded[1]['is_active'] is False
+
+
+def test_fixed_delphi_claims_and_three_round_limit(client, admin_headers):
+    form = create_form(client, admin_headers)
+    url = f'/forms/{form["id"]}/next_round'
+    questions = [{'questionId': 'claim_1_response', 'sectionTitle': 'Keep the original claim', 'label': 'Your response', 'inputType': 'single_select', 'options': ['Agree', 'Disagree']}]
+    second = client.post(url, json={'questions': questions}, headers=admin_headers)
+    assert second.status_code == 200
+    changed = [{**questions[0], 'sectionTitle': 'A different claim'}]
+    assert client.post(url, json={'questions': changed}, headers=admin_headers).status_code == 409
+    assert client.patch(f'/forms/{form["id"]}/rounds/{second.json()["id"]}', json={'questions': changed}, headers=admin_headers).status_code == 409
+    third = client.post(url, json={'questions': questions}, headers=admin_headers)
+    assert third.status_code == 200
+    assert third.json()['questions'] == questions
+    assert client.post(url, json={'questions': questions}, headers=admin_headers).status_code == 409

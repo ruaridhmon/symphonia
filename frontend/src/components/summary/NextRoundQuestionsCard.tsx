@@ -72,7 +72,7 @@ export default function NextRoundQuestionsCard({
             <div>
               <div className="text-sm font-semibold text-foreground">Next Delphi round</div>
               <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-                One response and one optional comment per claim. Review the previous feedback, then choose your position.
+                One response and one optional justification per claim. Review the previous feedback, then choose your position.
               </p>
             </div>
             {preparedQuestionCount > 0 ? (
