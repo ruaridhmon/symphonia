@@ -40,6 +40,8 @@ export default function SynthesisVersionPanel({
   if (!displayRound || synthesisVersions.length === 0) return null;
 
   return (
+    <details className="summary-disclosure">
+      <summary><span>Version history</span><small>Review drafts and published versions</small></summary>
     <div className="card p-3">
       <h3
         className="text-[10px] font-semibold uppercase tracking-wider mb-2"
@@ -162,6 +164,7 @@ export default function SynthesisVersionPanel({
           )}
         </div>
     </div>
+    </details>
   );
 }
 

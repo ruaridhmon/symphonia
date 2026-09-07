@@ -82,6 +82,8 @@ export default function AISynthesisPanel({
   ] as const;
 
   return (
+    <details className="summary-disclosure">
+      <summary><span>Generate synthesis</span><small>Model, method and instructions</small></summary>
     <div
       className="card p-4"
       style={{
@@ -487,5 +489,6 @@ export default function AISynthesisPanel({
         </div>
       </div>
     </div>
+    </details>
   );
 }
