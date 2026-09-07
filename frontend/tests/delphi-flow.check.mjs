@@ -127,7 +127,7 @@ test('setup activates on internal navigation and creates exactly two fields per 
       return { ok: false, text: async () => 'Test: not opening a live round' };
     };
     window.history.pushState({}, '', '/admin/form/14/summary');
-    window.document.body.innerHTML = '<button>Round setup</button>' +
+    window.document.body.innerHTML = '<button><span>Round setup</span><span> Open the next-round editor.</span></button>' +
       [1, 2].map(n => `<div class="claim-evidence-claim"><h3 class="claim-evidence-claim-heading">🟩 Claim ${n}: Synthetic claim ${n}</h3></div>`).join('');
     await settle();
     window.document.querySelector('button').click();
