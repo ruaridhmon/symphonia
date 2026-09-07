@@ -1,0 +1,91 @@
+/* Results-first summary. Scoped to this workspace, including the legacy mirror. */
+body:has(aside[aria-label="Synthesis controls"]) main {
+  max-width: 1280px;
+  font-size: 14px;
+}
+body:has(aside[aria-label="Synthesis controls"]) main .card {
+  background: var(--background) !important;
+  box-shadow: none !important;
+  border-color: var(--border) !important;
+  border-radius: 12px;
+}
+body:has(aside[aria-label="Synthesis controls"]) main > div > section:first-of-type {
+  padding: 8px 0 24px !important;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+body:has(aside[aria-label="Synthesis controls"]) main > div > section:first-of-type h2 {
+  font-size: clamp(23px, 2.3vw, 30px);
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -.035em;
+}
+body:has(aside[aria-label="Synthesis controls"]) #summary-workspace-select {
+  font-size: 13px;
+  font-weight: 500;
+}
+aside[aria-label="Synthesis controls"] { position: static !important; font-size: 13px; }
+.summary-disclosure {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.summary-disclosure > summary {
+  position: relative;
+  cursor: pointer;
+  list-style: none;
+  padding: 17px 38px 17px 18px;
+  color: var(--foreground);
+}
+.summary-disclosure > summary::-webkit-details-marker { display: none; }
+.summary-disclosure > summary::after { content: '+'; position: absolute; right: 18px; top: 18px; font-size: 18px; color: var(--muted-foreground); }
+.summary-disclosure[open] > summary::after { content: '−'; }
+.summary-disclosure > summary > span { display: block; font-size: 14px; font-weight: 600; }
+.summary-disclosure > summary > small { display: block; margin-top: 4px; font-size: 12px; line-height: 1.5; color: var(--muted-foreground); }
+.summary-disclosure > .card { border: 0; border-top: 1px solid var(--border); border-radius: 0 !important; padding: 16px !important; }
+.summary-disclosure > .card > h3,
+.summary-disclosure > .card > div > div:first-child:has(.lucide-cpu) { display: none; }
+.summary-disclosure label > span { text-transform: none; letter-spacing: 0; font-size: 12px; }
+.summary-disclosure label:has(#model-select) > span:last-child { display: none; }
+.summary-disclosure select { min-height: 40px; font-size: 13px !important; }
+.summary-disclosure textarea { font-size: 13px !important; line-height: 1.6 !important; min-height: 100px !important; }
+.summary-disclosure .synthesis-mode-selector { display: grid !important; grid-template-columns: 1fr; gap: 6px !important; }
+.summary-disclosure .synthesis-mode-option { width: 100%; min-height: 38px; padding: 8px 10px !important; font-size: 12px !important; border-radius: 7px; }
+.summary-disclosure .synthesis-mode-emoji { display: none; }
+.summary-disclosure .synthesis-mode-name { font-size: 12px !important; }
+.summary-disclosure button { font-size: 12px; }
+.summary-disclosure .lucide-wallet-cards { display: none; }
+aside[aria-label="Synthesis controls"] > button { width: 100%; text-align: left; font-size: 13px; padding: 15px 18px; border-radius: 10px; }
+.summary-disclosure :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#delphi-recorded-progress { padding: 24px !important; }
+#delphi-recorded-progress h2 { display: inline; font-size: 19px; font-weight: 600; letter-spacing: -.025em; }
+#delphi-recorded-progress > button { float: right; margin: 3px 0 0 !important; }
+#delphi-recorded-progress > p { margin: 12px 0 18px; color: var(--muted-foreground); font-size: 13px; line-height: 1.6; }
+#delphi-recorded-progress article { padding: 19px 0 !important; }
+#delphi-recorded-progress article strong { display: block; font-size: 14px; font-weight: 550; line-height: 1.6; max-width: 65ch; }
+#delphi-recorded-progress article p { margin: 8px 0 12px; color: var(--muted-foreground); font-size: 12px; }
+#delphi-recorded-progress small { color: var(--muted-foreground); font-size: 11px; line-height: 1.6; }
+#delphi-recorded-progress > small { display: block; padding-top: 12px; border-top: 1px solid var(--border); }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-toolbar { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 8px 0 16px; font-size: 12px; }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-toolbar button { font-weight: 500; font-size: 12px; }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-preview-title h2 { font-size: 18px; }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-preview-title p { font-size: 12px; }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-claim { border-left-width: 2px; background: var(--background); box-shadow: none; border-radius: 8px; }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-claim-heading { padding: 18px 18px 12px; font-size: 14px; line-height: 1.6; }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-claim-heading strong { font-weight: 550; }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-meta { font-size: 12px; }
+body:has(aside[aria-label="Synthesis controls"]) .claim-evidence-group { border: 0; border-top: 1px solid var(--border); border-radius: 0; }
+@media (min-width: 1280px) {
+  body:has(aside[aria-label="Synthesis controls"]) main > div > .grid { grid-template-columns: minmax(0,1fr) 280px !important; gap: 28px; }
+}
+@media (max-width: 767px) {
+  #delphi-recorded-progress { padding: 16px !important; }
+  body:has(aside[aria-label="Synthesis controls"]) main > div > .grid { display: flex; flex-direction: column; }
+  aside[aria-label="Synthesis controls"] { order: -1; display: flex; flex-direction: column; gap: 8px; }
+  aside[aria-label="Synthesis controls"] > * { margin: 0 !important; }
+  .summary-disclosure > summary { padding-top: 12px; padding-bottom: 12px; }
+  .summary-disclosure > summary > small { display: none; }
+  .summary-disclosure > summary::after { top: 10px; }
+}

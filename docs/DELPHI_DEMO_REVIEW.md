@@ -37,3 +37,17 @@ Six of 36 claim ratings changed between the two rating rounds. The reasons are r
 Validation: seven focused tests, TypeScript checking and a full source build passed. Live browser totals for all four claims match the fixture. No production deployment was made.
 
 Methodological background: [CREDES reporting guidance](https://www.equator-network.org/reporting-guidelines/credes/) and [Delphi methodology: feedback, stability and stopping criteria](https://pmc.ncbi.nlm.nih.gov/articles/PMC8299905/).
+
+## Recommended claim lifecycle
+
+Keep a stable core of claims after the initial open round, while accepting proposals in a separate queue. The facilitator reviews LLM extraction against the original words; participants can correct misrepresentation before ratings count. New claims receive new identifiers. A change to meaning creates a new version with a fresh rating baseline, linked to its predecessor; editorial corrections are logged. Retired, split, and merged claims remain auditable. Never compare percentages across materially different wording or scales.
+
+For the next iteration, use round 1 for independent proposals, round 2 for validation and baseline ratings, and round 3 for reconsideration after balanced anonymous feedback. Each expert should see their previous rating, the full distribution, supporting and dissenting reasons, and evidence before re-rating. Ask why a view changed or stayed unchanged without pressuring dissenters. Late additions may need another round; disclose when they have had only one rating opportunity.
+
+Set the agreement definition, treatment of uncertainty, minimum participation, maximum rounds and stability rule before collecting ratings. Report agreement, disagreement, uncertainty and dropout separately. Stop on the declared rule; stable disagreement is a legitimate endpoint. Describe conclusions as consensus within the selected panel, with evidence quality and limitations, rather than automatically claiming scientific consensus.
+
+Methodological basis: Jünger et al., CREDES (2017), https://doi.org/10.1177/0269216317690685; Nasa et al. (2021), https://pmc.ncbi.nlm.nih.gov/articles/PMC8299905/.
+
+## Summary visual refinement
+
+Generation and version history use native keyboard-accessible disclosures, closed initially. Recorded ratings and source evidence remain the primary reading surface. The scoped stylesheet reduces competing backgrounds, oversized settings and heavy borders, and supports narrow screens. Source components and the versioned dev summary module share the disclosure structure. `frontend/scripts/polish-summary-bundle.cjs` reproduces the focused mirror patch; build validation uses a temporary output directory to preserve the existing deployed participant fixes.
