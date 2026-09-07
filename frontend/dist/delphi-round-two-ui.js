@@ -304,6 +304,7 @@
       'body.' + ROOT_CLASS + ' [data-question-key] textarea:focus{outline:none!important;border-color:#58cc02!important;box-shadow:0 0 0 3px color-mix(in srgb,#58cc02 16%,transparent)!important}',
       'body.' + ROOT_CLASS + ' input,body.' + ROOT_CLASS + ' textarea,body.' + ROOT_CLASS + ' select{font-size:16px!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-comment-native-heading{display:none!important}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-saved-comment{margin:.5rem 0;padding:12px 16px;border-radius:16px;background:var(--background);color:var(--muted-foreground);font-size:16px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}',
       'body.' + ROOT_CLASS + ' [data-question-key] textarea{display:none!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-composer textarea{display:block!important;box-sizing:border-box;width:100%;min-height:52px!important;max-height:180px;margin:.4rem 0!important;padding:14px 16px!important;border:1px solid var(--border)!important;border-radius:22px!important;background:var(--background)!important;line-height:24px!important;resize:none;overflow-y:auto;scroll-margin-bottom:110px;transition:border-color .12s ease,box-shadow .12s ease}',
       'body.' + ROOT_CLASS + ' .delphi-r2-composer textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 12%,transparent)!important}',
@@ -333,6 +334,16 @@
 
     var textarea = question.querySelector('textarea');
     if (!textarea) return;
+
+    if (textarea.readOnly || textarea.disabled) {
+      var saved = document.createElement('p');
+      saved.className = 'delphi-r2-saved-comment';
+      saved.setAttribute('aria-label', 'Submitted comment');
+      saved.textContent = textarea.value.trim() || 'No comment added';
+      question.appendChild(saved);
+      question.dataset.delphiCommentReady = 'true';
+      return;
+    }
 
     var label = Array.prototype.find.call(question.querySelectorAll('*'), function (element) {
       return element.children.length === 0 &&
@@ -508,7 +519,8 @@
         if (active > 0) current[active - 1].click();
       });
       actions.querySelector('#delphi-round-two-next').addEventListener('click', function () {
-        if (!currentClaimAnswered()) return;
+        var readOnly = Array.prototype.every.call(document.querySelectorAll('[data-question-key] input[type="radio"]'), function (radio) { return radio.disabled; });
+        if (!readOnly && !currentClaimAnswered()) return;
         var current = sectionButtons();
         var active = currentIndex(current);
         if (active < current.length - 1) {
@@ -522,11 +534,14 @@
 
     var back = actions.querySelector('#delphi-round-two-back');
     var next = actions.querySelector('#delphi-round-two-next');
+    var radios = Array.prototype.slice.call(document.querySelectorAll('[data-question-key] input[type="radio"]'));
+    var readOnly = radios.length > 0 && radios.every(function (radio) { return radio.disabled; });
     back.disabled = index === 0;
-    next.disabled = !currentClaimAnswered();
+    next.disabled = readOnly ? index === buttons.length - 1 : !currentClaimAnswered();
     setText(
       next,
-      index === buttons.length - 1 ? 'Submit response' : 'Continue'
+      readOnly ? (index === buttons.length - 1 ? 'Review complete' : 'Next claim') :
+        (index === buttons.length - 1 ? 'Submit response' : 'Continue')
     );
   }
 
