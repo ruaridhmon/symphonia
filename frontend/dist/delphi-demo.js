@@ -1595,6 +1595,7 @@ function sync() {
     }
   }
   const dashboard = location.pathname === "/" && Array.from(main?.querySelectorAll("h1") || []).some((h) => h.textContent === "Consultations");
+  if (!dashboard) document.getElementById("delphi-demo-link")?.remove();
   if (dashboard && !document.getElementById("delphi-demo-link")) {
     const link = el("a", "", "demo-dashboard-link");
     link.id = "delphi-demo-link";

@@ -70,7 +70,7 @@ export default function ResponsesAccordion({
 
   return (
     <div
-      className="card flex flex-col"
+      className="card flex flex-col ux-source-responses"
       style={{
         maxHeight: '70vh',
         backgroundColor: 'color-mix(in srgb, var(--muted) 12%, var(--card))',
