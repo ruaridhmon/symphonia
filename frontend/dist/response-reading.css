@@ -1,0 +1,17 @@
+.response-reading{max-width:760px;margin:0 auto;color:var(--foreground)}
+.rr-section{padding:28px 0;border-bottom:1px solid var(--border)}
+.rr-section:first-child{padding-top:8px}.rr-section:last-child{border-bottom:0}
+.rr-question-number{font-size:11px;color:var(--muted-foreground);letter-spacing:.07em;text-transform:uppercase;margin-bottom:9px}
+.rr-section h4{font-size:19px;line-height:1.55;font-weight:600;letter-spacing:-.025em;margin:0 0 16px;overflow-wrap:anywhere}
+.rr-rating{display:inline-block;border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:14px;font-weight:600;background:var(--muted);margin:0 0 18px}
+.rr-block h5{font-size:12px;font-weight:600;color:var(--muted-foreground);margin:0 0 7px}
+.rr-block p{font-size:16px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 18px}.rr-block:last-child p{margin-bottom:0}
+.ux-response-columns{grid-template-columns:300px minmax(0,1fr)!important;gap:36px!important}
+.ux-response-reader{padding:0 12px 30px 28px;border-left:1px solid var(--border)}
+.ux-response-list [role=button][aria-pressed]{padding:16px 12px!important;border-bottom:1px solid var(--border)!important;border-radius:5px!important;margin:0 0 3px}
+.ux-response-list [role=button][aria-pressed] .truncate{white-space:normal!important;overflow-wrap:anywhere;font-size:14px;line-height:1.5}
+.ux-response-list [role=button][aria-pressed] [class*=line-clamp]{-webkit-line-clamp:2;color:var(--muted-foreground)}
+.ux-response-reader h3{font-size:17px!important;line-height:1.5!important;font-weight:600}
+.ux-response-list>div:first-child label{border-radius:7px!important;background:transparent!important}
+@media(max-width:767px){.ux-response-reader{padding:0;border-left:0}.rr-section h4{font-size:18px}.rr-section{padding:24px 0}.rr-block p{font-size:16px;line-height:1.75}.ux-response-list [role=button][aria-pressed] .truncate{font-size:15px}.ux-response-reader h3{font-size:17px!important}}
+.rr-edit{display:flex;align-items:center;gap:6px;margin:0 0 14px auto;min-height:36px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--muted-foreground)}
