@@ -223,6 +223,10 @@ export default function StructuredSynthesis({
     probes: visibleSections?.probes ?? true,
   };
 
+  if (!agreements.length && !disagreements.length && !nuances.length && !probes.length && !narrative && convergenceScore == null && !Object.keys(confidence).length) {
+    return <div className="structured-synthesis"><p className="di-analysis-empty">No structured analysis items are available for this synthesis. See recorded participant ratings in the Synthesis view.</p></div>;
+  }
+
   return (
     <div className="structured-synthesis fade-in">
       {/* ── Overview Bar ── */}
