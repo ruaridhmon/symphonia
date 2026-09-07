@@ -67,6 +67,7 @@ function sync() {
     const grid=main.querySelector(':scope > div > .grid');if(grid){grid.before(root);draw(root);}
   }
   const dashboard=location.pathname==='/'&&Array.from(main?.querySelectorAll('h1')||[]).some(h=>h.textContent==='Consultations');
+  if(!dashboard)document.getElementById('delphi-demo-link')?.remove();
   if(dashboard&&!document.getElementById('delphi-demo-link')){
     const link=el('a','','demo-dashboard-link') as HTMLAnchorElement;link.id='delphi-demo-link';link.href='/admin/form/17/summary?demo=public-ai';
     link.append(el('strong','Explore a Delphi in action'),el('span','8 fictional experts · 3 rounds · see what changes and what stays divided →'));main!.prepend(link);

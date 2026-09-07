@@ -1,3 +1,5 @@
+import './legacy/usability'
+import './usability.css'
 import './legacy/delphiDemo'
 import './components/summary/summary-refinement.css'
 import React from 'react'
