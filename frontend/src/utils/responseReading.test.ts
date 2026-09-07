@@ -14,3 +14,7 @@ it('does not merge unrelated questions and retains zero-valued answers',()=>{
  const rows=responseSections(['First','Second'],{q1:0,q2:'An independent answer'});
  expect(rows).toHaveLength(2);expect(rows[0].blocks[0].text).toBe('0');
 });
+it('shows the open question instead of a generic section heading and hides empty metadata',()=>{
+ const rows=responseSections([{label:'What should we do?',sectionTitle:'Section 1',inputType:'textarea'}],{q1:{position:'Keep it simple.',citations:[],expertNominations:[]}});
+ expect(rows[0].title).toBe('What should we do?');expect(rows[0].blocks).toEqual([{label:'',text:'Keep it simple.'}]);
+});
