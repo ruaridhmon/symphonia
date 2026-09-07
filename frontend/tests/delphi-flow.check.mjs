@@ -153,3 +153,22 @@ test('setup activates on internal navigation and creates exactly two fields per 
     assert.equal(modal.querySelector('[data-start]').disabled, false);
   } finally { dom.window.close(); }
 });
+
+test('share keeps invitation primary and preserves copy handlers and secondary code access', async () => {
+  const dom = page();
+  try {
+    dom.window.document.body.innerHTML = '<div role="dialog" aria-label="Share consultation"><div><span>Code</span><span>DEMO</span></div><div><button>Copy link</button><button>Copy join code</button><a href="/share/DEMO">Open join page</a></div></div>';
+    const [copy, code] = dom.window.document.querySelectorAll('button');
+    let copied = 0;
+    copy.addEventListener('click', () => copied++);
+    await settle();
+    assert.equal(copy.textContent, 'Copy invitation link');
+    copy.click();
+    assert.equal(copied, 1);
+    assert.equal(code.style.display, 'none');
+    const more = Array.from(dom.window.document.querySelectorAll('button')).find(button => button.textContent === 'More options');
+    more.click();
+    assert.equal(code.style.display, '');
+    assert.equal(more.getAttribute('aria-expanded'), 'true');
+  } finally { dom.window.close(); }
+});

@@ -136,7 +136,14 @@
           label.style.borderColor = input.checked ? '#58cc02' : 'var(--border)';
           label.style.background = input.checked ? 'color-mix(in srgb,#58cc02 8%,var(--background))' : 'var(--background)';
         }
-        input.addEventListener('change', function () { previewAnswers[previewIndex] = option; renderPreview(); });
+        input.addEventListener('change', function () {
+          previewAnswers[previewIndex] = option;
+          preview.querySelectorAll('label').forEach(function (item) {
+            var selected = item.querySelector('input').checked;
+            item.style.borderColor = selected ? '#58cc02' : 'var(--border)';
+            item.style.background = selected ? 'color-mix(in srgb,#58cc02 8%,var(--background))' : 'var(--background)';
+          });
+        });
         label.append(input, document.createTextNode(option));
         highlight();
         preview.appendChild(label);

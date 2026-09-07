@@ -70,3 +70,10 @@ def test_publication_is_explicit_and_admin_only(client, admin_headers, participa
     assert client.get(f'/forms/{form["id"]}/rounds', headers=admin_headers).json()[0]['synthesis_published'] is True
     hidden = client.post(base + '/synthesis_publication', json={'published':False}, headers=admin_headers)
     assert hidden.json()['synthesis_published'] is False
+    with TestingSessionLocal() as db:
+        db.get(FormModel, form['id']).allow_public_responses = True
+        db.commit()
+    assert client.post(f'/forms/{form["id"]}/next_round', json={}, headers=admin_headers).status_code == 200
+    assert client.get('/public/forms/PUBLISHDELPHI').json()['previous_round_synthesis'] == ''
+    client.post(base + '/synthesis_publication', json={'published':True}, headers=admin_headers)
+    assert client.get('/public/forms/PUBLISHDELPHI').json()['previous_round_synthesis'] == '<p>Reviewed evidence</p>'

@@ -7294,7 +7294,7 @@ def get_public_form(
         "questions": active_round.questions or form.questions,
         "document_template": form.document_template,
         "join_code": form.join_code,
-        "previous_round_synthesis": previous_round.synthesis if previous_round else "",
+        "previous_round_synthesis": previous_round.synthesis if _synthesis_is_published(previous_round) else "",
         **_serialize_public_settings(form),
         **_serialize_consent_settings(form),
     }
