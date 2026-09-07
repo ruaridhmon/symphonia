@@ -70,9 +70,9 @@ export default function NextRoundQuestionsCard({
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="text-sm font-semibold text-foreground">Delphi Round 2</div>
+              <div className="text-sm font-semibold text-foreground">Next Delphi round</div>
               <p className="mt-1 text-xs leading-5" style={{ color: 'var(--muted-foreground)', marginBottom: 0 }}>
-                Re-rate each claim after group feedback. Disagreement and uncertainty open required clarification questions; revised wording stays optional.
+                One response and one optional comment per claim. Review the previous feedback, then choose your position.
               </p>
             </div>
             {preparedQuestionCount > 0 ? (
@@ -188,7 +188,7 @@ export default function NextRoundQuestionsCard({
             className="sm:self-auto"
             icon={<ArrowRight size={14} aria-hidden="true" />}
           >
-            {preparedQuestionCount > 0 ? 'Start Delphi Round 2' : hasQuestions ? 'Start next round' : 'Add a question first'}
+            {preparedQuestionCount > 0 ? 'Open next Delphi round' : hasQuestions ? 'Start next round' : 'Add a question first'}
           </LoadingButton>
         </div>
       </div>

@@ -11,18 +11,12 @@ export interface DelphiClaim {
 }
 
 const RATING_OPTIONS = [
-  'Strongly disagree',
-  'Disagree',
-  'Neither agree nor disagree',
-  'Agree',
   'Strongly agree',
-];
-
-const FOLLOW_UP_RATINGS = [
-  'Strongly disagree',
-  'Disagree',
+  'Agree',
   'Neither agree nor disagree',
-  "Don't know / unsure",
+  'Disagree',
+  'Strongly disagree',
+  'Unable to judge — need more information',
 ];
 
 function detailCount(container: Element, label: string): number | null {
@@ -84,7 +78,7 @@ function groupFeedback(claim: DelphiClaim): string {
   ].filter(Boolean).join(' · ');
 
   return [
-    counts ? `Round 1: ${counts}.` : 'Review the Round 1 result before re-rating.',
+    counts ? `Previous round: ${counts}.` : 'Review the previous round before re-rating.',
     'The previous-round summary contains the anonymised original excerpts.',
     'Consensus is not required: retain your view if the evidence still supports it.',
   ].join(' ');
@@ -106,53 +100,22 @@ export function buildDelphiRoundTwoQuestions(synthesisHtml: string): QuestionInp
     const sectionTitle = `Claim ${claim.number}: ${claim.text}`;
     return [
       baseQuestion({
-        label: 'Having reviewed the group feedback, how far do you agree with this claim?',
-        questionId: `${prefix}_rating`,
+        label: 'Your response',
+        questionId: `${prefix}_response`,
         sectionTitle,
         groupPrompt: groupFeedback(claim),
-        inputType: 'likert',
-        options: RATING_OPTIONS,
-        allowUnsure: true,
-        optional: false,
-      }),
-      baseQuestion({
-        label: 'What is the main source of your disagreement or uncertainty?',
-        questionId: `${prefix}_reason`,
-        sectionTitle,
         inputType: 'single_select',
-        options: [
-          'Evidence or interpretation',
-          'Wording of the claim',
-          'Practical feasibility',
-          'Values or priorities',
-          'Missing conditions or assumptions',
-          'Other',
-        ],
+        options: RATING_OPTIONS,
         optional: false,
-        conditionalOnQuestionId: `${prefix}_rating`,
-        conditionalOnOptions: FOLLOW_UP_RATINGS,
       }),
       baseQuestion({
-        label: 'Explain what would need to be clarified, evidenced, or changed.',
-        questionId: `${prefix}_explanation`,
+        label: 'Comments or clarification',
+        questionId: `${prefix}_comment`,
         sectionTitle,
         inputType: 'textarea',
-        rows: 4,
-        placeholder: 'Explain the precise point of disagreement or uncertainty',
-        optional: false,
-        conditionalOnQuestionId: `${prefix}_rating`,
-        conditionalOnOptions: FOLLOW_UP_RATINGS,
-      }),
-      baseQuestion({
-        label: 'If helpful, suggest revised wording for this claim.',
-        questionId: `${prefix}_revision`,
-        sectionTitle,
-        inputType: 'textarea',
-        rows: 3,
-        placeholder: 'Optional revised wording',
+        rows: 1,
+        placeholder: 'Add a comment… (optional)',
         optional: true,
-        conditionalOnQuestionId: `${prefix}_rating`,
-        conditionalOnOptions: FOLLOW_UP_RATINGS,
       }),
     ];
   });

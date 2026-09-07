@@ -1,7 +1,9 @@
 (function () {
   'use strict';
 
-  if (!/^\/admin\/form\/\d+\/summary\/?$/.test(window.location.pathname)) return;
+  function isSummaryPath() {
+    return /^\/admin\/form\/\d+\/summary\/?$/.test(window.location.pathname);
+  }
 
   var BUTTON_ID = 'delphi-round-two-prepare';
   var MODAL_ID = 'delphi-round-two-modal';
@@ -66,6 +68,7 @@
   }
 
   function openModal() {
+    if (!isSummaryPath()) return;
     var claims = claimData();
     if (!claims.length) {
       window.alert('No claims were found in the current synthesis.');
@@ -83,7 +86,7 @@
     dialog.style.cssText = 'max-width:640px;max-height:94vh;margin:2vh auto;background:var(--card);color:var(--foreground);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 80px rgba(15,23,42,.3);overflow:auto;';
     dialog.innerHTML =
       '<div style="display:flex;justify-content:space-between;gap:1rem;padding:1rem 1.1rem;border-bottom:1px solid var(--border)">' +
-        '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.1rem">Set up Delphi Round 2</h2>' +
+        '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.1rem">Set up next Delphi round</h2>' +
         '<p style="margin:.3rem 0 0;color:var(--muted-foreground);font-size:.85rem">' +
           claims.length + ' claims ready to review</p></div>' +
         '<button type="button" data-close aria-label="Close" style="flex:0 0 auto;height:36px;width:36px;border:1px solid var(--border);border-radius:9px;background:var(--background);color:var(--foreground);font-size:1.25rem">×</button>' +
@@ -103,7 +106,7 @@
       '</div>' +
       '<div style="display:flex;justify-content:flex-end;gap:.65rem;padding:1rem 1.1rem;border-top:1px solid var(--border)">' +
         '<button type="button" data-close style="padding:.65rem .9rem;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--foreground);font-weight:700">Cancel</button>' +
-        '<button type="button" data-start style="padding:.65rem .95rem;border:1px solid var(--accent);border-radius:10px;background:var(--accent);color:white;font-weight:800">Open Round Two</button>' +
+        '<button type="button" data-start style="padding:.65rem .95rem;border:1px solid var(--accent);border-radius:10px;background:var(--accent);color:white;font-weight:800">Open next round</button>' +
       '</div>';
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
@@ -122,7 +125,7 @@
       var button = event.currentTarget;
       var intro = clean(dialog.querySelector('[data-intro]')?.value || '');
       button.disabled = true;
-      button.textContent = 'Opening Round Two…';
+      button.textContent = 'Opening next round…';
       var formId = window.location.pathname.match(/\/admin\/form\/(\d+)\/summary/)?.[1];
       try {
         var token = localStorage.getItem('access_token') || '';
@@ -138,23 +141,27 @@
           body: JSON.stringify({
             questions: questionsFor(claims),
             context_settings: {
-              intro_title: 'Round 2: Review the claims',
+              intro_title: 'Review the claims',
               intro_body: intro,
               show_previous_response: true,
             },
           }),
         });
-        if (!response.ok) throw new Error((await response.text()) || 'Unable to open Round Two');
+        if (!response.ok) throw new Error((await response.text()) || 'Unable to open the next round');
         window.location.reload();
       } catch (error) {
         button.disabled = false;
-        button.textContent = 'Open Round Two';
-        window.alert(error instanceof Error ? error.message : 'Unable to open Round Two');
+        button.textContent = 'Open next round';
+        window.alert(error instanceof Error ? error.message : 'Unable to open the next round');
       }
     });
   }
 
   function attach() {
+    if (!isSummaryPath()) {
+      closeModal();
+      return;
+    }
     if (document.getElementById(BUTTON_ID)) return;
     if (!claimData().length) return;
     var roundButtons = Array.prototype.filter.call(document.querySelectorAll('button'), function (button) {
@@ -166,7 +173,7 @@
     if (!button) return;
 
     button.id = BUTTON_ID;
-    button.textContent = 'Set up Delphi Round 2';
+    button.textContent = 'Set up next Delphi round';
     button.addEventListener('click', function (event) {
       event.preventDefault();
       event.stopPropagation();
@@ -273,7 +280,7 @@
     var roundTwoQuestions =
       /Having reviewed the group feedback/i.test(prompts) ||
       (/Your response/i.test(prompts) && /Comments or clarification/i.test(prompts));
-    return buttons.length > 1 &&
+    return buttons.length > 0 &&
       (/\bRound\s*2\b/i.test(text) || roundTwoQuestions);
   }
 
@@ -297,18 +304,16 @@
       'body.' + ROOT_CLASS + ' [data-question-key] textarea:focus{outline:none!important;border-color:#58cc02!important;box-shadow:0 0 0 3px color-mix(in srgb,#58cc02 16%,transparent)!important}',
       'body.' + ROOT_CLASS + ' input,body.' + ROOT_CLASS + ' textarea,body.' + ROOT_CLASS + ' select{font-size:16px!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-comment-native-heading{display:none!important}',
-      'body.' + ROOT_CLASS + ' .delphi-r2-comment-toggle{display:inline-flex;align-items:center;gap:.45rem;margin:.35rem 0 .15rem;padding:.6rem .15rem;border:0;background:transparent;color:var(--accent);font:inherit;font-size:.95rem;font-weight:800;cursor:pointer}',
-      'body.' + ROOT_CLASS + ' .delphi-r2-comment-toggle::before{content:"+";display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:2px solid currentColor;border-radius:50%;font-size:1.05rem;line-height:1}',
-      'body.' + ROOT_CLASS + ' .delphi-r2-comment-open .delphi-r2-comment-toggle::before{content:"−"}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-saved-comment{margin:.5rem 0;padding:12px 16px;border-radius:16px;background:var(--background);color:var(--muted-foreground);font-size:16px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}',
       'body.' + ROOT_CLASS + ' [data-question-key] textarea{display:none!important}',
-      'body.' + ROOT_CLASS + ' .delphi-r2-comment-collapsed textarea{display:none!important}',
-      'body.' + ROOT_CLASS + ' .delphi-r2-comment-open textarea{display:block!important;min-height:96px!important;margin-top:.35rem;animation:delphi-r2-comment-in .18s ease-out}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-composer textarea{display:block!important;box-sizing:border-box;width:100%;min-height:52px!important;max-height:180px;margin:.4rem 0!important;padding:14px 16px!important;border:1px solid var(--border)!important;border-radius:22px!important;background:var(--background)!important;line-height:24px!important;resize:none;overflow-y:auto;scroll-margin-bottom:110px;transition:border-color .12s ease,box-shadow .12s ease}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-composer textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 12%,transparent)!important}',
       'body.' + ROOT_CLASS + '.delphi-r2-commenting #' + ACTIONS_ID + '{display:none!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-native-submit{display:none!important}',
       '#' + HEADER_ID + '{margin:.7rem 0 1rem}',
       '.delphi-r2-progress-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.55rem;font-size:.82rem;font-weight:800}',
       '.delphi-r2-progress-label{color:var(--foreground)}',
-      '.delphi-r2-progress-count{color:var(--muted-foreground)}',
+      '.delphi-r2-progress-count{color:var(--muted-foreground);white-space:nowrap;flex-shrink:0}',
       '.delphi-r2-track{height:12px;border-radius:999px;background:color-mix(in srgb,var(--foreground) 9%,transparent);overflow:hidden}',
       '.delphi-r2-fill{height:100%;border-radius:inherit;background:#58cc02;box-shadow:inset 0 -2px 0 rgba(47,125,0,.22);transition:width .24s ease}',
       '#' + ACTIONS_ID + '{position:fixed;left:50%;right:auto;bottom:0;transform:translateX(-50%);width:min(100%,896px);z-index:40;display:grid;grid-template-columns:minmax(86px,.3fr) minmax(170px,1fr);gap:.65rem;margin:0;padding:.7rem max(1rem,env(safe-area-inset-left)) calc(.7rem + env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-right));background:color-mix(in srgb,var(--card) 95%,transparent);border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(15,23,42,.08);backdrop-filter:blur(14px)}',
@@ -344,26 +349,25 @@
       heading.classList.add('delphi-r2-comment-native-heading');
     }
 
-    var toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.className = 'delphi-r2-comment-toggle';
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.textContent = 'Add a comment (optional)';
-    question.insertBefore(toggle, question.firstChild);
-
-    function setOpen(open, focus) {
-      question.classList.toggle('delphi-r2-comment-open', open);
-      question.classList.toggle('delphi-r2-comment-collapsed', !open);
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggle.textContent = open ? 'Hide comment' : 'Add a comment (optional)';
-      if (open && focus) {
-        window.setTimeout(function () { textarea.focus(); }, 40);
-      }
+    if (textarea.readOnly || textarea.disabled) {
+      var saved = document.createElement('p');
+      saved.className = 'delphi-r2-saved-comment';
+      saved.setAttribute('aria-label', 'Submitted comment');
+      saved.textContent = textarea.value.trim() || 'No comment added';
+      question.appendChild(saved);
+      question.dataset.delphiCommentReady = 'true';
+      return;
     }
+    question.classList.add('delphi-r2-composer');
+    textarea.rows = 1;
+    textarea.placeholder = 'Add a comment… (optional)';
+    textarea.setAttribute('aria-label', 'Comments or clarification (optional)');
 
-    toggle.addEventListener('click', function () {
-      setOpen(!question.classList.contains('delphi-r2-comment-open'), true);
-    });
+    function resize() {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(180, Math.max(52, textarea.scrollHeight + 2)) + 'px';
+    }
+    textarea.addEventListener('input', resize);
     textarea.addEventListener('focus', function () {
       document.body.classList.add('delphi-r2-commenting');
     });
@@ -374,7 +378,7 @@
     });
 
     question.dataset.delphiCommentReady = 'true';
-    setOpen(Boolean(textarea.value.trim()), false);
+    resize();
   }
 
   function currentClaimAnswered() {
@@ -402,7 +406,10 @@
       return;
     }
     updateLoadingState();
-    if (!isRoundTwo()) return;
+    if (!isRoundTwo()) {
+      cleanupUi();
+      return;
+    }
 
     var buttons = sectionButtons();
     if (!buttons.length) return;
@@ -465,7 +472,7 @@
     if (!header) {
       header = document.createElement('section');
       header.id = HEADER_ID;
-      header.setAttribute('aria-label', 'Round 2 progress');
+      header.setAttribute('aria-label', 'Claim review progress');
       header.innerHTML =
         '<div class="delphi-r2-progress-row">' +
           '<span class="delphi-r2-progress-label"></span>' +
@@ -511,7 +518,8 @@
         if (active > 0) current[active - 1].click();
       });
       actions.querySelector('#delphi-round-two-next').addEventListener('click', function () {
-        if (!currentClaimAnswered()) return;
+        var readOnly = Array.prototype.every.call(document.querySelectorAll('[data-question-key] input[type="radio"]'), function (radio) { return radio.disabled; });
+        if (!readOnly && !currentClaimAnswered()) return;
         var current = sectionButtons();
         var active = currentIndex(current);
         if (active < current.length - 1) {
@@ -525,11 +533,14 @@
 
     var back = actions.querySelector('#delphi-round-two-back');
     var next = actions.querySelector('#delphi-round-two-next');
+    var radios = Array.prototype.slice.call(document.querySelectorAll('[data-question-key] input[type="radio"]'));
+    var readOnly = radios.length > 0 && radios.every(function (radio) { return radio.disabled; });
     back.disabled = index === 0;
-    next.disabled = !currentClaimAnswered();
+    next.disabled = readOnly ? index === buttons.length - 1 : !currentClaimAnswered();
     setText(
       next,
-      index === buttons.length - 1 ? 'Submit response' : 'Continue'
+      readOnly ? (index === buttons.length - 1 ? 'Review complete' : 'Next claim') :
+        (index === buttons.length - 1 ? 'Submit response' : 'Continue')
     );
   }
 
