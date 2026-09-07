@@ -53,7 +53,7 @@ export function ratingProgress(round: Round, rounds: Round[], responses: RoundWi
       const n = v.slice(0,5).reduce((a,b)=>a+b,0);
       return [{round:r.round_number, votes:v, n, percent:n ? 100*v[0]/n : null}];
     });
-    const commentIndex = round.questions.findIndex(p => typeof p === 'object' && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify|what led/i.test(String(p.label)));
+    const commentIndex = round.questions.findIndex(p => typeof p === 'object' && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify|what led|explain your position/i.test(String(p.label)));
     const stableEmails = (rs: RoundWithResponses | undefined) => {
       const map = new Map<string, typeof rs extends undefined ? never : import('../types/summary').StructuredResponse>();
       const duplicate = new Set<string>();

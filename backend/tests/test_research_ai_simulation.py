@@ -15,7 +15,7 @@ OPTIONS = ['Strongly agree','Agree','Neither agree nor disagree','Disagree','Str
 def questions():
     return [q for i,claim in enumerate(FIXTURE['claims'],1) for q in [
         {'questionId':f'claim_{i}_response','sectionTitle':f'Claim {i}: {claim}','label':'Your response','inputType':'single_select','options':OPTIONS,'optional':False},
-        {'questionId':f'claim_{i}_comment','sectionTitle':f'Claim {i}: {claim}','label':'What led you to this view?','inputType':'textarea','optional':True}]]
+        {'questionId':f'claim_{i}_comment','sectionTitle':f'Claim {i}: {claim}','label':'Explain your position','inputType':'textarea','optional':True}]]
 
 def synthesis(number):
     out=['<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p>']

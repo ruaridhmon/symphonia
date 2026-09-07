@@ -365,7 +365,7 @@
         {
           "questionId": "claim_1_comment",
           "sectionTitle": "Claim 1: Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
-          "label": "What led you to this view?",
+          "label": "Explain your position",
           "inputType": "textarea",
           "optional": true
         },
@@ -387,7 +387,7 @@
         {
           "questionId": "claim_2_comment",
           "sectionTitle": "Claim 2: AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
-          "label": "What led you to this view?",
+          "label": "Explain your position",
           "inputType": "textarea",
           "optional": true
         },
@@ -409,7 +409,7 @@
         {
           "questionId": "claim_3_comment",
           "sectionTitle": "Claim 3: At least 20% of a research team’s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
-          "label": "What led you to this view?",
+          "label": "Explain your position",
           "inputType": "textarea",
           "optional": true
         },
@@ -431,7 +431,7 @@
         {
           "questionId": "claim_4_comment",
           "sectionTitle": "Claim 4: Every prompt, intermediate output and dataset used by research AI must be released publicly.",
-          "label": "What led you to this view?",
+          "label": "Explain your position",
           "inputType": "textarea",
           "optional": true
         }
@@ -469,7 +469,7 @@
         {
           "questionId": "claim_1_comment",
           "sectionTitle": "Claim 1: Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
-          "label": "What led you to this view?",
+          "label": "Explain your position",
           "inputType": "textarea",
           "optional": true
         },
@@ -491,7 +491,7 @@
         {
           "questionId": "claim_2_comment",
           "sectionTitle": "Claim 2: AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
-          "label": "What led you to this view?",
+          "label": "Explain your position",
           "inputType": "textarea",
           "optional": true
         },
@@ -513,7 +513,7 @@
         {
           "questionId": "claim_3_comment",
           "sectionTitle": "Claim 3: At least 20% of a research team’s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
-          "label": "What led you to this view?",
+          "label": "Explain your position",
           "inputType": "textarea",
           "optional": true
         },
@@ -535,7 +535,7 @@
         {
           "questionId": "claim_4_comment",
           "sectionTitle": "Claim 4: Every prompt, intermediate output and dataset used by research AI must be released publicly.",
-          "label": "What led you to this view?",
+          "label": "Explain your position",
           "inputType": "textarea",
           "optional": true
         }

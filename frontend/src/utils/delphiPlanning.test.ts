@@ -5,7 +5,7 @@ const questions=[{questionId:'claim_1_response',sectionTitle:'Keep this exact cl
 const r:Round={id:2,round_number:2,is_active:true,synthesis:'',questions};
 it('preserves every frozen claim, identifier and scale, and relabels justification',()=>{
  const result=buildFixedDelphiRound(r,[r],[]);expect(result).toHaveLength(2);
- expect(result[0]).toMatchObject(questions[0]);expect(result[1]).toMatchObject({questionId:'claim_1_comment',label:'What led you to this view?'});
+ expect(result[0]).toMatchObject(questions[0]);expect(result[1]).toMatchObject({questionId:'claim_1_comment',label:'Explain your position'});
  expect(questions[1].label).toBe('Comments or clarification');
 });
 it('prevents a fourth round and a duplicate third round',()=>{

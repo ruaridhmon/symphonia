@@ -9,7 +9,7 @@ export function renderDelphiPlanner(root:HTMLElement,round:Round,rounds:Round[],
   box.append(detail);
   try {
     const questions=buildFixedDelphiRound(round,rounds.filter(r=>r.round_number<=2),responses);
-    questions.filter(q=>typeof q==='object'&&Array.isArray(q.options)).forEach(q=>{if(typeof q==='string')return;const item=el('details');item.append(el('summary',String(q.sectionTitle||q.label)),el('p',String(q.groupPrompt)),el('p',(q.options as string[]).join(' · ')),el('p','What led you to this view? — explain the reasoning behind your rating.'));detail.append(item);});
+    questions.filter(q=>typeof q==='object'&&Array.isArray(q.options)).forEach(q=>{if(typeof q==='string')return;const item=el('details');item.append(el('summary',String(q.sectionTitle||q.label)),el('p',String(q.groupPrompt)),el('p',(q.options as string[]).join(' · ')),el('p','Explain your position — why do you agree or disagree? Share the reasoning or evidence behind your answer.'));detail.append(item);});
     if(publish&&!rounds.some(r=>r.round_number>=3)){const open=el('button','Open round 3') as HTMLButtonElement;open.type='button';open.onclick=async()=>{open.disabled=true;try{await publish(questions);}catch(e){detail.append(el('p',(e as Error).message));open.disabled=false;}};detail.append(open);}else detail.append(el('p',rounds.some(r=>r.round_number>=3)?'Round 3 already exists.':'Simulation preview only.'));
   }catch(e){detail.append(el('p',(e as Error).message));}
 }

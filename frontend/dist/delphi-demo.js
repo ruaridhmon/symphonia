@@ -1,4 +1,4 @@
-// src/demos/public-ai-results.json
+// frontend/src/demos/public-ai-results.json
 var public_ai_results_default = {
   fixture: {
     title: "Who decides? AI in UK public services",
@@ -1168,7 +1168,7 @@ var public_ai_results_default = {
   ]
 };
 
-// src/demos/research-ai-results.json
+// frontend/src/demos/research-ai-results.json
 var research_ai_results_default = {
   fixture: {
     title: "How should UK university research teams use AI?",
@@ -1536,7 +1536,7 @@ var research_ai_results_default = {
         {
           questionId: "claim_1_comment",
           sectionTitle: "Claim 1: Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
-          label: "What led you to this view?",
+          label: "Explain your position",
           inputType: "textarea",
           optional: true
         },
@@ -1558,7 +1558,7 @@ var research_ai_results_default = {
         {
           questionId: "claim_2_comment",
           sectionTitle: "Claim 2: AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
-          label: "What led you to this view?",
+          label: "Explain your position",
           inputType: "textarea",
           optional: true
         },
@@ -1580,7 +1580,7 @@ var research_ai_results_default = {
         {
           questionId: "claim_3_comment",
           sectionTitle: "Claim 3: At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
-          label: "What led you to this view?",
+          label: "Explain your position",
           inputType: "textarea",
           optional: true
         },
@@ -1602,7 +1602,7 @@ var research_ai_results_default = {
         {
           questionId: "claim_4_comment",
           sectionTitle: "Claim 4: Every prompt, intermediate output and dataset used by research AI must be released publicly.",
-          label: "What led you to this view?",
+          label: "Explain your position",
           inputType: "textarea",
           optional: true
         }
@@ -1640,7 +1640,7 @@ var research_ai_results_default = {
         {
           questionId: "claim_1_comment",
           sectionTitle: "Claim 1: Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
-          label: "What led you to this view?",
+          label: "Explain your position",
           inputType: "textarea",
           optional: true
         },
@@ -1662,7 +1662,7 @@ var research_ai_results_default = {
         {
           questionId: "claim_2_comment",
           sectionTitle: "Claim 2: AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
-          label: "What led you to this view?",
+          label: "Explain your position",
           inputType: "textarea",
           optional: true
         },
@@ -1684,7 +1684,7 @@ var research_ai_results_default = {
         {
           questionId: "claim_3_comment",
           sectionTitle: "Claim 3: At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
-          label: "What led you to this view?",
+          label: "Explain your position",
           inputType: "textarea",
           optional: true
         },
@@ -1706,7 +1706,7 @@ var research_ai_results_default = {
         {
           questionId: "claim_4_comment",
           sectionTitle: "Claim 4: Every prompt, intermediate output and dataset used by research AI must be released publicly.",
-          label: "What led you to this view?",
+          label: "Explain your position",
           inputType: "textarea",
           optional: true
         }
@@ -2350,7 +2350,7 @@ var research_ai_results_default = {
   ]
 };
 
-// src/utils/answers.ts
+// frontend/src/utils/answers.ts
 function isRecord(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
@@ -2376,7 +2376,7 @@ function coerceAnswerPosition(value) {
   return "";
 }
 
-// src/utils/delphiProgress.ts
+// frontend/src/utils/delphiProgress.ts
 var stanceLabels = ["Agree", "Disagree", "Neutral", "Unable to judge", "Unrecognised", "Not answered"];
 function stance(value) {
   const v = value.trim().toLowerCase();
@@ -2420,7 +2420,7 @@ function ratingProgress(round, rounds, responses) {
       const n = v.slice(0, 5).reduce((a, b) => a + b, 0);
       return [{ round: r.round_number, votes: v, n, percent: n ? 100 * v[0] / n : null }];
     });
-    const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify|what led/i.test(String(p.label)));
+    const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify|what led|explain your position/i.test(String(p.label)));
     const stableEmails = (rs) => {
       const map = /* @__PURE__ */ new Map();
       const duplicate = /* @__PURE__ */ new Set();
@@ -2471,7 +2471,7 @@ function synthesisProvenanceNote(round, rounds) {
   return null;
 }
 
-// src/utils/delphiPlanning.ts
+// frontend/src/utils/delphiPlanning.ts
 function buildFixedDelphiRound(round, rounds, responses) {
   if (round.round_number !== 2 || rounds.some((r) => r.round_number >= 3)) throw new Error("This Delphi has three rounds. No further rating round is available.");
   const baseline = rounds.find((r) => r.round_number === 2) || round;
@@ -2481,12 +2481,12 @@ function buildFixedDelphiRound(round, rounds, responses) {
     if (typeof q === "string") return q;
     const row = rows.find((r) => r.key === String(q.questionId));
     if (row) return { ...q, groupPrompt: [`Round 2: ${row.votes[0]} agree, ${row.votes[1]} disagree, ${row.votes[2]} neutral, ${row.votes[3]} unable to judge; ${row.answered} answered.`, "Review the other participants\u2019 reasoning, then rate this same claim again. You do not need to change your mind.", ...row.evidence.filter((e) => e.comment).map((e) => `${e.position}: ${e.comment}`)].join("\n") };
-    if (/comment|clarification|justify|what led/i.test(String(q.label))) return { ...q, label: "What led you to this view?", placeholder: "A sentence or two is enough. Mention evidence, experience or a concern." };
+    if (/comment|clarification|justify|what led|explain your position/i.test(String(q.label))) return { ...q, label: "Explain your position", placeholder: "Why do you agree or disagree? Share the reasoning or evidence behind your answer." };
     return { ...q };
   });
 }
 
-// src/utils/renderDelphiPlanner.ts
+// frontend/src/utils/renderDelphiPlanner.ts
 var el = (tag, text = "") => {
   const n = document.createElement(tag);
   n.textContent = text;
@@ -2509,7 +2509,7 @@ function renderDelphiPlanner(root, round, rounds, responses, publish) {
     questions.filter((q) => typeof q === "object" && Array.isArray(q.options)).forEach((q) => {
       if (typeof q === "string") return;
       const item = el("details");
-      item.append(el("summary", String(q.sectionTitle || q.label)), el("p", String(q.groupPrompt)), el("p", q.options.join(" \xB7 ")), el("p", "What led you to this view? \u2014 explain the reasoning behind your rating."));
+      item.append(el("summary", String(q.sectionTitle || q.label)), el("p", String(q.groupPrompt)), el("p", q.options.join(" \xB7 ")), el("p", "Explain your position \u2014 why do you agree or disagree? Share the reasoning or evidence behind your answer."));
       detail.append(item);
     });
     if (publish && !rounds.some((r) => r.round_number >= 3)) {
@@ -2531,7 +2531,7 @@ function renderDelphiPlanner(root, round, rounds, responses, publish) {
   }
 }
 
-// src/utils/renderDelphiInsights.ts
+// frontend/src/utils/renderDelphiInsights.ts
 var colors = ["#137c70", "#b34d60", "#94a3b8", "#c28a2a", "#8b5fbf", "#e2e8f0"];
 var node = (tag, text = "", cls = "") => {
   const n = document.createElement(tag);
@@ -2700,7 +2700,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   root.append(methods);
 }
 
-// src/legacy/delphiDemo.ts
+// frontend/src/legacy/delphiDemo.ts
 var example = public_ai_results_default;
 var el2 = (tag, text = "", cls = "") => {
   const n = document.createElement(tag);

@@ -46,12 +46,12 @@
           optional: false,
         }),
         baseQuestion({
-          label: 'What led you to this view?',
+          label: 'Explain your position',
           questionId: prefix + '_comment',
           sectionTitle: sectionTitle,
           inputType: 'textarea',
           rows: 2,
-          placeholder: 'A sentence or two is enough. Mention evidence, experience or a concern.',
+          placeholder: 'Why do you agree or disagree? Share the reasoning or evidence behind your answer.',
           optional: true,
         }),
       ]);
@@ -166,10 +166,10 @@
       });
       var comment = document.createElement('textarea');
       comment.rows = 1;
-      comment.placeholder = 'A sentence or two is enough. Mention evidence, experience or a concern.';
-      comment.setAttribute('aria-label', 'What led you to this view? — preview only');
+      comment.placeholder = 'Why do you agree or disagree? Share the reasoning or evidence behind your answer.';
+      comment.setAttribute('aria-label', 'Explain your position — preview only');
       comment.style.cssText = 'width:100%;box-sizing:border-box;min-height:52px;padding:14px 16px;margin:.7rem 0;border:1px solid var(--border);border-radius:22px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px;resize:none';
-      var reasonLabel = document.createElement('p'); reasonLabel.textContent = 'What led you to this view? (optional)'; reasonLabel.style.cssText = 'font-size:15px;margin:14px 0 0;font-weight:600'; preview.appendChild(reasonLabel);
+      var reasonLabel = document.createElement('p'); reasonLabel.textContent = 'Explain your position (optional)'; reasonLabel.style.cssText = 'font-size:15px;margin:14px 0 0;font-weight:600'; preview.appendChild(reasonLabel);
       preview.appendChild(comment);
       var navigation = document.createElement('div');
       navigation.style.cssText = 'display:flex;gap:.65rem';
@@ -417,7 +417,7 @@
 
     var label = Array.prototype.find.call(question.querySelectorAll('*'), function (element) {
       return element.children.length === 0 &&
-        /^(Comments or clarification|Justify your position|What led you to this view\?)$/.test(clean(element.textContent));
+        /^(Comments or clarification|Justify your position|What led you to this view\?|Explain your position)$/.test(clean(element.textContent));
     });
     if (label) {
       var heading = label;
@@ -439,10 +439,10 @@
       return;
     }
     question.classList.add('delphi-r2-composer');
-    var reasonLabel = document.createElement('p'); reasonLabel.className = 'delphi-reason-label'; reasonLabel.textContent = 'What led you to this view? (optional)'; reasonLabel.style.cssText = 'font-size:15px;line-height:1.5;margin:12px 0 6px;font-weight:600'; textarea.before(reasonLabel);
+    var reasonLabel = document.createElement('p'); reasonLabel.className = 'delphi-reason-label'; reasonLabel.textContent = 'Explain your position (optional)'; reasonLabel.style.cssText = 'font-size:15px;line-height:1.5;margin:12px 0 6px;font-weight:600'; textarea.before(reasonLabel);
     textarea.rows = 2;
-    textarea.placeholder = 'A sentence or two is enough. Mention evidence, experience or a concern.';
-    textarea.setAttribute('aria-label', 'What led you to this view? (optional)');
+    textarea.placeholder = 'Why do you agree or disagree? Share the reasoning or evidence behind your answer.';
+    textarea.setAttribute('aria-label', 'Explain your position (optional)');
 
     function resize() {
       textarea.style.height = 'auto';
