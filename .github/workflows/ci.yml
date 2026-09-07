@@ -62,8 +62,8 @@ jobs:
         env:
           GIT_TERMINAL_PROMPT: "0"
 
-      - name: Test round synthesis editor persistence
-        run: python -m pytest tests/test_round_synthesis_save.py -v --tb=short --timeout=60
+      - name: Test Delphi persistence, evidence and three-round continuity
+        run: python -m pytest tests/test_round_synthesis_save.py tests/test_delphi_continuity.py tests/test_claim_grounding.py -v --tb=short --timeout=60
         env:
           SYNTHESIS_MODE: mock
           OPENAI_API_KEY: "sk-test-not-a-real-key"

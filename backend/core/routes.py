@@ -2236,6 +2236,34 @@ def get_summary_text(
         return {"summary": ""}
 
 
+def _synthesis_is_published(round_obj) -> bool:
+    # Legacy rounds already exposed their synthesis to participants.
+    return bool(round_obj and round_obj.synthesis and (round_obj.context_settings or {}).get("synthesis_published", True))
+
+
+class SynthesisPublicationPayload(BaseModel):
+    published: bool
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/synthesis_publication", tags=["Synthesis"])
+@limiter.limit(CRUD_LIMIT)
+def set_synthesis_publication(request: Request, form_id: int, round_id: int,
+                              payload: SynthesisPublicationPayload,
+                              db: Session = Depends(get_db), user: User = Depends(require_platform_admin)):
+    row = db.query(RoundModel).filter(RoundModel.id == round_id, RoundModel.form_id == form_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Round not found")
+    if payload.published and not (row.synthesis or "").strip():
+        raise HTTPException(status_code=409, detail="Save a synthesis before publishing it.")
+    row.context_settings = {**(row.context_settings or {}), "synthesis_published": payload.published}
+    db.commit()
+    return {"id": row.id, "round_number": row.round_number, "is_active": row.is_active,
+            "synthesis": row.synthesis, "synthesis_json": row.synthesis_json,
+            "synthesis_published": _synthesis_is_published(row), "questions": row.questions or [],
+            "context_settings": row.context_settings or {}, "convergence_score": row.convergence_score,
+            "response_count": db.query(Response).filter(Response.round_id == row.id).count()}
+
+
 class SummaryPayload(BaseModel):
     summary: str
 
@@ -2272,6 +2300,7 @@ def save_round_synthesis(
             if key in {"summary_options", "summary_order", "synthesis_background"}
         } if isinstance(round_obj.synthesis_json, dict) else {}
         round_obj.synthesis = summary
+        round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
         round_obj.synthesis_json = display
         db.add(SynthesisVersion(
             round_id=round_id, version=next_version, synthesis=summary,
@@ -2283,13 +2312,13 @@ def save_round_synthesis(
         "round_number": round_obj.round_number,
         "is_active": round_obj.is_active,
         "synthesis": round_obj.synthesis,
+        "synthesis_published": _synthesis_is_published(round_obj),
         "synthesis_json": round_obj.synthesis_json,
         "questions": round_obj.questions or [],
         "context_settings": round_obj.context_settings or {},
         "convergence_score": round_obj.convergence_score,
         "response_count": db.query(Response).filter(Response.round_id == round_id).count(),
     }
-
 
 
 class CodexSummaryMessage(BaseModel):
@@ -2982,6 +3011,7 @@ async def synthesise_committee(
 
     # Also store a text synthesis for backwards compatibility
     active_round.synthesis = _render_synthesis_text(result)
+    active_round.context_settings = {**(active_round.context_settings or {}), "synthesis_published": False}
 
     # If AI-assisted, store generated probes as FollowUp records
     if flow_mode == FlowMode.AI_ASSISTED and result.follow_up_probes:
@@ -3297,6 +3327,7 @@ async def _run_synthesis_job(
         db.add(new_version)
 
         round_obj.synthesis = synthesis_text
+        round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
         round_obj.synthesis_json = synthesis_json_data
 
         db.commit()
@@ -3515,7 +3546,7 @@ def _question_label_for_custom_synthesis(question: Any, fallback: str) -> str:
         for key in ("label", "text", "question", "title"):
             value = question.get(key)
             if isinstance(value, str) and value.strip():
-                return value.strip()
+                return ((str(question.get("sectionTitle") or "").strip() + " — ") if question.get("sectionTitle") else "") + value.strip()
     return fallback
 
 
@@ -3649,7 +3680,7 @@ def _format_custom_claim_list(
         opposing = {"strongly disagree", "disagree", "no", "oppose", "opposed", "false"}
         uncertain = {
             "neither agree nor disagree", "neither agree or disagree", "unsure",
-            "not sure", "don't know", "dont know", "no answer",
+            "not sure", "don't know", "dont know", "unable to judge — need more information",
         }
 
         for claim in claims:
@@ -3696,7 +3727,7 @@ def _format_custom_claim_list(
                     group = "uncertain_experts"
                     recognised += 1
                 else:
-                    group = "uncertain_experts"
+                    continue
                 expert_label = response.get("email") or f"Expert {response_index}"
                 positions.append(
                     (
@@ -3707,6 +3738,7 @@ def _format_custom_claim_list(
 
             if recognised < max(2, len(positions) // 2):
                 continue
+            claim["_recorded_positions"] = True
             claim["supporting_experts"] = []
             claim["opposing_experts"] = []
             claim["uncertain_experts"] = []
@@ -3717,133 +3749,21 @@ def _format_custom_claim_list(
             )
 
     def complete_written_evidence(claims: list[dict[str, Any]]) -> None:
-        """Keep only grounded classifications and backfill exact submitted sentences."""
+        from core.claim_grounding import ground_claim
         if not response_dicts:
             return
-
-        stop_words = {
-            "a", "an", "and", "are", "be", "for", "from", "has", "have", "in",
-            "is", "it", "of", "on", "or", "should", "that", "the", "this", "to",
-            "with",
-        }
-
-        def response_number(value: str) -> int | None:
-            text = normalise_statement(value)
-            match = re.match(r"^Response\s+(\d+)\b", text, re.IGNORECASE)
-            if match:
-                return int(match.group(1))
-            lowered = text.lower()
-            for response_index, response in enumerate(response_dicts, start=1):
-                label = str(response.get("email") or "").strip().lower()
-                if label and label in lowered:
-                    return response_index
-            return None
-
-        def meaningful_tokens(value: str) -> set[str]:
-            return {
-                token
-                for token in re.findall(r"[a-z0-9]+", value.lower())
-                if len(token) > 2 and token not in stop_words
-            }
-
-        def statement_body(value: str) -> str:
-            text = normalise_statement(value)
-            text = re.sub(
-                r"^Response\s+\d+(?:\s+\([^)]*\))?\s*:\s*",
-                "",
-                text,
-                flags=re.IGNORECASE,
-            )
-            return text.strip().strip('"“”')
-
-        def relevance(value: str, target: str) -> int:
-            return len(meaningful_tokens(statement_body(value)) & meaningful_tokens(target))
-
-        def response_sentences(response_index: int) -> list[str]:
-            if response_index < 1 or response_index > len(response_dicts):
-                return []
-            answers = response_dicts[response_index - 1].get("answers") or {}
+        sources, labels = [], []
+        for index, response in enumerate(response_dicts, start=1):
+            answers = response.get("answers") or {}
             if isinstance(answers, str):
                 try:
                     answers = json.loads(answers)
                 except json.JSONDecodeError:
                     answers = {}
-            if not isinstance(answers, dict):
-                return []
-            result: list[str] = []
-            for value in answers.values():
-                raw = _stringify_custom_synthesis_answer(value).strip()
-                for line in raw.splitlines():
-                    line = re.sub(
-                        r"^(?:Answer|Selected|Evidence|Confidence(?: rationale)?)\s*:\s*",
-                        "",
-                        line.strip(),
-                        flags=re.IGNORECASE,
-                    )
-                    for sentence in re.split(r"(?<=[.!?])\s+", line):
-                        sentence = sentence.strip()
-                        if len(sentence) >= 12:
-                            result.append(sentence)
-            return list(dict.fromkeys(result))
-
-        def best_sentence(response_index: int, target: str) -> str:
-            candidates = response_sentences(response_index)
-            if not candidates:
-                return ""
-            best = max(candidates, key=lambda sentence: (relevance(sentence, target), -len(sentence)))
-            return best if relevance(best, target) > 0 else ""
-
+            sources.append([_stringify_custom_synthesis_answer(value) for value in answers.values()] if isinstance(answers, dict) else [])
+            labels.append(response.get("email") or f"Expert {index}")
         for claim in claims:
-            for experts_key, statements_key, target in (
-                ("supporting_experts", "supporting_statements", claim.get("text", "")),
-                ("opposing_experts", "opposing_statements", claim.get("opposing", "") or claim.get("text", "")),
-                ("uncertain_experts", "uncertain_statements", claim.get("text", "")),
-            ):
-                expert_entries = {
-                    response_number(value): value
-                    for value in claim.get(experts_key, [])
-                    if response_number(value) is not None
-                }
-                grounded_statements: dict[int, str] = {}
-                for statement in claim.get(statements_key, []):
-                    response_index = response_number(statement)
-                    if response_index is not None and relevance(statement, target) > 0:
-                        grounded_statements[response_index] = normalise_statement(statement)
-                        if response_index not in expert_entries:
-                            label = response_dicts[response_index - 1].get("email") or f"Expert {response_index}"
-                            stance = (
-                                "Agree"
-                                if experts_key == "supporting_experts"
-                                else "Disagree"
-                                if experts_key == "opposing_experts"
-                                else "Neither agree nor disagree"
-                            )
-                            expert_entries[response_index] = (
-                                f"Response {response_index} ({label}): {stance}"
-                            )
-
-                for response_index in expert_entries:
-                    if response_index in grounded_statements:
-                        continue
-                    sentence = best_sentence(response_index, target)
-                    if not sentence:
-                        continue
-                    label = response_dicts[response_index - 1].get("email") or f"Expert {response_index}"
-                    grounded_statements[response_index] = (
-                        f"Response {response_index} ({label}): {sentence}"
-                    )
-
-                # Classification and quotation are separate evidence layers.
-                # Keep every grounded expert position even when that respondent did
-                # not supply a verbatim sentence relevant to this claim.
-                claim[experts_key] = list(expert_entries.values())
-                claim[statements_key] = list(grounded_statements.values())
-
-            supporting_ids = {
-                response_number(value)
-                for value in claim.get("supporting_experts", [])
-            } - {None}
-            claim["people"] = f"{len(supporting_ids)} of {len(response_dicts)}"
+            ground_claim(claim, sources, labels)
 
     def render_structured_claims(claims: list[dict[str, Any]]) -> str:
         output = ["<h2>Claims</h2>"]
@@ -4239,6 +4159,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     )
     db.add(new_version)
     round_obj.synthesis = synthesis_text
+    round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
     round_obj.synthesis_json = synthesis_json_data
     db.commit()
     db.refresh(new_version)
@@ -4429,6 +4350,7 @@ async def generate_synthesis_for_round(
         )
         db.add(new_version)
         round_obj.synthesis = synthesis_text
+        round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
         round_obj.synthesis_json = synthesis_json_data
         db.commit()
         db.refresh(new_version)
@@ -4573,6 +4495,7 @@ def activate_synthesis_version(
     round_obj = db.query(RoundModel).filter(RoundModel.id == version.round_id).first()
     if round_obj:
         round_obj.synthesis = version.synthesis
+        round_obj.context_settings = {**(round_obj.context_settings or {}), "synthesis_published": False}
         round_obj.synthesis_json = version.synthesis_json
 
     db.commit()
@@ -7376,7 +7299,7 @@ def get_public_form(
         "questions": active_round.questions or form.questions,
         "document_template": form.document_template,
         "join_code": form.join_code,
-        "previous_round_synthesis": previous_round.synthesis if previous_round else "",
+        "previous_round_synthesis": previous_round.synthesis if _synthesis_is_published(previous_round) else "",
         **_serialize_public_settings(form),
         **_serialize_consent_settings(form),
     }
@@ -7476,10 +7399,16 @@ def get_public_form_session(
     session = _get_public_session(db, session_token)
     form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
     active_round = _get_active_round_for_form(db, session.form_id)
-    if not form or not active_round or active_round.id != session.round_id:
-        raise HTTPException(
-            status_code=400, detail="This public form session is no longer active."
-        )
+    session_round = db.query(RoundModel).filter(
+        RoundModel.id == session.round_id, RoundModel.form_id == session.form_id
+    ).first()
+    if not form or not session_round:
+        raise HTTPException(status_code=404, detail="Public form session not found")
+    if not form.allow_public_responses:
+        raise HTTPException(status_code=403, detail="Public participation is closed.")
+    next_round_available = bool(active_round and active_round.round_number > session_round.round_number)
+    # Read the round bound to this token. Never reinterpret old answers as a new round.
+    active_round = session_round
 
     previous_round = (
         db.query(RoundModel)
@@ -7533,6 +7462,8 @@ def get_public_form_session(
     return {
         "session_token": session.session_token,
         "participant_name": session.participant_name,
+        "round_number": session_round.round_number,
+        "next_round_available": next_round_available,
         "submitted": submitted_response is not None or session.submitted_at is not None,
         "upload_filename": session.upload_filename,
         "form": {
@@ -7543,7 +7474,7 @@ def get_public_form_session(
             "document_template": form.document_template,
             "join_code": form.join_code,
             "previous_round_synthesis": previous_round.synthesis
-            if previous_round
+            if _synthesis_is_published(previous_round)
             else "",
             **_serialize_public_settings(form),
             **_serialize_consent_settings(
@@ -7559,6 +7490,37 @@ def get_public_form_session(
         if draft_answers is not None
         else None,
     }
+
+
+@router.post("/public/forms/session/{session_token}/continue", tags=["Forms"])
+@limiter.limit(CRUD_LIMIT)
+def continue_public_form_session(request: Request, session_token: str, db: Session = Depends(get_db)):
+    """Issue a round-bound link for the same participant; keep the old link immutable."""
+    previous = _get_public_session(db, session_token)
+    form = db.get(FormModel, previous.form_id)
+    active = _get_active_round_for_form(db, previous.form_id)
+    old_round = db.get(RoundModel, previous.round_id)
+    if not form or not form.allow_public_responses:
+        raise HTTPException(status_code=403, detail="Public participation is closed.")
+    if not active or not old_round or active.round_number <= old_round.round_number:
+        raise HTTPException(status_code=409, detail="There is no later round open yet.")
+    if _consent_required(form) and not previous.consent_given:
+        raise HTTPException(status_code=403, detail="Please complete the consent step first.")
+    # Retrying the transition reuses the same capability, including after submission.
+    existing = db.query(PublicFormSession).filter(
+        PublicFormSession.form_id == form.id,
+        PublicFormSession.user_id == previous.user_id,
+        PublicFormSession.round_id == active.id,
+    ).first()
+    if not existing:
+        existing = PublicFormSession(
+            form_id=form.id, user_id=previous.user_id, round_id=active.id,
+            session_token=secrets.token_urlsafe(24), participant_name=previous.participant_name,
+            consent_given=previous.consent_given,
+        )
+        db.add(existing)
+        db.commit()
+    return {"session_token": existing.session_token, "round_number": active.round_number}
 
 
 @router.put(
@@ -7586,6 +7548,8 @@ def save_public_form_draft(
         raise HTTPException(
             status_code=400, detail="This public form session is no longer active."
         )
+    if not form.allow_public_responses:
+        raise HTTPException(status_code=403, detail="Public participation is closed.")
     if _consent_required(form) and not session.consent_given:
         raise HTTPException(
             status_code=403,
@@ -7658,6 +7622,8 @@ def submit_public_form_response(
         raise HTTPException(
             status_code=400, detail="This public form session is no longer active."
         )
+    if not form.allow_public_responses:
+        raise HTTPException(status_code=403, detail="Public participation is closed.")
     if _consent_required(form) and not session.consent_given:
         raise HTTPException(
             status_code=403,
@@ -8076,7 +8042,7 @@ def get_active_round(
         .first()
     )
 
-    previous_round_synthesis = prev.synthesis if prev else ""
+    previous_round_synthesis = prev.synthesis if _synthesis_is_published(prev) else ""
     context_settings = active.context_settings or {}
     show_previous_response = bool(
         form.show_own_response_to_participants
@@ -8265,6 +8231,7 @@ def get_rounds(
                 "id": r.id,
                 "round_number": r.round_number,
                 "synthesis": r.synthesis,
+                "synthesis_published": _synthesis_is_published(r),
                 "synthesis_json": r.synthesis_json,
                 "is_active": r.is_active,
                 "questions": r.questions or [],
@@ -8491,6 +8458,7 @@ def rounds_with_responses(
                 "id": r.id,
                 "round_number": r.round_number,
                 "synthesis": r.synthesis,
+                "synthesis_published": _synthesis_is_published(r),
                 "is_active": r.is_active,
                 "responses": [
                     {

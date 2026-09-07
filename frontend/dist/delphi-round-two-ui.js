@@ -92,17 +92,10 @@
         '<button type="button" data-close aria-label="Close" style="flex:0 0 auto;height:36px;width:36px;border:1px solid var(--border);border-radius:9px;background:var(--background);color:var(--foreground);font-size:1.25rem">×</button>' +
       '</div>' +
       '<div style="display:grid;gap:1rem;padding:1rem 1.1rem">' +
-        '<label style="display:grid;gap:.4rem;font-size:.86rem;font-weight:750">Optional introduction' +
-          '<textarea data-intro rows="3" placeholder="Add a short message for participants" style="width:100%;box-sizing:border-box;resize:vertical;padding:.7rem .8rem;border:1px solid var(--border);border-radius:10px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px;line-height:1.45"></textarea>' +
-        '</label>' +
-        '<div>' +
-          '<div style="margin-bottom:.45rem;font-size:.86rem;font-weight:750">Claims included</div>' +
-          '<div data-claims style="display:grid;gap:.45rem;max-height:260px;overflow:auto"></div>' +
-        '</div>' +
-        '<div style="display:grid;gap:.45rem;padding:.8rem;border:1px solid var(--border);border-radius:11px;background:var(--background);font-size:.84rem;line-height:1.45">' +
-          '<div><strong>Response scale</strong><br><span style="color:var(--muted-foreground)">Strongly agree to strongly disagree, plus unable to judge.</span></div>' +
-          '<div><strong>Optional comments</strong><br><span style="color:var(--muted-foreground)">Participants can clarify their response to each claim.</span></div>' +
-        '</div>' +
+        '<div data-preview aria-label="Participant preview"></div>' +
+        '<details><summary style="cursor:pointer;font-size:.85rem">Introduction (optional)</summary>' +
+          '<textarea data-intro rows="2" aria-label="Optional introduction" placeholder="Add a short message for participants" style="width:100%;box-sizing:border-box;padding:.7rem;border:1px solid var(--border);border-radius:10px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px"></textarea>' +
+        '</details>' +
       '</div>' +
       '<div style="display:flex;justify-content:flex-end;gap:.65rem;padding:1rem 1.1rem;border-top:1px solid var(--border)">' +
         '<button type="button" data-close style="padding:.65rem .9rem;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--foreground);font-weight:700">Cancel</button>' +
@@ -111,13 +104,75 @@
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
 
-    var list = dialog.querySelector('[data-claims]');
-    claims.forEach(function (claim) {
-      var item = document.createElement('div');
-      item.style.cssText = 'padding:.65rem .75rem;border:1px solid var(--border);border-radius:9px;background:var(--background);font-size:.84rem;line-height:1.4;';
-      item.textContent = 'Claim ' + claim.number + ': ' + claim.title;
-      list.appendChild(item);
+    var previewIndex = 0;
+    var preview = dialog.querySelector('[data-preview]');
+    var previewAnswers = {};
+    function renderPreview() {
+      var claim = claims[previewIndex];
+      preview.replaceChildren();
+      var progress = document.createElement('p');
+      progress.style.cssText = 'display:flex;justify-content:space-between;color:var(--muted-foreground);font-size:.8rem;margin:0 0 .6rem';
+      progress.textContent = 'Participant preview · ' + (previewIndex + 1) + ' of ' + claims.length;
+      preview.appendChild(progress);
+      var track = document.createElement('div');
+      track.style.cssText = 'height:8px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem';
+      var fill = document.createElement('div');
+      fill.style.cssText = 'height:100%;background:#58cc02;width:' + ((previewIndex + 1) / claims.length * 100) + '%';
+      track.appendChild(fill);
+      preview.appendChild(track);
+      var heading = document.createElement('h3');
+      heading.textContent = claim.title;
+      heading.style.cssText = 'font-size:1.1rem;line-height:1.45;margin:0 0 1rem';
+      preview.appendChild(heading);
+      questionsFor([claim])[0].options.forEach(function (option) {
+        var label = document.createElement('label');
+        label.style.cssText = 'display:flex;align-items:center;gap:.7rem;min-height:48px;padding:.5rem .8rem;box-sizing:border-box;border:2px solid var(--border);border-radius:13px;margin:.45rem 0;font-size:16px;cursor:pointer';
+        var input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'delphi-preview-rating';
+        input.checked = previewAnswers[previewIndex] === option;
+        input.style.accentColor = '#58cc02';
+        function highlight() {
+          label.style.borderColor = input.checked ? '#58cc02' : 'var(--border)';
+          label.style.background = input.checked ? 'color-mix(in srgb,#58cc02 8%,var(--background))' : 'var(--background)';
+        }
+        input.addEventListener('change', function () {
+          previewAnswers[previewIndex] = option;
+          preview.querySelectorAll('label').forEach(function (item) {
+            var selected = item.querySelector('input').checked;
+            item.style.borderColor = selected ? '#58cc02' : 'var(--border)';
+            item.style.background = selected ? 'color-mix(in srgb,#58cc02 8%,var(--background))' : 'var(--background)';
+          });
+        });
+        label.append(input, document.createTextNode(option));
+        highlight();
+        preview.appendChild(label);
+      });
+      var comment = document.createElement('textarea');
+      comment.rows = 1;
+      comment.placeholder = 'Add a comment… (optional)';
+      comment.setAttribute('aria-label', 'Preview comment (not submitted)');
+      comment.style.cssText = 'width:100%;box-sizing:border-box;min-height:52px;padding:14px 16px;margin:.7rem 0;border:1px solid var(--border);border-radius:22px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px;resize:none';
+      preview.appendChild(comment);
+      var navigation = document.createElement('div');
+      navigation.style.cssText = 'display:flex;gap:.65rem';
+      ['Back', previewIndex + 1 === claims.length ? 'Preview complete' : 'Continue'].forEach(function (text, index) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = text;
+        button.style.cssText = 'min-height:48px;padding:.65rem 1rem;border:2px solid var(--border);border-radius:13px;font:inherit;font-weight:750;flex:' + (index ? '2' : '1') + ';background:' + (index ? '#58cc02' : 'var(--background)') + ';color:' + (index ? '#102800' : 'var(--foreground)');
+        button.disabled = index ? previewIndex + 1 === claims.length : previewIndex === 0;
+        if (button.disabled) button.style.opacity = '.45';
+        button.addEventListener('click', function () { previewIndex += index ? 1 : -1; renderPreview(); });
+        navigation.appendChild(button);
+      });
+      preview.appendChild(navigation);
+    }
+    renderPreview();
+    overlay.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeModal();
     });
+    dialog.querySelector('[data-close]').focus();
     dialog.querySelectorAll('[data-close]').forEach(function (button) {
       button.addEventListener('click', closeModal);
     });
@@ -313,7 +368,6 @@
       'body.' + ROOT_CLASS + ' [data-question-key] textarea{display:none!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-composer textarea{display:block!important;box-sizing:border-box;width:100%;min-height:52px!important;max-height:180px;margin:.4rem 0!important;padding:14px 16px!important;border:1px solid var(--border)!important;border-radius:22px!important;background:var(--background)!important;line-height:24px!important;resize:none;overflow-y:auto;scroll-margin-bottom:110px;transition:border-color .12s ease,box-shadow .12s ease}',
       'body.' + ROOT_CLASS + ' .delphi-r2-composer textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 12%,transparent)!important}',
-      'body.' + ROOT_CLASS + '.delphi-r2-commenting #' + ACTIONS_ID + '{display:none!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-native-submit{display:none!important}',
       '#' + HEADER_ID + '{margin:.7rem 0 1rem}',
       '.delphi-r2-progress-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.55rem;font-size:.82rem;font-weight:800}',
@@ -373,14 +427,6 @@
       textarea.style.height = Math.min(180, Math.max(52, textarea.scrollHeight + 2)) + 'px';
     }
     textarea.addEventListener('input', resize);
-    textarea.addEventListener('focus', function () {
-      document.body.classList.add('delphi-r2-commenting');
-    });
-    textarea.addEventListener('blur', function () {
-      window.setTimeout(function () {
-        document.body.classList.remove('delphi-r2-commenting');
-      }, 120);
-    });
 
     question.dataset.delphiCommentReady = 'true';
     resize();
@@ -608,4 +654,98 @@
   window.setTimeout(ensureUi, 250);
   window.setTimeout(ensureUi, 900);
   window.setTimeout(ensureUi, 1800);
+})();
+
+// Keep sharing secondary controls available without competing with the invitation.
+(function () {
+  function enhanceShare() {
+    var dialog = document.querySelector('[role="dialog"][aria-label="Share consultation"]');
+    if (!dialog || dialog.dataset.delphiShareReady) return;
+    var buttons = Array.from(dialog.querySelectorAll('button'));
+    var copy = buttons.find(function (button) { return button.textContent.trim() === 'Copy link'; });
+    var code = buttons.find(function (button) { return button.textContent.trim() === 'Copy join code'; });
+    var open = Array.from(dialog.querySelectorAll('a')).find(function (link) { return link.textContent.trim() === 'Open join page'; });
+    if (!copy || !code || !open) return;
+    dialog.dataset.delphiShareReady = 'true';
+    copy.style.cssText += ';width:100%;justify-content:center;min-height:48px;background:var(--accent);color:white;border-radius:13px;font-weight:750';
+    Array.from(copy.childNodes).filter(function (node) { return node.nodeType === 3; }).forEach(function (node) { node.textContent = 'Copy invitation link'; });
+    open.textContent = 'Preview invitation';
+    open.style.cssText += ';background:transparent;margin-left:auto;font-size:.85rem';
+    var codeRow = Array.from(dialog.querySelectorAll('span')).find(function (span) { return span.textContent === 'Code'; })?.parentElement;
+    code.style.display = 'none';
+    if (codeRow) codeRow.style.display = 'none';
+    var more = document.createElement('button');
+    more.type = 'button';
+    more.textContent = 'More options';
+    more.setAttribute('aria-expanded', 'false');
+    more.style.cssText = 'border:0;background:transparent;color:var(--muted-foreground);font:inherit;font-size:.85rem;padding:.6rem;min-height:44px';
+    more.addEventListener('click', function () {
+      var expanded = more.getAttribute('aria-expanded') !== 'true';
+      more.setAttribute('aria-expanded', String(expanded));
+      more.textContent = expanded ? 'Fewer options' : 'More options';
+      code.style.display = expanded ? '' : 'none';
+      if (codeRow) codeRow.style.display = expanded ? '' : 'none';
+    });
+    copy.parentElement.appendChild(more);
+  }
+  var timer;
+  new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(enhanceShare, 120); }).observe(document.body, {childList:true, subtree:true});
+  enhanceShare();
+})();
+
+// A later round receives its own token while preserving the participant identity.
+(function () {
+  var path = '', loading = false;
+  async function checkContinuation() {
+    var match = location.pathname.match(/^\/public\/session\/([^/]+)\/?$/);
+    if (!match) { path = ''; return; }
+    var card = document.querySelector('.card-lg');
+    if (!card || !card.querySelector('h1') || loading || path === location.pathname) return;
+    path = location.pathname;
+    var requestedPath = path;
+    loading = true;
+    try {
+      var response = await fetch('/api/public/forms/session/' + encodeURIComponent(match[1]), {credentials:'include'});
+      if (!response.ok) return;
+      var data = await response.json();
+      if (!data.next_round_available || location.pathname !== requestedPath) return;
+      var panel = document.createElement('div');
+      panel.style.cssText = 'padding:1rem;margin-bottom:1rem;border:1px solid var(--border);border-radius:13px;background:var(--background)';
+      var note = document.createElement('p');
+      note.textContent = 'The next round is open. Your previous response is preserved.';
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = 'Continue to next round';
+      button.style.cssText = 'min-height:48px;padding:.65rem 1rem;background:#58cc02;color:#102800;border:0;border-radius:13px;font:inherit;font-weight:750';
+      button.addEventListener('click', async function () {
+        button.disabled = true;
+        try {
+          var result = await fetch('/api/public/forms/session/' + encodeURIComponent(match[1]) + '/continue', {method:'POST',credentials:'include'});
+          if (!result.ok) throw new Error('Unable to continue. Please try again.');
+          var next = await result.json();
+          location.assign('/public/session/' + encodeURIComponent(next.session_token));
+        } catch (error) { note.textContent = error.message; button.disabled = false; }
+      });
+      panel.append(note, button);
+      card.prepend(panel);
+    } catch (error) {
+      // The main form owns load errors. A continuation check must not break it.
+    } finally { loading = false; }
+  }
+  var timer;
+  new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(checkContinuation, 200); }).observe(document.body, {childList:true,subtree:true});
+})();
+
+(function () {
+  function positionActions() {
+    var actions = document.getElementById('delphi-round-two-actions');
+    var viewport = window.visualViewport;
+    if (!actions || !viewport) return;
+    var keyboardInset = viewport.scale === 1 ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
+    actions.style.bottom = keyboardInset > 80 ? keyboardInset + 'px' : '';
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', positionActions);
+    window.visualViewport.addEventListener('scroll', positionActions);
+  }
 })();
