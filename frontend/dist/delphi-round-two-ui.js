@@ -292,7 +292,11 @@
       'body.' + ROOT_CLASS + ' nav[aria-label="Question sections"]{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}',
       'body.' + ROOT_CLASS + '{padding-bottom:86px}',
       'body.' + ROOT_CLASS + ' .card-lg{overflow:visible;padding:16px!important}',
-      'body.' + ROOT_CLASS + ' .delphi-r2-form-title{font-size:1.05rem!important;line-height:1.35!important;font-weight:750!important;color:var(--muted-foreground)!important;margin:0 0 .25rem!important}',
+      'body.' + ROOT_CLASS + ' .delphi-r2-form-title,body.' + ROOT_CLASS + ' [data-question-key] .delphi-r2-response-heading{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}',
+      '#delphi-round-two-about{margin:0 0 .75rem;font-size:.875rem;color:var(--muted-foreground)}',
+      '#delphi-round-two-about summary{cursor:pointer;width:fit-content;padding:.35rem 0;min-height:32px}',
+      '#delphi-round-two-about h2{font-size:1rem;line-height:1.4;color:var(--foreground);margin:.5rem 0}',
+      '#delphi-round-two-about p{font-size:.875rem;line-height:1.5;margin:.35rem 0 .75rem}',
       'body.' + ROOT_CLASS + ' .delphi-r2-form-description{display:none!important}',
       'body.' + ROOT_CLASS + ' section[aria-label^="Claim "]{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}',
       'body.' + ROOT_CLASS + ' [data-question-key]{padding:.35rem 0!important}',
@@ -395,6 +399,8 @@
     var header = document.getElementById(HEADER_ID);
     var actions = document.getElementById(ACTIONS_ID);
     var loading = document.getElementById(LOADING_ID);
+    var about = document.getElementById('delphi-round-two-about');
+    if (about) about.remove();
     if (header) header.remove();
     if (actions) actions.remove();
     if (loading) loading.remove();
@@ -433,7 +439,28 @@
       if (description && description.tagName === 'P') {
         description.classList.add('delphi-r2-form-description');
       }
+      if (formTitle) {
+        var about = card.querySelector('#delphi-round-two-about');
+        if (!about) {
+          about = document.createElement('details');
+          about.id = 'delphi-round-two-about';
+          about.appendChild(document.createElement('summary'));
+          about.appendChild(document.createElement('h2'));
+          about.appendChild(document.createElement('p'));
+          formTitle.before(about);
+        }
+        var descriptionText = description && description.tagName === 'P' ? clean(description.textContent) : '';
+        setText(about.querySelector('summary'), /synthetic/i.test(descriptionText) ? 'About this survey · Synthetic demo' : 'About this survey');
+        setText(about.querySelector('h2'), clean(formTitle.textContent));
+        setText(about.querySelector('p'), descriptionText);
+      }
     }
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-question-key] > label'), function (label) {
+      if (!label.querySelector('input') && /^Your response$/i.test(clean(label.firstElementChild ? label.firstElementChild.textContent : label.textContent))) {
+        label.classList.add('delphi-r2-response-heading');
+      }
+    });
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-question-key] *'), function (element) {
       var value = clean(element.textContent);
