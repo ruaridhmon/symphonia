@@ -335,16 +335,6 @@
     var textarea = question.querySelector('textarea');
     if (!textarea) return;
 
-    if (textarea.readOnly || textarea.disabled) {
-      var saved = document.createElement('p');
-      saved.className = 'delphi-r2-saved-comment';
-      saved.setAttribute('aria-label', 'Submitted comment');
-      saved.textContent = textarea.value.trim() || 'No comment added';
-      question.appendChild(saved);
-      question.dataset.delphiCommentReady = 'true';
-      return;
-    }
-
     var label = Array.prototype.find.call(question.querySelectorAll('*'), function (element) {
       return element.children.length === 0 &&
         clean(element.textContent) === 'Comments or clarification';
@@ -359,6 +349,15 @@
       heading.classList.add('delphi-r2-comment-native-heading');
     }
 
+    if (textarea.readOnly || textarea.disabled) {
+      var saved = document.createElement('p');
+      saved.className = 'delphi-r2-saved-comment';
+      saved.setAttribute('aria-label', 'Submitted comment');
+      saved.textContent = textarea.value.trim() || 'No comment added';
+      question.appendChild(saved);
+      question.dataset.delphiCommentReady = 'true';
+      return;
+    }
     question.classList.add('delphi-r2-composer');
     textarea.rows = 1;
     textarea.placeholder = 'Add a comment… (optional)';
