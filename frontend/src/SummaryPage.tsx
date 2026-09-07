@@ -597,6 +597,7 @@ export default function SummaryPage() {
 	const [synthesisTotalSteps, setSynthesisTotalSteps] = useState(4);
 	const [synthesisMode, setSynthesisMode] = useState<'custom' | 'simple' | 'committee' | 'ttd'>('simple');
 	const [customSynthesisPrompt, setCustomSynthesisPrompt] = useState('');
+	useEffect(() => { setCustomSynthesisPrompt(''); }, [formId]);
 	const [synthesisStartedAtMs, setSynthesisStartedAtMs] = useState<number | null>(null);
 	const [synthesisElapsedSeconds, setSynthesisElapsedSeconds] = useState(0);
 	const [synthesisEstimateSeconds, setSynthesisEstimateSeconds] = useState<number | null>(null);

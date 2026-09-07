@@ -1,57 +1,390 @@
 {
-  "synthetic": true,
-  "topic": "UK home energy upgrades",
-  "protocol": "Three rounds; ten fictional roles; scripted role-play, not independent expert evidence. 80% agreement among submitted ratings; neutral and uncertain ratings included. Stop after round 3 and report unresolved items.",
+  "attrition": "Expert 1 did not continue: the initial return URL was not retained during browser testing. Rounds 2 and 3 use the same nine remaining identities; no replacement.",
+  "claims": [
+    "Public grants should prioritise low-income households.",
+    "Insulation upgrades should be required before every heat pump installation.",
+    "Councils should coordinate street-by-street retrofit programmes.",
+    "Tenants should be protected from rent increases attributable to publicly funded upgrades."
+  ],
   "panel": [
     {
       "id": 1,
       "role": "Building physicist",
-      "round1": "Public funding should prioritise low-income households in the least efficient homes. Assess insulation and ventilation before specifying heating, but do not require every possible insulation measure before a heat pump. Councils should coordinate street-by-street upgrades where properties are similar, with independent quality checks. Protect tenants from rent increases caused by publicly funded works. Technical suitability matters more than a universal technology sequence."
+      "round1": "Public funding should prioritise low-income households in the least efficient homes. Assess insulation and ventilation before specifying heating, but do not require every possible insulation measure before a heat pump. Councils should coordinate street-by-street upgrades where properties are similar, with independent quality checks. Protect tenants from rent increases caused by publicly funded works. Technical suitability matters more than a universal technology sequence.",
+      "round2": null,
+      "round3": null
     },
     {
       "id": 2,
       "role": "Heat-pump installer",
-      "round1": "Low-income households should receive grants first. I oppose a rule requiring insulation upgrades before every heat pump: suitable homes could decarbonise sooner. Street-by-street coordination is useful but households should retain a choice of installer. I support safeguards preventing grant-funded work from displacing tenants. Training and clear performance standards would matter more than another complicated eligibility test."
+      "round1": "Low-income households should receive grants first. I oppose a rule requiring insulation upgrades before every heat pump: suitable homes could decarbonise sooner. Street-by-street coordination is useful but households should retain a choice of installer. I support safeguards preventing grant-funded work from displacing tenants. Training and clear performance standards would matter more than another complicated eligibility test.",
+      "round2": [
+        [
+          "Agree",
+          "I confirm my support for prioritising low-income households; installer capacity must expand alongside grants."
+        ],
+        [
+          "Strongly disagree",
+          "The word every makes this too rigid: suitable homes should not wait for unnecessary fabric work."
+        ],
+        [
+          "Agree",
+          "Coordination is useful provided residents can choose qualified installers."
+        ],
+        [
+          "Agree",
+          "Public grants should benefit residents rather than cause displacement."
+        ]
+      ],
+      "round3": [
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. I confirm my support for prioritising low-income households; installer capacity must expand alongside grants."
+        ],
+        [
+          "Strongly disagree",
+          "After reviewing the previous-round arguments, I retain this view. The word every makes this too rigid: suitable homes should not wait for unnecessary fabric work."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Coordination is useful provided residents can choose qualified installers."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Public grants should benefit residents rather than cause displacement."
+        ]
+      ]
     },
     {
       "id": 3,
       "role": "Fuel-poverty advocate",
-      "round1": "Prioritise grants for low-income households in inefficient homes. I initially favour insulation before heat pumps because families must be able to afford warmth, though exceptions may be sensible. Councils should deliver street-by-street programmes with trusted local advice. Landlords receiving public funding should not raise rents because of the improvements. Include people who cannot navigate complex applications."
+      "round1": "Prioritise grants for low-income households in inefficient homes. I initially favour insulation before heat pumps because families must be able to afford warmth, though exceptions may be sensible. Councils should deliver street-by-street programmes with trusted local advice. Landlords receiving public funding should not raise rents because of the improvements. Include people who cannot navigate complex applications.",
+      "round2": [
+        [
+          "Strongly agree",
+          "Affordability and access should determine who receives help first."
+        ],
+        [
+          "Agree",
+          "I still favour fabric work first for households struggling to keep warm, but the installer argument suggests exceptions should be tested."
+        ],
+        [
+          "Agree",
+          "Trusted local advice can help residents who cannot navigate grant applications."
+        ],
+        [
+          "Strongly agree",
+          "Families must retain the financial benefit of public investment."
+        ]
+      ],
+      "round3": [
+        [
+          "Strongly agree",
+          "After reviewing the previous-round arguments, I retain this view. Affordability and access should determine who receives help first."
+        ],
+        [
+          "Disagree",
+          "I change my vote after the installer and local authority arguments: the claim says every installation. I still prioritise fabric work in cold homes, but suitable homes should have an exception. A home-specific assessment is preferable to a universal prerequisite."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Trusted local advice can help residents who cannot navigate grant applications."
+        ],
+        [
+          "Strongly agree",
+          "After reviewing the previous-round arguments, I retain this view. Families must retain the financial benefit of public investment."
+        ]
+      ]
     },
     {
       "id": 4,
       "role": "Private landlord representative",
-      "round1": "I support targeting low-income households but grants must also make rented homes economically viable. I oppose mandatory insulation before every heat pump. I prefer owner-led delivery to compulsory council street programmes. I oppose a blanket ban on rent increases after publicly funded upgrades: a transparent limit accounting for private contributions would be fairer. Give small landlords predictable timelines."
+      "round1": "I support targeting low-income households but grants must also make rented homes economically viable. I oppose mandatory insulation before every heat pump. I prefer owner-led delivery to compulsory council street programmes. I oppose a blanket ban on rent increases after publicly funded upgrades: a transparent limit accounting for private contributions would be fairer. Give small landlords predictable timelines.",
+      "round2": [
+        [
+          "Agree",
+          "Include low-income private tenants, with a viable funding route for small landlords."
+        ],
+        [
+          "Disagree",
+          "Do not require unnecessary insulation work in already suitable properties."
+        ],
+        [
+          "Disagree",
+          "Owner-led procurement should remain the default; council capacity varies."
+        ],
+        [
+          "Disagree",
+          "A blanket restriction may discourage co-investment; distinguish the grant-funded share from privately funded improvements."
+        ]
+      ],
+      "round3": [
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Include low-income private tenants, with a viable funding route for small landlords."
+        ],
+        [
+          "Disagree",
+          "After reviewing the previous-round arguments, I retain this view. Do not require unnecessary insulation work in already suitable properties."
+        ],
+        [
+          "Disagree",
+          "After reviewing the previous-round arguments, I retain this view. Owner-led procurement should remain the default; council capacity varies."
+        ],
+        [
+          "Agree",
+          "I change my vote on re-reading attributable to publicly funded upgrades. That limits the restriction to the publicly funded benefit, rather than all future rent changes. With that interpretation, my co-investment objection is addressed; privately funded improvements need separate treatment."
+        ]
+      ]
     },
     {
       "id": 5,
       "role": "Tenant organiser",
-      "round1": "Direct grants to low-income households first and prevent eviction or rent increases linked to publicly funded improvements. I favour insulation before heat pumps because draughty homes need attention first, but I am open to technical exceptions. Street-by-street council delivery could avoid landlords cherry-picking profitable properties. Tenants must consent to scheduling and have independent complaints support."
+      "round1": "Direct grants to low-income households first and prevent eviction or rent increases linked to publicly funded improvements. I favour insulation before heat pumps because draughty homes need attention first, but I am open to technical exceptions. Street-by-street council delivery could avoid landlords cherry-picking profitable properties. Tenants must consent to scheduling and have independent complaints support.",
+      "round2": [
+        [
+          "Strongly agree",
+          "Prioritise households facing cold homes and high bills."
+        ],
+        [
+          "Agree",
+          "I favour addressing draughts first, but acknowledge that every may be too absolute."
+        ],
+        [
+          "Agree",
+          "Area-based coordination could reduce cherry-picking of profitable homes."
+        ],
+        [
+          "Strongly agree",
+          "Publicly funded works must not result in eviction or unaffordable rent."
+        ]
+      ],
+      "round3": [
+        [
+          "Strongly agree",
+          "After reviewing the previous-round arguments, I retain this view. Prioritise households facing cold homes and high bills."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. I favour addressing draughts first, but acknowledge that every may be too absolute."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Area-based coordination could reduce cherry-picking of profitable homes."
+        ],
+        [
+          "Strongly agree",
+          "After reviewing the previous-round arguments, I retain this view. Publicly funded works must not result in eviction or unaffordable rent."
+        ]
+      ]
     },
     {
       "id": 6,
       "role": "Local authority retrofit officer",
-      "round1": "Low-income households should have first call on grants. A blanket insulation-before-heat-pump requirement would delay suitable homes and should be rejected. Councils should coordinate street-by-street work with opt-outs and quality inspection. Prevent rent increases attributable to publicly funded upgrades. Rural properties will need a different delivery pathway; a single national delivery model would be brittle."
+      "round1": "Low-income households should have first call on grants. A blanket insulation-before-heat-pump requirement would delay suitable homes and should be rejected. Councils should coordinate street-by-street work with opt-outs and quality inspection. Prevent rent increases attributable to publicly funded upgrades. Rural properties will need a different delivery pathway; a single national delivery model would be brittle.",
+      "round2": [
+        [
+          "Agree",
+          "Income targeting should include accessible application support."
+        ],
+        [
+          "Disagree",
+          "The building assessment should determine the appropriate sequence."
+        ],
+        [
+          "Strongly agree",
+          "Coordinate procurement locally while keeping a separate rural route."
+        ],
+        [
+          "Agree",
+          "Grants should have enforceable tenant protection conditions."
+        ]
+      ],
+      "round3": [
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Income targeting should include accessible application support."
+        ],
+        [
+          "Disagree",
+          "After reviewing the previous-round arguments, I retain this view. The building assessment should determine the appropriate sequence."
+        ],
+        [
+          "Strongly agree",
+          "After reviewing the previous-round arguments, I retain this view. Coordinate procurement locally while keeping a separate rural route."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Grants should have enforceable tenant protection conditions."
+        ]
+      ]
     },
     {
       "id": 7,
       "role": "Rural housing specialist",
-      "round1": "Support low-income households first, including remote homes that cost more to upgrade. I cannot endorse insulation before every heat pump because solid-wall homes need individual assessment. I oppose street-by-street delivery as the default everywhere: scattered settlements may lose out. I support tenant protection after public investment. Reserve a route for individual rural properties rather than rewarding only cheap urban installations."
+      "round1": "Support low-income households first, including remote homes that cost more to upgrade. I cannot endorse insulation before every heat pump because solid-wall homes need individual assessment. I oppose street-by-street delivery as the default everywhere: scattered settlements may lose out. I support tenant protection after public investment. Reserve a route for individual rural properties rather than rewarding only cheap urban installations.",
+      "round2": [
+        [
+          "Agree",
+          "Retain support for expensive remote homes instead of allocating only by cheap carbon savings."
+        ],
+        [
+          "Disagree",
+          "Solid-wall and remote homes need case-by-case assessment, not a universal prerequisite."
+        ],
+        [
+          "Disagree",
+          "Scattered settlements cannot use a street model; I would support optional coordination with a protected rural pathway."
+        ],
+        [
+          "Agree",
+          "Public improvements should not displace existing residents."
+        ]
+      ],
+      "round3": [
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Retain support for expensive remote homes instead of allocating only by cheap carbon savings."
+        ],
+        [
+          "Disagree",
+          "After reviewing the previous-round arguments, I retain this view. Solid-wall and remote homes need case-by-case assessment, not a universal prerequisite."
+        ],
+        [
+          "Agree",
+          "I change to support coordination as an available programme, after the officer explicitly retained a separate rural route. This is conditional on protecting funding for scattered homes; I would still oppose making street delivery the only route."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Public improvements should not displace existing residents."
+        ]
+      ]
     },
     {
       "id": 8,
       "role": "Public finance economist",
-      "round1": "I am uncertain whether income should always outrank carbon savings in grant allocation; the trade-off needs an explicit budget. I oppose requiring insulation before every heat pump. I am uncertain whether councils coordinating street programmes would outperform competitive household grants. Preventing all rent increases could deter private co-investment, so I oppose a blanket restriction. Publish costs and measured outcomes from pilots."
+      "round1": "I am uncertain whether income should always outrank carbon savings in grant allocation; the trade-off needs an explicit budget. I oppose requiring insulation before every heat pump. I am uncertain whether councils coordinating street programmes would outperform competitive household grants. Preventing all rent increases could deter private co-investment, so I oppose a blanket restriction. Publish costs and measured outcomes from pilots.",
+      "round2": [
+        [
+          "Unable to judge — need more information",
+          "I need a clear trade-off between poverty reduction and emissions saved per pound."
+        ],
+        [
+          "Disagree",
+          "A universal sequencing rule could waste scarce budgets."
+        ],
+        [
+          "Unable to judge — need more information",
+          "Compare council coordination with household grants before committing."
+        ],
+        [
+          "Disagree",
+          "Restrictions may reduce landlord co-investment; test a proportional condition."
+        ]
+      ],
+      "round3": [
+        [
+          "Unable to judge — need more information",
+          "After reviewing the previous-round arguments, I retain this view. I need a clear trade-off between poverty reduction and emissions saved per pound."
+        ],
+        [
+          "Disagree",
+          "After reviewing the previous-round arguments, I retain this view. A universal sequencing rule could waste scarce budgets."
+        ],
+        [
+          "Unable to judge — need more information",
+          "After reviewing the previous-round arguments, I retain this view. Compare council coordination with household grants before committing."
+        ],
+        [
+          "Disagree",
+          "After reviewing the previous-round arguments, I retain this view. Restrictions may reduce landlord co-investment; test a proportional condition."
+        ]
+      ]
     },
     {
       "id": 9,
       "role": "Housing association asset manager",
-      "round1": "Prioritise grants for low-income households. I favour insulation before heat pumps because our worst homes need fabric work, although a building assessment may justify exceptions. Council coordination of street programmes can make procurement and resident support more coherent. I support protections against rent increases caused by public grants. Long-term maintenance and resident handover need dedicated funding."
+      "round1": "Prioritise grants for low-income households. I favour insulation before heat pumps because our worst homes need fabric work, although a building assessment may justify exceptions. Council coordination of street programmes can make procurement and resident support more coherent. I support protections against rent increases caused by public grants. Long-term maintenance and resident handover need dedicated funding.",
+      "round2": [
+        [
+          "Agree",
+          "Low-income social tenants should benefit first."
+        ],
+        [
+          "Agree",
+          "Our worst homes need fabric improvements, although already suitable homes may be exceptions."
+        ],
+        [
+          "Agree",
+          "Joint procurement can support maintenance and resident handover."
+        ],
+        [
+          "Agree",
+          "Public investment should improve affordability for existing tenants."
+        ]
+      ],
+      "round3": [
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Low-income social tenants should benefit first."
+        ],
+        [
+          "Disagree",
+          "The installer’s distinction between our worst homes and already suitable homes persuades me. I change my vote because every is too absolute. Our fabric-first priority should not become a universal rule for all properties."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Joint procurement can support maintenance and resident handover."
+        ],
+        [
+          "Agree",
+          "After reviewing the previous-round arguments, I retain this view. Public investment should improve affordability for existing tenants."
+        ]
+      ]
     },
     {
       "id": 10,
       "role": "Consumer protection researcher",
-      "round1": "I support low-income households receiving priority. I am uncertain about mandatory insulation before every heat pump and would want a home-specific assessment. I am uncertain whether council-led street delivery is always best; compare complaints, access and outcomes. Protect tenants from rent increases attributable to publicly funded works. Residents need accessible advice, warranties and independent routes to remedy poor installation."
+      "round1": "I support low-income households receiving priority. I am uncertain about mandatory insulation before every heat pump and would want a home-specific assessment. I am uncertain whether council-led street delivery is always best; compare complaints, access and outcomes. Protect tenants from rent increases attributable to publicly funded works. Residents need accessible advice, warranties and independent routes to remedy poor installation.",
+      "round2": [
+        [
+          "Strongly agree",
+          "Correction: the model placed my explicit support in the uncertain group. I support prioritising low-income households."
+        ],
+        [
+          "Unable to judge — need more information",
+          "The word every needs technical justification; I want home-specific assessment evidence."
+        ],
+        [
+          "Unable to judge — need more information",
+          "Compare access, complaints and measured outcomes across delivery models."
+        ],
+        [
+          "Strongly agree",
+          "Tenants need enforceable protections and an independent complaints route."
+        ]
+      ],
+      "round3": [
+        [
+          "Strongly agree",
+          "After reviewing the previous-round arguments, I retain this view. Correction: the model placed my explicit support in the uncertain group. I support prioritising low-income households."
+        ],
+        [
+          "Disagree",
+          "I move from unable to judge to disagree with the universal wording. The home-assessment argument supplies a reason to reject every; this is a change in judgement, not newly measured evidence about heat pumps."
+        ],
+        [
+          "Agree",
+          "I now support the principle of local coordination with independent complaints and outcome monitoring. The resident-support and handover arguments persuade me; I still want comparative evaluation before nationwide expansion."
+        ],
+        [
+          "Strongly agree",
+          "After reviewing the previous-round arguments, I retain this view. Tenants need enforceable protections and an independent complaints route."
+        ]
+      ]
     }
-  ]
+  ],
+  "protocol": "Three rounds; ten fictional roles; scripted role-play, not independent expert evidence. 80% agreement among submitted ratings; neutral and uncertain ratings included. Stop after round 3 and report unresolved items.",
+  "synthetic": true,
+  "topic": "UK home energy upgrades"
 }
