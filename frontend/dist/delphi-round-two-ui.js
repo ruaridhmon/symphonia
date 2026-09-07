@@ -695,10 +695,68 @@
 
 // A later round receives its own token while preserving the participant identity.
 (function () {
-  var path = '', loading = false;
+  var path = '', loading = false, feedbackClaims = [];
+  function titleKey(value) {
+    return value.replace(/^(?:🟩|🟥|🟨)?\s*Claim\s+\d+\s*:\s*/i, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+  function parseFeedback(html) {
+    var doc = new DOMParser().parseFromString(html || '', 'text/html');
+    var claims = [], current, group;
+    doc.querySelectorAll('p,h2,h3,summary,li').forEach(function (element) {
+      var text = element.textContent.trim();
+      if (/^(?:🟩|🟥|🟨)?\s*Claim\s+\d+\s*:/i.test(text)) {
+        current = {key:titleKey(text), groups:{}, count:''};
+        claims.push(current); group = '';
+      } else if (current && /^People making this claim:/i.test(text)) {
+        current.count = text;
+      } else if (current && /^Show (supporting|opposing|uncertain) (experts|statements)/i.test(text)) {
+        var match = text.match(/^Show (supporting|opposing|uncertain) (experts|statements)/i);
+        group = match[1].toLowerCase() + '_' + match[2].toLowerCase();
+        current.groups[group] = [];
+      } else if (current && group && element.tagName === 'LI') {
+        current.groups[group].push(text);
+      }
+    });
+    return claims;
+  }
+  function renderFeedback() {
+    var progress = document.querySelector('#delphi-round-two-progress');
+    var label = progress?.querySelector('.delphi-r2-progress-label');
+    var existing = document.getElementById('delphi-previous-feedback');
+    if (!label || path !== location.pathname) { if (existing) existing.remove(); return; }
+    var key = titleKey(label.textContent);
+    var claim = feedbackClaims.find(function (item) { return item.key === key; });
+    if (!claim) { if (existing) existing.remove(); return; }
+    if (existing?.dataset.claim === key) return;
+    if (existing) existing.remove();
+    var details = document.createElement('details');
+    details.id = 'delphi-previous-feedback';
+    details.dataset.claim = key;
+    details.style.cssText = 'margin:0 0 .8rem;padding:.65rem .8rem;border:1px solid var(--border);border-radius:13px;font-size:.875rem;line-height:1.5';
+    var summary = document.createElement('summary');
+    summary.textContent = 'Previous round feedback';
+    summary.style.cssText = 'cursor:pointer;min-height:28px;color:var(--muted-foreground)';
+    details.appendChild(summary);
+    var count = document.createElement('p'); count.textContent = claim.count; details.appendChild(count);
+    ['supporting','opposing','uncertain'].forEach(function (group) {
+      var statements = claim.groups[group + '_statements'] || [];
+      var experts = claim.groups[group + '_experts'] || [];
+      if (!statements.length && !experts.length) return;
+      var heading = document.createElement('strong');
+      heading.textContent = {supporting:'Supporting',opposing:'Opposing',uncertain:'Neutral / uncertain'}[group] + ' · ' + (experts.length || statements.length);
+      details.appendChild(heading);
+      var list = document.createElement('ul');
+      list.style.cssText = 'padding-left:1.1rem;margin:.4rem 0 .8rem';
+      (statements.length ? statements : experts).forEach(function (text) {
+        var item = document.createElement('li'); item.textContent = text; item.style.marginBottom = '.5rem'; list.appendChild(item);
+      });
+      details.appendChild(list);
+    });
+    progress.after(details);
+  }
   async function checkContinuation() {
     var match = location.pathname.match(/^\/public\/session\/([^/]+)\/?$/);
-    if (!match) { path = ''; return; }
+    if (!match) { path = ''; feedbackClaims = []; return; }
     var card = document.querySelector('.card-lg');
     if (!card || !card.querySelector('h1') || loading || path === location.pathname) return;
     path = location.pathname;
@@ -708,7 +766,10 @@
       var response = await fetch('/api/public/forms/session/' + encodeURIComponent(match[1]), {credentials:'include'});
       if (!response.ok) return;
       var data = await response.json();
-      if (!data.next_round_available || location.pathname !== requestedPath) return;
+      if (location.pathname !== requestedPath) return;
+      feedbackClaims = parseFeedback(data.form?.previous_round_synthesis);
+      renderFeedback();
+      if (!data.next_round_available) return;
       var panel = document.createElement('div');
       panel.style.cssText = 'padding:1rem;margin-bottom:1rem;border:1px solid var(--border);border-radius:13px;background:var(--background)';
       var note = document.createElement('p');
@@ -733,7 +794,7 @@
     } finally { loading = false; }
   }
   var timer;
-  new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(checkContinuation, 200); }).observe(document.body, {childList:true,subtree:true});
+  new MutationObserver(function () { clearTimeout(timer); timer = setTimeout(function () { renderFeedback(); checkContinuation(); }, 200); }).observe(document.body, {childList:true,subtree:true});
 })();
 
 (function () {
