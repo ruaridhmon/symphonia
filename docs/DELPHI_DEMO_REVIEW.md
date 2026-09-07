@@ -51,3 +51,15 @@ Methodological basis: Jünger et al., CREDES (2017), https://doi.org/10.1177/026
 ## Summary visual refinement
 
 Generation and version history use native keyboard-accessible disclosures, closed initially. Recorded ratings and source evidence remain the primary reading surface. The scoped stylesheet reduces competing backgrounds, oversized settings and heavy borders, and supports narrow screens. Source components and the versioned dev summary module share the disclosure structure. `frontend/scripts/polish-summary-bundle.cjs` reproduces the focused mirror patch; build validation uses a temporary output directory to preserve the existing deployed participant fixes.
+
+## September 7: results explorer and public-services simulation
+
+Reviewed the dashboard, create/preview/share controls, summary navigation, round setup and existing submitted participant view. The page header now has one compact set of view/round controls. The recorded-results surface groups claims by descriptive agreement bands, places counts and comparable round history together, and opens original comments alongside each claim. Matched-respondent movement excludes ambiguous identities and distinguishes a change of stance group from an intensity-only change. Missing answers no longer shrink the percentage bar while using a different denominator in its label. Model-inferred synthesis remains separate from direct rating counts.
+
+A new eight-role, three-round scenario asks where humans should retain control over AI in UK public services. The fixture is `backend/tests/fixtures/public_ai_delphi.json`. `test_public_ai_simulation.py` ran 24 authenticated submissions through an isolated FastAPI test instance, preserving eight identities, all claims, round feedback, saved synthesis and publication transitions. Model text is scripted LLM-authored roleplay; no empirical knowledge or independent-agent behaviour is claimed. An export of the verified responses drives the read-only explorer at an existing admin summary with `?demo=public-ai`. The dashboard links to it.
+
+Final support: human appeal 8/8; bounded administrative automation 6/8 (one disagreement and one uncertainty); staffing earmark 4/8 (four disagree); universal code-and-weights release 1/8 (seven disagree). The example explicitly retains the staffing trade-off and the minority view about supplier power. A proposed alternative disclosure policy is marked unrated and receives no inherited consensus score.
+
+Automatic approval review rejected enabling public access on the new live form. That setting was not saved. Live form 17 has no simulation submissions; the explorer prominently describes its saved isolated dataset and offers a return to live consultation data. Existing warmer-homes form 16 retains its earlier 28 live synthetic submissions. No production deployment or external invitations were made.
+
+Validation: eight frontend Delphi utility tests; isolated three-round API simulation; source Vite build; focused legacy modules rebuilt. Browser QA covers the deployed explorer and original live summary after deployment.

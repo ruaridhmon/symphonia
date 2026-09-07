@@ -33,6 +33,7 @@ export default function PublicShareSettings({
           </p>
         </div>
         <ToggleSwitch
+          label="Public share link"
           id="toggle-public-share"
           checked={enabled}
           onChange={onEnabledChange}

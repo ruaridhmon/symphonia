@@ -63,6 +63,7 @@ export default function ConsentSettings({
           </p>
         </div>
         <ToggleSwitch
+          label="Consent step"
           id="toggle-consent-step"
           checked={enabled}
           onChange={onEnabledChange}
