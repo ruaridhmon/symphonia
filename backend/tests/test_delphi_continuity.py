@@ -77,3 +77,19 @@ def test_publication_is_explicit_and_admin_only(client, admin_headers, participa
     assert client.get(f'/public/forms/{form["join_code"]}').json()['previous_round_synthesis'] == ''
     client.post(base + '/synthesis_publication', json={'published':True}, headers=admin_headers)
     assert client.get(f'/public/forms/{form["join_code"]}').json()['previous_round_synthesis'] == '<p>Reviewed evidence</p>'
+
+
+def test_repeated_open_does_not_skip_a_round(client, admin_headers):
+    form = create_form(client, admin_headers)
+    url = f'/forms/{form["id"]}/next_round'
+    payload = {'expected_round_number': 1, 'questions': ['Review this claim']}
+    assert client.post(url, json=payload, headers=admin_headers).status_code == 200
+    assert client.post(url, json=payload, headers=admin_headers).status_code == 409
+    rounds = client.get(f'/forms/{form["id"]}/rounds', headers=admin_headers).json()
+    assert len(rounds) == 2
+    assert rounds[-1]['is_active'] is True
+    restore = f'/forms/{form["id"]}/rounds/{rounds[0]["id"]}/make_active'
+    assert client.post(restore, headers=admin_headers).status_code == 200
+    reloaded = client.get(f'/forms/{form["id"]}/rounds', headers=admin_headers).json()
+    assert reloaded[0]['is_active'] is True
+    assert reloaded[1]['is_active'] is False

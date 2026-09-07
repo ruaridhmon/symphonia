@@ -70,6 +70,8 @@
   function openModal() {
     if (!isSummaryPath()) return;
     var claims = claimData();
+    var viewedRound = (document.body.innerText || document.body.textContent).match(/Round\s+(\d+)\s+of\s+\d+/i);
+    var expectedRound = viewedRound ? Number(viewedRound[1]) : null;
     if (!claims.length) {
       window.alert('No claims were found in the current synthesis.');
       return;
@@ -194,6 +196,7 @@
             csrf ? { 'X-CSRF-Token': csrf } : {}
           ),
           body: JSON.stringify({
+            expected_round_number: expectedRound,
             questions: questionsFor(claims),
             context_settings: {
               intro_title: 'Review the claims',
