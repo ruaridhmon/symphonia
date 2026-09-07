@@ -147,3 +147,4 @@ Any build pulses for this repo should read this file first. Key rules:
 3. After backend changes → `kill <uvicorn_pid>` then restart from `backend/` directory
 4. Frontend changes → `npm run build` in `frontend/`, then restart backend (serves dist/)
 5. Split-domain prod (`symphonia.caer.org.uk` + `api.symphonia.caer.org.uk`) requires `CSRF_COOKIE_DOMAIN=symphonia.caer.org.uk` and matching `CORS_ALLOW_ORIGINS`
+- **2026-09-07:** Added `DelphiProgressPanel` with counts from recorded ratings and exact wording/scale comparisons. Empty-round and copied synthesis notes apply to historical rounds too. Dev still deploys a patched dist mirror: `src/legacy/delphiProgress.ts` is the compatibility entry, bundled with esbuild to `dist/delphi-progress.js`; it reuses the existing deployed rounds API module. Remove the compatibility entry when the dev frontend returns to source builds. Do not replace the entire dist directory without reconciling existing participant-flow patches.

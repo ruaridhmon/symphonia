@@ -1,0 +1,57 @@
+{
+  "synthetic": true,
+  "topic": "UK home energy upgrades",
+  "protocol": "Three rounds; ten fictional roles; scripted role-play, not independent expert evidence. 80% agreement among submitted ratings; neutral and uncertain ratings included. Stop after round 3 and report unresolved items.",
+  "panel": [
+    {
+      "id": 1,
+      "role": "Building physicist",
+      "round1": "Public funding should prioritise low-income households in the least efficient homes. Assess insulation and ventilation before specifying heating, but do not require every possible insulation measure before a heat pump. Councils should coordinate street-by-street upgrades where properties are similar, with independent quality checks. Protect tenants from rent increases caused by publicly funded works. Technical suitability matters more than a universal technology sequence."
+    },
+    {
+      "id": 2,
+      "role": "Heat-pump installer",
+      "round1": "Low-income households should receive grants first. I oppose a rule requiring insulation upgrades before every heat pump: suitable homes could decarbonise sooner. Street-by-street coordination is useful but households should retain a choice of installer. I support safeguards preventing grant-funded work from displacing tenants. Training and clear performance standards would matter more than another complicated eligibility test."
+    },
+    {
+      "id": 3,
+      "role": "Fuel-poverty advocate",
+      "round1": "Prioritise grants for low-income households in inefficient homes. I initially favour insulation before heat pumps because families must be able to afford warmth, though exceptions may be sensible. Councils should deliver street-by-street programmes with trusted local advice. Landlords receiving public funding should not raise rents because of the improvements. Include people who cannot navigate complex applications."
+    },
+    {
+      "id": 4,
+      "role": "Private landlord representative",
+      "round1": "I support targeting low-income households but grants must also make rented homes economically viable. I oppose mandatory insulation before every heat pump. I prefer owner-led delivery to compulsory council street programmes. I oppose a blanket ban on rent increases after publicly funded upgrades: a transparent limit accounting for private contributions would be fairer. Give small landlords predictable timelines."
+    },
+    {
+      "id": 5,
+      "role": "Tenant organiser",
+      "round1": "Direct grants to low-income households first and prevent eviction or rent increases linked to publicly funded improvements. I favour insulation before heat pumps because draughty homes need attention first, but I am open to technical exceptions. Street-by-street council delivery could avoid landlords cherry-picking profitable properties. Tenants must consent to scheduling and have independent complaints support."
+    },
+    {
+      "id": 6,
+      "role": "Local authority retrofit officer",
+      "round1": "Low-income households should have first call on grants. A blanket insulation-before-heat-pump requirement would delay suitable homes and should be rejected. Councils should coordinate street-by-street work with opt-outs and quality inspection. Prevent rent increases attributable to publicly funded upgrades. Rural properties will need a different delivery pathway; a single national delivery model would be brittle."
+    },
+    {
+      "id": 7,
+      "role": "Rural housing specialist",
+      "round1": "Support low-income households first, including remote homes that cost more to upgrade. I cannot endorse insulation before every heat pump because solid-wall homes need individual assessment. I oppose street-by-street delivery as the default everywhere: scattered settlements may lose out. I support tenant protection after public investment. Reserve a route for individual rural properties rather than rewarding only cheap urban installations."
+    },
+    {
+      "id": 8,
+      "role": "Public finance economist",
+      "round1": "I am uncertain whether income should always outrank carbon savings in grant allocation; the trade-off needs an explicit budget. I oppose requiring insulation before every heat pump. I am uncertain whether councils coordinating street programmes would outperform competitive household grants. Preventing all rent increases could deter private co-investment, so I oppose a blanket restriction. Publish costs and measured outcomes from pilots."
+    },
+    {
+      "id": 9,
+      "role": "Housing association asset manager",
+      "round1": "Prioritise grants for low-income households. I favour insulation before heat pumps because our worst homes need fabric work, although a building assessment may justify exceptions. Council coordination of street programmes can make procurement and resident support more coherent. I support protections against rent increases caused by public grants. Long-term maintenance and resident handover need dedicated funding."
+    },
+    {
+      "id": 10,
+      "role": "Consumer protection researcher",
+      "round1": "I support low-income households receiving priority. I am uncertain about mandatory insulation before every heat pump and would want a home-specific assessment. I am uncertain whether council-led street delivery is always best; compare complaints, access and outcomes. Protect tenants from rent increases attributable to publicly funded works. Residents need accessible advice, warranties and independent routes to remedy poor installation."
+    }
+  ]
+}
