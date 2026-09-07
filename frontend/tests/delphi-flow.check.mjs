@@ -85,7 +85,7 @@ test('activates after SPA navigation; comment is a single accessible growing inp
     about.open = true;
     const input = window.document.querySelector('textarea');
     assert.equal(input.rows, 2);
-    assert.equal(input.getAttribute('aria-label'), 'What led you to this view? (optional)');
+    assert.equal(input.getAttribute('aria-label'), 'Explain your position (optional)');
     assert.equal(window.document.querySelectorAll('.delphi-r2-comment-toggle').length, 0);
     input.focus();
     assert.notEqual(window.getComputedStyle(window.document.querySelector('#delphi-round-two-actions')).display, 'none');
