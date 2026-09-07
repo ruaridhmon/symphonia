@@ -6,6 +6,21 @@ import { JSDOM } from 'jsdom';
 const script = readFileSync(new URL('../dist/delphi-round-two-ui.js', import.meta.url), 'utf8');
 const settle = () => new Promise(resolve => setTimeout(resolve, 180));
 
+test('submitted responses show saved comments, not an add-comment input or submit action', async () => {
+  const dom = page('/public/session/submitted');
+  try {
+    participant(dom.window, 1);
+    const input = dom.window.document.querySelector('textarea');
+    input.readOnly = true;
+    dom.window.document.querySelector('input').disabled = true;
+    await settle();
+    assert.equal(dom.window.document.querySelector('.delphi-r2-saved-comment').textContent, 'No comment added');
+    assert.equal(dom.window.document.querySelector('.delphi-r2-composer'), null);
+    assert.equal(dom.window.document.querySelector('#delphi-round-two-next').textContent, 'Review complete');
+    assert.equal(dom.window.document.querySelector('#delphi-round-two-next').disabled, true);
+  } finally { dom.window.close(); }
+});
+
 function page(path = '/') {
   const dom = new JSDOM('<body></body>', {
     url: 'https://symphonia-dev-488613.web.app' + path,
