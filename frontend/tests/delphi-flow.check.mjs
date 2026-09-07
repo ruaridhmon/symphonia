@@ -172,3 +172,18 @@ test('share keeps invitation primary and preserves copy handlers and secondary c
     assert.equal(more.getAttribute('aria-expanded'), 'true');
   } finally { dom.window.close(); }
 });
+
+test('returning participants see only matching previous feedback, collapsed and rendered as text', async () => {
+  const dom = page('/public/session/returning');
+  try {
+    dom.window.fetch = async () => ({ok:true, json:async () => ({form:{previous_round_synthesis:'<div><p>🟩 Claim 1: <strong>Test claim 1</strong></p><p>People making this claim: 1 of 2</p><details><summary>Show supporting statements</summary><ul><li>Response 1: A distinct original sentence.</li></ul></details><img src=x onerror="throw 1"></div><p>🟥 Claim 2: Different topic</p><p>Show opposing statements</p><ul><li>Do not show this under claim one.</li></ul>'}})});
+    participant(dom.window);
+    await new Promise(resolve => setTimeout(resolve, 650));
+    const feedback = dom.window.document.querySelector('#delphi-previous-feedback');
+    assert.ok(feedback);
+    assert.equal(feedback.open, false);
+    assert.match(feedback.textContent, /A distinct original sentence/);
+    assert.doesNotMatch(feedback.textContent, /Do not show/);
+    assert.equal(feedback.querySelector('img'), null);
+  } finally { dom.window.close(); }
+});
