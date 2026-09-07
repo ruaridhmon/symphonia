@@ -1,8 +1,10 @@
 // Read-only example explorer. Never writes to consultation data or changes access.
 import data from '../demos/public-ai-results.json';
+import research from '../demos/research-ai-results.json';
 import { renderDelphiInsights } from '../utils/renderDelphiInsights';
 import type { Round, RoundWithResponses } from '../types/summary';
-const example = data as unknown as {fixture:{title:string;method:string;claims:string[];experts:{role:string;proposal:string;round2:{votes:string[]};round3:{votes:string[]}}[]};rounds:Round[];responses:RoundWithResponses[]};
+type Example = {fixture:{title:string;method:string;claims:string[];narratives?:string[];short_labels?:string[];experts:{role:string;proposal:string;round2:{votes:string[]};round3:{votes:string[]}}[]};rounds:Round[];responses:RoundWithResponses[]};
+let example:Example = data as unknown as Example;
 const el=(tag:string,text='',cls='')=>{const n=document.createElement(tag);n.textContent=text;n.className=cls;return n;};
 const btn=(text:string,fn:()=>void)=>{const n=el('button',text) as HTMLButtonElement;n.type='button';n.onclick=fn;return n;};
 let selected=3;
@@ -10,26 +12,28 @@ function draw(root:HTMLElement) {
   root.replaceChildren();
   const top=el('div','','demo-topline');top.append(el('span','SYNTHETIC DELPHI · 8 FICTIONAL EXPERTS','di-eyebrow'));
   const back=el('a','Back to consultation') as HTMLAnchorElement;back.href=location.pathname;top.append(back);root.append(top);
-  root.append(el('h2','Can a panel find common ground without losing its disagreements?','demo-title'));
-  root.append(el('p','Explore three rounds on AI in UK public services. Follow the judgments, inspect the reasons, and see where the panel remains divided.','demo-deck'));
+  root.append(el('h2',example.fixture.title,'demo-title'));
+  root.append(el('p','1. Share ideas · 2. Rate the claims · 3. Review and rate again. The claims stay the same; the reasoning can develop.','demo-deck'));
   const provenance=el('details','','demo-protocol');provenance.append(el('summary','About this simulation'));
   provenance.append(el('p',example.fixture.method+' The 24 submissions were processed by an isolated test instance of the application. This is a saved demonstration, separate from live consultation responses.'));
   provenance.append(el('p','Protocol: eight returning participants; 80% agreement or disagreement, with uncertainty included; all eight responses required. Stop after three rounds and report unresolved claims. Claims stay unchanged between rating rounds.'));
   root.append(provenance);
   const nav=el('nav','','demo-rounds');nav.setAttribute('aria-label','Simulation rounds');
   const label=el('label','Viewing round ');const select=document.createElement('select');select.setAttribute('aria-label','Simulation round');
-  example.rounds.forEach(r=>{const o=document.createElement('option');o.value=String(r.round_number);o.textContent=`Round ${r.round_number} · ${['Independent ideas','First ratings','Reconsideration'][r.round_number-1] || 'Review'}`;o.selected=selected===r.round_number;select.append(o);});
+  example.rounds.forEach(r=>{const o=document.createElement('option');o.value=String(r.round_number);o.textContent=`Round ${r.round_number} · ${['Share ideas','Rate the claims','Review and rate again'][r.round_number-1] || 'Review'}`;o.selected=selected===r.round_number;select.append(o);});
   select.onchange=()=>{selected=Number(select.value);draw(root);};label.append(select);nav.append(label);root.append(nav);
   const narrative=el('div','','demo-narrative');
   if(selected===1){narrative.append(el('h3','Different starting points'),el('p','Eight roles bring different priorities: capacity, fairness, worker protection, fiscal flexibility and public accountability. Four candidate claims are distilled from their proposals; no agreement percentage is inferred from these paragraphs.'));}
   if(selected===2){narrative.append(el('h3','The first ratings reveal the fault lines'),el('p','Human appeals have broad support. The staffing earmark splits the panel evenly. Five respondents favour universal model disclosure, while others question whether it is the right route to accountability.'));}
   if(selected===3){narrative.append(el('h3','Common ground, with questions still open'),el('p','All eight support human appeal; seven reject universal model disclosure. Routine automation gains support but remains below the threshold. The staffing earmark stays split 4–4: protecting staff versus keeping budgets flexible.'));
 
-  }root.append(narrative);
+  }
+  if(example.fixture.narratives){narrative.replaceChildren(el('h3',['Independent starting points','Where opinions differ','What the panel learned'][selected-1]),el('p',example.fixture.narratives[selected-1]));}
+  root.append(narrative);
   if(selected===3) {
     const matrix=el('details','','demo-matrix');matrix.append(el('summary','See the eight perspectives side by side'));
     const table=el('table');table.append(el('caption','Round 2 → Round 3. Fictional roles; original claims unchanged.'));
-    const head=el('tr');['Perspective','Human appeal','Routine automation','Staffing earmark','Full model release'].forEach(t=>{const th=el('th',t);th.setAttribute('scope','col');head.append(th);});const thead=el('thead');thead.append(head);table.append(thead);
+    const head=el('tr');['Perspective',...(example.fixture.short_labels || ['Human appeal','Routine automation','Staffing earmark','Full model release'])].forEach(t=>{const th=el('th',t);th.setAttribute('scope','col');head.append(th);});const thead=el('thead');thead.append(head);table.append(thead);
     const tbody=el('tbody');example.fixture.experts.forEach(e=>{const row=el('tr');const label=el('th',e.role);label.setAttribute('scope','row');row.append(label);e.round3.votes.forEach((v,i)=>{const short=(x:string)=>x.startsWith('Unable')?'Unsure':x;const before=e.round2.votes[i];const cell=el('td',before===v?short(v):`${short(before)} → ${short(v)}`);if(before!==v)cell.className='demo-vote-changed';row.append(cell);});tbody.append(row);});table.append(tbody);
     const scroll=el('div','','demo-table-scroll');scroll.tabIndex=0;scroll.setAttribute('role','region');scroll.setAttribute('aria-label','Perspective ratings, scroll horizontally on small screens');scroll.append(table);matrix.append(scroll);root.append(matrix);
   }
@@ -59,20 +63,25 @@ function sync() {
       if(!empty)existing?.remove();
     }
   }
-  const requested=new URLSearchParams(location.search).get('demo')==='public-ai';
+  const demoKey=new URLSearchParams(location.search).get('demo');
+  const requested=demoKey==='public-ai'||demoKey==='research-ai';
+  example=(demoKey==='research-ai'?research:data) as unknown as Example;
   const active=isSummary&&requested;
   document.body.classList.toggle('delphi-demo-active',active);
   let root=document.getElementById('delphi-demo-workspace');
-  if(!active){root?.remove();root=null;}
+  if(!active||root?.dataset.example!==demoKey){root?.remove();root=null;}
   if(active&&main&&!root){
-    root=el('section','','demo-workspace');root.id='delphi-demo-workspace';
+    root=el('section','','demo-workspace');root.id='delphi-demo-workspace';root.dataset.example=demoKey || '';selected=3;
     const grid=main.querySelector(':scope > div > .grid');if(grid){grid.before(root);draw(root);}
   }
+  const researchRoute=/^\/admin\/form\/18(?:\/summary)?\/?$/.test(location.pathname);
+  if(!researchRoute || requested)document.getElementById('research-example-link')?.remove();
+  if(researchRoute&&!requested&&main&&!document.getElementById('research-example-link')){const link=el('a','Explore the completed synthetic example →','demo-dashboard-link') as HTMLAnchorElement;link.id='research-example-link';link.href='/admin/form/18/summary?demo=research-ai';main.prepend(link);}
   const dashboard=location.pathname==='/'&&Array.from(main?.querySelectorAll('h1')||[]).some(h=>h.textContent==='Consultations');
   if(!dashboard)document.getElementById('delphi-demo-link')?.remove();
   if(dashboard&&!document.getElementById('delphi-demo-link')){
-    const link=el('a','','demo-dashboard-link') as HTMLAnchorElement;link.id='delphi-demo-link';link.href='/admin/form/17/summary?demo=public-ai';
-    link.append(el('strong','Explore a Delphi in action'),el('span','8 fictional experts · 3 rounds · see what changes and what stays divided →'));main!.prepend(link);
+    const link=el('a','','demo-dashboard-link') as HTMLAnchorElement;link.id='delphi-demo-link';link.href='/admin/form/18/summary?demo=research-ai';
+    link.append(el('strong','Example: AI in university research'),el('span','8 fictional experts · 3 rounds · explore the completed example →'));main!.prepend(link);
   }
 }
 let timer:ReturnType<typeof setTimeout>;

@@ -68,7 +68,7 @@ function ratingProgress(round, rounds, responses) {
       const n = v.slice(0, 5).reduce((a, b) => a + b, 0);
       return [{ round: r.round_number, votes: v, n, percent: n ? 100 * v[0] / n : null }];
     });
-    const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify/i.test(String(p.label)));
+    const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify|what led/i.test(String(p.label)));
     const stableEmails = (rs) => {
       const map = /* @__PURE__ */ new Map();
       const duplicate = /* @__PURE__ */ new Set();
@@ -129,7 +129,7 @@ function buildFixedDelphiRound(round, rounds, responses) {
     if (typeof q === "string") return q;
     const row = rows.find((r) => r.key === String(q.questionId));
     if (row) return { ...q, groupPrompt: [`Round 2: ${row.votes[0]} agree, ${row.votes[1]} disagree, ${row.votes[2]} neutral, ${row.votes[3]} unable to judge; ${row.answered} answered.`, "Review the other participants\u2019 reasoning, then rate this same claim again. You do not need to change your mind.", ...row.evidence.filter((e) => e.comment).map((e) => `${e.position}: ${e.comment}`)].join("\n") };
-    if (/comment|clarification|justify/i.test(String(q.label))) return { ...q, label: "Justify your position", placeholder: "Explain why you chose this rating and what evidence or reasoning supports it. (optional)" };
+    if (/comment|clarification|justify|what led/i.test(String(q.label))) return { ...q, label: "What led you to this view?", placeholder: "A sentence or two is enough. Mention evidence, experience or a concern." };
     return { ...q };
   });
 }
@@ -150,14 +150,14 @@ function renderDelphiPlanner(root, round, rounds, responses, publish) {
   }
   if (round.round_number !== 2) return;
   const detail = el("details");
-  detail.append(el("summary", "Preview round 3 \xB7 Final ratings"), el("p", "All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and justify their position."));
+  detail.append(el("summary", "Preview round 3 \xB7 Final ratings"), el("p", "All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and explain their reasoning."));
   box.append(detail);
   try {
     const questions = buildFixedDelphiRound(round, rounds.filter((r) => r.round_number <= 2), responses);
     questions.filter((q) => typeof q === "object" && Array.isArray(q.options)).forEach((q) => {
       if (typeof q === "string") return;
       const item = el("details");
-      item.append(el("summary", String(q.sectionTitle || q.label)), el("p", String(q.groupPrompt)), el("p", q.options.join(" \xB7 ")), el("p", "Justify your position \u2014 explain the reasoning behind your rating."));
+      item.append(el("summary", String(q.sectionTitle || q.label)), el("p", String(q.groupPrompt)), el("p", q.options.join(" \xB7 ")), el("p", "What led you to this view? \u2014 explain the reasoning behind your rating."));
       detail.append(item);
     });
     if (publish && !rounds.some((r) => r.round_number >= 3)) {
@@ -430,7 +430,7 @@ function render() {
       /* @vite-ignore */
       deployedApi
     );
-    await api.n(Number(nextKey), { questions, expected_round_number: round.round_number, context_settings: { intro_title: "Review the panel\u2019s reasoning", intro_body: "Rate each claim independently. The claim set is unchanged. Justify your position.", show_previous_response: true } });
+    await api.n(Number(nextKey), { questions, expected_round_number: round.round_number, context_settings: { intro_title: "Review the panel\u2019s reasoning", intro_body: "Rate each claim independently. The claim set is unchanged. Explain what led you to your view.", show_previous_response: true } });
     location.assign(location.pathname);
   } : void 0);
 }
