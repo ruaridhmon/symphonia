@@ -43,7 +43,12 @@ function render() {
   panel.dataset.signature = signature;
   panel.setAttribute('aria-label', 'Delphi round progress');
   if (!round || !cache) { panel.replaceChildren(el('p', failed ? 'Recorded response data could not be loaded.' : 'Loading recorded responses…')); return; }
-  renderDelphiInsights(panel, round, cache.rounds, cache.responses, () => { lastFetch = 0; render(); });
+  renderDelphiInsights(panel, round, cache.rounds, cache.responses, () => { lastFetch = 0; render(); }, round.is_active ? async questions => {
+    const deployedApi = '/assets/rounds-CU08geHs.js';
+    const api = await import(/* @vite-ignore */ deployedApi);
+    await api.n(Number(nextKey), {questions, expected_round_number:round.round_number, context_settings:{intro_title:"Review the panel’s reasoning",intro_body:"Rate each claim independently. New proposals have no prior votes. Explain what supports your position and what would change it.",show_previous_response:true}});
+    location.assign(location.pathname);
+  } : undefined);
 
 }
 let timer: ReturnType<typeof setTimeout>;

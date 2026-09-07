@@ -17,7 +17,9 @@ function draw(root:HTMLElement) {
   provenance.append(el('p','Protocol: eight returning participants; 80% agreement or disagreement, with uncertainty included; all eight responses required. Stop after three rounds and report unresolved claims. Claims stay unchanged between rating rounds.'));
   root.append(provenance);
   const nav=el('nav','','demo-rounds');nav.setAttribute('aria-label','Simulation rounds');
-  ['1 · Independent ideas','2 · First ratings','3 · Reconsideration'].forEach((label,i)=>{const b=btn(label,()=>{selected=i+1;draw(root);});b.setAttribute('aria-current',selected===i+1?'step':'false');nav.append(b);});root.append(nav);
+  const label=el('label','Viewing round ');const select=document.createElement('select');select.setAttribute('aria-label','Simulation round');
+  example.rounds.forEach(r=>{const o=document.createElement('option');o.value=String(r.round_number);o.textContent=`Round ${r.round_number} · ${['Independent ideas','First ratings','Reconsideration'][r.round_number-1] || 'Review'}`;o.selected=selected===r.round_number;select.append(o);});
+  select.onchange=()=>{selected=Number(select.value);draw(root);};label.append(select);nav.append(label);root.append(nav);
   const narrative=el('div','','demo-narrative');
   if(selected===1){narrative.append(el('h3','Different starting points'),el('p','Eight roles bring different priorities: capacity, fairness, worker protection, fiscal flexibility and public accountability. Four candidate claims are distilled from their proposals; no agreement percentage is inferred from these paragraphs.'));}
   if(selected===2){narrative.append(el('h3','The first ratings reveal the fault lines'),el('p','Human appeals have broad support. The staffing earmark splits the panel evenly. Five respondents favour universal model disclosure, while others question whether it is the right route to accountability.'));}
