@@ -1238,7 +1238,7 @@ function ratingProgress(round, rounds, responses) {
       const n = v.slice(0, 5).reduce((a, b) => a + b, 0);
       return [{ round: r.round_number, votes: v, n, percent: n ? 100 * v[0] / n : null }];
     });
-    const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification/i.test(String(p.label)));
+    const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify/i.test(String(p.label)));
     const stableEmails = (rs) => {
       const map = /* @__PURE__ */ new Map();
       const duplicate = /* @__PURE__ */ new Set();
@@ -1290,28 +1290,18 @@ function synthesisProvenanceNote(round, rounds) {
 }
 
 // src/utils/delphiPlanning.ts
-function buildNextDelphi(round, rounds, responses, retained, proposals) {
-  const rows = ratingProgress(round, rounds, responses);
-  const questions = [];
-  for (const row of rows.filter((r) => retained.includes(r.key))) {
-    const original = round.questions.find((q) => typeof q === "object" && String(q.questionId) === row.key);
-    const comments = row.evidence.filter((e) => e.comment).map((e) => `${e.position}: ${e.comment}`).join("\n");
-    questions.push({ ...original, groupPrompt: `Previous round: ${row.votes[0]} agree, ${row.votes[1]} disagree, ${row.votes[2]} neutral, ${row.votes[3]} unable to judge; ${row.answered} answered. Retain or revise your view independently.
-${comments}` });
-    questions.push({ questionId: row.key + "_reason", sectionTitle: original.sectionTitle || original.label, label: "Comments or clarification", inputType: "textarea", optional: true, placeholder: "What explains your position? What evidence or condition would change it?", requireEvidence: false, requireConfidence: false, requireCounterarguments: false });
-  }
-  for (const p of proposals) {
-    const parent = rows.find((r) => r.key === p.parentId);
-    if (!parent || !p.text.trim() || !p.rationale.trim()) throw new Error("Each proposal needs a parent claim, wording and a reason.");
-    if (p.text.trim() === parent.label.replace(/^Claim\s+\d+:\s*/i, "")) throw new Error("Re-rate the original claim instead of adding identical wording.");
-    const sectionTitle = p.text.trim();
-    questions.push({ questionId: p.id, sectionTitle, label: "Your response", inputType: "single_select", options: ["Strongly agree", "Agree", "Neither agree nor disagree", "Disagree", "Strongly disagree", "Unable to judge \u2014 need more information"], optional: false, parentClaimId: p.parentId, parentClaimText: parent.label, claimRationale: p.rationale.trim(), introducedRound: Math.max(...rounds.map((r) => r.round_number)) + 1, groupPrompt: `New proposal, not previously rated. Related to: ${parent.label}
-Why test this: ${p.rationale.trim()}
-Judge this wording independently; earlier votes do not apply.`, requireEvidence: false, requireConfidence: false, requireCounterarguments: false });
-    questions.push({ questionId: p.id + "_reason", sectionTitle, label: "Comments or clarification", inputType: "textarea", optional: true, placeholder: "What supports your view? What remains unresolved?", requireEvidence: false, requireConfidence: false, requireCounterarguments: false });
-  }
-  if (!questions.length) throw new Error("Select a claim or add a proposal before continuing.");
-  return questions;
+function buildFixedDelphiRound(round, rounds, responses) {
+  if (round.round_number !== 2 || rounds.some((r) => r.round_number >= 3)) throw new Error("This Delphi has three rounds. No further rating round is available.");
+  const baseline = rounds.find((r) => r.round_number === 2) || round;
+  const rows = ratingProgress(baseline, rounds, responses);
+  if (!rows.length) throw new Error("No recorded claim questionnaire is available.");
+  return baseline.questions.map((q) => {
+    if (typeof q === "string") return q;
+    const row = rows.find((r) => r.key === String(q.questionId));
+    if (row) return { ...q, groupPrompt: [`Round 2: ${row.votes[0]} agree, ${row.votes[1]} disagree, ${row.votes[2]} neutral, ${row.votes[3]} unable to judge; ${row.answered} answered.`, "Review the other participants\u2019 reasoning, then rate this same claim again. You do not need to change your mind.", ...row.evidence.filter((e) => e.comment).map((e) => `${e.position}: ${e.comment}`)].join("\n") };
+    if (/comment|clarification|justify/i.test(String(q.label))) return { ...q, label: "Justify your position", placeholder: "Explain why you chose this rating and what evidence or reasoning supports it. (optional)" };
+    return { ...q };
+  });
 }
 
 // src/utils/renderDelphiPlanner.ts
@@ -1321,113 +1311,42 @@ var el = (tag, text = "") => {
   return n;
 };
 function renderDelphiPlanner(root, round, rounds, responses, publish) {
-  const rows = ratingProgress(round, rounds, responses);
-  if (!rows.length) return;
-  const box = el("details");
+  const box = el("div");
   box.className = "di-planner";
-  box.append(el("summary", publish ? "Plan the next round" : "Explore a follow-up round"));
-  box.append(el("p", "Re-rate selected claims and add proposals that investigate disagreements. Unselected claims keep their recorded results. Stable disagreement is a valid outcome."));
-  const form = el("form");
-  const retained = /* @__PURE__ */ new Set();
-  const proposals = [];
-  form.append(el("h3", "1. Choose claims to revisit"));
-  rows.forEach((r) => {
-    const label = el("label");
-    const check = document.createElement("input");
-    check.type = "checkbox";
-    check.checked = !!r.answered && Math.max(r.votes[0], r.votes[1]) / r.answered < 0.8;
-    if (check.checked) retained.add(r.key);
-    check.onchange = () => {
-      check.checked ? retained.add(r.key) : retained.delete(r.key);
-    };
-    label.append(check, document.createTextNode(r.label.replace(/^Claim\s+\d+:\s*/i, "")));
-    form.append(label);
-  });
-  form.append(el("h3", "2. Develop related proposals"));
-  form.append(el("p", "Read both sides above. Is the disagreement about evidence, wording, feasibility or values? Test a condition, an alternative, or a specific unresolved question."));
-  const entries = el("div");
-  form.append(entries);
-  const add = el("button", "Add linked proposal");
-  add.type = "button";
-  add.onclick = () => {
-    const p = { id: "claim_" + crypto.randomUUID() + "_response", parentId: rows[0].key, text: "", rationale: "" };
-    proposals.push(p);
-    const entry = el("fieldset");
-    entry.append(el("legend", `New proposal`));
-    const parent = document.createElement("select");
-    parent.setAttribute("aria-label", "Original claim");
-    rows.forEach((r) => {
-      const o = document.createElement("option");
-      o.value = r.key;
-      o.textContent = r.label;
-      parent.append(o);
-    });
-    parent.onchange = () => p.parentId = parent.value;
-    entry.append(parent);
-    for (const [key, label] of [["text", "Proposed claim"], ["rationale", "Which disagreement does this address?"]]) {
-      const l = el("label", label);
-      const input = document.createElement("textarea");
-      input.required = true;
-      input.rows = 2;
-      input.setAttribute("aria-label", label);
-      input.oninput = () => p[key] = input.value;
-      l.append(input);
-      entry.append(l);
-    }
-    const remove = el("button", "Remove proposal");
-    remove.type = "button";
-    remove.onclick = () => {
-      proposals.splice(proposals.indexOf(p), 1);
-      entry.remove();
-    };
-    entry.append(remove);
-    entries.append(entry);
-    parent.focus();
-  };
-  form.append(add);
-  const review = el("button", "Preview next round");
-  review.type = "submit";
-  form.append(review);
-  const preview = el("section");
-  preview.setAttribute("aria-live", "polite");
-  form.append(preview);
-  form.addEventListener("input", () => preview.replaceChildren());
-  form.addEventListener("change", () => preview.replaceChildren());
-  add.addEventListener("click", () => preview.replaceChildren());
-  entries.addEventListener("click", (e) => {
-    if (e.target.tagName === "BUTTON") preview.replaceChildren();
-  });
-  form.onsubmit = (e) => {
-    e.preventDefault();
-    preview.replaceChildren();
-    try {
-      const questions = buildNextDelphi(round, rounds, responses, [...retained], proposals);
-      preview.append(el("h3", `Review \xB7 ${questions.length / 2} claims`), el("p", "Each claim has a rating and an optional explanation. New proposals start with no votes."));
-      questions.filter((_, i) => i % 2 === 0).forEach((q) => {
-        const d = el("details");
-        d.append(el("summary", `${q.parentClaimId ? "New proposal" : "Re-rate"} \xB7 ${q.sectionTitle || q.label}`), el("p", String(q.groupPrompt)), el("p", String(q.options.join(" \xB7 "))));
-        preview.append(d);
-      });
-      if (publish) {
-        const open = el("button", "Open reviewed round");
-        open.type = "button";
-        open.onclick = async () => {
-          open.disabled = true;
-          try {
-            await publish(questions);
-          } catch (err) {
-            preview.append(el("p", err instanceof Error ? err.message : "Could not open round."));
-            open.disabled = false;
-          }
-        };
-        preview.append(el("p", "Opening this round closes the current round to new responses."), open);
-      } else preview.append(el("p", "Simulation preview only. No live round or responses will be created."));
-    } catch (err) {
-      preview.append(el("p", err.message));
-    }
-  };
-  box.append(form);
   root.append(box);
+  if (round.round_number >= 3) {
+    box.append(el("strong", "Round 3 of 3 \xB7 Final ratings"), el("p", "The same claims were rated in rounds 2 and 3. Compare the positions and justifications above; unresolved disagreement remains part of the result."));
+    return;
+  }
+  if (round.round_number !== 2) return;
+  const detail = el("details");
+  detail.append(el("summary", "Preview round 3 \xB7 Final ratings"), el("p", "All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and justify their position."));
+  box.append(detail);
+  try {
+    const questions = buildFixedDelphiRound(round, rounds.filter((r) => r.round_number <= 2), responses);
+    questions.filter((q) => typeof q === "object" && Array.isArray(q.options)).forEach((q) => {
+      if (typeof q === "string") return;
+      const item = el("details");
+      item.append(el("summary", String(q.sectionTitle || q.label)), el("p", String(q.groupPrompt)), el("p", q.options.join(" \xB7 ")), el("p", "Justify your position \u2014 explain the reasoning behind your rating."));
+      detail.append(item);
+    });
+    if (publish && !rounds.some((r) => r.round_number >= 3)) {
+      const open = el("button", "Open round 3");
+      open.type = "button";
+      open.onclick = async () => {
+        open.disabled = true;
+        try {
+          await publish(questions);
+        } catch (e) {
+          detail.append(el("p", e.message));
+          open.disabled = false;
+        }
+      };
+      detail.append(open);
+    } else detail.append(el("p", rounds.some((r) => r.round_number >= 3) ? "Round 3 already exists." : "Simulation preview only."));
+  } catch (e) {
+    detail.append(el("p", e.message));
+  }
 }
 
 // src/utils/renderDelphiInsights.ts
@@ -1657,9 +1576,6 @@ function draw(root) {
   }
   if (selected === 3) {
     narrative.append(el2("h3", "Common ground, with questions still open"), el2("p", "All eight support human appeal; seven reject universal model disclosure. Routine automation gains support but remains below the threshold. The staffing earmark stays split 4\u20134: protecting staff versus keeping budgets flexible."));
-    const proposed = el2("details", "", "demo-proposal");
-    proposed.append(el2("summary", "A new proposal to test next"), el2("p", "Require independent model inspection, public evaluation reports and accessible explanations, with justified exceptions to public release of weights."), el2("p", "Proposed from the discussion, not rated. It must receive a new claim identifier and a fresh baseline; the rejected claim\u2019s votes cannot be transferred to it."));
-    narrative.append(proposed);
   }
   root.append(narrative);
   if (selected === 3) {

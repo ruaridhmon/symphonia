@@ -67,6 +67,7 @@ import type { SynthesisEmbeddedBlock } from './components/summary/SynthesisEdito
 
 import { usePresence } from './hooks/usePresence';
 import { formatAnswerForDisplay } from './utils/answers';
+import { buildFixedDelphiRound } from './utils/delphiPlanning';
 import { buildDelphiRoundTwoQuestions, extractDelphiClaims } from './utils/delphiRoundTwo';
 
 import type {
@@ -1597,19 +1598,22 @@ export default function SummaryPage() {
 	}
 
 	function prepareDelphiRoundTwo() {
-		const questions = buildDelphiRoundTwoQuestions(displayRound?.synthesis || '');
+		if (!displayRound || displayRound.round_number >= 3) { toastWarning('This Delphi ends after round 3.'); return; }
+		const questions = displayRound.round_number === 2 ? buildFixedDelphiRound(displayRound, rounds, structuredRounds) : buildDelphiRoundTwoQuestions(displayRound.synthesis || '');
 		if (!questions.length) {
 			toastWarning('No structured claims were found in this synthesis.');
 			return;
 		}
 		setPreparedDelphiQuestions(questions);
-		toastSuccess(`Round 2 prepared from ${delphiClaims.length} claims.`);
+		toastSuccess('The fixed claim questionnaire is ready.');
 	}
 
 	async function startNextRound() {
 		if (!formId) return;
+		if (rounds.some(r=>r.round_number>=3)) { toastWarning('This Delphi ends after round 3.'); return; }
 		const cleaned = nextRoundQuestions.map(q => q.trim()).filter(q => q.length > 0);
-		const questions = preparedDelphiQuestions || cleaned;
+		const baseline = rounds.find(r=>r.round_number===2);
+		const questions = baseline ? buildFixedDelphiRound(baseline,rounds,structuredRounds) : (preparedDelphiQuestions || cleaned);
 		if (!questions.length) {
 			toastWarning('Add at least one question for the next round.');
 			return;
@@ -1618,9 +1622,10 @@ export default function SummaryPage() {
 		try {
 			await apiNextRound(formId, {
 				questions,
+				expected_round_number: Math.max(...rounds.map(r=>r.round_number)),
 				context_settings: preparedDelphiQuestions ? {
 					intro_title: 'Review the claims',
-					intro_body: 'Review the previous feedback, choose your position, and add an optional comment. Consensus is not required.',
+					intro_body: 'Review the previous feedback, choose your position, and justify your position. Consensus is not required.',
 					show_previous_response: true,
 				} : undefined,
 			});

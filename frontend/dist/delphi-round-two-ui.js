@@ -46,12 +46,12 @@
           optional: false,
         }),
         baseQuestion({
-          label: 'Comments or clarification',
+          label: 'Justify your position',
           questionId: prefix + '_comment',
           sectionTitle: sectionTitle,
           inputType: 'textarea',
           rows: 2,
-          placeholder: 'Optional',
+          placeholder: 'Justify your position… (optional)',
           optional: true,
         }),
       ]);
@@ -67,9 +67,23 @@
     document.getElementById(MODAL_ID)?.remove();
   }
 
-  function openModal() {
+  async function openModal() {
     if (!isSummaryPath()) return;
     var claims = claimData();
+    var formId = window.location.pathname.match(/\/admin\/form\/(\d+)\/summary/)?.[1];
+    var frozenQuestions = null;
+    try {
+      var api = await import('/assets/rounds-CU08geHs.js');
+      var rounds = await api.g(Number(formId));
+      if (rounds.some(function(r){return r.round_number >= 3;})) { window.alert('This Delphi ends after round 3.'); return; }
+      var baseline = rounds.find(function(r){return r.round_number === 2;});
+      if (baseline) {
+        var planner = await import('/delphi-progress.js?v=2');
+        frozenQuestions = planner.buildFixedDelphiRound(baseline, rounds, await api.a(Number(formId)));
+        claims = frozenQuestions.filter(function(q){return q && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options};});
+      }
+    } catch (error) {window.alert('Could not load the fixed claim set. Please retry.');return;}
+
     var viewedRound = (document.body.innerText || document.body.textContent).match(/Round\s+(\d+)\s+of\s+\d+/i);
     var expectedRound = viewedRound ? Number(viewedRound[1]) : null;
     if (!claims.length) {
@@ -126,7 +140,7 @@
       heading.textContent = claim.title;
       heading.style.cssText = 'font-size:1.1rem;line-height:1.45;margin:0 0 1rem';
       preview.appendChild(heading);
-      questionsFor([claim])[0].options.forEach(function (option) {
+      (claim.options || questionsFor([claim])[0].options).forEach(function (option) {
         var label = document.createElement('label');
         label.style.cssText = 'display:flex;align-items:center;gap:.7rem;min-height:48px;padding:.5rem .8rem;box-sizing:border-box;border:2px solid var(--border);border-radius:13px;margin:.45rem 0;font-size:16px;cursor:pointer';
         var input = document.createElement('input');
@@ -152,8 +166,8 @@
       });
       var comment = document.createElement('textarea');
       comment.rows = 1;
-      comment.placeholder = 'Add a comment… (optional)';
-      comment.setAttribute('aria-label', 'Preview comment (not submitted)');
+      comment.placeholder = 'Justify your position… (optional)';
+      comment.setAttribute('aria-label', 'Justify your position — preview only');
       comment.style.cssText = 'width:100%;box-sizing:border-box;min-height:52px;padding:14px 16px;margin:.7rem 0;border:1px solid var(--border);border-radius:22px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px;resize:none';
       preview.appendChild(comment);
       var navigation = document.createElement('div');
@@ -197,10 +211,11 @@
           ),
           body: JSON.stringify({
             expected_round_number: expectedRound,
-            questions: questionsFor(claims),
+            questions: frozenQuestions || questionsFor(claims),
             context_settings: {
               intro_title: 'Review the claims',
-              intro_body: intro,
+              intro_body: intro || 'Review the previous-round opinions, rate the same claims and justify your position. You do not need to agree with the group.',
+              delphi_protocol: 'fixed-three-rounds',
               show_previous_response: true,
             },
           }),
@@ -220,7 +235,9 @@
       closeModal();
       return;
     }
-    if (document.getElementById(BUTTON_ID)) return;
+    var existing = document.getElementById(BUTTON_ID);
+    var viewed = (document.body.innerText || '').match(/Round\s+(\d+)\s+of\s+(\d+)/i);
+    if(existing) { existing.hidden = !!viewed && Number(viewed[2]) >= 3; return; }
     if (!claimData().length) return;
     var roundButtons = Array.prototype.filter.call(document.querySelectorAll('button'), function (button) {
       return button.getAttribute('aria-controls') === 'summary-round-setup' ||
@@ -399,7 +416,7 @@
 
     var label = Array.prototype.find.call(question.querySelectorAll('*'), function (element) {
       return element.children.length === 0 &&
-        clean(element.textContent) === 'Comments or clarification';
+        /^(Comments or clarification|Justify your position)$/.test(clean(element.textContent));
     });
     if (label) {
       var heading = label;
@@ -422,8 +439,8 @@
     }
     question.classList.add('delphi-r2-composer');
     textarea.rows = 1;
-    textarea.placeholder = 'Add a comment… (optional)';
-    textarea.setAttribute('aria-label', 'Comments or clarification (optional)');
+    textarea.placeholder = 'Justify your position… (optional)';
+    textarea.setAttribute('aria-label', 'Justify your position (optional)');
 
     function resize() {
       textarea.style.height = 'auto';
