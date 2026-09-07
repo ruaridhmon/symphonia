@@ -30,33 +30,23 @@ describe('Delphi Round 2 builder', () => {
     }]);
   });
 
-  it('creates a rating plus targeted conditional follow-ups', () => {
+  it('creates a balanced response and one optional comment, without extra follow-ups', () => {
     const questions = buildDelphiRoundTwoQuestions(SYNTHESIS) as Record<string, unknown>[];
-    expect(questions).toHaveLength(4);
+    expect(questions).toHaveLength(2);
     expect(questions[0]).toMatchObject({
-      questionId: 'claim_1_rating',
-      inputType: 'likert',
+      questionId: 'claim_1_response',
+      inputType: 'single_select',
       optional: false,
       sectionTitle: 'Claim 1: A fully elected second chamber is favoured.',
       groupPrompt: expect.stringContaining('4 support · 5 oppose · 1 uncertain · 0 not classified'),
     });
     expect(questions[1]).toMatchObject({
-      questionId: 'claim_1_reason',
-      inputType: 'single_select',
-      optional: false,
-      conditionalOnQuestionId: 'claim_1_rating',
-      conditionalOnOptions: expect.arrayContaining(['Disagree', 'Neither agree nor disagree']),
-    });
-    expect(questions[2]).toMatchObject({
-      questionId: 'claim_1_explanation',
-      inputType: 'textarea',
-      optional: false,
-    });
-    expect(questions[3]).toMatchObject({
-      questionId: 'claim_1_revision',
+      questionId: 'claim_1_comment',
       inputType: 'textarea',
       optional: true,
     });
+    expect(questions[0].options).toEqual(['Strongly agree', 'Agree', 'Neither agree nor disagree', 'Disagree', 'Strongly disagree', 'Unable to judge — need more information']);
+    expect(questions.every(q => !q.conditionalOnQuestionId)).toBe(true);
   });
 
   it('does not invent Round 2 questions when no claims are present', () => {

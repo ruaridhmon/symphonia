@@ -1623,8 +1623,8 @@ export default function SummaryPage() {
 			await apiNextRound(formId, {
 				questions,
 				context_settings: preparedDelphiQuestions ? {
-					intro_title: 'Delphi Round 2: review and re-rate',
-					intro_body: 'Review the anonymous Round 1 feedback and your previous response, then re-rate every claim. If you disagree or remain uncertain, explain the precise issue. Consensus is not required.',
+					intro_title: 'Review the claims',
+					intro_body: 'Review the previous feedback, choose your position, and add an optional comment. Consensus is not required.',
 					show_previous_response: true,
 				} : undefined,
 			});
