@@ -1,4 +1,4 @@
-// src/legacy/usability.ts
+// frontend/src/legacy/usability.ts
 var makeButton = (text, fn) => {
   const b = document.createElement("button");
   b.type = "button";
@@ -91,6 +91,16 @@ function sync() {
   aside.classList.add("ux-response-list");
   reader.classList.add("ux-response-reader");
   aside.parentElement?.classList.add("ux-response-columns");
+  for (const n of [...aside.querySelectorAll('[role="button"][aria-pressed] .truncate'), ...reader.querySelectorAll("h3")]) {
+    if (n.children.length) continue;
+    const raw = n.textContent || "";
+    const clean = raw.replace(/^Guest:\s*/, "").replace(/\s*\[[A-Za-z0-9]{8}\]$/, "");
+    if (clean !== raw) {
+      n.title = raw;
+      n.textContent = clean;
+    }
+  }
+  for (const n of aside.querySelectorAll('[class*="line-clamp"]')) if (!n.children.length && n.textContent?.startsWith("Position: ")) n.textContent = n.textContent.slice(10);
   const search = aside.querySelector('input[type="search"]');
   search?.setAttribute("aria-label", "Search responses");
   const header = card.firstElementChild;

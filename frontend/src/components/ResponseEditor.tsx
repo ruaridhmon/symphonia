@@ -1,3 +1,5 @@
+import { createElement } from 'react';
+import { renderResponseReading } from '../utils/responseReading';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Pencil, Save, AlertTriangle } from 'lucide-react';
 import { ApiError } from '../api/client';
@@ -137,123 +139,10 @@ export default function ResponseEditor({
     }
   }, []);
 
-  function renderStructuredAnswer(answer: Record<string, unknown>) {
-    const rows = [
-      { label: 'Position', value: typeof answer.position === 'string' ? answer.position.trim() : '' },
-      { label: 'Evidence', value: typeof answer.evidence === 'string' ? answer.evidence.trim() : '' },
-      {
-        label: 'Confidence',
-        value: typeof answer.confidence === 'number' ? `${answer.confidence}/10` : '',
-      },
-      {
-        label: 'Confidence rationale',
-        value:
-          typeof answer.confidenceJustification === 'string'
-            ? answer.confidenceJustification.trim()
-            : '',
-      },
-      {
-        label: 'Counterarguments',
-        value:
-          typeof answer.counterarguments === 'string'
-            ? answer.counterarguments.trim()
-            : '',
-      },
-    ].filter(row => row.value);
-
-    if (rows.length === 0) {
-      return (
-        <div className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          No response provided
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-2">
-        {rows.map(row => (
-          <div key={row.label} className="text-sm leading-relaxed" style={{ color: 'var(--foreground)' }}>
-            <strong>{row.label}:</strong> {row.value}
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  // ── View mode ──────────────────────────────────────────
-
-  if (!isEditing) {
-    return (
-      <div
-        className="group relative rounded-lg p-4 transition-colors"
-        style={{
-          backgroundColor: 'var(--card)',
-          border: '1px solid var(--border)',
-        }}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <span
-            className="text-xs font-medium"
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            {response.email || 'Anonymous'}
-          </span>
-          {!hasStructuredAnswers && (
-            <button
-              onClick={startEditing}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded"
-              style={{
-                backgroundColor: 'var(--accent)',
-                color: 'var(--accent-foreground)',
-              }}
-              title="Edit response"
-            >
-              <Pencil size={12} className="inline mr-1" /> Edit
-            </button>
-          )}
-        </div>
-
-        {questions.map((q, i) => {
-          const key = `q${i + 1}`;
-          const answer = currentAnswers[key];
-          if (!answer) return null;
-          return (
-            <div
-              key={key}
-              className="mb-3 last:mb-0 rounded-lg px-3 py-3"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--foreground) 2%, var(--card))',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <div
-                className="text-[11px] font-semibold uppercase tracking-[0.14em] mb-1"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Question {i + 1}
-              </div>
-              <div
-                className="text-sm font-semibold mb-2"
-                style={{ color: 'var(--foreground)' }}
-              >
-                {extractQuestionText(q)}
-              </div>
-              {isStructuredAnswer(answer) ? (
-                renderStructuredAnswer(answer as unknown as Record<string, unknown>)
-              ) : (
-                <div
-                  className="text-sm leading-relaxed"
-                  style={{ color: 'var(--foreground)', whiteSpace: 'pre-wrap' }}
-                >
-                  <strong>Response:</strong> {formatAnswerForDisplay(answer)}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
+  if (!isEditing) return <div>
+    {!hasStructuredAnswers && <button type="button" className="rr-edit" onClick={startEditing}><Pencil size={12} /> Edit response</button>}
+    {renderResponseReading(createElement, questions, currentAnswers)}
+  </div>;
 
   // ── Edit mode ──────────────────────────────────────────
 

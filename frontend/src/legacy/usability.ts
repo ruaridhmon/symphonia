@@ -50,6 +50,13 @@ function sync(){
   if(!card||!aside||!reader){document.body.classList.remove('ux-responses');return;}
   document.body.classList.add('ux-responses');card.classList.add('ux-response-card');
   aside.classList.add('ux-response-list');reader.classList.add('ux-response-reader');aside.parentElement?.classList.add('ux-response-columns');
+  // Display names without transport prefixes; the full identifier remains available on hover.
+  for(const n of [...aside.querySelectorAll<HTMLElement>('[role="button"][aria-pressed] .truncate'),...reader.querySelectorAll<HTMLElement>('h3')]){
+    if(n.children.length)continue;
+    const raw=n.textContent||'';const clean=raw.replace(/^Guest:\s*/, '').replace(/\s*\[[A-Za-z0-9]{8}\]$/, '');
+    if(clean!==raw){n.title=raw;n.textContent=clean;}
+  }
+  for(const n of aside.querySelectorAll<HTMLElement>('[class*="line-clamp"]'))if(!n.children.length&&n.textContent?.startsWith('Position: '))n.textContent=n.textContent.slice(10);
   const search=aside.querySelector('input[type="search"]');search?.setAttribute('aria-label','Search responses');
   const header=card.firstElementChild;
   if(header&&!header.querySelector('.ux-manage')){
