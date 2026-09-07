@@ -7893,6 +7893,7 @@ def put_expert_labels(
 
 
 class RoundConfig(BaseModel):
+    expected_round_number: int | None = None
     questions: list[Any] | None = None
     context_settings: dict[str, Any] | None = None
 
@@ -8084,6 +8085,10 @@ def open_next_round(
         .first()
     )
 
+    if payload and payload.expected_round_number is not None:
+        if current is None or current.round_number != payload.expected_round_number:
+            raise HTTPException(status_code=409, detail="The live round has changed. Reload before opening another round.")
+
     if current:
         current.is_active = False
 
@@ -8159,6 +8164,7 @@ def update_round_setup(
     }
 
 
+@router.post("/forms/{form_id}/rounds/{round_id}/make_active", tags=["Rounds"])
 @router.post(
     "/forms/{form_id}/rounds/{round_id}/activate",
     tags=["Rounds"],

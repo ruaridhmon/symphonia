@@ -130,7 +130,7 @@ test('setup activates on internal navigation and creates exactly two fields per 
       return { ok: false, text: async () => 'Test: not opening a live round' };
     };
     window.history.pushState({}, '', '/admin/form/14/summary');
-    window.document.body.innerHTML = '<button aria-controls="summary-round-setup"><div>Round setup</div><div>Open the next-round editor.</div></button>' +
+    window.document.body.innerHTML = '<p>Round 2 of 2</p><button aria-controls="summary-round-setup"><div>Round setup</div><div>Open the next-round editor.</div></button>' +
       [1, 2].map(n => `<div class="claim-evidence-claim"><h3 class="claim-evidence-claim-heading">🟩 Claim ${n}: Synthetic claim ${n}</h3></div>`).join('');
     await settle();
     window.document.querySelector('button').click();
@@ -146,6 +146,7 @@ test('setup activates on internal navigation and creates exactly two fields per 
     modal.querySelector('[data-start]').click();
     await settle();
     assert.equal(request.url, '/api/forms/14/next_round');
+    assert.equal(request.body.expected_round_number, 2);
     assert.equal(request.body.questions.length, 4);
     assert.equal(request.body.questions[0].options.length, 6);
     assert.equal(request.body.questions[1].optional, true);
