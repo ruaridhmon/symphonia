@@ -41,10 +41,10 @@ function page(path = '/') {
 }
 
 function participant(window, count = 2) {
-  window.document.body.innerHTML = `<div class="card-lg"><h1>Synthetic consultation</h1>
+  window.document.body.innerHTML = `<div class="card-lg"><h1>Synthetic consultation</h1><p>Ten synthetic experts.</p>
     <nav aria-label="Question sections">${Array.from({ length: count }, (_, i) =>
       `<button ${i === 0 ? 'aria-current="step"' : ''}>Claim ${i + 1}: Test claim ${i + 1}</button>`).join('')}</nav>
-    <section aria-label="Claim 1"><div data-question-key="q1"><h2>Your response</h2>
+    <section aria-label="Claim 1"><div data-question-key="q1"><label><span>Your response</span><span>Answered</span></label>
       <label><input type="radio" name="rating">Agree</label></div>
     <div data-question-key="q2"><div><span>Comments or clarification</span></div><textarea></textarea></div></section>
     <button>Submit</button></div>`;
@@ -58,6 +58,13 @@ test('activates after SPA navigation; comment is a single accessible growing inp
     participant(window);
     await settle();
     assert.ok(window.document.body.classList.contains('delphi-round-two-participant'));
+    const about = window.document.querySelector('#delphi-round-two-about');
+    assert.equal(about.open, false);
+    assert.equal(about.querySelector('h2').textContent, 'Synthetic consultation');
+    assert.match(about.querySelector('summary').textContent, /Synthetic demo/);
+    assert.ok(window.document.querySelector('.delphi-r2-response-heading'));
+    assert.equal(window.document.querySelector('input').parentElement.classList.contains('delphi-r2-response-heading'), false);
+    about.open = true;
     const input = window.document.querySelector('textarea');
     assert.equal(input.rows, 1);
     assert.equal(input.getAttribute('aria-label'), 'Comments or clarification (optional)');
@@ -74,6 +81,8 @@ test('activates after SPA navigation; comment is a single accessible growing inp
     const header = window.document.querySelector('#delphi-round-two-progress');
     await settle();
     assert.equal(window.document.querySelector('#delphi-round-two-progress'), header);
+    assert.equal(window.document.querySelectorAll('#delphi-round-two-about').length, 1);
+    assert.equal(about.open, true);
   } finally { dom.window.close(); }
 });
 
