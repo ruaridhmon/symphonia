@@ -12,7 +12,7 @@ function sync(){
     title?.parentElement?.classList.add('ux-builder-heading');
     main.querySelector('#form-title')?.parentElement?.parentElement?.classList.add('ux-builder-panel');
     if(title&&!main.querySelector('.ux-builder-intro')){
-      const p=document.createElement('p');p.className='ux-builder-intro';p.textContent='Write your questions, preview the participant experience, then save.';title.parentElement?.after(p);
+      const p=document.createElement('p');p.className='ux-builder-intro';p.textContent='Add a title and question, then preview what participants will see.';title.parentElement?.after(p);
     }
     for(const select of main.querySelectorAll<HTMLSelectElement>('select[id^="question-type-"]')){
       for(const o of Array.from(select.options)){const label=o.value==='consensus'?'Written response':o.value==='survey'?'Survey question':o.textContent;if(label&&o.textContent!==label)o.textContent=label;}

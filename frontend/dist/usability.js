@@ -1,4 +1,4 @@
-// frontend/src/legacy/usability.ts
+// src/legacy/usability.ts
 var makeButton = (text, fn) => {
   const b = document.createElement("button");
   b.type = "button";
@@ -23,7 +23,7 @@ function sync() {
     if (title && !main.querySelector(".ux-builder-intro")) {
       const p = document.createElement("p");
       p.className = "ux-builder-intro";
-      p.textContent = "Write your questions, preview the participant experience, then save.";
+      p.textContent = "Add a title and question, then preview what participants will see.";
       title.parentElement?.after(p);
     }
     for (const select of main.querySelectorAll('select[id^="question-type-"]')) {

@@ -1168,6 +1168,1188 @@ var public_ai_results_default = {
   ]
 };
 
+// src/demos/research-ai-results.json
+var research_ai_results_default = {
+  fixture: {
+    title: "How should UK university research teams use AI?",
+    synthetic: true,
+    method: "Scripted LLM-authored roleplay, run through an isolated authenticated application workflow. No live participants or empirical findings.",
+    protocol: {
+      panel_size: 8,
+      rounds: 3,
+      threshold: 0.8,
+      minimum_responses: 8,
+      stopping_rule: "Stop after round 3; report unresolved claims.",
+      uncertainty_in_denominator: true
+    },
+    claims: [
+      "Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
+      "AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
+      "At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
+      "Every prompt, intermediate output and dataset used by research AI must be released publicly."
+    ],
+    question: "How should UK university research teams use AI to accelerate discovery while keeping findings reliable?",
+    short_labels: [
+      "Human review",
+      "Bounded autonomy",
+      "Exploration reserve",
+      "Universal release"
+    ],
+    narratives: [
+      "Eight fictional roles bring different priorities: reliable findings, research freedom, fair access and responsible use of resources. Four claims are extracted from their opening views and then kept unchanged.",
+      "The first ratings show broad support for human review, mixed views on autonomous tests, a 4\u20134 split on the exploration reserve and early support for full disclosure.",
+      "All eight support reproducible analysis with human review. Six support bounded autonomy; one disagrees and one still needs information. The 20% exploration reserve remains split 4\u20134. Seven reject universal release after considering confidentiality and the value of a focused reproducibility package."
+    ],
+    experts: [
+      {
+        id: "expert-1",
+        role: "Computational biologist",
+        proposal: "I want AI to generate and test hypotheses quickly. Published findings need code that another researcher can run and a named person responsible for checking it. Bounded computational experiments could run without individual approval. I support protected resources for unusual ideas. Full public records sound useful, though patient-derived data require care.",
+        round2: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Agree",
+            "Agree"
+          ],
+          comments: [
+            "Runnable code and a named reviewer make responsibility clear.",
+            "A budget and a sandbox make these tests reversible in practice.",
+            "Unusual biological hypotheses lose out when only near-term success is rewarded.",
+            "Full traces seem the simplest way to make the workflow inspectable."
+          ]
+        },
+        round3: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Agree",
+            "Disagree"
+          ],
+          comments: [
+            "The engineer\u2019s point persuaded me to specify rerunning the analysis as part of review. I still agree.",
+            "I still agree: enforce the agreed scope rather than seeking permission for each run.",
+            "I retain support. Without a protected share, plausible short-term ideas consume everything.",
+            "The governance specialist\u2019s example changed my view: an auditable record need not mean public release of protected data."
+          ]
+        }
+      },
+      {
+        id: "expert-2",
+        role: "Laboratory principal investigator",
+        proposal: "AI can search broadly, but a senior researcher must own any conclusion. I initially want human approval before each experiment because a flawed objective can waste resources. I would protect some budget for exploratory hypotheses. Full release of all intermediate material may bury the important evidence.",
+        round2: {
+          votes: [
+            "Agree",
+            "Disagree",
+            "Agree",
+            "Disagree"
+          ],
+          comments: [
+            "I need someone in the team to own each conclusion.",
+            "I worry that a cheap computation can still push the project towards the wrong target.",
+            "Exploration needs protection from immediate delivery pressure.",
+            "Publishing every intermediate output adds noise and may expose unpublished work."
+          ]
+        },
+        round3: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Agree",
+            "Disagree"
+          ],
+          comments: [
+            "I retain support; the reviewer should have the relevant expertise and time.",
+            "I changed from disagreement after the engineer distinguished bounded computation from wet-lab experiments. The agreed scope is the key safeguard.",
+            "I still support the reserve, even though its opportunity cost remains real.",
+            "I retain disagreement. A useful reproducibility package is different from publishing every abandoned intermediate output."
+          ]
+        }
+      },
+      {
+        id: "expert-3",
+        role: "Research software engineer",
+        proposal: "Reproducible code matters more than polished explanations. I support sandboxed tests with spending limits and explicit scope. A mandatory 20% reserve seems inflexible across projects. I initially favour publishing all prompts and outputs so others can reconstruct the workflow.",
+        round2: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Disagree",
+            "Agree"
+          ],
+          comments: [
+            "Review must include rerunning the code, not just reading a generated report.",
+            "I can enforce scope and spending limits in the execution environment.",
+            "Infrastructure-heavy projects need flexibility; 20% is not always sensible.",
+            "A complete trace would let me debug failures that selected reports omit."
+          ]
+        },
+        round3: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Disagree",
+            "Disagree"
+          ],
+          comments: [
+            "I still agree. A runnable workflow and a recorded review are concrete checks.",
+            "I retain support for tests with enforced limits and recorded execution.",
+            "I remain opposed to 20% for every team. The panel has not resolved differences in infrastructure needs.",
+            "The confidentiality arguments changed my view. Complete internal logging can coexist with selective, justified public release."
+          ]
+        }
+      },
+      {
+        id: "expert-4",
+        role: "Doctoral researcher",
+        proposal: "AI could let junior researchers explore ideas they cannot currently afford to test. I support a protected exploration budget and bounded autonomous tests. I worry a named reviewer requirement could create a sign-off bottleneck. I initially favour full disclosure of the process for equal access.",
+        round2: {
+          votes: [
+            "Unable to judge \u2014 need more information",
+            "Agree",
+            "Agree",
+            "Agree"
+          ],
+          comments: [
+            "Who is qualified to review, and how much time will they have? I need more detail.",
+            "Independent runs would let junior researchers test ideas without waiting for every meeting.",
+            "Protected resources would help people with unconventional ideas.",
+            "Universal release seems fairer than leaving access to the best-funded groups."
+          ]
+        },
+        round3: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Agree",
+            "Agree"
+          ],
+          comments: [
+            "I moved from uncertainty to agreement after the panel clarified that review should be resourced and specific to the analysis.",
+            "I still support autonomy within the agreed scope; it does not remove accountability.",
+            "I retain support because junior researchers otherwise struggle to protect speculative work.",
+            "I still support public release as written. I recognise the restrictions raised, but think this policy should limit which datasets are used in the first place."
+          ]
+        }
+      },
+      {
+        id: "expert-5",
+        role: "Research integrity officer",
+        proposal: "People must remain accountable for claims, with runnable analysis and documented checks. I am cautious about unapproved automated tests and want clear stopping rules. A fixed exploration percentage could reward activity over quality. Full public traces could help auditability but may reveal material that should remain confidential.",
+        round2: {
+          votes: [
+            "Agree",
+            "Disagree",
+            "Disagree",
+            "Agree"
+          ],
+          comments: [
+            "The reviewer needs to check whether the conclusion follows from the analysis.",
+            "I would require prior approval because scope boundaries can be ambiguous.",
+            "A fixed reserve could fund poor hypotheses simply to meet a target.",
+            "I favour complete records for accountability, while recognising confidentiality concerns."
+          ]
+        },
+        round3: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Disagree",
+            "Disagree"
+          ],
+          comments: [
+            "I retain support, with documented checks rather than a ceremonial sign-off.",
+            "I changed my view: explicit scope and a budget are advance human approval of the class of tests. Out-of-scope work would still need review.",
+            "I remain opposed. Good exploration should be funded on its merits rather than by a fixed fraction.",
+            "I changed to disagreement. Mandatory publication could conflict with confidentiality without improving the reliability of the final conclusion."
+          ]
+        }
+      },
+      {
+        id: "expert-6",
+        role: "Data governance specialist",
+        proposal: "Privacy and access conditions need to follow data through every AI step. A human reviewer should check the analysis and data handling. I cannot judge bounded autonomy without knowing how the boundaries are enforced. I oppose mandatory public release of every dataset and a fixed budget percentage.",
+        round2: {
+          votes: [
+            "Agree",
+            "Unable to judge \u2014 need more information",
+            "Disagree",
+            "Disagree"
+          ],
+          comments: [
+            "Responsibility must include checking whether data use stays within its permissions.",
+            "The statement does not tell me how scope and budget limits will be enforced.",
+            "Sensitive-data projects may need to spend more on controlled infrastructure.",
+            "Some datasets cannot be made public; the word every makes this unacceptable."
+          ]
+        },
+        round3: {
+          votes: [
+            "Agree",
+            "Unable to judge \u2014 need more information",
+            "Disagree",
+            "Disagree"
+          ],
+          comments: [
+            "I still agree, provided reviewers check access conditions as well as numerical results.",
+            "I remain unable to judge: enforceable boundaries depend on the actual data and execution environment.",
+            "I retain disagreement; the same reserve is not appropriate for every project.",
+            "I remain opposed. Public release of every dataset is incompatible with the restricted-data cases I raised."
+          ]
+        }
+      },
+      {
+        id: "expert-7",
+        role: "Research funding manager",
+        proposal: "I want evidence that AI improves useful discovery, not simply the number of tests. Reproducibility and review should be funded. I support bounded computation but oppose a blanket exploration reserve when teams have different bottlenecks. I initially support full release as a condition of public funding.",
+        round2: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Disagree",
+            "Agree"
+          ],
+          comments: [
+            "Funders should expect analysis that others can reproduce and a responsible reviewer.",
+            "A bounded test is different from spending money on a wet-lab experiment.",
+            "Project-specific budgets are more defensible than one fixed percentage.",
+            "Public funding should normally produce openly inspectable work."
+          ]
+        },
+        round3: {
+          votes: [
+            "Agree",
+            "Agree",
+            "Disagree",
+            "Disagree"
+          ],
+          comments: [
+            "I retain support for a reproducible analysis and an accountable reviewer.",
+            "I still agree because the proposal is limited to reversible computation within agreed resources.",
+            "I remain opposed to the fixed percentage. The disagreement is about allocation rules, not whether exploration has value.",
+            "I changed my view after distinguishing open outputs from unrestricted data release. Auditability does not require every input to be public."
+          ]
+        }
+      },
+      {
+        id: "expert-8",
+        role: "Reproducibility researcher",
+        proposal: "Independent teams should be able to reproduce the analysis behind a result. I support human review but initially need clearer requirements for the reviewer. I am unsure whether autonomous tests can avoid subtle data leakage. I favour a protected exploration budget. I initially support publishing every trace, though volume could be a problem.",
+        round2: {
+          votes: [
+            "Unable to judge \u2014 need more information",
+            "Unable to judge \u2014 need more information",
+            "Agree",
+            "Agree"
+          ],
+          comments: [
+            "A named reviewer alone is not enough; I want the check itself documented.",
+            "I cannot tell whether a reversible test can still contaminate later evaluation.",
+            "Replication and unconventional hypotheses need room even when immediate success is unlikely.",
+            "Complete traces might expose selective reporting, so I initially support release."
+          ]
+        },
+        round3: {
+          votes: [
+            "Agree",
+            "Disagree",
+            "Agree",
+            "Disagree"
+          ],
+          comments: [
+            "I moved to agreement after reviewing the software engineer\u2019s practical description of rerunning code and recording checks.",
+            "I moved from uncertainty to disagreement. A bounded run can still leak evaluation data into future model choices; the statement does not address that risk.",
+            "I retain support. The funding manager\u2019s flexibility argument does not solve the persistent neglect of unusual ideas.",
+            "I changed to disagreement. Releasing a clear reproducibility package is more useful than an indiscriminate archive of sensitive or misleading intermediate material."
+          ]
+        }
+      }
+    ]
+  },
+  rounds: [
+    {
+      id: 1,
+      round_number: 1,
+      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 2: <strong>AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 3: <strong>At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 4: <strong>Every prompt, intermediate output and dataset used by research AI must be released publicly.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p>",
+      synthesis_published: true,
+      synthesis_json: {},
+      is_active: false,
+      questions: [
+        {
+          label: "How should UK university research teams use AI to accelerate discovery while keeping findings reliable?",
+          requireEvidence: true,
+          requireCounterarguments: true,
+          requireConfidence: true,
+          questionId: "proposal",
+          sectionTitle: null,
+          helpText: null,
+          groupPrompt: null,
+          optional: false,
+          conditionalOnQuestionId: null,
+          conditionalOnOption: null,
+          inputType: "textarea",
+          options: null,
+          allowUnsure: null,
+          maxSelections: null,
+          minValue: null,
+          maxValue: null,
+          minLabel: null,
+          midLabel: null,
+          maxLabel: null,
+          importedFromQuestionnaire: null,
+          fieldType: null,
+          rows: null,
+          placeholder: null
+        }
+      ],
+      context_settings: {
+        synthesis_published: true
+      },
+      convergence_score: null,
+      response_count: 8,
+      draft_count: 0
+    },
+    {
+      id: 2,
+      round_number: 2,
+      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.</strong></p><p>Computational biologist \u2014 Agree: Runnable code and a named reviewer make responsibility clear.</p><p>Laboratory principal investigator \u2014 Agree: I need someone in the team to own each conclusion.</p><p>Research software engineer \u2014 Agree: Review must include rerunning the code, not just reading a generated report.</p><p>Doctoral researcher \u2014 Unable to judge \u2014 need more information: Who is qualified to review, and how much time will they have? I need more detail.</p><p>Research integrity officer \u2014 Agree: The reviewer needs to check whether the conclusion follows from the analysis.</p><p>Data governance specialist \u2014 Agree: Responsibility must include checking whether data use stays within its permissions.</p><p>Research funding manager \u2014 Agree: Funders should expect analysis that others can reproduce and a responsible reviewer.</p><p>Reproducibility researcher \u2014 Unable to judge \u2014 need more information: A named reviewer alone is not enough; I want the check itself documented.</p><p>Claim 2: <strong>AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.</strong></p><p>Computational biologist \u2014 Agree: A budget and a sandbox make these tests reversible in practice.</p><p>Laboratory principal investigator \u2014 Disagree: I worry that a cheap computation can still push the project towards the wrong target.</p><p>Research software engineer \u2014 Agree: I can enforce scope and spending limits in the execution environment.</p><p>Doctoral researcher \u2014 Agree: Independent runs would let junior researchers test ideas without waiting for every meeting.</p><p>Research integrity officer \u2014 Disagree: I would require prior approval because scope boundaries can be ambiguous.</p><p>Data governance specialist \u2014 Unable to judge \u2014 need more information: The statement does not tell me how scope and budget limits will be enforced.</p><p>Research funding manager \u2014 Agree: A bounded test is different from spending money on a wet-lab experiment.</p><p>Reproducibility researcher \u2014 Unable to judge \u2014 need more information: I cannot tell whether a reversible test can still contaminate later evaluation.</p><p>Claim 3: <strong>At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.</strong></p><p>Computational biologist \u2014 Agree: Unusual biological hypotheses lose out when only near-term success is rewarded.</p><p>Laboratory principal investigator \u2014 Agree: Exploration needs protection from immediate delivery pressure.</p><p>Research software engineer \u2014 Disagree: Infrastructure-heavy projects need flexibility; 20% is not always sensible.</p><p>Doctoral researcher \u2014 Agree: Protected resources would help people with unconventional ideas.</p><p>Research integrity officer \u2014 Disagree: A fixed reserve could fund poor hypotheses simply to meet a target.</p><p>Data governance specialist \u2014 Disagree: Sensitive-data projects may need to spend more on controlled infrastructure.</p><p>Research funding manager \u2014 Disagree: Project-specific budgets are more defensible than one fixed percentage.</p><p>Reproducibility researcher \u2014 Agree: Replication and unconventional hypotheses need room even when immediate success is unlikely.</p><p>Claim 4: <strong>Every prompt, intermediate output and dataset used by research AI must be released publicly.</strong></p><p>Computational biologist \u2014 Agree: Full traces seem the simplest way to make the workflow inspectable.</p><p>Laboratory principal investigator \u2014 Disagree: Publishing every intermediate output adds noise and may expose unpublished work.</p><p>Research software engineer \u2014 Agree: A complete trace would let me debug failures that selected reports omit.</p><p>Doctoral researcher \u2014 Agree: Universal release seems fairer than leaving access to the best-funded groups.</p><p>Research integrity officer \u2014 Agree: I favour complete records for accountability, while recognising confidentiality concerns.</p><p>Data governance specialist \u2014 Disagree: Some datasets cannot be made public; the word every makes this unacceptable.</p><p>Research funding manager \u2014 Agree: Public funding should normally produce openly inspectable work.</p><p>Reproducibility researcher \u2014 Agree: Complete traces might expose selective reporting, so I initially support release.</p>",
+      synthesis_published: true,
+      synthesis_json: {},
+      is_active: false,
+      questions: [
+        {
+          questionId: "claim_1_response",
+          sectionTitle: "Claim 1: Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
+          label: "Your response",
+          inputType: "single_select",
+          options: [
+            "Strongly agree",
+            "Agree",
+            "Neither agree nor disagree",
+            "Disagree",
+            "Strongly disagree",
+            "Unable to judge \u2014 need more information"
+          ],
+          optional: false
+        },
+        {
+          questionId: "claim_1_comment",
+          sectionTitle: "Claim 1: Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
+          label: "What led you to this view?",
+          inputType: "textarea",
+          optional: true
+        },
+        {
+          questionId: "claim_2_response",
+          sectionTitle: "Claim 2: AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
+          label: "Your response",
+          inputType: "single_select",
+          options: [
+            "Strongly agree",
+            "Agree",
+            "Neither agree nor disagree",
+            "Disagree",
+            "Strongly disagree",
+            "Unable to judge \u2014 need more information"
+          ],
+          optional: false
+        },
+        {
+          questionId: "claim_2_comment",
+          sectionTitle: "Claim 2: AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
+          label: "What led you to this view?",
+          inputType: "textarea",
+          optional: true
+        },
+        {
+          questionId: "claim_3_response",
+          sectionTitle: "Claim 3: At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
+          label: "Your response",
+          inputType: "single_select",
+          options: [
+            "Strongly agree",
+            "Agree",
+            "Neither agree nor disagree",
+            "Disagree",
+            "Strongly disagree",
+            "Unable to judge \u2014 need more information"
+          ],
+          optional: false
+        },
+        {
+          questionId: "claim_3_comment",
+          sectionTitle: "Claim 3: At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
+          label: "What led you to this view?",
+          inputType: "textarea",
+          optional: true
+        },
+        {
+          questionId: "claim_4_response",
+          sectionTitle: "Claim 4: Every prompt, intermediate output and dataset used by research AI must be released publicly.",
+          label: "Your response",
+          inputType: "single_select",
+          options: [
+            "Strongly agree",
+            "Agree",
+            "Neither agree nor disagree",
+            "Disagree",
+            "Strongly disagree",
+            "Unable to judge \u2014 need more information"
+          ],
+          optional: false
+        },
+        {
+          questionId: "claim_4_comment",
+          sectionTitle: "Claim 4: Every prompt, intermediate output and dataset used by research AI must be released publicly.",
+          label: "What led you to this view?",
+          inputType: "textarea",
+          optional: true
+        }
+      ],
+      context_settings: {
+        synthesis_published: true
+      },
+      convergence_score: null,
+      response_count: 8,
+      draft_count: 0
+    },
+    {
+      id: 3,
+      round_number: 3,
+      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.</strong></p><p>Computational biologist \u2014 Agree: The engineer\u2019s point persuaded me to specify rerunning the analysis as part of review. I still agree.</p><p>Laboratory principal investigator \u2014 Agree: I retain support; the reviewer should have the relevant expertise and time.</p><p>Research software engineer \u2014 Agree: I still agree. A runnable workflow and a recorded review are concrete checks.</p><p>Doctoral researcher \u2014 Agree: I moved from uncertainty to agreement after the panel clarified that review should be resourced and specific to the analysis.</p><p>Research integrity officer \u2014 Agree: I retain support, with documented checks rather than a ceremonial sign-off.</p><p>Data governance specialist \u2014 Agree: I still agree, provided reviewers check access conditions as well as numerical results.</p><p>Research funding manager \u2014 Agree: I retain support for a reproducible analysis and an accountable reviewer.</p><p>Reproducibility researcher \u2014 Agree: I moved to agreement after reviewing the software engineer\u2019s practical description of rerunning code and recording checks.</p><p>Claim 2: <strong>AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.</strong></p><p>Computational biologist \u2014 Agree: I still agree: enforce the agreed scope rather than seeking permission for each run.</p><p>Laboratory principal investigator \u2014 Agree: I changed from disagreement after the engineer distinguished bounded computation from wet-lab experiments. The agreed scope is the key safeguard.</p><p>Research software engineer \u2014 Agree: I retain support for tests with enforced limits and recorded execution.</p><p>Doctoral researcher \u2014 Agree: I still support autonomy within the agreed scope; it does not remove accountability.</p><p>Research integrity officer \u2014 Agree: I changed my view: explicit scope and a budget are advance human approval of the class of tests. Out-of-scope work would still need review.</p><p>Data governance specialist \u2014 Unable to judge \u2014 need more information: I remain unable to judge: enforceable boundaries depend on the actual data and execution environment.</p><p>Research funding manager \u2014 Agree: I still agree because the proposal is limited to reversible computation within agreed resources.</p><p>Reproducibility researcher \u2014 Disagree: I moved from uncertainty to disagreement. A bounded run can still leak evaluation data into future model choices; the statement does not address that risk.</p><p>Claim 3: <strong>At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.</strong></p><p>Computational biologist \u2014 Agree: I retain support. Without a protected share, plausible short-term ideas consume everything.</p><p>Laboratory principal investigator \u2014 Agree: I still support the reserve, even though its opportunity cost remains real.</p><p>Research software engineer \u2014 Disagree: I remain opposed to 20% for every team. The panel has not resolved differences in infrastructure needs.</p><p>Doctoral researcher \u2014 Agree: I retain support because junior researchers otherwise struggle to protect speculative work.</p><p>Research integrity officer \u2014 Disagree: I remain opposed. Good exploration should be funded on its merits rather than by a fixed fraction.</p><p>Data governance specialist \u2014 Disagree: I retain disagreement; the same reserve is not appropriate for every project.</p><p>Research funding manager \u2014 Disagree: I remain opposed to the fixed percentage. The disagreement is about allocation rules, not whether exploration has value.</p><p>Reproducibility researcher \u2014 Agree: I retain support. The funding manager\u2019s flexibility argument does not solve the persistent neglect of unusual ideas.</p><p>Claim 4: <strong>Every prompt, intermediate output and dataset used by research AI must be released publicly.</strong></p><p>Computational biologist \u2014 Disagree: The governance specialist\u2019s example changed my view: an auditable record need not mean public release of protected data.</p><p>Laboratory principal investigator \u2014 Disagree: I retain disagreement. A useful reproducibility package is different from publishing every abandoned intermediate output.</p><p>Research software engineer \u2014 Disagree: The confidentiality arguments changed my view. Complete internal logging can coexist with selective, justified public release.</p><p>Doctoral researcher \u2014 Agree: I still support public release as written. I recognise the restrictions raised, but think this policy should limit which datasets are used in the first place.</p><p>Research integrity officer \u2014 Disagree: I changed to disagreement. Mandatory publication could conflict with confidentiality without improving the reliability of the final conclusion.</p><p>Data governance specialist \u2014 Disagree: I remain opposed. Public release of every dataset is incompatible with the restricted-data cases I raised.</p><p>Research funding manager \u2014 Disagree: I changed my view after distinguishing open outputs from unrestricted data release. Auditability does not require every input to be public.</p><p>Reproducibility researcher \u2014 Disagree: I changed to disagreement. Releasing a clear reproducibility package is more useful than an indiscriminate archive of sensitive or misleading intermediate material.</p>",
+      synthesis_published: true,
+      synthesis_json: {},
+      is_active: true,
+      questions: [
+        {
+          questionId: "claim_1_response",
+          sectionTitle: "Claim 1: Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
+          label: "Your response",
+          inputType: "single_select",
+          options: [
+            "Strongly agree",
+            "Agree",
+            "Neither agree nor disagree",
+            "Disagree",
+            "Strongly disagree",
+            "Unable to judge \u2014 need more information"
+          ],
+          optional: false
+        },
+        {
+          questionId: "claim_1_comment",
+          sectionTitle: "Claim 1: Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.",
+          label: "What led you to this view?",
+          inputType: "textarea",
+          optional: true
+        },
+        {
+          questionId: "claim_2_response",
+          sectionTitle: "Claim 2: AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
+          label: "Your response",
+          inputType: "single_select",
+          options: [
+            "Strongly agree",
+            "Agree",
+            "Neither agree nor disagree",
+            "Disagree",
+            "Strongly disagree",
+            "Unable to judge \u2014 need more information"
+          ],
+          optional: false
+        },
+        {
+          questionId: "claim_2_comment",
+          sectionTitle: "Claim 2: AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.",
+          label: "What led you to this view?",
+          inputType: "textarea",
+          optional: true
+        },
+        {
+          questionId: "claim_3_response",
+          sectionTitle: "Claim 3: At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
+          label: "Your response",
+          inputType: "single_select",
+          options: [
+            "Strongly agree",
+            "Agree",
+            "Neither agree nor disagree",
+            "Disagree",
+            "Strongly disagree",
+            "Unable to judge \u2014 need more information"
+          ],
+          optional: false
+        },
+        {
+          questionId: "claim_3_comment",
+          sectionTitle: "Claim 3: At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.",
+          label: "What led you to this view?",
+          inputType: "textarea",
+          optional: true
+        },
+        {
+          questionId: "claim_4_response",
+          sectionTitle: "Claim 4: Every prompt, intermediate output and dataset used by research AI must be released publicly.",
+          label: "Your response",
+          inputType: "single_select",
+          options: [
+            "Strongly agree",
+            "Agree",
+            "Neither agree nor disagree",
+            "Disagree",
+            "Strongly disagree",
+            "Unable to judge \u2014 need more information"
+          ],
+          optional: false
+        },
+        {
+          questionId: "claim_4_comment",
+          sectionTitle: "Claim 4: Every prompt, intermediate output and dataset used by research AI must be released publicly.",
+          label: "What led you to this view?",
+          inputType: "textarea",
+          optional: true
+        }
+      ],
+      context_settings: {
+        synthesis_published: true
+      },
+      convergence_score: null,
+      response_count: 8,
+      draft_count: 0
+    }
+  ],
+  responses: [
+    {
+      id: 1,
+      round_number: 1,
+      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 2: <strong>AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 3: <strong>At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 4: <strong>Every prompt, intermediate output and dataset used by research AI must be released publicly.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p>",
+      synthesis_published: true,
+      is_active: false,
+      responses: [
+        {
+          id: 1,
+          answers: {
+            q1: {
+              position: "I want AI to generate and test hypotheses quickly. Published findings need code that another researcher can run and a named person responsible for checking it. Bounded computational experiments could run without individual approval. I support protected resources for unusual ideas. Full public records sound useful, though patient-derived data require care."
+            }
+          },
+          email: "synthetic-expert-1",
+          timestamp: "2026-09-07T18:16:42.019958",
+          version: 1
+        },
+        {
+          id: 2,
+          answers: {
+            q1: {
+              position: "AI can search broadly, but a senior researcher must own any conclusion. I initially want human approval before each experiment because a flawed objective can waste resources. I would protect some budget for exploratory hypotheses. Full release of all intermediate material may bury the important evidence."
+            }
+          },
+          email: "synthetic-expert-2",
+          timestamp: "2026-09-07T18:16:42.031741",
+          version: 1
+        },
+        {
+          id: 3,
+          answers: {
+            q1: {
+              position: "Reproducible code matters more than polished explanations. I support sandboxed tests with spending limits and explicit scope. A mandatory 20% reserve seems inflexible across projects. I initially favour publishing all prompts and outputs so others can reconstruct the workflow."
+            }
+          },
+          email: "synthetic-expert-3",
+          timestamp: "2026-09-07T18:16:42.039633",
+          version: 1
+        },
+        {
+          id: 4,
+          answers: {
+            q1: {
+              position: "AI could let junior researchers explore ideas they cannot currently afford to test. I support a protected exploration budget and bounded autonomous tests. I worry a named reviewer requirement could create a sign-off bottleneck. I initially favour full disclosure of the process for equal access."
+            }
+          },
+          email: "synthetic-expert-4",
+          timestamp: "2026-09-07T18:16:42.048004",
+          version: 1
+        },
+        {
+          id: 5,
+          answers: {
+            q1: {
+              position: "People must remain accountable for claims, with runnable analysis and documented checks. I am cautious about unapproved automated tests and want clear stopping rules. A fixed exploration percentage could reward activity over quality. Full public traces could help auditability but may reveal material that should remain confidential."
+            }
+          },
+          email: "synthetic-expert-5",
+          timestamp: "2026-09-07T18:16:42.057903",
+          version: 1
+        },
+        {
+          id: 6,
+          answers: {
+            q1: {
+              position: "Privacy and access conditions need to follow data through every AI step. A human reviewer should check the analysis and data handling. I cannot judge bounded autonomy without knowing how the boundaries are enforced. I oppose mandatory public release of every dataset and a fixed budget percentage."
+            }
+          },
+          email: "synthetic-expert-6",
+          timestamp: "2026-09-07T18:16:42.065822",
+          version: 1
+        },
+        {
+          id: 7,
+          answers: {
+            q1: {
+              position: "I want evidence that AI improves useful discovery, not simply the number of tests. Reproducibility and review should be funded. I support bounded computation but oppose a blanket exploration reserve when teams have different bottlenecks. I initially support full release as a condition of public funding."
+            }
+          },
+          email: "synthetic-expert-7",
+          timestamp: "2026-09-07T18:16:42.073133",
+          version: 1
+        },
+        {
+          id: 8,
+          answers: {
+            q1: {
+              position: "Independent teams should be able to reproduce the analysis behind a result. I support human review but initially need clearer requirements for the reviewer. I am unsure whether autonomous tests can avoid subtle data leakage. I favour a protected exploration budget. I initially support publishing every trace, though volume could be a problem."
+            }
+          },
+          email: "synthetic-expert-8",
+          timestamp: "2026-09-07T18:16:42.081603",
+          version: 1
+        }
+      ]
+    },
+    {
+      id: 2,
+      round_number: 2,
+      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.</strong></p><p>Computational biologist \u2014 Agree: Runnable code and a named reviewer make responsibility clear.</p><p>Laboratory principal investigator \u2014 Agree: I need someone in the team to own each conclusion.</p><p>Research software engineer \u2014 Agree: Review must include rerunning the code, not just reading a generated report.</p><p>Doctoral researcher \u2014 Unable to judge \u2014 need more information: Who is qualified to review, and how much time will they have? I need more detail.</p><p>Research integrity officer \u2014 Agree: The reviewer needs to check whether the conclusion follows from the analysis.</p><p>Data governance specialist \u2014 Agree: Responsibility must include checking whether data use stays within its permissions.</p><p>Research funding manager \u2014 Agree: Funders should expect analysis that others can reproduce and a responsible reviewer.</p><p>Reproducibility researcher \u2014 Unable to judge \u2014 need more information: A named reviewer alone is not enough; I want the check itself documented.</p><p>Claim 2: <strong>AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.</strong></p><p>Computational biologist \u2014 Agree: A budget and a sandbox make these tests reversible in practice.</p><p>Laboratory principal investigator \u2014 Disagree: I worry that a cheap computation can still push the project towards the wrong target.</p><p>Research software engineer \u2014 Agree: I can enforce scope and spending limits in the execution environment.</p><p>Doctoral researcher \u2014 Agree: Independent runs would let junior researchers test ideas without waiting for every meeting.</p><p>Research integrity officer \u2014 Disagree: I would require prior approval because scope boundaries can be ambiguous.</p><p>Data governance specialist \u2014 Unable to judge \u2014 need more information: The statement does not tell me how scope and budget limits will be enforced.</p><p>Research funding manager \u2014 Agree: A bounded test is different from spending money on a wet-lab experiment.</p><p>Reproducibility researcher \u2014 Unable to judge \u2014 need more information: I cannot tell whether a reversible test can still contaminate later evaluation.</p><p>Claim 3: <strong>At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.</strong></p><p>Computational biologist \u2014 Agree: Unusual biological hypotheses lose out when only near-term success is rewarded.</p><p>Laboratory principal investigator \u2014 Agree: Exploration needs protection from immediate delivery pressure.</p><p>Research software engineer \u2014 Disagree: Infrastructure-heavy projects need flexibility; 20% is not always sensible.</p><p>Doctoral researcher \u2014 Agree: Protected resources would help people with unconventional ideas.</p><p>Research integrity officer \u2014 Disagree: A fixed reserve could fund poor hypotheses simply to meet a target.</p><p>Data governance specialist \u2014 Disagree: Sensitive-data projects may need to spend more on controlled infrastructure.</p><p>Research funding manager \u2014 Disagree: Project-specific budgets are more defensible than one fixed percentage.</p><p>Reproducibility researcher \u2014 Agree: Replication and unconventional hypotheses need room even when immediate success is unlikely.</p><p>Claim 4: <strong>Every prompt, intermediate output and dataset used by research AI must be released publicly.</strong></p><p>Computational biologist \u2014 Agree: Full traces seem the simplest way to make the workflow inspectable.</p><p>Laboratory principal investigator \u2014 Disagree: Publishing every intermediate output adds noise and may expose unpublished work.</p><p>Research software engineer \u2014 Agree: A complete trace would let me debug failures that selected reports omit.</p><p>Doctoral researcher \u2014 Agree: Universal release seems fairer than leaving access to the best-funded groups.</p><p>Research integrity officer \u2014 Agree: I favour complete records for accountability, while recognising confidentiality concerns.</p><p>Data governance specialist \u2014 Disagree: Some datasets cannot be made public; the word every makes this unacceptable.</p><p>Research funding manager \u2014 Agree: Public funding should normally produce openly inspectable work.</p><p>Reproducibility researcher \u2014 Agree: Complete traces might expose selective reporting, so I initially support release.</p>",
+      synthesis_published: true,
+      is_active: false,
+      responses: [
+        {
+          id: 9,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "Runnable code and a named reviewer make responsibility clear."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "A budget and a sandbox make these tests reversible in practice."
+            },
+            q5: {
+              position: "Agree"
+            },
+            q6: {
+              position: "Unusual biological hypotheses lose out when only near-term success is rewarded."
+            },
+            q7: {
+              position: "Agree"
+            },
+            q8: {
+              position: "Full traces seem the simplest way to make the workflow inspectable."
+            }
+          },
+          email: "synthetic-expert-1",
+          timestamp: "2026-09-07T18:16:42.145226",
+          version: 1
+        },
+        {
+          id: 10,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "I need someone in the team to own each conclusion."
+            },
+            q3: {
+              position: "Disagree"
+            },
+            q4: {
+              position: "I worry that a cheap computation can still push the project towards the wrong target."
+            },
+            q5: {
+              position: "Agree"
+            },
+            q6: {
+              position: "Exploration needs protection from immediate delivery pressure."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "Publishing every intermediate output adds noise and may expose unpublished work."
+            }
+          },
+          email: "synthetic-expert-2",
+          timestamp: "2026-09-07T18:16:42.176335",
+          version: 1
+        },
+        {
+          id: 11,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "Review must include rerunning the code, not just reading a generated report."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "I can enforce scope and spending limits in the execution environment."
+            },
+            q5: {
+              position: "Disagree"
+            },
+            q6: {
+              position: "Infrastructure-heavy projects need flexibility; 20% is not always sensible."
+            },
+            q7: {
+              position: "Agree"
+            },
+            q8: {
+              position: "A complete trace would let me debug failures that selected reports omit."
+            }
+          },
+          email: "synthetic-expert-3",
+          timestamp: "2026-09-07T18:16:42.186174",
+          version: 1
+        },
+        {
+          id: 12,
+          answers: {
+            q1: {
+              position: "Unable to judge \u2014 need more information"
+            },
+            q2: {
+              position: "Who is qualified to review, and how much time will they have? I need more detail."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "Independent runs would let junior researchers test ideas without waiting for every meeting."
+            },
+            q5: {
+              position: "Agree"
+            },
+            q6: {
+              position: "Protected resources would help people with unconventional ideas."
+            },
+            q7: {
+              position: "Agree"
+            },
+            q8: {
+              position: "Universal release seems fairer than leaving access to the best-funded groups."
+            }
+          },
+          email: "synthetic-expert-4",
+          timestamp: "2026-09-07T18:16:42.207128",
+          version: 1
+        },
+        {
+          id: 13,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "The reviewer needs to check whether the conclusion follows from the analysis."
+            },
+            q3: {
+              position: "Disagree"
+            },
+            q4: {
+              position: "I would require prior approval because scope boundaries can be ambiguous."
+            },
+            q5: {
+              position: "Disagree"
+            },
+            q6: {
+              position: "A fixed reserve could fund poor hypotheses simply to meet a target."
+            },
+            q7: {
+              position: "Agree"
+            },
+            q8: {
+              position: "I favour complete records for accountability, while recognising confidentiality concerns."
+            }
+          },
+          email: "synthetic-expert-5",
+          timestamp: "2026-09-07T18:16:42.213716",
+          version: 1
+        },
+        {
+          id: 14,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "Responsibility must include checking whether data use stays within its permissions."
+            },
+            q3: {
+              position: "Unable to judge \u2014 need more information"
+            },
+            q4: {
+              position: "The statement does not tell me how scope and budget limits will be enforced."
+            },
+            q5: {
+              position: "Disagree"
+            },
+            q6: {
+              position: "Sensitive-data projects may need to spend more on controlled infrastructure."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "Some datasets cannot be made public; the word every makes this unacceptable."
+            }
+          },
+          email: "synthetic-expert-6",
+          timestamp: "2026-09-07T18:16:42.220801",
+          version: 1
+        },
+        {
+          id: 15,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "Funders should expect analysis that others can reproduce and a responsible reviewer."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "A bounded test is different from spending money on a wet-lab experiment."
+            },
+            q5: {
+              position: "Disagree"
+            },
+            q6: {
+              position: "Project-specific budgets are more defensible than one fixed percentage."
+            },
+            q7: {
+              position: "Agree"
+            },
+            q8: {
+              position: "Public funding should normally produce openly inspectable work."
+            }
+          },
+          email: "synthetic-expert-7",
+          timestamp: "2026-09-07T18:16:42.227723",
+          version: 1
+        },
+        {
+          id: 16,
+          answers: {
+            q1: {
+              position: "Unable to judge \u2014 need more information"
+            },
+            q2: {
+              position: "A named reviewer alone is not enough; I want the check itself documented."
+            },
+            q3: {
+              position: "Unable to judge \u2014 need more information"
+            },
+            q4: {
+              position: "I cannot tell whether a reversible test can still contaminate later evaluation."
+            },
+            q5: {
+              position: "Agree"
+            },
+            q6: {
+              position: "Replication and unconventional hypotheses need room even when immediate success is unlikely."
+            },
+            q7: {
+              position: "Agree"
+            },
+            q8: {
+              position: "Complete traces might expose selective reporting, so I initially support release."
+            }
+          },
+          email: "synthetic-expert-8",
+          timestamp: "2026-09-07T18:16:42.234313",
+          version: 1
+        }
+      ]
+    },
+    {
+      id: 3,
+      round_number: 3,
+      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>Any AI-generated result used to support a research conclusion must have reproducible code and a named human reviewer.</strong></p><p>Computational biologist \u2014 Agree: The engineer\u2019s point persuaded me to specify rerunning the analysis as part of review. I still agree.</p><p>Laboratory principal investigator \u2014 Agree: I retain support; the reviewer should have the relevant expertise and time.</p><p>Research software engineer \u2014 Agree: I still agree. A runnable workflow and a recorded review are concrete checks.</p><p>Doctoral researcher \u2014 Agree: I moved from uncertainty to agreement after the panel clarified that review should be resourced and specific to the analysis.</p><p>Research integrity officer \u2014 Agree: I retain support, with documented checks rather than a ceremonial sign-off.</p><p>Data governance specialist \u2014 Agree: I still agree, provided reviewers check access conditions as well as numerical results.</p><p>Research funding manager \u2014 Agree: I retain support for a reproducible analysis and an accountable reviewer.</p><p>Reproducibility researcher \u2014 Agree: I moved to agreement after reviewing the software engineer\u2019s practical description of rerunning code and recording checks.</p><p>Claim 2: <strong>AI may run reversible computational tests without prior human approval when the team has agreed a budget and scope.</strong></p><p>Computational biologist \u2014 Agree: I still agree: enforce the agreed scope rather than seeking permission for each run.</p><p>Laboratory principal investigator \u2014 Agree: I changed from disagreement after the engineer distinguished bounded computation from wet-lab experiments. The agreed scope is the key safeguard.</p><p>Research software engineer \u2014 Agree: I retain support for tests with enforced limits and recorded execution.</p><p>Doctoral researcher \u2014 Agree: I still support autonomy within the agreed scope; it does not remove accountability.</p><p>Research integrity officer \u2014 Agree: I changed my view: explicit scope and a budget are advance human approval of the class of tests. Out-of-scope work would still need review.</p><p>Data governance specialist \u2014 Unable to judge \u2014 need more information: I remain unable to judge: enforceable boundaries depend on the actual data and execution environment.</p><p>Research funding manager \u2014 Agree: I still agree because the proposal is limited to reversible computation within agreed resources.</p><p>Reproducibility researcher \u2014 Disagree: I moved from uncertainty to disagreement. A bounded run can still leak evaluation data into future model choices; the statement does not address that risk.</p><p>Claim 3: <strong>At least 20% of a research team\u2019s AI computing budget should be reserved for exploratory hypotheses with a low initial probability of success.</strong></p><p>Computational biologist \u2014 Agree: I retain support. Without a protected share, plausible short-term ideas consume everything.</p><p>Laboratory principal investigator \u2014 Agree: I still support the reserve, even though its opportunity cost remains real.</p><p>Research software engineer \u2014 Disagree: I remain opposed to 20% for every team. The panel has not resolved differences in infrastructure needs.</p><p>Doctoral researcher \u2014 Agree: I retain support because junior researchers otherwise struggle to protect speculative work.</p><p>Research integrity officer \u2014 Disagree: I remain opposed. Good exploration should be funded on its merits rather than by a fixed fraction.</p><p>Data governance specialist \u2014 Disagree: I retain disagreement; the same reserve is not appropriate for every project.</p><p>Research funding manager \u2014 Disagree: I remain opposed to the fixed percentage. The disagreement is about allocation rules, not whether exploration has value.</p><p>Reproducibility researcher \u2014 Agree: I retain support. The funding manager\u2019s flexibility argument does not solve the persistent neglect of unusual ideas.</p><p>Claim 4: <strong>Every prompt, intermediate output and dataset used by research AI must be released publicly.</strong></p><p>Computational biologist \u2014 Disagree: The governance specialist\u2019s example changed my view: an auditable record need not mean public release of protected data.</p><p>Laboratory principal investigator \u2014 Disagree: I retain disagreement. A useful reproducibility package is different from publishing every abandoned intermediate output.</p><p>Research software engineer \u2014 Disagree: The confidentiality arguments changed my view. Complete internal logging can coexist with selective, justified public release.</p><p>Doctoral researcher \u2014 Agree: I still support public release as written. I recognise the restrictions raised, but think this policy should limit which datasets are used in the first place.</p><p>Research integrity officer \u2014 Disagree: I changed to disagreement. Mandatory publication could conflict with confidentiality without improving the reliability of the final conclusion.</p><p>Data governance specialist \u2014 Disagree: I remain opposed. Public release of every dataset is incompatible with the restricted-data cases I raised.</p><p>Research funding manager \u2014 Disagree: I changed my view after distinguishing open outputs from unrestricted data release. Auditability does not require every input to be public.</p><p>Reproducibility researcher \u2014 Disagree: I changed to disagreement. Releasing a clear reproducibility package is more useful than an indiscriminate archive of sensitive or misleading intermediate material.</p>",
+      synthesis_published: true,
+      is_active: true,
+      responses: [
+        {
+          id: 17,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "The engineer\u2019s point persuaded me to specify rerunning the analysis as part of review. I still agree."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "I still agree: enforce the agreed scope rather than seeking permission for each run."
+            },
+            q5: {
+              position: "Agree"
+            },
+            q6: {
+              position: "I retain support. Without a protected share, plausible short-term ideas consume everything."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "The governance specialist\u2019s example changed my view: an auditable record need not mean public release of protected data."
+            }
+          },
+          email: "synthetic-expert-1",
+          timestamp: "2026-09-07T18:16:42.284984",
+          version: 1
+        },
+        {
+          id: 18,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "I retain support; the reviewer should have the relevant expertise and time."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "I changed from disagreement after the engineer distinguished bounded computation from wet-lab experiments. The agreed scope is the key safeguard."
+            },
+            q5: {
+              position: "Agree"
+            },
+            q6: {
+              position: "I still support the reserve, even though its opportunity cost remains real."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "I retain disagreement. A useful reproducibility package is different from publishing every abandoned intermediate output."
+            }
+          },
+          email: "synthetic-expert-2",
+          timestamp: "2026-09-07T18:16:42.291922",
+          version: 1
+        },
+        {
+          id: 19,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "I still agree. A runnable workflow and a recorded review are concrete checks."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "I retain support for tests with enforced limits and recorded execution."
+            },
+            q5: {
+              position: "Disagree"
+            },
+            q6: {
+              position: "I remain opposed to 20% for every team. The panel has not resolved differences in infrastructure needs."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "The confidentiality arguments changed my view. Complete internal logging can coexist with selective, justified public release."
+            }
+          },
+          email: "synthetic-expert-3",
+          timestamp: "2026-09-07T18:16:42.298244",
+          version: 1
+        },
+        {
+          id: 20,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "I moved from uncertainty to agreement after the panel clarified that review should be resourced and specific to the analysis."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "I still support autonomy within the agreed scope; it does not remove accountability."
+            },
+            q5: {
+              position: "Agree"
+            },
+            q6: {
+              position: "I retain support because junior researchers otherwise struggle to protect speculative work."
+            },
+            q7: {
+              position: "Agree"
+            },
+            q8: {
+              position: "I still support public release as written. I recognise the restrictions raised, but think this policy should limit which datasets are used in the first place."
+            }
+          },
+          email: "synthetic-expert-4",
+          timestamp: "2026-09-07T18:16:42.305721",
+          version: 1
+        },
+        {
+          id: 21,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "I retain support, with documented checks rather than a ceremonial sign-off."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "I changed my view: explicit scope and a budget are advance human approval of the class of tests. Out-of-scope work would still need review."
+            },
+            q5: {
+              position: "Disagree"
+            },
+            q6: {
+              position: "I remain opposed. Good exploration should be funded on its merits rather than by a fixed fraction."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "I changed to disagreement. Mandatory publication could conflict with confidentiality without improving the reliability of the final conclusion."
+            }
+          },
+          email: "synthetic-expert-5",
+          timestamp: "2026-09-07T18:16:42.317902",
+          version: 1
+        },
+        {
+          id: 22,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "I still agree, provided reviewers check access conditions as well as numerical results."
+            },
+            q3: {
+              position: "Unable to judge \u2014 need more information"
+            },
+            q4: {
+              position: "I remain unable to judge: enforceable boundaries depend on the actual data and execution environment."
+            },
+            q5: {
+              position: "Disagree"
+            },
+            q6: {
+              position: "I retain disagreement; the same reserve is not appropriate for every project."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "I remain opposed. Public release of every dataset is incompatible with the restricted-data cases I raised."
+            }
+          },
+          email: "synthetic-expert-6",
+          timestamp: "2026-09-07T18:16:42.329713",
+          version: 1
+        },
+        {
+          id: 23,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "I retain support for a reproducible analysis and an accountable reviewer."
+            },
+            q3: {
+              position: "Agree"
+            },
+            q4: {
+              position: "I still agree because the proposal is limited to reversible computation within agreed resources."
+            },
+            q5: {
+              position: "Disagree"
+            },
+            q6: {
+              position: "I remain opposed to the fixed percentage. The disagreement is about allocation rules, not whether exploration has value."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "I changed my view after distinguishing open outputs from unrestricted data release. Auditability does not require every input to be public."
+            }
+          },
+          email: "synthetic-expert-7",
+          timestamp: "2026-09-07T18:16:42.338130",
+          version: 1
+        },
+        {
+          id: 24,
+          answers: {
+            q1: {
+              position: "Agree"
+            },
+            q2: {
+              position: "I moved to agreement after reviewing the software engineer\u2019s practical description of rerunning code and recording checks."
+            },
+            q3: {
+              position: "Disagree"
+            },
+            q4: {
+              position: "I moved from uncertainty to disagreement. A bounded run can still leak evaluation data into future model choices; the statement does not address that risk."
+            },
+            q5: {
+              position: "Agree"
+            },
+            q6: {
+              position: "I retain support. The funding manager\u2019s flexibility argument does not solve the persistent neglect of unusual ideas."
+            },
+            q7: {
+              position: "Disagree"
+            },
+            q8: {
+              position: "I changed to disagreement. Releasing a clear reproducibility package is more useful than an indiscriminate archive of sensitive or misleading intermediate material."
+            }
+          },
+          email: "synthetic-expert-8",
+          timestamp: "2026-09-07T18:16:42.352778",
+          version: 1
+        }
+      ]
+    }
+  ]
+};
+
 // src/utils/answers.ts
 function isRecord(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -1238,7 +2420,7 @@ function ratingProgress(round, rounds, responses) {
       const n = v.slice(0, 5).reduce((a, b) => a + b, 0);
       return [{ round: r.round_number, votes: v, n, percent: n ? 100 * v[0] / n : null }];
     });
-    const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify/i.test(String(p.label)));
+    const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify|what led/i.test(String(p.label)));
     const stableEmails = (rs) => {
       const map = /* @__PURE__ */ new Map();
       const duplicate = /* @__PURE__ */ new Set();
@@ -1299,7 +2481,7 @@ function buildFixedDelphiRound(round, rounds, responses) {
     if (typeof q === "string") return q;
     const row = rows.find((r) => r.key === String(q.questionId));
     if (row) return { ...q, groupPrompt: [`Round 2: ${row.votes[0]} agree, ${row.votes[1]} disagree, ${row.votes[2]} neutral, ${row.votes[3]} unable to judge; ${row.answered} answered.`, "Review the other participants\u2019 reasoning, then rate this same claim again. You do not need to change your mind.", ...row.evidence.filter((e) => e.comment).map((e) => `${e.position}: ${e.comment}`)].join("\n") };
-    if (/comment|clarification|justify/i.test(String(q.label))) return { ...q, label: "Justify your position", placeholder: "Explain why you chose this rating and what evidence or reasoning supports it. (optional)" };
+    if (/comment|clarification|justify|what led/i.test(String(q.label))) return { ...q, label: "What led you to this view?", placeholder: "A sentence or two is enough. Mention evidence, experience or a concern." };
     return { ...q };
   });
 }
@@ -1320,14 +2502,14 @@ function renderDelphiPlanner(root, round, rounds, responses, publish) {
   }
   if (round.round_number !== 2) return;
   const detail = el("details");
-  detail.append(el("summary", "Preview round 3 \xB7 Final ratings"), el("p", "All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and justify their position."));
+  detail.append(el("summary", "Preview round 3 \xB7 Final ratings"), el("p", "All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and explain their reasoning."));
   box.append(detail);
   try {
     const questions = buildFixedDelphiRound(round, rounds.filter((r) => r.round_number <= 2), responses);
     questions.filter((q) => typeof q === "object" && Array.isArray(q.options)).forEach((q) => {
       if (typeof q === "string") return;
       const item = el("details");
-      item.append(el("summary", String(q.sectionTitle || q.label)), el("p", String(q.groupPrompt)), el("p", q.options.join(" \xB7 ")), el("p", "Justify your position \u2014 explain the reasoning behind your rating."));
+      item.append(el("summary", String(q.sectionTitle || q.label)), el("p", String(q.groupPrompt)), el("p", q.options.join(" \xB7 ")), el("p", "What led you to this view? \u2014 explain the reasoning behind your rating."));
       detail.append(item);
     });
     if (publish && !rounds.some((r) => r.round_number >= 3)) {
@@ -1541,8 +2723,8 @@ function draw(root) {
   back.href = location.pathname;
   top.append(back);
   root.append(top);
-  root.append(el2("h2", "Can a panel find common ground without losing its disagreements?", "demo-title"));
-  root.append(el2("p", "Explore three rounds on AI in UK public services. Follow the judgments, inspect the reasons, and see where the panel remains divided.", "demo-deck"));
+  root.append(el2("h2", example.fixture.title, "demo-title"));
+  root.append(el2("p", "1. Share ideas \xB7 2. Rate the claims \xB7 3. Review and rate again. The claims stay the same; the reasoning can develop.", "demo-deck"));
   const provenance = el2("details", "", "demo-protocol");
   provenance.append(el2("summary", "About this simulation"));
   provenance.append(el2("p", example.fixture.method + " The 24 submissions were processed by an isolated test instance of the application. This is a saved demonstration, separate from live consultation responses."));
@@ -1556,7 +2738,7 @@ function draw(root) {
   example.rounds.forEach((r) => {
     const o = document.createElement("option");
     o.value = String(r.round_number);
-    o.textContent = `Round ${r.round_number} \xB7 ${["Independent ideas", "First ratings", "Reconsideration"][r.round_number - 1] || "Review"}`;
+    o.textContent = `Round ${r.round_number} \xB7 ${["Share ideas", "Rate the claims", "Review and rate again"][r.round_number - 1] || "Review"}`;
     o.selected = selected === r.round_number;
     select.append(o);
   });
@@ -1577,6 +2759,9 @@ function draw(root) {
   if (selected === 3) {
     narrative.append(el2("h3", "Common ground, with questions still open"), el2("p", "All eight support human appeal; seven reject universal model disclosure. Routine automation gains support but remains below the threshold. The staffing earmark stays split 4\u20134: protecting staff versus keeping budgets flexible."));
   }
+  if (example.fixture.narratives) {
+    narrative.replaceChildren(el2("h3", ["Independent starting points", "Where opinions differ", "What the panel learned"][selected - 1]), el2("p", example.fixture.narratives[selected - 1]));
+  }
   root.append(narrative);
   if (selected === 3) {
     const matrix = el2("details", "", "demo-matrix");
@@ -1584,7 +2769,7 @@ function draw(root) {
     const table = el2("table");
     table.append(el2("caption", "Round 2 \u2192 Round 3. Fictional roles; original claims unchanged."));
     const head = el2("tr");
-    ["Perspective", "Human appeal", "Routine automation", "Staffing earmark", "Full model release"].forEach((t) => {
+    ["Perspective", ...example.fixture.short_labels || ["Human appeal", "Routine automation", "Staffing earmark", "Full model release"]].forEach((t) => {
       const th = el2("th", t);
       th.setAttribute("scope", "col");
       head.append(th);
@@ -1663,30 +2848,42 @@ function sync() {
       if (!empty) existing?.remove();
     }
   }
-  const requested = new URLSearchParams(location.search).get("demo") === "public-ai";
+  const demoKey = new URLSearchParams(location.search).get("demo");
+  const requested = demoKey === "public-ai" || demoKey === "research-ai";
+  example = demoKey === "research-ai" ? research_ai_results_default : public_ai_results_default;
   const active = isSummary && requested;
   document.body.classList.toggle("delphi-demo-active", active);
   let root = document.getElementById("delphi-demo-workspace");
-  if (!active) {
+  if (!active || root?.dataset.example !== demoKey) {
     root?.remove();
     root = null;
   }
   if (active && main && !root) {
     root = el2("section", "", "demo-workspace");
     root.id = "delphi-demo-workspace";
+    root.dataset.example = demoKey || "";
+    selected = 3;
     const grid = main.querySelector(":scope > div > .grid");
     if (grid) {
       grid.before(root);
       draw(root);
     }
   }
+  const researchRoute = /^\/admin\/form\/18(?:\/summary)?\/?$/.test(location.pathname);
+  if (!researchRoute || requested) document.getElementById("research-example-link")?.remove();
+  if (researchRoute && !requested && main && !document.getElementById("research-example-link")) {
+    const link = el2("a", "Explore the completed synthetic example \u2192", "demo-dashboard-link");
+    link.id = "research-example-link";
+    link.href = "/admin/form/18/summary?demo=research-ai";
+    main.prepend(link);
+  }
   const dashboard = location.pathname === "/" && Array.from(main?.querySelectorAll("h1") || []).some((h) => h.textContent === "Consultations");
   if (!dashboard) document.getElementById("delphi-demo-link")?.remove();
   if (dashboard && !document.getElementById("delphi-demo-link")) {
     const link = el2("a", "", "demo-dashboard-link");
     link.id = "delphi-demo-link";
-    link.href = "/admin/form/17/summary?demo=public-ai";
-    link.append(el2("strong", "Explore a Delphi in action"), el2("span", "8 fictional experts \xB7 3 rounds \xB7 see what changes and what stays divided \u2192"));
+    link.href = "/admin/form/18/summary?demo=research-ai";
+    link.append(el2("strong", "Example: AI in university research"), el2("span", "8 fictional experts \xB7 3 rounds \xB7 explore the completed example \u2192"));
     main.prepend(link);
   }
 }

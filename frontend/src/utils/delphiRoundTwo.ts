@@ -109,12 +109,12 @@ export function buildDelphiRoundTwoQuestions(synthesisHtml: string): QuestionInp
         optional: false,
       }),
       baseQuestion({
-        label: 'Justify your position',
+        label: 'What led you to this view?',
         questionId: `${prefix}_comment`,
         sectionTitle,
         inputType: 'textarea',
         rows: 1,
-        placeholder: 'Explain why you chose this rating. (optional)',
+        placeholder: 'A sentence or two is enough. Mention evidence, experience or a concern.',
         optional: true,
       }),
     ];
