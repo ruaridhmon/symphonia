@@ -1,0 +1,285 @@
+{
+  "title": "Who decides? AI in UK public services",
+  "synthetic": true,
+  "method": "Scripted LLM-authored roleplay, run through an isolated authenticated application workflow. No live participants or empirical findings.",
+  "protocol": {
+    "panel_size": 8,
+    "rounds": 3,
+    "threshold": 0.8,
+    "minimum_responses": 8,
+    "stopping_rule": "Stop after round 3; report unresolved claims.",
+    "uncertainty_in_denominator": true
+  },
+  "claims": [
+    "People must be able to request a human review of an AI decision affecting their access to a public service.",
+    "Low-risk administrative tasks may be completed by AI without prior human sign-off.",
+    "At least half of any verified financial savings from AI should be reinvested in frontline staffing.",
+    "Every AI model used in a public service must publish its full source code and model weights."
+  ],
+  "experts": [
+    {
+      "id": "expert-1",
+      "role": "Council service lead",
+      "proposal": "I want shorter queues without an unaccountable service. A human appeal should exist for decisions about access. Routine appointment allocation might run automatically, with a route to correct errors. Staff should share in the savings, although an inflexible percentage could limit other improvements. Publishing model code seems an attractive transparency requirement, but I need to understand procurement and security implications.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Agree",
+          "Agree"
+        ],
+        "comments": [
+          "Appeals should cover decisions affecting service access; routine bookings should not need prior review.",
+          "A reversible booking is a useful bounded test.",
+          "Frontline capacity is the visible service bottleneck, so I support the earmark.",
+          "I initially support full release as a simple accountability rule."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I retain support. Review must be accessible and able to correct the original outcome.",
+          "I retain support for reversible administration, excluding eligibility and enforcement.",
+          "I retain support: staff capacity is the bottleneck I would address first.",
+          "I change to disagree. The engineer distinguishes public accountability from universal weights release; independent inspection could be required without excluding every closed model."
+        ]
+      }
+    },
+    {
+      "id": "expert-2",
+      "role": "AI engineer",
+      "proposal": "Allow bounded administrative automation with logging, reversibility and escalation. A human appeal matters for consequential decisions, but a review for every trivial automated event may consume the benefits. I oppose a fixed staffing earmark: use verified savings where they do most good. Full release of every model is too absolute; independent access and public evaluation reports can offer other forms of scrutiny.",
+      "round2": {
+        "votes": [
+          "Disagree",
+          "Agree",
+          "Disagree",
+          "Disagree"
+        ],
+        "comments": [
+          "As written, I worry that human review could be demanded for trivial administrative actions and swamp staff.",
+          "Allow automation with logs, reversibility and escalation.",
+          "An automatic staffing earmark might prevent investment in better accessibility or infrastructure.",
+          "Full release is not the only scrutiny mechanism; independent inspection and published evaluation may suffice."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree",
+          "Disagree"
+        ],
+        "comments": [
+          "I change to agree after the panel separates access decisions from routine automation. An appeal after an access decision is not a requirement for prior sign-off on every booking.",
+          "I retain support for bounded, logged and reversible tasks.",
+          "I retain opposition. Ring-fencing inputs is different from improving outcomes.",
+          "I retain opposition to every. Public evaluations and independent inspection are a less absolute alternative."
+        ]
+      }
+    },
+    {
+      "id": "expert-3",
+      "role": "Disability advocate",
+      "proposal": "Access must include people who cannot navigate a digital complaint. Guarantee a human review and accessible routes to request it. I am wary of calling something low-risk when errors accumulate for disabled people. Reinvest savings in frontline staff who can help. Open source sounds desirable, but I cannot judge whether weights disclosure is necessary for accountability.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Disagree",
+          "Agree",
+          "Unable to judge — need more information"
+        ],
+        "comments": [
+          "The route to human review must work by phone and with assistance.",
+          "Repeated small errors may disproportionately harm disabled users, so I oppose without boundaries.",
+          "People need trained staff to resolve access problems.",
+          "I need to know what full release adds beyond independent inspection."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Unable to judge — need more information",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I retain support, conditional on an assisted and offline route.",
+          "I move from disagree to unable to judge. Reversibility addresses part of my concern, but I still need evidence on cumulative accessibility errors.",
+          "I retain support for staffing that makes appeals accessible.",
+          "I move from unsure to disagree with the universal rule. A code release does not itself make an inaccessible service contestable; require independent scrutiny and accessible explanations."
+        ]
+      }
+    },
+    {
+      "id": "expert-4",
+      "role": "Public-service union representative",
+      "proposal": "Technology should augment staff and retain human accountability. I want appeals, human checks before automated actions, and at least half of verified savings reinvested in frontline staffing. Without an earmark, service improvement can become a euphemism for job cuts. I initially favour publishing code and weights because commercial secrecy should not prevent scrutiny.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Disagree",
+          "Agree",
+          "Agree"
+        ],
+        "comments": [
+          "An accountable person must be available to reconsider an access decision.",
+          "I oppose removing sign-off while low-risk remains vague.",
+          "A protected share makes the promise to augment people credible.",
+          "Code and weights should be open so staff are not asked to trust a black box."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I retain support: a review must be meaningful, not a rubber stamp.",
+          "I change to agree for reversible administrative work. The caseworker separates booking from benefit eligibility, and I still oppose autonomous eligibility decisions.",
+          "I retain support. My unresolved disagreement with the economist is about commitment to staff, not the arithmetic of savings.",
+          "I change to disagree with the absolute wording. Staff need enforceable inspection and audit rights; universal public release is not the only way to secure them."
+        ]
+      }
+    },
+    {
+      "id": "expert-5",
+      "role": "Public finance economist",
+      "proposal": "Consider the opportunity cost of safeguards as well as their benefits. I support an appeal on access decisions and automation of reversible administrative work. A compulsory fifty-percent staffing earmark may stop spending on whichever service need is most urgent. I favour openness as a default and initially support full code and weights release, but would reconsider if the rule excluded useful auditable options.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree",
+          "Agree"
+        ],
+        "comments": [
+          "Appeal is a proportionate protection for decisions affecting access.",
+          "Reversible administrative automation can be assessed separately from eligibility.",
+          "Spend savings on the greatest unmet need, not a preselected input.",
+          "I support the release rule initially because it makes inspection possible."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree",
+          "Disagree"
+        ],
+        "comments": [
+          "I retain support for an appeal on access decisions.",
+          "I retain support, with measured errors and reversal.",
+          "I retain opposition. The union values a credible staffing commitment; I value flexibility to address whichever need is greatest. That trade-off remains unresolved.",
+          "I change to disagree. The engineer has identified a feasible alternative—independent inspection plus published evaluation—so I no longer require every model to be fully released."
+        ]
+      }
+    },
+    {
+      "id": "expert-6",
+      "role": "Civil liberties researcher",
+      "proposal": "Public accountability requires contestability, reasons and independent scrutiny. Human appeal is essential. Automation of administrative work may hide rights-impacting decisions behind apparently routine categories, so low-risk needs a defensible definition. Staffing earmarks are not the same as rights protection. I support full code and weights disclosure because opaque suppliers can concentrate power.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Disagree",
+          "Disagree",
+          "Agree"
+        ],
+        "comments": [
+          "People must be able to contest an administrative judgment affecting them.",
+          "The boundary between administration and access is porous; I retain opposition.",
+          "Budget earmarking does not guarantee accountability.",
+          "Full disclosure limits supplier power and permits independent scrutiny."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Disagree",
+          "Disagree",
+          "Agree"
+        ],
+        "comments": [
+          "I retain support. Review needs independence from the original automated process.",
+          "I retain disagreement. Administrative routing can determine practical access even when it is nominally reversible.",
+          "I retain opposition: funding rules are no substitute for rights and scrutiny.",
+          "I retain support. My concern is concentration of power: auditor access can depend on contracts, whereas public disclosure permits wider challenge. This remains a substantive minority view."
+        ]
+      }
+    },
+    {
+      "id": "expert-7",
+      "role": "Rural community organiser",
+      "proposal": "Rural residents need working phone and in-person routes as well as apps. Human appeal should be available. I cannot judge unattended administration without a clear boundary and a fallback when connectivity fails. Reinvest in frontline people. I initially support open code and weights as a way for communities to inspect services rather than depending on vendor promises.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Unable to judge — need more information",
+          "Agree",
+          "Agree"
+        ],
+        "comments": [
+          "Appeals must include an offline route.",
+          "I cannot judge until a failed automated action can be reversed locally.",
+          "Rural service capacity needs protected investment.",
+          "Open release could let communities examine systems themselves."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I retain support with phone and face-to-face routes.",
+          "I change from unsure to agree with locally reversible tasks and an offline fallback. I would oppose removing those conditions.",
+          "I retain support: without a protected share, sparse communities could lose more service capacity.",
+          "I change to disagree. The accessibility argument persuades me that usable accountability matters more than universal weights release; I still want public reporting."
+        ]
+      }
+    },
+    {
+      "id": "expert-8",
+      "role": "Frontline caseworker",
+      "proposal": "I see useful tools for letters and booking, but someone must own mistakes. Human appeal might help, though it could just shift the queue unless there are staff to act. I oppose unattended administrative decisions until we define what counts as reversible. Reinvest savings in people. I oppose mandatory publication of every model: clear explanations and independent audit could matter more to the service user.",
+      "round2": {
+        "votes": [
+          "Unable to judge — need more information",
+          "Agree",
+          "Disagree",
+          "Disagree"
+        ],
+        "comments": [
+          "Without staff or a review deadline I cannot tell whether the appeal is meaningful.",
+          "I support tightly reversible tasks with a named owner.",
+          "I favour capacity but oppose fixing the share before knowing service needs.",
+          "Users need a useful explanation and a route to correction; model weights alone provide neither."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree",
+          "Disagree"
+        ],
+        "comments": [
+          "I change from unsure to agree with the principle. The disability advocate clarifies that a usable human route is a design requirement; staffing and deadlines remain implementation conditions.",
+          "I retain support for reversible booking and correspondence, not eligibility or enforcement.",
+          "I retain opposition to a fixed share, while supporting adequate frontline capacity.",
+          "I retain opposition: explain the decision, provide correction, and allow independent inspection."
+        ]
+      }
+    }
+  ]
+}

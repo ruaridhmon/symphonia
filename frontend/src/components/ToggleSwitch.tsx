@@ -2,16 +2,19 @@ export function ToggleSwitch({
   checked,
   onChange,
   id,
+  label,
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
   id?: string;
+  label?: string;
 }) {
   return (
     <button
       type="button"
       id={id}
       role="switch"
+      aria-label={label}
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className="relative inline-flex shrink-0 rounded-full transition-colors duration-200 focus-visible:outline-none"

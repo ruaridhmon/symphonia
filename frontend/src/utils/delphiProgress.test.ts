@@ -31,3 +31,17 @@ describe('recorded Delphi progress', () => {
     expect(synthesisProvenanceNote({...r,response_count:10},[p,r])).toContain('matches Round 1');
   });
 });
+
+it('matches returning identities, preserves reasons and excludes ambiguous duplicate identities', () => {
+  const rounds=[makeRound(1),makeRound(2)];
+  rounds.forEach(r=>r.questions.push({questionId:'claim_1_comment',sectionTitle:question.sectionTitle,label:'Comments or clarification',inputType:'textarea'}));
+  const prior=votes(1,['Agree','Disagree']);const current=votes(2,['Disagree','Disagree']);
+  prior.responses.forEach((r,i)=>r.email=`synthetic-${i}`);current.responses.forEach((r,i)=>r.email=`synthetic-${i}`);
+  current.responses[0].answers.q2={position:'The exception changes my view.'};
+  const row=ratingProgress(rounds[1],rounds,[prior,current])[0];
+  expect(row.matched).toBe(2);expect(row.changed).toBe(1);
+  expect(row.evidence[0].comment).toBe('The exception changes my view.');
+  expect(row.history.map(h=>h.percent)).toEqual([50,0]);
+  current.responses.push({...current.responses[0],id:22});
+  expect(ratingProgress(rounds[1],rounds,[prior,current])[0].matched).toBe(1);
+});
