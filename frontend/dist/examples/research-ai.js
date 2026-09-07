@@ -2492,10 +2492,10 @@ var el = (tag, text = "") => {
   n.textContent = text;
   return n;
 };
-function renderDelphiPlanner(root, round, rounds, responses, publish) {
+function renderDelphiPlanner(root2, round, rounds, responses, publish) {
   const box = el("div");
   box.className = "di-planner";
-  root.append(box);
+  root2.append(box);
   if (round.round_number >= 3) {
     box.append(el("strong", "Round 3 of 3 \xB7 Final ratings"), el("p", "The same claims were rated in rounds 2 and 3. Compare the positions and justifications above; unresolved disagreement remains part of the result."));
     return;
@@ -2554,29 +2554,29 @@ function category(row) {
   if (row.votes[1] / row.answered > 0.5) return "Leaning disagree";
   return "Divided";
 }
-function renderDelphiInsights(root, round, rounds, responses, refresh, publish) {
+function renderDelphiInsights(root2, round, rounds, responses, refresh, publish) {
   const rows = ratingProgress(round, rounds, responses);
-  const priorOpen = new Set(Array.from(root.querySelectorAll("details[open]")).map((d) => d.dataset.key));
-  const filter = root.dataset.filter || "All claims";
-  const existingPlanner = root.dataset.plannerRound === String(round.id) ? root.querySelector(".di-planner") : null;
-  root.dataset.plannerRound = String(round.id);
-  root.replaceChildren();
-  root.className = "card delphi-insights";
+  const priorOpen = new Set(Array.from(root2.querySelectorAll("details[open]")).map((d) => d.dataset.key));
+  const filter = root2.dataset.filter || "All claims";
+  const existingPlanner = root2.dataset.plannerRound === String(round.id) ? root2.querySelector(".di-planner") : null;
+  root2.dataset.plannerRound = String(round.id);
+  root2.replaceChildren();
+  root2.className = "card delphi-insights";
   const head = node("div", "", "di-heading");
   head.append(node("div", "THE PANEL\u2019S VIEW", "di-eyebrow"));
   const title = node("div", "", "di-title");
   title.append(node("h2", "Where views stand"));
   if (refresh) title.append(button("Refresh", refresh));
   head.append(title);
-  root.append(head);
+  root2.append(head);
   const ordered = [...rounds].filter((r) => r.round_number <= round.round_number).sort((a, b) => a.round_number - b.round_number);
   const actual = responses.find((r) => r.id === round.id)?.responses.length;
   const intro = node("p", `Round ${round.round_number} \xB7 ${actual ?? "\u2014"} responses${rows.length ? ` \xB7 ${rows.length} claims` : ""}`, "di-subtitle");
-  root.append(intro);
+  root2.append(intro);
   const note = synthesisProvenanceNote(round, rounds);
-  if (note) root.append(node("p", note, "di-warning"));
+  if (note) root2.append(node("p", note, "di-warning"));
   if (!rows.length) {
-    root.append(node("p", "Ideas first. This round gathers independent proposals; the next round lets the panel rate the resulting claims.", "di-empty"));
+    root2.append(node("p", "Ideas first. This round gathers independent proposals; the next round lets the panel rate the resulting claims.", "di-empty"));
     return;
   }
   const cats = ["Mostly agree", "Leaning agree", "Divided", "Leaning disagree", "Mostly disagree", "Uncertain"];
@@ -2586,19 +2586,19 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     item.append(node("strong", String(rows.filter((r) => category(r) === label).length)), node("span", label));
     overview.append(item);
   });
-  root.append(overview);
+  root2.append(overview);
   const filters = node("div", "", "di-filters");
   filters.setAttribute("role", "group");
   filters.setAttribute("aria-label", "Filter claims");
   ["All claims", ...cats].forEach((label) => {
     const b = button(label, () => {
-      root.dataset.filter = label;
-      renderDelphiInsights(root, round, rounds, responses, refresh, publish);
+      root2.dataset.filter = label;
+      renderDelphiInsights(root2, round, rounds, responses, refresh, publish);
     });
     b.setAttribute("aria-pressed", String(filter === label));
     filters.append(b);
   });
-  root.append(filters);
+  root2.append(filters);
   const list = node("div", "", "di-claims");
   const selected2 = rows.filter((r) => filter === "All claims" || category(r) === filter);
   if (!selected2.length) list.append(node("p", "No claims in this group.", "di-empty"));
@@ -2676,7 +2676,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     article.append(detail);
     list.append(article);
   });
-  root.append(list);
+  root2.append(list);
   const archived = node("details", "", "di-method");
   archived.append(node("summary", "Earlier claims not rated in this round"));
   const seen = new Set(rows.map((r) => r.key));
@@ -2685,9 +2685,9 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     seen.add(row.key);
     archived.append(node("p", `${row.label} \u2014 last rated Round ${r.round_number}: ${row.percent === null ? "no ratings" : Math.round(row.percent) + "% agree"} (${row.answered} answered). Not re-rated; no current-round result.`));
   }));
-  if (archived.childElementCount > 1) root.append(archived);
-  if (existingPlanner) root.append(existingPlanner);
-  else if (round.is_active || !refresh) renderDelphiPlanner(root, round, rounds, responses, publish);
+  if (archived.childElementCount > 1) root2.append(archived);
+  if (existingPlanner) root2.append(existingPlanner);
+  else if (round.is_active || !refresh) renderDelphiPlanner(root2, round, rounds, responses, publish);
   const methods = document.createElement("details");
   methods.className = "di-method";
   methods.dataset.key = "method";
@@ -2697,7 +2697,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   methods.append(node("p", "Round comparisons require identical claim identifiers, wording and scales. Movement counts compare position groups for unambiguously matched returning respondents; changing intensity within agree or disagree is not counted. Response numbers identify rows within this round only. Comments are original submitted words."));
   methods.append(node("p", ordered.map((r) => `Round ${r.round_number}: ${responses.find((x) => x.id === r.id)?.responses.length ?? r.response_count ?? "\u2014"} responses`).join(" \xB7 ")));
   methods.append(node("p", "Agreement can coexist with conditional support. Changes in panel composition can change percentages. A synthetic demonstration illustrates the process; it does not establish scientific validity."));
-  root.append(methods);
+  root2.append(methods);
 }
 
 // src/legacy/delphiDemo.ts
@@ -2715,22 +2715,22 @@ var btn = (text, fn) => {
   return n;
 };
 var selected = 3;
-function draw(root) {
-  root.replaceChildren();
+function draw(root2) {
+  root2.replaceChildren();
   const top = el2("div", "", "demo-topline");
   top.append(el2("span", "SYNTHETIC DELPHI \xB7 8 FICTIONAL EXPERTS", "di-eyebrow"));
   const standalone = location.pathname.startsWith("/examples/");
   const back = el2("a", standalone ? "Dashboard" : "Back to consultation");
   back.href = standalone ? "/" : location.pathname;
   top.append(back);
-  root.append(top);
-  root.append(el2("h2", example.fixture.title, "demo-title"));
-  root.append(el2("p", "1. Share ideas \xB7 2. Rate the claims \xB7 3. Review and rate again. The claims stay the same; the reasoning can develop.", "demo-deck"));
+  root2.append(top);
+  root2.append(el2("h2", example.fixture.title, "demo-title"));
+  root2.append(el2("p", "1. Share ideas \xB7 2. Rate the claims \xB7 3. Review and rate again. The claims stay the same; the reasoning can develop.", "demo-deck"));
   const provenance = el2("details", "", "demo-protocol");
   provenance.append(el2("summary", "About this simulation"));
   provenance.append(el2("p", example.fixture.method + " The 24 submissions were processed by an isolated test instance of the application. This is a saved demonstration, separate from live consultation responses."));
   provenance.append(el2("p", "Protocol: eight returning participants; 80% agreement or disagreement, with uncertainty included; all eight responses required. Stop after three rounds and report unresolved claims. Claims stay unchanged between rating rounds."));
-  root.append(provenance);
+  root2.append(provenance);
   const nav = el2("nav", "", "demo-rounds");
   nav.setAttribute("aria-label", "Simulation rounds");
   const label = el2("label", "Viewing round ");
@@ -2745,11 +2745,11 @@ function draw(root) {
   });
   select.onchange = () => {
     selected = Number(select.value);
-    draw(root);
+    draw(root2);
   };
   label.append(select);
   nav.append(label);
-  root.append(nav);
+  root2.append(nav);
   const narrative = el2("div", "", "demo-narrative");
   if (selected === 1) {
     narrative.append(el2("h3", "Different starting points"), el2("p", "Eight roles bring different priorities: capacity, fairness, worker protection, fiscal flexibility and public accountability. Four candidate claims are distilled from their proposals; no agreement percentage is inferred from these paragraphs."));
@@ -2763,7 +2763,7 @@ function draw(root) {
   if (example.fixture.narratives) {
     narrative.replaceChildren(el2("h3", ["Independent starting points", "Where opinions differ", "What the panel learned"][selected - 1]), el2("p", example.fixture.narratives[selected - 1]));
   }
-  root.append(narrative);
+  root2.append(narrative);
   if (selected === 3) {
     const matrix = el2("details", "", "demo-matrix");
     matrix.append(el2("summary", "See the eight perspectives side by side"));
@@ -2800,7 +2800,7 @@ function draw(root) {
     scroll.setAttribute("aria-label", "Perspective ratings, scroll horizontally on small screens");
     scroll.append(table);
     matrix.append(scroll);
-    root.append(matrix);
+    root2.append(matrix);
   }
   if (selected === 1) {
     const proposals = el2("div", "", "demo-proposals");
@@ -2809,32 +2809,32 @@ function draw(root) {
       d.append(el2("summary", `Perspective ${i + 1} \xB7 ${e.role}`), el2("p", e.proposal));
       proposals.append(d);
     });
-    root.append(proposals);
+    root2.append(proposals);
     const claims = el2("section", "", "demo-candidates");
     claims.append(el2("h3", "Four claims for the next round"));
     example.fixture.claims.forEach((c, i) => claims.append(el2("p", `${i + 1}. ${c}`)));
-    root.append(claims);
+    root2.append(claims);
   } else {
     const results = el2("section");
     results.setAttribute("aria-label", "Synthetic Delphi results");
     renderDelphiInsights(results, example.rounds[selected - 1], example.rounds, example.responses);
-    root.append(results);
+    root2.append(results);
   }
   const footer = el2("div", "", "demo-footer");
   if (selected > 1) footer.append(btn("Previous round", () => {
     selected--;
-    draw(root);
+    draw(root2);
   }));
   if (selected < 3) footer.append(btn("Continue to next round", () => {
     selected++;
-    draw(root);
+    draw(root2);
   }));
-  root.append(footer);
+  root2.append(footer);
 }
-function mountResearchExample(root) {
+function mountResearchExample(root2) {
   example = research_ai_results_default;
   selected = 3;
-  draw(root);
+  draw(root2);
 }
 function sync() {
   if (location.pathname.startsWith("/examples/")) return;
@@ -2864,20 +2864,20 @@ function sync() {
   example = demoKey === "research-ai" ? research_ai_results_default : public_ai_results_default;
   const active = isSummary && requested;
   document.body.classList.toggle("delphi-demo-active", active);
-  let root = document.getElementById("delphi-demo-workspace");
-  if (!active || root?.dataset.example !== demoKey) {
-    root?.remove();
-    root = null;
+  let root2 = document.getElementById("delphi-demo-workspace");
+  if (!active || root2?.dataset.example !== demoKey) {
+    root2?.remove();
+    root2 = null;
   }
-  if (active && main && !root) {
-    root = el2("section", "", "demo-workspace");
-    root.id = "delphi-demo-workspace";
-    root.dataset.example = demoKey || "";
+  if (active && main && !root2) {
+    root2 = el2("section", "", "demo-workspace");
+    root2.id = "delphi-demo-workspace";
+    root2.dataset.example = demoKey || "";
     selected = 3;
     const grid = main.querySelector(":scope > div > .grid");
     if (grid) {
-      grid.before(root);
-      draw(root);
+      grid.before(root2);
+      draw(root2);
     }
   }
   const researchRoute = /^\/admin\/form\/18(?:\/summary)?\/?$/.test(location.pathname);
@@ -2905,6 +2905,7 @@ new MutationObserver(() => {
 }).observe(document.body, { childList: true, subtree: true });
 window.addEventListener("popstate", sync);
 sync();
-export {
-  mountResearchExample
-};
+
+// src/examples/researchEntry.ts
+var root = document.getElementById("research-example");
+if (root) mountResearchExample(root);
