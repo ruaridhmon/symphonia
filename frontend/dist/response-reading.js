@@ -14,7 +14,8 @@ function responseSections(questions, answers) {
     const group = String(config.sectionTitle || "");
     const comment = /comment|clarification|justify|what led|explain your position/i.test(label);
     const previous = result[result.length - 1];
-    const title = (group || label).replace(/^Claim\s+\d+:\s*/i, "");
+    const useGroup = Array.isArray(config.options) || comment || /^(Your response|Your position)$/i.test(label);
+    const title = (useGroup && group ? group : label).replace(/^Claim\s+\d+:\s*/i, "");
     const section = comment && group && previous?.title === title ? previous : { title, blocks: [] };
     if (section !== previous) result.push(section);
     const position = object ? text(object.position ?? object.value ?? object.selectedOptions) : text(raw);
@@ -25,8 +26,8 @@ function responseSections(questions, answers) {
       const labels = { evidence: "Evidence", counterarguments: "Reservations", confidence: "Confidence", confidenceJustification: "Confidence explained" };
       for (const [k, v] of Object.entries(object)) {
         if (k === "confidence" && config.requireConfidence === false) continue;
-        if (["position", "value", "selectedOptions"].includes(k) || v == null || v === "") continue;
-        section.blocks.push({ label: labels[k] || k, text: k === "confidence" && typeof v === "number" ? `${v}/10` : text(v) });
+        if (["position", "value", "selectedOptions"].includes(k) || v == null || v === "" || Array.isArray(v) && v.length === 0 || typeof v === "object" && Object.keys(v).length === 0) continue;
+        section.blocks.push({ label: labels[k] || k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase()), text: k === "confidence" && typeof v === "number" ? `${v}/10` : text(v) });
       }
     }
   });
