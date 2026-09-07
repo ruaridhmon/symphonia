@@ -60,6 +60,8 @@ import {
 	VersionCompare,
 	SurveyStatisticsPanel,
 } from './components/summary';
+import DelphiProgressPanel from './components/summary/DelphiProgressPanel';
+import { synthesisProvenanceNote } from './utils/delphiProgress';
 import type { SynthesisEmbeddedBlock } from './components/summary/SynthesisEditorCard';
 
 import { usePresence } from './hooks/usePresence';
@@ -943,15 +945,7 @@ export default function SummaryPage() {
 			|| showMissingStructuredViewsNotice
 		)
 	);
-	const synthesisContextNote = useMemo(() => {
-		if (!activeRound || activeRound.round_number <= 1) return null;
-		const previous = rounds.find(r => r.round_number === activeRound.round_number - 1);
-		const currentText = (activeRound.synthesis || '').trim();
-		const previousText = (previous?.synthesis || '').trim();
-		if (!currentText || !previousText) return null;
-		if (currentText !== previousText) return null;
-		return `This draft is carried forward from Round ${activeRound.round_number - 1}. Update and save it as the Round ${activeRound.round_number} synthesis.`;
-	}, [activeRound, rounds]);
+	const synthesisContextNote = synthesisProvenanceNote(displayRound, rounds);
 	const workspaceTabs = [
 		{
 			id: 'synthesis' as const,
@@ -2349,10 +2343,12 @@ export default function SummaryPage() {
 									</SectionErrorBoundary>
 								)}
 
+								<DelphiProgressPanel round={displayRound} rounds={rounds} responses={structuredRounds} />
+
 								{showSynthesisTextPanel && (
 									<SynthesisEditorCard
 										activeRound={displayRound}
-										contextNote={displayRound?.is_active ? synthesisContextNote : null}
+										contextNote={synthesisContextNote}
 										synthesisViewMode={synthesisViewMode}
 										onSetViewMode={handleSetSynthesisViewMode}
 										canGenerate={Boolean(displayRound?.is_active && responseCountForDisplay > 0)}
