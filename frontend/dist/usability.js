@@ -18,6 +18,8 @@ function sync() {
   document.body.classList.toggle("ux-builder", builder);
   if (builder) {
     const title = main.querySelector("h1");
+    title?.parentElement?.classList.add("ux-builder-heading");
+    main.querySelector("#form-title")?.parentElement?.parentElement?.classList.add("ux-builder-panel");
     if (title && !main.querySelector(".ux-builder-intro")) {
       const p = document.createElement("p");
       p.className = "ux-builder-intro";
@@ -112,7 +114,7 @@ function sync() {
   if (!reader.querySelector(".ux-reader-back")) {
     const back = makeButton("\u2190 All responses", () => {
       card.classList.remove("ux-reading");
-      const active = aside.querySelector('button[aria-pressed="true"]');
+      const active = aside.querySelector('[aria-pressed="true"]');
       active?.focus();
     });
     back.className = "ux-reader-back";
@@ -120,16 +122,20 @@ function sync() {
   }
   if (!card.dataset.uxBound) {
     card.dataset.uxBound = "true";
-    aside.addEventListener("click", (event) => {
+    const openReader = (event) => {
       const target = event.target;
       if (target.closest("input,label") || card.classList.contains("ux-managing")) return;
-      const chosen = target.closest("button[aria-pressed]");
+      const chosen = target.closest("[aria-pressed]");
       if (!chosen) return;
       card.classList.add("ux-reading");
       if (matchMedia("(max-width: 767px)").matches) setTimeout(() => {
         reader.querySelector(".ux-reader-back")?.focus();
         reader.scrollIntoView({ block: "start", behavior: "instant" });
       }, 0);
+    };
+    aside.addEventListener("click", openReader);
+    aside.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") openReader(e);
     });
     aside.querySelector("select")?.addEventListener("change", () => card.classList.remove("ux-reading"));
   }
@@ -138,6 +144,6 @@ var timer;
 new MutationObserver(() => {
   clearTimeout(timer);
   timer = setTimeout(sync, 80);
-}).observe(document.body, { childList: true, subtree: true });
+}).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "aria-checked"] });
 window.addEventListener("popstate", sync);
 sync();

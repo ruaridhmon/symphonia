@@ -17,10 +17,10 @@ body.ux-responses main > div > section:first-of-type { background:var(--backgrou
 .ux-response-list > div:first-child label {background:var(--background)!important;min-height:44px;}
 .ux-response-list input[type="search"] {border:0!important;box-shadow:none!important;min-width:0;width:100%;font-size:14px;padding:0!important;}
 .ux-response-list > div:last-child {border:0!important;background:transparent!important;}
-.ux-response-list button[aria-pressed] {background:transparent!important;border:0!important;border-left:2px solid transparent!important;border-radius:0!important;padding:14px 12px!important;min-height:72px;text-align:left;box-shadow:none!important;}
-.ux-response-list button[aria-pressed="true"] {background:var(--muted)!important;border-left-color:var(--accent)!important;}
-.ux-response-list button[aria-pressed] .rounded-full {display:none!important;}
-.ux-response-list button[aria-pressed] [class*="line-clamp"] {font-size:12px;line-height:1.6;}
+.ux-response-list [role="button"][aria-pressed] {background:transparent!important;border:0!important;border-left:2px solid transparent!important;border-radius:0!important;padding:14px 12px!important;min-height:72px;text-align:left;box-shadow:none!important;}
+.ux-response-list [role="button"][aria-pressed="true"] {background:var(--muted)!important;border-left-color:var(--accent)!important;}
+.ux-response-list [role="button"][aria-pressed] .rounded-full {display:none!important;}
+.ux-response-list [role="button"][aria-pressed] [class*="line-clamp"] {font-size:12px;line-height:1.6;}
 .ux-response-reader {min-width:0;scroll-margin-top:80px;}
 .ux-response-reader > div {border:0!important;background:var(--background)!important;overflow:visible!important;}
 .ux-response-reader > div > div {padding:0 0 20px!important;}
@@ -60,7 +60,7 @@ body.ux-builder main input,body.ux-builder main textarea,body.ux-builder main se
  .ux-response-card.ux-reading .ux-response-list {display:none;}
  .ux-reader-back {display:inline-flex;align-items:center;min-height:44px;margin:0 0 15px;padding:7px 0;font-size:14px;color:var(--accent);}
  .ux-response-list [class*="overflow-y"] {max-height:none!important;height:auto!important;overflow:visible!important;}
- .ux-response-list button[aria-pressed] {min-height:84px;padding:16px 12px!important;}
+ .ux-response-list [role="button"][aria-pressed] {min-height:84px;padding:16px 12px!important;}
  .ux-response-list input[type="search"],.ux-response-list select {font-size:16px!important;}
  .ux-response-reader .group .leading-relaxed {font-size:16px!important;line-height:1.8;}
  .ux-response-reader h3 {font-size:20px!important;}
@@ -85,3 +85,16 @@ body.ux-builder main input,body.ux-builder main textarea,body.ux-builder main se
 .ux-source-responses .group {background:transparent!important;border:0!important;}
 .ux-source-responses .group > div[class*="mb-3"] {background:transparent!important;border:0!important;border-bottom:1px solid var(--border)!important;border-radius:0!important;}
 @media(max-width:767px){.ux-source-responses .leading-relaxed{font-size:16px!important;line-height:1.8;}}
+.ux-response-card {padding:0!important;}
+.ux-builder-panel {background:var(--background)!important;box-shadow:none!important;border:0!important;border-radius:0!important;padding:0!important;}
+body.ux-builder fieldset > div {background:transparent!important;border:0!important;border-radius:0!important;padding:0!important;}
+body.ux-builder fieldset > div:only-of-type > div:first-child {display:none;}
+body.ux-builder fieldset > div > .space-y-3 > div {background:var(--background)!important;box-shadow:none!important;border-radius:8px!important;}
+@media(max-width:767px){
+ .ux-builder-heading {flex-direction:row!important;align-items:center!important;justify-content:space-between!important;}
+ .ux-question-row textarea {grid-column:1/-1!important;min-height:90px;}
+ .ux-question-row > div {grid-column:1/-1!important;justify-content:flex-end;}
+ .ux-question-row > div:has(button:disabled):not(:has(button:not(:disabled))) {display:none;}
+ body.ux-responses main > div > section:first-of-type {margin-bottom:12px!important;}
+ body.ux-responses main > div > section:first-of-type h2 {line-height:1.4;}
+}

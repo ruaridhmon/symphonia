@@ -9,6 +9,8 @@ function sync(){
   document.body.classList.toggle('ux-builder',builder);
   if(builder){
     const title=main.querySelector('h1');
+    title?.parentElement?.classList.add('ux-builder-heading');
+    main.querySelector('#form-title')?.parentElement?.parentElement?.classList.add('ux-builder-panel');
     if(title&&!main.querySelector('.ux-builder-intro')){
       const p=document.createElement('p');p.className='ux-builder-intro';p.textContent='Write your questions, preview the participant experience, then save.';title.parentElement?.after(p);
     }
@@ -60,19 +62,21 @@ function sync(){
   // The list's select-all toolbar is management-only; individual row buttons stay usable.
   const all=aside.querySelector('label.ux-selection-control');all?.parentElement?.parentElement?.classList.add('ux-selection-toolbar');
   if(!reader.querySelector('.ux-reader-back')){
-    const back=makeButton('← All responses',()=>{card.classList.remove('ux-reading');const active=aside.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');active?.focus();});back.className='ux-reader-back';reader.prepend(back);
+    const back=makeButton('← All responses',()=>{card.classList.remove('ux-reading');const active=aside.querySelector<HTMLElement>('[aria-pressed="true"]');active?.focus();});back.className='ux-reader-back';reader.prepend(back);
   }
   if(!card.dataset.uxBound){
     card.dataset.uxBound='true';
-    aside.addEventListener('click',event=>{const target=event.target as HTMLElement;
+    const openReader=(event:Event)=>{const target=event.target as HTMLElement;
       if(target.closest('input,label')||card.classList.contains('ux-managing'))return;
-      const chosen=target.closest('button[aria-pressed]');if(!chosen)return;
+      const chosen=target.closest('[aria-pressed]');if(!chosen)return;
       card.classList.add('ux-reading');
       if(matchMedia('(max-width: 767px)').matches)setTimeout(()=>{reader.querySelector<HTMLButtonElement>('.ux-reader-back')?.focus();reader.scrollIntoView({block:'start',behavior:'instant'});},0);
-    });
+    };
+    aside.addEventListener('click',openReader);
+    aside.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')openReader(e);});
     aside.querySelector('select')?.addEventListener('change',()=>card.classList.remove('ux-reading'));
   }
 }
 let timer:ReturnType<typeof setTimeout>;
-new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(sync,80);}).observe(document.body,{childList:true,subtree:true});
+new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(sync,80);}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','aria-checked']});
 window.addEventListener('popstate',sync);sync();
