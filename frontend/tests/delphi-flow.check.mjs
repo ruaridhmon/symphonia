@@ -45,6 +45,7 @@ function page(path = '/') {
   Object.defineProperty(dom.window.HTMLElement.prototype, 'offsetParent', {
     get() { return this.parentElement; },
   });
+  dom.window.fetch = async () => ({ok: true, json: async () => ({next_round_available:false})});
   const observers = [];
   const NativeObserver = dom.window.MutationObserver;
   dom.window.MutationObserver = class extends NativeObserver {
@@ -85,6 +86,8 @@ test('activates after SPA navigation; comment is a single accessible growing inp
     assert.equal(input.rows, 1);
     assert.equal(input.getAttribute('aria-label'), 'Comments or clarification (optional)');
     assert.equal(window.document.querySelectorAll('.delphi-r2-comment-toggle').length, 0);
+    input.focus();
+    assert.notEqual(window.getComputedStyle(window.document.querySelector('#delphi-round-two-actions')).display, 'none');
     input.value = 'Synthetic clarification';
     input.dispatchEvent(new window.Event('input', { bubbles: true }));
     assert.equal(input.value, 'Synthetic clarification');
@@ -135,6 +138,10 @@ test('setup activates on internal navigation and creates exactly two fields per 
     assert.ok(modal);
     assert.match(modal.textContent, /Set up next Delphi round/);
     assert.doesNotMatch(modal.textContent, /Round Two|Round 2|Add question/);
+    assert.equal(modal.querySelectorAll('input[type=radio]').length, 6);
+    assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 1/);
+    Array.from(modal.querySelectorAll('button')).find(button => button.textContent === 'Continue').click();
+    assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 2/);
     modal.querySelector('[data-intro]').value = 'Review the previous feedback.';
     modal.querySelector('[data-start]').click();
     await settle();
