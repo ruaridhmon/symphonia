@@ -165,7 +165,7 @@
     if (document.getElementById(BUTTON_ID)) return;
     if (!claimData().length) return;
     var roundButtons = Array.prototype.filter.call(document.querySelectorAll('button'), function (button) {
-      return clean(button.textContent) === 'Round setup';
+      return /^Round setup(?:\s|$)/.test(clean(button.textContent));
     });
     var button = roundButtons.find(function (candidate) {
       return candidate.offsetParent !== null;
