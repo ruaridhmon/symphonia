@@ -1,5 +1,4 @@
-import { renderActionGroup } from './utils/productPresentation';
-import { createElement, useState, useEffect, type MouseEvent } from 'react';
+import { useState, useEffect, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { Download, FileText, Pencil, Plus, Search, Share2, Ticket, Trash2 } from 'lucide-react';
@@ -177,7 +176,12 @@ export default function AdminDashboard() {
       },
     ];
 
-    return renderActionGroup(createElement, actions.map((action) => {
+    return (
+      <div
+        className={`inline-flex max-w-full flex-wrap items-center gap-1.5 ${align === 'end' ? 'justify-end' : 'justify-start'}`}
+        aria-label={`Actions for ${form.title}`}
+      >
+        {actions.map((action) => {
           const color = action.disabled
             ? 'var(--muted-foreground)'
             : action.danger
@@ -239,7 +243,9 @@ export default function AdminDashboard() {
               <span>{action.shortLabel}</span>
             </button>
           );
-        }), form.title);
+        })}
+      </div>
+    );
   };
 
   return (
