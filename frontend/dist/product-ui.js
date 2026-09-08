@@ -32,12 +32,17 @@ function unifyClaims(main) {
     const signature2 = carry + groups.map((g) => g.innerHTML).join("");
     if (existing?.dataset.signature === signature2) continue;
     existing?.remove();
-    const detail = document.createElement("details");
+    target.classList.add("unified-claim-card");
+    target.querySelector(".unified-claim-heading")?.remove();
+    const heading = candidates[0].querySelector(".claim-evidence-claim-heading")?.cloneNode(true);
+    if (heading) {
+      heading.classList.add("unified-claim-heading");
+      for (const n of Array.from(heading.childNodes)) if (n.nodeType === Node.TEXT_NODE) n.textContent = (n.textContent || "").replace(/^[^A-Za-z]*Claim/, "Claim");
+      target.prepend(heading);
+    }
+    const detail = document.createElement("div");
     detail.className = "unified-excerpts";
     detail.dataset.signature = signature2;
-    const title = document.createElement("summary");
-    title.textContent = "Synthesis excerpts";
-    detail.append(title);
     const note = document.createElement("p");
     note.className = "unified-provenance";
     note.textContent = carry || "From the saved synthesis. These excerpts are not additional ratings.";
@@ -49,6 +54,12 @@ function unifyClaims(main) {
       detail.append(clone);
     });
     target.append(detail);
+    const history = target.querySelector(".di-reasons");
+    if (history) {
+      const summary = history.querySelector("summary");
+      if (summary) summary.textContent = "Round history & full responses";
+      target.append(history);
+    }
   }
   const originals = Array.from(card.querySelectorAll("button")).filter((b) => !b.closest(".unified-actions") && /^(Hide from survey|Publish to survey|Save|Revert|Expand all|Collapse all|Edit synthesis text|Preview evidence)$/.test(b.textContent?.trim() || ""));
   if (!originals.length) return;
@@ -82,7 +93,7 @@ function unifyClaims(main) {
       b.onclick = () => {
         menu.open = false;
         const label = original.textContent?.trim();
-        if (label === "Expand all" || label === "Collapse all") progress?.querySelectorAll(".di-reasons,.unified-excerpts,.unified-excerpts details").forEach((d) => d.open = label === "Expand all");
+        if (label === "Expand all" || label === "Collapse all") progress?.querySelectorAll(".di-reasons,.unified-excerpts details").forEach((d) => d.open = label === "Expand all");
         original.click();
         if (label === "Edit synthesis text") {
           card.classList.add("unified-editing");
