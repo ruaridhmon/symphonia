@@ -133,3 +133,12 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
  .product-summary #delphi-recorded-progress .di-overview>div{min-width:0;}
  .product-summary #delphi-recorded-progress .di-overview span{font-size:11px;}
 }
+/* Keep toolbar buttons aligned and the reading column within a comfortable width. */
+#root:not(:has(main.product-dashboard)) main.product-summary:has(#summary-workspace-select){max-width:1000px!important;}
+.product-summary aside button[aria-controls="summary-round-setup"]{min-height:44px;padding:10px 14px!important;border-radius:8px;}
+.product-summary aside button[aria-controls="summary-round-setup"] .text-xs{display:none;}
+.product-summary aside button[aria-controls="summary-round-setup"] .text-sm{font-size:13px;font-weight:500;}
+.product-summary aside > div:has(button[aria-controls="summary-round-setup"][aria-expanded="true"]){flex-basis:100%;order:2;}
+@media(max-width:639px){
+ .product-dashboard section:has(.inbox-row){border:0!important;border-radius:0!important;background:var(--background)!important;box-shadow:none!important;}
+}
