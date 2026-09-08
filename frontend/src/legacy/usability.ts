@@ -57,7 +57,7 @@ function sync(){
     if(clean!==raw){n.title=raw;n.textContent=clean;}
   }
   for(const n of aside.querySelectorAll<HTMLElement>('[class*="line-clamp"]'))if(!n.children.length&&n.textContent?.startsWith('Position: '))n.textContent=n.textContent.slice(10);
-  const search=aside.querySelector<HTMLInputElement>('input[type="search"]');search?.setAttribute('aria-label','Search responses');if(search)search.placeholder='Search responses';
+  const search=aside.querySelector<HTMLInputElement>('input[type="search"]');search?.setAttribute('aria-label','Search responses');if(search)search.placeholder='Search';
   const roundFilter=aside.querySelector<HTMLSelectElement>('select');
   if(roundFilter){
     if(!roundFilter.dataset.readingDefault){
