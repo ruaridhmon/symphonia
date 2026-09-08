@@ -15,6 +15,8 @@ import OfflineBanner from './components/OfflineBanner'
 import './i18n'
 import RouteAnnouncer from './components/RouteAnnouncer'
 import './index.css'
+import './product.css'
+import './legacy/productUI'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

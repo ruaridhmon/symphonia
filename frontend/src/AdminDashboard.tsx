@@ -1,6 +1,7 @@
-import { useState, useEffect, type MouseEvent } from 'react';
+import { renderActionGroup } from './utils/productPresentation';
+import { createElement, useState, useEffect, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Download, FileText, Pencil, Plus, Search, Share2, Ticket, Trash2 } from 'lucide-react';
 import { API_BASE_URL } from './config';
 import { useAuth } from './AuthContext';
@@ -81,6 +82,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchForms();
   }, [token]);
+
+  useEffect(() => { void import('./SummaryPage').catch(() => {}); }, []);
 
   /* ── Filtered forms for search ── */
   const filteredForms = forms.filter(f => {
@@ -174,12 +177,7 @@ export default function AdminDashboard() {
       },
     ];
 
-    return (
-      <div
-        className={`inline-flex max-w-full flex-wrap items-center gap-1.5 ${align === 'end' ? 'justify-end' : 'justify-start'}`}
-        aria-label={`Actions for ${form.title}`}
-      >
-        {actions.map((action) => {
+    return renderActionGroup(createElement, actions.map((action) => {
           const color = action.disabled
             ? 'var(--muted-foreground)'
             : action.danger
@@ -222,10 +220,10 @@ export default function AdminDashboard() {
 
           if (action.href) {
             return (
-              <a key={action.key} href={action.href} {...commonProps}>
+              <Link key={action.key} to={action.href} {...commonProps}>
                 {action.icon}
                 <span>{action.shortLabel}</span>
-              </a>
+              </Link>
             );
           }
 
@@ -241,9 +239,7 @@ export default function AdminDashboard() {
               <span>{action.shortLabel}</span>
             </button>
           );
-        })}
-      </div>
-    );
+        }), form.title);
   };
 
   return (

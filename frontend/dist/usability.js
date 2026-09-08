@@ -1,4 +1,4 @@
-// frontend/src/legacy/usability.ts
+// src/legacy/usability.ts
 var makeButton = (text, fn) => {
   const b = document.createElement("button");
   b.type = "button";
@@ -150,10 +150,14 @@ function sync() {
     aside.querySelector("select")?.addEventListener("change", () => card.classList.remove("ux-reading"));
   }
 }
-var timer;
+var scheduled = false;
 new MutationObserver(() => {
-  clearTimeout(timer);
-  timer = setTimeout(sync, 80);
+  if (scheduled) return;
+  scheduled = true;
+  queueMicrotask(() => {
+    scheduled = false;
+    sync();
+  });
 }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "aria-checked"] });
 window.addEventListener("popstate", sync);
 sync();

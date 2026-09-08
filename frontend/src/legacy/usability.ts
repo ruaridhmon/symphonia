@@ -84,6 +84,6 @@ function sync(){
     aside.querySelector('select')?.addEventListener('change',()=>card.classList.remove('ux-reading'));
   }
 }
-let timer:ReturnType<typeof setTimeout>;
-new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(sync,80);}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','aria-checked']});
+let scheduled=false;
+new MutationObserver(()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;sync();});}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','aria-checked']});
 window.addEventListener('popstate',sync);sync();
