@@ -142,3 +142,29 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 @media(max-width:639px){
  .product-dashboard section:has(.inbox-row){border:0!important;border-radius:0!important;background:var(--background)!important;box-shadow:none!important;}
 }
+
+/* One claim workspace with original evidence beside measured agreement. */
+.unified-matched{display:none!important;}
+.unified-synthesis:not(.unified-editing){display:none!important;}
+.unified-original-action{display:none!important;}
+.claim-evidence-toolbar:has(.unified-original-action){display:none!important;}
+.unified-actions{position:relative;margin:0 0 12px auto;width:max-content;max-width:100%;font-size:13px;}
+.unified-actions>summary{list-style:none;cursor:pointer;min-height:40px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;color:var(--foreground);background:var(--background);}
+.unified-actions>summary::-webkit-details-marker{display:none;}
+.unified-actions>summary::after{content:'⌄';margin-left:12px;color:var(--muted-foreground);}
+.unified-actions>div{position:absolute;right:0;top:100%;width:280px;max-width:calc(100vw - 40px);z-index:60;background:var(--background);border:1px solid var(--border);border-radius:10px;padding:8px;box-shadow:0 12px 32px #0002;}
+.unified-actions button{display:block;width:100%;padding:12px;text-align:left;border:0;background:transparent;font-size:13px;min-height:44px;border-radius:6px;}
+.unified-actions button:hover{background:var(--muted);}
+.unified-actions p{font-size:12px;line-height:1.6;color:var(--muted-foreground);padding:8px;margin:0;}
+.unified-actions :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.unified-excerpts{margin-top:10px;border-top:1px solid var(--border);padding-top:10px;}
+.unified-excerpts>summary{cursor:pointer;color:var(--muted-foreground);font-size:13px;padding:6px 0;}
+.unified-provenance{font-size:12px!important;color:var(--muted-foreground);line-height:1.6;}
+.unified-excerpts .claim-evidence-cards{display:block;}
+.unified-excerpts .claim-evidence-card{padding:14px 0;border:0;border-bottom:1px solid var(--border);background:transparent;box-shadow:none;border-radius:0;}
+.unified-excerpts .claim-evidence-group{border:0;background:transparent;}
+.unified-excerpts .claim-evidence-quote{font-size:14px;line-height:1.75;}
+.di-heading:has(.unified-actions){display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.di-heading:has(.unified-actions) .di-title{flex:1;}
+.di-heading .unified-actions{margin:0;}
+@media(max-width:600px){.di-heading .unified-actions{margin-left:0;}.unified-excerpts .claim-evidence-quote{font-size:16px;}}
