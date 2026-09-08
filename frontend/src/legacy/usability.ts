@@ -57,7 +57,19 @@ function sync(){
     if(clean!==raw){n.title=raw;n.textContent=clean;}
   }
   for(const n of aside.querySelectorAll<HTMLElement>('[class*="line-clamp"]'))if(!n.children.length&&n.textContent?.startsWith('Position: '))n.textContent=n.textContent.slice(10);
-  const search=aside.querySelector('input[type="search"]');search?.setAttribute('aria-label','Search responses');
+  const search=aside.querySelector<HTMLInputElement>('input[type="search"]');search?.setAttribute('aria-label','Search responses');if(search)search.placeholder='Search responses';
+  const roundFilter=aside.querySelector<HTMLSelectElement>('select');
+  if(roundFilter){
+    if(!roundFilter.dataset.readingDefault){
+      roundFilter.dataset.readingDefault='true';
+      const roundText=main.querySelector('section')?.textContent||'';
+      const viewed=roundText.match(/Round\s+(\d+)\s+of/);const desired=viewed?`Round ${viewed[1]}`:null;
+      const option=Array.from(roundFilter.options).find(o=>o.textContent?.trim()===desired);
+      if(option){roundFilter.value=option.value;roundFilter.dispatchEvent(new Event('change',{bubbles:true}));}
+    }
+    card.classList.toggle('ux-all-rounds',roundFilter.value==='all');
+    if(!roundFilter.dataset.readingBound){roundFilter.dataset.readingBound='true';roundFilter.addEventListener('change',()=>card.classList.toggle('ux-all-rounds',roundFilter.value==='all'));}
+  }
   const header=card.firstElementChild;
   if(header&&!header.querySelector('.ux-manage')){
     const toggle=makeButton('Manage responses',()=>{const managing=card.classList.toggle('ux-managing');toggle.textContent=managing?'Done managing':'Manage responses';toggle.setAttribute('aria-pressed',String(managing));});toggle.className='ux-manage';toggle.setAttribute('aria-pressed','false');header.append(toggle);

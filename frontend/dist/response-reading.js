@@ -1,4 +1,4 @@
-// frontend/src/utils/responseReading.ts
+// src/utils/responseReading.ts
 var text = (v) => v == null ? "" : typeof v === "string" ? v : typeof v === "object" ? JSON.stringify(v, null, 2) : String(v);
 function responseSections(questions, answers) {
   const result = [];
@@ -39,10 +39,9 @@ function renderResponseReading(h, questions, answers) {
   return h("div", { className: "response-reading" }, sections.length ? sections.map((s, i) => h(
     "article",
     { className: "rr-section", key: i },
-    h("div", { className: "rr-question-number" }, `Question ${i + 1}`),
+    h("div", { className: "rr-kicker" }, h("span", { className: "rr-question-number" }, `${s.rating ? "Claim" : "Question"} ${i + 1}`), s.rating ? h("span", { className: "rr-rating" }, s.rating) : null),
     h("h4", null, s.title),
-    s.rating ? h("p", { className: "rr-rating" }, s.rating) : null,
-    ...s.blocks.map((b, j) => h("div", { className: "rr-block", key: j }, b.label ? h("h5", null, b.label) : null, h("p", null, b.text)))
+    ...s.blocks.map((b, j) => h("div", { className: "rr-block", key: j }, b.label && !(b.label === "Reasoning" && s.blocks.length === 1) ? h("h5", null, b.label) : null, h("p", null, b.text)))
   )) : h("p", null, "No answers have been recorded."));
 }
 export {

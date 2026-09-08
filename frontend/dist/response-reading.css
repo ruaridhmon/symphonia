@@ -15,3 +15,49 @@
 .ux-response-list>div:first-child label{border-radius:7px!important;background:transparent!important}
 @media(max-width:767px){.ux-response-reader{padding:0;border-left:0}.rr-section h4{font-size:18px}.rr-section{padding:24px 0}.rr-block p{font-size:16px;line-height:1.75}.ux-response-list [role=button][aria-pressed] .truncate{font-size:15px}.ux-response-reader h3{font-size:17px!important}}
 .rr-edit{display:flex;align-items:center;gap:6px;margin:0 0 14px auto;min-height:36px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--muted-foreground)}
+/* Expert chooser + quiet reading pane. Full answers and metadata stay in the reader. */
+.ux-response-card > div:first-child { padding:8px 0 18px!important; border-bottom:0!important; }
+.ux-response-card > div:first-child > h2 { font-size:16px!important;font-weight:500!important; }
+.ux-response-card > div:first-child > h2 svg { display:none; }
+.ux-response-card > div:first-child > .grid { display:none!important; }
+.ux-manage { top:0!important;border:0!important;background:transparent;font-size:12px; }
+.ux-response-columns { grid-template-columns:270px minmax(0,1fr)!important;gap:40px!important;padding-top:8px!important; }
+.ux-response-list > div:first-child { grid-template-columns:minmax(0,1fr) 108px!important;gap:6px!important; }
+.ux-response-list > div:first-child > label { padding:7px 9px!important;min-height:40px!important;border-radius:8px!important;background:var(--muted)!important;border:0!important; }
+.ux-response-list > div:first-child svg { display:none; }
+.ux-response-list input[type=search],.ux-response-list select { font-size:12px!important;background:transparent!important; }
+.ux-response-list [role=button][aria-pressed] { min-height:58px!important;padding:14px 12px!important;border:0!important;border-radius:8px!important;margin:0 0 4px!important; }
+.ux-response-list [role=button][aria-pressed=true] { background:var(--muted)!important; }
+.ux-response-list [role=button][aria-pressed]:hover { background:color-mix(in srgb,var(--muted) 60%,var(--background))!important; }
+.ux-response-list [role=button][aria-pressed] .truncate { font-size:13px!important;font-weight:500!important;line-height:1.6; }
+.ux-response-list [role=button][aria-pressed] [class*=line-clamp] { display:none!important; }
+.ux-response-list [role=button][aria-pressed] .min-w-0 > div:last-child { display:none!important; }
+.ux-all-rounds .ux-response-list [role=button][aria-pressed] .min-w-0 > div:last-child { display:flex!important; }
+.ux-all-rounds .ux-response-list [role=button][aria-pressed] .min-w-0 > div:last-child > :not(:first-child) { display:none; }
+.ux-response-list [class*=overflow-y] { padding:0!important; }
+.ux-response-reader { padding:0 0 40px 40px!important;border-left:1px solid var(--border); }
+.ux-response-reader > div > div:first-child { padding-bottom:24px!important;border-bottom:0!important; }
+.ux-response-reader h3 { font-size:18px!important;font-weight:600!important; }
+.ux-response-reader > div > div:first-child > div > div:last-child:has(> strong) { display:none; }
+.response-reading { max-width:660px;margin:0; }
+.rr-section { padding:32px 0;border-bottom:1px solid color-mix(in srgb,var(--border) 65%,transparent); }
+.rr-section:first-child { padding-top:4px; }
+.rr-kicker { display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px; }
+.rr-question-number { margin:0;font-size:10px;letter-spacing:.06em; }
+.rr-rating { border:0;border-radius:5px;font-size:12px;font-weight:500;margin:0;padding:5px 9px; }
+.rr-section h4 { font-size:16px;font-weight:500;line-height:1.65;margin-bottom:16px;letter-spacing:-.01em; }
+.rr-block p { font-size:16px;line-height:1.85; }
+@media(max-width:767px){
+ .ux-response-card > div:first-child { padding:8px 0 18px!important; }
+ .ux-response-columns { padding:0!important; }
+ .ux-response-reader { padding:0 0 28px!important;border:0; }
+ .ux-response-list > div:first-child { grid-template-columns:minmax(0,1fr) 124px!important; }
+ .ux-response-list input[type=search],.ux-response-list select { font-size:16px!important;min-height:44px; }
+ .ux-response-list [role=button][aria-pressed] { min-height:64px!important;padding:18px 12px!important; }
+ .ux-response-list [role=button][aria-pressed] .truncate { font-size:15px!important; }
+ .rr-section { padding:28px 0; }
+ .rr-section h4 { font-size:16px; }
+ .rr-block p { line-height:1.8; }
+ .ux-response-card.ux-reading > div:first-child { display:none; }
+ .ux-reader-back { margin-bottom:20px; }
+}
