@@ -1,4 +1,4 @@
-// src/legacy/usability.ts
+// frontend/src/legacy/usability.ts
 var makeButton = (text, fn) => {
   const b = document.createElement("button");
   b.type = "button";
@@ -103,7 +103,7 @@ function sync() {
   for (const n of aside.querySelectorAll('[class*="line-clamp"]')) if (!n.children.length && n.textContent?.startsWith("Position: ")) n.textContent = n.textContent.slice(10);
   const search = aside.querySelector('input[type="search"]');
   search?.setAttribute("aria-label", "Search responses");
-  if (search) search.placeholder = "Search responses";
+  if (search) search.placeholder = "Search";
   const roundFilter = aside.querySelector("select");
   if (roundFilter) {
     if (!roundFilter.dataset.readingDefault) {
