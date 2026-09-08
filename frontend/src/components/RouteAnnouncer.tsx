@@ -37,6 +37,7 @@ export default function RouteAnnouncer() {
     // Don't announce on first render (initial load)
     if (prevPathRef.current === pathname) return;
     prevPathRef.current = pathname;
+    window.scrollTo({ top: 0, behavior: 'instant' });
 
     const title = getPageTitle(pathname);
     if (announceRef.current) {

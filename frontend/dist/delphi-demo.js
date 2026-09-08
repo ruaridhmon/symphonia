@@ -2898,10 +2898,14 @@ function sync() {
     main.prepend(link);
   }
 }
-var timer;
+var scheduled = false;
 new MutationObserver(() => {
-  clearTimeout(timer);
-  timer = setTimeout(sync, 100);
+  if (scheduled) return;
+  scheduled = true;
+  queueMicrotask(() => {
+    scheduled = false;
+    sync();
+  });
 }).observe(document.body, { childList: true, subtree: true });
 window.addEventListener("popstate", sync);
 sync();

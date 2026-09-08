@@ -1,3 +1,4 @@
+import RouteLoadingFallback from './components/RouteLoadingFallback';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
@@ -20,28 +21,7 @@ export default function PrivateRoute({ children, isAdminRoute = false, requiredR
   const { token, isAdmin, isFacilitator, role, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{
-          backgroundColor: 'var(--background)',
-          color: 'var(--foreground)',
-        }}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full border-2 border-t-transparent"
-            style={{ borderColor: 'var(--border)', borderTopColor: 'transparent' }}
-          />
-          <span
-            className="text-sm"
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            Loading…
-          </span>
-        </div>
-      </div>
-    );
+    return <RouteLoadingFallback />;
   }
 
   if (!token) {

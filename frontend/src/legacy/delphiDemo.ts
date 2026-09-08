@@ -88,6 +88,6 @@ function sync() {
     link.append(el('strong','Example: AI in university research'),el('span','8 fictional experts · 3 rounds · explore the completed example →'));main!.prepend(link);
   }
 }
-let timer:ReturnType<typeof setTimeout>;
-new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(sync,100);}).observe(document.body,{childList:true,subtree:true});
+let scheduled=false;
+new MutationObserver(()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;sync();});}).observe(document.body,{childList:true,subtree:true});
 window.addEventListener('popstate',sync);sync();
