@@ -21,6 +21,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   const existingPlanner=root.dataset.plannerRound===String(round.id)?root.querySelector('.di-planner'):null;
   root.dataset.plannerRound=String(round.id);
   root.replaceChildren();root.className='card delphi-insights';
+  root.dataset.claimLabels=JSON.stringify(rows.map(r=>r.label.replace(/^Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim()));
   const head=node('div','','di-heading');head.append(node('div','THE PANEL’S VIEW','di-eyebrow'));
   const title=node('div','','di-title');title.append(node('h2','Where views stand'));if(refresh)title.append(button('Refresh',refresh));head.append(title);root.append(head);
   const ordered=[...rounds].filter(r=>r.round_number<=round.round_number).sort((a,b)=>a.round_number-b.round_number);
@@ -52,7 +53,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     }
     if(row.matched)article.append(node('p',`${row.changed} of ${row.matched} returning respondents changed position group since Round ${row.previousRound}.`,'di-movement'));
     const detail=document.createElement('details');detail.className='di-reasons';detail.dataset.key=row.key;detail.open=priorOpen.has(row.key);
-    const summary=node('summary','Reasons & history');detail.append(summary);
+    const summary=node('summary','Expert responses & history');detail.append(summary);
     detail.append(node('p',row.history.map(h=>`Round ${h.round}: ${h.n ? Math.round(h.percent!)+'% agree' : 'No ratings'} (${h.n} answered)`).join(' · ')));
     const question=round.questions.find(q=>typeof q==='object'&&String(q.questionId)===row.key) as Record<string,unknown>|undefined;
     if(question?.parentClaimId) { article.prepend(node('p',`Related proposal · introduced in Round ${question.introducedRound || round.round_number}`,'di-eyebrow'));detail.append(node('p',`Original claim: ${question.parentClaimText || question.parentClaimId}`),node('p',`Reason for this proposal: ${question.claimRationale || 'Not recorded'}`)); }

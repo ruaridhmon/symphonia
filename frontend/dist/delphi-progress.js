@@ -210,6 +210,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   root.dataset.plannerRound = String(round.id);
   root.replaceChildren();
   root.className = "card delphi-insights";
+  root.dataset.claimLabels = JSON.stringify(rows.map((r) => r.label.replace(/^Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim()));
   const head = node("div", "", "di-heading");
   head.append(node("div", "THE PANEL\u2019S VIEW", "di-eyebrow"));
   const title = node("div", "", "di-title");
@@ -297,7 +298,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     detail.className = "di-reasons";
     detail.dataset.key = row.key;
     detail.open = priorOpen.has(row.key);
-    const summary = node("summary", "Reasons & history");
+    const summary = node("summary", "Expert responses & history");
     detail.append(summary);
     detail.append(node("p", row.history.map((h) => `Round ${h.round}: ${h.n ? Math.round(h.percent) + "% agree" : "No ratings"} (${h.n} answered)`).join(" \xB7 ")));
     const question = round.questions.find((q) => typeof q === "object" && String(q.questionId) === row.key);
