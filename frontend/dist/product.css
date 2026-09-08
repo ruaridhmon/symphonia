@@ -168,3 +168,22 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 .di-heading:has(.unified-actions) .di-title{flex:1;}
 .di-heading .unified-actions{margin:0;}
 @media(max-width:600px){.di-heading .unified-actions{margin-left:0;}.unified-excerpts .claim-evidence-quote{font-size:16px;}}
+
+/* Preserve the evidence-led claim card, with measured agreement inside it. */
+.product-summary #delphi-recorded-progress .unified-claim-card{border:1px solid var(--border);border-left:3px solid var(--muted-foreground);border-radius:12px;padding:22px!important;margin:16px 0;background:var(--background);}
+.unified-claim-heading{font-size:17px;line-height:1.6;margin:0 0 14px;}
+.unified-claim-card .di-claim-top h3{display:none;}
+.unified-claim-card .di-claim-top{align-items:center;margin-bottom:12px;}
+.unified-claim-card .di-score{display:flex;align-items:baseline;gap:5px;}
+.unified-claim-card .di-score strong{font-size:21px;}
+.unified-claim-card .di-legend{gap:8px;}
+.unified-claim-card .di-legend>span{border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-size:12px;}
+.unified-claim-card:has(.di-status.mostly-agree),.unified-claim-card:has(.di-status.leaning-agree){border-left-color:#137c70!important;}
+.unified-claim-card:has(.di-status.mostly-disagree),.unified-claim-card:has(.di-status.leaning-disagree){border-left-color:#b34d60!important;}
+.unified-claim-card .unified-excerpts{border-top:0;margin-top:12px;padding:0;display:flex;flex-direction:column;}
+.unified-claim-card .unified-provenance{order:2;margin:8px 0 0;font-size:11px!important;}
+.unified-claim-card .claim-evidence-group{border:1px solid var(--border);border-radius:8px;margin:8px 0;background:var(--background);overflow:hidden;}
+.unified-claim-card .claim-evidence-group>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:12px 14px;background:var(--muted);font-size:14px;font-weight:600;cursor:pointer;}
+.unified-claim-card .claim-evidence-cards{padding:0 14px;}
+.unified-claim-card .di-reasons{margin-top:12px;border-top:1px solid var(--border);padding-top:10px;}
+@media(max-width:600px){.product-summary #delphi-recorded-progress .unified-claim-card{padding:16px!important;}.unified-claim-heading{font-size:16px;}.unified-claim-card .claim-evidence-group>summary{font-size:13px;padding:12px;}}
