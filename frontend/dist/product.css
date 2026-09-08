@@ -97,3 +97,14 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
  #root [role="dialog"] { overscroll-behavior:contain; }
 }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important;animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important; } }
+/* Keep response names aligned with their text when management checkboxes are hidden. */
+.ux-response-list [role="button"][aria-pressed] > div:first-child { justify-content:flex-start!important; }
+.ux-response-list [role="button"][aria-pressed] > div:first-child > .min-w-0 { flex:1;text-align:left; }
+.ux-response-card:not(.ux-managing) .ux-response-list [role="button"] > div:first-child > span:has(input[type="checkbox"]) { display:none; }
+.ux-response-list > div:first-child > label { padding:8px 12px!important;min-height:44px!important; }
+@media(max-width:767px) { .product-more-items { left:auto;right:0; } }
+/* Keep the account control in the same place across dashboard, editor and summary. */
+#root header:has(button[aria-haspopup="menu"]) nav[aria-label="Primary navigation"] { display:flex!important; }
+#root header:has(button[aria-haspopup="menu"]) button[aria-controls="mobile-nav-menu"],
+#root header:has(button[aria-haspopup="menu"]) #mobile-nav-menu { display:none!important; }
+#root header [role="menu"] { max-width:calc(100vw - 32px);background:var(--background)!important;border-radius:12px!important; }
