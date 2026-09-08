@@ -27,7 +27,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   const actual=responses.find(r=>r.id===round.id)?.responses.length;
   const intro=node('p',`Round ${round.round_number} · ${actual ?? '—'} responses${rows.length ? ` · ${rows.length} claims` : ''}`,'di-subtitle');root.append(intro);
   const note=synthesisProvenanceNote(round,rounds);if(note)root.append(node('p',note,'di-warning'));
-  if(!rows.length) {root.append(node('p','Ideas first. This round gathers independent proposals; the next round lets the panel rate the resulting claims.','di-empty'));return;}
+  if(!rows.length) {root.append(node('p',actual===0?'No responses yet for this round. Responses will appear here as participants submit them.':round.round_number===1?'This round gathers independent views. Extract claims from the responses before setting up the rating round.':'There are no comparable claim ratings in this round. Review the written responses or synthesis below.','di-empty'));return;}
   const cats=['Mostly agree','Leaning agree','Divided','Leaning disagree','Mostly disagree','Uncertain'];
   const overview=node('div','','di-overview');
   cats.forEach(label=>{const item=node('div');item.append(node('strong',String(rows.filter(r=>category(r)===label).length)),node('span',label));overview.append(item);});root.append(overview);

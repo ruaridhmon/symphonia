@@ -82,3 +82,54 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 #root:not(:has(main.product-dashboard)) header:has(button[aria-haspopup="menu"]) button[aria-controls="mobile-nav-menu"],
 #root:not(:has(main.product-dashboard)) header:has(button[aria-haspopup="menu"]) #mobile-nav-menu { display:none!important; }
 #root:not(:has(main.product-dashboard)) header [role="menu"] { max-width:calc(100vw - 32px);background:var(--background)!important;border-radius:12px!important; }
+
+/* Consultation inbox: tap to read, explicit menu plus optional touch gestures. */
+.inbox-row{position:relative;cursor:pointer;touch-action:pan-y;}
+.inbox-row [role=link]:focus-visible{outline:2px solid var(--accent);outline-offset:4px;}
+.inbox-more{display:none;min-width:44px;min-height:44px;border:0;border-radius:8px;background:transparent;color:var(--muted-foreground);letter-spacing:2px;cursor:pointer;}
+.inbox-sheet{width:min(420px,calc(100vw - 32px));max-height:85dvh;overflow:auto;margin:auto;padding:20px;border:1px solid var(--border);border-radius:18px;background:var(--background);color:var(--foreground);box-shadow:0 20px 70px #0003;}
+.inbox-sheet::backdrop{background:#10182855;}
+.inbox-sheet h2{font-size:17px;line-height:1.5;font-weight:600;margin:0 0 14px;overflow-wrap:anywhere;}
+.inbox-sheet button{display:block;width:100%;min-height:48px;padding:12px;text-align:left;font-size:15px;background:transparent;border:0;border-radius:8px;cursor:pointer;}
+.inbox-sheet button:hover{background:var(--muted);}.inbox-sheet button:focus-visible{outline:2px solid var(--accent);}
+.inbox-sheet .inbox-delete{color:var(--destructive);}.inbox-sheet .inbox-cancel{margin-top:8px;border-top:1px solid var(--border);text-align:center;}
+@media(max-width:639px){
+ .product-dashboard .inbox-original-actions{display:none!important;}
+ .product-dashboard .inbox-more{display:block;position:absolute;right:4px;top:14px;}
+ .product-dashboard .inbox-row{border:0!important;border-bottom:1px solid var(--border)!important;border-radius:0!important;padding:20px 50px 20px 4px!important;background:var(--background)!important;margin:0!important;}
+ .product-dashboard .inbox-row .font-semibold{font-size:16px;line-height:1.5;font-weight:550;}
+ .product-dashboard .inbox-row .mt-2{font-size:12px;margin-top:5px;}
+ .product-dashboard .inbox-row:hover{background:var(--muted)!important;}
+ .product-dashboard .card:has(.inbox-row){border:0!important;border-radius:0!important;background:var(--background)!important;box-shadow:none!important;}
+ .inbox-sheet{margin:auto 0 0;width:100%;max-width:none;border-radius:20px 20px 0 0;padding:20px 20px max(20px,env(safe-area-inset-bottom));}
+}
+/* One connected summary column, with controls immediately above the results. */
+#root main.product-summary{max-width:1000px!important;}
+.product-summary div:has(> aside[aria-label="Synthesis controls"]){display:flex!important;flex-direction:column;gap:20px!important;}
+.product-summary aside[aria-label="Synthesis controls"]{order:-1;display:flex;flex-wrap:wrap;gap:8px;width:100%;align-items:flex-start;}
+.product-summary aside[aria-label="Synthesis controls"] > *{margin:0!important;}
+.product-summary aside[aria-label="Synthesis controls"] > button{width:auto!important;min-height:44px;padding:10px 14px!important;font-size:13px!important;}
+.product-summary .summary-disclosure{border-radius:8px;}
+.product-summary .summary-disclosure > summary{padding:12px 36px 12px 14px;min-height:44px;}
+.product-summary .summary-disclosure > summary::after{top:10px;right:14px;}
+.product-summary .summary-disclosure > summary > span{font-size:13px;font-weight:500;}
+.product-summary .summary-disclosure > summary > small{display:none;}
+.product-summary .summary-disclosure[open]{flex-basis:100%;order:2;}
+.product-summary .summary-disclosure[open] > .card{max-width:640px;}
+.product-summary #delphi-recorded-progress{padding:0!important;margin:0!important;}
+.product-summary #delphi-recorded-progress .di-empty{padding:16px 0!important;margin:0!important;min-height:0;}
+.product-summary #delphi-recorded-progress .di-subtitle{margin:6px 0 12px!important;}
+.product-summary #delphi-recorded-progress .di-title h2{font-size:20px!important;}
+.product-summary #delphi-recorded-progress .di-overview{gap:12px!important;margin:16px 0!important;}
+.product-summary #delphi-recorded-progress .di-overview>div{min-width:90px;}
+.product-summary #delphi-recorded-progress .di-claims{margin-top:12px;}
+.product-summary #delphi-recorded-progress .di-claim{padding:18px 0;}
+.product-summary .space-y-4.sm\:space-y-6 > .card{margin-top:20px!important;}
+.product-summary main,.product-summary .card{min-width:0;}
+@media(max-width:767px){
+ .product-summary aside[aria-label="Synthesis controls"]{gap:6px;}
+ .product-summary .summary-disclosure > summary{padding-left:10px;}
+ .product-summary #delphi-recorded-progress .di-overview{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));}
+ .product-summary #delphi-recorded-progress .di-overview>div{min-width:0;}
+ .product-summary #delphi-recorded-progress .di-overview span{font-size:11px;}
+}

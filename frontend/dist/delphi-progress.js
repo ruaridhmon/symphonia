@@ -224,7 +224,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   const note = synthesisProvenanceNote(round, rounds);
   if (note) root.append(node("p", note, "di-warning"));
   if (!rows.length) {
-    root.append(node("p", "Ideas first. This round gathers independent proposals; the next round lets the panel rate the resulting claims.", "di-empty"));
+    root.append(node("p", actual === 0 ? "No responses yet for this round. Responses will appear here as participants submit them." : round.round_number === 1 ? "This round gathers independent views. Extract claims from the responses before setting up the rating round." : "There are no comparable claim ratings in this round. Review the written responses or synthesis below.", "di-empty"));
     return;
   }
   const cats = ["Mostly agree", "Leaning agree", "Divided", "Leaning disagree", "Mostly disagree", "Uncertain"];
