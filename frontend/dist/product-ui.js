@@ -1,10 +1,16 @@
 // frontend/src/utils/unifiedClaims.ts
 var claimText = (s) => s.replace(/^\s*Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim();
+var previous = /* @__PURE__ */ new WeakMap();
 function unifyClaims(main) {
   const preview = main.querySelector(".claim-evidence-preview");
   const card = preview?.closest(".card");
   if (!preview || !card) return;
   const progress = main.querySelector("#delphi-recorded-progress");
+  const first = progress?.querySelector(".di-claim") || null;
+  const signatureKey = (card.querySelector(".ProseMirror")?.innerHTML || preview.innerHTML) + String(preview.hidden) + (progress?.dataset.signature || "") + (progress?.dataset.filter || "") + Array.from(card.querySelectorAll("button")).filter((b) => !b.closest(".unified-actions")).map((b) => b.textContent + String(b.disabled)).join("|");
+  const last = previous.get(main);
+  if (last?.preview === preview && last.first === first && last.signature === signatureKey) return;
+  previous.set(main, { preview, first, signature: signatureKey });
   const source = Array.from(preview.querySelectorAll(".claim-evidence-claim"));
   const labels = JSON.parse(progress?.dataset.claimLabels || "[]");
   const matched = source.filter((c) => labels.filter((l) => l === claimText(c.querySelector(".claim-evidence-claim-heading strong")?.textContent || "")).length === 1);
