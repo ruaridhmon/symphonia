@@ -215,13 +215,6 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 .delphi-insights .di-reasons>summary { min-height:36px;align-content:center;padding:7px 0;font-size:12px;line-height:1.5; }
 .delphi-insights .di-reasons>p { font-size:12px;line-height:1.6;color:var(--muted-foreground);margin:8px 0; }
 .delphi-insights .unified-excerpts summary:focus-visible { outline:2px solid var(--accent);outline-offset:2px;border-radius:3px; }
-/* First-round extracted claims retain their original counts, without implying measured agreement. */
-.product-summary .claim-evidence-preview .claim-evidence-claim { border-left-width:2px;box-shadow:none;background:var(--background); }
-.product-summary .claim-evidence-preview .claim-evidence-claim-heading { padding:16px 18px 10px;font-size:15px;line-height:1.5; }
-.product-summary .claim-evidence-preview .claim-evidence-meta { padding:0 18px 10px;font-size:12px; }
-.product-summary .claim-evidence-preview .claim-evidence-group { margin:0 18px;border:0;border-top:1px solid var(--border);border-radius:0;background:transparent; }
-.product-summary .claim-evidence-preview .claim-evidence-group>summary { min-height:38px;padding:8px 0;font-size:12px;font-weight:500; }
-.product-summary .claim-evidence-preview .claim-evidence-group:last-child { margin-bottom:8px; }
 @media(max-width:640px) {
  .delphi-insights .di-claims article.di-claim,
  .product-summary #delphi-recorded-progress .di-claims .di-claim { padding:16px!important; }
@@ -237,4 +230,33 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
  .delphi-insights .unified-excerpts .claim-evidence-group>summary,
  .delphi-insights .di-reasons>summary { min-height:44px; }
  .delphi-insights .di-filters button { min-height:44px; }
+}
+
+/* Keep matched synthesis cards in their original evidence-led style. */
+.delphi-insights .di-claims:has(.unified-claim-card) { display:grid;gap:16px;border:0;border-radius:0;overflow:visible;background:transparent; }
+.product-summary #delphi-recorded-progress .di-claims .unified-claim-card {
+ border:1px solid var(--border);border-left:3px solid var(--border);border-radius:12px;padding:18px!important;background:var(--background);
+}
+.product-summary #delphi-recorded-progress .di-claims .unified-claim-card:has(.di-rating[aria-label*="agree"]):not(:has(.di-rating[aria-label*="disagree"])) { border-left-color:#137c70; }
+.product-summary #delphi-recorded-progress .di-claims .unified-claim-card:has(.di-rating[aria-label*="disagree"]) { border-left-color:#b34d60; }
+.delphi-insights .unified-claim-card .di-claim-top { display:block; }
+.delphi-insights .unified-claim-card .di-claim-number { display:inline;margin:0 6px 0 0;font-size:15px;color:var(--foreground);font-weight:400; }
+.delphi-insights .unified-claim-card .di-claim-number::after { content:':'; }
+.delphi-insights .unified-claim-card .di-claim-top h3 { display:inline;font-size:16px;line-height:1.6; }
+.delphi-insights .unified-claim-card .di-rating { display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 14px;margin-top:14px; }
+.delphi-insights .unified-claim-card .di-score { grid-column:2;grid-row:1;margin:0; }
+.delphi-insights .unified-claim-card .di-score strong { font-size:20px!important; }
+.delphi-insights .unified-claim-card .di-bar { grid-column:1;grid-row:1;height:7px; }
+.delphi-insights .unified-claim-card .di-legend { grid-column:1/-1;justify-content:flex-start;gap:8px;margin:0; }
+.delphi-insights .unified-claim-card .di-legend>span { padding:4px 10px;border:1px solid var(--border);border-radius:20px;font-size:12px; }
+.delphi-insights .unified-claim-card .unified-excerpts { margin-top:14px;padding:0;border:0;gap:8px; }
+.delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-group { overflow:hidden;border:1px solid var(--border);border-radius:7px; }
+.delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-group>summary { min-height:44px;padding:10px 12px;background:var(--muted);color:var(--foreground);font-size:13px;font-weight:600; }
+.delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-count { margin-left:auto;padding:1px 6px;border-radius:12px;background:var(--background);font-size:12px; }
+.delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-group>summary::after { margin-left:8px;color:var(--accent); }
+.delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-cards { padding:0 12px 10px; }
+.delphi-insights .unified-claim-card .unified-excerpts+.di-reasons { margin-top:8px; }
+@media(max-width:640px) {
+ .product-summary #delphi-recorded-progress .di-claims .unified-claim-card { padding:14px!important; }
+ .delphi-insights .unified-claim-card .di-claim-top h3 { font-size:15px; }
 }
