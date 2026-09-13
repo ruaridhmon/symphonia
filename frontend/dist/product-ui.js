@@ -100,12 +100,7 @@ function unifyClaims(main) {
       detail.append(clone);
     });
     target.append(detail);
-    const history = target.querySelector(".di-reasons");
-    if (history) {
-      const summary = history.querySelector("summary");
-      if (summary) summary.textContent = "Round history & full responses";
-      target.append(history);
-    }
+    target.querySelector(".di-reasons")?.remove();
   }
   const originals = Array.from(card.querySelectorAll("button")).filter((b) => !b.closest(".unified-actions") && /^(Hide from survey|Publish to survey|Save|Revert|Expand all|Collapse all|Edit synthesis text|Preview evidence)$/.test(b.textContent?.trim() || ""));
   if (!originals.length) return;

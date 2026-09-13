@@ -408,19 +408,20 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
  .delphi-insights .di-filters button { min-height:44px; }
 }
 
-/* A quiet synthesis card: statement and score, then distribution and optional evidence. */
+/* Claim-first synthesis cards with a small, secondary rating summary. */
 .delphi-insights .di-claims:has(.unified-claim-card) { display:grid;gap:12px;border:0;border-radius:0;overflow:visible;background:transparent; }
 .product-summary #delphi-recorded-progress .di-claims .unified-claim-card { border:1px solid var(--border);border-radius:10px;padding:20px!important;background:var(--background); }
-.delphi-insights .unified-claim-card .di-claim-top { display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:24px;row-gap:12px;align-items:start; }
-.delphi-insights .unified-claim-card .di-claim-copy { grid-column:1;grid-row:1; }
-.delphi-insights .unified-claim-card .di-claim-number { display:block;margin:0 0 5px;font-size:11px;color:var(--muted-foreground);font-weight:500; }
-.delphi-insights .unified-claim-card .di-claim-top h3 { display:block;font-size:16px;line-height:1.5;font-weight:600; }
-.delphi-insights .unified-claim-card .di-rating { display:contents; }
-.delphi-insights .unified-claim-card .di-score { grid-column:2;grid-row:1;display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding-top:20px;margin:0;min-width:64px; }
-.delphi-insights .unified-claim-card .di-score strong { font-size:25px!important; }
-.delphi-insights .unified-claim-card .di-score span { font-size:11px; }
-.delphi-insights .unified-claim-card .di-bar { grid-column:1/-1;grid-row:2;height:6px; }
-.delphi-insights .unified-claim-card .di-legend { grid-column:1/-1;grid-row:3;justify-content:flex-start;gap:6px 16px;margin:-3px 0 0; }
+.delphi-insights .unified-claim-card .di-claim-top { display:block; }
+.delphi-insights .unified-claim-card .di-claim-copy { min-width:0; }
+.delphi-insights .unified-claim-card .di-claim-number { display:inline;margin:0 7px 0 0;font-size:15px;color:var(--muted-foreground);font-weight:400; }
+.delphi-insights .unified-claim-card .di-claim-number::after { content:':'; }
+.delphi-insights .unified-claim-card .di-claim-top h3 { display:inline;font-size:17px;line-height:1.5;font-weight:600; }
+.delphi-insights .unified-claim-card .di-rating { display:grid;grid-template-columns:minmax(0,220px) auto;align-items:center;gap:9px 10px;width:fit-content;max-width:100%;margin-top:14px;padding:0; }
+.delphi-insights .unified-claim-card .di-score { grid-column:2;grid-row:1;display:flex;flex-direction:row;align-items:baseline;gap:3px;padding:0;margin:0;min-width:0;white-space:nowrap; }
+.delphi-insights .unified-claim-card .di-score strong { font-size:12px!important;font-weight:500!important;letter-spacing:0;color:var(--muted-foreground); }
+.delphi-insights .unified-claim-card .di-score span { font-size:12px; }
+.delphi-insights .unified-claim-card .di-bar { grid-column:1;grid-row:1;width:220px;max-width:100%;height:4px; }
+.delphi-insights .unified-claim-card .di-legend { grid-column:1/-1;grid-row:2;justify-content:flex-start;gap:6px 14px;margin:0; }
 .delphi-insights .unified-claim-card .di-legend>span { padding:0;border:0;border-radius:0;font-size:12px; }
 .delphi-insights .unified-claim-card .di-trend { font-size:11px;margin-top:7px; }
 .delphi-insights .unified-claim-card .unified-excerpts { border-top:1px solid var(--border);margin-top:14px;padding-top:5px;gap:0; }
@@ -437,16 +438,10 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 .unified-excerpts .claim-evidence-group>summary[hidden] { display:none!important; }
 .delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-cards { padding:4px 0 0;max-width:75ch; }
 .delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-card { margin:8px 0;padding:10px 14px;background:color-mix(in srgb,var(--muted) 40%,var(--background));border-left:2px solid var(--border); }
-.delphi-insights .unified-claim-card .unified-excerpts+.di-reasons { margin-top:0; }
-.delphi-insights .unified-claim-card .di-reasons>summary { font-size:11px;min-height:28px;padding:5px 0; }
 @media(max-width:640px) {
  .product-summary #delphi-recorded-progress .di-claims .unified-claim-card { padding:16px!important; }
- .delphi-insights .unified-claim-card .di-claim-top { column-gap:14px;row-gap:12px; }
- .delphi-insights .unified-claim-card .di-claim-top h3 { font-size:15px; }
- .delphi-insights .unified-claim-card .di-score { min-width:48px; }
- .delphi-insights .unified-claim-card .di-score strong { font-size:22px!important; }
+ .delphi-insights .unified-claim-card .di-claim-top h3 { font-size:16px; }
  .unified-excerpt-controls { gap:0 4px; }
  .unified-excerpt-label { flex-basis:100%;margin:7px 0 0; }
  .unified-excerpt-button { min-height:44px;padding:8px 6px; }
- .delphi-insights .unified-claim-card .di-reasons>summary { min-height:44px; }
 }

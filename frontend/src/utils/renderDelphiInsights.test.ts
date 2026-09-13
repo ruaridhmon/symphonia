@@ -30,6 +30,7 @@ it('preserves open excerpts across result refreshes without counting them as rat
  expect(root.querySelector('.di-legend')!.textContent).toBe('1 agree1 disagree');
  expect(root.querySelector('.unified-excerpts blockquote')!.textContent).toBe('Exact original words.');
  expect(root.querySelectorAll('h3')).toHaveLength(1);
+ expect(root.querySelector('.di-reasons')).toBeNull();
  expect(root.querySelector('.unified-excerpts summary')!.textContent).toBe('Supporting excerpts17');
  const control=root.querySelector<HTMLButtonElement>('.unified-excerpt-button')!;
  expect(control.getAttribute('aria-expanded')).toBe('true');

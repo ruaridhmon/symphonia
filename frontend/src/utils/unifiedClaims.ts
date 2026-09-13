@@ -59,7 +59,7 @@ export function unifyClaims(main:HTMLElement){
    detail.append(clone);
   });
   target.append(detail);
-  const history=target.querySelector('.di-reasons');if(history){const summary=history.querySelector('summary');if(summary)summary.textContent='Round history & full responses';target.append(history);}
+  target.querySelector('.di-reasons')?.remove();
  }
  // Retain all original editor/publishing handlers, accessed through a compact disclosure.
  const originals=Array.from(card.querySelectorAll<HTMLButtonElement>('button')).filter(b=>!b.closest('.unified-actions')&&/^(Hide from survey|Publish to survey|Save|Revert|Expand all|Collapse all|Edit synthesis text|Preview evidence)$/.test(b.textContent?.trim()||''));
