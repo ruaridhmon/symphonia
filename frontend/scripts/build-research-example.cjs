@@ -4,3 +4,6 @@ fs.mkdirSync('public/examples',{recursive:true});fs.mkdirSync('dist/examples',{r
 fs.writeFileSync('public/examples/example.css',base+'\n'+fs.readFileSync('src/components/summary/summary-refinement.css','utf8')+'\n'+fs.readFileSync('src/claim-workspace.css','utf8')+'\n'+fs.readFileSync('src/product.css','utf8'));
 execFileSync('./node_modules/.bin/esbuild',['src/examples/researchEntry.ts','--bundle','--format=esm','--outfile=public/examples/research-ai.js'],{stdio:'inherit'});
 for(const file of ['example.css','research-ai.js','research-ai.html'])fs.copyFileSync('public/examples/'+file,'dist/examples/'+file);
+
+execFileSync('./node_modules/.bin/esbuild',['src/examples/claimLayoutEntry.ts','--bundle','--format=esm','--outfile=public/examples/claim-layout.js'],{stdio:'inherit'});
+for(const file of ['claim-layout.js','claim-layout.html'])fs.copyFileSync('public/examples/'+file,'dist/examples/'+file);
