@@ -1,6 +1,6 @@
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import {enhanceConsultationInbox} from './consultationInbox';
-let row:HTMLElement,open:ReturnType<typeof vi.fn>,share:ReturnType<typeof vi.fn>;
+let row:HTMLElement,open:ReturnType<typeof vi.fn<()=>void>>,share:ReturnType<typeof vi.fn<()=>void>>;
 beforeEach(()=>{
  document.body.innerHTML='<main><div class="rounded-2xl"><div class="font-semibold">Test consultation</div><div><a href="/admin/form/1/summary" title="Summary" aria-label="Summary Test consultation">Summary</a><button title="Share">Share</button><button title="Delete">Delete</button></div></div></main>';
  HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};

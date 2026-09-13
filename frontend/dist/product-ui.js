@@ -1,4 +1,4 @@
-// frontend/src/utils/unifiedClaims.ts
+// src/utils/unifiedClaims.ts
 var claimText = (s) => s.replace(/^\s*Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim();
 var previous = /* @__PURE__ */ new WeakMap();
 function unifyClaims(main) {
@@ -31,26 +31,30 @@ function unifyClaims(main) {
     const groups = Array.from(candidates[0].querySelectorAll(":scope > details"));
     const signature2 = carry + groups.map((g) => g.innerHTML).join("");
     if (existing?.dataset.signature === signature2) continue;
+    const openKeys = new Set(existing ? Array.from(existing.querySelectorAll("details[open]")).map((d) => d.dataset.key) : JSON.parse(target.dataset.openExcerpts || "[]"));
     existing?.remove();
     target.classList.add("unified-claim-card");
     target.querySelector(".unified-claim-heading")?.remove();
-    const heading = candidates[0].querySelector(".claim-evidence-claim-heading")?.cloneNode(true);
-    if (heading) {
-      heading.classList.add("unified-claim-heading");
-      for (const n of Array.from(heading.childNodes)) if (n.nodeType === Node.TEXT_NODE) n.textContent = (n.textContent || "").replace(/^[^A-Za-z]*Claim/, "Claim");
-      target.prepend(heading);
-    }
     const detail = document.createElement("div");
     detail.className = "unified-excerpts";
     detail.dataset.signature = signature2;
     const note = document.createElement("p");
     note.className = "unified-provenance";
-    note.textContent = carry || "From the saved synthesis. These excerpts are not additional ratings.";
+    note.textContent = carry || "Original excerpts from the saved synthesis; counts above are recorded ratings.";
+    if (carry) note.dataset.carried = "true";
     detail.append(note);
-    groups.forEach((g) => {
+    groups.forEach((g, i) => {
       const clone = g.cloneNode(true);
-      clone.open = false;
+      clone.dataset.key = `${target.dataset.key}:excerpt:${i}`;
+      clone.open = openKeys.has(clone.dataset.key);
+      clone.removeAttribute("id");
       clone.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+      const summary = clone.querySelector("summary");
+      if (summary) {
+        const label2 = summary.querySelector("span:not(.claim-evidence-count)");
+        if (label2) label2.textContent = (label2.textContent || "").replace(/original excerpts/i, "excerpts");
+        for (const n of Array.from(summary.childNodes)) if (n.nodeType === Node.TEXT_NODE) n.textContent = (n.textContent || "").replace(/original excerpts/i, "excerpts");
+      }
       detail.append(clone);
     });
     target.append(detail);
@@ -105,7 +109,7 @@ function unifyClaims(main) {
   }
 }
 
-// frontend/src/utils/consultationInbox.ts
+// src/utils/consultationInbox.ts
 function enhanceConsultationInbox(main) {
   for (const link of main.querySelectorAll('a[href$="/summary"]')) {
     const row = link.closest("tr") || link.closest(".rounded-2xl");
@@ -235,7 +239,7 @@ function enhanceConsultationInbox(main) {
   }
 }
 
-// frontend/src/legacy/productUI.ts
+// src/legacy/productUI.ts
 function syncProductUI() {
   const main = document.querySelector("main");
   if (!main) return;
