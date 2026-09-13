@@ -413,6 +413,7 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
  .delphi-insights .di-trend { grid-column:1/-1;margin:0; }
  .delphi-insights .unified-excerpts { display:block;margin:5px 0 0;padding:0;border:0; }
  .unified-excerpt-controls { gap:0 3px;margin-left:-6px; }
+ .unified-excerpt-label { display:none; }
  .unified-excerpt-button { min-height:44px; }
  .delphi-insights .unified-excerpts .claim-evidence-group { margin-left:0; }
  .delphi-insights .unified-provenance { margin-left:0; }
