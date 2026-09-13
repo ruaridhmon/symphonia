@@ -1,4 +1,4 @@
-// frontend/src/utils/answers.ts
+// src/utils/answers.ts
 function isRecord(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
@@ -24,7 +24,7 @@ function coerceAnswerPosition(value) {
   return "";
 }
 
-// frontend/src/utils/delphiProgress.ts
+// src/utils/delphiProgress.ts
 var stanceLabels = ["Agree", "Disagree", "Neutral", "Unable to judge", "Unrecognised", "Not answered"];
 function stance(value) {
   const v = value.trim().toLowerCase();
@@ -119,7 +119,7 @@ function synthesisProvenanceNote(round, rounds) {
   return null;
 }
 
-// frontend/src/utils/delphiPlanning.ts
+// src/utils/delphiPlanning.ts
 function buildFixedDelphiRound(round, rounds, responses) {
   if (round.round_number !== 2 || rounds.some((r) => r.round_number >= 3)) throw new Error("This Delphi has three rounds. No further rating round is available.");
   const baseline = rounds.find((r) => r.round_number === 2) || round;
@@ -134,7 +134,7 @@ function buildFixedDelphiRound(round, rounds, responses) {
   });
 }
 
-// frontend/src/utils/renderDelphiPlanner.ts
+// src/utils/renderDelphiPlanner.ts
 var el = (tag, text = "") => {
   const n = document.createElement(tag);
   n.textContent = text;
@@ -179,7 +179,7 @@ function renderDelphiPlanner(root, round, rounds, responses, publish) {
   }
 }
 
-// frontend/src/utils/renderDelphiInsights.ts
+// src/utils/renderDelphiInsights.ts
 var colors = ["#137c70", "#b34d60", "#94a3b8", "#c28a2a", "#8b5fbf", "#e2e8f0"];
 var node = (tag, text = "", cls = "") => {
   const n = document.createElement(tag);
@@ -229,21 +229,17 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     return;
   }
   const cats = ["Mostly agree", "Leaning agree", "Divided", "Leaning disagree", "Mostly disagree", "Uncertain"];
-  const overview = node("div", "", "di-overview");
-  cats.forEach((label) => {
-    const item = node("div");
-    item.append(node("strong", String(rows.filter((r) => category(r) === label).length)), node("span", label));
-    overview.append(item);
-  });
-  root.append(overview);
   const filters = node("div", "", "di-filters");
   filters.setAttribute("role", "group");
   filters.setAttribute("aria-label", "Filter claims");
   ["All claims", ...cats].forEach((label) => {
+    const count = label === "All claims" ? rows.length : rows.filter((r) => category(r) === label).length;
+    if (!count && label !== filter) return;
     const b = button(label, () => {
       root.dataset.filter = label;
       renderDelphiInsights(root, round, rounds, responses, refresh, publish);
     });
+    b.append(node("span", String(count), "di-filter-count"));
     b.setAttribute("aria-pressed", String(filter === label));
     filters.append(b);
   });
@@ -253,13 +249,18 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   if (!selected.length) list.append(node("p", "No claims in this group.", "di-empty"));
   selected.forEach((row) => {
     const article = node("article", "", "di-claim");
+    article.dataset.key = row.key;
+    article.dataset.openExcerpts = JSON.stringify([...priorOpen].filter((k) => k?.startsWith(`${row.key}:excerpt:`)));
     const heading = node("div", "", "di-claim-top");
-    const left = node("div");
-    left.append(node("span", category(row), "di-status " + category(row).toLowerCase().replaceAll(" ", "-")), node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, "")));
+    const left = node("div", "", "di-claim-copy");
+    left.append(node("span", `Claim ${rows.indexOf(row) + 1}`, "di-claim-number"), node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, "")));
     heading.append(left);
+    const rating = node("div", "", "di-rating");
+    rating.setAttribute("aria-label", category(row));
     const score = node("div", "", "di-score");
-    score.append(node("strong", row.percent === null ? "\u2014" : `${Math.round(row.percent)}%`), node("span", "agree"));
-    heading.append(score);
+    score.append(node("strong", row.percent === null ? "\u2014" : `${Math.round(row.percent)}%`), node("span", row.percent === null ? "No ratings" : "agree"));
+    rating.append(score);
+    heading.append(rating);
     article.append(heading);
     const bar = node("div", "", "di-bar");
     bar.setAttribute("aria-hidden", "true");
@@ -271,7 +272,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
         bar.append(part);
       }
     });
-    article.append(bar);
+    rating.append(bar);
     const legend = node("div", "", "di-legend");
     row.votes.forEach((n, i) => {
       if (n || i < 2) {
@@ -282,18 +283,17 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
         legend.append(item);
       }
     });
-    article.append(legend);
+    rating.append(legend);
     if (row.history.filter((h) => h.n > 0).length > 1) {
+      const previous = row.history.filter((h) => h.n > 0).at(-2);
       const trend = node("div", "", "di-trend");
-      trend.append(node("span", "Agreement:"));
-      row.history.filter((h) => h.n > 0).slice(-2).forEach((h, i) => {
-        if (i) trend.append(node("span", "\u2192", "di-arrow"));
-        trend.append(node("span", `R${h.round} ${Math.round(h.percent)}%`));
-      });
-      if (row.delta !== null) trend.append(node("strong", row.delta === 0 ? "Unchanged" : `${row.delta > 0 ? "+" : ""}${Math.round(row.delta)} points`));
-      article.append(trend);
+      if (row.delta !== null) {
+        const change = Math.round(row.delta);
+        trend.append(node("span", change === 0 ? "No change" : `${change > 0 ? "+" : "\u2212"}${Math.abs(change)} pp`, "di-change"), node("span", `since R${previous.round}`));
+        trend.title = `Agreement: Round ${previous.round} ${Math.round(previous.percent)}% \u2192 Round ${round.round_number} ${Math.round(row.percent)}%. Change in percentage points.`;
+      }
+      left.append(trend);
     }
-    if (row.matched) article.append(node("p", `${row.changed} of ${row.matched} returning respondents changed position group since Round ${row.previousRound}.`, "di-movement"));
     const detail = document.createElement("details");
     detail.className = "di-reasons";
     detail.dataset.key = row.key;
@@ -301,6 +301,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     const summary = node("summary", "Expert responses & history");
     detail.append(summary);
     detail.append(node("p", row.history.map((h) => `Round ${h.round}: ${h.n ? Math.round(h.percent) + "% agree" : "No ratings"} (${h.n} answered)`).join(" \xB7 ")));
+    if (row.matched) detail.append(node("p", `${row.changed} of ${row.matched} returning respondents changed position group since Round ${row.previousRound}.`, "di-movement"));
     const question = round.questions.find((q) => typeof q === "object" && String(q.questionId) === row.key);
     if (question?.parentClaimId) {
       article.prepend(node("p", `Related proposal \xB7 introduced in Round ${question.introducedRound || round.round_number}`, "di-eyebrow"));
@@ -349,7 +350,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   root.append(methods);
 }
 
-// frontend/src/legacy/delphiProgress.ts
+// src/legacy/delphiProgress.ts
 var key = "";
 var cache = null;
 var pending = false;

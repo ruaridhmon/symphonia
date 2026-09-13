@@ -1,7 +1,7 @@
 import type { Round, RoundWithResponses } from '../types/summary';
 import { ratingProgress } from './delphiProgress';
 /** Round 2 is the frozen claim set. Round 3 changes feedback, never claims or scales. */
-export function buildFixedDelphiRound(round:Round,rounds:Round[],responses:RoundWithResponses[]) {
+export function buildFixedDelphiRound(round:Round,rounds:Round[],responses:RoundWithResponses[]):(string|Record<string,unknown>)[] {
   if(round.round_number!==2 || rounds.some(r=>r.round_number>=3))throw new Error('This Delphi has three rounds. No further rating round is available.');
   const baseline=rounds.find(r=>r.round_number===2) || round;
   const rows=ratingProgress(baseline,rounds,responses);

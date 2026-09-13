@@ -28,14 +28,24 @@ export function unifyClaims(main:HTMLElement){
   const groups=Array.from(candidates[0].querySelectorAll<HTMLElement>(':scope > details'));
   const signature=carry+groups.map(g=>g.innerHTML).join('');
   if(existing?.dataset.signature===signature)continue;
+  const openKeys=new Set(existing?Array.from(existing.querySelectorAll<HTMLDetailsElement>('details[open]')).map(d=>d.dataset.key):JSON.parse(target.dataset.openExcerpts||'[]'));
   existing?.remove();
   target.classList.add('unified-claim-card');
   target.querySelector('.unified-claim-heading')?.remove();
-  const heading=candidates[0].querySelector('.claim-evidence-claim-heading')?.cloneNode(true) as HTMLElement|undefined;
-  if(heading){heading.classList.add('unified-claim-heading');for(const n of Array.from(heading.childNodes))if(n.nodeType===Node.TEXT_NODE)n.textContent=(n.textContent||'').replace(/^[^A-Za-z]*Claim/, 'Claim');target.prepend(heading);}
   const detail=document.createElement('div');detail.className='unified-excerpts';detail.dataset.signature=signature;
-  const note=document.createElement('p');note.className='unified-provenance';note.textContent=carry||'From the saved synthesis. These excerpts are not additional ratings.';detail.append(note);
-  groups.forEach(g=>{const clone=g.cloneNode(true) as HTMLDetailsElement;clone.open=false;clone.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));detail.append(clone);});
+  const note=document.createElement('p');note.className='unified-provenance';note.textContent=carry||'Original excerpts from the saved synthesis; counts above are recorded ratings.';if(carry)note.dataset.carried='true';detail.append(note);
+  groups.forEach((g,i)=>{
+   const clone=g.cloneNode(true) as HTMLDetailsElement;
+   clone.dataset.key=`${target.dataset.key}:excerpt:${i}`;clone.open=openKeys.has(clone.dataset.key);
+   clone.removeAttribute('id');clone.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
+   const summary=clone.querySelector('summary');
+   if(summary){
+    const label=summary.querySelector('span:not(.claim-evidence-count)');
+    if(label)label.textContent=(label.textContent||'').replace(/original excerpts/i,'excerpts');
+    for(const n of Array.from(summary.childNodes))if(n.nodeType===Node.TEXT_NODE)n.textContent=(n.textContent||'').replace(/original excerpts/i,'excerpts');
+   }
+   detail.append(clone);
+  });
   target.append(detail);
   const history=target.querySelector('.di-reasons');if(history){const summary=history.querySelector('summary');if(summary)summary.textContent='Round history & full responses';target.append(history);}
  }

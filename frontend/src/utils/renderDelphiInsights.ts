@@ -30,31 +30,31 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   const note=synthesisProvenanceNote(round,rounds);if(note)root.append(node('p',note,'di-warning'));
   if(!rows.length) {root.append(node('p',actual===0?'No responses yet for this round. Responses will appear here as participants submit them.':round.round_number===1?'This round gathers independent views. Extract claims from the responses before setting up the rating round.':'There are no comparable claim ratings in this round. Review the written responses or synthesis below.','di-empty'));return;}
   const cats=['Mostly agree','Leaning agree','Divided','Leaning disagree','Mostly disagree','Uncertain'];
-  const overview=node('div','','di-overview');
-  cats.forEach(label=>{const item=node('div');item.append(node('strong',String(rows.filter(r=>category(r)===label).length)),node('span',label));overview.append(item);});root.append(overview);
   const filters=node('div','','di-filters');filters.setAttribute('role','group');filters.setAttribute('aria-label','Filter claims');
-  ['All claims',...cats].forEach(label=>{const b=button(label,()=>{root.dataset.filter=label;renderDelphiInsights(root,round,rounds,responses,refresh,publish);});b.setAttribute('aria-pressed',String(filter===label));filters.append(b);});root.append(filters);
+  ['All claims',...cats].forEach(label=>{const count=label==='All claims'?rows.length:rows.filter(r=>category(r)===label).length;if(!count&&label!==filter)return;const b=button(label,()=>{root.dataset.filter=label;renderDelphiInsights(root,round,rounds,responses,refresh,publish);});b.append(node('span',String(count),'di-filter-count'));b.setAttribute('aria-pressed',String(filter===label));filters.append(b);});root.append(filters);
   const list=node('div','','di-claims');
   const selected=rows.filter(r=>filter==='All claims'||category(r)===filter);
   if(!selected.length)list.append(node('p','No claims in this group.','di-empty'));
   selected.forEach((row)=>{
-    const article=node('article','','di-claim');
+    const article=node('article','','di-claim');article.dataset.key=row.key;
+    article.dataset.openExcerpts=JSON.stringify([...priorOpen].filter(k=>k?.startsWith(`${row.key}:excerpt:`)));
     const heading=node('div','','di-claim-top');
-    const left=node('div');left.append(node('span',category(row),'di-status '+category(row).toLowerCase().replaceAll(' ','-')),node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,'')));heading.append(left);
-    const score=node('div','','di-score');score.append(node('strong',row.percent===null?'—':`${Math.round(row.percent)}%`),node('span','agree'));heading.append(score);article.append(heading);
+    const left=node('div','','di-claim-copy');left.append(node('span',`Claim ${rows.indexOf(row)+1}`,'di-claim-number'),node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,'')));heading.append(left);
+    const rating=node('div','','di-rating');rating.setAttribute('aria-label',category(row));
+    const score=node('div','','di-score');score.append(node('strong',row.percent===null?'—':`${Math.round(row.percent)}%`),node('span',row.percent===null?'No ratings':'agree'));rating.append(score);heading.append(rating);article.append(heading);
     const bar=node('div','','di-bar');bar.setAttribute('aria-hidden','true');
     // Denominator matches the displayed percentage; omissions are reported separately.
-    row.votes.slice(0,5).forEach((n,i)=>{if(n&&row.answered){const part=node('span');part.style.width=`${n/row.answered*100}%`;part.style.background=colors[i];bar.append(part);}});article.append(bar);
-    const legend=node('div','','di-legend');row.votes.forEach((n,i)=>{if(n||i<2){const item=node('span',`${n} ${stanceLabels[i].toLowerCase()}`);const dot=node('i');dot.style.background=colors[i];item.prepend(dot);legend.append(item);}});article.append(legend);
+    row.votes.slice(0,5).forEach((n,i)=>{if(n&&row.answered){const part=node('span');part.style.width=`${n/row.answered*100}%`;part.style.background=colors[i];bar.append(part);}});rating.append(bar);
+    const legend=node('div','','di-legend');row.votes.forEach((n,i)=>{if(n||i<2){const item=node('span',`${n} ${stanceLabels[i].toLowerCase()}`);const dot=node('i');dot.style.background=colors[i];item.prepend(dot);legend.append(item);}});rating.append(legend);
     if(row.history.filter(h=>h.n>0).length>1) {
-      const trend=node('div','','di-trend');trend.append(node('span','Agreement:'));
-      row.history.filter(h=>h.n>0).slice(-2).forEach((h,i)=>{if(i)trend.append(node('span','→','di-arrow'));trend.append(node('span',`R${h.round} ${Math.round(h.percent!)}%`));});
-      if(row.delta!==null)trend.append(node('strong',row.delta===0?'Unchanged':`${row.delta>0?'+':''}${Math.round(row.delta)} points`));article.append(trend);
+      const previous=row.history.filter(h=>h.n>0).at(-2)!;
+      const trend=node('div','','di-trend');
+      if(row.delta!==null){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since R${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}left.append(trend);
     }
-    if(row.matched)article.append(node('p',`${row.changed} of ${row.matched} returning respondents changed position group since Round ${row.previousRound}.`,'di-movement'));
     const detail=document.createElement('details');detail.className='di-reasons';detail.dataset.key=row.key;detail.open=priorOpen.has(row.key);
     const summary=node('summary','Expert responses & history');detail.append(summary);
     detail.append(node('p',row.history.map(h=>`Round ${h.round}: ${h.n ? Math.round(h.percent!)+'% agree' : 'No ratings'} (${h.n} answered)`).join(' · ')));
+    if(row.matched)detail.append(node('p',`${row.changed} of ${row.matched} returning respondents changed position group since Round ${row.previousRound}.`,'di-movement'));
     const question=round.questions.find(q=>typeof q==='object'&&String(q.questionId)===row.key) as Record<string,unknown>|undefined;
     if(question?.parentClaimId) { article.prepend(node('p',`Related proposal · introduced in Round ${question.introducedRound || round.round_number}`,'di-eyebrow'));detail.append(node('p',`Original claim: ${question.parentClaimText || question.parentClaimId}`),node('p',`Reason for this proposal: ${question.claimRationale || 'Not recorded'}`)); }
     const evidence=row.evidence.filter(e=>e.comment||e.changed);
