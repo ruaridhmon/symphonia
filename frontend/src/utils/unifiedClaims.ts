@@ -1,6 +1,7 @@
 /** Presentation-only linking. Exact wording only; synthesis excerpts never become votes. */
 export const claimText=(s:string)=>s.replace(/^\s*Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim();
 const previous=new WeakMap<HTMLElement,{preview:HTMLElement;first:Element|null;signature:string}>();
+let excerptId=0;
 export function unifyClaims(main:HTMLElement){
  const preview=main.querySelector<HTMLElement>('.claim-evidence-preview');
  const card=preview?.closest<HTMLElement>('.card');
@@ -34,6 +35,8 @@ export function unifyClaims(main:HTMLElement){
   target.querySelector('.unified-claim-heading')?.remove();
   const detail=document.createElement('div');detail.className='unified-excerpts';detail.dataset.signature=signature;
   const note=document.createElement('p');note.className='unified-provenance';note.textContent=carry||'Original excerpts from the saved synthesis; counts above are recorded ratings.';if(carry)note.dataset.carried='true';detail.append(note);
+  const controls=document.createElement('div');controls.className='unified-excerpt-controls';controls.setAttribute('role','group');controls.setAttribute('aria-label','Original excerpts');
+  const caption=document.createElement('span');caption.className='unified-excerpt-label';caption.textContent='Excerpts';controls.append(caption);if(groups.length)detail.append(controls);
   groups.forEach((g,i)=>{
    const clone=g.cloneNode(true) as HTMLDetailsElement;
    clone.dataset.key=`${target.dataset.key}:excerpt:${i}`;clone.open=openKeys.has(clone.dataset.key);
@@ -43,6 +46,15 @@ export function unifyClaims(main:HTMLElement){
     const label=summary.querySelector('span:not(.claim-evidence-count)');
     if(label)label.textContent=(label.textContent||'').replace(/original excerpts/i,'excerpts');
     for(const n of Array.from(summary.childNodes))if(n.nodeType===Node.TEXT_NODE)n.textContent=(n.textContent||'').replace(/original excerpts/i,'excerpts');
+    const button=document.createElement('button');button.type='button';button.className='unified-excerpt-button';
+    const name=summary.querySelector('span:not(.claim-evidence-count)')?.textContent||summary.textContent||'Original excerpts';
+    const count=summary.querySelector('.claim-evidence-count')?.textContent;
+    button.append(document.createTextNode(name.replace(/\s+(original\s+)?excerpts.*$/i,'').trim()));
+    if(count){const n=document.createElement('span');n.textContent=count;n.className='unified-excerpt-total';button.append(n);}
+    clone.id=`claim-excerpts-${++excerptId}`;button.id=`${clone.id}-control`;button.setAttribute('aria-controls',clone.id);button.setAttribute('aria-label',`${name}${count?' · '+count:''}`);clone.setAttribute('aria-labelledby',button.id);
+    const sync=()=>button.setAttribute('aria-expanded',String(clone.open));sync();clone.addEventListener('toggle',sync);
+    button.onclick=()=>{const open=!clone.open;detail.querySelectorAll<HTMLDetailsElement>('details').forEach(d=>{d.open=false;const control=controls.querySelector(`[aria-controls="${d.id}"]`);control?.setAttribute('aria-expanded','false');});clone.open=open;sync();};
+    controls.append(button);summary.hidden=true;
    }
    detail.append(clone);
   });

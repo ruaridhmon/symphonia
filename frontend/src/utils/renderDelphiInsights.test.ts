@@ -31,4 +31,13 @@ it('preserves open excerpts across result refreshes without counting them as rat
  expect(root.querySelector('.unified-excerpts blockquote')!.textContent).toBe('Exact original words.');
  expect(root.querySelectorAll('h3')).toHaveLength(1);
  expect(root.querySelector('.unified-excerpts summary')!.textContent).toBe('Supporting excerpts17');
+ const control=root.querySelector<HTMLButtonElement>('.unified-excerpt-button')!;
+ expect(control.getAttribute('aria-expanded')).toBe('true');
+ expect(document.getElementById(control.getAttribute('aria-controls')!)).toBe(root.querySelector('.unified-excerpts details'));
+ control.click();
+ expect(control.getAttribute('aria-expanded')).toBe('false');
+ expect(root.querySelector<HTMLDetailsElement>('.unified-excerpts details')!.open).toBe(false);
+ control.click();
+ expect(control.getAttribute('aria-expanded')).toBe('true');
+ expect(root.querySelector('.unified-excerpts blockquote')!.textContent).toBe('Exact original words.');
 });
