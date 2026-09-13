@@ -1,6 +1,7 @@
 // src/utils/unifiedClaims.ts
 var claimText = (s) => s.replace(/^\s*Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim();
 var previous = /* @__PURE__ */ new WeakMap();
+var excerptId = 0;
 function unifyClaims(main) {
   const preview = main.querySelector(".claim-evidence-preview");
   const card = preview?.closest(".card");
@@ -43,6 +44,15 @@ function unifyClaims(main) {
     note.textContent = carry || "Original excerpts from the saved synthesis; counts above are recorded ratings.";
     if (carry) note.dataset.carried = "true";
     detail.append(note);
+    const controls = document.createElement("div");
+    controls.className = "unified-excerpt-controls";
+    controls.setAttribute("role", "group");
+    controls.setAttribute("aria-label", "Original excerpts");
+    const caption = document.createElement("span");
+    caption.className = "unified-excerpt-label";
+    caption.textContent = "Excerpts";
+    controls.append(caption);
+    if (groups.length) detail.append(controls);
     groups.forEach((g, i) => {
       const clone = g.cloneNode(true);
       clone.dataset.key = `${target.dataset.key}:excerpt:${i}`;
@@ -54,6 +64,38 @@ function unifyClaims(main) {
         const label2 = summary.querySelector("span:not(.claim-evidence-count)");
         if (label2) label2.textContent = (label2.textContent || "").replace(/original excerpts/i, "excerpts");
         for (const n of Array.from(summary.childNodes)) if (n.nodeType === Node.TEXT_NODE) n.textContent = (n.textContent || "").replace(/original excerpts/i, "excerpts");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "unified-excerpt-button";
+        const name = summary.querySelector("span:not(.claim-evidence-count)")?.textContent || summary.textContent || "Original excerpts";
+        const count = summary.querySelector(".claim-evidence-count")?.textContent;
+        button.append(document.createTextNode(name.replace(/\s+(original\s+)?excerpts.*$/i, "").trim()));
+        if (count) {
+          const n = document.createElement("span");
+          n.textContent = count;
+          n.className = "unified-excerpt-total";
+          button.append(n);
+        }
+        clone.id = `claim-excerpts-${++excerptId}`;
+        button.id = `${clone.id}-control`;
+        button.setAttribute("aria-controls", clone.id);
+        button.setAttribute("aria-label", `${name}${count ? " \xB7 " + count : ""}`);
+        clone.setAttribute("aria-labelledby", button.id);
+        const sync = () => button.setAttribute("aria-expanded", String(clone.open));
+        sync();
+        clone.addEventListener("toggle", sync);
+        button.onclick = () => {
+          const open = !clone.open;
+          detail.querySelectorAll("details").forEach((d) => {
+            d.open = false;
+            const control = controls.querySelector(`[aria-controls="${d.id}"]`);
+            control?.setAttribute("aria-expanded", "false");
+          });
+          clone.open = open;
+          sync();
+        };
+        controls.append(button);
+        summary.hidden = true;
       }
       detail.append(clone);
     });
