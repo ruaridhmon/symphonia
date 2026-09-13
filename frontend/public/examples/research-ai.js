@@ -2597,6 +2597,10 @@ function renderDelphiInsights(root2, round, rounds, responses, refresh, publish)
   });
   root2.append(filters);
   const list = node("div", "", "di-claims");
+  const columns = node("div", "", "di-column-head");
+  columns.setAttribute("aria-hidden", "true");
+  columns.append(node("span", "Claim"), node("span", "Recorded agreement"));
+  list.append(columns);
   const selected2 = rows.filter((r) => filter === "All claims" || category(r) === filter);
   if (!selected2.length) list.append(node("p", "No claims in this group.", "di-empty"));
   selected2.forEach((row) => {
@@ -2605,7 +2609,9 @@ function renderDelphiInsights(root2, round, rounds, responses, refresh, publish)
     article.dataset.openExcerpts = JSON.stringify([...priorOpen].filter((k) => k?.startsWith(`${row.key}:excerpt:`)));
     const heading = node("div", "", "di-claim-top");
     const left = node("div", "", "di-claim-copy");
-    left.append(node("span", `Claim ${rows.indexOf(row) + 1}`, "di-claim-number"), node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, "")));
+    const number = node("span", String(rows.indexOf(row) + 1).padStart(2, "0"), "di-claim-number");
+    number.setAttribute("aria-label", `Claim ${rows.indexOf(row) + 1}`);
+    left.append(number, node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, "")));
     heading.append(left);
     const rating = node("div", "", "di-rating");
     rating.setAttribute("aria-label", category(row));
@@ -2644,7 +2650,7 @@ function renderDelphiInsights(root2, round, rounds, responses, refresh, publish)
         trend.append(node("span", change === 0 ? "No change" : `${change > 0 ? "+" : "\u2212"}${Math.abs(change)} pp`, "di-change"), node("span", `since R${previous.round}`));
         trend.title = `Agreement: Round ${previous.round} ${Math.round(previous.percent)}% \u2192 Round ${round.round_number} ${Math.round(row.percent)}%. Change in percentage points.`;
       }
-      left.append(trend);
+      rating.append(trend);
     }
     const detail = document.createElement("details");
     detail.className = "di-reasons";

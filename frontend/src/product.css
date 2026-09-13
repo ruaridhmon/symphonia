@@ -169,103 +169,77 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 .di-heading .unified-actions{margin:0;}
 @media(max-width:600px){.di-heading .unified-actions{margin-left:0;}.unified-excerpts .claim-evidence-quote{font-size:16px;}}
 
-/* Compact claim rows: a consistent rating column and quiet, direct evidence disclosures. */
-.delphi-insights .di-claims { border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--background); }
+/* Shared columns keep claims readable and ratings directly comparable. */
+.delphi-insights .di-claims { --rating-width:220px;--claim-gap:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--background); }
+.delphi-insights .di-column-head { display:grid;grid-template-columns:minmax(0,1fr) var(--rating-width);gap:var(--claim-gap);padding:11px 20px;background:color-mix(in srgb,var(--muted) 65%,var(--background));border-bottom:1px solid var(--border);font-size:11px;font-weight:500;color:var(--muted-foreground); }
+.delphi-insights .di-column-head>span:first-child { padding-left:32px; }
 .delphi-insights .di-claims article.di-claim,
-.product-summary #delphi-recorded-progress .di-claims .di-claim {
- margin:0;padding:20px!important;border:0;border-bottom:1px solid var(--border);border-radius:0;background:var(--background);
-}
+.product-summary #delphi-recorded-progress .di-claims .di-claim { display:grid;grid-template-columns:minmax(0,1fr) var(--rating-width);column-gap:var(--claim-gap);row-gap:8px;margin:0;padding:18px 20px!important;border:0;border-bottom:1px solid var(--border);border-radius:0;background:var(--background); }
 .delphi-insights .di-claims article.di-claim:last-child { border-bottom:0; }
-.delphi-insights .di-claim-top { display:grid;grid-template-columns:minmax(0,1fr) 232px;gap:28px;align-items:start;margin:0; }
-.delphi-insights .di-claim-copy { min-width:0; }
-.delphi-insights .di-claim-number { display:block;color:var(--muted-foreground);font-size:11px;font-weight:500;line-height:1.4;margin:0 0 5px; }
-.delphi-insights .di-claim-top h3 { display:block;margin:0;max-width:none;font-size:15px;font-weight:600;line-height:1.5;letter-spacing:-.01em;overflow-wrap:anywhere; }
-.delphi-insights .di-rating { min-width:0;padding-top:1px; }
-.delphi-insights .di-score { display:flex;flex-direction:row;justify-content:flex-end;align-items:baseline;gap:5px;padding:0;margin:0 0 10px; }
-.delphi-insights .di-score strong { font-size:23px!important;font-weight:600!important;line-height:1!important;letter-spacing:-.04em;font-variant-numeric:tabular-nums; }
-.delphi-insights .di-score span { font-size:12px;margin:0;color:var(--muted-foreground); }
-.delphi-insights .di-bar { height:6px;gap:0;width:100%;background:var(--muted);border-radius:4px; }
+.delphi-insights .di-claim-top { display:contents;margin:0; }
+.delphi-insights .di-claim-copy { display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;min-width:0;grid-column:1;grid-row:1;align-self:start; }
+.delphi-insights .di-claim-number { display:block;color:var(--muted-foreground);font-size:11px;font-weight:500;line-height:23px;margin:0;font-variant-numeric:tabular-nums; }
+.delphi-insights .di-claim-top h3 { display:block;margin:0;max-width:none;font-size:15px;font-weight:600;line-height:1.55;letter-spacing:-.01em;overflow-wrap:anywhere; }
+.delphi-insights .di-rating { grid-column:2;grid-row:1/3;min-width:0;align-self:start;padding:1px 0 0; }
+.delphi-insights .di-score { display:flex;flex-direction:row;justify-content:flex-start;align-items:baseline;gap:4px;padding:0;margin:0 0 8px; }
+.delphi-insights .di-score strong { font-size:13px!important;font-weight:600!important;line-height:1!important;letter-spacing:0;font-variant-numeric:tabular-nums; }
+.delphi-insights .di-score span { font-size:11px;margin:0;color:var(--muted-foreground); }
+.delphi-insights .di-bar { height:5px;gap:0;width:100%;background:var(--muted);border-radius:4px; }
 .delphi-insights .di-bar span { flex-shrink:0; }
-.delphi-insights .di-legend { display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px 12px;margin:9px 0 0; }
+.delphi-insights .di-legend { display:flex;flex-wrap:wrap;justify-content:flex-start;gap:3px 10px;margin:7px 0 0; }
 .delphi-insights .di-legend>span { border:0;border-radius:0;padding:0;font-size:11px;line-height:1.5;white-space:nowrap; }
-.delphi-insights .di-legend i { width:6px;height:6px;flex-shrink:0; }
-.delphi-insights .di-trend { gap:5px;margin:9px 0 0;font-size:11px;line-height:1.4; }
-.delphi-insights .di-change { font-variant-numeric:tabular-nums;color:var(--foreground); }
+.delphi-insights .di-legend i { width:5px;height:5px;flex-shrink:0; }
+.delphi-insights .di-trend { gap:4px;margin:6px 0 0;font-size:10px;line-height:1.4;color:var(--muted-foreground); }
+.delphi-insights .di-change { font-variant-numeric:tabular-nums;color:inherit; }
 .delphi-insights .di-filters { padding:0;gap:6px;margin:16px 0; }
 .delphi-insights .di-filters button { display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:7px 10px;border:1px solid transparent;border-radius:7px;font-size:12px; }
 .delphi-insights .di-filters button:hover { background:var(--muted); }
 .delphi-insights .di-filters button[aria-pressed=true] { border-color:var(--border); }
 .di-filter-count { color:var(--muted-foreground);font-size:11px;font-weight:500;font-variant-numeric:tabular-nums; }
-.delphi-insights .unified-excerpts { display:flex;flex-direction:column;border-top:1px solid var(--border);margin:16px 0 0;padding:4px 0 0; }
-.delphi-insights .unified-excerpts .claim-evidence-group { margin:0;border:0;border-radius:0;background:transparent;overflow:visible; }
-.delphi-insights .unified-excerpts .claim-evidence-group>summary { justify-content:flex-start;min-height:36px;padding:7px 0;gap:8px;background:transparent;font-size:12px;font-weight:500;line-height:1.5;color:var(--muted-foreground); }
-.delphi-insights .unified-excerpts .claim-evidence-group>summary:hover { color:var(--foreground); }
-.delphi-insights .unified-excerpts .claim-evidence-group>summary::after { margin-left:auto;color:var(--muted-foreground);font-size:14px; }
-.delphi-insights .unified-excerpts .claim-evidence-count { margin:0;padding:0;min-width:0;background:transparent;font-size:11px;color:var(--muted-foreground); }
-.delphi-insights .unified-excerpts .claim-evidence-group[open]>summary { color:var(--foreground); }
-.delphi-insights .unified-excerpts .claim-evidence-cards { padding:0 0 10px;max-width:75ch; }
-.delphi-insights .unified-excerpts .claim-evidence-card { padding:12px 14px;margin:6px 0;border:0;border-left:2px solid var(--border);border-radius:0;background:color-mix(in srgb,var(--muted) 50%,var(--background)); }
-.delphi-insights .unified-excerpts .claim-evidence-quote { font-size:14px;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap; }
-.delphi-insights .unified-excerpts .claim-evidence-expert { font-size:11px;font-weight:500;color:var(--muted-foreground); }
-.delphi-insights .unified-provenance { display:none;order:2;margin:6px 0 10px;font-size:11px!important; }
-.delphi-insights .unified-excerpts:has(details[open]) .unified-provenance,
-.delphi-insights .unified-provenance[data-carried=true] { display:block; }
-.delphi-insights .di-claim .di-reasons { margin:10px 0 0;padding:0;border:0; }
-.delphi-insights .di-claim .unified-excerpts+.di-reasons { margin:0; }
-.delphi-insights .di-reasons>summary { min-height:36px;align-content:center;padding:7px 0;font-size:12px;line-height:1.5; }
-.delphi-insights .di-reasons>p { font-size:12px;line-height:1.6;color:var(--muted-foreground);margin:8px 0; }
-.delphi-insights .unified-excerpts summary:focus-visible { outline:2px solid var(--accent);outline-offset:2px;border-radius:3px; }
-@media(max-width:640px) {
- .delphi-insights .di-claims article.di-claim,
- .product-summary #delphi-recorded-progress .di-claims .di-claim { padding:16px!important; }
- .delphi-insights .di-claim-top { grid-template-columns:minmax(0,1fr);gap:14px; }
- .delphi-insights .di-claim-top h3 { font-size:15px; }
- .delphi-insights .di-rating { display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px;row-gap:8px; }
- .delphi-insights .di-score { grid-column:2;grid-row:1;margin:0;gap:4px; }
- .delphi-insights .di-score strong { font-size:20px!important; }
- .delphi-insights .di-score span { font-size:11px; }
- .delphi-insights .di-bar { grid-column:1;grid-row:1; }
- .delphi-insights .di-legend { grid-column:1/-1;justify-content:flex-start;margin:0; }
- .delphi-insights .unified-excerpts { margin-top:14px; }
- .delphi-insights .unified-excerpts .claim-evidence-group>summary,
- .delphi-insights .di-reasons>summary { min-height:44px; }
- .delphi-insights .di-filters button { min-height:44px; }
-}
-
-/* Claim-first synthesis cards with a small, secondary rating summary. */
-.delphi-insights .di-claims:has(.unified-claim-card) { display:grid;gap:12px;border:0;border-radius:0;overflow:visible;background:transparent; }
-.product-summary #delphi-recorded-progress .di-claims .unified-claim-card { border:1px solid var(--border);border-radius:10px;padding:20px!important;background:var(--background); }
-.delphi-insights .unified-claim-card .di-claim-top { display:block; }
-.delphi-insights .unified-claim-card .di-claim-copy { min-width:0; }
-.delphi-insights .unified-claim-card .di-claim-number { display:inline;margin:0 7px 0 0;font-size:15px;color:var(--muted-foreground);font-weight:400; }
-.delphi-insights .unified-claim-card .di-claim-number::after { content:':'; }
-.delphi-insights .unified-claim-card .di-claim-top h3 { display:inline;font-size:17px;line-height:1.5;font-weight:600; }
-.delphi-insights .unified-claim-card .di-rating { display:grid;grid-template-columns:minmax(0,220px) auto;align-items:center;gap:9px 10px;width:fit-content;max-width:100%;margin-top:14px;padding:0; }
-.delphi-insights .unified-claim-card .di-score { grid-column:2;grid-row:1;display:flex;flex-direction:row;align-items:baseline;gap:3px;padding:0;margin:0;min-width:0;white-space:nowrap; }
-.delphi-insights .unified-claim-card .di-score strong { font-size:12px!important;font-weight:500!important;letter-spacing:0;color:var(--muted-foreground); }
-.delphi-insights .unified-claim-card .di-score span { font-size:12px; }
-.delphi-insights .unified-claim-card .di-bar { grid-column:1;grid-row:1;width:220px;max-width:100%;height:4px; }
-.delphi-insights .unified-claim-card .di-legend { grid-column:1/-1;grid-row:2;justify-content:flex-start;gap:6px 14px;margin:0; }
-.delphi-insights .unified-claim-card .di-legend>span { padding:0;border:0;border-radius:0;font-size:12px; }
-.delphi-insights .unified-claim-card .di-trend { font-size:11px;margin-top:7px; }
-.delphi-insights .unified-claim-card .unified-excerpts { border-top:1px solid var(--border);margin-top:14px;padding-top:5px;gap:0; }
-.unified-excerpt-controls { display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px; }
-.unified-excerpt-label { font-size:11px;color:var(--muted-foreground);margin-right:5px; }
-.unified-excerpt-button { display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:7px 8px;border:0;border-radius:5px;background:transparent;color:var(--muted-foreground);font-size:12px;font-weight:500;cursor:pointer; }
+.delphi-insights .unified-excerpts { display:contents; }
+.unified-excerpt-controls { display:flex;flex-wrap:wrap;align-items:center;grid-column:1;grid-row:2;gap:0 4px;margin:0 0 0 26px;align-self:start; }
+.unified-excerpt-label { font-size:11px;color:var(--muted-foreground);margin:0 3px 0 6px; }
+.unified-excerpt-button { display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:6px;border:0;border-radius:5px;background:transparent;color:var(--muted-foreground);font-size:11px;font-weight:500;cursor:pointer; }
 .unified-excerpt-button::after { content:'⌄';font-size:12px;margin-left:2px; }
-.unified-excerpt-button:hover { background:var(--muted);color:var(--foreground); }
-.unified-excerpt-button[aria-expanded=true] { background:var(--muted);color:var(--foreground); }
+.unified-excerpt-button:hover,.unified-excerpt-button[aria-expanded=true] { background:var(--muted);color:var(--foreground); }
 .unified-excerpt-button[aria-expanded=true]::after { content:'⌃'; }
 .unified-excerpt-button:focus-visible { outline:2px solid var(--accent);outline-offset:2px; }
-.unified-excerpt-total { font-size:11px;color:var(--muted-foreground);font-variant-numeric:tabular-nums; }
-.delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-group { margin:0;border:0;border-radius:0;background:transparent;overflow:visible; }
+.unified-excerpt-total { font-size:11px;color:inherit;font-variant-numeric:tabular-nums; }
+.delphi-insights .unified-excerpts .claim-evidence-group { grid-column:1/-1;margin:0 0 0 32px;border:0;border-radius:0;background:transparent;overflow:visible; }
+.delphi-insights .unified-excerpts details:not([open]) { display:none; }
 .unified-excerpts .claim-evidence-group>summary[hidden] { display:none!important; }
-.delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-cards { padding:4px 0 0;max-width:75ch; }
-.delphi-insights .unified-claim-card .unified-excerpts .claim-evidence-card { margin:8px 0;padding:10px 14px;background:color-mix(in srgb,var(--muted) 40%,var(--background));border-left:2px solid var(--border); }
-@media(max-width:640px) {
- .product-summary #delphi-recorded-progress .di-claims .unified-claim-card { padding:16px!important; }
- .delphi-insights .unified-claim-card .di-claim-top h3 { font-size:16px; }
- .unified-excerpt-controls { gap:0 4px; }
- .unified-excerpt-label { flex-basis:100%;margin:7px 0 0; }
- .unified-excerpt-button { min-height:44px;padding:8px 6px; }
+.delphi-insights .unified-excerpts .claim-evidence-cards { padding:4px 0 0;max-width:78ch; }
+.delphi-insights .unified-excerpts .claim-evidence-card { padding:12px 14px;margin:6px 0;border:0;border-left:2px solid var(--border);border-radius:0;background:color-mix(in srgb,var(--muted) 55%,var(--background)); }
+.delphi-insights .unified-excerpts .claim-evidence-quote { font-size:14px;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap; }
+.delphi-insights .unified-excerpts .claim-evidence-expert { font-size:11px;font-weight:500;color:var(--muted-foreground); }
+.delphi-insights .unified-provenance { display:none;grid-column:1/-1;order:2;margin:0 0 0 32px;font-size:11px!important; }
+.delphi-insights .unified-excerpts:has(details[open]) .unified-provenance,
+.delphi-insights .unified-provenance[data-carried=true] { display:block; }
+.delphi-insights .di-claim .di-reasons { grid-column:1/-1;margin:0 0 0 32px;padding:0;border:0; }
+.delphi-insights .di-reasons>summary { min-height:32px;align-content:center;padding:6px 0;font-size:11px;line-height:1.5; }
+.delphi-insights .di-reasons>p { font-size:12px;line-height:1.6;color:var(--muted-foreground);margin:8px 0; }
+.delphi-insights .di-reasons:focus-visible { outline:2px solid var(--accent);outline-offset:2px; }
+@media(max-width:700px) {
+ .delphi-insights .di-column-head { display:none; }
+ .delphi-insights .di-filters { flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:thin;padding-bottom:3px; }
+ .delphi-insights .di-filters button { flex-shrink:0; }
+ .delphi-insights .di-claims article.di-claim,
+ .product-summary #delphi-recorded-progress .di-claims .di-claim { display:block;padding:16px!important; }
+ .delphi-insights .di-claim-top { display:block; }
+ .delphi-insights .di-claim-copy { display:block; }
+ .delphi-insights .di-claim-number { display:inline;margin-right:8px; }
+ .delphi-insights .di-claim-top h3 { display:inline;font-size:15px; }
+ .delphi-insights .di-rating { display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:10px;row-gap:7px;margin:12px 0 4px;padding:0; }
+ .delphi-insights .di-score { grid-column:2;grid-row:1;margin:0;gap:3px; }
+ .delphi-insights .di-score strong { font-size:12px!important; }
+ .delphi-insights .di-bar { grid-column:1;grid-row:1;height:4px; }
+ .delphi-insights .di-legend { grid-column:1/-1;grid-row:2;justify-content:flex-start;margin:0; }
+ .delphi-insights .di-trend { grid-column:1/-1;margin:0; }
+ .delphi-insights .unified-excerpts { display:block;margin:5px 0 0;padding:0;border:0; }
+ .unified-excerpt-controls { gap:0 3px;margin-left:-6px; }
+ .unified-excerpt-label { display:none; }
+ .unified-excerpt-button { min-height:44px; }
+ .delphi-insights .unified-excerpts .claim-evidence-group { margin-left:0; }
+ .delphi-insights .unified-provenance { margin-left:0; }
+ .delphi-insights .di-reasons>summary,.delphi-insights .di-filters button { min-height:44px; }
 }

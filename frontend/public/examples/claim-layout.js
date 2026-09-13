@@ -1,1173 +1,3 @@
-// src/demos/public-ai-results.json
-var public_ai_results_default = {
-  fixture: {
-    title: "Who decides? AI in UK public services",
-    synthetic: true,
-    method: "Scripted LLM-authored roleplay, run through an isolated authenticated application workflow. No live participants or empirical findings.",
-    protocol: {
-      panel_size: 8,
-      rounds: 3,
-      threshold: 0.8,
-      minimum_responses: 8,
-      stopping_rule: "Stop after round 3; report unresolved claims.",
-      uncertainty_in_denominator: true
-    },
-    claims: [
-      "People must be able to request a human review of an AI decision affecting their access to a public service.",
-      "Low-risk administrative tasks may be completed by AI without prior human sign-off.",
-      "At least half of any verified financial savings from AI should be reinvested in frontline staffing.",
-      "Every AI model used in a public service must publish its full source code and model weights."
-    ],
-    experts: [
-      {
-        id: "expert-1",
-        role: "Council service lead",
-        proposal: "I want shorter queues without an unaccountable service. A human appeal should exist for decisions about access. Routine appointment allocation might run automatically, with a route to correct errors. Staff should share in the savings, although an inflexible percentage could limit other improvements. Publishing model code seems an attractive transparency requirement, but I need to understand procurement and security implications.",
-        round2: {
-          votes: [
-            "Agree",
-            "Agree",
-            "Agree",
-            "Agree"
-          ],
-          comments: [
-            "Appeals should cover decisions affecting service access; routine bookings should not need prior review.",
-            "A reversible booking is a useful bounded test.",
-            "Frontline capacity is the visible service bottleneck, so I support the earmark.",
-            "I initially support full release as a simple accountability rule."
-          ]
-        },
-        round3: {
-          votes: [
-            "Agree",
-            "Agree",
-            "Agree",
-            "Disagree"
-          ],
-          comments: [
-            "I retain support. Review must be accessible and able to correct the original outcome.",
-            "I retain support for reversible administration, excluding eligibility and enforcement.",
-            "I retain support: staff capacity is the bottleneck I would address first.",
-            "I change to disagree. The engineer distinguishes public accountability from universal weights release; independent inspection could be required without excluding every closed model."
-          ]
-        }
-      },
-      {
-        id: "expert-2",
-        role: "AI engineer",
-        proposal: "Allow bounded administrative automation with logging, reversibility and escalation. A human appeal matters for consequential decisions, but a review for every trivial automated event may consume the benefits. I oppose a fixed staffing earmark: use verified savings where they do most good. Full release of every model is too absolute; independent access and public evaluation reports can offer other forms of scrutiny.",
-        round2: {
-          votes: [
-            "Disagree",
-            "Agree",
-            "Disagree",
-            "Disagree"
-          ],
-          comments: [
-            "As written, I worry that human review could be demanded for trivial administrative actions and swamp staff.",
-            "Allow automation with logs, reversibility and escalation.",
-            "An automatic staffing earmark might prevent investment in better accessibility or infrastructure.",
-            "Full release is not the only scrutiny mechanism; independent inspection and published evaluation may suffice."
-          ]
-        },
-        round3: {
-          votes: [
-            "Agree",
-            "Agree",
-            "Disagree",
-            "Disagree"
-          ],
-          comments: [
-            "I change to agree after the panel separates access decisions from routine automation. An appeal after an access decision is not a requirement for prior sign-off on every booking.",
-            "I retain support for bounded, logged and reversible tasks.",
-            "I retain opposition. Ring-fencing inputs is different from improving outcomes.",
-            "I retain opposition to every. Public evaluations and independent inspection are a less absolute alternative."
-          ]
-        }
-      },
-      {
-        id: "expert-3",
-        role: "Disability advocate",
-        proposal: "Access must include people who cannot navigate a digital complaint. Guarantee a human review and accessible routes to request it. I am wary of calling something low-risk when errors accumulate for disabled people. Reinvest savings in frontline staff who can help. Open source sounds desirable, but I cannot judge whether weights disclosure is necessary for accountability.",
-        round2: {
-          votes: [
-            "Agree",
-            "Disagree",
-            "Agree",
-            "Unable to judge \u2014 need more information"
-          ],
-          comments: [
-            "The route to human review must work by phone and with assistance.",
-            "Repeated small errors may disproportionately harm disabled users, so I oppose without boundaries.",
-            "People need trained staff to resolve access problems.",
-            "I need to know what full release adds beyond independent inspection."
-          ]
-        },
-        round3: {
-          votes: [
-            "Agree",
-            "Unable to judge \u2014 need more information",
-            "Agree",
-            "Disagree"
-          ],
-          comments: [
-            "I retain support, conditional on an assisted and offline route.",
-            "I move from disagree to unable to judge. Reversibility addresses part of my concern, but I still need evidence on cumulative accessibility errors.",
-            "I retain support for staffing that makes appeals accessible.",
-            "I move from unsure to disagree with the universal rule. A code release does not itself make an inaccessible service contestable; require independent scrutiny and accessible explanations."
-          ]
-        }
-      },
-      {
-        id: "expert-4",
-        role: "Public-service union representative",
-        proposal: "Technology should augment staff and retain human accountability. I want appeals, human checks before automated actions, and at least half of verified savings reinvested in frontline staffing. Without an earmark, service improvement can become a euphemism for job cuts. I initially favour publishing code and weights because commercial secrecy should not prevent scrutiny.",
-        round2: {
-          votes: [
-            "Agree",
-            "Disagree",
-            "Agree",
-            "Agree"
-          ],
-          comments: [
-            "An accountable person must be available to reconsider an access decision.",
-            "I oppose removing sign-off while low-risk remains vague.",
-            "A protected share makes the promise to augment people credible.",
-            "Code and weights should be open so staff are not asked to trust a black box."
-          ]
-        },
-        round3: {
-          votes: [
-            "Agree",
-            "Agree",
-            "Agree",
-            "Disagree"
-          ],
-          comments: [
-            "I retain support: a review must be meaningful, not a rubber stamp.",
-            "I change to agree for reversible administrative work. The caseworker separates booking from benefit eligibility, and I still oppose autonomous eligibility decisions.",
-            "I retain support. My unresolved disagreement with the economist is about commitment to staff, not the arithmetic of savings.",
-            "I change to disagree with the absolute wording. Staff need enforceable inspection and audit rights; universal public release is not the only way to secure them."
-          ]
-        }
-      },
-      {
-        id: "expert-5",
-        role: "Public finance economist",
-        proposal: "Consider the opportunity cost of safeguards as well as their benefits. I support an appeal on access decisions and automation of reversible administrative work. A compulsory fifty-percent staffing earmark may stop spending on whichever service need is most urgent. I favour openness as a default and initially support full code and weights release, but would reconsider if the rule excluded useful auditable options.",
-        round2: {
-          votes: [
-            "Agree",
-            "Agree",
-            "Disagree",
-            "Agree"
-          ],
-          comments: [
-            "Appeal is a proportionate protection for decisions affecting access.",
-            "Reversible administrative automation can be assessed separately from eligibility.",
-            "Spend savings on the greatest unmet need, not a preselected input.",
-            "I support the release rule initially because it makes inspection possible."
-          ]
-        },
-        round3: {
-          votes: [
-            "Agree",
-            "Agree",
-            "Disagree",
-            "Disagree"
-          ],
-          comments: [
-            "I retain support for an appeal on access decisions.",
-            "I retain support, with measured errors and reversal.",
-            "I retain opposition. The union values a credible staffing commitment; I value flexibility to address whichever need is greatest. That trade-off remains unresolved.",
-            "I change to disagree. The engineer has identified a feasible alternative\u2014independent inspection plus published evaluation\u2014so I no longer require every model to be fully released."
-          ]
-        }
-      },
-      {
-        id: "expert-6",
-        role: "Civil liberties researcher",
-        proposal: "Public accountability requires contestability, reasons and independent scrutiny. Human appeal is essential. Automation of administrative work may hide rights-impacting decisions behind apparently routine categories, so low-risk needs a defensible definition. Staffing earmarks are not the same as rights protection. I support full code and weights disclosure because opaque suppliers can concentrate power.",
-        round2: {
-          votes: [
-            "Agree",
-            "Disagree",
-            "Disagree",
-            "Agree"
-          ],
-          comments: [
-            "People must be able to contest an administrative judgment affecting them.",
-            "The boundary between administration and access is porous; I retain opposition.",
-            "Budget earmarking does not guarantee accountability.",
-            "Full disclosure limits supplier power and permits independent scrutiny."
-          ]
-        },
-        round3: {
-          votes: [
-            "Agree",
-            "Disagree",
-            "Disagree",
-            "Agree"
-          ],
-          comments: [
-            "I retain support. Review needs independence from the original automated process.",
-            "I retain disagreement. Administrative routing can determine practical access even when it is nominally reversible.",
-            "I retain opposition: funding rules are no substitute for rights and scrutiny.",
-            "I retain support. My concern is concentration of power: auditor access can depend on contracts, whereas public disclosure permits wider challenge. This remains a substantive minority view."
-          ]
-        }
-      },
-      {
-        id: "expert-7",
-        role: "Rural community organiser",
-        proposal: "Rural residents need working phone and in-person routes as well as apps. Human appeal should be available. I cannot judge unattended administration without a clear boundary and a fallback when connectivity fails. Reinvest in frontline people. I initially support open code and weights as a way for communities to inspect services rather than depending on vendor promises.",
-        round2: {
-          votes: [
-            "Agree",
-            "Unable to judge \u2014 need more information",
-            "Agree",
-            "Agree"
-          ],
-          comments: [
-            "Appeals must include an offline route.",
-            "I cannot judge until a failed automated action can be reversed locally.",
-            "Rural service capacity needs protected investment.",
-            "Open release could let communities examine systems themselves."
-          ]
-        },
-        round3: {
-          votes: [
-            "Agree",
-            "Agree",
-            "Agree",
-            "Disagree"
-          ],
-          comments: [
-            "I retain support with phone and face-to-face routes.",
-            "I change from unsure to agree with locally reversible tasks and an offline fallback. I would oppose removing those conditions.",
-            "I retain support: without a protected share, sparse communities could lose more service capacity.",
-            "I change to disagree. The accessibility argument persuades me that usable accountability matters more than universal weights release; I still want public reporting."
-          ]
-        }
-      },
-      {
-        id: "expert-8",
-        role: "Frontline caseworker",
-        proposal: "I see useful tools for letters and booking, but someone must own mistakes. Human appeal might help, though it could just shift the queue unless there are staff to act. I oppose unattended administrative decisions until we define what counts as reversible. Reinvest savings in people. I oppose mandatory publication of every model: clear explanations and independent audit could matter more to the service user.",
-        round2: {
-          votes: [
-            "Unable to judge \u2014 need more information",
-            "Agree",
-            "Disagree",
-            "Disagree"
-          ],
-          comments: [
-            "Without staff or a review deadline I cannot tell whether the appeal is meaningful.",
-            "I support tightly reversible tasks with a named owner.",
-            "I favour capacity but oppose fixing the share before knowing service needs.",
-            "Users need a useful explanation and a route to correction; model weights alone provide neither."
-          ]
-        },
-        round3: {
-          votes: [
-            "Agree",
-            "Agree",
-            "Disagree",
-            "Disagree"
-          ],
-          comments: [
-            "I change from unsure to agree with the principle. The disability advocate clarifies that a usable human route is a design requirement; staffing and deadlines remain implementation conditions.",
-            "I retain support for reversible booking and correspondence, not eligibility or enforcement.",
-            "I retain opposition to a fixed share, while supporting adequate frontline capacity.",
-            "I retain opposition: explain the decision, provide correction, and allow independent inspection."
-          ]
-        }
-      }
-    ]
-  },
-  rounds: [
-    {
-      id: 1,
-      round_number: 1,
-      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>People must be able to request a human review of an AI decision affecting their access to a public service.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 2: <strong>Low-risk administrative tasks may be completed by AI without prior human sign-off.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 3: <strong>At least half of any verified financial savings from AI should be reinvested in frontline staffing.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 4: <strong>Every AI model used in a public service must publish its full source code and model weights.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p>",
-      synthesis_published: true,
-      synthesis_json: {},
-      is_active: false,
-      questions: [
-        {
-          label: "Where should humans stay in control?",
-          requireEvidence: true,
-          requireCounterarguments: true,
-          requireConfidence: true,
-          questionId: "proposal",
-          sectionTitle: null,
-          helpText: null,
-          groupPrompt: null,
-          optional: false,
-          conditionalOnQuestionId: null,
-          conditionalOnOption: null,
-          inputType: "textarea",
-          options: null,
-          allowUnsure: null,
-          maxSelections: null,
-          minValue: null,
-          maxValue: null,
-          minLabel: null,
-          midLabel: null,
-          maxLabel: null,
-          importedFromQuestionnaire: null,
-          fieldType: null,
-          rows: null,
-          placeholder: null
-        }
-      ],
-      context_settings: {
-        synthesis_published: true
-      },
-      convergence_score: null,
-      response_count: 8,
-      draft_count: 0
-    },
-    {
-      id: 2,
-      round_number: 2,
-      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>People must be able to request a human review of an AI decision affecting their access to a public service.</strong></p><p>Council service lead \u2014 Agree: Appeals should cover decisions affecting service access; routine bookings should not need prior review.</p><p>AI engineer \u2014 Disagree: As written, I worry that human review could be demanded for trivial administrative actions and swamp staff.</p><p>Disability advocate \u2014 Agree: The route to human review must work by phone and with assistance.</p><p>Public-service union representative \u2014 Agree: An accountable person must be available to reconsider an access decision.</p><p>Public finance economist \u2014 Agree: Appeal is a proportionate protection for decisions affecting access.</p><p>Civil liberties researcher \u2014 Agree: People must be able to contest an administrative judgment affecting them.</p><p>Rural community organiser \u2014 Agree: Appeals must include an offline route.</p><p>Frontline caseworker \u2014 Unable to judge \u2014 need more information: Without staff or a review deadline I cannot tell whether the appeal is meaningful.</p><p>Claim 2: <strong>Low-risk administrative tasks may be completed by AI without prior human sign-off.</strong></p><p>Council service lead \u2014 Agree: A reversible booking is a useful bounded test.</p><p>AI engineer \u2014 Agree: Allow automation with logs, reversibility and escalation.</p><p>Disability advocate \u2014 Disagree: Repeated small errors may disproportionately harm disabled users, so I oppose without boundaries.</p><p>Public-service union representative \u2014 Disagree: I oppose removing sign-off while low-risk remains vague.</p><p>Public finance economist \u2014 Agree: Reversible administrative automation can be assessed separately from eligibility.</p><p>Civil liberties researcher \u2014 Disagree: The boundary between administration and access is porous; I retain opposition.</p><p>Rural community organiser \u2014 Unable to judge \u2014 need more information: I cannot judge until a failed automated action can be reversed locally.</p><p>Frontline caseworker \u2014 Agree: I support tightly reversible tasks with a named owner.</p><p>Claim 3: <strong>At least half of any verified financial savings from AI should be reinvested in frontline staffing.</strong></p><p>Council service lead \u2014 Agree: Frontline capacity is the visible service bottleneck, so I support the earmark.</p><p>AI engineer \u2014 Disagree: An automatic staffing earmark might prevent investment in better accessibility or infrastructure.</p><p>Disability advocate \u2014 Agree: People need trained staff to resolve access problems.</p><p>Public-service union representative \u2014 Agree: A protected share makes the promise to augment people credible.</p><p>Public finance economist \u2014 Disagree: Spend savings on the greatest unmet need, not a preselected input.</p><p>Civil liberties researcher \u2014 Disagree: Budget earmarking does not guarantee accountability.</p><p>Rural community organiser \u2014 Agree: Rural service capacity needs protected investment.</p><p>Frontline caseworker \u2014 Disagree: I favour capacity but oppose fixing the share before knowing service needs.</p><p>Claim 4: <strong>Every AI model used in a public service must publish its full source code and model weights.</strong></p><p>Council service lead \u2014 Agree: I initially support full release as a simple accountability rule.</p><p>AI engineer \u2014 Disagree: Full release is not the only scrutiny mechanism; independent inspection and published evaluation may suffice.</p><p>Disability advocate \u2014 Unable to judge \u2014 need more information: I need to know what full release adds beyond independent inspection.</p><p>Public-service union representative \u2014 Agree: Code and weights should be open so staff are not asked to trust a black box.</p><p>Public finance economist \u2014 Agree: I support the release rule initially because it makes inspection possible.</p><p>Civil liberties researcher \u2014 Agree: Full disclosure limits supplier power and permits independent scrutiny.</p><p>Rural community organiser \u2014 Agree: Open release could let communities examine systems themselves.</p><p>Frontline caseworker \u2014 Disagree: Users need a useful explanation and a route to correction; model weights alone provide neither.</p>",
-      synthesis_published: true,
-      synthesis_json: {},
-      is_active: false,
-      questions: [
-        {
-          questionId: "claim_1_response",
-          sectionTitle: "Claim 1: People must be able to request a human review of an AI decision affecting their access to a public service.",
-          label: "Your response",
-          inputType: "single_select",
-          options: [
-            "Strongly agree",
-            "Agree",
-            "Neither agree nor disagree",
-            "Disagree",
-            "Strongly disagree",
-            "Unable to judge \u2014 need more information"
-          ],
-          optional: false
-        },
-        {
-          questionId: "claim_1_comment",
-          sectionTitle: "Claim 1: People must be able to request a human review of an AI decision affecting their access to a public service.",
-          label: "Comments or clarification",
-          inputType: "textarea",
-          optional: true
-        },
-        {
-          questionId: "claim_2_response",
-          sectionTitle: "Claim 2: Low-risk administrative tasks may be completed by AI without prior human sign-off.",
-          label: "Your response",
-          inputType: "single_select",
-          options: [
-            "Strongly agree",
-            "Agree",
-            "Neither agree nor disagree",
-            "Disagree",
-            "Strongly disagree",
-            "Unable to judge \u2014 need more information"
-          ],
-          optional: false
-        },
-        {
-          questionId: "claim_2_comment",
-          sectionTitle: "Claim 2: Low-risk administrative tasks may be completed by AI without prior human sign-off.",
-          label: "Comments or clarification",
-          inputType: "textarea",
-          optional: true
-        },
-        {
-          questionId: "claim_3_response",
-          sectionTitle: "Claim 3: At least half of any verified financial savings from AI should be reinvested in frontline staffing.",
-          label: "Your response",
-          inputType: "single_select",
-          options: [
-            "Strongly agree",
-            "Agree",
-            "Neither agree nor disagree",
-            "Disagree",
-            "Strongly disagree",
-            "Unable to judge \u2014 need more information"
-          ],
-          optional: false
-        },
-        {
-          questionId: "claim_3_comment",
-          sectionTitle: "Claim 3: At least half of any verified financial savings from AI should be reinvested in frontline staffing.",
-          label: "Comments or clarification",
-          inputType: "textarea",
-          optional: true
-        },
-        {
-          questionId: "claim_4_response",
-          sectionTitle: "Claim 4: Every AI model used in a public service must publish its full source code and model weights.",
-          label: "Your response",
-          inputType: "single_select",
-          options: [
-            "Strongly agree",
-            "Agree",
-            "Neither agree nor disagree",
-            "Disagree",
-            "Strongly disagree",
-            "Unable to judge \u2014 need more information"
-          ],
-          optional: false
-        },
-        {
-          questionId: "claim_4_comment",
-          sectionTitle: "Claim 4: Every AI model used in a public service must publish its full source code and model weights.",
-          label: "Comments or clarification",
-          inputType: "textarea",
-          optional: true
-        }
-      ],
-      context_settings: {
-        synthesis_published: true
-      },
-      convergence_score: null,
-      response_count: 8,
-      draft_count: 0
-    },
-    {
-      id: 3,
-      round_number: 3,
-      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>People must be able to request a human review of an AI decision affecting their access to a public service.</strong></p><p>Council service lead \u2014 Agree: I retain support. Review must be accessible and able to correct the original outcome.</p><p>AI engineer \u2014 Agree: I change to agree after the panel separates access decisions from routine automation. An appeal after an access decision is not a requirement for prior sign-off on every booking.</p><p>Disability advocate \u2014 Agree: I retain support, conditional on an assisted and offline route.</p><p>Public-service union representative \u2014 Agree: I retain support: a review must be meaningful, not a rubber stamp.</p><p>Public finance economist \u2014 Agree: I retain support for an appeal on access decisions.</p><p>Civil liberties researcher \u2014 Agree: I retain support. Review needs independence from the original automated process.</p><p>Rural community organiser \u2014 Agree: I retain support with phone and face-to-face routes.</p><p>Frontline caseworker \u2014 Agree: I change from unsure to agree with the principle. The disability advocate clarifies that a usable human route is a design requirement; staffing and deadlines remain implementation conditions.</p><p>Claim 2: <strong>Low-risk administrative tasks may be completed by AI without prior human sign-off.</strong></p><p>Council service lead \u2014 Agree: I retain support for reversible administration, excluding eligibility and enforcement.</p><p>AI engineer \u2014 Agree: I retain support for bounded, logged and reversible tasks.</p><p>Disability advocate \u2014 Unable to judge \u2014 need more information: I move from disagree to unable to judge. Reversibility addresses part of my concern, but I still need evidence on cumulative accessibility errors.</p><p>Public-service union representative \u2014 Agree: I change to agree for reversible administrative work. The caseworker separates booking from benefit eligibility, and I still oppose autonomous eligibility decisions.</p><p>Public finance economist \u2014 Agree: I retain support, with measured errors and reversal.</p><p>Civil liberties researcher \u2014 Disagree: I retain disagreement. Administrative routing can determine practical access even when it is nominally reversible.</p><p>Rural community organiser \u2014 Agree: I change from unsure to agree with locally reversible tasks and an offline fallback. I would oppose removing those conditions.</p><p>Frontline caseworker \u2014 Agree: I retain support for reversible booking and correspondence, not eligibility or enforcement.</p><p>Claim 3: <strong>At least half of any verified financial savings from AI should be reinvested in frontline staffing.</strong></p><p>Council service lead \u2014 Agree: I retain support: staff capacity is the bottleneck I would address first.</p><p>AI engineer \u2014 Disagree: I retain opposition. Ring-fencing inputs is different from improving outcomes.</p><p>Disability advocate \u2014 Agree: I retain support for staffing that makes appeals accessible.</p><p>Public-service union representative \u2014 Agree: I retain support. My unresolved disagreement with the economist is about commitment to staff, not the arithmetic of savings.</p><p>Public finance economist \u2014 Disagree: I retain opposition. The union values a credible staffing commitment; I value flexibility to address whichever need is greatest. That trade-off remains unresolved.</p><p>Civil liberties researcher \u2014 Disagree: I retain opposition: funding rules are no substitute for rights and scrutiny.</p><p>Rural community organiser \u2014 Agree: I retain support: without a protected share, sparse communities could lose more service capacity.</p><p>Frontline caseworker \u2014 Disagree: I retain opposition to a fixed share, while supporting adequate frontline capacity.</p><p>Claim 4: <strong>Every AI model used in a public service must publish its full source code and model weights.</strong></p><p>Council service lead \u2014 Disagree: I change to disagree. The engineer distinguishes public accountability from universal weights release; independent inspection could be required without excluding every closed model.</p><p>AI engineer \u2014 Disagree: I retain opposition to every. Public evaluations and independent inspection are a less absolute alternative.</p><p>Disability advocate \u2014 Disagree: I move from unsure to disagree with the universal rule. A code release does not itself make an inaccessible service contestable; require independent scrutiny and accessible explanations.</p><p>Public-service union representative \u2014 Disagree: I change to disagree with the absolute wording. Staff need enforceable inspection and audit rights; universal public release is not the only way to secure them.</p><p>Public finance economist \u2014 Disagree: I change to disagree. The engineer has identified a feasible alternative\u2014independent inspection plus published evaluation\u2014so I no longer require every model to be fully released.</p><p>Civil liberties researcher \u2014 Agree: I retain support. My concern is concentration of power: auditor access can depend on contracts, whereas public disclosure permits wider challenge. This remains a substantive minority view.</p><p>Rural community organiser \u2014 Disagree: I change to disagree. The accessibility argument persuades me that usable accountability matters more than universal weights release; I still want public reporting.</p><p>Frontline caseworker \u2014 Disagree: I retain opposition: explain the decision, provide correction, and allow independent inspection.</p>",
-      synthesis_published: true,
-      synthesis_json: {},
-      is_active: true,
-      questions: [
-        {
-          questionId: "claim_1_response",
-          sectionTitle: "Claim 1: People must be able to request a human review of an AI decision affecting their access to a public service.",
-          label: "Your response",
-          inputType: "single_select",
-          options: [
-            "Strongly agree",
-            "Agree",
-            "Neither agree nor disagree",
-            "Disagree",
-            "Strongly disagree",
-            "Unable to judge \u2014 need more information"
-          ],
-          optional: false
-        },
-        {
-          questionId: "claim_1_comment",
-          sectionTitle: "Claim 1: People must be able to request a human review of an AI decision affecting their access to a public service.",
-          label: "Comments or clarification",
-          inputType: "textarea",
-          optional: true
-        },
-        {
-          questionId: "claim_2_response",
-          sectionTitle: "Claim 2: Low-risk administrative tasks may be completed by AI without prior human sign-off.",
-          label: "Your response",
-          inputType: "single_select",
-          options: [
-            "Strongly agree",
-            "Agree",
-            "Neither agree nor disagree",
-            "Disagree",
-            "Strongly disagree",
-            "Unable to judge \u2014 need more information"
-          ],
-          optional: false
-        },
-        {
-          questionId: "claim_2_comment",
-          sectionTitle: "Claim 2: Low-risk administrative tasks may be completed by AI without prior human sign-off.",
-          label: "Comments or clarification",
-          inputType: "textarea",
-          optional: true
-        },
-        {
-          questionId: "claim_3_response",
-          sectionTitle: "Claim 3: At least half of any verified financial savings from AI should be reinvested in frontline staffing.",
-          label: "Your response",
-          inputType: "single_select",
-          options: [
-            "Strongly agree",
-            "Agree",
-            "Neither agree nor disagree",
-            "Disagree",
-            "Strongly disagree",
-            "Unable to judge \u2014 need more information"
-          ],
-          optional: false
-        },
-        {
-          questionId: "claim_3_comment",
-          sectionTitle: "Claim 3: At least half of any verified financial savings from AI should be reinvested in frontline staffing.",
-          label: "Comments or clarification",
-          inputType: "textarea",
-          optional: true
-        },
-        {
-          questionId: "claim_4_response",
-          sectionTitle: "Claim 4: Every AI model used in a public service must publish its full source code and model weights.",
-          label: "Your response",
-          inputType: "single_select",
-          options: [
-            "Strongly agree",
-            "Agree",
-            "Neither agree nor disagree",
-            "Disagree",
-            "Strongly disagree",
-            "Unable to judge \u2014 need more information"
-          ],
-          optional: false
-        },
-        {
-          questionId: "claim_4_comment",
-          sectionTitle: "Claim 4: Every AI model used in a public service must publish its full source code and model weights.",
-          label: "Comments or clarification",
-          inputType: "textarea",
-          optional: true
-        }
-      ],
-      context_settings: {
-        synthesis_published: true
-      },
-      convergence_score: null,
-      response_count: 8,
-      draft_count: 0
-    }
-  ],
-  responses: [
-    {
-      id: 1,
-      round_number: 1,
-      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>People must be able to request a human review of an AI decision affecting their access to a public service.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 2: <strong>Low-risk administrative tasks may be completed by AI without prior human sign-off.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 3: <strong>At least half of any verified financial savings from AI should be reinvested in frontline staffing.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p><p>Claim 4: <strong>Every AI model used in a public service must publish its full source code and model weights.</strong></p><p>Candidate claim extracted from the proposals; not yet rated.</p>",
-      synthesis_published: true,
-      is_active: false,
-      responses: [
-        {
-          id: 1,
-          answers: {
-            q1: {
-              position: "I want shorter queues without an unaccountable service. A human appeal should exist for decisions about access. Routine appointment allocation might run automatically, with a route to correct errors. Staff should share in the savings, although an inflexible percentage could limit other improvements. Publishing model code seems an attractive transparency requirement, but I need to understand procurement and security implications."
-            }
-          },
-          email: "synthetic-expert-1",
-          timestamp: "2026-09-07T16:16:09.109216",
-          version: 1
-        },
-        {
-          id: 2,
-          answers: {
-            q1: {
-              position: "Allow bounded administrative automation with logging, reversibility and escalation. A human appeal matters for consequential decisions, but a review for every trivial automated event may consume the benefits. I oppose a fixed staffing earmark: use verified savings where they do most good. Full release of every model is too absolute; independent access and public evaluation reports can offer other forms of scrutiny."
-            }
-          },
-          email: "synthetic-expert-2",
-          timestamp: "2026-09-07T16:16:09.118835",
-          version: 1
-        },
-        {
-          id: 3,
-          answers: {
-            q1: {
-              position: "Access must include people who cannot navigate a digital complaint. Guarantee a human review and accessible routes to request it. I am wary of calling something low-risk when errors accumulate for disabled people. Reinvest savings in frontline staff who can help. Open source sounds desirable, but I cannot judge whether weights disclosure is necessary for accountability."
-            }
-          },
-          email: "synthetic-expert-3",
-          timestamp: "2026-09-07T16:16:09.134303",
-          version: 1
-        },
-        {
-          id: 4,
-          answers: {
-            q1: {
-              position: "Technology should augment staff and retain human accountability. I want appeals, human checks before automated actions, and at least half of verified savings reinvested in frontline staffing. Without an earmark, service improvement can become a euphemism for job cuts. I initially favour publishing code and weights because commercial secrecy should not prevent scrutiny."
-            }
-          },
-          email: "synthetic-expert-4",
-          timestamp: "2026-09-07T16:16:09.142746",
-          version: 1
-        },
-        {
-          id: 5,
-          answers: {
-            q1: {
-              position: "Consider the opportunity cost of safeguards as well as their benefits. I support an appeal on access decisions and automation of reversible administrative work. A compulsory fifty-percent staffing earmark may stop spending on whichever service need is most urgent. I favour openness as a default and initially support full code and weights release, but would reconsider if the rule excluded useful auditable options."
-            }
-          },
-          email: "synthetic-expert-5",
-          timestamp: "2026-09-07T16:16:09.154234",
-          version: 1
-        },
-        {
-          id: 6,
-          answers: {
-            q1: {
-              position: "Public accountability requires contestability, reasons and independent scrutiny. Human appeal is essential. Automation of administrative work may hide rights-impacting decisions behind apparently routine categories, so low-risk needs a defensible definition. Staffing earmarks are not the same as rights protection. I support full code and weights disclosure because opaque suppliers can concentrate power."
-            }
-          },
-          email: "synthetic-expert-6",
-          timestamp: "2026-09-07T16:16:09.164596",
-          version: 1
-        },
-        {
-          id: 7,
-          answers: {
-            q1: {
-              position: "Rural residents need working phone and in-person routes as well as apps. Human appeal should be available. I cannot judge unattended administration without a clear boundary and a fallback when connectivity fails. Reinvest in frontline people. I initially support open code and weights as a way for communities to inspect services rather than depending on vendor promises."
-            }
-          },
-          email: "synthetic-expert-7",
-          timestamp: "2026-09-07T16:16:09.176122",
-          version: 1
-        },
-        {
-          id: 8,
-          answers: {
-            q1: {
-              position: "I see useful tools for letters and booking, but someone must own mistakes. Human appeal might help, though it could just shift the queue unless there are staff to act. I oppose unattended administrative decisions until we define what counts as reversible. Reinvest savings in people. I oppose mandatory publication of every model: clear explanations and independent audit could matter more to the service user."
-            }
-          },
-          email: "synthetic-expert-8",
-          timestamp: "2026-09-07T16:16:09.184543",
-          version: 1
-        }
-      ]
-    },
-    {
-      id: 2,
-      round_number: 2,
-      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>People must be able to request a human review of an AI decision affecting their access to a public service.</strong></p><p>Council service lead \u2014 Agree: Appeals should cover decisions affecting service access; routine bookings should not need prior review.</p><p>AI engineer \u2014 Disagree: As written, I worry that human review could be demanded for trivial administrative actions and swamp staff.</p><p>Disability advocate \u2014 Agree: The route to human review must work by phone and with assistance.</p><p>Public-service union representative \u2014 Agree: An accountable person must be available to reconsider an access decision.</p><p>Public finance economist \u2014 Agree: Appeal is a proportionate protection for decisions affecting access.</p><p>Civil liberties researcher \u2014 Agree: People must be able to contest an administrative judgment affecting them.</p><p>Rural community organiser \u2014 Agree: Appeals must include an offline route.</p><p>Frontline caseworker \u2014 Unable to judge \u2014 need more information: Without staff or a review deadline I cannot tell whether the appeal is meaningful.</p><p>Claim 2: <strong>Low-risk administrative tasks may be completed by AI without prior human sign-off.</strong></p><p>Council service lead \u2014 Agree: A reversible booking is a useful bounded test.</p><p>AI engineer \u2014 Agree: Allow automation with logs, reversibility and escalation.</p><p>Disability advocate \u2014 Disagree: Repeated small errors may disproportionately harm disabled users, so I oppose without boundaries.</p><p>Public-service union representative \u2014 Disagree: I oppose removing sign-off while low-risk remains vague.</p><p>Public finance economist \u2014 Agree: Reversible administrative automation can be assessed separately from eligibility.</p><p>Civil liberties researcher \u2014 Disagree: The boundary between administration and access is porous; I retain opposition.</p><p>Rural community organiser \u2014 Unable to judge \u2014 need more information: I cannot judge until a failed automated action can be reversed locally.</p><p>Frontline caseworker \u2014 Agree: I support tightly reversible tasks with a named owner.</p><p>Claim 3: <strong>At least half of any verified financial savings from AI should be reinvested in frontline staffing.</strong></p><p>Council service lead \u2014 Agree: Frontline capacity is the visible service bottleneck, so I support the earmark.</p><p>AI engineer \u2014 Disagree: An automatic staffing earmark might prevent investment in better accessibility or infrastructure.</p><p>Disability advocate \u2014 Agree: People need trained staff to resolve access problems.</p><p>Public-service union representative \u2014 Agree: A protected share makes the promise to augment people credible.</p><p>Public finance economist \u2014 Disagree: Spend savings on the greatest unmet need, not a preselected input.</p><p>Civil liberties researcher \u2014 Disagree: Budget earmarking does not guarantee accountability.</p><p>Rural community organiser \u2014 Agree: Rural service capacity needs protected investment.</p><p>Frontline caseworker \u2014 Disagree: I favour capacity but oppose fixing the share before knowing service needs.</p><p>Claim 4: <strong>Every AI model used in a public service must publish its full source code and model weights.</strong></p><p>Council service lead \u2014 Agree: I initially support full release as a simple accountability rule.</p><p>AI engineer \u2014 Disagree: Full release is not the only scrutiny mechanism; independent inspection and published evaluation may suffice.</p><p>Disability advocate \u2014 Unable to judge \u2014 need more information: I need to know what full release adds beyond independent inspection.</p><p>Public-service union representative \u2014 Agree: Code and weights should be open so staff are not asked to trust a black box.</p><p>Public finance economist \u2014 Agree: I support the release rule initially because it makes inspection possible.</p><p>Civil liberties researcher \u2014 Agree: Full disclosure limits supplier power and permits independent scrutiny.</p><p>Rural community organiser \u2014 Agree: Open release could let communities examine systems themselves.</p><p>Frontline caseworker \u2014 Disagree: Users need a useful explanation and a route to correction; model weights alone provide neither.</p>",
-      synthesis_published: true,
-      is_active: false,
-      responses: [
-        {
-          id: 9,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "Appeals should cover decisions affecting service access; routine bookings should not need prior review."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "A reversible booking is a useful bounded test."
-            },
-            q5: {
-              position: "Agree"
-            },
-            q6: {
-              position: "Frontline capacity is the visible service bottleneck, so I support the earmark."
-            },
-            q7: {
-              position: "Agree"
-            },
-            q8: {
-              position: "I initially support full release as a simple accountability rule."
-            }
-          },
-          email: "synthetic-expert-1",
-          timestamp: "2026-09-07T16:16:09.249040",
-          version: 1
-        },
-        {
-          id: 10,
-          answers: {
-            q1: {
-              position: "Disagree"
-            },
-            q2: {
-              position: "As written, I worry that human review could be demanded for trivial administrative actions and swamp staff."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "Allow automation with logs, reversibility and escalation."
-            },
-            q5: {
-              position: "Disagree"
-            },
-            q6: {
-              position: "An automatic staffing earmark might prevent investment in better accessibility or infrastructure."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "Full release is not the only scrutiny mechanism; independent inspection and published evaluation may suffice."
-            }
-          },
-          email: "synthetic-expert-2",
-          timestamp: "2026-09-07T16:16:09.260418",
-          version: 1
-        },
-        {
-          id: 11,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "The route to human review must work by phone and with assistance."
-            },
-            q3: {
-              position: "Disagree"
-            },
-            q4: {
-              position: "Repeated small errors may disproportionately harm disabled users, so I oppose without boundaries."
-            },
-            q5: {
-              position: "Agree"
-            },
-            q6: {
-              position: "People need trained staff to resolve access problems."
-            },
-            q7: {
-              position: "Unable to judge \u2014 need more information"
-            },
-            q8: {
-              position: "I need to know what full release adds beyond independent inspection."
-            }
-          },
-          email: "synthetic-expert-3",
-          timestamp: "2026-09-07T16:16:09.274948",
-          version: 1
-        },
-        {
-          id: 12,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "An accountable person must be available to reconsider an access decision."
-            },
-            q3: {
-              position: "Disagree"
-            },
-            q4: {
-              position: "I oppose removing sign-off while low-risk remains vague."
-            },
-            q5: {
-              position: "Agree"
-            },
-            q6: {
-              position: "A protected share makes the promise to augment people credible."
-            },
-            q7: {
-              position: "Agree"
-            },
-            q8: {
-              position: "Code and weights should be open so staff are not asked to trust a black box."
-            }
-          },
-          email: "synthetic-expert-4",
-          timestamp: "2026-09-07T16:16:09.290245",
-          version: 1
-        },
-        {
-          id: 13,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "Appeal is a proportionate protection for decisions affecting access."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "Reversible administrative automation can be assessed separately from eligibility."
-            },
-            q5: {
-              position: "Disagree"
-            },
-            q6: {
-              position: "Spend savings on the greatest unmet need, not a preselected input."
-            },
-            q7: {
-              position: "Agree"
-            },
-            q8: {
-              position: "I support the release rule initially because it makes inspection possible."
-            }
-          },
-          email: "synthetic-expert-5",
-          timestamp: "2026-09-07T16:16:09.298613",
-          version: 1
-        },
-        {
-          id: 14,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "People must be able to contest an administrative judgment affecting them."
-            },
-            q3: {
-              position: "Disagree"
-            },
-            q4: {
-              position: "The boundary between administration and access is porous; I retain opposition."
-            },
-            q5: {
-              position: "Disagree"
-            },
-            q6: {
-              position: "Budget earmarking does not guarantee accountability."
-            },
-            q7: {
-              position: "Agree"
-            },
-            q8: {
-              position: "Full disclosure limits supplier power and permits independent scrutiny."
-            }
-          },
-          email: "synthetic-expert-6",
-          timestamp: "2026-09-07T16:16:09.307348",
-          version: 1
-        },
-        {
-          id: 15,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "Appeals must include an offline route."
-            },
-            q3: {
-              position: "Unable to judge \u2014 need more information"
-            },
-            q4: {
-              position: "I cannot judge until a failed automated action can be reversed locally."
-            },
-            q5: {
-              position: "Agree"
-            },
-            q6: {
-              position: "Rural service capacity needs protected investment."
-            },
-            q7: {
-              position: "Agree"
-            },
-            q8: {
-              position: "Open release could let communities examine systems themselves."
-            }
-          },
-          email: "synthetic-expert-7",
-          timestamp: "2026-09-07T16:16:09.319849",
-          version: 1
-        },
-        {
-          id: 16,
-          answers: {
-            q1: {
-              position: "Unable to judge \u2014 need more information"
-            },
-            q2: {
-              position: "Without staff or a review deadline I cannot tell whether the appeal is meaningful."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "I support tightly reversible tasks with a named owner."
-            },
-            q5: {
-              position: "Disagree"
-            },
-            q6: {
-              position: "I favour capacity but oppose fixing the share before knowing service needs."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "Users need a useful explanation and a route to correction; model weights alone provide neither."
-            }
-          },
-          email: "synthetic-expert-8",
-          timestamp: "2026-09-07T16:16:09.338657",
-          version: 1
-        }
-      ]
-    },
-    {
-      id: 3,
-      round_number: 3,
-      synthesis: "<p>Scripted synthetic panel. Eight fictional experts; no empirical evidence. Threshold 80%; stop after three rounds.</p><p>Claim 1: <strong>People must be able to request a human review of an AI decision affecting their access to a public service.</strong></p><p>Council service lead \u2014 Agree: I retain support. Review must be accessible and able to correct the original outcome.</p><p>AI engineer \u2014 Agree: I change to agree after the panel separates access decisions from routine automation. An appeal after an access decision is not a requirement for prior sign-off on every booking.</p><p>Disability advocate \u2014 Agree: I retain support, conditional on an assisted and offline route.</p><p>Public-service union representative \u2014 Agree: I retain support: a review must be meaningful, not a rubber stamp.</p><p>Public finance economist \u2014 Agree: I retain support for an appeal on access decisions.</p><p>Civil liberties researcher \u2014 Agree: I retain support. Review needs independence from the original automated process.</p><p>Rural community organiser \u2014 Agree: I retain support with phone and face-to-face routes.</p><p>Frontline caseworker \u2014 Agree: I change from unsure to agree with the principle. The disability advocate clarifies that a usable human route is a design requirement; staffing and deadlines remain implementation conditions.</p><p>Claim 2: <strong>Low-risk administrative tasks may be completed by AI without prior human sign-off.</strong></p><p>Council service lead \u2014 Agree: I retain support for reversible administration, excluding eligibility and enforcement.</p><p>AI engineer \u2014 Agree: I retain support for bounded, logged and reversible tasks.</p><p>Disability advocate \u2014 Unable to judge \u2014 need more information: I move from disagree to unable to judge. Reversibility addresses part of my concern, but I still need evidence on cumulative accessibility errors.</p><p>Public-service union representative \u2014 Agree: I change to agree for reversible administrative work. The caseworker separates booking from benefit eligibility, and I still oppose autonomous eligibility decisions.</p><p>Public finance economist \u2014 Agree: I retain support, with measured errors and reversal.</p><p>Civil liberties researcher \u2014 Disagree: I retain disagreement. Administrative routing can determine practical access even when it is nominally reversible.</p><p>Rural community organiser \u2014 Agree: I change from unsure to agree with locally reversible tasks and an offline fallback. I would oppose removing those conditions.</p><p>Frontline caseworker \u2014 Agree: I retain support for reversible booking and correspondence, not eligibility or enforcement.</p><p>Claim 3: <strong>At least half of any verified financial savings from AI should be reinvested in frontline staffing.</strong></p><p>Council service lead \u2014 Agree: I retain support: staff capacity is the bottleneck I would address first.</p><p>AI engineer \u2014 Disagree: I retain opposition. Ring-fencing inputs is different from improving outcomes.</p><p>Disability advocate \u2014 Agree: I retain support for staffing that makes appeals accessible.</p><p>Public-service union representative \u2014 Agree: I retain support. My unresolved disagreement with the economist is about commitment to staff, not the arithmetic of savings.</p><p>Public finance economist \u2014 Disagree: I retain opposition. The union values a credible staffing commitment; I value flexibility to address whichever need is greatest. That trade-off remains unresolved.</p><p>Civil liberties researcher \u2014 Disagree: I retain opposition: funding rules are no substitute for rights and scrutiny.</p><p>Rural community organiser \u2014 Agree: I retain support: without a protected share, sparse communities could lose more service capacity.</p><p>Frontline caseworker \u2014 Disagree: I retain opposition to a fixed share, while supporting adequate frontline capacity.</p><p>Claim 4: <strong>Every AI model used in a public service must publish its full source code and model weights.</strong></p><p>Council service lead \u2014 Disagree: I change to disagree. The engineer distinguishes public accountability from universal weights release; independent inspection could be required without excluding every closed model.</p><p>AI engineer \u2014 Disagree: I retain opposition to every. Public evaluations and independent inspection are a less absolute alternative.</p><p>Disability advocate \u2014 Disagree: I move from unsure to disagree with the universal rule. A code release does not itself make an inaccessible service contestable; require independent scrutiny and accessible explanations.</p><p>Public-service union representative \u2014 Disagree: I change to disagree with the absolute wording. Staff need enforceable inspection and audit rights; universal public release is not the only way to secure them.</p><p>Public finance economist \u2014 Disagree: I change to disagree. The engineer has identified a feasible alternative\u2014independent inspection plus published evaluation\u2014so I no longer require every model to be fully released.</p><p>Civil liberties researcher \u2014 Agree: I retain support. My concern is concentration of power: auditor access can depend on contracts, whereas public disclosure permits wider challenge. This remains a substantive minority view.</p><p>Rural community organiser \u2014 Disagree: I change to disagree. The accessibility argument persuades me that usable accountability matters more than universal weights release; I still want public reporting.</p><p>Frontline caseworker \u2014 Disagree: I retain opposition: explain the decision, provide correction, and allow independent inspection.</p>",
-      synthesis_published: true,
-      is_active: true,
-      responses: [
-        {
-          id: 17,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "I retain support. Review must be accessible and able to correct the original outcome."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "I retain support for reversible administration, excluding eligibility and enforcement."
-            },
-            q5: {
-              position: "Agree"
-            },
-            q6: {
-              position: "I retain support: staff capacity is the bottleneck I would address first."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "I change to disagree. The engineer distinguishes public accountability from universal weights release; independent inspection could be required without excluding every closed model."
-            }
-          },
-          email: "synthetic-expert-1",
-          timestamp: "2026-09-07T16:16:09.399075",
-          version: 1
-        },
-        {
-          id: 18,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "I change to agree after the panel separates access decisions from routine automation. An appeal after an access decision is not a requirement for prior sign-off on every booking."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "I retain support for bounded, logged and reversible tasks."
-            },
-            q5: {
-              position: "Disagree"
-            },
-            q6: {
-              position: "I retain opposition. Ring-fencing inputs is different from improving outcomes."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "I retain opposition to every. Public evaluations and independent inspection are a less absolute alternative."
-            }
-          },
-          email: "synthetic-expert-2",
-          timestamp: "2026-09-07T16:16:09.414207",
-          version: 1
-        },
-        {
-          id: 19,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "I retain support, conditional on an assisted and offline route."
-            },
-            q3: {
-              position: "Unable to judge \u2014 need more information"
-            },
-            q4: {
-              position: "I move from disagree to unable to judge. Reversibility addresses part of my concern, but I still need evidence on cumulative accessibility errors."
-            },
-            q5: {
-              position: "Agree"
-            },
-            q6: {
-              position: "I retain support for staffing that makes appeals accessible."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "I move from unsure to disagree with the universal rule. A code release does not itself make an inaccessible service contestable; require independent scrutiny and accessible explanations."
-            }
-          },
-          email: "synthetic-expert-3",
-          timestamp: "2026-09-07T16:16:09.424763",
-          version: 1
-        },
-        {
-          id: 20,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "I retain support: a review must be meaningful, not a rubber stamp."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "I change to agree for reversible administrative work. The caseworker separates booking from benefit eligibility, and I still oppose autonomous eligibility decisions."
-            },
-            q5: {
-              position: "Agree"
-            },
-            q6: {
-              position: "I retain support. My unresolved disagreement with the economist is about commitment to staff, not the arithmetic of savings."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "I change to disagree with the absolute wording. Staff need enforceable inspection and audit rights; universal public release is not the only way to secure them."
-            }
-          },
-          email: "synthetic-expert-4",
-          timestamp: "2026-09-07T16:16:09.437885",
-          version: 1
-        },
-        {
-          id: 21,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "I retain support for an appeal on access decisions."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "I retain support, with measured errors and reversal."
-            },
-            q5: {
-              position: "Disagree"
-            },
-            q6: {
-              position: "I retain opposition. The union values a credible staffing commitment; I value flexibility to address whichever need is greatest. That trade-off remains unresolved."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "I change to disagree. The engineer has identified a feasible alternative\u2014independent inspection plus published evaluation\u2014so I no longer require every model to be fully released."
-            }
-          },
-          email: "synthetic-expert-5",
-          timestamp: "2026-09-07T16:16:09.449360",
-          version: 1
-        },
-        {
-          id: 22,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "I retain support. Review needs independence from the original automated process."
-            },
-            q3: {
-              position: "Disagree"
-            },
-            q4: {
-              position: "I retain disagreement. Administrative routing can determine practical access even when it is nominally reversible."
-            },
-            q5: {
-              position: "Disagree"
-            },
-            q6: {
-              position: "I retain opposition: funding rules are no substitute for rights and scrutiny."
-            },
-            q7: {
-              position: "Agree"
-            },
-            q8: {
-              position: "I retain support. My concern is concentration of power: auditor access can depend on contracts, whereas public disclosure permits wider challenge. This remains a substantive minority view."
-            }
-          },
-          email: "synthetic-expert-6",
-          timestamp: "2026-09-07T16:16:09.463921",
-          version: 1
-        },
-        {
-          id: 23,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "I retain support with phone and face-to-face routes."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "I change from unsure to agree with locally reversible tasks and an offline fallback. I would oppose removing those conditions."
-            },
-            q5: {
-              position: "Agree"
-            },
-            q6: {
-              position: "I retain support: without a protected share, sparse communities could lose more service capacity."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "I change to disagree. The accessibility argument persuades me that usable accountability matters more than universal weights release; I still want public reporting."
-            }
-          },
-          email: "synthetic-expert-7",
-          timestamp: "2026-09-07T16:16:09.476148",
-          version: 1
-        },
-        {
-          id: 24,
-          answers: {
-            q1: {
-              position: "Agree"
-            },
-            q2: {
-              position: "I change from unsure to agree with the principle. The disability advocate clarifies that a usable human route is a design requirement; staffing and deadlines remain implementation conditions."
-            },
-            q3: {
-              position: "Agree"
-            },
-            q4: {
-              position: "I retain support for reversible booking and correspondence, not eligibility or enforcement."
-            },
-            q5: {
-              position: "Disagree"
-            },
-            q6: {
-              position: "I retain opposition to a fixed share, while supporting adequate frontline capacity."
-            },
-            q7: {
-              position: "Disagree"
-            },
-            q8: {
-              position: "I retain opposition: explain the decision, provide correction, and allow independent inspection."
-            }
-          },
-          email: "synthetic-expert-8",
-          timestamp: "2026-09-07T16:16:09.487638",
-          version: 1
-        }
-      ]
-    }
-  ]
-};
-
 // src/demos/research-ai-results.json
 var research_ai_results_default = {
   fixture: {
@@ -2402,13 +1232,13 @@ function counts(q, index, responses) {
 }
 function ratingProgress(round, rounds, responses) {
   const current = responses.find((r) => r.id === round.id);
-  const previous = rounds.find((r) => r.round_number === round.round_number - 1);
-  const previousResponses = responses.find((r) => r.id === previous?.id);
+  const previous2 = rounds.find((r) => r.round_number === round.round_number - 1);
+  const previousResponses = responses.find((r) => r.id === previous2?.id);
   return round.questions.flatMap((q, index) => {
     if (!ratingQuestion(q)) return [];
-    const priorIndex = previous?.questions.findIndex((p) => ratingQuestion(p) && !!q.questionId && p.questionId === q.questionId && wording(p) === wording(q) && JSON.stringify(p.options) === JSON.stringify(q.options)) ?? -1;
+    const priorIndex = previous2?.questions.findIndex((p) => ratingQuestion(p) && !!q.questionId && p.questionId === q.questionId && wording(p) === wording(q) && JSON.stringify(p.options) === JSON.stringify(q.options)) ?? -1;
     const votes = counts(q, index, current);
-    const prior = priorIndex >= 0 && previousResponses ? counts(previous.questions[priorIndex], priorIndex, previousResponses) : null;
+    const prior = priorIndex >= 0 && previousResponses ? counts(previous2.questions[priorIndex], priorIndex, previousResponses) : null;
     const answered = votes.slice(0, 5).reduce((a, b) => a + b, 0);
     const priorAnswered = prior?.slice(0, 5).reduce((a, b) => a + b, 0) || 0;
     const percent = answered ? 100 * votes[0] / answered : null;
@@ -2457,7 +1287,7 @@ function ratingProgress(round, rounds, responses) {
       votes,
       answered,
       percent,
-      previousRound: previous?.round_number,
+      previousRound: previous2?.round_number,
       delta: percent !== null && prior && priorAnswered ? percent - 100 * prior[0] / priorAnswered : null,
       previousAnswered: priorAnswered
     }];
@@ -2466,8 +1296,8 @@ function ratingProgress(round, rounds, responses) {
 function synthesisProvenanceNote(round, rounds) {
   if (!round?.synthesis?.trim()) return null;
   if (round.response_count === 0) return `No responses have been submitted in Round ${round.round_number}. This text is background or a draft, not a result from this round.`;
-  const previous = rounds.find((r) => r.round_number === round.round_number - 1);
-  if (previous?.synthesis?.trim() === round.synthesis.trim()) return `This text matches Round ${previous.round_number}. Review it against this round\u2019s responses before treating it as an updated result.`;
+  const previous2 = rounds.find((r) => r.round_number === round.round_number - 1);
+  if (previous2?.synthesis?.trim() === round.synthesis.trim()) return `This text matches Round ${previous2.round_number}. Review it against this round\u2019s responses before treating it as an updated result.`;
   return null;
 }
 
@@ -2492,10 +1322,10 @@ var el = (tag, text = "") => {
   n.textContent = text;
   return n;
 };
-function renderDelphiPlanner(root2, round, rounds, responses, publish) {
+function renderDelphiPlanner(root, round, rounds, responses, publish) {
   const box = el("div");
   box.className = "di-planner";
-  root2.append(box);
+  root.append(box);
   if (round.round_number >= 3) {
     box.append(el("strong", "Round 3 of 3 \xB7 Final ratings"), el("p", "The same claims were rated in rounds 2 and 3. Compare the positions and justifications above; unresolved disagreement remains part of the result."));
     return;
@@ -2554,30 +1384,30 @@ function category(row) {
   if (row.votes[1] / row.answered > 0.5) return "Leaning disagree";
   return "Divided";
 }
-function renderDelphiInsights(root2, round, rounds, responses, refresh, publish) {
+function renderDelphiInsights(root, round, rounds, responses, refresh, publish) {
   const rows = ratingProgress(round, rounds, responses);
-  const priorOpen = new Set(Array.from(root2.querySelectorAll("details[open]")).map((d) => d.dataset.key));
-  const filter = root2.dataset.filter || "All claims";
-  const existingPlanner = root2.dataset.plannerRound === String(round.id) ? root2.querySelector(".di-planner") : null;
-  root2.dataset.plannerRound = String(round.id);
-  root2.replaceChildren();
-  root2.className = "card delphi-insights";
-  root2.dataset.claimLabels = JSON.stringify(rows.map((r) => r.label.replace(/^Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim()));
+  const priorOpen = new Set(Array.from(root.querySelectorAll("details[open]")).map((d) => d.dataset.key));
+  const filter = root.dataset.filter || "All claims";
+  const existingPlanner = root.dataset.plannerRound === String(round.id) ? root.querySelector(".di-planner") : null;
+  root.dataset.plannerRound = String(round.id);
+  root.replaceChildren();
+  root.className = "card delphi-insights";
+  root.dataset.claimLabels = JSON.stringify(rows.map((r) => r.label.replace(/^Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim()));
   const head = node("div", "", "di-heading");
   head.append(node("div", "THE PANEL\u2019S VIEW", "di-eyebrow"));
   const title = node("div", "", "di-title");
   title.append(node("h2", "Where views stand"));
   if (refresh) title.append(button("Refresh", refresh));
   head.append(title);
-  root2.append(head);
+  root.append(head);
   const ordered = [...rounds].filter((r) => r.round_number <= round.round_number).sort((a, b) => a.round_number - b.round_number);
   const actual = responses.find((r) => r.id === round.id)?.responses.length;
   const intro = node("p", `Round ${round.round_number} \xB7 ${actual ?? "\u2014"} responses${rows.length ? ` \xB7 ${rows.length} claims` : ""}`, "di-subtitle");
-  root2.append(intro);
+  root.append(intro);
   const note = synthesisProvenanceNote(round, rounds);
-  if (note) root2.append(node("p", note, "di-warning"));
+  if (note) root.append(node("p", note, "di-warning"));
   if (!rows.length) {
-    root2.append(node("p", actual === 0 ? "No responses yet for this round. Responses will appear here as participants submit them." : round.round_number === 1 ? "This round gathers independent views. Extract claims from the responses before setting up the rating round." : "There are no comparable claim ratings in this round. Review the written responses or synthesis below.", "di-empty"));
+    root.append(node("p", actual === 0 ? "No responses yet for this round. Responses will appear here as participants submit them." : round.round_number === 1 ? "This round gathers independent views. Extract claims from the responses before setting up the rating round." : "There are no comparable claim ratings in this round. Review the written responses or synthesis below.", "di-empty"));
     return;
   }
   const cats = ["Mostly agree", "Leaning agree", "Divided", "Leaning disagree", "Mostly disagree", "Uncertain"];
@@ -2588,22 +1418,22 @@ function renderDelphiInsights(root2, round, rounds, responses, refresh, publish)
     const count = label === "All claims" ? rows.length : rows.filter((r) => category(r) === label).length;
     if (!count && label !== filter) return;
     const b = button(label, () => {
-      root2.dataset.filter = label;
-      renderDelphiInsights(root2, round, rounds, responses, refresh, publish);
+      root.dataset.filter = label;
+      renderDelphiInsights(root, round, rounds, responses, refresh, publish);
     });
     b.append(node("span", String(count), "di-filter-count"));
     b.setAttribute("aria-pressed", String(filter === label));
     filters.append(b);
   });
-  root2.append(filters);
+  root.append(filters);
   const list = node("div", "", "di-claims");
   const columns = node("div", "", "di-column-head");
   columns.setAttribute("aria-hidden", "true");
   columns.append(node("span", "Claim"), node("span", "Recorded agreement"));
   list.append(columns);
-  const selected2 = rows.filter((r) => filter === "All claims" || category(r) === filter);
-  if (!selected2.length) list.append(node("p", "No claims in this group.", "di-empty"));
-  selected2.forEach((row) => {
+  const selected = rows.filter((r) => filter === "All claims" || category(r) === filter);
+  if (!selected.length) list.append(node("p", "No claims in this group.", "di-empty"));
+  selected.forEach((row) => {
     const article = node("article", "", "di-claim");
     article.dataset.key = row.key;
     article.dataset.openExcerpts = JSON.stringify([...priorOpen].filter((k) => k?.startsWith(`${row.key}:excerpt:`)));
@@ -2643,12 +1473,12 @@ function renderDelphiInsights(root2, round, rounds, responses, refresh, publish)
     });
     rating.append(legend);
     if (row.history.filter((h) => h.n > 0).length > 1) {
-      const previous = row.history.filter((h) => h.n > 0).at(-2);
+      const previous2 = row.history.filter((h) => h.n > 0).at(-2);
       const trend = node("div", "", "di-trend");
       if (row.delta !== null) {
         const change = Math.round(row.delta);
-        trend.append(node("span", change === 0 ? "No change" : `${change > 0 ? "+" : "\u2212"}${Math.abs(change)} pp`, "di-change"), node("span", `since R${previous.round}`));
-        trend.title = `Agreement: Round ${previous.round} ${Math.round(previous.percent)}% \u2192 Round ${round.round_number} ${Math.round(row.percent)}%. Change in percentage points.`;
+        trend.append(node("span", change === 0 ? "No change" : `${change > 0 ? "+" : "\u2212"}${Math.abs(change)} pp`, "di-change"), node("span", `since R${previous2.round}`));
+        trend.title = `Agreement: Round ${previous2.round} ${Math.round(previous2.percent)}% \u2192 Round ${round.round_number} ${Math.round(row.percent)}%. Change in percentage points.`;
       }
       rating.append(trend);
     }
@@ -2684,7 +1514,7 @@ function renderDelphiInsights(root2, round, rounds, responses, refresh, publish)
     article.append(detail);
     list.append(article);
   });
-  root2.append(list);
+  root.append(list);
   const archived = node("details", "", "di-method");
   archived.append(node("summary", "Earlier claims not rated in this round"));
   const seen = new Set(rows.map((r) => r.key));
@@ -2693,9 +1523,9 @@ function renderDelphiInsights(root2, round, rounds, responses, refresh, publish)
     seen.add(row.key);
     archived.append(node("p", `${row.label} \u2014 last rated Round ${r.round_number}: ${row.percent === null ? "no ratings" : Math.round(row.percent) + "% agree"} (${row.answered} answered). Not re-rated; no current-round result.`));
   }));
-  if (archived.childElementCount > 1) root2.append(archived);
-  if (existingPlanner) root2.append(existingPlanner);
-  else if (round.is_active || !refresh) renderDelphiPlanner(root2, round, rounds, responses, publish);
+  if (archived.childElementCount > 1) root.append(archived);
+  if (existingPlanner) root.append(existingPlanner);
+  else if (round.is_active || !refresh) renderDelphiPlanner(root, round, rounds, responses, publish);
   const methods = document.createElement("details");
   methods.className = "di-method";
   methods.dataset.key = "method";
@@ -2705,219 +1535,195 @@ function renderDelphiInsights(root2, round, rounds, responses, refresh, publish)
   methods.append(node("p", "Round comparisons require identical claim identifiers, wording and scales. Movement counts compare position groups for unambiguously matched returning respondents; changing intensity within agree or disagree is not counted. Response numbers identify rows within this round only. Comments are original submitted words."));
   methods.append(node("p", ordered.map((r) => `Round ${r.round_number}: ${responses.find((x) => x.id === r.id)?.responses.length ?? r.response_count ?? "\u2014"} responses`).join(" \xB7 ")));
   methods.append(node("p", "Agreement can coexist with conditional support. Changes in panel composition can change percentages. A synthetic demonstration illustrates the process; it does not establish scientific validity."));
-  root2.append(methods);
+  root.append(methods);
 }
 
-// src/legacy/delphiDemo.ts
-var example = public_ai_results_default;
+// src/utils/unifiedClaims.ts
+var claimText = (s) => s.replace(/^\s*Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim();
+var previous = /* @__PURE__ */ new WeakMap();
+var excerptId = 0;
+function unifyClaims(main2) {
+  const preview2 = main2.querySelector(".claim-evidence-preview");
+  const card = preview2?.closest(".card");
+  if (!preview2 || !card) return;
+  const progress = main2.querySelector("#delphi-recorded-progress");
+  const first = progress?.querySelector(".di-claim") || null;
+  const signatureKey = (card.querySelector(".ProseMirror")?.innerHTML || preview2.innerHTML) + String(preview2.hidden) + (progress?.dataset.signature || "") + (progress?.dataset.filter || "") + Array.from(card.querySelectorAll("button")).filter((b) => !b.closest(".unified-actions")).map((b) => b.textContent + String(b.disabled)).join("|");
+  const last = previous.get(main2);
+  if (last?.preview === preview2 && last.first === first && last.signature === signatureKey) return;
+  previous.set(main2, { preview: preview2, first, signature: signatureKey });
+  const source2 = Array.from(preview2.querySelectorAll(".claim-evidence-claim"));
+  const labels = JSON.parse(progress?.dataset.claimLabels || "[]");
+  const matched = source2.filter((c) => labels.filter((l) => l === claimText(c.querySelector(".claim-evidence-claim-heading strong")?.textContent || "")).length === 1);
+  const allMatched = source2.length > 0 && matched.length === source2.length;
+  const editing = preview2.hidden;
+  card.classList.toggle("unified-synthesis", allMatched);
+  card.classList.toggle("unified-editing", editing);
+  for (const item of source2) item.classList.toggle("unified-matched", matched.includes(item));
+  const carry = Array.from(card.querySelectorAll("p,div")).find((p) => !p.closest(".unified-actions") && (p.textContent || "").length < 350 && p.textContent?.includes("carried forward"))?.textContent || "";
+  for (const target of progress?.querySelectorAll(".di-claim") || []) {
+    const label = claimText(target.querySelector("h3")?.textContent || "");
+    const candidates = matched.filter((c) => claimText(c.querySelector(".claim-evidence-claim-heading strong")?.textContent || "") === label);
+    const existing = target.querySelector(".unified-excerpts");
+    if (candidates.length !== 1) {
+      existing?.remove();
+      continue;
+    }
+    const groups = Array.from(candidates[0].querySelectorAll(":scope > details"));
+    const signature2 = carry + groups.map((g) => g.innerHTML).join("");
+    if (existing?.dataset.signature === signature2) continue;
+    const openKeys = new Set(existing ? Array.from(existing.querySelectorAll("details[open]")).map((d) => d.dataset.key) : JSON.parse(target.dataset.openExcerpts || "[]"));
+    existing?.remove();
+    target.classList.add("unified-claim-card");
+    target.querySelector(".unified-claim-heading")?.remove();
+    const detail = document.createElement("div");
+    detail.className = "unified-excerpts";
+    detail.dataset.signature = signature2;
+    const note = document.createElement("p");
+    note.className = "unified-provenance";
+    note.textContent = carry || "Original excerpts from the saved synthesis; counts above are recorded ratings.";
+    if (carry) note.dataset.carried = "true";
+    detail.append(note);
+    const controls = document.createElement("div");
+    controls.className = "unified-excerpt-controls";
+    controls.setAttribute("role", "group");
+    controls.setAttribute("aria-label", "Original excerpts");
+    const caption = document.createElement("span");
+    caption.className = "unified-excerpt-label";
+    caption.textContent = "Excerpts";
+    controls.append(caption);
+    if (groups.length) detail.append(controls);
+    groups.forEach((g, i) => {
+      const clone = g.cloneNode(true);
+      clone.dataset.key = `${target.dataset.key}:excerpt:${i}`;
+      clone.open = openKeys.has(clone.dataset.key);
+      clone.removeAttribute("id");
+      clone.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+      const summary = clone.querySelector("summary");
+      if (summary) {
+        const label2 = summary.querySelector("span:not(.claim-evidence-count)");
+        if (label2) label2.textContent = (label2.textContent || "").replace(/original excerpts/i, "excerpts");
+        for (const n of Array.from(summary.childNodes)) if (n.nodeType === Node.TEXT_NODE) n.textContent = (n.textContent || "").replace(/original excerpts/i, "excerpts");
+        const button2 = document.createElement("button");
+        button2.type = "button";
+        button2.className = "unified-excerpt-button";
+        const name = summary.querySelector("span:not(.claim-evidence-count)")?.textContent || summary.textContent || "Original excerpts";
+        const count = summary.querySelector(".claim-evidence-count")?.textContent;
+        button2.append(document.createTextNode(name.replace(/\s+(original\s+)?excerpts.*$/i, "").trim()));
+        if (count) {
+          const n = document.createElement("span");
+          n.textContent = count;
+          n.className = "unified-excerpt-total";
+          button2.append(n);
+        }
+        clone.id = `claim-excerpts-${++excerptId}`;
+        button2.id = `${clone.id}-control`;
+        button2.setAttribute("aria-controls", clone.id);
+        button2.setAttribute("aria-label", `${name}${count ? " \xB7 " + count : ""}`);
+        clone.setAttribute("aria-labelledby", button2.id);
+        const sync = () => button2.setAttribute("aria-expanded", String(clone.open));
+        sync();
+        clone.addEventListener("toggle", sync);
+        button2.onclick = () => {
+          const open = !clone.open;
+          detail.querySelectorAll("details").forEach((d) => {
+            d.open = false;
+            const control = controls.querySelector(`[aria-controls="${d.id}"]`);
+            control?.setAttribute("aria-expanded", "false");
+          });
+          clone.open = open;
+          sync();
+        };
+        controls.append(button2);
+        summary.hidden = true;
+      }
+      detail.append(clone);
+    });
+    target.append(detail);
+    target.querySelector(".di-reasons")?.remove();
+  }
+  const originals = Array.from(card.querySelectorAll("button")).filter((b) => !b.closest(".unified-actions") && /^(Hide from survey|Publish to survey|Save|Revert|Expand all|Collapse all|Edit synthesis text|Preview evidence)$/.test(b.textContent?.trim() || ""));
+  if (!originals.length) return;
+  originals.forEach((b) => b.classList.add("unified-original-action"));
+  let menu = main2.querySelector(".unified-actions");
+  if (!menu) {
+    menu = document.createElement("details");
+    menu.className = "unified-actions";
+    const summary = document.createElement("summary");
+    summary.textContent = "Synthesis actions";
+    menu.append(summary, document.createElement("div"));
+  }
+  const host = allMatched && progress ? progress.querySelector(".di-heading") : card.firstElementChild;
+  if (host && menu.parentElement !== host) host.append(menu);
+  const status = Array.from(card.querySelectorAll("p,div")).filter((p) => !p.closest(".unified-actions") && (p.textContent || "").length < 350).map((p) => p.textContent || "").find((t) => t.includes("All changes saved") || t.includes("unsaved")) || "";
+  const signature = originals.map((b) => `${b.textContent}:${b.disabled}`).join("|") + status;
+  if (menu.dataset.signature !== signature) {
+    menu.dataset.signature = signature;
+    const items = menu.lastElementChild;
+    items.replaceChildren();
+    if (status) {
+      const note = document.createElement("p");
+      note.textContent = status;
+      items.append(note);
+    }
+    originals.filter((b) => !b.disabled || !["Save", "Revert"].includes(b.textContent?.trim() || "")).forEach((original) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = original.textContent;
+      b.disabled = original.disabled;
+      b.onclick = () => {
+        menu.open = false;
+        const label = original.textContent?.trim();
+        if (label === "Expand all" || label === "Collapse all") progress?.querySelectorAll(".di-reasons,.unified-excerpts details").forEach((d) => d.open = label === "Expand all");
+        original.click();
+        if (label === "Edit synthesis text") {
+          card.classList.add("unified-editing");
+          card.scrollIntoView({ block: "start" });
+        }
+      };
+      items.append(b);
+    });
+  }
+}
+
+// src/examples/claimLayoutEntry.ts
+var main = document.querySelector("main");
 var el2 = (tag, text = "", cls = "") => {
   const n = document.createElement(tag);
   n.textContent = text;
   n.className = cls;
   return n;
 };
-var btn = (text, fn) => {
-  const n = el2("button", text);
-  n.type = "button";
-  n.onclick = fn;
-  return n;
-};
-var selected = 3;
-function draw(root2) {
-  root2.replaceChildren();
-  const top = el2("div", "", "demo-topline");
-  top.append(el2("span", "SYNTHETIC DELPHI \xB7 8 FICTIONAL EXPERTS", "di-eyebrow"));
-  const standalone = location.pathname.startsWith("/examples/");
-  const back = el2("a", standalone ? "Dashboard" : "Back to consultation");
-  back.href = standalone ? "/" : location.pathname;
-  top.append(back);
-  root2.append(top);
-  root2.append(el2("h2", example.fixture.title, "demo-title"));
-  root2.append(el2("p", "1. Share ideas \xB7 2. Rate the claims \xB7 3. Review and rate again. The claims stay the same; the reasoning can develop.", "demo-deck"));
-  const provenance = el2("details", "", "demo-protocol");
-  provenance.append(el2("summary", "About this simulation"));
-  provenance.append(el2("p", example.fixture.method + " The 24 submissions were processed by an isolated test instance of the application. This is a saved demonstration, separate from live consultation responses."));
-  provenance.append(el2("p", "Protocol: eight returning participants; 80% agreement or disagreement, with uncertainty included; all eight responses required. Stop after three rounds and report unresolved claims. Claims stay unchanged between rating rounds."));
-  root2.append(provenance);
-  const nav = el2("nav", "", "demo-rounds");
-  nav.setAttribute("aria-label", "Simulation rounds");
-  const label = el2("label", "Viewing round ");
-  const select = document.createElement("select");
-  select.setAttribute("aria-label", "Simulation round");
-  example.rounds.forEach((r) => {
-    const o = document.createElement("option");
-    o.value = String(r.round_number);
-    o.textContent = `Round ${r.round_number} \xB7 ${["Share ideas", "Rate the claims", "Review and rate again"][r.round_number - 1] || "Review"}`;
-    o.selected = selected === r.round_number;
-    select.append(o);
-  });
-  select.onchange = () => {
-    selected = Number(select.value);
-    draw(root2);
-  };
-  label.append(select);
-  nav.append(label);
-  root2.append(nav);
-  const narrative = el2("div", "", "demo-narrative");
-  if (selected === 1) {
-    narrative.append(el2("h3", "Different starting points"), el2("p", "Eight roles bring different priorities: capacity, fairness, worker protection, fiscal flexibility and public accountability. Four candidate claims are distilled from their proposals; no agreement percentage is inferred from these paragraphs."));
-  }
-  if (selected === 2) {
-    narrative.append(el2("h3", "The first ratings reveal the fault lines"), el2("p", "Human appeals have broad support. The staffing earmark splits the panel evenly. Five respondents favour universal model disclosure, while others question whether it is the right route to accountability."));
-  }
-  if (selected === 3) {
-    narrative.append(el2("h3", "Common ground, with questions still open"), el2("p", "All eight support human appeal; seven reject universal model disclosure. Routine automation gains support but remains below the threshold. The staffing earmark stays split 4\u20134: protecting staff versus keeping budgets flexible."));
-  }
-  if (example.fixture.narratives) {
-    narrative.replaceChildren(el2("h3", ["Independent starting points", "Where opinions differ", "What the panel learned"][selected - 1]), el2("p", example.fixture.narratives[selected - 1]));
-  }
-  root2.append(narrative);
-  if (selected === 3) {
-    const matrix = el2("details", "", "demo-matrix");
-    matrix.append(el2("summary", "See the eight perspectives side by side"));
-    const table = el2("table");
-    table.append(el2("caption", "Round 2 \u2192 Round 3. Fictional roles; original claims unchanged."));
-    const head = el2("tr");
-    ["Perspective", ...example.fixture.short_labels || ["Human appeal", "Routine automation", "Staffing earmark", "Full model release"]].forEach((t) => {
-      const th = el2("th", t);
-      th.setAttribute("scope", "col");
-      head.append(th);
+var results = el2("section");
+results.id = "delphi-recorded-progress";
+main.append(results);
+var source = el2("section", "", "card");
+var preview = el2("div", "", "claim-evidence-preview");
+source.append(preview);
+main.append(source);
+research_ai_results_default.fixture.claims.forEach((claim, index) => {
+  const article = el2("article", "", "claim-evidence-claim");
+  const title = el2("div", "", "claim-evidence-claim-heading");
+  title.append(el2("strong", claim));
+  article.append(title);
+  for (const [label, vote] of [["Supporting", "Agree"], ["Opposing", "Disagree"], ["Uncertain", "Unable"]]) {
+    const experts = research_ai_results_default.fixture.experts.filter((e) => e.round3.votes[index].startsWith(vote));
+    if (!experts.length) continue;
+    const group = el2("details", "", "claim-evidence-group");
+    const summary = el2("summary");
+    summary.append(el2("span", `${label} original excerpts`), el2("span", String(experts.length), "claim-evidence-count"));
+    group.append(summary);
+    const cards = el2("div", "", "claim-evidence-cards");
+    experts.forEach((e) => {
+      const card = el2("div", "", "claim-evidence-card");
+      card.append(el2("p", e.role, "claim-evidence-expert"), el2("blockquote", e.round3.comments[index], "claim-evidence-quote"));
+      cards.append(card);
     });
-    const thead = el2("thead");
-    thead.append(head);
-    table.append(thead);
-    const tbody = el2("tbody");
-    example.fixture.experts.forEach((e) => {
-      const row = el2("tr");
-      const label2 = el2("th", e.role);
-      label2.setAttribute("scope", "row");
-      row.append(label2);
-      e.round3.votes.forEach((v, i) => {
-        const short = (x) => x.startsWith("Unable") ? "Unsure" : x;
-        const before = e.round2.votes[i];
-        const cell = el2("td", before === v ? short(v) : `${short(before)} \u2192 ${short(v)}`);
-        if (before !== v) cell.className = "demo-vote-changed";
-        row.append(cell);
-      });
-      tbody.append(row);
-    });
-    table.append(tbody);
-    const scroll = el2("div", "", "demo-table-scroll");
-    scroll.tabIndex = 0;
-    scroll.setAttribute("role", "region");
-    scroll.setAttribute("aria-label", "Perspective ratings, scroll horizontally on small screens");
-    scroll.append(table);
-    matrix.append(scroll);
-    root2.append(matrix);
+    group.append(cards);
+    article.append(group);
   }
-  if (selected === 1) {
-    const proposals = el2("div", "", "demo-proposals");
-    example.fixture.experts.forEach((e, i) => {
-      const d = el2("details");
-      d.append(el2("summary", `Perspective ${i + 1} \xB7 ${e.role}`), el2("p", e.proposal));
-      proposals.append(d);
-    });
-    root2.append(proposals);
-    const claims = el2("section", "", "demo-candidates");
-    claims.append(el2("h3", "Four claims for the next round"));
-    example.fixture.claims.forEach((c, i) => claims.append(el2("p", `${i + 1}. ${c}`)));
-    root2.append(claims);
-  } else {
-    const results = el2("section");
-    results.setAttribute("aria-label", "Synthetic Delphi results");
-    renderDelphiInsights(results, example.rounds[selected - 1], example.rounds, example.responses);
-    root2.append(results);
-  }
-  const footer = el2("div", "", "demo-footer");
-  if (selected > 1) footer.append(btn("Previous round", () => {
-    selected--;
-    draw(root2);
-  }));
-  if (selected < 3) footer.append(btn("Continue to next round", () => {
-    selected++;
-    draw(root2);
-  }));
-  root2.append(footer);
-}
-function mountResearchExample(root2) {
-  example = research_ai_results_default;
-  selected = 3;
-  draw(root2);
-}
-function sync() {
-  if (location.pathname.startsWith("/examples/")) return;
-  if (new URLSearchParams(location.search).get("demo") === "research-ai") {
-    location.replace("/examples/research-ai.html");
-    return;
-  }
-  for (const [id, label] of [["toggle-public-share", "Public share link"], ["toggle-consent-step", "Consent step"]]) {
-    const control = document.getElementById(id);
-    if (control && !control.getAttribute("aria-label")) control.setAttribute("aria-label", label);
-  }
-  const main = document.querySelector("main");
-  const isSummary = /^\/admin\/form\/\d+\/summary\/?$/.test(location.pathname) && !!main?.querySelector("#summary-workspace-select");
-  if (isSummary && main) {
-    for (const label of main.querySelectorAll("aside span")) if (label.childElementCount === 0 && label.textContent === "Participants") label.textContent = "Responses";
-    for (const analysis of main.querySelectorAll(".structured-synthesis")) {
-      const values = Array.from(analysis.querySelectorAll(".structured-stat-value"));
-      const empty = values.length === 4 && values.every((v) => v.textContent?.trim() === "0") && !analysis.querySelector(".structured-section-header");
-      analysis.classList.toggle("di-empty-analysis", empty);
-      const existing = analysis.querySelector(".di-analysis-empty");
-      if (empty && !existing) analysis.prepend(el2("p", "No structured analysis items are available for this synthesis. See recorded participant ratings in the Synthesis view.", "di-analysis-empty"));
-      if (!empty) existing?.remove();
-    }
-  }
-  const demoKey = new URLSearchParams(location.search).get("demo");
-  const requested = demoKey === "public-ai" || demoKey === "research-ai";
-  example = demoKey === "research-ai" ? research_ai_results_default : public_ai_results_default;
-  const active = isSummary && requested;
-  document.body.classList.toggle("delphi-demo-active", active);
-  let root2 = document.getElementById("delphi-demo-workspace");
-  if (!active || root2?.dataset.example !== demoKey) {
-    root2?.remove();
-    root2 = null;
-  }
-  if (active && main && !root2) {
-    root2 = el2("section", "", "demo-workspace");
-    root2.id = "delphi-demo-workspace";
-    root2.dataset.example = demoKey || "";
-    selected = 3;
-    const grid = main.querySelector(":scope > div > .grid");
-    if (grid) {
-      grid.before(root2);
-      draw(root2);
-    }
-  }
-  const researchRoute = /^\/admin\/form\/18(?:\/summary)?\/?$/.test(location.pathname);
-  if (!researchRoute || requested) document.getElementById("research-example-link")?.remove();
-  if (researchRoute && !requested && main && !document.getElementById("research-example-link")) {
-    const link = el2("a", "Explore the completed synthetic example \u2192", "demo-dashboard-link");
-    link.id = "research-example-link";
-    link.href = "/examples/research-ai.html";
-    main.prepend(link);
-  }
-  const dashboard = location.pathname === "/" && Array.from(main?.querySelectorAll("h1") || []).some((h) => h.textContent === "Consultations");
-  if (!dashboard) document.getElementById("delphi-demo-link")?.remove();
-  if (dashboard && !document.getElementById("delphi-demo-link")) {
-    const link = el2("a", "", "demo-dashboard-link");
-    link.id = "delphi-demo-link";
-    link.href = "/examples/research-ai.html";
-    link.append(el2("strong", "Example: AI in university research"), el2("span", "8 fictional experts \xB7 3 rounds \xB7 explore the completed example \u2192"));
-    main.prepend(link);
-  }
-}
-var scheduled = false;
-new MutationObserver(() => {
-  if (scheduled) return;
-  scheduled = true;
-  queueMicrotask(() => {
-    scheduled = false;
-    sync();
-  });
-}).observe(document.body, { childList: true, subtree: true });
-window.addEventListener("popstate", sync);
-sync();
-
-// src/examples/researchEntry.ts
-var root = document.getElementById("research-example");
-if (root) mountResearchExample(root);
+  preview.append(article);
+});
+renderDelphiInsights(results, research_ai_results_default.rounds[2], research_ai_results_default.rounds, research_ai_results_default.responses);
+unifyClaims(main);
+new MutationObserver(() => unifyClaims(main)).observe(results, { childList: true, subtree: true });
