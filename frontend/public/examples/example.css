@@ -423,6 +423,38 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
  .delphi-insights .di-reasons>summary,.delphi-insights .di-filters button { min-height:44px; }
 }
 
+/* Draft controls: content identity first, secondary actions kept quiet. */
+.synthesis-draft-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.synthesis-draft-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0;}
+.synthesis-draft-title h2{font-size:16px!important;line-height:1.5;font-weight:600;margin:0!important;}
+.synthesis-draft-state{font-size:11px;color:var(--muted-foreground);background:var(--muted);border-radius:4px;padding:3px 7px;white-space:nowrap;}
+.synthesis-draft-note{flex-basis:100%;margin:0!important;font-size:12px;line-height:1.6;color:var(--muted-foreground);}
+.synthesis-draft-buttons{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.synthesis-draft-buttons button{font-size:12px;min-height:36px;padding:7px 11px;border:1px solid var(--border);border-radius:6px;background:var(--background);color:var(--foreground);cursor:pointer;}
+.synthesis-draft-buttons button:disabled{opacity:.5;cursor:default;}
+.synthesis-draft-buttons .synthesis-primary{background:var(--accent);border-color:var(--accent);color:white;}
+.synthesis-draft-buttons .synthesis-publish{border-color:transparent;color:var(--muted-foreground);}
+.synthesis-draft-header .unified-actions{margin:0;}
+.product-summary .synthesis-generator{font-size:13px;}
+.synthesis-generator-heading{padding-right:65px;margin-bottom:22px;}
+.synthesis-generator-heading h3{font-size:17px;font-weight:600;margin:0 0 5px;}
+.synthesis-generator-heading p{font-size:12px;color:var(--muted-foreground);margin:0;}
+.synthesis-generator > div > label,.synthesis-field{display:block;margin:0 0 18px!important;}
+.synthesis-generator label > span:first-child,.synthesis-field > span{display:block;font-size:12px!important;font-weight:500!important;text-transform:none!important;letter-spacing:0!important;margin:0 0 7px!important;color:var(--foreground)!important;}
+.synthesis-generator select{width:100%!important;max-width:none!important;min-height:42px;border:1px solid var(--border)!important;background:var(--background)!important;border-radius:7px;padding:9px 11px!important;font-size:13px!important;color:var(--foreground);}
+.synthesis-field small{display:block;margin-top:6px;font-size:12px;line-height:1.5;color:var(--muted-foreground);}
+.synthesis-generator textarea{resize:vertical!important;min-height:110px;}
+.synthesis-optional{border:0!important;border-top:1px solid var(--border)!important;border-radius:0!important;margin:18px 0 0!important;background:transparent!important;}
+.synthesis-optional > summary{padding:13px 0;cursor:pointer;font-size:12px;font-weight:500;color:var(--muted-foreground);}
+.synthesis-optional > div{margin-bottom:12px;}
+.synthesis-generate-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--border);margin-top:4px!important;padding-top:16px;}
+.synthesis-generate-footer p{margin:0;font-size:12px;line-height:1.5;color:var(--muted-foreground);}
+.synthesis-generate-footer button{min-height:40px;white-space:nowrap;}
+.synthesis-generator:has(.synthesis-generator-heading) > .summary-panel-close{position:absolute;right:18px;top:18px;}
+@media(max-width:600px){.synthesis-draft-header{flex-direction:column;gap:12px;}.synthesis-draft-buttons{justify-content:flex-start;}.synthesis-draft-buttons button{min-height:44px;}.synthesis-generate-footer{align-items:stretch;flex-direction:column;gap:10px;}}
+.synthesis-preview-generate{border:1px solid var(--accent);background:var(--accent);color:white;border-radius:7px;padding:9px 14px;font-size:13px;cursor:pointer;}
+.synthesis-generator label:has(#model-select) > span:first-child{display:block!important;}
+
 .response-reading{max-width:760px;margin:0 auto;color:var(--foreground)}
 .rr-section{padding:28px 0;border-bottom:1px solid var(--border)}
 .rr-section:first-child{padding-top:8px}.rr-section:last-child{border-bottom:0}

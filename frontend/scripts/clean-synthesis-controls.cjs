@@ -1,0 +1,44 @@
+// Keep the legacy editor, API callbacks and input-preview dialog intact.
+const fs=require('node:fs'),{parse,parseExpression}=require('@babel/parser'),generate=require('@babel/generator').default;
+const input='dist/assets/SummaryPage-workspace-v2.js';
+let code=fs.readFileSync(input,'utf8');
+const ast=parse(code,{sourceType:'module'});
+const prop=(n,k)=>n.arguments[1].properties.find(p=>p.key.name===k);
+const children=n=>prop(n,'children').value;
+const expr=s=>parseExpression(s);
+const fn=name=>ast.program.body.find(n=>n.type==='FunctionDeclaration'&&n.id.name===name);
+const editor=fn('lt'), generator=fn('dt');
+if(!editor||!generator)throw Error('Expected legacy components');
+const ret=editor.body.body.find(n=>n.type==='ReturnStatement').argument;
+const rows=children(ret).elements;
+// One quiet identity line, a short provenance note and actions only when useful.
+rows[0]=expr(`e.jsxs("header",{className:"synthesis-draft-header",children:[e.jsxs("div",{className:"synthesis-draft-title",children:[e.jsx("h2",{children:N?"Question summaries":"Round "+(s?.round_number||"")+" synthesis"}),e.jsx("span",{className:"synthesis-draft-state",children:n?"Unsaved changes":c?"Published":"Draft"}),t&&!N&&e.jsx("p",{className:"synthesis-draft-note",title:t,children:/carried forward from Round (\\d+)/i.test(t)?"Based on Round "+t.match(/carried forward from Round (\\d+)/i)[1]+" · Save to create this round’s draft.":t})]}),e.jsxs("div",{className:"synthesis-draft-buttons",children:[!_&&a&&d?e.jsx("button",{type:"button",onClick:d,children:"Generate draft"}):null,n||l?e.jsxs(e.Fragment,{children:[e.jsx("button",{type:"button",onClick:v,disabled:l,children:"Revert"}),e.jsx("button",{type:"button",onClick:m,disabled:l,className:"synthesis-primary",children:l?"Saving…":"Save"})]}):null,e.jsx("button",{type:"button",onClick:y,disabled:i||(!_&&!c),className:"synthesis-publish",children:i?"Updating…":c?"Hide from survey":"Publish to survey"})]})]})`);
+rows.splice(1,1); // Redundant saved/public-state paragraph, now in the header.
+// Use the existing generator fields, prompt persistence, spend data and callbacks.
+const genret=generator.body.body.find(n=>n.type==='ReturnStatement').argument;
+const disclosure=children(genret).elements[0];
+const panel=children(disclosure).elements[1];
+prop(panel,'className').value=expr('"card p-4 synthesis-generator"');
+const body=children(panel), old=children(body).elements;
+if(old.length!==7)throw Error('Generator shape changed: '+old.length);
+const model=old[1].alternate;
+children(model).elements=children(model).elements.slice(0,2); // Drop duplicate model description.
+const modes=old[4].alternate;
+children(modes).elements[0]=expr('null');
+children(modes).elements[1]=expr(`e.jsxs("label",{className:"synthesis-field",children:[e.jsx("span",{children:"Method"}),e.jsxs("select",{"aria-label":"Method",value:s,onChange:f=>t(f.target.value),children:[e.jsx("option",{value:"simple",children:"Simple"}),e.jsx("option",{value:"custom",children:"Custom instructions"}),e.jsx("option",{value:"committee",children:"Committee"}),e.jsx("option",{value:"ttd",children:"Thorough analysis"})]}),e.jsx("small",{children:s==="committee"?"Multiple perspectives, combined into one draft.":s==="ttd"?"A deeper review; takes longer.":s==="custom"?"Add your instructions below.":"A concise synthesis of this round’s responses."})]})`);
+const question=old[4].consequent;
+children(question).elements.pop(); // One shared generation action below both modes.
+const spend=old[3].alternate;
+children(body).elements=[
+ expr(`e.jsxs("div",{className:"synthesis-generator-heading",children:[e.jsx("h3",{children:"Create a draft"}),e.jsx("p",{children:l+" response"+(l===1?"":"s")+(N&&n?" · "+n:"")})]})`),
+ model,expr(`y?${generate(question).code}:${generate(modes).code}`),
+ expr(`e.jsxs("details",{className:"synthesis-optional",children:[e.jsx("summary",{children:"Usage and cost"}),${generate(spend).code}]})`),
+ expr(`e.jsxs("div",{className:"synthesis-generate-footer",children:[e.jsx("p",{children:N?"Review the draft before publishing.":"Waiting for responses"}),e.jsx(be,{variant:N?"accent":"secondary",size:"sm",loading:c,loadingText:"Generating…",onClick:i,disabled:!N,children:"Generate draft"})]})`)
+];
+const edits=[editor,generator].map(n=>({start:n.start,end:n.end,text:generate(n,{compact:true}).code}));
+for(const edit of edits.sort((a,b)=>b.start-a.start))code=code.slice(0,edit.start)+edit.text+code.slice(edit.end);
+parse(code,{sourceType:'module'});
+fs.writeFileSync('dist/assets/SummaryPage-workspace-v3.js',code);
+let index=fs.readFileSync('dist/index.html','utf8').replace('SummaryPage-workspace-v2.js','SummaryPage-workspace-v3.js').replace('product.css?v=7','product.css?v=8').replace('product-ui.js?v=6','product-ui.js?v=7');fs.writeFileSync('dist/index.html',index);
+// Render the exact deployed components against inert synthetic props for visual QA.
+fs.writeFileSync('src/examples/synthesisControlsFixture.ts',`// @ts-nocheck\n// Generated by clean-synthesis-controls.cjs. Synthetic, no API calls.\nimport * as o from 'react';\nimport * as e from 'react/jsx-runtime';\nconst kn={},ct={};const Cn=()=>({}),Sn=()=>[];const es=v=>typeof v==='number'?'$'+v.toFixed(2):'—';const Rr=()=>null;\nconst be=({children,onClick,disabled,loading})=>e.jsx('button',{onClick,disabled:disabled||loading,className:'synthesis-preview-generate',children:loading?'Generating…':children});\nconst Ft=()=>e.jsx('p',{children:'A synthetic draft for reviewing the layout. The claims and original responses remain below.'});\n${generate(editor).code}\n${generate(generator).code}\nexport function DraftFixture(){const [dirty,setDirty]=o.useState(false),[published,setPublished]=o.useState(false);return e.jsxs(e.Fragment,{children:[e.jsx(lt,{activeRound:{round_number:2,synthesis:'Synthetic draft'},contextNote:'This draft is carried forward from Round 1. Update and save it as the Round 2 synthesis.',isDirty:dirty,isPublished:published,onSave:()=>setDirty(false),onRevert:()=>setDirty(false),onTogglePublished:()=>setPublished(!published)}),e.jsx('button',{onClick:()=>setDirty(true),children:'Simulate an edit'})]});}\nexport function GeneratorFixture(){const [mode,setMode]=o.useState('simple'),[model,setModel]=o.useState('Example model'),[done,setDone]=o.useState(false);return e.jsxs(e.Fragment,{children:[e.jsx(dt,{synthesisMode:mode,onModeChange:setMode,selectedModel:model,onModelChange:setModel,models:['Example model','Another example model'],responseCount:8,estimateLabel:'About 30 seconds',onGenerate:()=>setDone(true)}),done&&e.jsx('p',{role:'status',children:'Preview only — no synthesis generated.'})]});}\n`);

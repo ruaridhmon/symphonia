@@ -20,7 +20,7 @@ export function unifyClaims(main:HTMLElement){
  card.classList.toggle('unified-synthesis',allMatched);
  card.classList.toggle('unified-editing',editing);
  for(const item of source)item.classList.toggle('unified-matched',matched.includes(item));
- const carry=Array.from(card.querySelectorAll('p,div')).find(p=>!p.closest('.unified-actions')&&(p.textContent||'').length<350&&p.textContent?.includes('carried forward'))?.textContent||'';
+ const carry=Array.from(card.querySelectorAll('p,div')).find(p=>!p.closest('.unified-actions')&&(p.textContent||'').length<350&&(p.textContent?.includes('carried forward')||p.classList.contains('synthesis-draft-note')))?.textContent||'';
  for(const target of progress?.querySelectorAll<HTMLElement>('.di-claim')||[]){
   const label=claimText(target.querySelector('h3')?.textContent||'');
   const candidates=matched.filter(c=>claimText(c.querySelector('.claim-evidence-claim-heading strong')?.textContent||'')===label);
@@ -64,7 +64,7 @@ export function unifyClaims(main:HTMLElement){
  // Retain all original editor/publishing handlers, accessed through a compact disclosure.
  const originals=Array.from(card.querySelectorAll<HTMLButtonElement>('button')).filter(b=>!b.closest('.unified-actions')&&/^(Hide from survey|Publish to survey|Save|Revert|Expand all|Collapse all|Edit synthesis text|Preview evidence)$/.test(b.textContent?.trim()||''));
  if(!originals.length)return;
- originals.forEach(b=>b.classList.add('unified-original-action'));
+ originals.forEach(b=>b.classList.toggle('unified-original-action',allMatched||!b.closest('.synthesis-draft-header')));
  let menu=main.querySelector<HTMLDetailsElement>('.unified-actions');
  if(!menu){menu=document.createElement('details');menu.className='unified-actions';const summary=document.createElement('summary');summary.textContent='Synthesis actions';menu.append(summary,document.createElement('div'));}
  const host=allMatched&&progress?progress.querySelector('.di-heading'):card.firstElementChild;
@@ -74,7 +74,7 @@ export function unifyClaims(main:HTMLElement){
  if(menu.dataset.signature!==signature){
   menu.dataset.signature=signature;const items=menu.lastElementChild!;items.replaceChildren();
   if(status){const note=document.createElement('p');note.textContent=status;items.append(note);}
-  originals.filter(b=>!b.disabled||!['Save','Revert'].includes(b.textContent?.trim()||'')).forEach(original=>{
+  originals.filter(b=>(allMatched||!b.closest('.synthesis-draft-header'))&&(!b.disabled||!['Save','Revert'].includes(b.textContent?.trim()||''))).forEach(original=>{
    const b=document.createElement('button');b.type='button';b.textContent=original.textContent;b.disabled=original.disabled;
    b.onclick=()=>{
     menu!.open=false;
