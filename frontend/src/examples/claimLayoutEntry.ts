@@ -1,3 +1,8 @@
+import * as React from 'react';
+import {createRoot} from 'react-dom/client';
+import {createResponseWorkspace} from '../utils/responseWorkspace';
+import {renderResponseReading} from '../utils/responseReading';
+import {enhanceSynthesisControls} from '../utils/synthesisControls';
 // Visual regression fixture. Public synthetic responses only; never calls the API.
 import data from '../demos/research-ai-results.json';
 import { renderDelphiInsights } from '../utils/renderDelphiInsights';
@@ -5,6 +10,9 @@ import { unifyClaims } from '../utils/unifiedClaims';
 import type { Round, RoundWithResponses } from '../types/summary';
 const main=document.querySelector<HTMLElement>('main')!;
 const el=(tag:string,text='',cls='')=>{const n=document.createElement(tag);n.textContent=text;n.className=cls;return n;};
+const toolbar=el('aside');toolbar.setAttribute('aria-label','Synthesis controls');
+toolbar.innerHTML='<details class="summary-disclosure"><summary><span>Generate synthesis</span></summary><div class="card"><label>Synthesis method <select><option>Simple</option><option>Committee</option></select></label><label>Instructions<textarea rows="5" placeholder="Optional instructions"></textarea></label><p>Preview controls only. No synthesis will be generated.</p></div></details><details class="summary-disclosure"><summary><span>Version history</span></summary><div class="card"><h3>Versions</h3><button type="button">Version 3 · Published</button><button type="button">Version 2</button><p>These sample controls demonstrate the same panel behaviour.</p></div></details>';
+main.append(toolbar);enhanceSynthesisControls(main);
 const results=el('section');results.id='delphi-recorded-progress';main.append(results);
 const source=el('section','','card');const preview=el('div','','claim-evidence-preview');source.append(preview);main.append(source);
 data.fixture.claims.forEach((claim,index)=>{
@@ -20,3 +28,10 @@ renderDelphiInsights(results,data.rounds[2] as unknown as Round,data.rounds as u
 unifyClaims(main);
 // Reapply the same presentation adapter after filtering, as the application does.
 new MutationObserver(()=>unifyClaims(main)).observe(results,{childList:true,subtree:true});
+
+const responsePreview=el('div');responsePreview.hidden=true;main.append(responsePreview);
+const PreviewEditor=({questions,response}:any)=>renderResponseReading(React.createElement,questions,response.answers);
+const Workspace=createResponseWorkspace(React,PreviewEditor);
+createRoot(responsePreview).render(React.createElement(Workspace,{structuredRounds:data.responses as unknown as RoundWithResponses[],rounds:data.rounds as unknown as Round[],formQuestions:[],initialRoundId:data.rounds[2].id,onResponseUpdated:()=>{}}));
+const switcher=document.querySelector<HTMLSelectElement>('[aria-label="Preview surface"]');
+if(switcher)switcher.onchange=()=>{const showResponses=switcher.value==='responses';responsePreview.hidden=!showResponses;results.hidden=showResponses;toolbar.hidden=showResponses;source.hidden=showResponses;};

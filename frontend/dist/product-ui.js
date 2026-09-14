@@ -1,3 +1,60 @@
+// src/utils/synthesisControls.ts
+var bound = /* @__PURE__ */ new WeakSet();
+var panelId = 0;
+function enhanceSynthesisControls(main) {
+  const toolbar = main.querySelector('aside[aria-label="Synthesis controls"]');
+  if (!toolbar) return;
+  for (const detail of toolbar.querySelectorAll(":scope > details.summary-disclosure")) {
+    if (bound.has(detail)) continue;
+    bound.add(detail);
+    const trigger = detail.querySelector(":scope > summary");
+    const panel = detail.querySelector(":scope > .card");
+    if (!trigger || !panel) continue;
+    panel.id ||= `synthesis-panel-${++panelId}`;
+    trigger.setAttribute("aria-controls", panel.id);
+    panel.setAttribute("role", "region");
+    panel.setAttribute("aria-label", trigger.querySelector("span")?.textContent || "Synthesis settings");
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "summary-panel-close";
+    close.textContent = "Close";
+    close.setAttribute("aria-label", `Close ${panel.getAttribute("aria-label")?.toLowerCase()}`);
+    close.onclick = () => {
+      detail.open = false;
+      trigger.focus();
+    };
+    panel.prepend(close);
+    const sync = () => {
+      trigger.setAttribute("aria-expanded", String(detail.open));
+      if (detail.open) toolbar.querySelectorAll("details.summary-disclosure").forEach((other) => {
+        if (other !== detail) other.open = false;
+      });
+    };
+    detail.addEventListener("toggle", sync);
+    sync();
+  }
+  if (bound.has(toolbar)) return;
+  bound.add(toolbar);
+  toolbar.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const open = toolbar.querySelector("details.summary-disclosure[open]");
+    if (open) {
+      event.preventDefault();
+      open.open = false;
+      open.querySelector("summary")?.focus();
+    }
+  });
+  const outside = (event) => {
+    if (!toolbar.isConnected) {
+      document.removeEventListener("pointerdown", outside);
+      return;
+    }
+    if (toolbar.contains(event.target)) return;
+    toolbar.querySelectorAll("details.summary-disclosure[open]").forEach((d) => d.open = false);
+  };
+  document.addEventListener("pointerdown", outside);
+}
+
 // src/utils/unifiedClaims.ts
 var claimText = (s) => s.replace(/^\s*Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim();
 var previous = /* @__PURE__ */ new WeakMap();
@@ -281,10 +338,11 @@ function syncProductUI() {
   const main = document.querySelector("main");
   if (!main) return;
   unifyClaims(main);
+  enhanceSynthesisControls(main);
   const dashboard = location.pathname === "/" && !!main.querySelector('input[aria-label="Search consultations"]');
   main.classList.toggle("product-dashboard", dashboard);
   if (dashboard) enhanceConsultationInbox(main);
-  main.classList.toggle("product-summary", !!main.querySelector('aside[aria-label="Synthesis controls"]'));
+  main.classList.toggle("product-summary", !!main.querySelector('#summary-workspace-select,aside[aria-label="Synthesis controls"]'));
   const select = main.querySelector("#summary-workspace-select");
   if (select) {
     select.closest("label")?.classList.add("product-view-control");

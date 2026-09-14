@@ -220,7 +220,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   root.append(head);
   const ordered = [...rounds].filter((r) => r.round_number <= round.round_number).sort((a, b) => a.round_number - b.round_number);
   const actual = responses.find((r) => r.id === round.id)?.responses.length;
-  const intro = node("p", `Round ${round.round_number} \xB7 ${actual ?? "\u2014"} responses${rows.length ? ` \xB7 ${rows.length} claims` : ""}`, "di-subtitle");
+  const intro = node("p", `Round ${round.round_number} \xB7 ${actual ?? "\u2014"} responses`, "di-subtitle");
   root.append(intro);
   const note = synthesisProvenanceNote(round, rounds);
   if (note) root.append(node("p", note, "di-warning"));
@@ -293,7 +293,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     if (row.history.filter((h) => h.n > 0).length > 1) {
       const previous = row.history.filter((h) => h.n > 0).at(-2);
       const trend = node("div", "", "di-trend");
-      if (row.delta !== null) {
+      if (row.delta !== null && Math.round(row.delta) !== 0) {
         const change = Math.round(row.delta);
         trend.append(node("span", change === 0 ? "No change" : `${change > 0 ? "+" : "\u2212"}${Math.abs(change)} pp`, "di-change"), node("span", `since R${previous.round}`));
         trend.title = `Agreement: Round ${previous.round} ${Math.round(previous.percent)}% \u2192 Round ${round.round_number} ${Math.round(row.percent)}%. Change in percentage points.`;

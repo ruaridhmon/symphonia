@@ -26,7 +26,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   const title=node('div','','di-title');title.append(node('h2','Where views stand'));if(refresh)title.append(button('Refresh',refresh));head.append(title);root.append(head);
   const ordered=[...rounds].filter(r=>r.round_number<=round.round_number).sort((a,b)=>a.round_number-b.round_number);
   const actual=responses.find(r=>r.id===round.id)?.responses.length;
-  const intro=node('p',`Round ${round.round_number} · ${actual ?? '—'} responses${rows.length ? ` · ${rows.length} claims` : ''}`,'di-subtitle');root.append(intro);
+  const intro=node('p',`Round ${round.round_number} · ${actual ?? '—'} responses`,'di-subtitle');root.append(intro);
   const note=synthesisProvenanceNote(round,rounds);if(note)root.append(node('p',note,'di-warning'));
   if(!rows.length) {root.append(node('p',actual===0?'No responses yet for this round. Responses will appear here as participants submit them.':round.round_number===1?'This round gathers independent views. Extract claims from the responses before setting up the rating round.':'There are no comparable claim ratings in this round. Review the written responses or synthesis below.','di-empty'));return;}
   const cats=['Mostly agree','Leaning agree','Divided','Leaning disagree','Mostly disagree','Uncertain'];
@@ -50,7 +50,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     if(row.history.filter(h=>h.n>0).length>1) {
       const previous=row.history.filter(h=>h.n>0).at(-2)!;
       const trend=node('div','','di-trend');
-      if(row.delta!==null){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since R${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}rating.append(trend);
+      if(row.delta!==null&&Math.round(row.delta)!==0){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since R${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}rating.append(trend);
     }
     const detail=document.createElement('details');detail.className='di-reasons';detail.dataset.key=row.key;detail.open=priorOpen.has(row.key);
     const summary=node('summary','Expert responses & history');detail.append(summary);
