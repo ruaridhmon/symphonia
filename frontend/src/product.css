@@ -304,3 +304,20 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
  .product-summary aside > .summary-refresh{margin-left:0!important;}
  .product-summary #delphi-recorded-progress .di-filters button{min-height:44px;}
 }
+
+/* Direct navigation suits the fixed three-round consultation. */
+.round-selector{align-self:flex-start;position:relative;flex-shrink:0;width:max-content;max-width:100%;margin-left:auto;}
+.round-selector-options{display:flex;align-items:stretch;gap:3px;padding:3px;border:1px solid var(--border);border-radius:9px;background:var(--muted);}
+.round-selector-options button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:76px;min-height:46px;padding:6px 12px;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--muted-foreground);cursor:pointer;}
+.round-selector-options button>span{font-size:12px;font-weight:500;white-space:nowrap;}
+.round-selector-options button>small{font-size:9px;line-height:1.2;}
+.round-selector-options button[aria-pressed=true]{background:var(--background);border-color:var(--border);color:var(--foreground);box-shadow:0 1px 2px #10182808;}
+.round-selector-options button:hover{color:var(--foreground);}
+.round-selector-actions{position:relative;margin-top:5px;text-align:right;}
+.round-selector-actions>summary{font-size:11px;color:var(--muted-foreground);cursor:pointer;list-style:none;padding:5px;}
+.round-selector-actions>summary::after{content:'⌄';margin-left:6px;}
+.round-selector-actions>div{position:absolute;right:0;top:100%;z-index:50;width:260px;padding:14px;text-align:left;border:1px solid var(--border);border-radius:8px;background:var(--background);box-shadow:0 8px 24px #14203320;}
+.round-selector-actions p{font-size:12px;line-height:1.5;color:var(--muted-foreground);margin:0 0 10px;}
+.round-selector-actions button,.round-selector select{min-height:40px;padding:8px 10px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:var(--background);color:var(--foreground);}
+.round-selector-label{display:block;font-size:12px;margin-bottom:5px;}
+@media(max-width:600px){.round-selector{margin-left:0;}.round-selector-actions>div{right:auto;left:0;max-width:calc(100vw - 40px);}}

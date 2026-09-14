@@ -1,3 +1,4 @@
+import {createRoundSelector} from '../utils/roundSelector';
 import {DraftFixture,GeneratorFixture} from './synthesisControlsFixture';
 import * as React from 'react';
 import {createRoot} from 'react-dom/client';
@@ -20,6 +21,7 @@ createRoot(controlsToolbar).render(React.createElement(GeneratorFixture));
 const draftPreview=el('div');controlsPreview.append(draftPreview);createRoot(draftPreview).render(React.createElement(DraftFixture));
 new MutationObserver(()=>enhanceSynthesisControls(controlsPreview)).observe(controlsToolbar,{childList:true,subtree:true});
 const layout=el('div');layout.className='summary-layout-regression';main.append(layout);layout.append(toolbar);const content=el('div');layout.append(content);
+const roundHost=el('div');roundHost.style.marginBottom='20px';layout.before(roundHost);const Rounds=createRoundSelector(React);function RoundPreview(){const [id,setId]=React.useState(data.rounds[2].id);return React.createElement(Rounds,{rounds:data.rounds as unknown as Round[],selectedRoundId:id,onSelectRound:r=>{setId(r.id);renderDelphiInsights(results,r,data.rounds as unknown as Round[],data.responses as unknown as RoundWithResponses[]);unifyClaims(main);enhanceSynthesisControls(main);}});}createRoot(roundHost).render(React.createElement(RoundPreview));
 const results=el('section');results.id='delphi-recorded-progress';content.append(results);
 const source=el('section','','card');const preview=el('div','','claim-evidence-preview');source.append(preview);content.append(source);
 data.fixture.claims.forEach((claim,index)=>{
