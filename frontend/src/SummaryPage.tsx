@@ -2404,6 +2404,7 @@ export default function SummaryPage() {
 						{activeWorkspaceTab === 'responses' && (
 							<SectionErrorBoundary fallbackTitle="Failed to render responses">
 								<ResponsesAccordion
+                                    initialRoundId={displayRound?.id}
 									structuredRounds={structuredRounds}
 									rounds={rounds}
 									formQuestions={form.questions || []}

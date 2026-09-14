@@ -1,3 +1,4 @@
+import { enhanceSynthesisControls } from '../utils/synthesisControls';
 import { unifyClaims } from '../utils/unifiedClaims';
 import { enhanceConsultationInbox } from '../utils/consultationInbox';
 // Presentation only. Native form controls retain their values and React handlers.
@@ -5,10 +6,11 @@ function syncProductUI() {
   const main = document.querySelector('main');
   if (!main) return;
   unifyClaims(main);
+  enhanceSynthesisControls(main);
   const dashboard = location.pathname === '/' && !!main.querySelector('input[aria-label="Search consultations"]');
   main.classList.toggle('product-dashboard', dashboard);
   if(dashboard)enhanceConsultationInbox(main);
-  main.classList.toggle('product-summary',!!main.querySelector('aside[aria-label="Synthesis controls"]'));
+  main.classList.toggle('product-summary',!!main.querySelector('#summary-workspace-select,aside[aria-label="Synthesis controls"]'));
   const select = main.querySelector<HTMLSelectElement>('#summary-workspace-select');
   if (select) {
     select.closest('label')?.classList.add('product-view-control');

@@ -5,5 +5,5 @@ fs.writeFileSync('public/examples/example.css',base+'\n'+fs.readFileSync('src/co
 execFileSync('./node_modules/.bin/esbuild',['src/examples/researchEntry.ts','--bundle','--format=esm','--outfile=public/examples/research-ai.js'],{stdio:'inherit'});
 for(const file of ['example.css','research-ai.js','research-ai.html'])fs.copyFileSync('public/examples/'+file,'dist/examples/'+file);
 
-execFileSync('./node_modules/.bin/esbuild',['src/examples/claimLayoutEntry.ts','--bundle','--format=esm','--outfile=public/examples/claim-layout.js'],{stdio:'inherit'});
+execFileSync('./node_modules/.bin/esbuild',['src/examples/claimLayoutEntry.ts','--bundle','--format=esm','--minify','--define:process.env.NODE_ENV="production"','--outfile=public/examples/claim-layout.js'],{stdio:'inherit'});
 for(const file of ['claim-layout.js','claim-layout.html'])fs.copyFileSync('public/examples/'+file,'dist/examples/'+file);
