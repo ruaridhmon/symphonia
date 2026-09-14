@@ -384,7 +384,7 @@ function render() {
     lastFetch = 0;
     failed = false;
   }
-  const heading = Array.from(document.querySelectorAll("h2")).find((n) => /Synthesis for Round \d+/.test(n.textContent || ""));
+  const heading = Array.from(document.querySelectorAll("h2")).find((n) => /(?:Synthesis for Round \d+|Round \d+ synthesis)/.test(n.textContent || ""));
   if (!heading) {
     document.getElementById("delphi-recorded-progress")?.remove();
     return;

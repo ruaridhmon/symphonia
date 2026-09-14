@@ -20,7 +20,7 @@ function render() {
   if (!match) { key = ''; cache = null; document.getElementById('delphi-recorded-progress')?.remove(); return; }
   const nextKey = match[1];
   if (key !== nextKey) { key = nextKey; cache = null; lastFetch = 0; failed = false; }
-  const heading = Array.from(document.querySelectorAll('h2')).find(n => /Synthesis for Round \d+/.test(n.textContent || ''));
+  const heading = Array.from(document.querySelectorAll('h2')).find(n => /(?:Synthesis for Round \d+|Round \d+ synthesis)/.test(n.textContent || ''));
   if (!heading) { document.getElementById('delphi-recorded-progress')?.remove(); return; }
   if (!pending && (!lastFetch || Date.now() - lastFetch > 30000)) {
     pending = true;

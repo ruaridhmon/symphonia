@@ -4,6 +4,21 @@ var panelId = 0;
 function enhanceSynthesisControls(main) {
   const toolbar = main.querySelector('aside[aria-label="Synthesis controls"]');
   if (!toolbar) return;
+  const progress = main.querySelector("#delphi-recorded-progress");
+  if (progress) {
+    main.classList.add("summary-with-results");
+    const refresh = progress.querySelector(".di-title > button");
+    if (refresh) {
+      toolbar.querySelector(".summary-refresh")?.remove();
+      refresh.classList.add("summary-refresh");
+      toolbar.append(refresh);
+    }
+    const actions = toolbar.querySelector(".unified-actions");
+    if (actions && actions !== toolbar.lastElementChild) toolbar.append(actions);
+  } else {
+    main.classList.remove("summary-with-results");
+    toolbar.querySelector(".summary-refresh")?.remove();
+  }
   for (const detail of toolbar.querySelectorAll(":scope > details.summary-disclosure")) {
     if (bound.has(detail)) continue;
     bound.add(detail);
@@ -170,7 +185,7 @@ function unifyClaims(main) {
     summary.textContent = "Synthesis actions";
     menu.append(summary, document.createElement("div"));
   }
-  const host = allMatched && progress ? progress.querySelector(".di-heading") : card.firstElementChild;
+  const host = allMatched && progress ? main.querySelector('aside[aria-label="Synthesis controls"]') || progress.querySelector(".di-heading") : card.firstElementChild;
   if (host && menu.parentElement !== host) host.append(menu);
   const status = Array.from(card.querySelectorAll("p,div")).filter((p) => !p.closest(".unified-actions") && (p.textContent || "").length < 350).map((p) => p.textContent || "").find((t) => t.includes("All changes saved") || t.includes("unsaved")) || "";
   const signature = originals.map((b) => `${b.textContent}:${b.disabled}`).join("|") + status;

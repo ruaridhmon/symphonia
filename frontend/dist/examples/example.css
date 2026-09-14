@@ -455,6 +455,32 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 .synthesis-preview-generate{border:1px solid var(--accent);background:var(--accent);color:white;border-radius:7px;padding:9px 14px;font-size:13px;cursor:pointer;}
 .synthesis-generator label:has(#model-select) > span:first-child{display:block!important;}
 
+/* A single compact tool row between navigation and the claim table. */
+#root main.product-summary > div > section:first-of-type{margin-bottom:20px!important;}
+#root main.product-summary > div > div[aria-live="polite"]:empty{display:none;}
+.product-summary div:has(> aside[aria-label="Synthesis controls"]){gap:4px!important;}
+.product-summary aside[aria-label="Synthesis controls"]{align-items:center;gap:6px;padding:0 0 8px;}
+.product-summary .summary-disclosure{border:0;background:transparent;}
+.product-summary .summary-disclosure > summary{padding:9px 26px 9px 10px;min-height:36px;border-radius:6px;}
+.product-summary .summary-disclosure > summary::after{content:'⌄';font-size:12px;top:9px;right:9px;}
+.product-summary .summary-disclosure[open] > summary::after{content:'⌃';}
+.product-summary .summary-disclosure > summary:hover{background:var(--muted);}
+.product-summary .summary-disclosure > summary > span{font-size:12px;}
+.product-summary.summary-with-results #delphi-recorded-progress .di-heading{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+.product-summary aside > .summary-refresh{margin-left:auto!important;min-height:36px!important;padding:8px 10px!important;font-size:12px!important;border:0;background:transparent;color:var(--muted-foreground);}
+.product-summary aside > .unified-actions{margin-left:auto!important;font-size:12px;}
+.product-summary aside > .summary-refresh + .unified-actions{margin-left:0!important;}
+.product-summary aside > .unified-actions > summary{min-height:36px;padding:8px 10px;border:0;border-radius:6px;font-size:12px;color:var(--muted-foreground);}
+.product-summary aside > .unified-actions[open] > summary,.product-summary aside > .unified-actions > summary:hover{background:var(--muted);}
+.product-summary #delphi-recorded-progress .di-filters{margin:4px 0 12px;gap:4px;}
+.product-summary #delphi-recorded-progress .di-filters button{min-height:32px;padding:6px 9px;font-size:11px;}
+@media(max-width:600px){
+ .product-summary .summary-disclosure > summary,.product-summary aside > .unified-actions > summary,.product-summary aside > .summary-refresh{min-height:44px!important;}
+ .product-summary aside > .unified-actions{margin-left:0!important;}
+ .product-summary aside > .summary-refresh{margin-left:0!important;}
+ .product-summary #delphi-recorded-progress .di-filters button{min-height:44px;}
+}
+
 .response-reading{max-width:760px;margin:0 auto;color:var(--foreground)}
 .rr-section{padding:28px 0;border-bottom:1px solid var(--border)}
 .rr-section:first-child{padding-top:8px}.rr-section:last-child{border-bottom:0}
