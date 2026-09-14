@@ -56,7 +56,8 @@ function createResponseWorkspace(R, Editor, remove) {
     const wasReading = R.useRef(false);
     const listScroll = R.useRef(0);
     const rows = R.useMemo(() => p.structuredRounds.flatMap((round) => {
-      const questions = round.questions || p.rounds.find((r) => r.id === round.id)?.questions || p.formQuestions;
+      const embedded = round.questions;
+      const questions = (embedded?.length ? embedded : null) || p.rounds.find((r) => r.id === round.id)?.questions || p.formQuestions;
       return round.responses.map((response, index2) => {
         const sections = responseSections(questions, response.answers);
         const name = label(response, index2);

@@ -13,7 +13,8 @@ export function createResponseWorkspace(R:typeof React,Editor:React.ComponentTyp
   const [selected,setSelected]=R.useState<Set<number>>(new Set());const [busy,setBusy]=R.useState(false);const [error,setError]=R.useState('');
   const container=R.useRef<HTMLElement>(null);const returnId=R.useRef<number|null>(null);const wasReading=R.useRef(false);const listScroll=R.useRef(0);
   const rows=R.useMemo(()=>p.structuredRounds.flatMap(round=>{
-   const questions=(round as RoundWithResponses & {questions?:Round['questions']}).questions||p.rounds.find(r=>r.id===round.id)?.questions||p.formQuestions;
+   const embedded=(round as RoundWithResponses & {questions?:Round['questions']}).questions;
+   const questions=(embedded?.length?embedded:null)||p.rounds.find(r=>r.id===round.id)?.questions||p.formQuestions;
    return round.responses.map((response,index)=>{const sections=responseSections(questions,response.answers);const name=label(response,index);return {response,round,questions,name,sections,search:JSON.stringify([name,sections]).toLowerCase()};});
   }),[p.structuredRounds,p.rounds,p.formQuestions]);
   const filtered=rows.filter(row=>(roundId==='all'||row.round.id===roundId)&&row.search.includes(query.trim().toLowerCase()));
