@@ -282,7 +282,7 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 /* One connected summary column, with controls immediately above the results. */
 #root main.product-summary{max-width:1000px!important;}
 .product-summary div:has(> aside[aria-label="Synthesis controls"]){display:flex!important;flex-direction:column;gap:20px!important;}
-.product-summary aside[aria-label="Synthesis controls"]{position:relative!important;order:-1;display:flex;flex-direction:row!important;flex-wrap:wrap;gap:8px;width:100%;align-items:flex-start;z-index:40;}
+.product-summary aside[aria-label="Synthesis controls"]{position:relative!important;inset:auto!important;order:-1;display:flex;flex-direction:row!important;flex-wrap:wrap;gap:8px;width:100%;align-items:flex-start;z-index:40;}
 .product-summary aside[aria-label="Synthesis controls"] > *{margin:0!important;}
 .product-summary aside[aria-label="Synthesis controls"] > button{width:auto!important;min-height:44px;padding:10px 14px!important;font-size:13px!important;}
 .product-summary .summary-disclosure{position:static;border-radius:8px;overflow:visible;flex:0 0 auto;}
