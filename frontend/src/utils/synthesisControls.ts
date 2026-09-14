@@ -3,6 +3,13 @@ const bound=new WeakSet<HTMLElement>();
 let panelId=0;
 export function enhanceSynthesisControls(main:HTMLElement){
  const toolbar=main.querySelector<HTMLElement>('aside[aria-label="Synthesis controls"]');if(!toolbar)return;
+ const progress=main.querySelector<HTMLElement>('#delphi-recorded-progress');
+ if(progress){
+  main.classList.add('summary-with-results');
+  const refresh=progress.querySelector<HTMLButtonElement>('.di-title > button');
+  if(refresh){toolbar.querySelector('.summary-refresh')?.remove();refresh.classList.add('summary-refresh');toolbar.append(refresh);}
+  const actions=toolbar.querySelector('.unified-actions');if(actions&&actions!==toolbar.lastElementChild)toolbar.append(actions);
+ }else{main.classList.remove('summary-with-results');toolbar.querySelector('.summary-refresh')?.remove();}
  for(const detail of toolbar.querySelectorAll<HTMLDetailsElement>(':scope > details.summary-disclosure')){
   if(bound.has(detail))continue;bound.add(detail);
   const trigger=detail.querySelector<HTMLElement>(':scope > summary');const panel=detail.querySelector<HTMLElement>(':scope > .card');if(!trigger||!panel)continue;

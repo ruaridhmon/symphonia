@@ -31,9 +31,9 @@ data.fixture.claims.forEach((claim,index)=>{
  preview.append(article);
 });
 renderDelphiInsights(results,data.rounds[2] as unknown as Round,data.rounds as unknown as Round[],data.responses as unknown as RoundWithResponses[]);
-unifyClaims(main);
+unifyClaims(main);enhanceSynthesisControls(main);
 // Reapply the same presentation adapter after filtering, as the application does.
-new MutationObserver(()=>unifyClaims(main)).observe(results,{childList:true,subtree:true});
+new MutationObserver(()=>{unifyClaims(main);enhanceSynthesisControls(main);}).observe(results,{childList:true,subtree:true});
 
 const responsePreview=el('div');responsePreview.hidden=true;main.append(responsePreview);
 const PreviewEditor=({questions,response}:any)=>renderResponseReading(React.createElement,questions,response.answers);

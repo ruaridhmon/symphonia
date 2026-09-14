@@ -67,7 +67,7 @@ export function unifyClaims(main:HTMLElement){
  originals.forEach(b=>b.classList.toggle('unified-original-action',allMatched||!b.closest('.synthesis-draft-header')));
  let menu=main.querySelector<HTMLDetailsElement>('.unified-actions');
  if(!menu){menu=document.createElement('details');menu.className='unified-actions';const summary=document.createElement('summary');summary.textContent='Synthesis actions';menu.append(summary,document.createElement('div'));}
- const host=allMatched&&progress?progress.querySelector('.di-heading'):card.firstElementChild;
+ const host=allMatched&&progress?(main.querySelector('aside[aria-label="Synthesis controls"]')||progress.querySelector('.di-heading')):card.firstElementChild;
  if(host&&menu.parentElement!==host)host.append(menu);
  const status=Array.from(card.querySelectorAll('p,div')).filter(p=>!p.closest('.unified-actions')&&(p.textContent||'').length<350).map(p=>p.textContent||'').find(t=>t.includes('All changes saved')||t.includes('unsaved'))||'';
  const signature=originals.map(b=>`${b.textContent}:${b.disabled}`).join('|')+status;
