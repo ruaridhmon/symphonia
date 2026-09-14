@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { LoadingButton, SynthesisModeSelector } from '../index';
-import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ClipboardCopy, Cpu, Clock3, Eye, FileDown, GripVertical, Layers3, ListChecks, Palette, PencilLine, Terminal } from 'lucide-react';
+import { LoadingButton } from '../index';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ClipboardCopy,  Eye, FileDown, GripVertical,  ListChecks, Palette, PencilLine, Terminal } from 'lucide-react';
 
 type Props = {
   synthesisMode: 'custom' | 'simple' | 'committee' | 'ttd';
@@ -85,7 +85,7 @@ export default function AISynthesisPanel({
     <details className="summary-disclosure">
       <summary><span>Generate synthesis</span><small>Model, method and instructions</small></summary>
     <div
-      className="card p-4"
+      className="card p-4 synthesis-generator"
       style={{
         backgroundColor: 'color-mix(in srgb, var(--muted) 20%, var(--card))',
         borderColor: 'color-mix(in srgb, var(--border) 58%, transparent)',
@@ -93,74 +93,27 @@ export default function AISynthesisPanel({
       }}
     >
       <div className="space-y-2.5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
-                color: 'color-mix(in srgb, var(--accent) 86%, var(--foreground))',
-              }}
-            >
-              <Cpu size={15} aria-hidden="true" />
-            </span>
-            <div>
-              <h3 className="text-sm font-semibold text-foreground" style={{ margin: 0 }}>
-                Synthesis
-              </h3>
-            </div>
-          </div>
-          <select
-            id="model-select"
-            className="rounded-md px-2.5 py-1.5 text-xs"
-            value={selectedModel}
-            onChange={e => onModelChange(e.target.value)}
-            style={{
-              backgroundColor: 'color-mix(in srgb, var(--background) 78%, var(--card))',
-              border: '1px solid color-mix(in srgb, var(--border) 62%, transparent)',
-              color: 'var(--foreground)',
-              maxWidth: '10.5rem',
-            }}
-          >
-            {models.map(model => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
+        <div className="synthesis-generator-heading">
+          <h3>Create a draft</h3>
+          <p>{responseCount} response{responseCount === 1 ? '' : 's'}{canGenerate && estimateLabel ? ` · ${estimateLabel}` : ''}</p>
+        </div>
+        <label className="synthesis-field">
+          <span>Model</span>
+          <select id="model-select" value={selectedModel} onChange={e => onModelChange(e.target.value)}>
+            {models.map(model => <option key={model} value={model}>{model}</option>)}
           </select>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <div
-            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium"
-            style={{
-              backgroundColor: 'var(--muted)',
-              color: 'var(--foreground)',
-            }}
-          >
-            <Layers3 size={12} aria-hidden="true" />
-            {responseCount} response{responseCount === 1 ? '' : 's'}
-          </div>
-          {canGenerate && estimateLabel && (
-            <div
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium"
-              style={{
-              backgroundColor: 'var(--muted)',
-              color: 'var(--muted-foreground)',
-            }}
-            >
-              <Clock3 size={12} aria-hidden="true" />
-              {estimateLabel}
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs" style={{ color: 'var(--muted-foreground)', margin: 0 }}>
-            Choose the synthesis method. More thorough modes usually produce deeper analysis,
-            but they take longer and use more compute.
-          </p>
-          <SynthesisModeSelector mode={synthesisMode} onModeChange={onModeChange} compact />
+        </label>
+        <div>
+          <label className="synthesis-field">
+            <span>Method</span>
+            <select aria-label="Method" value={synthesisMode} onChange={e => onModeChange(e.target.value as Props['synthesisMode'])}>
+              <option value="simple">Simple</option>
+              <option value="custom">Custom instructions</option>
+              <option value="committee">Committee</option>
+              <option value="ttd">Thorough analysis</option>
+            </select>
+            <small>{synthesisMode === 'committee' ? 'Multiple perspectives, combined into one draft.' : synthesisMode === 'ttd' ? 'A deeper review; takes longer.' : synthesisMode === 'custom' ? 'Add your instructions below.' : 'A concise synthesis of this round’s responses.'}</small>
+          </label>
           {synthesisMode === 'custom' && (
             <label className="block">
               <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--muted-foreground)' }}>
@@ -186,6 +139,9 @@ export default function AISynthesisPanel({
           )}
         </div>
 
+        <details className="synthesis-optional">
+          <summary>Display and participant settings</summary>
+          <div>
         <div className="space-y-1.5">
           <button
             type="button"
@@ -383,17 +339,17 @@ export default function AISynthesisPanel({
           )}
         </div>
 
-        <div className="space-y-1.5 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
-          <div className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
-            AI generation
           </div>
+        </details>
+        <div className="synthesis-generate-footer">
+          <p>Review the draft before publishing.</p>
           <LoadingButton
             variant={canGenerate ? 'accent' : 'secondary'}
             size="sm"
             loading={isGenerating}
             loadingText="Generating…"
             onClick={onGenerate}
-            className="w-full font-semibold"
+            className="font-semibold"
             disabled={!canGenerate}
             style={!canGenerate ? { opacity: 0.72 } : undefined}
           >
@@ -406,7 +362,9 @@ export default function AISynthesisPanel({
           )}
         </div>
 
-        <div className="space-y-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+        <details className="synthesis-optional">
+          <summary>Other ways to create a draft</summary>
+        <div className="space-y-2">
           <div>
             <div className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>
               Codex workspace
@@ -487,6 +445,7 @@ export default function AISynthesisPanel({
             </p>
           )}
         </div>
+        </details>
       </div>
     </div>
     </details>

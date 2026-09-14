@@ -1,6 +1,6 @@
 import { EditorContent, Editor } from '@tiptap/react';
 import type { CSSProperties, ReactNode } from 'react';
-import { Bot, SquarePen } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { MarkdownRenderer } from '../index';
 import type { Round } from '../../types/summary';
 
@@ -133,14 +133,15 @@ export default function SynthesisEditorCard({
         ...backgroundStyle,
       }}
     >
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
-        <div>
+      <div className="synthesis-draft-header">
+        <div className="synthesis-draft-title">
           <h2 className="text-lg font-semibold text-foreground flex items-center gap-2" style={{ margin: 0 }}>
-            <SquarePen size={18} style={{ color: 'var(--accent)' }} /> Synthesis for Round {activeRound?.round_number || ''}
+            Round {activeRound?.round_number || ''} synthesis
           </h2>
+          <span className="synthesis-draft-state">{isDirty ? 'Unsaved changes' : 'Draft'}</span>
           {contextNote && (
-            <p className="text-xs mt-1" style={{ color: 'var(--muted-foreground)' }}>
-              {contextNote}
+            <p className="synthesis-draft-note" style={{ color: 'var(--muted-foreground)' }}>
+              {contextNote.match(/carried forward from Round (\d+)/i) ? `Based on Round ${contextNote.match(/carried forward from Round (\d+)/i)![1]} · Save to create this round’s draft.` : contextNote}
             </p>
           )}
         </div>
@@ -193,7 +194,7 @@ export default function SynthesisEditorCard({
           </div>
         )}
       </div>
-      {canEdit && synthesisViewMode === 'edit' && (
+      {canEdit && synthesisViewMode === 'edit' && (isDirty || isSaving) && (
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="text-xs" style={{ color: isDirty ? 'var(--accent)' : 'var(--muted-foreground)' }}>
             {isDirty ? 'Unsaved changes' : 'All changes saved'}
