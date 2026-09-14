@@ -126,6 +126,7 @@ export default function ResponsesModal({
                         <ResponseEditor
                           key={resp.id}
                           response={resp}
+                          roundNumber={round.round_number}
                           questions={roundQuestions}
                           token={token}
                           onUpdated={updated => onResponseUpdated(round.id, updated)}

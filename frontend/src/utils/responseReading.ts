@@ -34,8 +34,18 @@ export function responseSections(questions:Question[],answers:Record<string,unkn
  for(const [key,value]of Object.entries(answers))if(!consumed.has(key))result.push({title:`Additional response · ${key}`,blocks:[{label:'',text:text(value)}]});
  return result;
 }
-export function renderResponseReading(h:any,questions:Question[],answers:Record<string,unknown>){
+export function renderResponseReading(h:any,questions:Question[],answers:Record<string,unknown>,roundNumber?:number){
  const sections=responseSections(questions,answers);
+ if(roundNumber===1){
+  return h('div',{className:'response-reading rr-original',key:JSON.stringify(answers)},
+   ...sections.map((section,i)=>h('div',{key:i,className:'rr-original-answer'},
+    ...section.blocks.filter(block=>!block.label).map((block,j)=>h('p',{key:j},block.text)),
+    section.rating?h('p',null,section.rating):null,
+    section.blocks.some(block=>block.label)?h('details',{className:'rr-supporting'},
+     h('summary',null,'Supporting details'),
+     ...section.blocks.filter(block=>block.label).map((block,j)=>h('div',{className:'rr-block',key:j},h('h5',null,block.label),h('p',null,block.text)))):null)),
+   sections.length?null:h('p',null,'No answers have been recorded.'));
+ }
  const fold=sections.length>1;
  const blocks=(s:ReadingSection)=>s.blocks.map((b,j)=>h('div',{className:'rr-block',key:j},b.label&&!(b.label==='Reasoning'&&s.blocks.length===1)?h('h5',null,b.label):null,h('p',null,b.text)));
  const syncToggle=(root:HTMLElement|null)=>{

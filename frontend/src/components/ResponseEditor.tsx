@@ -25,6 +25,7 @@ interface ConflictInfo {
 
 interface ResponseEditorProps {
   response: ResponseData;
+  roundNumber?: number;
   questions: (string | Record<string, unknown>)[];
   /** @deprecated Auth is handled by API client; prop kept for backward compatibility */
   token?: string;
@@ -37,6 +38,7 @@ export default function ResponseEditor({
   response,
   questions,
   onUpdated,
+  roundNumber,
 }: ResponseEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedAnswers, setEditedAnswers] = useState<Record<string, string>>({});
@@ -141,7 +143,7 @@ export default function ResponseEditor({
 
   if (!isEditing) return <div>
     {!hasStructuredAnswers && <button type="button" className="rr-edit" onClick={startEditing}><Pencil size={12} /> Edit response</button>}
-    {renderResponseReading(createElement, questions, currentAnswers)}
+    {renderResponseReading(createElement, questions, currentAnswers, roundNumber)}
   </div>;
 
   // ── Edit mode ──────────────────────────────────────────

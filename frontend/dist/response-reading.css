@@ -155,3 +155,14 @@
  .rw-position{margin-right:2px;}
  .rw-reader-title{font-size:20px;}
 }
+
+/* Keep the participant list and its filters in place while reading. */
+.rw-list-row{flex-wrap:wrap;}
+.rw-list-row>.rw-open{flex:1;}
+.rw-inline-reader{flex-basis:100%;min-width:0;padding:0 20px 24px;}
+.rr-original{margin:0;max-width:75ch;}
+.rr-original-answer+ .rr-original-answer{margin-top:24px;}
+.rr-original p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;}
+.rr-supporting{margin-top:12px;}
+.rr-supporting summary{cursor:pointer;color:var(--muted-foreground);font-size:13px;}
+@media(max-width:640px){.rw-inline-reader{padding:0 14px 20px;}}

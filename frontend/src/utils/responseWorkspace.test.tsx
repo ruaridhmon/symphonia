@@ -7,20 +7,26 @@ const questions=[{questionId:'claim',sectionTitle:'Preserve the exact claim',lab
 const rounds=[{id:2,round_number:2,synthesis:'',is_active:false,questions},{id:3,round_number:3,synthesis:'',is_active:true,questions}];
 const answer=(id:number,email:string,round_id:number)=>({id,email,round_id,timestamp:'2026-09-14T10:00:00Z',version:1,answers:{q1:{position:'Agree',evidence:`Original evidence ${id}`},orphan:'Retained unmatched answer'}});
 const structuredRounds=[{...rounds[0],responses:[answer(1,'Earlier expert',2)]},{...rounds[1],questions:[],responses:[answer(2,'Alice',3),answer(3,'Bob',3)]}];
-const Editor=({questions,response,onUpdated}:any)=><>{renderResponseReading(React.createElement,questions,response.answers)}<button onClick={()=>onUpdated({...response,version:2})}>Save fixture edit</button></>;
+const Editor=({questions,response,onUpdated,roundNumber}:any)=><>{renderResponseReading(React.createElement,questions,response.answers,roundNumber)}<button onClick={()=>onUpdated({...response,version:2})}>Save fixture edit</button></>;
 const base={rounds,structuredRounds,formQuestions:questions,initialRoundId:3,onResponseUpdated:vi.fn()};
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});});
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
-it('starts with a full list, preserves filters and opens one complete response with previous/next navigation',()=>{
+it('expands a person inline while keeping the list and filters visible',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);
- expect(screen.queryByRole('navigation',{name:'Response navigation'})).toBeNull();expect(screen.queryByText('Earlier expert')).toBeNull();
  fireEvent.change(screen.getByRole('searchbox'),{target:{value:'Original evidence'}});
- fireEvent.click(screen.getByRole('button',{name:"Read response from Alice, round 3"}));
- expect(screen.getByRole('heading',{name:'Alice'})).toHaveFocus();expect(screen.getByRole('heading',{name:'Preserve the exact claim'})).toBeInTheDocument();expect(screen.getByText('Retained unmatched answer')).toBeInTheDocument();
- expect(screen.queryByRole('searchbox')).toBeNull();expect(screen.getByRole('button',{name:'Previous'})).toBeDisabled();
- fireEvent.click(screen.getByRole('button',{name:'Next'}));expect(screen.getByRole('heading',{name:'Bob'})).toBeInTheDocument();
+ const alice=screen.getByRole('button',{name:'Read response from Alice, round 3'});
+ fireEvent.click(alice);
+ expect(alice).toHaveAttribute('aria-expanded','true');
+ expect(screen.getByRole('heading',{name:'Preserve the exact claim'})).toBeInTheDocument();
+ expect(screen.getByText('Retained unmatched answer')).toBeInTheDocument();
+ expect(screen.getByRole('searchbox')).toHaveValue('Original evidence');
+ const bob=screen.getByRole('button',{name:'Read response from Bob, round 3'});
+ expect(bob).toBeInTheDocument();
+ expect(screen.queryByRole('navigation',{name:'Response navigation'})).toBeNull();
+ fireEvent.click(bob);expect(alice).toHaveAttribute('aria-expanded','false');
  fireEvent.click(screen.getByRole('button',{name:'Save fixture edit'}));expect(base.onResponseUpdated).toHaveBeenCalledWith(3,expect.objectContaining({id:3,version:2}));
- fireEvent.click(screen.getByRole('button',{name:'← All responses'}));expect(screen.getByRole('searchbox')).toHaveValue('Original evidence');expect(screen.getByRole('button',{name:"Read response from Bob, round 3"})).toHaveFocus();
+ fireEvent.click(bob);expect(bob).toHaveAttribute('aria-expanded','false');
+ expect(screen.queryByText('Save fixture edit')).toBeNull();
 });
 it('searches all answer fields and distinguishes rounds',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);

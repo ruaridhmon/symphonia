@@ -21,3 +21,14 @@ it('shows a single written answer without disclosure controls',()=>{
  expect(container.querySelector('details')).toBeNull();
  expect(screen.getByText('Original paragraph')).toBeVisible();
 });
+
+it('shows first-round original prose without claim or question cards, preserving supporting fields',()=>{
+ const {container}=render(renderResponseReading(createElement,['First question','Second question'],{q1:{position:'First paragraph.\n\nSecond paragraph.',evidence:'Original evidence',confidence:0},q2:false},1));
+ expect(screen.queryByText('First question')).toBeNull();
+ expect(screen.queryByText('Positions & reasoning')).toBeNull();
+ expect(screen.getByText('First paragraph. Second paragraph.').textContent).toBe('First paragraph.\n\nSecond paragraph.');
+ expect(screen.getByText('false')).toBeVisible();
+ expect(screen.getByText('Supporting details').closest('details')).not.toHaveAttribute('open');
+ expect(container).toHaveTextContent('Original evidence');
+ expect(container).toHaveTextContent('0/10');
+});
