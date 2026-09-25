@@ -1,0 +1,302 @@
+{
+  "title": "SIMULATED PANEL — From AI ideas to laboratory tests",
+  "description": "Ten fictional experts explore how to select AI-generated hypotheses. Authored synthetic responses across three rounds, including changes of mind and persistent disagreement. This demonstration contains no real expert opinions or empirical findings.",
+  "question": "How should a research team decide which AI-generated hypotheses deserve a laboratory experiment?",
+  "claims": [
+    "Every AI-generated hypothesis should receive an independent expert review before a laboratory experiment begins.",
+    "At least 20% of an exploratory research budget should be reserved for hypotheses with low initial expert confidence.",
+    "A hypothesis should be prioritised only when two independent evidence sources support it."
+  ],
+  "experts": [
+    {
+      "name": "Maya Foster",
+      "role": "experimental biologist",
+      "opening": "I want ideas that survive contact with an assay. A plausible mechanism is useful, but a small discriminating experiment is often more informative than another literature review.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Disagree",
+          "Agree"
+        ],
+        "comments": [
+          "An independent experimentalist can catch an impossible assay before resources are committed.",
+          "A fixed allocation could consume scarce bench capacity with ideas that have no workable test.",
+          "Two sources reduce the risk of following an attractive story built on one unreliable result."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Neither agree nor disagree",
+          "Disagree"
+        ],
+        "comments": [
+          "The automation engineer makes a good distinction between review of a new hypothesis and approval of every instrument action. I support the former.",
+          "The portfolio argument makes me less opposed, but I would reserve experimental capacity by test cost and learning value rather than a fixed fraction.",
+          "The discovery scientist persuaded me that this rule excludes genuinely new mechanisms. I would permit one strong source followed by an informative pilot."
+        ]
+      }
+    },
+    {
+      "name": "Daniel Cho",
+      "role": "statistician",
+      "opening": "I would rank proposed experiments by what they can distinguish, record every attempted test, and compare the AI workflow with a credible baseline. Confidence should be calibrated, not merely high.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Neither agree nor disagree",
+          "Disagree"
+        ],
+        "comments": [
+          "An independent reviewer can challenge the proposed comparison and decision rule.",
+          "Twenty percent is not justified by a cost or information model.",
+          "Two apparently separate sources may share the same selection bias."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I retain support, provided review records a testable objection rather than a ceremonial signature.",
+          "For an explicitly exploratory portfolio, I now favour a protected minimum against the selection pressure described by the junior researcher. The fraction should be revisited using outcomes.",
+          "The data steward reinforces my concern: independence must be established, and a count of sources cannot replace their quality."
+        ]
+      }
+    },
+    {
+      "name": "Amara Okoye",
+      "role": "data steward",
+      "opening": "Before ranking an idea, check provenance, permitted use, and whether the variables mean what the hypothesis assumes. Two datasets can reproduce the same error.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Neither agree nor disagree",
+          "Agree"
+        ],
+        "comments": [
+          "Review should include the authority to use the supporting data.",
+          "Low confidence may reflect poor data quality rather than useful novelty.",
+          "Independent sources can reveal inconsistent coding or a local dataset artefact."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Neither agree nor disagree",
+          "Neither agree nor disagree"
+        ],
+        "comments": [
+          "I retain agreement because an independent check can uncover provenance gaps that the generating system missed.",
+          "I remain undecided: the programme needs a definition that separates novelty from unresolved data defects.",
+          "The statistician showed why a two-source rule is too easy to satisfy superficially. I want an independence assessment, but I am unsure that two sources must always exist."
+        ]
+      }
+    },
+    {
+      "name": "Leo Martins",
+      "role": "laboratory automation engineer",
+      "opening": "A laboratory can learn rapidly through cheap, reversible pilots. Separate the decision to test a new biological idea from the many routine machine actions inside an approved protocol.",
+      "round2": {
+        "votes": [
+          "Disagree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "Review for every idea may become the main bottleneck for inexpensive automated pilots.",
+          "An automation platform should have room to test unexpected ideas instead of only confirming familiar ones.",
+          "A strict evidence threshold defeats the purpose of a rapid exploratory screen."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "The experimentalist clarified that a short review can approve the hypothesis and protocol together, without approving each machine action. On that interpretation I now agree.",
+          "I retain support for a protected exploration budget, with a clear total resource ceiling.",
+          "I still oppose making two sources a universal prerequisite; a controlled pilot can create the second source."
+        ]
+      }
+    },
+    {
+      "name": "Sofia Lind",
+      "role": "reproducibility researcher",
+      "opening": "The unit of value is a finding someone else can challenge and repeat. Preserve failed tests, code, assay conditions and the reason each candidate was selected.",
+      "round2": {
+        "votes": [
+          "Strongly agree",
+          "Disagree",
+          "Strongly agree"
+        ],
+        "comments": [
+          "An independent reviewer can detect omissions in the proposed controls and measurement plan.",
+          "A numerical novelty quota could encourage teams to relabel weak ideas as exploration.",
+          "Independent corroboration is a useful defence against local technical errors."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Neither agree nor disagree",
+          "Agree"
+        ],
+        "comments": [
+          "I still support review, but the automation argument persuades me that it should be proportionate and concise.",
+          "I am now undecided: a reserved budget could counter cherry-picking if all outcomes and selection decisions are recorded.",
+          "I retain agreement for prioritisation, while recognising that an exploratory pilot is different from prioritising a full programme."
+        ]
+      }
+    },
+    {
+      "name": "Noah Bennett",
+      "role": "research programme director",
+      "opening": "Research is a portfolio of uncertain options. I want a visible budget for exploration, explicit stopping rules, and a record of what was displaced when an idea was funded.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "Independent review should state the most consequential failure mode and a stop condition.",
+          "A minimum prevents short-term delivery pressure from consuming the entire portfolio.",
+          "A novel hypothesis may have only one line of support but substantial option value."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I retain agreement and would measure review delay as well as the faults it catches.",
+          "I retain support after hearing the early-career perspective; the minimum is a governance choice to protect exploration, not an estimate of optimal return.",
+          "I remain opposed to a universal gate. Independent review and a bounded pilot can be preferable to waiting for corroboration."
+        ]
+      }
+    },
+    {
+      "name": "Priya Shah",
+      "role": "early-career researcher",
+      "opening": "A credible process must make room for unconventional ideas from people without an established reputation. Reviewers should evaluate the proposed test, not the status of its proposer.",
+      "round2": {
+        "votes": [
+          "Disagree",
+          "Strongly agree",
+          "Disagree"
+        ],
+        "comments": [
+          "Mandatory review can let senior gatekeepers block unfamiliar approaches.",
+          "A protected budget makes exploration a real opportunity rather than a rhetorical promise.",
+          "Requiring existing corroboration systematically favours established fields and well-funded topics."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Neither agree nor disagree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I am less opposed after the governance proposal for written reasons and an appeal route, but those protections are not in the claim. I cannot fully endorse it.",
+          "I retain agreement, with a transparent selection process so the protected budget is accessible beyond senior investigators.",
+          "I still disagree because the rule excludes precisely the underexplored questions this process should help surface."
+        ]
+      }
+    },
+    {
+      "name": "Elias Morgan",
+      "role": "research governance scholar",
+      "opening": "The process needs attributable decisions and a way to challenge rejection. Independence is a relationship between people and incentives, not simply a second name on a form.",
+      "round2": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Neither agree nor disagree"
+        ],
+        "comments": [
+          "Independent review can distribute responsibility if conflicts of interest are disclosed.",
+          "An explicit reserve makes the trade-off between exploration and delivery open to scrutiny.",
+          "The rule may help accountability, but the meaning of independent evidence is unclear."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I retain agreement, with written reasons and a route to contest rejection to address the junior researcher’s concern.",
+          "I still agree for an exploratory programme, provided spending and outcomes are reported consistently.",
+          "The panel made the exclusion cost concrete. I now prefer a documented justification for limited evidence over a universal two-source gate."
+        ]
+      }
+    },
+    {
+      "name": "Clara Weiss",
+      "role": "discovery scientist",
+      "opening": "The interesting hypotheses often lack a second established source. I would favour experiments that cheaply overturn a mechanism over plans that accumulate confirmatory citations.",
+      "round2": {
+        "votes": [
+          "Neither agree nor disagree",
+          "Strongly agree",
+          "Strongly disagree"
+        ],
+        "comments": [
+          "Review might improve experimental design or merely enforce existing assumptions; its form matters.",
+          "A protected exploratory allocation is essential if the system is to discover rather than imitate.",
+          "Genuinely new mechanisms often have only one initial clue."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Agree",
+          "Agree",
+          "Disagree"
+        ],
+        "comments": [
+          "I now agree after the panel distinguished concise design review from a requirement for prior consensus. A reviewer can improve the falsification test without endorsing the mechanism.",
+          "I retain agreement but favour a plain minimum rather than treating twenty percent as scientifically optimal.",
+          "I remain opposed. The experimentalist’s small discriminating pilot is a better response to scarce evidence."
+        ]
+      }
+    },
+    {
+      "name": "Oliver Grant",
+      "role": "research economist",
+      "opening": "The relevant comparison is the expected learning per unit of constrained resource. Fixed quotas and extra review can both be sensible, but their opportunity costs should be visible.",
+      "round2": {
+        "votes": [
+          "Disagree",
+          "Disagree",
+          "Agree"
+        ],
+        "comments": [
+          "A universal review requirement may cost more than some reversible experiments.",
+          "A fixed minimum ignores variation in test costs and portfolio maturity.",
+          "Corroboration can reduce expenditure on fragile signals."
+        ]
+      },
+      "round3": {
+        "votes": [
+          "Disagree",
+          "Disagree",
+          "Agree"
+        ],
+        "comments": [
+          "I retain disagreement. Even concise independent review has a cost, and the claim contains no exception for very cheap tests.",
+          "I retain disagreement; protecting exploration is desirable, but a universal twenty-percent floor does not follow from that objective.",
+          "I retain qualified agreement for prioritising substantial laboratory resources. Small exploratory pilots should have a different decision category."
+        ]
+      }
+    }
+  ]
+}

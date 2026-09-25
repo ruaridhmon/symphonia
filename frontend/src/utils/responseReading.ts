@@ -38,7 +38,7 @@ export function renderResponseReading(h:any,questions:Question[],answers:Record<
  const sections=responseSections(questions,answers);
  return h('div',{className:`response-reading rr-flow ${roundNumber===1?'rr-original':''}`,key:JSON.stringify(answers)},
   ...sections.map((section,i)=>{
-   const stance=/disagree/i.test(section.rating||'')?'disagree':/agree/i.test(section.rating||'')?'agree':'neutral';
+   const stance=/^(strongly )?disagree$/i.test(section.rating||'')?'disagree':/agree/i.test(section.rating||'')?'agree':'neutral';
    return h('article',{className:'rr-section',key:i},
     (sections.length>1||roundNumber!==1)?h('header',{className:'rr-answer-heading'},
      h('div',{className:'rr-kicker'},h('span',{className:'rr-question-number'},`${section.rating?'Claim':'Question'} ${i+1}`),section.rating?h('span',{className:`rr-rating rr-${stance}`},section.rating):null),

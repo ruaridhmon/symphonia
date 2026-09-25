@@ -9,22 +9,16 @@ export function createResponseWorkspace(R:typeof React,Editor:React.ComponentTyp
  const timestamp=(value:string)=>{const date=new Date(value);return Number.isNaN(date.getTime())?'':date.toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});};
  return function ResponseWorkspace(p:Props){
   const [roundId,setRoundId]=R.useState<number|'all'>(()=>p.initialRoundId??p.rounds.find(r=>r.is_active)?.id??p.structuredRounds.at(-1)?.id??'all');
+  const [mode,setMode]=R.useState<'question'|'person'|'changes'>('question'); const [question,setQuestion]=R.useState(''); const [expanded,setExpanded]=R.useState<Set<number>>(new Set());
   const [query,setQuery]=R.useState('');const [active,setActive]=R.useState<number|null>(null);const [managing,setManaging]=R.useState(false);
   const [selected,setSelected]=R.useState<Set<number>>(new Set());const [busy,setBusy]=R.useState(false);const [error,setError]=R.useState('');
   const container=R.useRef<HTMLElement>(null);
-  const lastOpened=R.useRef<number|null>(null);
-  R.useEffect(()=>{
-   if(active!==null){lastOpened.current=active;const reader=container.current?.querySelector<HTMLElement>('.rw-reader');reader?.querySelector<HTMLElement>('h3')?.focus({preventScroll:true});reader?.scrollIntoView?.({block:'start'});}
-   else if(lastOpened.current!==null){const button=container.current?.querySelector<HTMLButtonElement>(`[data-response-id="${lastOpened.current}"]`);button?.focus({preventScroll:true});button?.scrollIntoView?.({block:'nearest'});}
-  },[active]);
   const rows=R.useMemo(()=>p.structuredRounds.flatMap(round=>{
    const embedded=(round as RoundWithResponses & {questions?:Round['questions']}).questions;
    const questions=(embedded?.length?embedded:null)||p.rounds.find(r=>r.id===round.id)?.questions||p.formQuestions;
    return round.responses.map((response,index)=>{const sections=responseSections(questions,response.answers);const name=label(response,index);return {response,round,questions,name,sections,search:JSON.stringify([name,sections]).toLowerCase()};});
   }),[p.structuredRounds,p.rounds,p.formQuestions]);
   const filtered=rows.filter(row=>(roundId==='all'||row.round.id===roundId)&&row.search.includes(query.trim().toLowerCase()));
-  const activeIndex=filtered.findIndex(row=>row.response.id===active);const index=Math.max(0,activeIndex);const current=filtered[index];
-  R.useEffect(()=>{if(active!==null&&activeIndex<0)setActive(null);},[active,activeIndex]);
   R.useEffect(()=>{if(p.initialRoundId!==undefined){setRoundId(p.initialRoundId);setActive(null);}},[p.initialRoundId]);
   R.useEffect(()=>{setSelected(previous=>{const next=new Set([...previous].filter(id=>rows.some(r=>r.response.id===id)));return next.size===previous.size?previous:next;});},[rows]);
   const allowLeave=()=>!container.current?.querySelector('textarea')||window.confirm('Discard unsaved response edits?');
@@ -40,28 +34,30 @@ export function createResponseWorkspace(R:typeof React,Editor:React.ComponentTyp
    catch(e){setError(e instanceof Error?e.message:'Could not delete the selected responses.');}finally{setBusy(false);}
   };
   const button=(text:string,onClick:()=>void,props:Record<string,unknown>={})=>h('button',{type:'button',onClick,...props},text);
-  const go=(id:number|null)=>{if(allowLeave())setActive(id);};
-  return h('section',{className:`response-workspace rw-inbox ${active!==null?'rw-has-selection':''}`,ref:container,'aria-label':'Expert responses'},
-    h('header',{className:'rw-heading'},h('div',null,h('h2',null,'The panel'),h('p',null,'Each perspective, in their own words.')),canManage?button(managing?'Done':'Manage',()=>{if(allowLeave()){setManaging(!managing);setSelected(new Set());}},{disabled:busy,'aria-pressed':managing}):null),
-    h('div',{className:'rw-toolbar'},h('label',null,h('span',{className:'rw-label'},'Search responses'),h('input',{type:'search',value:query,placeholder:'Search…',onChange:(e:React.ChangeEvent<HTMLInputElement>)=>{if(allowLeave())setQuery(e.target.value);}})),h('label',null,h('span',{className:'rw-label'},'Round'),h('select',{value:roundId,onChange:(e:React.ChangeEvent<HTMLSelectElement>)=>{if(allowLeave()){setRoundId(e.target.value==='all'?'all':Number(e.target.value));setActive(null);}}},h('option',{value:'all'},'All rounds'),...p.structuredRounds.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}`))))),
-    h('p',{className:'rw-result-count','aria-live':'polite'},`${filtered.length} response${filtered.length===1?'':'s'}${query?' found':''}`),
-    managing?h('div',{className:'rw-management'},button('Select visible',()=>setSelected(new Set(filtered.map(r=>r.response.id))),{disabled:busy}),button('Clear selection',()=>setSelected(new Set()),{disabled:busy||!selected.size}),h('span',null,`${selectedRows.length} selected`),button(busy?'Deleting…':'Delete selected',deleteSelected,{disabled:busy||!selectedRows.length,className:'rw-delete'})):null,
+  const titles=[...new Set((mode==='changes'?rows:filtered).flatMap(row=>row.sections.map(s=>s.title)))];
+  const chosen=titles.includes(question)?question:titles[0];
+  const badge=(rating?:string)=>rating?h('span',{className:`rp-rating ${/^(strongly )?disagree$/i.test(rating)?'rp-disagree':/^(strongly )?agree$/i.test(rating)?'rp-agree':'rp-neutral'}`},rating):null;
+  const blocks=(section:any)=>section?h('div',{className:'rp-answer'},badge(section.rating),...section.blocks.map((b:any,i:number)=>h('div',{key:i},b.label?h('span',{className:'rp-block-label'},b.label):null,h('p',null,b.text)))):h('span',{className:'rp-missing'},'Not answered');
+  const editor=(row:typeof rows[number])=>active===row.response.id?h('div',{className:'rp-edit'},button('Close editor',()=>{if(allowLeave())setActive(null);}),h(Editor,{response:row.response,questions:row.questions,roundNumber:row.round.round_number,token:p.token,onUpdated:(response:any)=>{p.onResponseUpdated(row.round.id,response);setActive(null);}})):null;
+  const identity=(row:typeof rows[number])=>h('header',{className:'rp-person-heading'},h('strong',{title:row.response.email||undefined},row.name),h('span',null,`Round ${row.round.round_number}`),managing?button('Edit response',()=>open(row.response.id)):null);
+  const changeRows=rows.filter(row=>row.search.includes(query.trim().toLowerCase())&&row.sections.some(s=>s.title===chosen));
+  // Match identities exactly, never merge anonymous records or infer equivalent claim wording.
+  const identities=[...new Set(changeRows.map(row=>row.response.email||`anonymous-${row.response.id}`))];
+  return h('section',{className:'response-workspace response-panel','aria-label':'Expert responses',ref:container},
+    h('h2',{className:'sr-only'},'Panel responses'),
+    h('div',{className:'rp-controls'},h('nav',{'aria-label':'Response layout'},...([['question','By question'],['person','By person'],['changes','Across rounds']] as const).map(([value,text])=>button(text,()=>{if(allowLeave()){setQuestion(chosen);setMode(value);setActive(null);}},{key:value,'aria-pressed':mode===value}))),h('label',{className:'rp-search'},h('span',{className:'sr-only'},'Search responses'),h('input',{type:'search',value:query,placeholder:'Search the panel…',onChange:(e:React.ChangeEvent<HTMLInputElement>)=>{if(allowLeave())setQuery(e.target.value);}})),mode!=='changes'?h('label',null,h('span',{className:'sr-only'},'Round'),h('select',{'aria-label':'Round',value:roundId,onChange:(e:React.ChangeEvent<HTMLSelectElement>)=>{if(allowLeave()){setRoundId(e.target.value==='all'?'all':Number(e.target.value));setActive(null);}}},h('option',{value:'all'},'All rounds'),...p.structuredRounds.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}`)))):null,canManage?button(managing?'Done':'Manage',()=>{if(allowLeave()){setManaging(!managing);setSelected(new Set());setActive(null);}},{disabled:busy,'aria-pressed':managing}):null),
+    managing?h('div',{className:'rw-management'},button('Select visible',()=>setSelected(new Set(filtered.map(r=>r.response.id))),{disabled:busy}),button('Clear selection',()=>setSelected(new Set()),{disabled:busy||!selected.size}),h('span',null,`${selectedRows.length} selected`),button(busy?'Deleting…':'Delete selected',deleteSelected,{disabled:busy||!selectedRows.length,className:'rw-delete'}),h('div',null,...filtered.map(row=>h('label',{key:row.response.id},h('input',{type:'checkbox','aria-label':`Select ${row.name}, round ${row.round.round_number}`,checked:selected.has(row.response.id),disabled:busy,onChange:()=>toggle(row.response.id)}),row.name,` · R${row.round.round_number}`)))):null,
     error?h('p',{role:'alert',className:'rw-error'},error):null,
-    h('div',{className:'rw-inbox-layout'},
-      h('div',{className:'rw-list','aria-label':'Participant responses'},...filtered.map(row=>{
-        const excerpt=row.sections.flatMap(s=>s.blocks.map(b=>b.text)).find(Boolean)||row.sections.map(s=>s.rating).filter(Boolean).join(' · ')||'No answer text recorded.';
-        const initials=row.name.split(/[\s@._-]+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
-        return h('div',{className:'rw-list-row',key:row.response.id},managing?h('input',{type:'checkbox','aria-label':`Select ${row.name}, round ${row.round.round_number}`,checked:selected.has(row.response.id),disabled:busy,onChange:()=>toggle(row.response.id)}):null,
-          h('button',{type:'button',className:'rw-open','aria-label':`Read response from ${row.name}, round ${row.round.round_number}`,'data-response-id':row.response.id,'aria-pressed':current?.response.id===row.response.id,'aria-controls':'panel-response-reader',onClick:()=>open(row.response.id)},
-            h('span',{className:'rw-avatar','aria-hidden':true},initials),
-            h('div',{className:'rw-row-main'},h('strong',{title:row.response.email||undefined},row.name),h('span',{className:'rw-preview'},excerpt),roundId==='all'?h('small',null,`Round ${row.round.round_number}`):null),h('span',{'aria-hidden':true,className:'rw-arrow'},'›')));
-      })),
-      current?h('article',{id:'panel-response-reader',className:'rw-reader'},
-        h('nav',{className:'rw-reader-nav','aria-label':'Response navigation'},button('← All responses',()=>go(null),{className:'rw-back'}),h('span',{className:'rw-position'},`${index+1} of ${filtered.length}`),h('div',null,button('←',()=>go(filtered[index-1]?.response.id),{disabled:index===0,'aria-label':'Previous response'}),button('→',()=>go(filtered[index+1]?.response.id),{disabled:index===filtered.length-1,'aria-label':'Next response'}))),
-        h('header',{className:'rw-reader-heading'},h('p',{className:'rw-reader-eyebrow'},`Round ${current.round.round_number} · Original response`),h('h3',{className:'rw-reader-title',tabIndex:-1},current.name),h('time',{dateTime:current.response.timestamp},timestamp(current.response.timestamp))),
-        h(Editor,{key:current.response.id,response:current.response,questions:current.questions,roundNumber:current.round.round_number,token:p.token,onUpdated:(response:any)=>p.onResponseUpdated(current.round.id,response)})):
-        h('p',{className:'rw-empty'},rows.length?'No responses match these filters.':'Invite your panel to begin. Their responses will appear here as they submit.')
-    )
+    mode!=='person'&&titles.length?h('div',{className:'rp-question-bar'},h('label',null,h('span',null,'Question / claim'),h('select',{'aria-label':'Question or claim',value:chosen,onChange:(e:React.ChangeEvent<HTMLSelectElement>)=>{if(allowLeave()){setQuestion(e.target.value);setActive(null);}}},...titles.map(title=>h('option',{key:title,value:title},title)))),h('h3',null,chosen)):null,
+    h('p',{className:'rp-count','aria-live':'polite'},mode==='changes'?`${identities.length} participants · compare identical questions across rounds`:`${filtered.length} response${filtered.length===1?'':'s'}${query?' found':''}`),
+    mode==='question'?h('div',{className:'rp-answer-list'},...filtered.filter(row=>row.sections.some(s=>s.title===chosen)).map(row=>h('article',{key:row.response.id,className:'rp-person-answer'},identity(row),blocks(row.sections.find(s=>s.title===chosen)),editor(row)))):null,
+    mode==='person'?h('div',{className:'rp-person-list'},...filtered.map(row=>h('article',{key:row.response.id,className:'rp-person-answer'},h('button',{type:'button',className:'rp-expand','aria-expanded':expanded.has(row.response.id),onClick:()=>{if(allowLeave())setExpanded(previous=>{const next=new Set(previous);next.has(row.response.id)?next.delete(row.response.id):next.add(row.response.id);return next;});}},h('strong',null,row.name),h('span',null,`Round ${row.round.round_number}`),h('span',{'aria-hidden':true},expanded.has(row.response.id)?'−':'+')),expanded.has(row.response.id)?h('div',null,...row.sections.map((section,i)=>h('section',{key:i,className:'rp-person-section'},h('h4',null,section.title),blocks(section))),managing?button('Edit response',()=>open(row.response.id)):null,editor(row)):h('p',{className:'rp-person-preview'},row.sections[0]?.blocks[0]?.text||row.sections[0]?.rating||'No answer text recorded.')))):null,
+    mode==='changes'?h('div',{className:'rp-evolution'},...identities.map(identityKey=>{
+      const history=rows.filter(row=>(row.response.email||`anonymous-${row.response.id}`)===identityKey&&row.sections.some(s=>s.title===chosen)).sort((a,b)=>a.round.round_number-b.round.round_number);
+      const rated=history.map(row=>row.sections.find(s=>s.title===chosen)?.rating).filter(Boolean); const movement=rated.length>1?(rated.every(value=>value===rated[0])?'Position unchanged':`${rated[0]} → ${rated.at(-1)}`):'One round recorded';
+      return h('article',{key:identityKey,className:'rp-person-answer'},h('header',{className:'rp-person-heading'},h('h4',null,history[0].name),h('span',null,movement)),h('div',{className:'rp-timeline'},...history.map(row=>h('section',{key:row.response.id},h('p',{className:'rp-round-label'},`Round ${row.round.round_number}`),blocks(row.sections.find(s=>s.title===chosen))))));
+    })):null,
+    (mode==='changes'?!identities.length:!filtered.length)?h('p',{className:'rw-empty'},rows.length?'No responses match these filters.':'Invite your panel to begin. Their responses will appear here as they submit.'):null
   );
  };
 }

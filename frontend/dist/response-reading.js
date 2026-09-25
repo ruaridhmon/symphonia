@@ -40,7 +40,7 @@ function renderResponseReading(h, questions, answers, roundNumber) {
     "div",
     { className: `response-reading rr-flow ${roundNumber === 1 ? "rr-original" : ""}`, key: JSON.stringify(answers) },
     ...sections.map((section, i) => {
-      const stance = /disagree/i.test(section.rating || "") ? "disagree" : /agree/i.test(section.rating || "") ? "agree" : "neutral";
+      const stance = /^(strongly )?disagree$/i.test(section.rating || "") ? "disagree" : /agree/i.test(section.rating || "") ? "agree" : "neutral";
       return h(
         "article",
         { className: "rr-section", key: i },

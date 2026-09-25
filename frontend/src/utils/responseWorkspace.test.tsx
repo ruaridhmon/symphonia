@@ -11,26 +11,31 @@ const Editor=({questions,response,onUpdated,roundNumber}:any)=><>{renderResponse
 const base={rounds,structuredRounds,formQuestions:questions,initialRoundId:3,onResponseUpdated:vi.fn()};
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});});
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
-it('reads each person in a dedicated pane while preserving filters and original answers',()=>{
+it('shows all answers for one claim without a separate reader or back navigation',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);
- fireEvent.change(screen.getByRole('searchbox'),{target:{value:'Original evidence'}});
- const alice=screen.getByRole('button',{name:'Read response from Alice, round 3'});
- fireEvent.click(alice);
- expect(alice).toHaveAttribute('aria-pressed','true');
- expect(screen.getByRole('heading',{name:'Preserve the exact claim'})).toBeInTheDocument();
- expect(screen.getByText('Retained unmatched answer')).toBeInTheDocument();
- expect(screen.getByRole('searchbox')).toHaveValue('Original evidence');
- const bob=screen.getByRole('button',{name:'Read response from Bob, round 3'});
- expect(bob).toBeInTheDocument();
- expect(screen.getByRole('navigation',{name:'Response navigation'})).toBeInTheDocument();
- fireEvent.click(bob);expect(alice).toHaveAttribute('aria-pressed','false');
- fireEvent.click(screen.getByRole('button',{name:'Save fixture edit'}));expect(base.onResponseUpdated).toHaveBeenCalledWith(3,expect.objectContaining({id:3,version:2}));
- fireEvent.click(screen.getByRole('button',{name:'Previous response'}));expect(alice).toHaveAttribute('aria-pressed','true');
- expect(screen.getAllByText('Original evidence 2').length).toBeGreaterThan(0);
+ expect(screen.getByText('Original evidence 2')).toBeInTheDocument();
+ expect(screen.getByText('Original evidence 3')).toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:/All responses/})).not.toBeInTheDocument();
+ fireEvent.change(screen.getByRole('combobox',{name:'Question or claim'}),{target:{value:'Additional response · orphan'}});
+ expect(screen.getAllByText('Retained unmatched answer')).toHaveLength(2);
+ fireEvent.click(screen.getByRole('button',{name:'By person'}));
+ const alice=screen.getByRole('button',{name:/Alice/}); const bob=screen.getByRole('button',{name:/Bob/});
+ fireEvent.click(alice);fireEvent.click(bob);
+ expect(alice).toHaveAttribute('aria-expanded','true');expect(bob).toHaveAttribute('aria-expanded','true');
+ expect(screen.getAllByText('Retained unmatched answer')).toHaveLength(2);
+});
+it('compares only identical question wording and retains a participant across rounds',()=>{
+ const Workspace=createResponseWorkspace(React,Editor);
+ render(<Workspace {...base} structuredRounds={[{...rounds[0],responses:[answer(1,'Alice',2)]},structuredRounds[1]]}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Across rounds'}));
+ expect(screen.getByText('Original evidence 1')).toBeInTheDocument();
+ expect(screen.getByText('Original evidence 2')).toBeInTheDocument();
+ expect(screen.getByText('Original evidence 3')).toBeInTheDocument();
+ expect(screen.getByText('2 participants · compare identical questions across rounds')).toBeInTheDocument();
 });
 it('searches all answer fields and distinguishes rounds',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);
- fireEvent.change(screen.getByRole('combobox'),{target:{value:'all'}});expect(screen.getByRole('button',{name:'Read response from Earlier expert, round 2'})).toBeInTheDocument();
+ fireEvent.change(screen.getByRole('combobox',{name:'Round'}),{target:{value:'all'}});expect(screen.getByText('Earlier expert')).toBeInTheDocument();
  fireEvent.change(screen.getByRole('searchbox'),{target:{value:'Retained unmatched answer'}});expect(screen.getByText('3 responses found')).toBeInTheDocument();
  fireEvent.change(screen.getByRole('searchbox'),{target:{value:'absent'}});expect(screen.getByText('No responses match these filters.')).toBeInTheDocument();
 });
@@ -40,4 +45,12 @@ it('retains successful deletions and remaining selection when a later deletion f
  fireEvent.click(screen.getByRole('button',{name:'Manage'}));fireEvent.click(screen.getByRole('button',{name:'Select visible'}));fireEvent.click(screen.getByRole('button',{name:'Delete selected'}));
  await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Server unavailable'));
  expect(onResponseDeleted).toHaveBeenCalledExactlyOnceWith(3,2);expect(screen.getByRole('checkbox',{name:'Select Alice, round 3'})).not.toBeChecked();expect(screen.getByRole('checkbox',{name:'Select Bob, round 3'})).toBeChecked();
+});
+it('preserves the selected claim across views and does not mark neutral ratings as disagreement',()=>{
+ const Workspace=createResponseWorkspace(React,Editor);
+ const neutral={...answer(4,'Neutral participant',3),answers:{q1:{position:'Neither agree nor disagree'}}};
+ render(<Workspace {...base} structuredRounds={[structuredRounds[0],{...rounds[1],responses:[neutral]}]}/>);
+ expect(screen.getByText('Neither agree nor disagree')).toHaveClass('rp-neutral');
+ fireEvent.click(screen.getByRole('button',{name:'Across rounds'}));
+ expect(screen.getByRole('combobox',{name:'Question or claim'})).toHaveValue('Preserve the exact claim');
 });
