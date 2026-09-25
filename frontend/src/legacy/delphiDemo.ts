@@ -85,7 +85,7 @@ function sync() {
   if(!dashboard)document.getElementById('delphi-demo-link')?.remove();
   if(dashboard&&!document.getElementById('delphi-demo-link')){
     const link=el('a','','demo-dashboard-link') as HTMLAnchorElement;link.id='delphi-demo-link';link.href='/examples/research-ai.html';
-    link.append(el('strong','Example: AI in university research'),el('span','8 fictional experts · 3 rounds · explore the completed example →'));main!.prepend(link);
+    link.append(el('strong','Explore an example →'),el('span','Demo · 8 fictional experts'));main!.append(link);
   }
 }
 let scheduled=false;

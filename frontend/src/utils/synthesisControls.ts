@@ -4,6 +4,7 @@ let panelId=0;
 export function enhanceSynthesisControls(main:HTMLElement){
  const toolbar=main.querySelector<HTMLElement>('aside[aria-label="Synthesis controls"]');if(!toolbar)return;
  const progress=main.querySelector<HTMLElement>('#delphi-recorded-progress');
+ for(const text of toolbar.querySelectorAll('summary span')){if(text.textContent?.trim()==='Generate synthesis')text.textContent='Generate summary';}
  if(progress){
   main.classList.add('summary-with-results');
   const refresh=progress.querySelector<HTMLButtonElement>('.di-title > button');

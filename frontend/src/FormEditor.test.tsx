@@ -41,3 +41,11 @@ it('does not offer saving when loading fails',async()=>{
  render(<MemoryRouter><FormEditor/></MemoryRouter>);await screen.findByRole('alert');
  expect(screen.queryByRole('button',{name:'Save changes'})).not.toBeInTheDocument();expect(api.put).not.toHaveBeenCalled();
 });
+it('uses the shared canvas for documents and preserves the template on title edits',async()=>{
+ vi.mocked(api.get).mockImplementation(async url=>url.endsWith('/rounds')?[{round_number:1,is_active:true,questions:[question],response_count:0}]:{...form,document_template:'{{long:Your response}}'});
+ render(<MemoryRouter initialEntries={['/admin/form/42']}><Routes><Route path='/admin/form/:id' element={<FormEditor/>}/></Routes></MemoryRouter>);
+ await screen.findByDisplayValue('Saved consultation');expect(screen.queryByText('Document editor')).not.toBeInTheDocument();
+ fireEvent.change(screen.getByLabelText('Consultation title'),{target:{value:'Updated document'}});
+ fireEvent.click(screen.getByRole('button',{name:'Save changes'}));
+ await waitFor(()=>expect(api.put).toHaveBeenCalledWith('/forms/42',expect.objectContaining({title:'Updated document',document_template:'{{long:Your response}}'})));
+});

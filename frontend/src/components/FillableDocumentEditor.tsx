@@ -113,7 +113,7 @@ function FieldNodePreview({ attrs, selected }: { attrs: SelectedFieldState['attr
 
   return (
     <span
-      className="symphonia-fillable-node inline-flex max-w-full align-middle"
+      className="symphonia-fillable-node inline-flex w-full max-w-full align-middle"
       contentEditable={false}
       data-question-key={attrs.key}
     >
@@ -130,7 +130,7 @@ function FieldNodePreview({ attrs, selected }: { attrs: SelectedFieldState['attr
 }
 
 const FillableFieldNodeView = ReactNodeViewRenderer((props) => (
-  <NodeViewWrapper as="span" className="inline-flex align-middle">
+  <NodeViewWrapper as="span" className="inline-flex w-full align-middle">
     <FieldNodePreview attrs={props.node.attrs as SelectedFieldState['attrs']} selected={props.selected} />
   </NodeViewWrapper>
 ));
@@ -1095,7 +1095,7 @@ export default function FillableDocumentEditor({
   return (
     <div
       ref={rootRef}
-      className="overflow-visible rounded-[1.7rem]"
+      className="fd-editor overflow-visible rounded-[1.7rem]"
       style={{
         border: '1px solid color-mix(in srgb, #d7e0ea 92%, transparent)',
         background:
@@ -1134,33 +1134,7 @@ export default function FillableDocumentEditor({
         }
       `}</style>
 
-      <div
-        className="flex flex-col gap-4 border-b px-5 py-5"
-        style={{ borderColor: 'color-mix(in srgb, #d6e0ea 88%, transparent)' }}
-      >
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div
-              className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]"
-              style={{ backgroundColor: 'rgba(255,255,255,0.8)', color: '#5a6b80' }}
-            >
-              Fillable document studio
-            </div>
-            <div className="mt-3 text-lg font-semibold text-foreground">Document canvas</div>
-            <p className="mt-1.5 max-w-2xl text-sm" style={{ color: '#617489', lineHeight: 1.7 }}>
-              Compose the final participant-facing document here. Type normally for content, use <code>/</code> for fields, and configure only the selected field in the side inspector.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span
-              className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium"
-              style={{ backgroundColor: 'rgba(255,255,255,0.82)', border: '1px solid rgba(193,205,217,0.78)', color: '#5c6f84' }}
-            >
-              One editing surface, one live document view
-            </span>
-          </div>
-        </div>
-
+      <details className="fd-format"><summary>Formatting</summary>
         <div className="flex flex-wrap items-center gap-2">
           <ToolbarGroup>
             <div className="mr-1 flex items-center gap-2 rounded-2xl px-2 py-1.5" style={{ border: '1px solid color-mix(in srgb, var(--border) 76%, transparent)', backgroundColor: 'rgba(248,250,252,0.92)' }}>
@@ -1302,10 +1276,10 @@ export default function FillableDocumentEditor({
             <QuickInsertButton label="Divider" icon={<SeparatorHorizontal size={13} />} onClick={insertDivider} />
           </ToolbarGroup>
         </div>
-      </div>
+      </details>
 
       <div
-        className="px-4 py-6"
+        className="fd-workarea px-4 py-6"
         style={{
           background:
             'radial-gradient(circle at top, rgba(188,205,219,0.32), transparent 34%), linear-gradient(180deg, #edf3f6 0%, #eef2f5 100%)',
@@ -1313,27 +1287,13 @@ export default function FillableDocumentEditor({
       >
         <div ref={workAreaRef} className="mx-auto max-w-[1440px]">
             <div className="rounded-[2rem] border px-4 py-4" style={{ borderColor: 'rgba(196,206,216,0.7)', background: 'linear-gradient(180deg, rgba(255,255,255,0.46) 0%, rgba(241,245,248,0.55) 100%)' }}>
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3 px-2">
-                <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: '#6c7c8e' }}>Live document view</div>
-                  <div className="mt-1 text-sm font-medium text-foreground">This is the surface participants will experience.</div>
-                </div>
-                <div className="inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium" style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '1px solid rgba(193,205,217,0.82)', color: '#5d7085' }}>
-                  Type <code className="mx-1">/</code> for fields
-                </div>
-              </div>
-
+              <p className="fd-field-hint">Type / to add a response field.</p>
               <div
                 ref={documentCanvasRef}
                 data-testid="document-template-rich-editor"
                 className="relative overflow-visible rounded-[1.8rem] border bg-white px-10 py-12 shadow-[0_30px_70px_-42px_rgba(15,23,42,0.4)]"
                 style={{ borderColor: 'rgba(168, 182, 196, 0.24)' }}
               >
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-10 rounded-t-[1.8rem]" style={{ background: 'linear-gradient(180deg, rgba(244,247,249,0.92) 0%, rgba(255,255,255,0) 100%)' }} />
-                <div className="pointer-events-none absolute left-10 top-5 right-10 flex items-center justify-between text-[11px] uppercase tracking-[0.16em]" style={{ color: '#7a8797' }}>
-                  <span>Participant document</span>
-                  <span>Editable fill fields</span>
-                </div>
                 <div className="relative">
                   <EditorContent editor={editor} />
                 </div>

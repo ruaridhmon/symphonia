@@ -149,7 +149,7 @@ function createResponseWorkspace(R, Editor, remove) {
       }, { disabled: busy, "aria-pressed": managing }) : null),
       managing ? h("div", { className: "rw-management" }, button("Select visible", () => setSelected(new Set(filtered.map((r) => r.response.id))), { disabled: busy }), button("Clear selection", () => setSelected(/* @__PURE__ */ new Set()), { disabled: busy || !selected.size }), h("span", null, `${selectedRows.length} selected`), button(busy ? "Deleting\u2026" : "Delete selected", deleteSelected, { disabled: busy || !selectedRows.length, className: "rw-delete" }), h("div", null, ...filtered.map((row) => h("label", { key: row.response.id }, h("input", { type: "checkbox", "aria-label": `Select ${row.name}, round ${row.round.round_number}`, checked: selected.has(row.response.id), disabled: busy, onChange: () => toggle(row.response.id) }), row.name, ` \xB7 R${row.round.round_number}`)))) : null,
       error ? h("p", { role: "alert", className: "rw-error" }, error) : null,
-      mode !== "person" && titles.length ? h("div", { className: "rp-question-bar" }, h("label", null, h("span", null, "Question / claim"), h("select", { "aria-label": "Question or claim", value: chosen, onChange: (e) => {
+      mode !== "person" && titles.length ? h("div", { className: "rp-question-bar" }, h("label", null, h("span", null, "Question"), h("select", { "aria-label": "Question or claim", value: chosen, onChange: (e) => {
         if (allowLeave()) {
           setQuestion(e.target.value);
           setActive(null);

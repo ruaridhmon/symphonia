@@ -56,3 +56,11 @@ The workspace now exposes only Summary and Responses, with a compact round dropd
 - Browser QA: local form 4 title saved through API and persisted on reload; local form 3 rendered round 3 correctly with protected questions. No live panel data changed.
 - TypeScript passed; source Vite build passed outside committed dist; 78 tests passed across 22 relevant test files.
 - Compatibility: existing document consultations retain the dedicated legacy document editor; introduction and join controls remain create-only because the existing update endpoint does not support those fields.
+
+## 2026-09-25 simplification follow-up
+
+- Removed the leading example banner and compounded dashboard padding. Checked 390px mobile and desktop layouts. The header and consultations are now adjacent with normal page gutters.
+- Results show a concise computed change sentence for comparable claims, numerical agreement/disagreement, and original responses behind an inline disclosure. Generation controls follow results. Fictional examples retain a visible demo label; saved titles/data are unchanged.
+- Documents now use the same FormCanvas for create/edit/preview. Verified local form 5 creation, existing-document loading, title saving and retained template. Formatting and guidance are collapsed; field controls use full available width. Question authoring no longer shows voice prompts or duplicate help text.
+- 81 tests passed in the broad relevant run, plus the added comparable-claim summary test passed (82 current relevant tests total). TypeScript and source Vite build passed. Browser checks include mobile results overflow (390px viewport, 384px document width) and document create/save/reopen.
+- Remaining limitation: introduction/join updates need backend support. The connected gcloud account was denied access to symphonia-dev in symphonia-dev-488613; no backend or production deployment was attempted. Controls are not falsely exposed as editable.

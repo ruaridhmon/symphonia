@@ -4,6 +4,7 @@ var id = 0;
 function quietSummary(main) {
   const progress = main.querySelector("#delphi-recorded-progress");
   const hasResults = !!progress?.querySelector(".di-claim");
+  const empty = progress?.dataset.empty === "true";
   for (const stale of main.querySelectorAll(".quiet-synthesis-toggle")) {
     if (!document.getElementById(stale.getAttribute("aria-controls") || "")) stale.remove();
   }
@@ -11,7 +12,7 @@ function quietSummary(main) {
   const card = heading?.closest(".card");
   if (!card) return;
   let state = states.get(card);
-  if (!hasResults) {
+  if (!hasResults && !empty) {
     if (state) {
       card.hidden = false;
       state.button.hidden = true;
@@ -42,7 +43,7 @@ function quietSummary(main) {
   const current = state;
   function sync() {
     const published = !!Array.from(card.querySelectorAll("button")).find((b) => b.textContent?.trim() === "Hide from survey");
-    const text = `${current.open ? "Hide" : "Full"} synthesis${published ? " \xB7 Published" : ""}`;
+    const text = empty && !current.open ? "Write a summary" : `${current.open ? "Hide" : "Full"} summary${published ? " \xB7 Published" : ""}`;
     if (current.button.textContent !== text) current.button.textContent = text;
     const expanded = String(current.open);
     if (current.button.getAttribute("aria-expanded") !== expanded) current.button.setAttribute("aria-expanded", expanded);
@@ -90,6 +91,9 @@ function enhanceSynthesisControls(main) {
   const toolbar = main.querySelector('aside[aria-label="Synthesis controls"]');
   if (!toolbar) return;
   const progress = main.querySelector("#delphi-recorded-progress");
+  for (const text of toolbar.querySelectorAll("summary span")) {
+    if (text.textContent?.trim() === "Generate synthesis") text.textContent = "Generate summary";
+  }
   if (progress) {
     main.classList.add("summary-with-results");
     const refresh = progress.querySelector(".di-title > button");
@@ -305,6 +309,12 @@ function unifyClaims(main) {
 
 // src/utils/consultationInbox.ts
 function enhanceConsultationInbox(main) {
+  for (const button of main.querySelectorAll("button")) {
+    for (const child of button.childNodes) if (child.nodeType === Node.TEXT_NODE) {
+      if (child.textContent?.trim() === "Create Form") child.textContent = "New consultation";
+      if (child.textContent?.trim() === "Enter code") child.textContent = "Join";
+    }
+  }
   for (const link of main.querySelectorAll('a[href$="/summary"]')) {
     const row = link.closest("tr") || link.closest(".rounded-2xl");
     if (!row || row.dataset.inboxBound) continue;
@@ -312,7 +322,18 @@ function enhanceConsultationInbox(main) {
     row.classList.add("inbox-row");
     const mobile = row.tagName !== "TR";
     const title = row.querySelector(mobile ? ".font-semibold" : "td");
-    const name = link.getAttribute("aria-label")?.replace(/^Summary\s*/, "") || "Consultation";
+    const rawName = link.getAttribute("aria-label")?.replace(/^Summary\s*/, "") || "Consultation";
+    const simulated = /^SIMULATED PANEL\s*[—–-]\s*/i.test(rawName);
+    const name = rawName.replace(/^SIMULATED PANEL\s*[—–-]\s*/i, "");
+    if (simulated && title) {
+      const walker = document.createTreeWalker(title, NodeFilter.SHOW_TEXT);
+      let text;
+      while (text = walker.nextNode()) if (text.textContent?.includes("SIMULATED PANEL")) text.textContent = text.textContent.replace(/^SIMULATED PANEL\s*[—–-]\s*/i, "");
+      const badge = document.createElement("span");
+      badge.className = "inbox-demo-badge";
+      badge.textContent = "Demo \xB7 fictional experts";
+      title.append(badge);
+    }
     const actions = link.parentElement;
     actions.classList.add("inbox-original-actions");
     const more = document.createElement("button");

@@ -48,3 +48,12 @@ it('shows every claim without filters, repeated round counts or final-round guid
  expect(root.querySelectorAll('.di-claim')).toHaveLength(1);
  expect(root.querySelector('.di-filters')).toBeNull();expect(root.querySelector('.di-subtitle')).toBeNull();expect(root.querySelector('.di-planner')).toBeNull();expect(root.textContent).not.toContain('How to read these results');
 });
+it('summarises changes only for comparable rated claims',()=>{
+ const root=document.createElement('section');document.body.append(root);
+ const previous={...round,id:2,round_number:2};
+ const previousResponses={...previous,responses:[{id:9,round_id:2,email:'expert@example.com',timestamp:'',version:1,answers:{q1:{position:'Disagree'}}}]};
+ renderDelphiInsights(root,round,[previous,round],[previousResponses,...responses(['Agree'])]);
+ expect(root.querySelector('.di-change-overview')?.textContent).toBe('1 claim gained support.');
+ renderDelphiInsights(root,round,[round],responses(['Agree']));
+ expect(root.querySelector('.di-change-overview')).toBeNull();
+});

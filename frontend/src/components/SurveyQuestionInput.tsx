@@ -9,6 +9,7 @@ interface SurveyQuestionInputProps {
   onChange: (value: StructuredResponse) => void;
   readOnly?: boolean;
   previewOnly?: boolean;
+  authoring?: boolean;
 }
 
 type SpeechRecognitionLike = {
@@ -236,6 +237,7 @@ export default function SurveyQuestionInput({
   onChange,
   readOnly = false,
   previewOnly = false,
+  authoring = false,
 }: SurveyQuestionInputProps) {
   const inputType = question.inputType ?? 'textarea';
   const options = question.options ?? [];
@@ -248,7 +250,7 @@ export default function SurveyQuestionInput({
   const sliderStartLabel = formatSliderBoundary(sliderMin);
   const sliderEndLabel = formatSliderBoundary(sliderMax);
   const voiceInput = useVoiceInput(
-    !readOnly && (inputType === 'text' || inputType === 'textarea'),
+    !readOnly && !authoring && (inputType === 'text' || inputType === 'textarea'),
     value.position,
     (nextValue) => onChange(updatePosition(value, nextValue)),
   );
@@ -276,19 +278,13 @@ export default function SurveyQuestionInput({
             readOnly={readOnly}
             onChange={(event) => onChange(updatePosition(value, event.target.value))}
           />
-          {!readOnly ? (
+          {!readOnly && !authoring ? (
             <div className="absolute inset-y-0 right-2 flex items-center">
               <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
             </div>
           ) : null}
         </div>
-        {!readOnly ? (
-          <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-            {voiceInput.isSupported
-              ? 'Use voice input to dictate this answer.'
-              : 'Voice input appears here on supported browsers.'}
-          </p>
-        ) : null}
+
       </div>
     );
   }
@@ -526,19 +522,13 @@ export default function SurveyQuestionInput({
           readOnly={readOnly}
           onChange={(event) => onChange(updatePosition(value, event.target.value))}
         />
-        {!readOnly ? (
+        {!readOnly && !authoring ? (
           <div className="absolute bottom-2 right-2">
             <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
           </div>
         ) : null}
       </div>
-      {!readOnly ? (
-        <p className="mt-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-          {voiceInput.isSupported
-            ? 'Use voice input to dictate this answer.'
-            : 'Voice input appears here on supported browsers.'}
-        </p>
-      ) : null}
+
     </div>
   );
 }

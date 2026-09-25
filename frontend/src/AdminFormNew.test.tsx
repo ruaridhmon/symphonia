@@ -13,12 +13,12 @@ it('edits on the same canvas, preserves test answers and restores the authoring 
  const view=show();
  fireEvent.change(screen.getByLabelText('Consultation title'),{target:{value:'An important question'}});
  fireEvent.change(screen.getByLabelText('Question 1'),{target:{value:'What should we test?'}});
- fireEvent.click(screen.getByRole('button',{name:'View as participant'}));
+ fireEvent.click(screen.getByRole('button',{name:'Preview'}));
  expect(screen.getByRole('heading',{name:'An important question'})).toBeInTheDocument();
  expect(screen.getByRole('heading',{name:'What should we test?'})).toBeInTheDocument();
  expect(screen.queryByLabelText('Question 1')).not.toBeInTheDocument();
  fireEvent.change(screen.getByPlaceholderText('Write your response here'),{target:{value:'Try a small pilot'}});
- fireEvent.click(screen.getByRole('button',{name:'Edit form'}));
+ fireEvent.click(screen.getByRole('button',{name:'Edit'}));
  expect(screen.getByLabelText('Question 1')).toHaveValue('What should we test?');
  expect(screen.getByPlaceholderText('Write your response here')).toHaveValue('Try a small pilot');
  view.unmount();show();expect(screen.getByLabelText('Consultation title')).toHaveValue('An important question');
@@ -40,7 +40,7 @@ it('applies imported conditional visibility in participant view',()=>{
   {label:'Choose a route',questionId:'route',inputType:'single_select',options:['Yes','No'],requireEvidence:false,requireCounterarguments:false,requireConfidence:false},
   {label:'Explain why',questionId:'detail',inputType:'textarea',conditionalOnQuestionId:'route',conditionalOnOption:'Yes',requireEvidence:false,requireCounterarguments:false,requireConfidence:false}
  ]}));
- show();fireEvent.click(screen.getByRole('button',{name:'View as participant'}));
+ show();fireEvent.click(screen.getByRole('button',{name:'Preview'}));
  expect(screen.queryByRole('heading',{name:'Explain why'})).not.toBeInTheDocument();
  fireEvent.click(screen.getByRole('radio',{name:'Yes'}));
  expect(screen.getByRole('heading',{name:'Explain why'})).toBeInTheDocument();
@@ -50,4 +50,11 @@ it('changes answer types inline and opens only the relevant configuration',()=>{
  expect(screen.getByLabelText('Options')).toBeInTheDocument();
  expect(screen.queryByLabelText('Response type')).not.toBeInTheDocument();
  expect(screen.queryByLabelText('Required')).not.toBeInTheDocument();
+});
+it('creates a document through the same canvas without requiring hidden question blocks',async()=>{
+ localStorage.setItem('symphonia:canvas-draft:v1:current',JSON.stringify({title:'Document consultation',description:'',questions:[{label:'',inputType:'textarea'}],format:'document',documentTemplate:'{{long:Your response}}'}));
+ vi.mocked(api.post).mockRejectedValueOnce(new Error('offline'));show();
+ fireEvent.click(screen.getByRole('button',{name:'Create consultation'}));
+ await waitFor(()=>expect(api.post).toHaveBeenCalledWith('/forms/create',expect.objectContaining({document_template:'{{long:Your response}}',title:'Document consultation'})));
+ await screen.findByRole('alert');expect(screen.getByLabelText('Consultation title')).toHaveValue('Document consultation');
 });

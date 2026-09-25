@@ -22,12 +22,21 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   root.dataset.plannerRound=String(round.id);
   root.replaceChildren();root.className='card delphi-insights';
   root.dataset.claimLabels=JSON.stringify(rows.map(r=>r.label.replace(/^Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim()));
-  const head=node('div','','di-heading');head.append(node('div','THE PANEL’S VIEW','di-eyebrow'));
-  const title=node('div','','di-title');title.append(node('h2','Where views stand'));if(refresh)title.append(button('Refresh',refresh));head.append(title);root.append(head);
+  const head=node('div','','di-heading');
+  const title=node('div','','di-title');title.append(node('h2','What the panel thinks'));if(refresh)title.append(button('Refresh',refresh));head.append(title);root.append(head);
   const ordered=[...rounds].filter(r=>r.round_number<=round.round_number).sort((a,b)=>a.round_number-b.round_number);
   const actual=responses.find(r=>r.id===round.id)?.responses.length;
+  root.dataset.empty=String(actual===0);
   const note=synthesisProvenanceNote(round,rounds);if(note)root.append(node('p',note,'di-warning'));
   if(!rows.length) {root.append(node('p',actual===0?'No responses yet for this round. Responses will appear here as participants submit them.':round.round_number===1?'This round gathers independent views. Extract claims from the responses before setting up the rating round.':'There are no comparable claim ratings in this round. Review the written responses or synthesis below.','di-empty'));return;}
+  const comparable=rows.filter(row=>row.delta!==null);
+  if(comparable.length){
+    const increased=comparable.filter(row=>row.delta!>0).length;
+    const decreased=comparable.filter(row=>row.delta!<0).length;
+    const unchanged=comparable.length-increased-decreased;
+    const changes=[increased?`${increased} ${increased===1?'claim gained':'claims gained'} support`:null,decreased?`${decreased} ${decreased===1?'lost':'lost'} support`:null,unchanged?`${unchanged} ${unchanged===1?'was':'were'} unchanged`:null].filter(Boolean).join(' · ');
+    root.append(node('p',changes+'.','di-change-overview'));
+  }
   const list=node('div','','di-claims');
   const columns=node('div','','di-column-head');columns.setAttribute('aria-hidden','true');columns.append(node('span','Claim'),node('span','Recorded agreement'));list.append(columns);
   const selected=rows;
@@ -46,10 +55,10 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     if(row.history.filter(h=>h.n>0).length>1) {
       const previous=row.history.filter(h=>h.n>0).at(-2)!;
       const trend=node('div','','di-trend');
-      if(row.delta!==null&&Math.round(row.delta)!==0){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since R${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}rating.append(trend);
+      if(row.delta!==null&&Math.round(row.delta)!==0){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since Round ${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}rating.append(trend);
     }
     const detail=document.createElement('details');detail.className='di-reasons';detail.dataset.key=row.key;detail.open=priorOpen.has(row.key);
-    const summary=node('summary','Expert responses & history');detail.append(summary);
+    const summary=node('summary','Responses and changes');detail.append(summary);
     detail.append(node('p',row.history.map(h=>`Round ${h.round}: ${h.n ? Math.round(h.percent!)+'% agree' : 'No ratings'} (${h.n} answered)`).join(' · ')));
     if(row.matched)detail.append(node('p',`${row.changed} of ${row.matched} returning respondents changed position group since Round ${row.previousRound}.`,'di-movement'));
     const question=round.questions.find(q=>typeof q==='object'&&String(q.questionId)===row.key) as Record<string,unknown>|undefined;

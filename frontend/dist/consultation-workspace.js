@@ -28,6 +28,8 @@ function createConsultationWorkspace(R) {
     const count = responseGroup ? responseGroup.responses.length : round?.response_count;
     const joinUrl = new URL(`/share/${encodeURIComponent(p.form.join_code)}`, window.location.origin).href;
     const outline = questionOutline(round?.questions || p.form.questions);
+    const simulated = /^SIMULATED PANEL\s*[—–-]\s*/i.test(p.form.title);
+    const displayTitle = p.form.title.replace(/^SIMULATED PANEL\s*[—–-]\s*/i, "");
     const hint = round?.round_number === 1 ? "Collect independent views, then draw out the claims." : round?.round_number === 2 ? "Review the claims and where the panel agrees or differs." : "Review final ratings alongside the reasons behind them.";
     R.useEffect(() => {
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
@@ -53,7 +55,7 @@ function createConsultationWorkspace(R) {
       h(
         "div",
         { className: "cw-title-row" },
-        h("div", { className: "cw-identity" }, h("p", { className: "cw-eyebrow" }, "Consultation"), h("h2", null, p.form.title)),
+        h("div", { className: "cw-identity" }, simulated || p.isDemo ? h("p", { className: "cw-provenance" }, "Demo \xB7 fictional experts") : null, h("h2", null, displayTitle)),
         p.isDemo ? h("span", { className: "cw-demo-badge" }, "Synthetic example") : h(
           "div",
           { className: "cw-title-actions" },

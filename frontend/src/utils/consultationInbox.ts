@@ -1,12 +1,22 @@
 /** Inbox gestures reveal existing actions; they never perform destructive actions. */
 export function enhanceConsultationInbox(main:HTMLElement){
+ // Keep React-owned elements and handlers; edit only their text nodes.
+ for(const button of main.querySelectorAll('button')) {
+  for(const child of button.childNodes)if(child.nodeType===Node.TEXT_NODE){
+   if(child.textContent?.trim()==='Create Form')child.textContent='New consultation';
+   if(child.textContent?.trim()==='Enter code')child.textContent='Join';
+  }
+ }
  for(const link of main.querySelectorAll<HTMLAnchorElement>('a[href$="/summary"]')){
   const row=link.closest<HTMLElement>('tr')||link.closest<HTMLElement>('.rounded-2xl');
   if(!row||row.dataset.inboxBound)continue;
   row.dataset.inboxBound='true';row.classList.add('inbox-row');
   const mobile=row.tagName!=='TR';
   const title=row.querySelector<HTMLElement>(mobile?'.font-semibold':'td');
-  const name=link.getAttribute('aria-label')?.replace(/^Summary\s*/,'')||'Consultation';
+  const rawName=link.getAttribute('aria-label')?.replace(/^Summary\s*/,'')||'Consultation';
+  const simulated=/^SIMULATED PANEL\s*[—–-]\s*/i.test(rawName);
+  const name=rawName.replace(/^SIMULATED PANEL\s*[—–-]\s*/i,'');
+  if(simulated&&title){const walker=document.createTreeWalker(title,NodeFilter.SHOW_TEXT);let text;while((text=walker.nextNode()))if(text.textContent?.includes('SIMULATED PANEL'))text.textContent=text.textContent.replace(/^SIMULATED PANEL\s*[—–-]\s*/i,'');const badge=document.createElement('span');badge.className='inbox-demo-badge';badge.textContent='Demo · fictional experts';title.append(badge);}
   const actions=link.parentElement!;actions.classList.add('inbox-original-actions');
   const more=document.createElement('button');more.type='button';more.className='inbox-more';more.textContent='•••';more.setAttribute('aria-label',`Actions for ${name}`);more.setAttribute('aria-haspopup','dialog');
   const open=()=>{

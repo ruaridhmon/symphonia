@@ -241,7 +241,7 @@ export default function DocumentTemplateEditor({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Document Template</h3>
+          <h3 className="text-sm font-semibold text-foreground">Document</h3>
           <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
             Choose whether participants fill marked fields in place or receive their own editable copy of the whole document.
           </p>
@@ -340,7 +340,7 @@ export default function DocumentTemplateEditor({
         )}
       </div>
 
-      <div
+      <details
         className="mt-4 rounded-lg px-3 py-3 text-xs"
         style={{
           backgroundColor: 'var(--background)',
@@ -349,10 +349,10 @@ export default function DocumentTemplateEditor({
           lineHeight: 1.6,
         }}
       >
-        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <summary className="flex items-center gap-2 text-sm font-medium text-foreground">
           <FileText size={15} />
           {isEditableDocumentTemplate(value) ? 'Document guidance' : 'Fillable document guidance'}
-        </div>
+        </summary>
         <p className="mt-2">
           {isEditableDocumentTemplate(value)
             ? 'Participants will open this document and edit their own copy directly. `.docx` imports preserve much more structure here than the fill-field mode.'
@@ -368,7 +368,7 @@ export default function DocumentTemplateEditor({
             {fields.length} field{fields.length === 1 ? '' : 's'} currently in this document.
           </p>
         ) : null}
-      </div>
+      </details>
 
       {uploadError && (
         <div
