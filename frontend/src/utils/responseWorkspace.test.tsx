@@ -34,7 +34,8 @@ it('compares only identical question wording and retains a participant across ro
  expect(screen.getByText('2 participants · opening perspectives and rating history')).toBeInTheDocument();
 });
 it('searches all answer fields and distinguishes rounds',()=>{
- const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);
+ const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base} initialRoundId={undefined}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Search responses'}));
  fireEvent.change(screen.getByRole('combobox',{name:'Round'}),{target:{value:'all'}});expect(screen.getByText('Earlier expert')).toBeInTheDocument();
  fireEvent.change(screen.getByRole('searchbox'),{target:{value:'Retained unmatched answer'}});expect(screen.getByText('3 responses found')).toBeInTheDocument();
  fireEvent.change(screen.getByRole('searchbox'),{target:{value:'absent'}});expect(screen.getByText('No responses match these filters.')).toBeInTheDocument();
@@ -42,7 +43,7 @@ it('searches all answer fields and distinguishes rounds',()=>{
 it('retains successful deletions and remaining selection when a later deletion fails',async()=>{
  const remove=vi.fn().mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('Server unavailable'));const onResponseDeleted=vi.fn();vi.spyOn(window,'confirm').mockReturnValue(true);
  const Workspace=createResponseWorkspace(React,Editor,remove);render(<Workspace {...base} onResponseDeleted={onResponseDeleted}/>);
- fireEvent.click(screen.getByRole('button',{name:'Manage'}));fireEvent.click(screen.getByRole('button',{name:'Select visible'}));fireEvent.click(screen.getByRole('button',{name:'Delete selected'}));
+ fireEvent.click(screen.getByRole('button',{name:'Manage responses'}));fireEvent.click(screen.getByRole('button',{name:'Select visible'}));fireEvent.click(screen.getByRole('button',{name:'Delete selected'}));
  await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Server unavailable'));
  expect(onResponseDeleted).toHaveBeenCalledExactlyOnceWith(3,2);expect(screen.getByRole('checkbox',{name:'Select Alice, round 3'})).not.toBeChecked();expect(screen.getByRole('checkbox',{name:'Select Bob, round 3'})).toBeChecked();
 });
@@ -70,3 +71,5 @@ it('includes the opening response as context without inventing a round-one claim
  const expand=screen.getByRole('button',{name:'Read full responses'});fireEvent.click(expand);expect(expand).toHaveAttribute('aria-expanded','true');
  expect(screen.getByText('Original evidence 1')).toBeInTheDocument();
 });
+
+it('uses the parent round selector without repeating it in the response toolbar',()=>{const Workspace=createResponseWorkspace(React,Editor);const view=render(<Workspace {...base}/>);expect(screen.queryByRole('combobox',{name:'Round'})).not.toBeInTheDocument();view.rerender(<Workspace {...base} initialRoundId={2}/>);expect(screen.getByText('Earlier expert')).toBeInTheDocument();expect(screen.queryByText('Alice')).not.toBeInTheDocument();});

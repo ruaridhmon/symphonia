@@ -64,3 +64,11 @@ The workspace now exposes only Summary and Responses, with a compact round dropd
 - Documents now use the same FormCanvas for create/edit/preview. Verified local form 5 creation, existing-document loading, title saving and retained template. Formatting and guidance are collapsed; field controls use full available width. Question authoring no longer shows voice prompts or duplicate help text.
 - 81 tests passed in the broad relevant run, plus the added comparable-claim summary test passed (82 current relevant tests total). TypeScript and source Vite build passed. Browser checks include mobile results overflow (390px viewport, 384px document width) and document create/save/reopen.
 - Remaining limitation: introduction/join updates need backend support. The connected gcloud account was denied access to symphonia-dev in symphonia-dev-488613; no backend or production deployment was attempted. Controls are not falsely exposed as editable.
+
+## 2026-09-25 response clutter and summary switching
+
+- Claims and Full summary now switch in the same content area. Original prose/editor/publication handlers remain intact; tests verify returning to claims without altering summary HTML.
+- Embedded responses inherit the workspace round. Standalone readers retain their own round filter. Parent-round changes and search are covered in tests.
+- Search opens on demand, management uses an accessible ellipsis, and question selection displays a short number while the full question appears once below.
+- Full summary paragraphs have explicit reading spacing. Create has a visible title label and concise guidance.
+- Verified locally in the real browser: switching in both directions, Responses toolbar, mobile Create at 390px (384px content width). 84 tests across 22 files, TypeScript and source Vite build passed.

@@ -1056,3 +1056,25 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 #root .product-summary.summary-with-results #delphi-recorded-progress .di-heading { position:static;width:auto;height:auto;padding:0;overflow:visible;clip-path:none;white-space:normal; }
 #root .di-heading h2 { font-size:18px!important;font-weight:500;margin:0!important; }
 #root .di-change-overview { margin:0 0 18px; }
+/* One result surface at a time; one round control for the workspace. */
+.summary-switch { display:flex;gap:6px;margin:8px 0 18px; }
+#root .summary-switch button { padding:8px 13px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted-foreground);font-size:13px;cursor:pointer; }
+#root .summary-switch button[aria-pressed=true] { background:var(--muted);color:var(--foreground); }
+#root .summary-switch .quiet-synthesis-toggle { margin:0;width:auto;display:inline-block;border:0; }
+#root .summary-switch .quiet-synthesis-toggle:before { content:none; }
+#root .rp-controls { gap:12px;padding:8px 0 16px; }
+#root .rp-controls nav { background:none;padding:0;gap:4px; }
+#root .rp-controls nav button { font-size:12px;padding:8px 10px;min-height:36px;box-shadow:none; }
+#root .rp-search-trigger { margin-left:auto; }
+#root .rp-search input { min-height:36px;font-size:12px;padding:8px 12px; }
+.fc-field-label { display:block;color:var(--muted-foreground);font-size:12px;margin-bottom:10px; }
+.fc-create-guide { color:var(--muted-foreground);font-size:14px;line-height:1.6;margin:0 0 28px; }
+#root .fc-create-guide + .fc-introduction .fc-title { font-size:28px; }
+#root .summary-switch[hidden],#root #delphi-recorded-progress[hidden],#root .full-summary-surface[hidden] { display:none!important; }
+#root .full-summary-surface { box-shadow:none!important;border:0!important;padding:12px 0!important; }
+#root .full-summary-surface .tiptap { max-width:72ch;margin-inline:auto;font-size:15px;line-height:1.75; }
+#root .full-summary-surface .tiptap p { margin:0 0 18px!important;line-height:1.75!important; }
+#root .full-summary-surface .tiptap p:has(>strong):not(:has(br)) { font-size:17px;margin-top:28px!important; }
+#root .rp-question-bar label { display:flex;align-items:center;gap:10px; }
+#root .rp-question-bar label>span { display:none; }
+#root .rp-question-bar select { max-width:160px;font-size:12px;padding:8px 10px;min-height:36px; }

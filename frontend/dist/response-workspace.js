@@ -48,6 +48,7 @@ function createResponseWorkspace(R, Editor, remove) {
     const [mode, setMode] = R.useState("question");
     const [question, setQuestion] = R.useState("");
     const [expanded, setExpanded] = R.useState(/* @__PURE__ */ new Set());
+    const [searching, setSearching] = R.useState(false);
     const [query, setQuery] = R.useState("");
     const [active, setActive] = R.useState(null);
     const [managing, setManaging] = R.useState(false);
@@ -133,20 +134,20 @@ function createResponseWorkspace(R, Editor, remove) {
           setMode(value);
           setActive(null);
         }
-      }, { key: value, "aria-pressed": mode === value }))), h("label", { className: "rp-search" }, h("span", { className: "sr-only" }, "Search responses"), h("input", { type: "search", value: query, placeholder: "Search the panel\u2026", onChange: (e) => {
+      }, { key: value, "aria-pressed": mode === value }))), searching || query ? h("label", { className: "rp-search" }, h("span", { className: "sr-only" }, "Search responses"), h("input", { type: "search", value: query, placeholder: "Search the panel\u2026", onChange: (e) => {
         if (allowLeave()) setQuery(e.target.value);
-      } })), mode !== "changes" ? h("label", null, h("span", { className: "sr-only" }, "Round"), h("select", { "aria-label": "Round", value: roundId, onChange: (e) => {
+      } })) : button("Search", () => setSearching(true), { "aria-label": "Search responses", className: "rp-search-trigger" }), mode !== "changes" && p.initialRoundId === void 0 ? h("label", null, h("span", { className: "sr-only" }, "Round"), h("select", { "aria-label": "Round", value: roundId, onChange: (e) => {
         if (allowLeave()) {
           setRoundId(e.target.value === "all" ? "all" : Number(e.target.value));
           setActive(null);
         }
-      } }, h("option", { value: "all" }, "All rounds"), ...p.structuredRounds.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}`)))) : null, canManage ? button(managing ? "Done" : "Manage", () => {
+      } }, h("option", { value: "all" }, "All rounds"), ...p.structuredRounds.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}`)))) : null, canManage ? button(managing ? "Done" : "\u2022\u2022\u2022", () => {
         if (allowLeave()) {
           setManaging(!managing);
           setSelected(/* @__PURE__ */ new Set());
           setActive(null);
         }
-      }, { disabled: busy, "aria-pressed": managing }) : null),
+      }, { disabled: busy, "aria-pressed": managing, "aria-label": managing ? "Done managing responses" : "Manage responses", title: "Manage responses" }) : null),
       managing ? h("div", { className: "rw-management" }, button("Select visible", () => setSelected(new Set(filtered.map((r) => r.response.id))), { disabled: busy }), button("Clear selection", () => setSelected(/* @__PURE__ */ new Set()), { disabled: busy || !selected.size }), h("span", null, `${selectedRows.length} selected`), button(busy ? "Deleting\u2026" : "Delete selected", deleteSelected, { disabled: busy || !selectedRows.length, className: "rw-delete" }), h("div", null, ...filtered.map((row) => h("label", { key: row.response.id }, h("input", { type: "checkbox", "aria-label": `Select ${row.name}, round ${row.round.round_number}`, checked: selected.has(row.response.id), disabled: busy, onChange: () => toggle(row.response.id) }), row.name, ` \xB7 R${row.round.round_number}`)))) : null,
       error ? h("p", { role: "alert", className: "rw-error" }, error) : null,
       mode !== "person" && titles.length ? h("div", { className: "rp-question-bar" }, h("label", null, h("span", null, "Question"), h("select", { "aria-label": "Question or claim", value: chosen, onChange: (e) => {
@@ -154,7 +155,7 @@ function createResponseWorkspace(R, Editor, remove) {
           setQuestion(e.target.value);
           setActive(null);
         }
-      } }, ...titles.map((title) => h("option", { key: title, value: title }, title)))), h("h3", null, chosen)) : null,
+      } }, ...titles.map((title, index) => h("option", { key: title, value: title, title }, `Question ${index + 1}`)))), h("h3", null, chosen)) : null,
       h("p", { className: "rp-count", "aria-live": "polite" }, mode === "changes" ? `${identities.length} participants \xB7 opening perspectives and rating history` : `${filtered.length} response${filtered.length === 1 ? "" : "s"}${query ? " found" : ""}`),
       mode === "question" ? h("div", { className: "rp-answer-list" }, ...filtered.filter((row) => row.sections.some((s) => s.title === chosen)).map((row) => h("article", { key: row.response.id, className: "rp-person-answer" }, identity(row), blocks(row.sections.find((s) => s.title === chosen)), editor(row)))) : null,
       mode === "person" ? h("div", { className: "rp-person-list" }, ...filtered.map((row) => h("article", { key: row.response.id, className: "rp-person-answer" }, h("button", { type: "button", className: "rp-expand", "aria-expanded": expanded.has(row.response.id), onClick: () => {
