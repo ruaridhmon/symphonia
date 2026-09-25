@@ -72,3 +72,10 @@ The workspace now exposes only Summary and Responses, with a compact round dropd
 - Search opens on demand, management uses an accessible ellipsis, and question selection displays a short number while the full question appears once below.
 - Full summary paragraphs have explicit reading spacing. Create has a visible title label and concise guidance.
 - Verified locally in the real browser: switching in both directions, Responses toolbar, mobile Create at 390px (384px content width). 84 tests across 22 files, TypeScript and source Vite build passed.
+
+## 2026-09-25 unified responses
+
+- Removed the three browsing modes. One question selector shows every current answer; earlier answers expand beneath each person. Exact previous ratings show changes inline.
+- Earlier rounds require the same non-empty identity and exact question. Unmatched round-one answers are opening context; future rounds are excluded.
+- Verified local panel round 3 to round 2 switching, Leo's Disagree to Agree history, and mobile layout without horizontal overflow (384px content width).
+- 86 tests across 22 files passed, alongside TypeScript and an isolated source build. Shared deployed modules and standalone examples rebuilt.

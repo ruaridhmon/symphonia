@@ -18,20 +18,16 @@ it('shows all answers for one claim without a separate reader or back navigation
  expect(screen.queryByRole('button',{name:/All responses/})).not.toBeInTheDocument();
  fireEvent.change(screen.getByRole('combobox',{name:'Question or claim'}),{target:{value:'Additional response · orphan'}});
  expect(screen.getAllByText('Retained unmatched answer')).toHaveLength(2);
- fireEvent.click(screen.getByRole('button',{name:'By person'}));
- const alice=screen.getByRole('button',{name:/Alice/}); const bob=screen.getByRole('button',{name:/Bob/});
- fireEvent.click(alice);fireEvent.click(bob);
- expect(alice).toHaveAttribute('aria-expanded','true');expect(bob).toHaveAttribute('aria-expanded','true');
- expect(screen.getAllByText('Retained unmatched answer')).toHaveLength(2);
+ expect(screen.queryByRole('navigation',{name:'Response layout'})).not.toBeInTheDocument();
 });
 it('compares only identical question wording and retains a participant across rounds',()=>{
  const Workspace=createResponseWorkspace(React,Editor);
  render(<Workspace {...base} structuredRounds={[{...rounds[0],responses:[answer(1,'Alice',2)]},structuredRounds[1]]}/>);
- fireEvent.click(screen.getByRole('button',{name:'Across rounds'}));
+ fireEvent.click(screen.getByRole('button',{name:/Alice.*Earlier answers/}));
  expect(screen.getByText('Original evidence 1')).toBeInTheDocument();
  expect(screen.getByText('Original evidence 2')).toBeInTheDocument();
  expect(screen.getByText('Original evidence 3')).toBeInTheDocument();
- expect(screen.getByText('2 participants · opening perspectives and rating history')).toBeInTheDocument();
+ expect(screen.getByRole('button',{name:/Alice.*Hide history/})).toHaveAttribute('aria-expanded','true');
 });
 it('searches all answer fields and distinguishes rounds',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base} initialRoundId={undefined}/>);
@@ -52,7 +48,6 @@ it('preserves the selected claim across views and does not mark neutral ratings 
  const neutral={...answer(4,'Neutral participant',3),answers:{q1:{position:'Neither agree nor disagree'}}};
  render(<Workspace {...base} structuredRounds={[structuredRounds[0],{...rounds[1],responses:[neutral]}]}/>);
  expect(screen.getByText('Neither agree nor disagree')).toHaveClass('rp-neutral');
- fireEvent.click(screen.getByRole('button',{name:'Across rounds'}));
  expect(screen.getByRole('combobox',{name:'Question or claim'})).toHaveValue('Preserve the exact claim');
 });
 it('includes the opening response as context without inventing a round-one claim rating',()=>{
@@ -61,15 +56,15 @@ it('includes the opening response as context without inventing a round-one claim
  const revised={...answer(2,'Alice',3),answers:{q1:{position:'Agree',evidence:'My explanation changed after feedback.'}}};
  const Workspace=createResponseWorkspace(React,Editor);
  render(<Workspace {...base} rounds={[opening,...rounds]} structuredRounds={[{...opening,responses:[initial]},{...rounds[0],responses:[answer(1,'Alice',2)]},{...rounds[1],responses:[revised]}]}/>);
- fireEvent.click(screen.getByRole('button',{name:'Across rounds'}));
+ fireEvent.click(screen.getByRole('button',{name:/Alice.*Earlier answers/}));
  expect(screen.getByText('Start with a useful experiment.')).toBeInTheDocument();
  expect(screen.getAllByText('What matters before testing?').length).toBeGreaterThan(0);
- expect(screen.getByText('Opening perspective')).toBeInTheDocument();
- expect(screen.getByText('First rating')).toBeInTheDocument();
- expect(screen.getByText('After feedback')).toBeInTheDocument();
- expect(screen.getByText('Same rating · explanation changed')).toBeInTheDocument();
- const expand=screen.getByRole('button',{name:'Read full responses'});fireEvent.click(expand);expect(expand).toHaveAttribute('aria-expanded','true');
+ expect(screen.getByText('Round 1 · Opening context')).toBeInTheDocument();
+ expect(screen.getByText('Round 2')).toBeInTheDocument();
  expect(screen.getByText('Original evidence 1')).toBeInTheDocument();
 });
 
 it('uses the parent round selector without repeating it in the response toolbar',()=>{const Workspace=createResponseWorkspace(React,Editor);const view=render(<Workspace {...base}/>);expect(screen.queryByRole('combobox',{name:'Round'})).not.toBeInTheDocument();view.rerender(<Workspace {...base} initialRoundId={2}/>);expect(screen.getByText('Earlier expert')).toBeInTheDocument();expect(screen.queryByText('Alice')).not.toBeInTheDocument();});
+
+it('shows a change from the nearest earlier exact claim and hides history initially',()=>{const Workspace=createResponseWorkspace(React,Editor);const earlier={...answer(1,'Alice',2),answers:{q1:{position:'Disagree',evidence:'Before'}}};render(<Workspace {...base} structuredRounds={[{...rounds[0],responses:[earlier]},structuredRounds[1]]}/>);expect(screen.getByText('Disagree → Agree')).toBeInTheDocument();expect(screen.queryByText('Before')).not.toBeInTheDocument();fireEvent.click(screen.getByRole('button',{name:/Alice.*Earlier answers/}));expect(screen.getByText('Before')).toBeInTheDocument();});
+it('does not match anonymous identities or differently worded questions',()=>{const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base} structuredRounds={[{...{...rounds[0],questions:[{...questions[0],sectionTitle:'Different claim'}]},responses:[answer(1,'Alice',2),answer(7,'',2)]},{...rounds[1],responses:[answer(2,'Alice',3),answer(8,'',3)]}]}/>);expect(screen.queryByText('Earlier answers')).not.toBeInTheDocument();expect(screen.queryByText(/→/)).not.toBeInTheDocument();});
