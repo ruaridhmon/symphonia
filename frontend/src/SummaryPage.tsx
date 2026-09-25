@@ -1,3 +1,6 @@
+import * as WorkspaceReact from 'react';
+import { createConsultationWorkspace } from './utils/consultationWorkspace';
+const ConsultationWorkspace = createConsultationWorkspace(WorkspaceReact);
 import './components/summary/summary-refinement.css';
 import { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
@@ -2209,122 +2212,17 @@ export default function SummaryPage() {
 			<main id="main-content" className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6" tabIndex={-1}>
 				<div>
 				<BackLink to="/" label={t('common.backToDashboard')} className="mb-4 sm:mb-5" />
-				<section className="card mb-4 sm:mb-6 p-5 sm:p-6">
-					<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-						<div className="min-w-0 max-w-3xl">
-							<div className="text-xs font-medium" style={{ color: 'var(--muted-foreground)' }}>
-								Summary
-							</div>
-							<h2 className="mt-1.5 text-2xl font-bold tracking-tight" style={{ color: 'var(--foreground)' }}>
-								{form.title}
-							</h2>
-							<div className="mt-3 flex flex-wrap gap-2">
-								<span
-									className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-									style={{
-										backgroundColor: 'var(--muted)',
-										color: 'var(--foreground)',
-									}}
-								>
-									{displayRound ? `Round ${displayRound.round_number}` : 'No round selected'}
-								</span>
-								{displayRound?.is_active && (
-									<span
-										className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
-										style={{
-											backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)',
-											color: 'var(--success)',
-										}}
-									>
-										Live
-									</span>
-								)}
-							</div>
-						</div>
+				<ConsultationWorkspace
+                        form={form} rounds={rounds} responses={structuredRounds}
+                        selectedRoundId={displayRound?.id || null}
+                        view={activeWorkspaceTab} onView={view => { void handleWorkspaceTabChange(view); }}
+                        onRound={handleSelectRound}
+                        onMakeLive={() => { void makeSelectedRoundLive(); }}
+                        makingLiveId={isActivatingRound ? displayRound?.id : null}
+                        onDownload={() => setDownloadSheetOpen(true)}
+                    />
 
-						<div className="w-full max-w-xl space-y-3 lg:max-w-sm">
-							<div className="flex flex-wrap justify-start gap-2 lg:justify-end">
-								{displayRound && !displayRound.is_active && (
-									<LoadingButton
-										type="button"
-										variant="success"
-										size="sm"
-										onClick={makeSelectedRoundLive}
-										loading={isActivatingRound}
-										loadingText="Making live..."
-										icon={<CheckCircle2 size={15} aria-hidden="true" />}
-									>
-										Make live
-									</LoadingButton>
-								)}
-								<button
-									type="button"
-									onClick={() => setDownloadSheetOpen(true)}
-									className="inline-flex h-9 items-center gap-2 rounded-full px-3 text-sm font-semibold transition-colors"
-									style={{
-										backgroundColor: 'color-mix(in srgb, var(--accent) 9%, transparent)',
-										border: '1px solid color-mix(in srgb, var(--accent) 28%, var(--border))',
-										color: 'var(--accent)',
-									}}
-									aria-label="Download consultation exports"
-									title="Download consultation exports"
-								>
-									<Download size={15} aria-hidden="true" />
-									<span>Download</span>
-								</button>
-							</div>
-							<RoundHistoryCard
-								rounds={rounds}
-								selectedRoundId={selectedRound?.id || null}
-								onSelectRound={handleSelectRound}
-							/>
-						</div>
-					</div>
-				</section>
-
-				<section className="mb-4 sm:mb-6">
-					<div
-						className="flex flex-wrap gap-2 rounded-2xl p-1.5"
-						style={{
-							backgroundColor: 'color-mix(in srgb, var(--muted) 34%, transparent)',
-							border: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
-						}}
-					>
-						{workspaceTabs.map(tab => {
-							const Icon = tab.icon;
-							const isActive = activeWorkspaceTab === tab.id;
-							return (
-								<button
-									key={tab.id}
-									type="button"
-									onClick={() => { void handleWorkspaceTabChange(tab.id); }}
-									className="flex min-w-[9rem] flex-1 items-center gap-2 rounded-xl px-3 py-2 text-left transition-colors"
-									style={{
-										backgroundColor: isActive
-											? 'var(--card)'
-											: 'transparent',
-										border: isActive
-											? '1px solid color-mix(in srgb, var(--border) 62%, transparent)'
-											: '1px solid transparent',
-										boxShadow: isActive ? '0 6px 18px rgba(15, 23, 42, 0.06)' : 'none',
-										cursor: 'pointer',
-									}}
-									aria-pressed={isActive}
-								>
-									<Icon size={16} style={{ color: isActive ? 'var(--accent)' : 'var(--muted-foreground)' }} />
-									<span
-										className="text-sm font-semibold"
-										style={{ color: isActive ? 'var(--foreground)' : 'var(--muted-foreground)' }}
-									>
-										{tab.label}
-									</span>
-								</button>
-							);
-						})}
-					</div>
-				</section>
-
-				{/* Synthesis progress bar */}
+                    {/* Synthesis progress bar */}
 				<div aria-live="polite">
 				<SynthesisProgress
 					stage={synthesisStage}

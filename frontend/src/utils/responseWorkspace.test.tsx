@@ -11,26 +11,26 @@ const Editor=({questions,response,onUpdated,roundNumber}:any)=><>{renderResponse
 const base={rounds,structuredRounds,formQuestions:questions,initialRoundId:3,onResponseUpdated:vi.fn()};
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});});
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
-it('expands a person inline while keeping the list and filters visible',()=>{
+it('reads each person in a dedicated pane while preserving filters and original answers',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);
  fireEvent.change(screen.getByRole('searchbox'),{target:{value:'Original evidence'}});
  const alice=screen.getByRole('button',{name:'Read response from Alice, round 3'});
  fireEvent.click(alice);
- expect(alice).toHaveAttribute('aria-expanded','true');
+ expect(alice).toHaveAttribute('aria-pressed','true');
  expect(screen.getByRole('heading',{name:'Preserve the exact claim'})).toBeInTheDocument();
  expect(screen.getByText('Retained unmatched answer')).toBeInTheDocument();
  expect(screen.getByRole('searchbox')).toHaveValue('Original evidence');
  const bob=screen.getByRole('button',{name:'Read response from Bob, round 3'});
  expect(bob).toBeInTheDocument();
- expect(screen.queryByRole('navigation',{name:'Response navigation'})).toBeNull();
- fireEvent.click(bob);expect(alice).toHaveAttribute('aria-expanded','false');
+ expect(screen.getByRole('navigation',{name:'Response navigation'})).toBeInTheDocument();
+ fireEvent.click(bob);expect(alice).toHaveAttribute('aria-pressed','false');
  fireEvent.click(screen.getByRole('button',{name:'Save fixture edit'}));expect(base.onResponseUpdated).toHaveBeenCalledWith(3,expect.objectContaining({id:3,version:2}));
- fireEvent.click(bob);expect(bob).toHaveAttribute('aria-expanded','false');
- expect(screen.queryByText('Save fixture edit')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Previous response'}));expect(alice).toHaveAttribute('aria-pressed','true');
+ expect(screen.getAllByText('Original evidence 2').length).toBeGreaterThan(0);
 });
 it('searches all answer fields and distinguishes rounds',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);
- fireEvent.change(screen.getByRole('combobox'),{target:{value:'all'}});expect(screen.getByText('Earlier expert')).toBeInTheDocument();
+ fireEvent.change(screen.getByRole('combobox'),{target:{value:'all'}});expect(screen.getByRole('button',{name:'Read response from Earlier expert, round 2'})).toBeInTheDocument();
  fireEvent.change(screen.getByRole('searchbox'),{target:{value:'Retained unmatched answer'}});expect(screen.getByText('3 responses found')).toBeInTheDocument();
  fireEvent.change(screen.getByRole('searchbox'),{target:{value:'absent'}});expect(screen.getByText('No responses match these filters.')).toBeInTheDocument();
 });

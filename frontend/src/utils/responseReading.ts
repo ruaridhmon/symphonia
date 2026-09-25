@@ -36,36 +36,13 @@ export function responseSections(questions:Question[],answers:Record<string,unkn
 }
 export function renderResponseReading(h:any,questions:Question[],answers:Record<string,unknown>,roundNumber?:number){
  const sections=responseSections(questions,answers);
- if(roundNumber===1){
-  return h('div',{className:'response-reading rr-original',key:JSON.stringify(answers)},
-   ...sections.map((section,i)=>h('div',{key:i,className:'rr-original-answer'},
-    ...section.blocks.filter(block=>!block.label).map((block,j)=>h('p',{key:j},block.text)),
-    section.rating?h('p',null,section.rating):null,
-    section.blocks.some(block=>block.label)?h('details',{className:'rr-supporting'},
-     h('summary',null,'Supporting details'),
-     ...section.blocks.filter(block=>block.label).map((block,j)=>h('div',{className:'rr-block',key:j},h('h5',null,block.label),h('p',null,block.text)))):null)),
-   sections.length?null:h('p',null,'No answers have been recorded.'));
- }
- const fold=sections.length>1;
- const blocks=(s:ReadingSection)=>s.blocks.map((b,j)=>h('div',{className:'rr-block',key:j},b.label&&!(b.label==='Reasoning'&&s.blocks.length===1)?h('h5',null,b.label):null,h('p',null,b.text)));
- const syncToggle=(root:HTMLElement|null)=>{
-  if(!root)return;
-  const all=Array.from(root.querySelectorAll<HTMLDetailsElement>('details'));
-  const expanded=all.length>0&&all.every(d=>d.open);
-  const button=root.querySelector<HTMLButtonElement>('.rr-expand');
-  if(button){button.textContent=expanded?'Collapse explanations':'Expand explanations';button.setAttribute('aria-expanded',String(expanded));}
- };
- return h('div',{className:'response-reading',key:JSON.stringify(answers)},
-  fold?h('div',{className:'rr-toolbar'},h('span',null,'Positions & reasoning'),h('button',{type:'button',className:'rr-expand','aria-expanded':false,onClick:(e:any)=>{
-   const root=e.currentTarget.closest('.response-reading');const all=Array.from(root.querySelectorAll('details')) as HTMLDetailsElement[];
-   const open=!all.every(d=>d.open);all.forEach(d=>d.open=open);syncToggle(root);
-  }},'Expand explanations')):null,
-  sections.length?sections.map((s,i)=>{
-   const stance=/disagree/i.test(s.rating||'')?'disagree':/agree/i.test(s.rating||'')?'agree':'neutral';
-   const heading=[h('div',{className:'rr-kicker',key:'kicker'},h('span',{className:'rr-question-number'},`${s.rating?'Claim':'Question'} ${i+1}`),s.rating?h('span',{className:`rr-rating rr-${stance}`},s.rating):null),h('h4',{key:'title'},s.title)];
-   return fold?h('details',{className:'rr-section rr-disclosure',key:i,open:i===0,onToggle:(e:any)=>syncToggle(e.currentTarget.closest('.response-reading'))},
-    h('summary',null,...heading,h('span',{className:'rr-disclosure-hint'},'Explanation',h('span',{'aria-hidden':true},'⌄'))),
-    h('div',{className:'rr-explanation'},...blocks(s))
-   ):h('article',{className:'rr-section',key:i},...heading,...blocks(s));
-  }):h('p',null,'No answers have been recorded.'));
+ return h('div',{className:`response-reading rr-flow ${roundNumber===1?'rr-original':''}`,key:JSON.stringify(answers)},
+  ...sections.map((section,i)=>{
+   const stance=/disagree/i.test(section.rating||'')?'disagree':/agree/i.test(section.rating||'')?'agree':'neutral';
+   return h('article',{className:'rr-section',key:i},
+    (sections.length>1||roundNumber!==1)?h('header',{className:'rr-answer-heading'},
+     h('div',{className:'rr-kicker'},h('span',{className:'rr-question-number'},`${section.rating?'Claim':'Question'} ${i+1}`),section.rating?h('span',{className:`rr-rating rr-${stance}`},section.rating):null),
+     h('h4',null,section.title)):null,
+    ...section.blocks.map((block,j)=>h('div',{className:'rr-block',key:j},block.label&&block.label!=='Reasoning'?h('h5',null,block.label):null,h('p',null,block.text))));
+  }),sections.length?null:h('p',null,'No answers have been recorded.'));
 }

@@ -76,13 +76,8 @@ async function apiClient<T>(
       },
     });
   } catch (err) {
-    // Network error (offline, DNS failure, CORS block on opaque redirect, etc.)
-    // If we had auth state, this might be a CF Access redirect manifesting as a TypeError
-    if (err instanceof TypeError && (bearerToken || getCookie('csrf_token'))) {
-      clearAuthAndRedirect();
-      throw new ApiError(0, 'Network error — possible session expiry. Redirecting to login.');
-    }
-    throw new ApiError(0, err instanceof Error ? err.message : 'Network request failed');
+    // A failed connection is not proof of expired authentication. Keep drafts and session.
+    throw new ApiError(0, 'Connection interrupted. Please try again when you are online.');
   }
 
   // Detect Cloudflare Access redirect (session expired at the edge)
@@ -119,9 +114,7 @@ async function apiClient<T>(
     // If the response is not JSON despite being "ok", it's likely a CF/proxy interception
     const contentType = response.headers.get('content-type') || '';
     if (contentType.includes('text/html')) {
-      // HTML response on an API endpoint = likely CF Access or proxy page
-      clearAuthAndRedirect();
-      throw new ApiError(401, 'Unexpected HTML response — possible session expiry.');
+      throw new ApiError(502, 'The server returned an unexpected page. Please try again.');
     }
     throw new ApiError(response.status, 'Invalid JSON response from server');
   }

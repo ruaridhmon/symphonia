@@ -2855,7 +2855,7 @@ function sync() {
     if (control && !control.getAttribute("aria-label")) control.setAttribute("aria-label", label);
   }
   const main = document.querySelector("main");
-  const isSummary = /^\/admin\/form\/\d+\/summary\/?$/.test(location.pathname) && !!main?.querySelector("#summary-workspace-select");
+  const isSummary = /^\/admin\/form\/\d+\/summary\/?$/.test(location.pathname) && !!main?.querySelector("#summary-workspace-select,.consultation-workspace");
   if (isSummary && main) {
     for (const label of main.querySelectorAll("aside span")) if (label.childElementCount === 0 && label.textContent === "Participants") label.textContent = "Responses";
     for (const analysis of main.querySelectorAll(".structured-synthesis")) {

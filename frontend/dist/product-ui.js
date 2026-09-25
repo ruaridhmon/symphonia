@@ -1,3 +1,34 @@
+// src/utils/participantPresentation.ts
+function enhanceParticipantPresentation(main) {
+  const participant = /^\/(?:form\/\d+|public\/session\/)/.test(location.pathname);
+  main.classList.toggle("cw-participant", participant);
+  if (!participant) return;
+  const nav = main.querySelector('nav[aria-label="Question sections"]');
+  if (nav) {
+    nav.querySelectorAll("button").forEach((button, index) => {
+      const label = button.querySelector("span")?.textContent || button.textContent || "";
+      if (button.dataset.step !== String(index + 1)) button.dataset.step = String(index + 1);
+      if (button.getAttribute("aria-label") !== label) button.setAttribute("aria-label", label);
+      if (button.title !== label) button.title = label;
+    });
+    main.querySelectorAll("section[aria-label]").forEach((section) => {
+      const label = section.getAttribute("aria-label");
+      if (!label) return;
+      let heading = section.querySelector(":scope > .cw-question-heading");
+      if (!heading) {
+        heading = document.createElement("h2");
+        heading.className = "cw-question-heading";
+        section.prepend(heading);
+      }
+      if (heading.textContent !== label) heading.textContent = label;
+    });
+  }
+  main.querySelectorAll("[data-question-key] textarea").forEach((area) => {
+    const label = area.closest("[data-question-key]")?.querySelector("label")?.textContent?.replace(/Required|Optional|Not answered yet/g, "").trim();
+    if (label && !area.labels?.length && area.getAttribute("aria-label") !== label) area.setAttribute("aria-label", label);
+  });
+}
+
 // src/utils/synthesisControls.ts
 var bound = /* @__PURE__ */ new WeakSet();
 var panelId = 0;
@@ -352,12 +383,13 @@ function enhanceConsultationInbox(main) {
 function syncProductUI() {
   const main = document.querySelector("main");
   if (!main) return;
+  enhanceParticipantPresentation(main);
   unifyClaims(main);
   enhanceSynthesisControls(main);
   const dashboard = location.pathname === "/" && !!main.querySelector('input[aria-label="Search consultations"]');
   main.classList.toggle("product-dashboard", dashboard);
   if (dashboard) enhanceConsultationInbox(main);
-  main.classList.toggle("product-summary", !!main.querySelector('#summary-workspace-select,aside[aria-label="Synthesis controls"]'));
+  main.classList.toggle("product-summary", !!main.querySelector('.consultation-workspace,#summary-workspace-select,aside[aria-label="Synthesis controls"]'));
   const select = main.querySelector("#summary-workspace-select");
   if (select) {
     select.closest("label")?.classList.add("product-view-control");

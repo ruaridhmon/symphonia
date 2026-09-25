@@ -16,6 +16,7 @@ import './i18n'
 import RouteAnnouncer from './components/RouteAnnouncer'
 import './index.css'
 import './product.css'
+import './workspace.css'
 import './legacy/productUI'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

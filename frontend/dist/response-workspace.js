@@ -38,7 +38,7 @@ function responseSections(questions, answers) {
 // src/utils/responseWorkspace.ts
 function createResponseWorkspace(R, Editor, remove) {
   const h = R.createElement;
-  const label = (response, index) => (response.email || `Anonymous response ${index + 1}`).replace(/^Guest:\s*/, "").replace(/\s*\[[A-Za-z0-9]{8}\]$/, "");
+  const label = (response, index) => (response.email || `Anonymous response ${index + 1}`).replace(/^Guest:\s*/, "").replace(/\s*\[[A-Za-z0-9_-]{8}\]$/, "");
   const timestamp = (value) => {
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? "" : date.toLocaleString(void 0, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -52,6 +52,19 @@ function createResponseWorkspace(R, Editor, remove) {
     const [busy, setBusy] = R.useState(false);
     const [error, setError] = R.useState("");
     const container = R.useRef(null);
+    const lastOpened = R.useRef(null);
+    R.useEffect(() => {
+      if (active !== null) {
+        lastOpened.current = active;
+        const reader = container.current?.querySelector(".rw-reader");
+        reader?.querySelector("h3")?.focus({ preventScroll: true });
+        reader?.scrollIntoView?.({ block: "start" });
+      } else if (lastOpened.current !== null) {
+        const button2 = container.current?.querySelector(`[data-response-id="${lastOpened.current}"]`);
+        button2?.focus({ preventScroll: true });
+        button2?.scrollIntoView?.({ block: "nearest" });
+      }
+    }, [active]);
     const rows = R.useMemo(() => p.structuredRounds.flatMap((round) => {
       const embedded = round.questions;
       const questions = (embedded?.length ? embedded : null) || p.rounds.find((r) => r.id === round.id)?.questions || p.formQuestions;
@@ -62,11 +75,12 @@ function createResponseWorkspace(R, Editor, remove) {
       });
     }), [p.structuredRounds, p.rounds, p.formQuestions]);
     const filtered = rows.filter((row) => (roundId === "all" || row.round.id === roundId) && row.search.includes(query.trim().toLowerCase()));
-    const index = filtered.findIndex((row) => row.response.id === active);
+    const activeIndex = filtered.findIndex((row) => row.response.id === active);
+    const index = Math.max(0, activeIndex);
     const current = filtered[index];
     R.useEffect(() => {
-      if (active !== null && !current) setActive(null);
-    }, [active, current]);
+      if (active !== null && activeIndex < 0) setActive(null);
+    }, [active, activeIndex]);
     R.useEffect(() => {
       if (p.initialRoundId !== void 0) {
         setRoundId(p.initialRoundId);
@@ -81,7 +95,7 @@ function createResponseWorkspace(R, Editor, remove) {
     }, [rows]);
     const allowLeave = () => !container.current?.querySelector("textarea") || window.confirm("Discard unsaved response edits?");
     const open = (id) => {
-      if (allowLeave()) setActive((previous) => previous === id ? null : id);
+      if (allowLeave()) setActive(id);
     };
     const toggle = (id) => setSelected((prev) => {
       const next = new Set(prev);
@@ -112,35 +126,55 @@ function createResponseWorkspace(R, Editor, remove) {
       }
     };
     const button = (text2, onClick, props = {}) => h("button", { type: "button", onClick, ...props }, text2);
+    const go = (id) => {
+      if (allowLeave()) setActive(id);
+    };
     return h(
       "section",
-      { className: "response-workspace", ref: container, "aria-label": "Expert responses" },
-      h(
-        R.Fragment,
-        null,
-        h("header", { className: "rw-heading" }, h("h2", null, "Responses"), canManage ? button(managing ? "Done" : "Manage", () => {
+      { className: `response-workspace rw-inbox ${active !== null ? "rw-has-selection" : ""}`, ref: container, "aria-label": "Expert responses" },
+      h("header", { className: "rw-heading" }, h("div", null, h("h2", null, "The panel"), h("p", null, "Each perspective, in their own words.")), canManage ? button(managing ? "Done" : "Manage", () => {
+        if (allowLeave()) {
           setManaging(!managing);
           setSelected(/* @__PURE__ */ new Set());
-        }, { disabled: busy, "aria-pressed": managing }) : null),
-        h("div", { className: "rw-toolbar" }, h("label", null, h("span", { className: "rw-label" }, "Search responses"), h("input", { type: "search", value: query, placeholder: "Search people or answers", onChange: (e) => {
-          if (allowLeave()) setQuery(e.target.value);
-        } })), h("label", null, h("span", { className: "rw-label" }, "Round"), h("select", { value: roundId, onChange: (e) => {
-          if (allowLeave()) setRoundId(e.target.value === "all" ? "all" : Number(e.target.value));
-        } }, h("option", { value: "all" }, "All rounds"), ...p.structuredRounds.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}`))))),
-        h("p", { className: "rw-result-count", "aria-live": "polite" }, `${filtered.length} response${filtered.length === 1 ? "" : "s"}${query ? " found" : ""}`),
-        managing ? h("div", { className: "rw-management" }, button("Select visible", () => setSelected(new Set(filtered.map((r) => r.response.id))), { disabled: busy }), button("Clear selection", () => setSelected(/* @__PURE__ */ new Set()), { disabled: busy || !selected.size }), h("span", null, `${selectedRows.length} selected`), button(busy ? "Deleting\u2026" : "Delete selected", deleteSelected, { disabled: busy || !selectedRows.length, className: "rw-delete" })) : null,
-        error ? h("p", { role: "alert", className: "rw-error" }, error) : null,
-        h("div", { className: "rw-list" }, ...filtered.map((row) => {
+        }
+      }, { disabled: busy, "aria-pressed": managing }) : null),
+      h("div", { className: "rw-toolbar" }, h("label", null, h("span", { className: "rw-label" }, "Search responses"), h("input", { type: "search", value: query, placeholder: "Search\u2026", onChange: (e) => {
+        if (allowLeave()) setQuery(e.target.value);
+      } })), h("label", null, h("span", { className: "rw-label" }, "Round"), h("select", { value: roundId, onChange: (e) => {
+        if (allowLeave()) {
+          setRoundId(e.target.value === "all" ? "all" : Number(e.target.value));
+          setActive(null);
+        }
+      } }, h("option", { value: "all" }, "All rounds"), ...p.structuredRounds.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}`))))),
+      h("p", { className: "rw-result-count", "aria-live": "polite" }, `${filtered.length} response${filtered.length === 1 ? "" : "s"}${query ? " found" : ""}`),
+      managing ? h("div", { className: "rw-management" }, button("Select visible", () => setSelected(new Set(filtered.map((r) => r.response.id))), { disabled: busy }), button("Clear selection", () => setSelected(/* @__PURE__ */ new Set()), { disabled: busy || !selected.size }), h("span", null, `${selectedRows.length} selected`), button(busy ? "Deleting\u2026" : "Delete selected", deleteSelected, { disabled: busy || !selectedRows.length, className: "rw-delete" })) : null,
+      error ? h("p", { role: "alert", className: "rw-error" }, error) : null,
+      h(
+        "div",
+        { className: "rw-inbox-layout" },
+        h("div", { className: "rw-list", "aria-label": "Participant responses" }, ...filtered.map((row) => {
           const excerpt = row.sections.flatMap((s) => s.blocks.map((b) => b.text)).find(Boolean) || row.sections.map((s) => s.rating).filter(Boolean).join(" \xB7 ") || "No answer text recorded.";
+          const initials = row.name.split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map((x) => x[0]).join("").toUpperCase();
           return h(
             "div",
             { className: "rw-list-row", key: row.response.id },
             managing ? h("input", { type: "checkbox", "aria-label": `Select ${row.name}, round ${row.round.round_number}`, checked: selected.has(row.response.id), disabled: busy, onChange: () => toggle(row.response.id) }) : null,
-            h("button", { type: "button", className: "rw-open", "aria-label": `Read response from ${row.name}, round ${row.round.round_number}`, "data-response-id": row.response.id, "aria-expanded": active === row.response.id, "aria-controls": `inline-response-${row.response.id}`, onClick: () => open(row.response.id) }, h("div", { className: "rw-row-main" }, h("strong", null, row.name), active !== row.response.id ? h("span", { className: "rw-preview" }, excerpt) : null), h("span", { className: "rw-row-meta" }, roundId === "all" ? h("span", null, `Round ${row.round.round_number}`) : null, h("time", { dateTime: row.response.timestamp }, timestamp(row.response.timestamp))), h("span", { "aria-hidden": true, className: "rw-arrow" }, active === row.response.id ? "\u2303" : "\u2304")),
-            active === row.response.id ? h("div", { id: `inline-response-${row.response.id}`, className: "rw-inline-reader" }, h(Editor, { key: row.response.id, response: row.response, questions: row.questions, roundNumber: row.round.round_number, token: p.token, onUpdated: (response) => p.onResponseUpdated(row.round.id, response) })) : null
+            h(
+              "button",
+              { type: "button", className: "rw-open", "aria-label": `Read response from ${row.name}, round ${row.round.round_number}`, "data-response-id": row.response.id, "aria-pressed": current?.response.id === row.response.id, "aria-controls": "panel-response-reader", onClick: () => open(row.response.id) },
+              h("span", { className: "rw-avatar", "aria-hidden": true }, initials),
+              h("div", { className: "rw-row-main" }, h("strong", { title: row.response.email || void 0 }, row.name), h("span", { className: "rw-preview" }, excerpt), roundId === "all" ? h("small", null, `Round ${row.round.round_number}`) : null),
+              h("span", { "aria-hidden": true, className: "rw-arrow" }, "\u203A")
+            )
           );
         })),
-        !filtered.length ? h("p", { className: "rw-empty" }, rows.length ? "No responses match these filters." : "Responses will appear here when participants submit them.") : null
+        current ? h(
+          "article",
+          { id: "panel-response-reader", className: "rw-reader" },
+          h("nav", { className: "rw-reader-nav", "aria-label": "Response navigation" }, button("\u2190 All responses", () => go(null), { className: "rw-back" }), h("span", { className: "rw-position" }, `${index + 1} of ${filtered.length}`), h("div", null, button("\u2190", () => go(filtered[index - 1]?.response.id), { disabled: index === 0, "aria-label": "Previous response" }), button("\u2192", () => go(filtered[index + 1]?.response.id), { disabled: index === filtered.length - 1, "aria-label": "Next response" }))),
+          h("header", { className: "rw-reader-heading" }, h("p", { className: "rw-reader-eyebrow" }, `Round ${current.round.round_number} \xB7 Original response`), h("h3", { className: "rw-reader-title", tabIndex: -1 }, current.name), h("time", { dateTime: current.response.timestamp }, timestamp(current.response.timestamp))),
+          h(Editor, { key: current.response.id, response: current.response, questions: current.questions, roundNumber: current.round.round_number, token: p.token, onUpdated: (response) => p.onResponseUpdated(current.round.id, response) })
+        ) : h("p", { className: "rw-empty" }, rows.length ? "No responses match these filters." : "Invite your panel to begin. Their responses will appear here as they submit.")
       )
     );
   };
