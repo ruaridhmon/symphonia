@@ -227,6 +227,7 @@ function enhanceSynthesisControls(main) {
   } else main.querySelector(".summary-tools-only")?.remove();
   if (nav && !nav.hidden) {
     toolbar.classList.add("summary-actions-panel");
+    if (main.querySelector(".di-claim")) nav.querySelector(".summary-generate-empty")?.remove();
     let menu = nav.querySelector(".summary-actions-menu");
     if (!menu) {
       menu = document.createElement("details");
@@ -239,7 +240,7 @@ function enhanceSynthesisControls(main) {
       items.className = "summary-actions-items";
       menu.append(items);
       nav.append(menu);
-      if (!progress?.querySelector(".di-claim")) {
+      if (!main.querySelector(".di-claim")) {
         const generate = document.createElement("button");
         generate.type = "button";
         generate.className = "summary-generate-empty";

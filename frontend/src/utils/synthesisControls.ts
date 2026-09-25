@@ -26,12 +26,13 @@ export function enhanceSynthesisControls(main:HTMLElement){
  }else main.querySelector('.summary-tools-only')?.remove();
  if(nav&&!nav.hidden){
   toolbar.classList.add('summary-actions-panel');
+  if(main.querySelector('.di-claim'))nav.querySelector('.summary-generate-empty')?.remove();
   let menu=nav.querySelector<HTMLDetailsElement>('.summary-actions-menu');
   if(!menu){
    menu=document.createElement('details');menu.className='summary-actions-menu';
    const trigger=document.createElement('summary');trigger.textContent='•••';trigger.setAttribute('aria-label','Summary actions');menu.append(trigger);
    const items=document.createElement('div');items.className='summary-actions-items';menu.append(items);nav.append(menu);
-   if(!progress?.querySelector('.di-claim')){const generate=document.createElement('button');generate.type='button';generate.className='summary-generate-empty';generate.textContent='Generate summary';generate.onclick=()=>{const detail=toolbar.querySelector<HTMLDetailsElement>('details.summary-disclosure');if(detail){detail.open=true;detail.querySelector<HTMLElement>('.summary-panel-close')?.focus();}};nav.prepend(generate);}
+   if(!main.querySelector('.di-claim')){const generate=document.createElement('button');generate.type='button';generate.className='summary-generate-empty';generate.textContent='Generate summary';generate.onclick=()=>{const detail=toolbar.querySelector<HTMLDetailsElement>('details.summary-disclosure');if(detail){detail.open=true;detail.querySelector<HTMLElement>('.summary-panel-close')?.focus();}};nav.prepend(generate);}
    for(const detail of toolbar.querySelectorAll<HTMLDetailsElement>(':scope > details.summary-disclosure')){
     const action=document.createElement('button');action.type='button';action.textContent=detail.querySelector('summary span')?.textContent||'Summary settings';
     action.onclick=()=>{menu!.open=false;toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure').forEach(other=>other.open=other===detail);detail.querySelector<HTMLElement>('.card input,.card select,.summary-panel-close')?.focus();};items.append(action);
