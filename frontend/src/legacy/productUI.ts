@@ -1,3 +1,4 @@
+import { quietSummary } from '../utils/quietSummary';
 import { enhanceParticipantPresentation } from '../utils/participantPresentation';
 import { enhanceSynthesisControls } from '../utils/synthesisControls';
 import { unifyClaims } from '../utils/unifiedClaims';
@@ -9,6 +10,7 @@ function syncProductUI() {
   enhanceParticipantPresentation(main);
   unifyClaims(main);
   enhanceSynthesisControls(main);
+  quietSummary(main);
   const dashboard = location.pathname === '/' && !!main.querySelector('input[aria-label="Search consultations"]');
   main.classList.toggle('product-dashboard', dashboard);
   if(dashboard)enhanceConsultationInbox(main);

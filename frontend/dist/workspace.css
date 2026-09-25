@@ -319,3 +319,12 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 .rp-journey:not(.rp-journey-expanded) .rp-opening-question { display:none; }
 #root .cw-question-outline { gap:0; }
 .cw-dialog:has(.cw-question-outline) { width:min(680px,calc(100vw - 32px)); }
+/* Two views and one round selector; results lead, long synthesis is optional. */
+.cw-simple-context { margin:24px 0 6px;justify-content:flex-start;gap:14px; }
+.cw-simple-context .cw-text-button { margin-left:auto; }
+.cw-round-picker select { appearance:auto;background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12px;min-height:36px; }
+.quiet-synthesis-toggle { display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--border);color:var(--muted-foreground);padding:18px 0;margin:16px 0 0;cursor:pointer;font-family:inherit;font-size:12px; }
+.quiet-synthesis-toggle:hover { color:var(--foreground); }
+.quiet-synthesis-toggle::before { content:'▸';margin-right:8px; }.quiet-synthesis-toggle[aria-expanded=true]::before { content:'▾'; }
+#root .card[hidden],.quiet-synthesis-toggle[hidden] { display:none!important; }
+@media(max-width:500px){.cw-simple-context{gap:9px;}.cw-simple-context>span{font-size:11px;}.cw-simple-context .cw-text-button{font-size:11px;}}

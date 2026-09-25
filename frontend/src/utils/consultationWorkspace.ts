@@ -43,7 +43,6 @@ export function createConsultationWorkspace(R: typeof React) {
     const responseGroup = p.responses?.find(r => r.id === round?.id);
     const count = responseGroup ? responseGroup.responses.length : round?.response_count;
     const joinUrl = new URL(`/share/${encodeURIComponent(p.form.join_code)}`, window.location.origin).href;
-    const stage = round?.round_number === 1 ? 'Independent perspectives' : round?.round_number === 2 ? 'Rate the claims' : round?.round_number === 3 ? 'Reflect and re-rate' : 'Panel discussion';
     const outline=questionOutline(round?.questions || p.form.questions);
     const hint = round?.round_number === 1 ? 'Collect independent views, then draw out the claims.' : round?.round_number === 2 ? 'Review the claims and where the panel agrees or differs.' : 'Review final ratings alongside the reasons behind them.';
     R.useEffect(() => {
@@ -66,16 +65,12 @@ export function createConsultationWorkspace(R: typeof React) {
             h('div', null, h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),
               p.onDownload ? button('Download', p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? 'Updating…' : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null)))),
-      h('div', { className: 'cw-rounds', role: 'group', 'aria-label': 'View round' }, ordered.map(r =>
-        button(`Round ${r.round_number}`, () => { if (canLeave()) p.onRound(r); }, {
-          key: r.id, 'aria-pressed': r.id === round?.id, 'aria-label': `Round ${r.round_number}${r.is_active ? ' Current' : ''}`,
-          children: [h('span', { className: 'cw-round-number', key: 'number' }, r.round_number), h('span', { key: 'label' }, r.round_number === 1 ? 'Perspectives' : r.round_number === 2 ? 'Rating' : r.round_number === 3 ? 'Reflection' : `Round ${r.round_number}`), r.is_active ? h('span', { className: 'cw-current-dot', key: 'current', title: 'Current round', 'aria-hidden': true }) : null],
-        }))),
-      h('div', { className: 'cw-context' },
-        h('p', null, h('strong', null, stage), count !== undefined ? ` · ${count} response${count === 1 ? '' : 's'}` : '', round && !round.is_active ? ' · Earlier round' : ''),
+      h('div', { className: 'cw-context cw-simple-context' },
+        h('label',{className:'cw-round-picker'},h('span',{className:'sr-only'},'Round'),h('select',{'aria-label':'Round',value:round?.id||'',onChange:(event:React.ChangeEvent<HTMLSelectElement>)=>{const selected=ordered.find(r=>r.id===Number(event.target.value));if(selected&&canLeave())p.onRound(selected);}},...ordered.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}${r.is_active?' · Current':''}`)))),
+        count!==undefined?h('span',null,`${count} response${count===1?'':'s'}`):null,
         button('View questions', () => setPanel('questions'), { className: 'cw-text-button', disabled: !round })),
       h('nav', { className: 'cw-views', 'aria-label': 'Consultation views' },
-        ([['synthesis', 'Findings'], ['responses', 'Responses'], ['analysis', 'Analysis']] as [View, string][]).map(([view, label]) =>
+        ([['synthesis', 'Summary'], ['responses', 'Responses']] as [View, string][]).map(([view, label]) =>
           button(label, () => { if (canLeave()) p.onView(view); }, { key: view, 'aria-pressed': p.view === view }))),
       h('dialog', { ref: dialog, className: 'cw-dialog', 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => setPanel(null), onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
         h('div', { className: 'cw-dialog-body' },

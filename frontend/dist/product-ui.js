@@ -1,3 +1,57 @@
+// src/utils/quietSummary.ts
+var states = /* @__PURE__ */ new WeakMap();
+var id = 0;
+function quietSummary(main) {
+  const progress = main.querySelector("#delphi-recorded-progress");
+  const hasResults = !!progress?.querySelector(".di-claim");
+  for (const stale of main.querySelectorAll(".quiet-synthesis-toggle")) {
+    if (!document.getElementById(stale.getAttribute("aria-controls") || "")) stale.remove();
+  }
+  const heading = Array.from(main.querySelectorAll("h2")).find((n) => /^(Round \d+ synthesis|Synthesis for Round \d+)$/.test(n.textContent?.trim() || ""));
+  const card = heading?.closest(".card");
+  if (!card) return;
+  let state = states.get(card);
+  if (!hasResults) {
+    if (state) {
+      card.hidden = false;
+      state.button.hidden = true;
+    }
+    return;
+  }
+  const round = heading.textContent || "";
+  if (!state) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "quiet-synthesis-toggle";
+    card.id ||= `full-synthesis-${++id}`;
+    button.setAttribute("aria-controls", card.id);
+    state = { button, open: false, round };
+    states.set(card, state);
+    card.before(button);
+    button.onclick = () => {
+      const current2 = states.get(card);
+      current2.open = !current2.open;
+      sync();
+    };
+  }
+  if (state.round !== round) {
+    state.round = round;
+    state.open = false;
+  }
+  if (card.classList.contains("unified-editing")) state.open = true;
+  const current = state;
+  function sync() {
+    const published = !!Array.from(card.querySelectorAll("button")).find((b) => b.textContent?.trim() === "Hide from survey");
+    const text = `${current.open ? "Hide" : "Full"} synthesis${published ? " \xB7 Published" : ""}`;
+    if (current.button.textContent !== text) current.button.textContent = text;
+    const expanded = String(current.open);
+    if (current.button.getAttribute("aria-expanded") !== expanded) current.button.setAttribute("aria-expanded", expanded);
+    if (card.hidden === current.open) card.hidden = !current.open;
+    current.button.hidden = false;
+  }
+  sync();
+}
+
 // src/utils/participantPresentation.ts
 function enhanceParticipantPresentation(main) {
   const participant = /^\/(?:form\/\d+|public\/session\/)/.test(location.pathname);
@@ -386,6 +440,7 @@ function syncProductUI() {
   enhanceParticipantPresentation(main);
   unifyClaims(main);
   enhanceSynthesisControls(main);
+  quietSummary(main);
   const dashboard = location.pathname === "/" && !!main.querySelector('input[aria-label="Search consultations"]');
   main.classList.toggle("product-dashboard", dashboard);
   if (dashboard) enhanceConsultationInbox(main);

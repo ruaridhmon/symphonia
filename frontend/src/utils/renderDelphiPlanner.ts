@@ -2,8 +2,8 @@ import type { Round, RoundWithResponses } from '../types/summary';
 import { buildFixedDelphiRound } from './delphiPlanning';
 const el=(tag:string,text='')=>{const n=document.createElement(tag);n.textContent=text;return n;};
 export function renderDelphiPlanner(root:HTMLElement,round:Round,rounds:Round[],responses:RoundWithResponses[],publish?: (questions:(string|Record<string,unknown>)[])=>Promise<void>) {
+  if(round.round_number>=3)return;
   const box=el('div');box.className='di-planner';root.append(box);
-  if(round.round_number>=3){box.append(el('strong','Round 3 of 3 · Final ratings'),el('p','The same claims were rated in rounds 2 and 3. Compare the positions and justifications above; unresolved disagreement remains part of the result.'));return;}
   if(round.round_number!==2)return;
   const detail=el('details');detail.append(el('summary','Preview round 3 · Final ratings'),el('p','All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and explain their reasoning.'));
   box.append(detail);

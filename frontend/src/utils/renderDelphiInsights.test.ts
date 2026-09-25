@@ -42,3 +42,9 @@ it('preserves open excerpts across result refreshes without counting them as rat
  expect(control.getAttribute('aria-expanded')).toBe('true');
  expect(root.querySelector('.unified-excerpts blockquote')!.textContent).toBe('Exact original words.');
 });
+it('shows every claim without filters, repeated round counts or final-round guidance',()=>{
+ const root=document.createElement('section');document.body.append(root);root.dataset.filter='Divided';
+ renderDelphiInsights(root,{...round,is_active:true},[round],responses(['Agree']));
+ expect(root.querySelectorAll('.di-claim')).toHaveLength(1);
+ expect(root.querySelector('.di-filters')).toBeNull();expect(root.querySelector('.di-subtitle')).toBeNull();expect(root.querySelector('.di-planner')).toBeNull();expect(root.textContent).not.toContain('How to read these results');
+});

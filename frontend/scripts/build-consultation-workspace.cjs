@@ -21,7 +21,7 @@ code = 'import {createConsultationWorkspace} from "/consultation-workspace.js?v=
 code = code.replace('/response-workspace.js?v=2','/response-workspace.js?v=3').replace('/response-reading.js?v=3','/response-reading.js?v=4');
 parse(code, {sourceType: 'module'});
 fs.writeFileSync('dist/assets/SummaryPage-workspace-v6.js', code);
-for (const [entry, outfile] of [['src/utils/consultationWorkspace.ts','consultation-workspace'],['src/legacy/productUI.ts','product-ui'],['src/utils/responseWorkspace.ts','response-workspace'],['src/utils/responseReading.ts','response-reading'],['src/legacy/delphiDemo.ts','delphi-demo']]) {
+for (const [entry, outfile] of [['src/utils/consultationWorkspace.ts','consultation-workspace'],['src/legacy/productUI.ts','product-ui'],['src/utils/responseWorkspace.ts','response-workspace'],['src/utils/responseReading.ts','response-reading'],['src/legacy/delphiDemo.ts','delphi-demo'],['src/legacy/delphiProgress.ts','delphi-progress']]) {
   buildSync({entryPoints:[entry], outfile:`dist/${outfile}.js`, bundle:true, format:'esm', target:'es2022'});
 }
 fs.copyFileSync('src/workspace.css','dist/workspace.css');

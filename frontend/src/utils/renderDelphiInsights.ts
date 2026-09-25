@@ -17,7 +17,7 @@ function category(row:Row) {
 export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round[], responses:RoundWithResponses[], refresh?:()=>void, publish?: (questions:(string|Record<string,unknown>)[])=>Promise<void>) {
   const rows=ratingProgress(round,rounds,responses);
   const priorOpen=new Set(Array.from(root.querySelectorAll('details[open]')).map(d=>(d as HTMLElement).dataset.key));
-  const filter=root.dataset.filter || 'All claims';
+  delete root.dataset.filter;
   const existingPlanner=root.dataset.plannerRound===String(round.id)?root.querySelector('.di-planner'):null;
   root.dataset.plannerRound=String(round.id);
   root.replaceChildren();root.className='card delphi-insights';
@@ -26,15 +26,11 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   const title=node('div','','di-title');title.append(node('h2','Where views stand'));if(refresh)title.append(button('Refresh',refresh));head.append(title);root.append(head);
   const ordered=[...rounds].filter(r=>r.round_number<=round.round_number).sort((a,b)=>a.round_number-b.round_number);
   const actual=responses.find(r=>r.id===round.id)?.responses.length;
-  const intro=node('p',`Round ${round.round_number} · ${actual ?? '—'} responses`,'di-subtitle');root.append(intro);
   const note=synthesisProvenanceNote(round,rounds);if(note)root.append(node('p',note,'di-warning'));
   if(!rows.length) {root.append(node('p',actual===0?'No responses yet for this round. Responses will appear here as participants submit them.':round.round_number===1?'This round gathers independent views. Extract claims from the responses before setting up the rating round.':'There are no comparable claim ratings in this round. Review the written responses or synthesis below.','di-empty'));return;}
-  const cats=['Mostly agree','Leaning agree','Divided','Leaning disagree','Mostly disagree','Uncertain'];
-  const filters=node('div','','di-filters');filters.setAttribute('role','group');filters.setAttribute('aria-label','Filter claims');
-  ['All claims',...cats].forEach(label=>{const count=label==='All claims'?rows.length:rows.filter(r=>category(r)===label).length;if(!count&&label!==filter)return;const b=button(label,()=>{root.dataset.filter=label;renderDelphiInsights(root,round,rounds,responses,refresh,publish);});b.append(node('span',String(count),'di-filter-count'));b.setAttribute('aria-pressed',String(filter===label));filters.append(b);});root.append(filters);
   const list=node('div','','di-claims');
   const columns=node('div','','di-column-head');columns.setAttribute('aria-hidden','true');columns.append(node('span','Claim'),node('span','Recorded agreement'));list.append(columns);
-  const selected=rows.filter(r=>filter==='All claims'||category(r)===filter);
+  const selected=rows;
   if(!selected.length)list.append(node('p','No claims in this group.','di-empty'));
   selected.forEach((row)=>{
     const article=node('article','','di-claim');article.dataset.key=row.key;
@@ -72,9 +68,4 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   if(archived.childElementCount>1)root.append(archived);
   if(existingPlanner)root.append(existingPlanner);
   else if(round.is_active || !refresh)renderDelphiPlanner(root,round,rounds,responses,publish);
-  const methods=document.createElement('details');methods.className='di-method';methods.dataset.key='method';methods.open=priorOpen.has('method');methods.append(node('summary','How to read these results'));
-  methods.append(node('p','These are recorded ratings, not AI-inferred agreement. “Leaning” means a majority below 80%; “Divided” means neither side has a majority (unless uncertainty dominates). “Mostly” means at least 80% of answered ratings; it is a descriptive display band, not a substitute for the study’s declared consensus rule. Neutral, unsure and unrecognised answers remain in the denominator; missing answers are shown separately.'));
-  methods.append(node('p','Round comparisons require identical claim identifiers, wording and scales. Movement counts compare position groups for unambiguously matched returning respondents; changing intensity within agree or disagree is not counted. Response numbers identify rows within this round only. Comments are original submitted words.'));
-  methods.append(node('p',ordered.map(r=>`Round ${r.round_number}: ${responses.find(x=>x.id===r.id)?.responses.length ?? r.response_count ?? '—'} responses`).join(' · ')));
-  methods.append(node('p','Agreement can coexist with conditional support. Changes in panel composition can change percentages. A synthetic demonstration illustrates the process; it does not establish scientific validity.'));root.append(methods);
 }
