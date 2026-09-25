@@ -247,8 +247,8 @@ export default function SurveyQuestionInput({
   const sliderMax = question.maxValue ?? 10;
   const sliderMidpoint = Math.round((sliderMin + sliderMax) / 2);
   const sliderValue = parseSliderValue(value.position, sliderMin, sliderMax);
-  const sliderStartLabel = formatSliderBoundary(sliderMin);
-  const sliderEndLabel = formatSliderBoundary(sliderMax);
+  const sliderStartLabel = question.minLabel || formatSliderBoundary(sliderMin);
+  const sliderEndLabel = question.maxLabel || formatSliderBoundary(sliderMax);
   const voiceInput = useVoiceInput(
     !readOnly && !authoring && (inputType === 'text' || inputType === 'textarea'),
     value.position,

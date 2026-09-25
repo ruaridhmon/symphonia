@@ -107,3 +107,11 @@ The workspace now exposes only Summary and Responses, with a compact round dropd
 - Participant survey uses the same compact hierarchy without changing routing, required fields, answer values or submission.
 - Dashboard visually removes the redundant large Consultations heading while preserving its accessible heading. Search/actions and table now lead.
 - Browser reviewed desktop dashboard, filled canvas and mobile preview. No behaviour changes or new tests required for this CSS-only update; build mirror scripts completed.
+
+## Focused consultation composer — 2026-09-25
+
+Replaced the nested inline Options panels with a native modal sheet. Question cards now lead with the editable prompt and retain the actual answer control, with a small type/options footer. Empty questions reveal the answer control after a prompt is entered. Create and edit share this layout; preview preserves its reading geometry. General settings use the same sheet.
+
+Added minimum/maximum and endpoint-label editing for number scales, fixed multiline choice editing, and block invalid ranges or fewer than two choice options before save. Importing questions does not unexpectedly open a second settings panel.
+
+Validation: 92 tests across 22 files; TypeScript; isolated Vite build; clean diff. Browser checks at desktop and 390px: scale settings update the draft, Escape restores opener focus, mobile sheet stays within viewport, and local form 4 saves guidance through the shared edit flow. No live consultation data changed.

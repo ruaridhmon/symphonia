@@ -1210,3 +1210,51 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
  #root .fc-description,#root .fc-answer textarea,#root main.cw-participant textarea { font-size:16px!important; }
  #root main.cw-participant .cw-question-heading { font-size:17px; }
 }
+/* A quiet composer with focused settings sheets. */
+#root .fc-composer .fc-paper { max-width:720px;margin:36px auto; }
+#root .fc-composer .fc-eyebrow { margin-bottom:14px;font-size:11px; }
+#root .fc-composer .fc-introduction { margin-bottom:26px; }
+#root .fc-composer .fc-title,#root .fc-composer .fc-introduction h1 { font-size:26px;min-height:1.3em; }
+#root .fc-composer .fc-title::placeholder { color:var(--foreground);opacity:.75; }
+#root .fc-composer .fc-question { padding:20px 22px 10px;border:1px solid var(--border);border-radius:16px;margin:0 0 14px;background:var(--background); }
+#root .fc-composer .fc-question-label,#root .fc-composer .fc-question h2 { font-size:17px!important;font-weight:500;margin:0 0 16px; }
+#root .fc-composer .fc-question-label::placeholder { color:var(--muted-foreground);font-weight:400; }
+#root .fc-composer .fc-question-top { margin-top:14px;padding-top:8px;border-top:1px solid var(--border);min-height:38px; }
+#root .fc-composer .fc-question-actions select { border:0;max-width:160px;cursor:pointer; }
+#root .fc-composer .fc-question-actions button { color:var(--muted-foreground); }
+#root .fc-composer .fc-add { border:0;width:auto;padding:10px 2px;color:var(--muted-foreground);font-size:13px; }
+#root .fc-composer .fc-add:hover { color:var(--foreground);background:none; }
+#root .fc-composer .fc-answer[hidden] { display:none; }
+#root .fc-composer .fc-answer>div>div:has(>input[type=range]) { border:0!important;background:var(--muted)!important;border-radius:10px;padding:10px 14px; }
+#root .fc-sheet { position:fixed;inset:76px 20px auto auto;width:390px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 100px);padding:0;border:1px solid var(--border);border-radius:16px;background:var(--background);color:var(--foreground);box-shadow:0 16px 60px #0002;overflow:auto;margin:0; }
+#root .fc-sheet::backdrop { background:rgb(0 0 0 / .12); }
+.fc-sheet-body { padding:22px; }
+.fc-sheet header { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px; }
+#root .fc-sheet header h2 { font-size:16px;font-weight:550;margin:0; }
+#root .fc-sheet header button { padding:0;width:32px;min-height:32px;font-size:22px;color:var(--muted-foreground); }
+.fc-sheet-context { font-size:12px;line-height:1.6;color:var(--muted-foreground);margin:0 0 20px; }
+.fc-setting-field { display:block;font-size:12px;font-weight:500;margin:18px 0; }
+#root .fc-setting-field input,#root .fc-setting-field textarea { display:block;width:100%;font-family:inherit;font-size:13px;font-weight:400;line-height:1.6;color:var(--foreground);background:var(--background);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-top:7px;box-shadow:none; }
+#root .fc-setting-field textarea { resize:vertical;min-height:110px; }
+.fc-setting-field small,.fc-optional { font-size:11px;font-weight:400;color:var(--muted-foreground); }
+.fc-optional { float:right; }
+.fc-setting-toggle { display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:13px;line-height:1.6;margin:18px 0; }
+.fc-setting-toggle input { flex-shrink:0;accent-color:var(--foreground);width:16px;height:16px; }
+.fc-scale-settings { display:grid;grid-template-columns:1fr 1fr;gap:0 14px; }
+.fc-scale-settings .fc-setting-field { margin:10px 0; }
+.fc-advanced { border-top:1px solid var(--border);padding-top:15px;margin-top:22px;font-size:12px; }
+.fc-advanced>summary { cursor:pointer;color:var(--muted-foreground); }
+.fc-sheet-order { display:flex;flex-wrap:wrap;gap:4px; }
+#root .fc-sheet-order button { font-size:11px;padding:8px; }
+#root .fc-sheet footer { padding:18px 0 0;min-height:0;background:transparent;display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--border);padding-top:18px;margin-top:22px; }
+.fc-sheet footer>span { font-size:11px;color:var(--muted-foreground); }
+#root .fc-sheet footer .cw-primary { background:var(--foreground);color:var(--background);border-radius:20px;padding:8px 18px; }
+#root .fc-sheet .fc-settings { padding:0;border:0;margin:18px 0;max-width:none;font-size:13px;gap:18px; }
+@media(max-width:640px){
+ #root .fc-composer .fc-paper { margin:24px auto; }
+ #root .fc-composer .fc-title,#root .fc-composer .fc-introduction h1 { font-size:23px; }
+ #root .fc-composer .fc-question { padding:16px 16px 8px; }
+ #root .fc-sheet { inset:auto 8px 8px;width:calc(100vw - 16px);max-width:none;max-height:85dvh;border-radius:18px; }
+ .fc-sheet-body { padding:20px; }
+ #root .fc-setting-field input,#root .fc-setting-field textarea { font-size:16px; }
+}
