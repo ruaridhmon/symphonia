@@ -100,3 +100,10 @@ The workspace now exposes only Summary and Responses, with a compact round dropd
 - Every round uses collapsed person headings; expanding a person reveals all current answers and a separate earlier-answer disclosure. Question headings use the same style in every round.
 - Changed ratings render both values as badges with an arrow between them. Verified on mobile without overflow (384px content width).
 - 90 tests across 22 files, TypeScript and isolated source build passed. Browser checked Round 1 table/full summary and Round 3 person expansion with rating changes.
+
+## 2026-09-25 compact survey and dashboard
+
+- Canvas edit/preview: 24px desktop title, 16px questions, tighter spacing and 88px initial response box (resizable). Mobile inputs retain 16px text; choice targets remain at least 44px.
+- Participant survey uses the same compact hierarchy without changing routing, required fields, answer values or submission.
+- Dashboard visually removes the redundant large Consultations heading while preserving its accessible heading. Search/actions and table now lead.
+- Browser reviewed desktop dashboard, filled canvas and mobile preview. No behaviour changes or new tests required for this CSS-only update; build mirror scripts completed.
