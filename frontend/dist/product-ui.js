@@ -2,16 +2,75 @@
 var states = /* @__PURE__ */ new WeakMap();
 var id = 0;
 function quietSummary(main) {
-  const progress = main.querySelector("#delphi-recorded-progress");
-  const hasResults = !!progress?.querySelector(".di-claim");
-  const empty = progress?.dataset.empty === "true";
   for (const stale of main.querySelectorAll(".quiet-synthesis-toggle")) {
     if (!document.getElementById(stale.getAttribute("aria-controls") || "")) stale.closest(".summary-switch")?.remove();
   }
   const heading = Array.from(main.querySelectorAll("h2")).find((n) => /^(Round \d+ synthesis|Synthesis for Round \d+)$/.test(n.textContent?.trim() || ""));
   const card = heading?.closest(".card");
-  if (!card) return;
+  if (!card) {
+    main.querySelector(".opening-claims")?.remove();
+    return;
+  }
   card.classList.add("full-summary-surface");
+  card.id ||= `full-synthesis-${++id}`;
+  let progress = main.querySelector("#delphi-recorded-progress");
+  for (const stale of main.querySelectorAll(".opening-claims")) {
+    if (stale.dataset.owner !== card.id || !/^Round 1 synthesis$|^Synthesis for Round 1$/.test(heading.textContent || "")) stale.remove();
+  }
+  if (/^Round 1 synthesis$|^Synthesis for Round 1$/.test(heading.textContent || "")) {
+    const claims = Array.from(card.querySelectorAll(".ProseMirror p,.ProseMirror h3,.claim-evidence-claim-heading")).map((n) => (n.textContent || "").trim()).filter((text) => /^Claim\s+\d+:\s*\S/i.test(text));
+    const unique = [...new Set(claims.map((text) => text.replace(/^Claim\s+\d+:\s*/i, "")))];
+    if (unique.length) {
+      let opening = main.querySelector(".opening-claims");
+      if (!opening) {
+        opening = document.createElement("section");
+        opening.className = "delphi-insights opening-claims";
+        opening.dataset.owner = card.id;
+        (progress || card).before(opening);
+      }
+      const signature = JSON.stringify(unique);
+      if (opening.dataset.signature !== signature) {
+        opening.dataset.signature = signature;
+        opening.replaceChildren();
+        const note = document.createElement("p");
+        note.className = "di-change-overview";
+        note.textContent = "Claims from the opening round \xB7 not yet rated";
+        opening.append(note);
+        const table = document.createElement("div");
+        table.className = "di-claims";
+        opening.append(table);
+        const columns = document.createElement("div");
+        columns.className = "di-column-head";
+        for (const text of ["Claim", "Status"]) {
+          const cell = document.createElement("span");
+          cell.textContent = text;
+          columns.append(cell);
+        }
+        table.append(columns);
+        unique.forEach((text, index) => {
+          const row = document.createElement("article");
+          row.className = "di-claim";
+          const copy = document.createElement("div");
+          copy.className = "di-claim-copy";
+          const number = document.createElement("span");
+          number.className = "di-claim-number";
+          number.textContent = String(index + 1).padStart(2, "0");
+          const title = document.createElement("h3");
+          title.textContent = text;
+          copy.append(number, title);
+          const status = document.createElement("div");
+          status.className = "di-rating opening-status";
+          status.textContent = "Not rated";
+          row.append(copy, status);
+          table.append(row);
+        });
+      }
+      if (progress) progress.hidden = true;
+      progress = opening;
+    } else main.querySelector(".opening-claims")?.remove();
+  }
+  const hasResults = !!progress?.querySelector(".di-claim");
+  const empty = progress?.dataset.empty === "true";
   let state = states.get(card);
   if (!hasResults && !empty) {
     if (state) {

@@ -93,3 +93,10 @@ The workspace now exposes only Summary and Responses, with a compact round dropd
 - Direct round buttons retain the chosen Summary/Responses view and do not change the active consultation round. Exact-question changes and explicitly labelled opening context remain inline.
 - Browser verified round 1/3 switching, full per-person history, mobile response width 384px without overflow, and no leftover summary actions in Responses. Mobile question preview is available in consultation options.
 - TypeScript, isolated source build and 88 relevant tests passed; generation controls and response management handlers retained.
+
+## 2026-09-25 opening-round parity and expandable people
+
+- Round 1 explicit saved claims use the same table and Claims/Full summary navigation, with Not rated status rather than invented agreement. Original full prose and handlers preserved.
+- Every round uses collapsed person headings; expanding a person reveals all current answers and a separate earlier-answer disclosure. Question headings use the same style in every round.
+- Changed ratings render both values as badges with an arrow between them. Verified on mobile without overflow (384px content width).
+- 90 tests across 22 files, TypeScript and isolated source build passed. Browser checked Round 1 table/full summary and Round 3 person expansion with rating changes.

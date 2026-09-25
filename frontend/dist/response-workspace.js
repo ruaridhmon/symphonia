@@ -45,6 +45,7 @@ function createResponseWorkspace(R, Editor, remove) {
   };
   return function ResponseWorkspace(p) {
     const [roundId, setRoundId] = R.useState(() => p.initialRoundId ?? p.rounds.find((r) => r.is_active)?.id ?? p.structuredRounds.at(-1)?.id ?? "all");
+    const [people, setPeople] = R.useState(/* @__PURE__ */ new Set());
     const [expanded, setExpanded] = R.useState(/* @__PURE__ */ new Set());
     const [searching, setSearching] = R.useState(false);
     const [query, setQuery] = R.useState("");
@@ -118,8 +119,6 @@ function createResponseWorkspace(R, Editor, remove) {
       setActive(null);
     } })) : null;
     const visible = filtered;
-    const titles = [...new Set(rows.filter((row) => roundId === "all" || row.round.id === roundId).flatMap((row) => row.sections.map((section) => section.title)))];
-    const singleQuestion = titles.length === 1 ? titles[0] : null;
     return h(
       "section",
       { className: "response-workspace response-panel", "aria-label": "Expert responses", ref: container },
@@ -140,37 +139,50 @@ function createResponseWorkspace(R, Editor, remove) {
       }, { disabled: busy, "aria-pressed": managing, "aria-label": managing ? "Done managing responses" : "Manage responses", title: "Manage responses" }) : null),
       managing ? h("div", { className: "rw-management" }, button("Select visible", () => setSelected(new Set(visible.map((r) => r.response.id))), { disabled: busy }), button("Clear selection", () => setSelected(/* @__PURE__ */ new Set()), { disabled: busy || !selected.size }), h("span", null, `${selectedRows.length} selected`), button(busy ? "Deleting\u2026" : "Delete selected", deleteSelected, { disabled: busy || !selectedRows.length, className: "rw-delete" }), h("div", null, ...visible.map((row) => h("label", { key: row.response.id }, h("input", { type: "checkbox", "aria-label": `Select ${row.name}, round ${row.round.round_number}`, checked: selected.has(row.response.id), disabled: busy, onChange: () => toggle(row.response.id) }), row.name, ` \xB7 R${row.round.round_number}`)))) : null,
       error ? h("p", { role: "alert", className: "rw-error" }, error) : null,
-      singleQuestion ? h("h3", { className: "rp-shared-question" }, singleQuestion) : null,
       h("div", { className: "rp-answer-list" }, ...visible.map((row) => {
         const earlier = row.response.email ? rows.filter((previous) => previous.response.email === row.response.email && previous.round.round_number < row.round.round_number).sort((a, b) => b.round.round_number - a.round.round_number) : [];
         const history = earlier.filter((previous) => previous.sections.some((section) => row.sections.some((current) => current.title === section.title)) || previous.round.round_number === 1);
         const isExpanded = expanded.has(row.response.id);
-        const heading = h(R.Fragment, null, h("strong", null, row.name), roundId === "all" ? h("span", { className: "rp-round-label" }, `Round ${row.round.round_number}`) : null, history.length ? h("span", { className: "rp-history-cue" }, isExpanded ? "Hide history" : "Earlier answers") : null);
+        const personOpen = people.has(row.response.id);
+        const heading = h(R.Fragment, null, h("strong", null, row.name), roundId === "all" ? h("span", { className: "rp-round-label" }, `Round ${row.round.round_number}`) : null, h("span", { className: "rp-person-chevron", "aria-hidden": true }, personOpen ? "\u2212" : "+"));
         return h(
           "article",
           { key: row.response.id, className: "rp-person-answer rp-unified-answer" },
-          history.length ? button("", () => setExpanded((previous) => {
-            const next = new Set(previous);
-            isExpanded ? next.delete(row.response.id) : next.add(row.response.id);
-            return next;
-          }), { className: "rp-answer-heading", "aria-expanded": isExpanded, "aria-controls": `answer-history-${row.response.id}`, children: heading }) : h("header", { className: "rp-answer-heading" }, heading),
-          h("div", { className: "rp-person-answers" }, ...row.sections.map((section, index) => {
-            const previous = earlier.flatMap((past) => past.sections.filter((pastSection) => pastSection.title === section.title)).find((pastSection) => pastSection.rating);
-            const changed = !!previous?.rating && !!section.rating && previous.rating !== section.rating;
-            return h(
-              "section",
-              { key: index, className: "rp-question-answer" },
-              h("div", { className: "rp-question-heading" }, singleQuestion ? null : h("h3", null, section.title), changed ? h("span", { className: "rp-rating-change" }, `${previous.rating} \u2192 ${section.rating}`) : badge(section.rating)),
-              h("div", { className: "rp-answer" }, ...section.blocks.map((block, i) => h("div", { key: i }, block.label && block.label !== "Reasoning" ? h("span", { className: "rp-block-label" }, block.label) : null, h("p", null, block.text))))
-            );
-          })),
-          isExpanded ? h("div", { className: "rp-inline-history", id: `answer-history-${row.response.id}` }, ...history.slice().reverse().map((previous) => {
-            const exact = previous.sections.filter((section) => row.sections.some((current) => current.title === section.title));
-            const context = !exact.length;
-            return h("section", { key: previous.response.id }, h("h4", null, `Round ${previous.round.round_number}${context ? " \xB7 Opening context" : ""}`), ...(context ? previous.sections : exact).map((past, index) => h("div", { key: index }, h("p", { className: "rp-history-question" }, past.title), blocks(past))));
-          })) : null,
-          managing ? button("Edit response", () => open(row.response.id)) : null,
-          editor(row)
+          button("", () => {
+            if (active === row.response.id && !allowLeave()) return;
+            setActive(null);
+            setPeople((previous) => {
+              const next = new Set(previous);
+              personOpen ? next.delete(row.response.id) : next.add(row.response.id);
+              return next;
+            });
+          }, { className: "rp-answer-heading", "aria-label": `Responses from ${row.name}`, "aria-expanded": personOpen, "aria-controls": `person-answers-${row.response.id}`, children: heading }),
+          personOpen ? h(
+            "div",
+            { id: `person-answers-${row.response.id}`, className: "rp-person-content" },
+            h("div", { className: "rp-person-answers" }, ...row.sections.map((section, index) => {
+              const previous = earlier.flatMap((past) => past.sections.filter((pastSection) => pastSection.title === section.title)).find((pastSection) => pastSection.rating);
+              const changed = !!previous?.rating && !!section.rating && previous.rating !== section.rating;
+              return h(
+                "section",
+                { key: index, className: "rp-question-answer" },
+                h("div", { className: "rp-question-heading" }, h("h3", null, section.title), changed ? h("span", { className: "rp-rating-change", "aria-label": `${previous.rating} to ${section.rating}` }, badge(previous.rating), h("span", { "aria-hidden": true }, " \u2192 "), badge(section.rating)) : badge(section.rating)),
+                h("div", { className: "rp-answer" }, ...section.blocks.map((block, i) => h("div", { key: i }, block.label && block.label !== "Reasoning" ? h("span", { className: "rp-block-label" }, block.label) : null, h("p", null, block.text))))
+              );
+            })),
+            history.length ? button(isExpanded ? "Hide earlier answers" : "Earlier answers", () => setExpanded((previous) => {
+              const next = new Set(previous);
+              isExpanded ? next.delete(row.response.id) : next.add(row.response.id);
+              return next;
+            }), { className: "rp-history-toggle", "aria-label": `Earlier answers from ${row.name}`, "aria-expanded": isExpanded }) : null,
+            isExpanded ? h("div", { className: "rp-inline-history", id: `answer-history-${row.response.id}` }, ...history.slice().reverse().map((previous) => {
+              const exact = previous.sections.filter((section) => row.sections.some((current) => current.title === section.title));
+              const context = !exact.length;
+              return h("section", { key: previous.response.id }, h("h4", null, `Round ${previous.round.round_number}${context ? " \xB7 Opening context" : ""}`), ...(context ? previous.sections : exact).map((past, index) => h("div", { key: index }, h("p", { className: "rp-history-question" }, past.title), blocks(past))));
+            })) : null,
+            managing ? button("Edit response", () => open(row.response.id)) : null,
+            editor(row)
+          ) : null
         );
       })),
       !visible.length ? h("p", { className: "rw-empty" }, rows.length ? "No responses match these filters." : "Invite your panel to begin. Their responses will appear here as they submit.") : null
