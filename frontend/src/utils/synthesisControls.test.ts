@@ -24,3 +24,7 @@ it('offers contextual actions and preserves the original generation fields',()=>
  const actions=main.querySelectorAll<HTMLButtonElement>('.summary-actions-items button');actions[0].click();expect(main.querySelector('details.summary-disclosure')!.hasAttribute('open')).toBe(true);expect(main.querySelector('input')).toBe(original);
  actions[1].click();expect(main.querySelector('details.summary-disclosure')!.hasAttribute('open')).toBe(false);expect(main.querySelectorAll('details.summary-disclosure')[1].hasAttribute('open')).toBe(true);
 });
+it('removes generated summary actions when switching to responses',()=>{
+ document.body.innerHTML='<main><section class="consultation-workspace"></section><aside aria-label="Synthesis controls"><details class="summary-disclosure"><summary><span>Generate synthesis</span></summary><div class="card">Settings</div></details></aside></main>';
+ const main=document.querySelector('main')!;enhanceSynthesisControls(main);expect(main.querySelector('.summary-tools-only')).not.toBeNull();main.querySelector('aside')!.remove();enhanceSynthesisControls(main);expect(main.querySelector('.summary-tools-only')).toBeNull();
+});

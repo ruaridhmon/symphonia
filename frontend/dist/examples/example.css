@@ -1136,3 +1136,27 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 }
 .summary-tools-only { display:flex;align-items:center;margin:0 0 16px; }
 #root .summary-generate-empty { border:1px solid var(--border);background:var(--background);color:var(--foreground);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer; }
+/* One continuous response transcript; all of a person's answers stay together. */
+#root .cw-round-tabs { display:flex;gap:2px;padding:3px;background:var(--muted);border-radius:8px; }
+#root .cw-round-tabs button { font-size:12px;min-height:30px;padding:5px 9px;border:0;border-radius:5px;white-space:nowrap; }
+#root .cw-round-tabs button[aria-pressed=true] { background:var(--background);color:var(--foreground);box-shadow:0 1px 3px #0001; }
+#root .rp-controls>.rp-count { margin:0 auto 0 0;font-size:12px; }
+#root .rp-person-answer.rp-unified-answer { padding:26px 0; }
+#root .rp-answer-heading { margin-bottom:20px; }
+#root .rp-answer-heading strong { font-size:15px;font-weight:550; }
+.rp-person-answers { display:grid;gap:22px; }
+#root .rp-question-heading { display:flex;align-items:baseline;gap:8px 16px;flex-wrap:wrap;margin-bottom:6px; }
+#root .rp-question-heading h3 { font-size:12px;line-height:1.6;font-weight:500;color:var(--muted-foreground);margin:0;max-width:680px; }
+#root .rp-question-heading .rp-rating,#root .rp-question-heading .rp-rating-change { flex-shrink:0;font-size:11px; }
+#root .rp-question-answer .rp-answer p { margin:0;font-size:14px;line-height:1.75; }
+#root .rp-question-answer .rp-block-label { margin-top:8px; }
+.rp-round-label { color:var(--muted-foreground);font-size:12px; }
+@media(min-width:900px){#root .rp-person-answers { padding-left:20px;border-left:1px solid var(--border); }}
+@media(max-width:640px){#root .cw-views .cw-context { flex-wrap:wrap; }#root .cw-round-tabs { margin-right:auto; }#root .cw-views .cw-context>span { font-size:11px; }#root .cw-views .cw-text-button { margin-left:auto; }}
+#root .rp-question-heading { display:block; }
+#root .rp-question-heading .rp-rating,#root .rp-question-heading .rp-rating-change { display:inline-block;margin-top:6px; }
+#root .rp-controls>.rp-search-trigger { margin-left:auto; }
+#root .rp-shared-question { font-size:16px;font-weight:500;line-height:1.6;margin:12px 0 8px;max-width:760px; }
+#root .cw-mobile-questions { display:none; }
+#root .rp-answer-list>.rp-person-answer:first-child { padding-top:12px; }
+@media(max-width:640px){#root .cw-views .cw-context>.cw-text-button{display:none;}#root .cw-options .cw-mobile-questions{display:block;}}

@@ -105,7 +105,10 @@ var bound = /* @__PURE__ */ new WeakSet();
 var panelId = 0;
 function enhanceSynthesisControls(main) {
   const toolbar = main.querySelector('aside[aria-label="Synthesis controls"]');
-  if (!toolbar) return;
+  if (!toolbar) {
+    main.querySelector(".summary-tools-only")?.remove();
+    return;
+  }
   const progress = main.querySelector("#delphi-recorded-progress");
   for (const text of toolbar.querySelectorAll("summary span")) {
     if (text.textContent?.trim() === "Generate synthesis") text.textContent = "Generate summary";
@@ -154,13 +157,13 @@ function enhanceSynthesisControls(main) {
     sync();
   }
   let nav = main.querySelector(".summary-switch");
-  if ((!nav || nav.hidden) && progress) {
+  if ((!nav || nav.hidden) && (progress || main.querySelector(".consultation-workspace"))) {
     nav = main.querySelector(".summary-tools-only");
     if (!nav) {
       nav = document.createElement("nav");
       nav.className = "summary-tools-only";
       nav.setAttribute("aria-label", "Summary actions");
-      progress.before(nav);
+      (progress || toolbar).before(nav);
     }
   } else main.querySelector(".summary-tools-only")?.remove();
   if (nav && !nav.hidden) {

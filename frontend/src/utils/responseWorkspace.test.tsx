@@ -11,12 +11,12 @@ const Editor=({questions,response,onUpdated,roundNumber}:any)=><>{renderResponse
 const base={rounds,structuredRounds,formQuestions:questions,initialRoundId:3,onResponseUpdated:vi.fn()};
 beforeEach(()=>{vi.spyOn(window,'scrollTo').mockImplementation(()=>{});});
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
-it('shows all answers for one claim without a separate reader or back navigation',()=>{
+it('shows every question and answer together without filtering or back navigation',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);
  expect(screen.getByText('Original evidence 2')).toBeInTheDocument();
  expect(screen.getByText('Original evidence 3')).toBeInTheDocument();
  expect(screen.queryByRole('button',{name:/All responses/})).not.toBeInTheDocument();
- fireEvent.change(screen.getByRole('combobox',{name:'Question or claim'}),{target:{value:'Additional response · orphan'}});
+ expect(screen.queryByRole('combobox',{name:'Question or claim'})).not.toBeInTheDocument();
  expect(screen.getAllByText('Retained unmatched answer')).toHaveLength(2);
  expect(screen.queryByRole('navigation',{name:'Response layout'})).not.toBeInTheDocument();
 });
@@ -43,12 +43,12 @@ it('retains successful deletions and remaining selection when a later deletion f
  await waitFor(()=>expect(screen.getByRole('alert')).toHaveTextContent('Server unavailable'));
  expect(onResponseDeleted).toHaveBeenCalledExactlyOnceWith(3,2);expect(screen.getByRole('checkbox',{name:'Select Alice, round 3'})).not.toBeChecked();expect(screen.getByRole('checkbox',{name:'Select Bob, round 3'})).toBeChecked();
 });
-it('preserves the selected claim across views and does not mark neutral ratings as disagreement',()=>{
+it('shows neutral ratings without marking them as disagreement',()=>{
  const Workspace=createResponseWorkspace(React,Editor);
  const neutral={...answer(4,'Neutral participant',3),answers:{q1:{position:'Neither agree nor disagree'}}};
  render(<Workspace {...base} structuredRounds={[structuredRounds[0],{...rounds[1],responses:[neutral]}]}/>);
  expect(screen.getByText('Neither agree nor disagree')).toHaveClass('rp-neutral');
- expect(screen.getByRole('combobox',{name:'Question or claim'})).toHaveValue('Preserve the exact claim');
+ expect(screen.getByRole('heading',{name:'Preserve the exact claim'})).toBeInTheDocument();
 });
 it('includes the opening response as context without inventing a round-one claim rating',()=>{
  const opening={id:1,round_number:1,is_active:false,synthesis:'',questions:['What matters before testing?']};
@@ -67,4 +67,4 @@ it('includes the opening response as context without inventing a round-one claim
 it('uses the parent round selector without repeating it in the response toolbar',()=>{const Workspace=createResponseWorkspace(React,Editor);const view=render(<Workspace {...base}/>);expect(screen.queryByRole('combobox',{name:'Round'})).not.toBeInTheDocument();view.rerender(<Workspace {...base} initialRoundId={2}/>);expect(screen.getByText('Earlier expert')).toBeInTheDocument();expect(screen.queryByText('Alice')).not.toBeInTheDocument();});
 
 it('shows a change from the nearest earlier exact claim and hides history initially',()=>{const Workspace=createResponseWorkspace(React,Editor);const earlier={...answer(1,'Alice',2),answers:{q1:{position:'Disagree',evidence:'Before'}}};render(<Workspace {...base} structuredRounds={[{...rounds[0],responses:[earlier]},structuredRounds[1]]}/>);expect(screen.getByText('Disagree → Agree')).toBeInTheDocument();expect(screen.queryByText('Before')).not.toBeInTheDocument();fireEvent.click(screen.getByRole('button',{name:/Alice.*Earlier answers/}));expect(screen.getByText('Before')).toBeInTheDocument();});
-it('does not match anonymous identities or differently worded questions',()=>{const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base} structuredRounds={[{...{...rounds[0],questions:[{...questions[0],sectionTitle:'Different claim'}]},responses:[answer(1,'Alice',2),answer(7,'',2)]},{...rounds[1],responses:[answer(2,'Alice',3),answer(8,'',3)]}]}/>);expect(screen.queryByText('Earlier answers')).not.toBeInTheDocument();expect(screen.queryByText(/→/)).not.toBeInTheDocument();});
+it('does not match anonymous identities or differently worded questions',()=>{const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base} structuredRounds={[{...{...rounds[0],questions:[{...questions[0],sectionTitle:'Different claim'}]},responses:[answer(1,'Alice',2),answer(7,'',2)]},{...rounds[1],responses:[answer(2,'Alice',3),answer(8,'',3)]}]}/>);expect(screen.queryByRole('button',{name:/Anonymous.*Earlier answers/})).not.toBeInTheDocument();expect(screen.queryByText(/→/)).not.toBeInTheDocument();});

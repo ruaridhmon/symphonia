@@ -71,6 +71,7 @@ function createConsultationWorkspace(R) {
               "div",
               null,
               h("a", { href: `/admin/form/${p.form.id}` }, "Edit consultation"),
+              button("View questions", () => setPanel("questions"), { className: "cw-mobile-questions", "aria-label": "Preview round questions", disabled: !round }),
               p.onDownload ? button("Download", p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? "Updating\u2026" : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null
             )
@@ -86,7 +87,9 @@ function createConsultationWorkspace(R) {
         h(
           "div",
           { className: "cw-context cw-simple-context" },
-          h("label", { className: "cw-round-picker" }, h("span", { className: "cw-round-display", "aria-hidden": true }, `Round ${round?.round_number || "\u2014"} \u2304`), h("select", { "aria-label": "Round", value: round?.id || "", onChange: (event) => {
+          ordered.length <= 5 ? h("div", { className: "cw-round-tabs", "aria-label": "Rounds" }, ...ordered.map((r) => button(`Round ${r.round_number}`, () => {
+            if (canLeave()) p.onRound(r);
+          }, { key: r.id, "aria-pressed": round?.id === r.id, title: r.is_active ? "Current round" : `View Round ${r.round_number}` }))) : h("label", { className: "cw-round-picker" }, h("span", { className: "cw-round-display", "aria-hidden": true }, `Round ${round?.round_number || "\u2014"} \u2304`), h("select", { "aria-label": "Round", value: round?.id || "", onChange: (event) => {
             const selected = ordered.find((r) => r.id === Number(event.target.value));
             if (selected && canLeave()) p.onRound(selected);
           } }, ...ordered.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}${r.is_active ? " \xB7 Current" : ""}`)))),

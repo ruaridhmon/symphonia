@@ -2,7 +2,7 @@
 const bound=new WeakSet<HTMLElement>();
 let panelId=0;
 export function enhanceSynthesisControls(main:HTMLElement){
- const toolbar=main.querySelector<HTMLElement>('aside[aria-label="Synthesis controls"]');if(!toolbar)return;
+ const toolbar=main.querySelector<HTMLElement>('aside[aria-label="Synthesis controls"]');if(!toolbar){main.querySelector('.summary-tools-only')?.remove();return;}
  const progress=main.querySelector<HTMLElement>('#delphi-recorded-progress');
  for(const text of toolbar.querySelectorAll('summary span')){if(text.textContent?.trim()==='Generate synthesis')text.textContent='Generate summary';}
  if(progress){
@@ -20,9 +20,9 @@ export function enhanceSynthesisControls(main:HTMLElement){
   detail.addEventListener('toggle',sync);sync();
  }
  let nav=main.querySelector<HTMLElement>('.summary-switch');
- if((!nav||nav.hidden)&&progress){
+ if((!nav||nav.hidden)&&(progress||main.querySelector('.consultation-workspace'))){
   nav=main.querySelector<HTMLElement>('.summary-tools-only');
-  if(!nav){nav=document.createElement('nav');nav.className='summary-tools-only';nav.setAttribute('aria-label','Summary actions');progress.before(nav);}
+  if(!nav){nav=document.createElement('nav');nav.className='summary-tools-only';nav.setAttribute('aria-label','Summary actions');(progress||toolbar).before(nav);}
  }else main.querySelector('.summary-tools-only')?.remove();
  if(nav&&!nav.hidden){
   toolbar.classList.add('summary-actions-panel');

@@ -15,7 +15,7 @@ function props(): WorkspaceProps {
 describe('consultation workspace', () => {
   it('views a previous round without changing the live round', () => {
     const p=props();render(<Workspace {...p}/>);
-    fireEvent.change(screen.getByRole('combobox',{name:'Round'}),{target:{value:'11'}});
+    fireEvent.click(screen.getByRole('button',{name:'Round 1'}));
     expect(p.onRound).toHaveBeenCalledWith(p.rounds[0]);expect(p.onMakeLive).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button',{name:'Responses'}));expect(p.onView).toHaveBeenCalledWith('responses');
   });
@@ -53,10 +53,10 @@ it('groups rating and explanation under one claim without repeating the scale',(
  expect(screen.getAllByText('Rating',{exact:true}).length).toBeGreaterThan(0);
  expect(screen.getByText('Written explanation',{exact:false})).toBeInTheDocument();
 });
-it('offers only Summary and Responses with a compact round selector',()=>{
+it('offers only Summary and Responses with directly selectable rounds',()=>{
  render(<Workspace {...props()}/>);
  expect(screen.getByRole('button',{name:'Summary'})).toBeInTheDocument();
  expect(screen.queryByRole('button',{name:'Analysis'})).not.toBeInTheDocument();
  expect(screen.queryByText('Reflection')).not.toBeInTheDocument();
- expect(screen.getByRole('combobox',{name:'Round'})).toHaveValue('12');
+ expect(screen.getByRole('button',{name:'Round 2'})).toHaveAttribute('aria-pressed','true');
 });

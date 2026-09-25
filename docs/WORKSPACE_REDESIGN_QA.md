@@ -86,3 +86,10 @@ The workspace now exposes only Summary and Responses, with a compact round dropd
 - Summary actions menu opens original generation/history panels. Browser checked both panels, preserved fields, and close returning focus to the menu; no generation or publication performed.
 - Question settings now follow the answer. Editor and preview use the same answer controls and title sizing; a filled sample retained 703px answer width and answer-top positions within 1px in the browser. Mobile form preview: 384px content, no overflow.
 - 87 tests across 22 files, TypeScript and isolated source build passed. Shared modules/examples rebuilt and immutable canvas chunks versioned.
+
+## 2026-09-25 continuous submissions and direct rounds
+
+- Complete submissions replace the question-filtered reader. All 30 answer sections across the local ten-person, three-question round render together. Single-question wording is shown once.
+- Direct round buttons retain the chosen Summary/Responses view and do not change the active consultation round. Exact-question changes and explicitly labelled opening context remain inline.
+- Browser verified round 1/3 switching, full per-person history, mobile response width 384px without overflow, and no leftover summary actions in Responses. Mobile question preview is available in consultation options.
+- TypeScript, isolated source build and 88 relevant tests passed; generation controls and response management handlers retained.
