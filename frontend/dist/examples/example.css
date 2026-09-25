@@ -1093,3 +1093,5 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 @media(max-width:640px){.rp-history-cue{margin-left:0;}.rp-inline-history{padding-left:14px;}}
 .rp-question-picker>span { display:none; }
 #root .rp-question-picker select { max-width:160px;min-height:36px;padding:8px 10px;font-size:12px; }
+#root .rp-question-bar { padding:12px 0 4px; }
+#root .rp-question-bar h3 { margin:0 0 4px; }
