@@ -79,3 +79,10 @@ The workspace now exposes only Summary and Responses, with a compact round dropd
 - Earlier rounds require the same non-empty identity and exact question. Unmatched round-one answers are opening context; future rounds are excluded.
 - Verified local panel round 3 to round 2 switching, Leo's Disagree to Agree history, and mobile layout without horizontal overflow (384px content width).
 - 86 tests across 22 files passed, alongside TypeScript and an isolated source build. Shared deployed modules and standalone examples rebuilt.
+
+## 2026-09-25 summary hierarchy and canvas parity
+
+- Removed the extra panel heading; compact round picker sits beside Summary/Responses. Claims retain counts, changes and expandable details with cleaner columns and typography.
+- Summary actions menu opens original generation/history panels. Browser checked both panels, preserved fields, and close returning focus to the menu; no generation or publication performed.
+- Question settings now follow the answer. Editor and preview use the same answer controls and title sizing; a filled sample retained 703px answer width and answer-top positions within 1px in the browser. Mobile form preview: 384px content, no overflow.
+- 87 tests across 22 files, TypeScript and isolated source build passed. Shared modules/examples rebuilt and immutable canvas chunks versioned.

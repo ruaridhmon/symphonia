@@ -78,21 +78,21 @@ function createConsultationWorkspace(R) {
         )
       ),
       h(
-        "div",
-        { className: "cw-context cw-simple-context" },
-        h("label", { className: "cw-round-picker" }, h("span", { className: "sr-only" }, "Round"), h("select", { "aria-label": "Round", value: round?.id || "", onChange: (event) => {
-          const selected = ordered.find((r) => r.id === Number(event.target.value));
-          if (selected && canLeave()) p.onRound(selected);
-        } }, ...ordered.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}${r.is_active ? " \xB7 Current" : ""}`)))),
-        count !== void 0 ? h("span", null, `${count} response${count === 1 ? "" : "s"}`) : null,
-        button("View questions", () => setPanel("questions"), { className: "cw-text-button", disabled: !round })
-      ),
-      h(
         "nav",
         { className: "cw-views", "aria-label": "Consultation views" },
         [["synthesis", "Summary"], ["responses", "Responses"]].map(([view, label]) => button(label, () => {
           if (canLeave()) p.onView(view);
-        }, { key: view, "aria-pressed": p.view === view }))
+        }, { key: view, "aria-pressed": p.view === view })),
+        h(
+          "div",
+          { className: "cw-context cw-simple-context" },
+          h("label", { className: "cw-round-picker" }, h("span", { className: "cw-round-display", "aria-hidden": true }, `Round ${round?.round_number || "\u2014"} \u2304`), h("select", { "aria-label": "Round", value: round?.id || "", onChange: (event) => {
+            const selected = ordered.find((r) => r.id === Number(event.target.value));
+            if (selected && canLeave()) p.onRound(selected);
+          } }, ...ordered.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}${r.is_active ? " \xB7 Current" : ""}`)))),
+          count !== void 0 ? h("span", null, `${count} response${count === 1 ? "" : "s"}`) : null,
+          button("View questions", () => setPanel("questions"), { className: "cw-text-button", disabled: !round })
+        )
       ),
       h(
         "dialog",

@@ -9,8 +9,8 @@ function syncProductUI() {
   if (!main) return;
   enhanceParticipantPresentation(main);
   unifyClaims(main);
-  enhanceSynthesisControls(main);
   quietSummary(main);
+  enhanceSynthesisControls(main);
   const dashboard = location.pathname === '/' && !!main.querySelector('input[aria-label="Search consultations"]');
   main.classList.toggle('product-dashboard', dashboard);
   if(dashboard)enhanceConsultationInbox(main);

@@ -17,3 +17,10 @@ it('groups result actions without replacing the refresh handler',()=>{
  expect(main.querySelectorAll('.summary-refresh')).toHaveLength(1);
  expect(refresh.parentElement?.tagName).toBe('ASIDE');refresh.click();expect(count).toBe(1);
 });
+it('offers contextual actions and preserves the original generation fields',()=>{
+ document.body.innerHTML='<main><nav class="summary-switch"><button>Claims</button></nav><aside aria-label="Synthesis controls"><details class="summary-disclosure"><summary><span>Generate synthesis</span></summary><div class="card"><input value="Saved prompt"></div></details><details class="summary-disclosure"><summary><span>Version history</span></summary><div class="card">Original history</div></details></aside></main>';
+ const main=document.querySelector('main')!;const original=main.querySelector('input');enhanceSynthesisControls(main);enhanceSynthesisControls(main);
+ expect(main.querySelectorAll('.summary-actions-menu')).toHaveLength(1);
+ const actions=main.querySelectorAll<HTMLButtonElement>('.summary-actions-items button');actions[0].click();expect(main.querySelector('details.summary-disclosure')!.hasAttribute('open')).toBe(true);expect(main.querySelector('input')).toBe(original);
+ actions[1].click();expect(main.querySelector('details.summary-disclosure')!.hasAttribute('open')).toBe(false);expect(main.querySelectorAll('details.summary-disclosure')[1].hasAttribute('open')).toBe(true);
+});

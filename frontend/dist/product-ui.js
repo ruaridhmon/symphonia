@@ -141,7 +141,7 @@ function enhanceSynthesisControls(main) {
     close.setAttribute("aria-label", `Close ${panel.getAttribute("aria-label")?.toLowerCase()}`);
     close.onclick = () => {
       detail.open = false;
-      trigger.focus();
+      (main.querySelector(".summary-actions-menu>summary") || trigger).focus();
     };
     panel.prepend(close);
     const sync = () => {
@@ -153,6 +153,82 @@ function enhanceSynthesisControls(main) {
     detail.addEventListener("toggle", sync);
     sync();
   }
+  let nav = main.querySelector(".summary-switch");
+  if ((!nav || nav.hidden) && progress) {
+    nav = main.querySelector(".summary-tools-only");
+    if (!nav) {
+      nav = document.createElement("nav");
+      nav.className = "summary-tools-only";
+      nav.setAttribute("aria-label", "Summary actions");
+      progress.before(nav);
+    }
+  } else main.querySelector(".summary-tools-only")?.remove();
+  if (nav && !nav.hidden) {
+    toolbar.classList.add("summary-actions-panel");
+    let menu = nav.querySelector(".summary-actions-menu");
+    if (!menu) {
+      menu = document.createElement("details");
+      menu.className = "summary-actions-menu";
+      const trigger = document.createElement("summary");
+      trigger.textContent = "\u2022\u2022\u2022";
+      trigger.setAttribute("aria-label", "Summary actions");
+      menu.append(trigger);
+      const items = document.createElement("div");
+      items.className = "summary-actions-items";
+      menu.append(items);
+      nav.append(menu);
+      if (!progress?.querySelector(".di-claim")) {
+        const generate = document.createElement("button");
+        generate.type = "button";
+        generate.className = "summary-generate-empty";
+        generate.textContent = "Generate summary";
+        generate.onclick = () => {
+          const detail = toolbar.querySelector("details.summary-disclosure");
+          if (detail) {
+            detail.open = true;
+            detail.querySelector(".summary-panel-close")?.focus();
+          }
+        };
+        nav.prepend(generate);
+      }
+      for (const detail of toolbar.querySelectorAll(":scope > details.summary-disclosure")) {
+        const action = document.createElement("button");
+        action.type = "button";
+        action.textContent = detail.querySelector("summary span")?.textContent || "Summary settings";
+        action.onclick = () => {
+          menu.open = false;
+          toolbar.querySelectorAll("details.summary-disclosure").forEach((other) => other.open = other === detail);
+          detail.querySelector(".card input,.card select,.summary-panel-close")?.focus();
+        };
+        items.append(action);
+      }
+      const refresh = toolbar.querySelector(".summary-refresh");
+      if (refresh) {
+        const action = document.createElement("button");
+        action.type = "button";
+        action.textContent = "Refresh";
+        action.onclick = () => {
+          menu.open = false;
+          refresh.click();
+        };
+        items.append(action);
+      }
+      menu.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          menu.open = false;
+          trigger.focus();
+        }
+      });
+      const dismiss = (event) => {
+        if (!menu.isConnected) {
+          document.removeEventListener("pointerdown", dismiss);
+          return;
+        }
+        if (!menu.contains(event.target)) menu.open = false;
+      };
+      document.addEventListener("pointerdown", dismiss);
+    }
+  } else toolbar.classList.remove("summary-actions-panel");
   if (bound.has(toolbar)) return;
   bound.add(toolbar);
   toolbar.addEventListener("keydown", (event) => {
@@ -161,7 +237,7 @@ function enhanceSynthesisControls(main) {
     if (open) {
       event.preventDefault();
       open.open = false;
-      open.querySelector("summary")?.focus();
+      (main.querySelector(".summary-actions-menu>summary") || open.querySelector("summary"))?.focus();
     }
   });
   const outside = (event) => {
@@ -476,8 +552,8 @@ function syncProductUI() {
   if (!main) return;
   enhanceParticipantPresentation(main);
   unifyClaims(main);
-  enhanceSynthesisControls(main);
   quietSummary(main);
+  enhanceSynthesisControls(main);
   const dashboard = location.pathname === "/" && !!main.querySelector('input[aria-label="Search consultations"]');
   main.classList.toggle("product-dashboard", dashboard);
   if (dashboard) enhanceConsultationInbox(main);

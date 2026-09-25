@@ -23,7 +23,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   root.replaceChildren();root.className='card delphi-insights';
   root.dataset.claimLabels=JSON.stringify(rows.map(r=>r.label.replace(/^Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim()));
   const head=node('div','','di-heading');
-  const title=node('div','','di-title');title.append(node('h2','What the panel thinks'));if(refresh)title.append(button('Refresh',refresh));head.append(title);root.append(head);
+  const title=node('div','','di-title');if(refresh)title.append(button('Refresh',refresh));head.append(title);root.append(head);
   const ordered=[...rounds].filter(r=>r.round_number<=round.round_number).sort((a,b)=>a.round_number-b.round_number);
   const actual=responses.find(r=>r.id===round.id)?.responses.length;
   root.dataset.empty=String(actual===0);

@@ -210,7 +210,6 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   root.dataset.claimLabels = JSON.stringify(rows.map((r) => r.label.replace(/^Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim()));
   const head = node("div", "", "di-heading");
   const title = node("div", "", "di-title");
-  title.append(node("h2", "What the panel thinks"));
   if (refresh) title.append(button("Refresh", refresh));
   head.append(title);
   root.append(head);
