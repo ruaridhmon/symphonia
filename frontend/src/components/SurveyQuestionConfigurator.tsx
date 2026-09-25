@@ -5,6 +5,7 @@ import { DEFAULT_LIKERT_OPTIONS } from '../utils/questions';
 interface SurveyQuestionConfiguratorProps {
   question: ConfigurableQuestion;
   index: number;
+  showType?: boolean;
   onChange: (question: ConfigurableQuestion) => void;
 }
 
@@ -107,7 +108,7 @@ function getSurveyDefaults(inputType: SurveyInputType): Partial<ConfigurableQues
   };
 }
 
-function ensureTypeTransition(
+export function ensureTypeTransition(
   question: ConfigurableQuestion,
   inputType: SurveyInputType,
 ): ConfigurableQuestion {
@@ -163,6 +164,7 @@ export default function SurveyQuestionConfigurator({
   question,
   index,
   onChange,
+  showType = true,
 }: SurveyQuestionConfiguratorProps) {
   const inputType = question.inputType ?? 'textarea';
   const optionText = (question.options ?? []).join('\n');
@@ -181,7 +183,7 @@ export default function SurveyQuestionConfigurator({
       }}
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-1.5">
+        {showType ? <div className="space-y-1.5">
           <FieldLabel htmlFor={`${baseId}-type`}>Response type</FieldLabel>
           <select
             id={`${baseId}-type`}
@@ -203,7 +205,7 @@ export default function SurveyQuestionConfigurator({
             <option value="slider">0-10 slider</option>
             <option value="likert">Likert scale</option>
           </select>
-        </div>
+        </div> : null}
 
         <div className="space-y-1.5">
           <FieldLabel htmlFor={`${baseId}-section`}>Section heading</FieldLabel>

@@ -47,3 +47,12 @@ A new dev consultation, form 20, contains ten fictional research experts, three 
 ## Simplified summary navigation
 
 The workspace now exposes only Summary and Responses, with a compact round dropdown. Stage aliases, agreement-category filters, repeated round counts and final-round guidance were removed. `quietSummary` places the original synthesis behind an accessible disclosure when recorded claim results are present; the original DOM/editor and publishing callbacks are preserved. The synthesis remains visible when no claim result can replace it. Tests cover disclosure state, editor/publish preservation, all-claim visibility and round selection without changing the live round. Browser checks verified opening/closing synthesis and clean Summary/Responses switching.
+
+## 2026-09-25 centred authoring and editing
+
+- Dashboard measured at a 1800px viewport: header and main both width 1120px, left edge 340px. Mobile 390px canvas has no horizontal overflow.
+- Create and question-form Edit share FormCanvas, including inline answer-type choice, same-canvas participant preview and question settings. Adjacent repeated section titles render once.
+- Edit loads active-round questions, preserves question IDs/routing, public response and consent settings, reports dirty/saved state, retains failed edits and guards leaving unsaved edits. Answered/drafted rounds preserve question structure and wording.
+- Browser QA: local form 4 title saved through API and persisted on reload; local form 3 rendered round 3 correctly with protected questions. No live panel data changed.
+- TypeScript passed; source Vite build passed outside committed dist; 78 tests passed across 22 relevant test files.
+- Compatibility: existing document consultations retain the dedicated legacy document editor; introduction and join controls remain create-only because the existing update endpoint does not support those fields.

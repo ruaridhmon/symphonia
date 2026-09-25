@@ -45,3 +45,9 @@ it('applies imported conditional visibility in participant view',()=>{
  fireEvent.click(screen.getByRole('radio',{name:'Yes'}));
  expect(screen.getByRole('heading',{name:'Explain why'})).toBeInTheDocument();
 });
+it('changes answer types inline and opens only the relevant configuration',()=>{
+ show();fireEvent.change(screen.getByLabelText('Answer type for question 1'),{target:{value:'single_select'}});
+ expect(screen.getByLabelText('Options')).toBeInTheDocument();
+ expect(screen.queryByLabelText('Response type')).not.toBeInTheDocument();
+ expect(screen.queryByLabelText('Required')).not.toBeInTheDocument();
+});

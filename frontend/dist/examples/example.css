@@ -997,3 +997,19 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 .quiet-synthesis-toggle::before { content:'▸';margin-right:8px; }.quiet-synthesis-toggle[aria-expanded=true]::before { content:'▾'; }
 #root .card[hidden],.quiet-synthesis-toggle[hidden] { display:none!important; }
 @media(max-width:500px){.cw-simple-context{gap:9px;}.cw-simple-context>span{font-size:11px;}.cw-simple-context .cw-text-button{font-size:11px;}}
+
+/* Shared page axis: dashboard, global header and authoring toolbar. */
+#root main.product-dashboard { width:100%;max-width:1120px;margin-inline:auto!important;padding:32px 24px 64px;box-sizing:border-box; }
+#root main.product-dashboard > .container { width:100%;max-width:none;padding-inline:0; }
+#root main.product-summary { width:100%;margin-inline:auto!important;box-sizing:border-box; }
+#root .fc-toolbar { position:sticky;top:0;z-index:20;background:var(--background); }
+#root .fc-toolbar button:disabled { opacity:.4;cursor:default; }
+#root .fc-question-settings { box-shadow:none; }
+#root .fc-section-title { font-size:17px;font-weight:500;color:var(--foreground);line-height:1.5;margin:18px 0 8px; }
+#root .fc-question:has(.fc-section-title) .fc-question-label { font-size:16px; }
+#root .fc-answer { margin-top:4px; }
+#root .fc-paper[data-preview=false] .fc-title:hover,#root .fc-paper[data-preview=false] .fc-description:hover,#root .fc-paper[data-preview=false] .fc-question-label:hover { background:var(--muted); }
+@media(max-width:640px){#root main.product-dashboard{padding:24px 20px 48px;}#root .fc-toolbar{position:static;}.fc-save-state{margin-left:auto;}}
+.fc-question-actions { display:flex;align-items:center;gap:8px; }
+#root .fc-question-actions select { color:var(--muted-foreground);font:inherit;background:transparent;border:1px solid var(--border);border-radius:8px;padding:8px;max-width:160px; }
+@media(max-width:480px){.fc-question-top{align-items:flex-start;gap:8px;}.fc-question-actions{flex-wrap:wrap;justify-content:flex-end;gap:2px;}.fc-question-actions button{font-size:11px;padding:8px;}}
