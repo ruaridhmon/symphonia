@@ -31,7 +31,7 @@ it('compares only identical question wording and retains a participant across ro
  expect(screen.getByText('Original evidence 1')).toBeInTheDocument();
  expect(screen.getByText('Original evidence 2')).toBeInTheDocument();
  expect(screen.getByText('Original evidence 3')).toBeInTheDocument();
- expect(screen.getByText('2 participants · compare identical questions across rounds')).toBeInTheDocument();
+ expect(screen.getByText('2 participants · opening perspectives and rating history')).toBeInTheDocument();
 });
 it('searches all answer fields and distinguishes rounds',()=>{
  const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base}/>);
@@ -53,4 +53,20 @@ it('preserves the selected claim across views and does not mark neutral ratings 
  expect(screen.getByText('Neither agree nor disagree')).toHaveClass('rp-neutral');
  fireEvent.click(screen.getByRole('button',{name:'Across rounds'}));
  expect(screen.getByRole('combobox',{name:'Question or claim'})).toHaveValue('Preserve the exact claim');
+});
+it('includes the opening response as context without inventing a round-one claim rating',()=>{
+ const opening={id:1,round_number:1,is_active:false,synthesis:'',questions:['What matters before testing?']};
+ const initial={...answer(9,'Alice',1),answers:{q1:{position:'Start with a useful experiment.'}}};
+ const revised={...answer(2,'Alice',3),answers:{q1:{position:'Agree',evidence:'My explanation changed after feedback.'}}};
+ const Workspace=createResponseWorkspace(React,Editor);
+ render(<Workspace {...base} rounds={[opening,...rounds]} structuredRounds={[{...opening,responses:[initial]},{...rounds[0],responses:[answer(1,'Alice',2)]},{...rounds[1],responses:[revised]}]}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Across rounds'}));
+ expect(screen.getByText('Start with a useful experiment.')).toBeInTheDocument();
+ expect(screen.getAllByText('What matters before testing?').length).toBeGreaterThan(0);
+ expect(screen.getByText('Opening perspective')).toBeInTheDocument();
+ expect(screen.getByText('First rating')).toBeInTheDocument();
+ expect(screen.getByText('After feedback')).toBeInTheDocument();
+ expect(screen.getByText('Same rating · explanation changed')).toBeInTheDocument();
+ const expand=screen.getByRole('button',{name:'Read full responses'});fireEvent.click(expand);expect(expand).toHaveAttribute('aria-expanded','true');
+ expect(screen.getByText('Original evidence 1')).toBeInTheDocument();
 });

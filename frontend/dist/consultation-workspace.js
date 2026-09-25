@@ -1,4 +1,20 @@
 // src/utils/consultationWorkspace.ts
+function questionOutline(questions) {
+  const groups = [];
+  for (const [index, q] of questions.entries()) {
+    const config = typeof q === "string" ? {} : q;
+    const label = typeof q === "string" ? q : String(q.label || q.question || q.text || `Question ${index + 1}`);
+    const section = String(config.sectionTitle || "");
+    let group = section && groups.at(-1)?.title === section ? groups.at(-1) : void 0;
+    if (!group) {
+      group = { title: section || label, fields: [] };
+      groups.push(group);
+    }
+    group.fields.push({ label: section ? label : "", options: Array.isArray(config.options) ? config.options.map(String) : [], optional: config.optional === true });
+  }
+  const scales = [...new Set(groups.flatMap((group) => group.fields.filter((field) => field.options.length).map((field) => JSON.stringify(field.options))))];
+  return { groups, sharedScale: scales.length === 1 ? JSON.parse(scales[0]) : null };
+}
 function createConsultationWorkspace(R) {
   const h = R.createElement;
   return function ConsultationWorkspace(p) {
@@ -12,6 +28,7 @@ function createConsultationWorkspace(R) {
     const count = responseGroup ? responseGroup.responses.length : round?.response_count;
     const joinUrl = new URL(`/share/${encodeURIComponent(p.form.join_code)}`, window.location.origin).href;
     const stage = round?.round_number === 1 ? "Independent perspectives" : round?.round_number === 2 ? "Rate the claims" : round?.round_number === 3 ? "Reflect and re-rate" : "Panel discussion";
+    const outline = questionOutline(round?.questions || p.form.questions);
     const hint = round?.round_number === 1 ? "Collect independent views, then draw out the claims." : round?.round_number === 2 ? "Review the claims and where the panel agrees or differs." : "Review final ratings alongside the reasons behind them.";
     R.useEffect(() => {
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
@@ -101,15 +118,30 @@ function createConsultationWorkspace(R) {
             h("p", { className: "cw-copy-status", role: "status" }, copyState),
             h("div", { className: "cw-invite-note" }, h("strong", null, "One panel, every round"), h("p", null, "Participants use this link again when the next round opens. Existing sign-in and consent requirements still apply.")),
             h("a", { className: "cw-settings-link", href: `/admin/form/${p.form.id}` }, "Manage access and consultation settings \u2192")
-          ) : h(R.Fragment, null, h("p", { className: "cw-dialog-intro" }, hint), h("ol", { className: "cw-questions" }, (round?.questions || p.form.questions).map((q, i) => {
-            const label = typeof q === "string" ? q : String(q.label || q.question || q.text || `Question ${i + 1}`);
-            return h("li", { key: i }, typeof q !== "string" && q.sectionTitle ? h("strong", null, String(q.sectionTitle)) : null, h("p", null, label), typeof q !== "string" && Array.isArray(q.options) ? h("small", null, q.options.map(String).join(" \xB7 ")) : null);
-          })))
+          ) : h(
+            R.Fragment,
+            null,
+            h("p", { className: "cw-dialog-intro" }, hint),
+            outline.sharedScale ? h("details", { className: "cw-shared-scale" }, h("summary", null, "Rating scale used for every rated claim"), h("p", null, outline.sharedScale.join(" \xB7 "))) : null,
+            h("ol", { className: "cw-questions cw-question-outline" }, ...outline.groups.map((group, i) => h(
+              "li",
+              { key: i },
+              h("h3", null, group.title),
+              h("div", { className: "cw-field-outline" }, ...group.fields.map((field, j) => h(
+                "p",
+                { key: j },
+                field.options.length && /^your (response|position)$/i.test(field.label) ? "Rating" : /^explain your position$/i.test(field.label) ? "Written explanation" : field.label || "Written response",
+                h("span", null, field.optional ? " \xB7 Optional" : " \xB7 Required"),
+                !outline.sharedScale && field.options.length ? h("small", null, field.options.join(" \xB7 ")) : null
+              )))
+            )))
+          )
         )
       )
     );
   };
 }
 export {
-  createConsultationWorkspace
+  createConsultationWorkspace,
+  questionOutline
 };

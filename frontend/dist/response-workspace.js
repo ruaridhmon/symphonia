@@ -155,7 +155,7 @@ function createResponseWorkspace(R, Editor, remove) {
           setActive(null);
         }
       } }, ...titles.map((title) => h("option", { key: title, value: title }, title)))), h("h3", null, chosen)) : null,
-      h("p", { className: "rp-count", "aria-live": "polite" }, mode === "changes" ? `${identities.length} participants \xB7 compare identical questions across rounds` : `${filtered.length} response${filtered.length === 1 ? "" : "s"}${query ? " found" : ""}`),
+      h("p", { className: "rp-count", "aria-live": "polite" }, mode === "changes" ? `${identities.length} participants \xB7 opening perspectives and rating history` : `${filtered.length} response${filtered.length === 1 ? "" : "s"}${query ? " found" : ""}`),
       mode === "question" ? h("div", { className: "rp-answer-list" }, ...filtered.filter((row) => row.sections.some((s) => s.title === chosen)).map((row) => h("article", { key: row.response.id, className: "rp-person-answer" }, identity(row), blocks(row.sections.find((s) => s.title === chosen)), editor(row)))) : null,
       mode === "person" ? h("div", { className: "rp-person-list" }, ...filtered.map((row) => h("article", { key: row.response.id, className: "rp-person-answer" }, h("button", { type: "button", className: "rp-expand", "aria-expanded": expanded.has(row.response.id), onClick: () => {
         if (allowLeave()) setExpanded((previous) => {
@@ -164,12 +164,50 @@ function createResponseWorkspace(R, Editor, remove) {
           return next;
         });
       } }, h("strong", null, row.name), h("span", null, `Round ${row.round.round_number}`), h("span", { "aria-hidden": true }, expanded.has(row.response.id) ? "\u2212" : "+")), expanded.has(row.response.id) ? h("div", null, ...row.sections.map((section, i) => h("section", { key: i, className: "rp-person-section" }, h("h4", null, section.title), blocks(section))), managing ? button("Edit response", () => open(row.response.id)) : null, editor(row)) : h("p", { className: "rp-person-preview" }, row.sections[0]?.blocks[0]?.text || row.sections[0]?.rating || "No answer text recorded.")))) : null,
-      mode === "changes" ? h("div", { className: "rp-evolution" }, ...identities.map((identityKey) => {
-        const history = rows.filter((row) => (row.response.email || `anonymous-${row.response.id}`) === identityKey && row.sections.some((s) => s.title === chosen)).sort((a, b) => a.round.round_number - b.round.round_number);
-        const rated = history.map((row) => row.sections.find((s) => s.title === chosen)?.rating).filter(Boolean);
-        const movement = rated.length > 1 ? rated.every((value) => value === rated[0]) ? "Position unchanged" : `${rated[0]} \u2192 ${rated.at(-1)}` : "One round recorded";
-        return h("article", { key: identityKey, className: "rp-person-answer" }, h("header", { className: "rp-person-heading" }, h("h4", null, history[0].name), h("span", null, movement)), h("div", { className: "rp-timeline" }, ...history.map((row) => h("section", { key: row.response.id }, h("p", { className: "rp-round-label" }, `Round ${row.round.round_number}`), blocks(row.sections.find((s) => s.title === chosen))))));
-      })) : null,
+      mode === "changes" ? h(
+        "div",
+        { className: "rp-journeys" },
+        h("p", { className: "rp-journey-context" }, "Round 1 collects opening perspectives. Round 2 rates the claims. Round 3 revisits those ratings after panel feedback."),
+        h("details", { className: "rp-opening-context" }, h("summary", null, "Round 1 \xB7 Opening question"), ...[...new Set(rows.filter((row) => row.round.round_number === 1).flatMap((row) => row.sections.map((section) => section.title)))].map((title) => h("p", { key: title }, title))),
+        ...identities.map((identityKey) => {
+          const allHistory = rows.filter((row) => (row.response.email || `anonymous-${row.response.id}`) === identityKey).sort((a, b) => a.round.round_number - b.round.round_number);
+          const history = allHistory.filter((row) => row.sections.some((s) => s.title === chosen));
+          const rated = history.map((row) => row.sections.find((s) => s.title === chosen)).filter((section) => section?.rating);
+          const sameRating = rated.length > 1 && rated.every((section) => section?.rating === rated[0]?.rating);
+          const sameExplanation = rated.length > 1 && rated.every((section) => JSON.stringify(section?.blocks) === JSON.stringify(rated[0]?.blocks));
+          const movement = rated.length > 1 ? sameRating ? sameExplanation ? "Same rating and explanation" : "Same rating \xB7 explanation changed" : `${rated[0]?.rating} \u2192 ${rated.at(-1)?.rating}` : "No repeated rating";
+          const first = allHistory[0];
+          const isExpanded = expanded.has(first.response.id);
+          const stageLabels = { 1: "Opening perspective", 2: "First rating", 3: "After feedback" };
+          const relevantRounds = p.rounds.filter((round) => round.round_number === 1 || history.some((row) => row.round.id === round.id) || round.round_number === 2 || round.round_number === 3).sort((a, b) => a.round_number - b.round_number);
+          return h(
+            "article",
+            { key: identityKey, className: `rp-journey ${isExpanded ? "rp-journey-expanded" : ""}` },
+            h("header", { className: "rp-journey-heading" }, h("h4", null, first.name), h("span", null, movement)),
+            h("div", { className: "rp-journey-stages" }, ...relevantRounds.map((round) => {
+              const row = allHistory.find((row2) => row2.round.id === round.id);
+              const sections = round.round_number === 1 ? row?.sections : row?.sections.filter((s) => s.title === chosen);
+              return h(
+                "section",
+                { key: round.id, className: "rp-journey-stage" },
+                h("h5", null, h("span", { className: "rp-stage-number" }, `R${round.round_number}`), stageLabels[round.round_number] || `Round ${round.round_number}`),
+                sections?.length ? h("div", { className: "rp-journey-text" }, ...sections.map((section, i) => h(
+                  "div",
+                  { key: i },
+                  round.round_number === 1 ? h("p", { className: "rp-opening-question" }, section.title) : null,
+                  badge(section.rating),
+                  ...section.blocks.map((block, j) => h("div", { key: j }, block.label && block.label !== "Reasoning" ? h("span", { className: "rp-block-label" }, block.label) : null, h("p", { className: "rp-stage-prose" }, block.text)))
+                ))) : h("p", { className: "rp-missing" }, row ? "This question was not asked." : "No response recorded.")
+              );
+            })),
+            button(isExpanded ? "Show less" : "Read full responses", () => setExpanded((previous) => {
+              const next = new Set(previous);
+              isExpanded ? next.delete(first.response.id) : next.add(first.response.id);
+              return next;
+            }), { "aria-expanded": isExpanded, className: "rp-journey-expand" })
+          );
+        })
+      ) : null,
       (mode === "changes" ? !identities.length : !filtered.length) ? h("p", { className: "rw-empty" }, rows.length ? "No responses match these filters." : "Invite your panel to begin. Their responses will appear here as they submit.") : null
     );
   };

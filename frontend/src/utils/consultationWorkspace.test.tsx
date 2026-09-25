@@ -41,3 +41,15 @@ describe('consultation workspace', () => {
     expect(await screen.findByText(/Copy unavailable/)).toBeTruthy();expect(screen.getByRole('textbox',{name:'Invitation link'})).toBeTruthy();
   });
 });
+
+it('groups rating and explanation under one claim without repeating the scale',()=>{
+ const Workspace=createConsultationWorkspace(React);
+ const claim='Claim 1: An exact claim';
+ const questions=[{sectionTitle:claim,label:'Your response',inputType:'single_select',options:['Agree','Disagree']},{sectionTitle:claim,label:'Explain your position',inputType:'textarea'}];
+ const round={id:22,round_number:2,is_active:true,synthesis:'',questions};
+ render(<Workspace form={{id:1,title:'Panel',questions,allow_join:true,join_code:'abc'}} rounds={[round]} selectedRoundId={22} view="synthesis" onView={()=>{}} onRound={()=>{}}/>);
+ fireEvent.click(screen.getByRole('button',{name:'View questions'}));
+ expect(screen.getAllByRole('heading',{name:claim})).toHaveLength(1);
+ expect(screen.getAllByText('Rating',{exact:true}).length).toBeGreaterThan(0);
+ expect(screen.getByText('Written explanation',{exact:false})).toBeInTheDocument();
+});
