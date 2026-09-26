@@ -10,7 +10,7 @@ export function stance(value: string): number {
   if (['strongly agree', 'agree'].includes(v)) return 0;
   if (['strongly disagree', 'disagree'].includes(v)) return 1;
   if (['neither agree nor disagree', 'neutral'].includes(v)) return 2;
-  if (['unable to judge — need more information', "don't know / unsure", 'unsure', 'uncertain'].includes(v)) return 3;
+  if (['unable to judge', 'insufficient evidence', 'unable to judge — need more information', "don't know / unsure", 'unsure', 'uncertain'].includes(v)) return 3;
   return v ? 4 : 5;
 }
 function ratingQuestion(q: Question): q is Record<string, unknown> {

@@ -1,0 +1,16 @@
+{
+  "submissions": 144,
+  "rating_rows": 384,
+  "scenarios": 3,
+  "consultations": 6,
+  "fictional_identities": 24,
+  "independent_model_participants": 0,
+  "openrouter_calls": 0,
+  "identical_baselines": true,
+  "identical_rating_questions": true,
+  "feedback_hashes_match": true,
+  "no_peer_content_in_control_feedback": true,
+  "saved_responses_match_authored_fixture": true,
+  "provenance": "Integrity checks on saved platform records; not independent semantic validation",
+  "records_sha256": "41983feb701f8c4a94cef7ca7ec46d8cbc0b161b23ba9e7db73d14788242d29c"
+}

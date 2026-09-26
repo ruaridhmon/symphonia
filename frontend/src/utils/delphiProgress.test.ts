@@ -5,6 +5,13 @@ const question = {questionId:'claim_1_response', label:'Your response', sectionT
 const makeRound = (id: number): Round => ({id, round_number:id, synthesis:'', is_active:id===2, questions:[question], response_count:3});
 const votes = (id: number, values: string[]): RoundWithResponses => ({id,round_number:id,synthesis:'',is_active:true,responses:values.map((position,i)=>({id:i,round_id:id,email:null,timestamp:'',version:1,answers:{q1:{position}}}))});
 describe('recorded Delphi progress', () => {
+  it('keeps short uncertainty labels distinct from unrecognised and missing ratings', () => {
+    const round=makeRound(2);
+    const [row]=ratingProgress(round,[round],[votes(2,['Agree','Unable to judge','Insufficient evidence','Unexpected value',''])]);
+    expect(row.votes).toEqual([1,0,0,2,1,1]);
+    expect(row.answered).toBe(4);
+    expect(row.percent).toBe(25);
+  });
   it('includes neutral and uncertain votes, separates omissions, and compares exact claims', () => {
     const rounds=[makeRound(1),makeRound(2)];
     const [row]=ratingProgress(rounds[1],rounds,[votes(1,['Agree','Disagree']),votes(2,['Strongly agree','Neither agree nor disagree','Unable to judge — need more information',''])]);

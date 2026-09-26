@@ -1,0 +1,122 @@
+[
+  {
+    "scenario": "attendance",
+    "arm": "feedback",
+    "round": 2,
+    "correct": 6,
+    "factual_n": 16,
+    "factual_unsure": 6,
+    "unresolved_unsure": 4,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "attendance",
+    "arm": "feedback",
+    "round": 3,
+    "correct": 13,
+    "factual_n": 16,
+    "factual_unsure": 2,
+    "unresolved_unsure": 7,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "attendance",
+    "arm": "no-feedback",
+    "round": 2,
+    "correct": 6,
+    "factual_n": 16,
+    "factual_unsure": 6,
+    "unresolved_unsure": 4,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "attendance",
+    "arm": "no-feedback",
+    "round": 3,
+    "correct": 6,
+    "factual_n": 16,
+    "factual_unsure": 6,
+    "unresolved_unsure": 4,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "health",
+    "arm": "feedback",
+    "round": 2,
+    "correct": 6,
+    "factual_n": 16,
+    "factual_unsure": 5,
+    "unresolved_unsure": 5,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "health",
+    "arm": "feedback",
+    "round": 3,
+    "correct": 14,
+    "factual_n": 16,
+    "factual_unsure": 1,
+    "unresolved_unsure": 7,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "health",
+    "arm": "no-feedback",
+    "round": 2,
+    "correct": 6,
+    "factual_n": 16,
+    "factual_unsure": 5,
+    "unresolved_unsure": 5,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "health",
+    "arm": "no-feedback",
+    "round": 3,
+    "correct": 7,
+    "factual_n": 16,
+    "factual_unsure": 4,
+    "unresolved_unsure": 5,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "release",
+    "arm": "feedback",
+    "round": 2,
+    "correct": 5,
+    "factual_n": 16,
+    "factual_unsure": 6,
+    "unresolved_unsure": 4,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "release",
+    "arm": "feedback",
+    "round": 3,
+    "correct": 12,
+    "factual_n": 16,
+    "factual_unsure": 3,
+    "unresolved_unsure": 7,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "release",
+    "arm": "no-feedback",
+    "round": 2,
+    "correct": 5,
+    "factual_n": 16,
+    "factual_unsure": 6,
+    "unresolved_unsure": 4,
+    "unresolved_n": 8
+  },
+  {
+    "scenario": "release",
+    "arm": "no-feedback",
+    "round": 3,
+    "correct": 6,
+    "factual_n": 16,
+    "factual_unsure": 6,
+    "unresolved_unsure": 4,
+    "unresolved_n": 8
+  }
+]

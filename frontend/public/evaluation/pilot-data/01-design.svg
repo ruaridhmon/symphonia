@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="584.64pt" height="271.476pt" viewBox="0 0 584.64 271.476" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-26T16:19:26.672553</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 271.476 
+L 584.64 271.476 
+L 584.64 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="text_1">
+    <g id="patch_2">
+     <path d="M 84.306656 130.39344 
+L 186.701344 130.39344 
+Q 193.901344 130.39344 193.901344 123.19344 
+L 193.901344 90.79344 
+Q 193.901344 83.59344 186.701344 83.59344 
+L 84.306656 83.59344 
+Q 77.106656 83.59344 77.106656 90.79344 
+L 77.106656 123.19344 
+Q 77.106656 130.39344 84.306656 130.39344 
+z
+" style="fill: #f4f4f1; stroke: #d0d0c8; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(88.030406 102.248752)">3 authored scenarios</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(84.306656 117.576877)">8 fictional people each</text>
+   </g>
+   <g id="text_2">
+    <g id="patch_3">
+     <path d="M 238.946344 130.39344 
+L 333.381656 130.39344 
+Q 340.581656 130.39344 340.581656 123.19344 
+L 340.581656 90.79344 
+Q 340.581656 83.59344 333.381656 83.59344 
+L 238.946344 83.59344 
+Q 231.746344 83.59344 231.746344 90.79344 
+L 231.746344 123.19344 
+Q 231.746344 130.39344 238.946344 130.39344 
+z
+" style="fill: #f4f4f1; stroke: #d0d0c8; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(238.946344 101.376877)">Round 1: paragraphs</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(245.625328 118.448752)">4 authored claims</text>
+   </g>
+   <g id="text_3">
+    <g id="patch_4">
+     <path d="M 393.633984 130.39344 
+L 510.146016 130.39344 
+Q 517.346016 130.39344 517.346016 123.19344 
+L 517.346016 90.79344 
+Q 517.346016 83.59344 510.146016 83.59344 
+L 393.633984 83.59344 
+Q 386.433984 83.59344 386.433984 90.79344 
+L 386.433984 123.19344 
+Q 386.433984 130.39344 393.633984 130.39344 
+z
+" style="fill: #f4f4f1; stroke: #d0d0c8; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(404.514141 101.376877)">Round 2: first ratings</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(393.633984 117.576877)">Exact copies in both arms</text>
+   </g>
+   <g id="text_4">
+    <g id="patch_5">
+     <path d="M 224.900016 203.91984 
+L 347.427984 203.91984 
+Q 354.627984 203.91984 354.627984 196.71984 
+L 354.627984 164.31984 
+Q 354.627984 157.11984 347.427984 157.11984 
+L 224.900016 157.11984 
+Q 217.700016 157.11984 217.700016 164.31984 
+L 217.700016 196.71984 
+Q 217.700016 203.91984 224.900016 203.91984 
+z
+" style="fill: #f4f4f1; stroke: #d0d0c8; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(243.871734 175.775152)">Peer-feedback arm</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(224.900016 191.975152)">Saved counts + all reasons</text>
+   </g>
+   <g id="text_5">
+    <g id="patch_6">
+     <path d="M 385.778672 203.91984 
+L 518.001328 203.91984 
+Q 525.201328 203.91984 525.201328 196.71984 
+L 525.201328 164.31984 
+Q 525.201328 157.11984 518.001328 157.11984 
+L 385.778672 157.11984 
+Q 378.578672 157.11984 378.578672 164.31984 
+L 378.578672 196.71984 
+Q 378.578672 203.91984 385.778672 203.91984 
+z
+" style="fill: #f4f4f1; stroke: #d0d0c8; stroke-linejoin: miter"/>
+    </g>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(413.047266 175.775152)">No-feedback arm</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; fill: #242424" transform="translate(385.778672 191.103277)">Original private material only</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 202.787275 106.99344 
+Q 208.321382 106.99344 212.737456 106.99344 
+" style="fill: none; stroke: #666666; stroke-linecap: round"/>
+    <path d="M 209.137456 105.19344 
+L 212.737456 106.99344 
+L 209.137456 108.79344 
+" style="fill: none; stroke: #666666; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 358.468049 106.99344 
+Q 366.513578 106.99344 373.441074 106.99344 
+" style="fill: none; stroke: #666666; stroke-linecap: round"/>
+    <path d="M 369.841074 105.19344 
+L 373.441074 106.99344 
+L 369.841074 108.79344 
+" style="fill: none; stroke: #666666; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 449.908358 136.645775 
+Q 376.56058 145.594729 304.322606 154.40828 
+" style="fill: none; stroke: #666666; stroke-linecap: round"/>
+    <path d="M 308.114103 155.759038 
+L 304.322606 154.40828 
+L 307.678111 152.185537 
+" style="fill: none; stroke: #666666; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 451.89 138.401024 
+Q 451.89 145.595277 451.89 151.671496 
+" style="fill: none; stroke: #666666; stroke-linecap: round"/>
+    <path d="M 453.69 148.071496 
+L 451.89 151.671496 
+L 450.09 148.071496 
+" style="fill: none; stroke: #666666; stroke-linecap: round"/>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle; fill: #242424" x="371.538" y="220.95936" transform="rotate(-0 371.538 220.95936)">Round 3: authored reconsiderations → normal platform submissions</text>
+   </g>
+  </g>
+  <g id="text_7">
+   <text style="font-weight: 700; font-size: 14px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #242424" x="7.2" y="17.837812" transform="rotate(-0 7.2 17.837812)">Study design and provenance</text>
+  </g>
+  <g id="text_8">
+   <text style="font-size: 8px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #626262" x="7.2" y="262.354125" transform="rotate(-0 7.2 262.354125)">Workflow pilot only. Same author across scenarios, participants and reconsiderations; no independent efficacy estimate.</text>
+  </g>
+ </g>
+</svg>

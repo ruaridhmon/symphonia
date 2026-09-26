@@ -1,0 +1,1586 @@
+{
+  "version": 1,
+  "provenance": "Authored by the assistant in this Codex conversation. No independent participant models or evaluators. No OpenRouter calls.",
+  "purpose": "Platform workflow pilot; not a causal efficacy study",
+  "scenarios": [
+    {
+      "id": "attendance",
+      "title": "School attendance alerts",
+      "question": "Should a fictional school district expand its attendance-alert programme?",
+      "evidence": [
+        "A1: In a randomised fictional pilot, 60 of 100 alerted pupils and 40 of 100 control pupils returned to regular attendance over one term. This is a 20 percentage-point difference, not proof about every subgroup.",
+        "A2: Among pupils with caregiver work-schedule conflicts, 10 of 25 alerted pupils and 10 of 25 controls returned to regular attendance. This small subgroup showed no observed benefit; it does not prove zero effect.",
+        "A3: The pilot measured attendance only. It collected no attainment outcomes and followed nobody beyond one term."
+      ],
+      "claims": [
+        "In this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group.",
+        "The pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts.",
+        "The alerts improve attainment over two years.",
+        "The district should prioritise a targeted expansion over immediate universal rollout."
+      ],
+      "truth": [
+        true,
+        false,
+        null,
+        null
+      ],
+      "claim_sources": [
+        "A1",
+        "A2",
+        "A3",
+        "Values"
+      ],
+      "pro": "Targeting may avoid spending on groups without demonstrated benefit.",
+      "con": "Universal access is fairer and may avoid eligibility barriers.",
+      "correction": [
+        "The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+        "The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+        "A3 says attainment and two-year outcomes were never measured."
+      ],
+      "people": [
+        {
+          "id": "P01",
+          "name": "Participant 1",
+          "role": "Quantitative reviewer",
+          "private_evidence": [
+            "A1: In a randomised fictional pilot, 60 of 100 alerted pupils and 40 of 100 control pupils returned to regular attendance over one term. This is a 20 percentage-point difference, not proof about every subgroup.",
+            "A2: Among pupils with caregiver work-schedule conflicts, 10 of 25 alerted pupils and 10 of 25 controls returned to regular attendance. This small subgroup showed no observed benefit; it does not prove zero effect.",
+            "A3: The pilot measured attendance only. It collected no attainment outcomes and followed nobody beyond one term."
+          ],
+          "opening": "On whether in this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group. My view is agree. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference. On whether the pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts. My view is disagree. The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated. On whether the alerts improve attainment over two years. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the district should prioritise a targeted expansion over immediate universal rollout. My view is agree. Targeting may avoid spending on groups without demonstrated benefit.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Disagree",
+              "Unable to judge",
+              "Agree"
+            ],
+            "reasons": [
+              "The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+              "The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Targeting may avoid spending on groups without demonstrated benefit."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I retain my rating. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+                "I retain my rating. The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Targeting may avoid spending on groups without demonstrated benefit. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference. On reconsideration, my original packet supplies no additional basis for a change.",
+                "The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Targeting may avoid spending on groups without demonstrated benefit. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P02",
+          "name": "Participant 2",
+          "role": "Service practitioner",
+          "private_evidence": [
+            "A1: In a randomised fictional pilot, 60 of 100 alerted pupils and 40 of 100 control pupils returned to regular attendance over one term. This is a 20 percentage-point difference, not proof about every subgroup."
+          ],
+          "opening": "On whether in this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group. My view is agree. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference. On whether the pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the alerts improve attainment over two years. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the district should prioritise a targeted expansion over immediate universal rollout. My view is agree. Targeting may avoid spending on groups without demonstrated benefit.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Agree",
+              "Agree",
+              "Agree"
+            ],
+            "reasons": [
+              "The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "Targeting may avoid spending on groups without demonstrated benefit."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I retain my rating. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+                "The peer discussion gives no measured outcome for this claim. I withdraw my unsupported expectation.",
+                "Targeting may avoid spending on groups without demonstrated benefit. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Agree",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Targeting may avoid spending on groups without demonstrated benefit. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P03",
+          "name": "Participant 3",
+          "role": "Community advocate",
+          "private_evidence": [
+            "A3: The pilot measured attendance only. It collected no attainment outcomes and followed nobody beyond one term."
+          ],
+          "opening": "On whether in this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the alerts improve attainment over two years. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the district should prioritise a targeted expansion over immediate universal rollout. My view is disagree. Universal access is fairer and may avoid eligibility barriers.",
+          "round2": {
+            "votes": [
+              "Unable to judge",
+              "Unable to judge",
+              "Unable to judge",
+              "Disagree"
+            ],
+            "reasons": [
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Universal access is fairer and may avoid eligibility barriers."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Unable to judge",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Universal access is fairer and may avoid eligibility barriers. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Unable to judge",
+                "Unable to judge",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Universal access is fairer and may avoid eligibility barriers. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P04",
+          "name": "Participant 4",
+          "role": "Programme manager",
+          "private_evidence": [],
+          "opening": "On whether in this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group. My view is disagree. I doubt this proposition, but I do not have direct data to settle it. On whether the pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the alerts improve attainment over two years. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the district should prioritise a targeted expansion over immediate universal rollout. My view is agree. Targeting may avoid spending on groups without demonstrated benefit.",
+          "round2": {
+            "votes": [
+              "Disagree",
+              "Agree",
+              "Agree",
+              "Agree"
+            ],
+            "reasons": [
+              "I doubt this proposition, but I do not have direct data to settle it.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "Targeting may avoid spending on groups without demonstrated benefit."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Agree",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+                "I retain my earlier expectation despite P01\u2019s contrary explanation. I have no new supporting evidence; this remaining belief is not evidence of effectiveness.",
+                "I retain my earlier expectation despite P01\u2019s contrary explanation. I have no new supporting evidence; this remaining belief is not evidence of effectiveness.",
+                "Targeting may avoid spending on groups without demonstrated benefit. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Disagree",
+                "Agree",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "I doubt this proposition, but I do not have direct data to settle it. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Targeting may avoid spending on groups without demonstrated benefit. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P05",
+          "name": "Participant 5",
+          "role": "Budget analyst",
+          "private_evidence": [
+            "A1: In a randomised fictional pilot, 60 of 100 alerted pupils and 40 of 100 control pupils returned to regular attendance over one term. This is a 20 percentage-point difference, not proof about every subgroup."
+          ],
+          "opening": "On whether in this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group. My view is agree. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference. On whether the pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the alerts improve attainment over two years. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the district should prioritise a targeted expansion over immediate universal rollout. My view is disagree. Universal access is fairer and may avoid eligibility barriers.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Unable to judge",
+              "Unable to judge",
+              "Disagree"
+            ],
+            "reasons": [
+              "The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Universal access is fairer and may avoid eligibility barriers."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I retain my rating. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Universal access is fairer and may avoid eligibility barriers. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Unable to judge",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Universal access is fairer and may avoid eligibility barriers. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P06",
+          "name": "Participant 6",
+          "role": "Frontline worker",
+          "private_evidence": [
+            "A2: Among pupils with caregiver work-schedule conflicts, 10 of 25 alerted pupils and 10 of 25 controls returned to regular attendance. This small subgroup showed no observed benefit; it does not prove zero effect."
+          ],
+          "opening": "On whether in this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts. My view is disagree. The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated. On whether the alerts improve attainment over two years. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the district should prioritise a targeted expansion over immediate universal rollout. My view is agree. Targeting may avoid spending on groups without demonstrated benefit.",
+          "round2": {
+            "votes": [
+              "Unable to judge",
+              "Disagree",
+              "Agree",
+              "Agree"
+            ],
+            "reasons": [
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "Targeting may avoid spending on groups without demonstrated benefit."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+                "I retain my rating. The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+                "The peer discussion gives no measured outcome for this claim. I withdraw my unsupported expectation.",
+                "Targeting may avoid spending on groups without demonstrated benefit. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Unable to judge",
+                "Disagree",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Targeting may avoid spending on groups without demonstrated benefit. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P07",
+          "name": "Participant 7",
+          "role": "Access advocate",
+          "private_evidence": [
+            "A3: The pilot measured attendance only. It collected no attainment outcomes and followed nobody beyond one term."
+          ],
+          "opening": "On whether in this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the alerts improve attainment over two years. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the district should prioritise a targeted expansion over immediate universal rollout. My view is disagree. Universal access is fairer and may avoid eligibility barriers.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Agree",
+              "Unable to judge",
+              "Disagree"
+            ],
+            "reasons": [
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Universal access is fairer and may avoid eligibility barriers."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I retain my rating. The shared A1 counts are 60/100 versus 40/100: a 20 percentage-point difference.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Universal access is fairer and may avoid eligibility barriers. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Agree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Universal access is fairer and may avoid eligibility barriers. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P08",
+          "name": "Participant 8",
+          "role": "Evidence reviewer",
+          "private_evidence": [],
+          "opening": "On whether in this one-term pilot, the attendance recovery rate was 20 percentage points higher in the alert group than in the control group. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the pilot demonstrated an attendance benefit for pupils with caregiver work-schedule conflicts. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the alerts improve attainment over two years. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the district should prioritise a targeted expansion over immediate universal rollout. My view is agree. Targeting may avoid spending on groups without demonstrated benefit.",
+          "round2": {
+            "votes": [
+              "Unable to judge",
+              "Unable to judge",
+              "Agree",
+              "Agree"
+            ],
+            "reasons": [
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "Targeting may avoid spending on groups without demonstrated benefit."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Unable to judge",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. The shared A2 subgroup counts are 10/25 in each group; benefit was not demonstrated.",
+                "The peer discussion gives no measured outcome for this claim. I withdraw my unsupported expectation.",
+                "Targeting may avoid spending on groups without demonstrated benefit. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Unable to judge",
+                "Unable to judge",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Targeting may avoid spending on groups without demonstrated benefit. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        }
+      ],
+      "extraction_audit": [
+        {
+          "claim": 1,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "A1"
+        },
+        {
+          "claim": 2,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "A2"
+        },
+        {
+          "claim": 3,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "A3"
+        },
+        {
+          "claim": 4,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "Values"
+        }
+      ],
+      "reviewed_feedback_sha256": "d36d4aa6c6b7fb4e82802bac870fb8a1bfcba0ac505da94391af261bc058f3df"
+    },
+    {
+      "id": "health",
+      "title": "Community health appointments",
+      "question": "Should a fictional town expand evening preventive-health appointments?",
+      "evidence": [
+        "H1: In a fictional randomised invitation study, 90 of 150 residents offered evening appointments attended, versus 75 of 150 offered daytime appointments. The attendance difference was 10 percentage points.",
+        "H2: The evening group cost 18000 benchmark units for 90 attendees; daytime cost 12000 for 75 attendees. Cost per attendee was 200 versus 160 units. These are programme costs, not a full cost-effectiveness analysis.",
+        "H3: The study measured attendance and delivery costs. It did not measure hospital admissions or long-term health benefits."
+      ],
+      "claims": [
+        "Evening invitations increased observed attendance by 10 percentage points in this study.",
+        "The evening programme had a lower delivery cost per attendee than the daytime programme.",
+        "Evening appointments reduce hospital admissions over the next year.",
+        "The town should fund evening access despite its higher delivery cost per attendee."
+      ],
+      "truth": [
+        true,
+        false,
+        null,
+        null
+      ],
+      "claim_sources": [
+        "H1",
+        "H2",
+        "H3",
+        "Values"
+      ],
+      "pro": "Flexible access deserves funding even when delivery is more expensive.",
+      "con": "A fixed budget should prioritise the lower-cost service until health benefits are known.",
+      "correction": [
+        "H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+        "H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+        "H3 contains no hospital-admission outcome."
+      ],
+      "people": [
+        {
+          "id": "P01",
+          "name": "Participant 1",
+          "role": "Quantitative reviewer",
+          "private_evidence": [
+            "H1: In a fictional randomised invitation study, 90 of 150 residents offered evening appointments attended, versus 75 of 150 offered daytime appointments. The attendance difference was 10 percentage points.",
+            "H2: The evening group cost 18000 benchmark units for 90 attendees; daytime cost 12000 for 75 attendees. Cost per attendee was 200 versus 160 units. These are programme costs, not a full cost-effectiveness analysis.",
+            "H3: The study measured attendance and delivery costs. It did not measure hospital admissions or long-term health benefits."
+          ],
+          "opening": "On whether evening invitations increased observed attendance by 10 percentage points in this study. My view is agree. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference. On whether the evening programme had a lower delivery cost per attendee than the daytime programme. My view is disagree. H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee. On whether evening appointments reduce hospital admissions over the next year. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the town should fund evening access despite its higher delivery cost per attendee. My view is agree. Flexible access deserves funding even when delivery is more expensive.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Disagree",
+              "Unable to judge",
+              "Agree"
+            ],
+            "reasons": [
+              "H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+              "H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Flexible access deserves funding even when delivery is more expensive."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I retain my rating. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+                "I retain my rating. H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Flexible access deserves funding even when delivery is more expensive. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference. On reconsideration, my original packet supplies no additional basis for a change.",
+                "H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Flexible access deserves funding even when delivery is more expensive. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P02",
+          "name": "Participant 2",
+          "role": "Service practitioner",
+          "private_evidence": [
+            "H1: In a fictional randomised invitation study, 90 of 150 residents offered evening appointments attended, versus 75 of 150 offered daytime appointments. The attendance difference was 10 percentage points."
+          ],
+          "opening": "On whether evening invitations increased observed attendance by 10 percentage points in this study. My view is agree. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference. On whether the evening programme had a lower delivery cost per attendee than the daytime programme. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether evening appointments reduce hospital admissions over the next year. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the town should fund evening access despite its higher delivery cost per attendee. My view is disagree. A fixed budget should prioritise the lower-cost service until health benefits are known.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Unable to judge",
+              "Agree",
+              "Disagree"
+            ],
+            "reasons": [
+              "H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "A fixed budget should prioritise the lower-cost service until health benefits are known."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I retain my rating. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+                "The peer discussion gives no measured outcome for this claim. I withdraw my unsupported expectation.",
+                "A fixed budget should prioritise the lower-cost service until health benefits are known. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Unable to judge",
+                "Agree",
+                "Disagree"
+              ],
+              "reasons": [
+                "H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A fixed budget should prioritise the lower-cost service until health benefits are known. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P03",
+          "name": "Participant 3",
+          "role": "Community advocate",
+          "private_evidence": [
+            "H3: The study measured attendance and delivery costs. It did not measure hospital admissions or long-term health benefits."
+          ],
+          "opening": "On whether evening invitations increased observed attendance by 10 percentage points in this study. My view is disagree. I doubt this proposition, but I do not have direct data to settle it. On whether the evening programme had a lower delivery cost per attendee than the daytime programme. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether evening appointments reduce hospital admissions over the next year. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the town should fund evening access despite its higher delivery cost per attendee. My view is agree. Flexible access deserves funding even when delivery is more expensive.",
+          "round2": {
+            "votes": [
+              "Disagree",
+              "Agree",
+              "Unable to judge",
+              "Agree"
+            ],
+            "reasons": [
+              "I doubt this proposition, but I do not have direct data to settle it.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Flexible access deserves funding even when delivery is more expensive."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Flexible access deserves funding even when delivery is more expensive. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Disagree",
+                "Agree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I doubt this proposition, but I do not have direct data to settle it. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Flexible access deserves funding even when delivery is more expensive. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P04",
+          "name": "Participant 4",
+          "role": "Programme manager",
+          "private_evidence": [],
+          "opening": "On whether evening invitations increased observed attendance by 10 percentage points in this study. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the evening programme had a lower delivery cost per attendee than the daytime programme. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether evening appointments reduce hospital admissions over the next year. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the town should fund evening access despite its higher delivery cost per attendee. My view is disagree. A fixed budget should prioritise the lower-cost service until health benefits are known.",
+          "round2": {
+            "votes": [
+              "Unable to judge",
+              "Agree",
+              "Agree",
+              "Disagree"
+            ],
+            "reasons": [
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "A fixed budget should prioritise the lower-cost service until health benefits are known."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Unable to judge",
+                "Disagree",
+                "Agree",
+                "Disagree"
+              ],
+              "reasons": [
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+                "I retain my earlier expectation despite P01\u2019s contrary explanation. I have no new supporting evidence; this remaining belief is not evidence of effectiveness.",
+                "A fixed budget should prioritise the lower-cost service until health benefits are known. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Unable to judge",
+                "Agree",
+                "Agree",
+                "Disagree"
+              ],
+              "reasons": [
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A fixed budget should prioritise the lower-cost service until health benefits are known. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P05",
+          "name": "Participant 5",
+          "role": "Budget analyst",
+          "private_evidence": [
+            "H1: In a fictional randomised invitation study, 90 of 150 residents offered evening appointments attended, versus 75 of 150 offered daytime appointments. The attendance difference was 10 percentage points."
+          ],
+          "opening": "On whether evening invitations increased observed attendance by 10 percentage points in this study. My view is agree. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference. On whether the evening programme had a lower delivery cost per attendee than the daytime programme. My view is disagree. I doubt this proposition, but I do not have direct data to settle it. On whether evening appointments reduce hospital admissions over the next year. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the town should fund evening access despite its higher delivery cost per attendee. My view is agree. Flexible access deserves funding even when delivery is more expensive.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Disagree",
+              "Unable to judge",
+              "Agree"
+            ],
+            "reasons": [
+              "H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+              "I doubt this proposition, but I do not have direct data to settle it.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Flexible access deserves funding even when delivery is more expensive."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I retain my rating. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+                "I retain my rating. H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Flexible access deserves funding even when delivery is more expensive. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I doubt this proposition, but I do not have direct data to settle it. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Flexible access deserves funding even when delivery is more expensive. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P06",
+          "name": "Participant 6",
+          "role": "Frontline worker",
+          "private_evidence": [
+            "H2: The evening group cost 18000 benchmark units for 90 attendees; daytime cost 12000 for 75 attendees. Cost per attendee was 200 versus 160 units. These are programme costs, not a full cost-effectiveness analysis."
+          ],
+          "opening": "On whether evening invitations increased observed attendance by 10 percentage points in this study. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the evening programme had a lower delivery cost per attendee than the daytime programme. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether evening appointments reduce hospital admissions over the next year. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the town should fund evening access despite its higher delivery cost per attendee. My view is disagree. A fixed budget should prioritise the lower-cost service until health benefits are known.",
+          "round2": {
+            "votes": [
+              "Unable to judge",
+              "Unable to judge",
+              "Agree",
+              "Disagree"
+            ],
+            "reasons": [
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "A fixed budget should prioritise the lower-cost service until health benefits are known."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+                "The peer discussion gives no measured outcome for this claim. I withdraw my unsupported expectation.",
+                "A fixed budget should prioritise the lower-cost service until health benefits are known. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Unable to judge",
+                "Disagree",
+                "Agree",
+                "Disagree"
+              ],
+              "reasons": [
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "On rereading my original H2 packet, 18000/90 is 200 and 12000/75 is 160; evening delivery is more expensive per attendee.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A fixed budget should prioritise the lower-cost service until health benefits are known. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P07",
+          "name": "Participant 7",
+          "role": "Access advocate",
+          "private_evidence": [
+            "H3: The study measured attendance and delivery costs. It did not measure hospital admissions or long-term health benefits."
+          ],
+          "opening": "On whether evening invitations increased observed attendance by 10 percentage points in this study. My view is disagree. I doubt this proposition, but I do not have direct data to settle it. On whether the evening programme had a lower delivery cost per attendee than the daytime programme. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether evening appointments reduce hospital admissions over the next year. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the town should fund evening access despite its higher delivery cost per attendee. My view is agree. Flexible access deserves funding even when delivery is more expensive.",
+          "round2": {
+            "votes": [
+              "Disagree",
+              "Agree",
+              "Unable to judge",
+              "Agree"
+            ],
+            "reasons": [
+              "I doubt this proposition, but I do not have direct data to settle it.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Flexible access deserves funding even when delivery is more expensive."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Agree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+                "I retain my earlier expectation despite P01\u2019s contrary explanation. I have no new supporting evidence; this remaining belief is not evidence of effectiveness.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Flexible access deserves funding even when delivery is more expensive. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Disagree",
+                "Agree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I doubt this proposition, but I do not have direct data to settle it. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Flexible access deserves funding even when delivery is more expensive. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P08",
+          "name": "Participant 8",
+          "role": "Evidence reviewer",
+          "private_evidence": [],
+          "opening": "On whether evening invitations increased observed attendance by 10 percentage points in this study. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the evening programme had a lower delivery cost per attendee than the daytime programme. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether evening appointments reduce hospital admissions over the next year. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the town should fund evening access despite its higher delivery cost per attendee. My view is disagree. A fixed budget should prioritise the lower-cost service until health benefits are known.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Unable to judge",
+              "Unable to judge",
+              "Disagree"
+            ],
+            "reasons": [
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "A fixed budget should prioritise the lower-cost service until health benefits are known."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I retain my rating. H1 reports 90/150 versus 75/150, which is a 10 percentage-point attendance difference.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. H2 gives 18000/90 = 200, versus 12000/75 = 160 units per attendee.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "A fixed budget should prioritise the lower-cost service until health benefits are known. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Unable to judge",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A fixed budget should prioritise the lower-cost service until health benefits are known. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        }
+      ],
+      "extraction_audit": [
+        {
+          "claim": 1,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "H1"
+        },
+        {
+          "claim": 2,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "H2"
+        },
+        {
+          "claim": 3,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "H3"
+        },
+        {
+          "claim": 4,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "Values"
+        }
+      ],
+      "reviewed_feedback_sha256": "fc82ca912dcc777ae715993d28c80d7fe1a580f8a0975ceb4040e08139a3b949"
+    },
+    {
+      "id": "release",
+      "title": "Support after release",
+      "question": "Should a fictional region expand a housing-and-employment support programme after release?",
+      "evidence": [
+        "R1: A fictional non-randomised cohort recorded stable housing at six months for 36 of 60 programme participants and 24 of 60 comparison participants. Participants volunteered and baseline housing readiness differed.",
+        "R2: The employment report includes only 30 of the 60 programme participants and only 45 of the 60 comparison participants. Twenty programme respondents and twenty-five comparison respondents reported employment; missing outcomes are unknown.",
+        "R3: No reconviction outcome was collected. The observational design cannot establish a causal programme effect."
+      ],
+      "claims": [
+        "Recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort.",
+        "The employment report establishes a higher employment rate across all programme participants than across all comparison participants.",
+        "The programme reduces reconviction over two years.",
+        "The region should offer a limited expansion while commissioning a stronger evaluation."
+      ],
+      "truth": [
+        true,
+        false,
+        null,
+        null
+      ],
+      "claim_sources": [
+        "R1",
+        "R2",
+        "R3",
+        "Values"
+      ],
+      "pro": "A bounded expansion can provide support while improving the evidence.",
+      "con": "Expansion should wait because selection and missing outcomes undermine the case.",
+      "correction": [
+        "R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate.",
+        "R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established.",
+        "R3 says reconviction was not measured."
+      ],
+      "people": [
+        {
+          "id": "P01",
+          "name": "Participant 1",
+          "role": "Quantitative reviewer",
+          "private_evidence": [
+            "R1: A fictional non-randomised cohort recorded stable housing at six months for 36 of 60 programme participants and 24 of 60 comparison participants. Participants volunteered and baseline housing readiness differed.",
+            "R2: The employment report includes only 30 of the 60 programme participants and only 45 of the 60 comparison participants. Twenty programme respondents and twenty-five comparison respondents reported employment; missing outcomes are unknown.",
+            "R3: No reconviction outcome was collected. The observational design cannot establish a causal programme effect."
+          ],
+          "opening": "On whether recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort. My view is agree. R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate. On whether the employment report establishes a higher employment rate across all programme participants than across all comparison participants. My view is disagree. R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established. On whether the programme reduces reconviction over two years. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the region should offer a limited expansion while commissioning a stronger evaluation. My view is agree. A bounded expansion can provide support while improving the evidence.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Disagree",
+              "Unable to judge",
+              "Agree"
+            ],
+            "reasons": [
+              "R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate.",
+              "R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "A bounded expansion can provide support while improving the evidence."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I retain my rating. R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate.",
+                "I retain my rating. R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "A bounded expansion can provide support while improving the evidence. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate. On reconsideration, my original packet supplies no additional basis for a change.",
+                "R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A bounded expansion can provide support while improving the evidence. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P02",
+          "name": "Participant 2",
+          "role": "Service practitioner",
+          "private_evidence": [
+            "R1: A fictional non-randomised cohort recorded stable housing at six months for 36 of 60 programme participants and 24 of 60 comparison participants. Participants volunteered and baseline housing readiness differed."
+          ],
+          "opening": "On whether recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort. My view is disagree. I doubt this proposition, but I do not have direct data to settle it. On whether the employment report establishes a higher employment rate across all programme participants than across all comparison participants. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the programme reduces reconviction over two years. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the region should offer a limited expansion while commissioning a stronger evaluation. My view is agree. A bounded expansion can provide support while improving the evidence.",
+          "round2": {
+            "votes": [
+              "Disagree",
+              "Agree",
+              "Agree",
+              "Agree"
+            ],
+            "reasons": [
+              "I doubt this proposition, but I do not have direct data to settle it.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "A bounded expansion can provide support while improving the evidence."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established.",
+                "The peer discussion gives no measured outcome for this claim. I withdraw my unsupported expectation.",
+                "A bounded expansion can provide support while improving the evidence. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Agree",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "On rereading my original R1 packet, 36/60 minus 24/60 is 20 percentage points. I correct my earlier arithmetic doubt; this remains an association.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A bounded expansion can provide support while improving the evidence. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P03",
+          "name": "Participant 3",
+          "role": "Community advocate",
+          "private_evidence": [
+            "R3: No reconviction outcome was collected. The observational design cannot establish a causal programme effect."
+          ],
+          "opening": "On whether recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the employment report establishes a higher employment rate across all programme participants than across all comparison participants. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the programme reduces reconviction over two years. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the region should offer a limited expansion while commissioning a stronger evaluation. My view is disagree. Expansion should wait because selection and missing outcomes undermine the case.",
+          "round2": {
+            "votes": [
+              "Unable to judge",
+              "Unable to judge",
+              "Unable to judge",
+              "Disagree"
+            ],
+            "reasons": [
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Expansion should wait because selection and missing outcomes undermine the case."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Unable to judge",
+                "Unable to judge",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Expansion should wait because selection and missing outcomes undermine the case. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Unable to judge",
+                "Unable to judge",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Expansion should wait because selection and missing outcomes undermine the case. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P04",
+          "name": "Participant 4",
+          "role": "Programme manager",
+          "private_evidence": [],
+          "opening": "On whether recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the employment report establishes a higher employment rate across all programme participants than across all comparison participants. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the programme reduces reconviction over two years. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the region should offer a limited expansion while commissioning a stronger evaluation. My view is agree. A bounded expansion can provide support while improving the evidence.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Agree",
+              "Agree",
+              "Agree"
+            ],
+            "reasons": [
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "A bounded expansion can provide support while improving the evidence."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Agree",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "I retain my rating. R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate.",
+                "I retain my earlier expectation despite P01\u2019s contrary explanation. I have no new supporting evidence; this remaining belief is not evidence of effectiveness.",
+                "I retain my earlier expectation despite P01\u2019s contrary explanation. I have no new supporting evidence; this remaining belief is not evidence of effectiveness.",
+                "A bounded expansion can provide support while improving the evidence. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Agree",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A bounded expansion can provide support while improving the evidence. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P05",
+          "name": "Participant 5",
+          "role": "Budget analyst",
+          "private_evidence": [
+            "R1: A fictional non-randomised cohort recorded stable housing at six months for 36 of 60 programme participants and 24 of 60 comparison participants. Participants volunteered and baseline housing readiness differed."
+          ],
+          "opening": "On whether recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the employment report establishes a higher employment rate across all programme participants than across all comparison participants. My view is disagree. I doubt this proposition, but I do not have direct data to settle it. On whether the programme reduces reconviction over two years. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the region should offer a limited expansion while commissioning a stronger evaluation. My view is disagree. Expansion should wait because selection and missing outcomes undermine the case.",
+          "round2": {
+            "votes": [
+              "Unable to judge",
+              "Disagree",
+              "Unable to judge",
+              "Disagree"
+            ],
+            "reasons": [
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "I doubt this proposition, but I do not have direct data to settle it.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Expansion should wait because selection and missing outcomes undermine the case."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate.",
+                "I retain my rating. R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Expansion should wait because selection and missing outcomes undermine the case. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Unable to judge",
+                "Disagree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I doubt this proposition, but I do not have direct data to settle it. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Expansion should wait because selection and missing outcomes undermine the case. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P06",
+          "name": "Participant 6",
+          "role": "Frontline worker",
+          "private_evidence": [
+            "R2: The employment report includes only 30 of the 60 programme participants and only 45 of the 60 comparison participants. Twenty programme respondents and twenty-five comparison respondents reported employment; missing outcomes are unknown."
+          ],
+          "opening": "On whether recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the employment report establishes a higher employment rate across all programme participants than across all comparison participants. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the programme reduces reconviction over two years. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the region should offer a limited expansion while commissioning a stronger evaluation. My view is agree. A bounded expansion can provide support while improving the evidence.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Unable to judge",
+              "Agree",
+              "Agree"
+            ],
+            "reasons": [
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "A bounded expansion can provide support while improving the evidence."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I retain my rating. R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established.",
+                "The peer discussion gives no measured outcome for this claim. I withdraw my unsupported expectation.",
+                "A bounded expansion can provide support while improving the evidence. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Agree",
+                "Unable to judge",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A bounded expansion can provide support while improving the evidence. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P07",
+          "name": "Participant 7",
+          "role": "Access advocate",
+          "private_evidence": [
+            "R3: No reconviction outcome was collected. The observational design cannot establish a causal programme effect."
+          ],
+          "opening": "On whether recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort. My view is disagree. I doubt this proposition, but I do not have direct data to settle it. On whether the employment report establishes a higher employment rate across all programme participants than across all comparison participants. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the programme reduces reconviction over two years. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the region should offer a limited expansion while commissioning a stronger evaluation. My view is disagree. Expansion should wait because selection and missing outcomes undermine the case.",
+          "round2": {
+            "votes": [
+              "Disagree",
+              "Agree",
+              "Unable to judge",
+              "Disagree"
+            ],
+            "reasons": [
+              "I doubt this proposition, but I do not have direct data to settle it.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "Expansion should wait because selection and missing outcomes undermine the case."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Agree",
+                "Disagree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. R1 gives 36/60 versus 24/60: an observed 20 percentage-point difference, not a causal estimate.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established.",
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "Expansion should wait because selection and missing outcomes undermine the case. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Disagree",
+                "Agree",
+                "Unable to judge",
+                "Disagree"
+              ],
+              "reasons": [
+                "I doubt this proposition, but I do not have direct data to settle it. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "Expansion should wait because selection and missing outcomes undermine the case. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        },
+        {
+          "id": "P08",
+          "name": "Participant 8",
+          "role": "Evidence reviewer",
+          "private_evidence": [],
+          "opening": "On whether recorded stable housing at six months was 20 percentage points higher in the programme cohort than in the comparison cohort. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the employment report establishes a higher employment rate across all programme participants than across all comparison participants. My view is unable to judge. My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On whether the programme reduces reconviction over two years. My view is agree. I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On whether the region should offer a limited expansion while commissioning a stronger evaluation. My view is agree. A bounded expansion can provide support while improving the evidence.",
+          "round2": {
+            "votes": [
+              "Unable to judge",
+              "Unable to judge",
+              "Agree",
+              "Agree"
+            ],
+            "reasons": [
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "My packet does not establish this proposition; I need the relevant outcome counts and follow-up.",
+              "I currently lean toward this proposition based on an unverified expectation, not direct outcome data.",
+              "A bounded expansion can provide support while improving the evidence."
+            ]
+          },
+          "round3": {
+            "feedback": {
+              "votes": [
+                "Unable to judge",
+                "Disagree",
+                "Unable to judge",
+                "Agree"
+              ],
+              "reasons": [
+                "I remain unable to judge; the peer statements do not resolve the evidence gap to my satisfaction.",
+                "I revise my rating after reading P01\u2019s explanation in the saved feedback. R2 omits 30 programme outcomes and 15 comparison outcomes; full-cohort employment rates are not established.",
+                "The peer discussion gives no measured outcome for this claim. I withdraw my unsupported expectation.",
+                "A bounded expansion can provide support while improving the evidence. The other participants prioritise different values; their ratings do not settle this choice."
+              ]
+            },
+            "no-feedback": {
+              "votes": [
+                "Unable to judge",
+                "Unable to judge",
+                "Agree",
+                "Agree"
+              ],
+              "reasons": [
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "My packet does not establish this proposition; I need the relevant outcome counts and follow-up. On reconsideration, my original packet supplies no additional basis for a change.",
+                "I currently lean toward this proposition based on an unverified expectation, not direct outcome data. On reconsideration, my original packet supplies no additional basis for a change.",
+                "A bounded expansion can provide support while improving the evidence. On reconsideration, my original packet supplies no additional basis for a change."
+              ]
+            }
+          }
+        }
+      ],
+      "extraction_audit": [
+        {
+          "claim": 1,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "R1"
+        },
+        {
+          "claim": 2,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "R2"
+        },
+        {
+          "claim": 3,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "R3"
+        },
+        {
+          "claim": 4,
+          "origin": "Authored from the eight openings; not platform AI extraction",
+          "source_participants": [
+            "P01",
+            "P02",
+            "P03",
+            "P04",
+            "P05",
+            "P06",
+            "P07",
+            "P08"
+          ],
+          "meaning": "Preserved by construction; requires independent review",
+          "qualification": "Values"
+        }
+      ],
+      "reviewed_feedback_sha256": "86c466672a345e94eee0d79664651066fcd36e3b2c67c318cbfc1e7665d32eed"
+    }
+  ],
+  "reconsideration_provenance": "Assistant-authored after reading saved round-two feedback. No separate model agents; no causal inference is valid. No-feedback responses use only the original private packets."
+}
