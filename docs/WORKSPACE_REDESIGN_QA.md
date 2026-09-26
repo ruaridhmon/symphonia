@@ -121,3 +121,11 @@ Validation: 92 tests across 22 files; TypeScript; isolated Vite build; clean dif
 Confirmed dashboard rows already navigate directly to `/admin/form/:id/summary`. Removed transient full-synthesis display while compatibility claims data loads and eliminated the 150ms render debounce. Failed data loading restores saved prose. Generate summary remains visible and toggles its existing generation panel; pointer dismissal excludes the trigger row, and the panel opens below that row. Existing generation fields and handlers remain intact. Removed the redundant dashboard column heading; compact Demo badges retain fictional-expert context in their accessible label and tooltip.
 
 Validation: 80 utility tests passed, then 10 targeted tests including the added loading/failure regression passed. TypeScript and isolated Vite build passed. Local browser verified direct consultation entry, unchanged generator inputs, trigger position, repeated open/close and focus. No summary generation was requested and no live survey data changed.
+
+## Unified create, edit and preview
+
+Replaced disconnected question cards with a continuous authoring document. Persistent Edit/Preview controls, consistent heading and introduction metrics, reserved question-tool space and stable scrollbar gutter prevent layout shifts. Create and saved-edit share the same introduction field, question controls, options sheet and answer components. Mobile preview uses the same introduction size.
+
+Found that sending description to FormCreate did not persist it. Introductions now use the existing round-context PATCH endpoint and load from active-round intro_body. Other context is retained. A pending form id survives a context-save failure in the local creation draft; retry updates/resumes that form rather than creating another.
+
+Validation: 95 tests across 22 files, TypeScript and isolated source build. New regressions cover introduction persistence, retained context and create retry without duplicates. Browser: local form 6 created with introduction, reopened and edited successfully; desktop Edit/Preview screenshots align; 390px editing checked. Live survey data untouched.

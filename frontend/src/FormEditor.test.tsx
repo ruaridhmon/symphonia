@@ -3,7 +3,7 @@ import {cleanup,fireEvent,render,screen,waitFor} from '@testing-library/react';
 import {MemoryRouter,Routes,Route} from 'react-router-dom';
 import FormEditor from './FormEditor';
 import {api} from './api/client';
-vi.mock('./api/client',()=>({api:{get:vi.fn(),put:vi.fn()},getApiErrorDetail:()=>''}));
+vi.mock('./api/client',()=>({api:{get:vi.fn(),put:vi.fn(),patch:vi.fn()},getApiErrorDetail:()=>''}));
 vi.mock('./LegacyAdminFormNew',()=>({default:()=>null}));
 vi.mock('./LegacyFormEditor',()=>({default:()=> <p>Document editor</p>}));
 vi.mock('./components/QuestionnaireImporter',()=>({default:()=>null}));
@@ -48,4 +48,10 @@ it('uses the shared canvas for documents and preserves the template on title edi
  fireEvent.change(screen.getByLabelText('Consultation title'),{target:{value:'Updated document'}});
  fireEvent.click(screen.getByRole('button',{name:'Save changes'}));
  await waitFor(()=>expect(api.put).toHaveBeenCalledWith('/forms/42',expect.objectContaining({title:'Updated document',document_template:'{{long:Your response}}'})));
+});
+
+it('loads and saves the introduction without replacing other round context',async()=>{
+ vi.mocked(api.get).mockImplementation(async url=>url.endsWith('/rounds')?[{id:9,round_number:1,is_active:true,questions:[question],response_count:0,context_settings:{intro_body:'Original introduction',show_previous_response:true}}]:form);
+ render(<MemoryRouter initialEntries={['/admin/form/42']}><Routes><Route path='/admin/form/:id' element={<FormEditor/>}/></Routes></MemoryRouter>);
+ await screen.findByDisplayValue('Original introduction');fireEvent.change(screen.getByLabelText('Introduction'),{target:{value:'Updated introduction'}});fireEvent.click(screen.getByRole('button',{name:'Save changes'}));await waitFor(()=>expect(api.patch).toHaveBeenCalledWith('/forms/42/rounds/9',{context_settings:{intro_body:'Updated introduction',show_previous_response:true}}));
 });

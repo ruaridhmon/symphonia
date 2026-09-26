@@ -1274,3 +1274,33 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 #root .product-summary .summary-switch { order:0; }
 #root .product-summary aside.summary-actions-panel { order:1;margin-bottom:16px!important; }
 #root .product-summary #delphi-recorded-progress,#root .product-summary .opening-claims,#root .product-summary .full-summary-surface { order:2; }
+/* One document surface in authoring and participant preview. */
+#root .fc-composer .fc-paper { max-width:720px;margin:28px auto; }
+#root .fc-composer .fc-eyebrow { display:flex;justify-content:space-between;margin-bottom:20px; }
+#root .fc-composer .fc-eyebrow span { color:var(--muted-foreground); }
+#root .fc-mode-switch { display:flex;padding:3px;border-radius:10px;background:var(--muted); }
+#root .fc-mode-switch button { min-width:64px;padding:7px 12px;font-size:12px;border-radius:7px;color:var(--muted-foreground); }
+#root .fc-mode-switch button[aria-pressed=true] { background:var(--background);color:var(--foreground);box-shadow:0 1px 3px #0001; }
+#root .fc-composer .fc-introduction { margin-bottom:12px;padding-bottom:20px;border-bottom:1px solid var(--border); }
+#root .fc-composer .fc-title,#root .fc-composer .fc-introduction h1 { font-size:26px;line-height:1.35;min-height:1.35em;margin:0 0 12px; }
+#root .fc-composer .fc-description,#root .fc-composer .fc-introduction>p { font-size:14px;line-height:1.6;min-height:1.6em;margin:0; }
+#root .fc-composer .fc-question { padding:20px 0 14px;border:0;border-bottom:1px solid var(--border);border-radius:0;margin:0;background:transparent; }
+#root .fc-composer .fc-question-label,#root .fc-composer .fc-question h2 { font-size:17px!important;line-height:1.5;min-height:1.5em;margin:0 0 14px; }
+#root .fc-composer .fc-question-top { border:0;margin-top:10px;padding-top:0;min-height:32px; }
+#root .fc-composer .fc-question-actions { gap:4px; }
+#root .fc-composer .fc-question-actions button:hover,#root .fc-composer .fc-question-actions select:hover { background:var(--muted);border-radius:6px; }
+#root .fc-composer .fc-add { width:100%;margin-top:14px;padding:12px;border:1px dashed var(--border);border-radius:10px;color:var(--foreground); }
+#root .fc-composer .fc-add:hover { background:var(--muted); }
+.fc-canvas-hint { margin:18px 0 0;text-align:center;font-size:11px;line-height:1.6;color:var(--muted-foreground); }
+@media(max-width:640px){
+ #root .fc-composer .fc-paper { margin-top:22px; }
+ #root .fc-composer .fc-title,#root .fc-composer .fc-introduction h1 { font-size:23px; }
+ #root .fc-composer .fc-description { font-size:16px; }
+ #root .fc-mode-switch button { min-width:56px; }
+ #root .fc-composer .fc-toolbar>div { justify-content:space-between; }
+ .fc-canvas-hint { text-align:left; }
+}
+html:has(.fc-composer) { scrollbar-gutter:stable; }
+#root .fc-composer textarea.fc-title,#root .fc-composer textarea.fc-description,#root .fc-composer textarea.fc-question-label { display:block; }
+
+@media(max-width:640px){#root .fc-composer .fc-introduction>p { font-size:16px; }}

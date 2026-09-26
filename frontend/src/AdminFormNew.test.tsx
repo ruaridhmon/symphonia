@@ -3,7 +3,7 @@ import {cleanup,fireEvent,render,screen,waitFor} from '@testing-library/react';
 import {MemoryRouter} from 'react-router-dom';
 import AdminFormNew from './AdminFormNew';
 import {api} from './api/client';
-vi.mock('./api/client',()=>({api:{post:vi.fn()},getApiErrorDetail:()=>''}));
+vi.mock('./api/client',()=>({api:{post:vi.fn(),get:vi.fn(),patch:vi.fn(),put:vi.fn()},getApiErrorDetail:()=>''}));
 vi.mock('./LegacyAdminFormNew',()=>({default:()=>null}));
 vi.mock('./components/ConsentSettings',()=>({default:()=>null}));
 vi.mock('./components/QuestionnaireImporter',()=>({default:()=>null}));
@@ -62,3 +62,10 @@ it('creates a document through the same canvas without requiring hidden question
 
 it('keeps question settings focused, preserves multiline options, and closes without losing changes',()=>{show();fireEvent.change(screen.getByLabelText('Answer type for question 1'),{target:{value:'single_select'}});expect(screen.getByRole('dialog',{name:'Question 1 settings'})).toBeInTheDocument();fireEvent.change(screen.getByLabelText('Options'),{target:{value:'First\n'}});expect(screen.getByLabelText('Options')).toHaveValue('First\n');fireEvent.change(screen.getByLabelText('Options'),{target:{value:'First\nSecond'}});fireEvent.click(screen.getByRole('button',{name:'Done'}));expect(screen.queryByRole('dialog')).not.toBeInTheDocument();expect(JSON.parse(localStorage.getItem('symphonia:canvas-draft:v1:current')!).questions[0].options).toEqual(['First','Second']);});
 it('exposes scale limits and prevents publishing an invalid scale',()=>{show();fireEvent.change(screen.getByLabelText('Consultation title'),{target:{value:'Scale survey'}});fireEvent.change(screen.getByLabelText('Question 1'),{target:{value:'How confident are you?'}});fireEvent.change(screen.getByLabelText('Answer type for question 1'),{target:{value:'slider'}});fireEvent.change(screen.getByLabelText('Minimum'),{target:{value:'10'}});fireEvent.change(screen.getByLabelText('Maximum'),{target:{value:'5'}});fireEvent.click(screen.getByRole('button',{name:'Done'}));fireEvent.click(screen.getByRole('button',{name:'Create consultation'}));expect(screen.getByRole('alert')).toHaveTextContent('maximum');expect(api.post).not.toHaveBeenCalled();});
+
+it('saves the introduction as round context and retries without creating a duplicate',async()=>{
+ vi.mocked(api.post).mockResolvedValue({id:99});vi.mocked(api.get).mockResolvedValue([{id:100,is_active:true,context_settings:{show_previous_response:true}}]);vi.mocked(api.patch).mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({});
+ show();fireEvent.change(screen.getByLabelText('Consultation title'),{target:{value:'Introduction check'}});fireEvent.change(screen.getByLabelText('Question 1'),{target:{value:'Why?'}});fireEvent.change(screen.getByLabelText('Introduction'),{target:{value:'Please share a concrete example.'}});fireEvent.click(screen.getByRole('button',{name:'Create consultation'}));await screen.findByRole('alert');
+ expect(JSON.parse(localStorage.getItem('symphonia:canvas-draft:v1:current')!).pendingFormId).toBe(99);
+ fireEvent.click(screen.getByRole('button',{name:'Create consultation'}));await waitFor(()=>expect(api.patch).toHaveBeenCalledTimes(2));expect(api.post).toHaveBeenCalledTimes(1);expect(api.patch).toHaveBeenLastCalledWith('/forms/99/rounds/100',{context_settings:{show_previous_response:true,intro_body:'Please share a concrete example.'}});
+});
