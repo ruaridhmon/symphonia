@@ -55,7 +55,7 @@ function createConsultationWorkspace(R) {
       h(
         "div",
         { className: "cw-title-row" },
-        h("div", { className: "cw-identity" }, simulated || p.isDemo ? h("p", { className: "cw-provenance" }, "Demo \xB7 fictional experts") : null, h("h2", null, displayTitle)),
+        h("div", { className: "cw-identity" }, h("h2", null, displayTitle), simulated && !p.isDemo ? h("span", { className: "cw-provenance", title: "Simulated consultation with fictional experts", "aria-label": "Demo with fictional experts" }, "Demo") : null),
         p.isDemo ? h("span", { className: "cw-demo-badge" }, "Synthetic example") : h(
           "div",
           { className: "cw-title-actions" },

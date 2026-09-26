@@ -43,6 +43,7 @@ function render() {
   if (!panel) { panel = el('section', '', 'card'); panel.id = 'delphi-recorded-progress'; card.before(panel); }
   panel.dataset.signature = signature;
   panel.setAttribute('aria-label', 'Delphi round progress');
+  panel.dataset.loading=String(!cache&&!failed);
   if (!round || !cache) { panel.replaceChildren(el('p', failed ? 'Recorded response data could not be loaded.' : 'Loading recorded responses…')); return; }
   renderDelphiInsights(panel, round, cache.rounds, cache.responses, () => { lastFetch = 0; render(); }, round.is_active ? async questions => {
     const deployedApi = '/assets/rounds-CU08geHs.js';
@@ -53,7 +54,7 @@ function render() {
 
 }
 let timer: ReturnType<typeof setTimeout>;
-new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(render, 150); }).observe(document.body, { childList:true, subtree:true, characterData:true });
+new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(render, 0); }).observe(document.body, { childList:true, subtree:true, characterData:true });
 window.addEventListener('focus', () => { lastFetch = 0; render(); });
 render();
 

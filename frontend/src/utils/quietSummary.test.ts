@@ -24,3 +24,11 @@ it('offers an optional summary editor before responses arrive',()=>{
 
 it('switches back to claims without changing the full summary or its editor',()=>{const main=fixture(),card=main.querySelector<HTMLElement>('.card')!;quietSummary(main);const original=card.innerHTML;main.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();main.querySelector<HTMLButtonElement>('.summary-switch button')!.click();expect(card.hidden).toBe(true);expect(main.querySelector<HTMLElement>('#delphi-recorded-progress')!.hidden).toBe(false);expect(card.innerHTML).toBe(original);});
 it('presents explicit opening claims in the same table without inventing ratings',()=>{document.body.innerHTML='<main><section class="card"><h2>Round 1 synthesis</h2><div class="ProseMirror"><p>Opening context</p><p>Claim 1: Keep independent review</p><p>Candidate for the next round</p></div></section></main>';const main=document.querySelector('main')!;const editor=main.querySelector('.ProseMirror');quietSummary(main);quietSummary(main);expect(main.querySelectorAll('.opening-claims .di-claim')).toHaveLength(1);expect(main.querySelector('.opening-status')).toHaveTextContent('Not rated');expect(main.querySelector('.opening-claims')).not.toHaveTextContent('%');main.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();expect(main.querySelector<HTMLElement>('.opening-claims')!.hidden).toBe(true);expect(main.querySelector('.ProseMirror')).toBe(editor);});
+it('does not flash full prose before claims finish loading and restores it on failure',()=>{
+ document.body.innerHTML='<main><section class="consultation-workspace"></section><section class="card"><h2>Round 3 synthesis</h2><p>Saved summary</p></section></main>';
+ const main=document.querySelector('main')!,card=main.querySelector<HTMLElement>('.card')!;
+ quietSummary(main);expect(card.hidden).toBe(true);
+ const progress=document.createElement('section');progress.id='delphi-recorded-progress';progress.dataset.loading='true';card.before(progress);
+ quietSummary(main);expect(card.hidden).toBe(true);
+ progress.dataset.loading='false';quietSummary(main);expect(card.hidden).toBe(false);
+});

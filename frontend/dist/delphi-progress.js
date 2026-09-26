@@ -401,6 +401,7 @@ function render() {
   }
   panel.dataset.signature = signature;
   panel.setAttribute("aria-label", "Delphi round progress");
+  panel.dataset.loading = String(!cache && !failed);
   if (!round || !cache) {
     panel.replaceChildren(el2("p", failed ? "Recorded response data could not be loaded." : "Loading recorded responses\u2026"));
     return;
@@ -421,7 +422,7 @@ function render() {
 var timer;
 new MutationObserver(() => {
   clearTimeout(timer);
-  timer = setTimeout(render, 150);
+  timer = setTimeout(render, 0);
 }).observe(document.body, { childList: true, subtree: true, characterData: true });
 window.addEventListener("focus", () => {
   lastFetch = 0;

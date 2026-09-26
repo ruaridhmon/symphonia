@@ -115,3 +115,9 @@ Replaced the nested inline Options panels with a native modal sheet. Question ca
 Added minimum/maximum and endpoint-label editing for number scales, fixed multiline choice editing, and block invalid ranges or fewer than two choice options before save. Importing questions does not unexpectedly open a second settings panel.
 
 Validation: 92 tests across 22 files; TypeScript; isolated Vite build; clean diff. Browser checks at desktop and 390px: scale settings update the draft, Escape restores opener focus, mobile sheet stays within viewport, and local form 4 saves guidance through the shared edit flow. No live consultation data changed.
+
+## Stable navigation and summary toggle
+
+Confirmed dashboard rows already navigate directly to `/admin/form/:id/summary`. Removed transient full-synthesis display while compatibility claims data loads and eliminated the 150ms render debounce. Failed data loading restores saved prose. Generate summary remains visible and toggles its existing generation panel; pointer dismissal excludes the trigger row, and the panel opens below that row. Existing generation fields and handlers remain intact. Removed the redundant dashboard column heading; compact Demo badges retain fictional-expert context in their accessible label and tooltip.
+
+Validation: 80 utility tests passed, then 10 targeted tests including the added loading/failure regression passed. TypeScript and isolated Vite build passed. Local browser verified direct consultation entry, unchanged generator inputs, trigger position, repeated open/close and focus. No summary generation was requested and no live survey data changed.

@@ -69,6 +69,11 @@ function quietSummary(main) {
       progress = opening;
     } else main.querySelector(".opening-claims")?.remove();
   }
+  if (progress?.dataset.loading === "true" || !progress && main.querySelector(".consultation-workspace")) {
+    card.hidden = true;
+    return;
+  }
+  card.hidden = false;
   const hasResults = !!progress?.querySelector(".di-claim");
   const empty = progress?.dataset.empty === "true";
   let state = states.get(card);
@@ -203,7 +208,7 @@ function enhanceSynthesisControls(main) {
     close.setAttribute("aria-label", `Close ${panel.getAttribute("aria-label")?.toLowerCase()}`);
     close.onclick = () => {
       detail.open = false;
-      (main.querySelector(".summary-actions-menu>summary") || trigger).focus();
+      (main.querySelector(".summary-generate-empty") || trigger).focus();
     };
     panel.prepend(close);
     const sync = () => {
@@ -227,7 +232,22 @@ function enhanceSynthesisControls(main) {
   } else main.querySelector(".summary-tools-only")?.remove();
   if (nav && !nav.hidden) {
     toolbar.classList.add("summary-actions-panel");
-    if (main.querySelector(".di-claim")) nav.querySelector(".summary-generate-empty")?.remove();
+    const generation = toolbar.querySelector("details.summary-disclosure");
+    if (generation && !nav.querySelector(".summary-generate-empty")) {
+      const generate = document.createElement("button");
+      generate.type = "button";
+      generate.className = "summary-generate-empty";
+      generate.textContent = "Generate summary";
+      const sync = () => generate.setAttribute("aria-expanded", String(generation.open));
+      generate.setAttribute("aria-controls", generation.querySelector(".card")?.id || "");
+      sync();
+      generate.onclick = () => {
+        generation.open = !generation.open;
+        sync();
+      };
+      generation.addEventListener("toggle", sync);
+      nav.append(generate);
+    }
     let menu = nav.querySelector(".summary-actions-menu");
     if (!menu) {
       menu = document.createElement("details");
@@ -240,27 +260,14 @@ function enhanceSynthesisControls(main) {
       items.className = "summary-actions-items";
       menu.append(items);
       nav.append(menu);
-      if (!main.querySelector(".di-claim")) {
-        const generate = document.createElement("button");
-        generate.type = "button";
-        generate.className = "summary-generate-empty";
-        generate.textContent = "Generate summary";
-        generate.onclick = () => {
-          const detail = toolbar.querySelector("details.summary-disclosure");
-          if (detail) {
-            detail.open = true;
-            detail.querySelector(".summary-panel-close")?.focus();
-          }
-        };
-        nav.prepend(generate);
-      }
       for (const detail of toolbar.querySelectorAll(":scope > details.summary-disclosure")) {
+        if (detail === generation) continue;
         const action = document.createElement("button");
         action.type = "button";
         action.textContent = detail.querySelector("summary span")?.textContent || "Summary settings";
         action.onclick = () => {
           menu.open = false;
-          toolbar.querySelectorAll("details.summary-disclosure").forEach((other) => other.open = other === detail);
+          toolbar.querySelectorAll("details.summary-disclosure").forEach((other) => other.open = other === detail ? !detail.open : false);
           detail.querySelector(".card input,.card select,.summary-panel-close")?.focus();
         };
         items.append(action);
@@ -300,7 +307,7 @@ function enhanceSynthesisControls(main) {
     if (open) {
       event.preventDefault();
       open.open = false;
-      (main.querySelector(".summary-actions-menu>summary") || open.querySelector("summary"))?.focus();
+      (main.querySelector(".summary-generate-empty") || open.querySelector("summary"))?.focus();
     }
   });
   const outside = (event) => {
@@ -308,7 +315,7 @@ function enhanceSynthesisControls(main) {
       document.removeEventListener("pointerdown", outside);
       return;
     }
-    if (toolbar.contains(event.target)) return;
+    if (toolbar.contains(event.target) || event.target.closest(".summary-switch,.summary-tools-only")) return;
     toolbar.querySelectorAll("details.summary-disclosure[open]").forEach((d) => d.open = false);
   };
   document.addEventListener("pointerdown", outside);
@@ -486,8 +493,10 @@ function enhanceConsultationInbox(main) {
       while (text = walker.nextNode()) if (text.textContent?.includes("SIMULATED PANEL")) text.textContent = text.textContent.replace(/^SIMULATED PANEL\s*[—–-]\s*/i, "");
       const badge = document.createElement("span");
       badge.className = "inbox-demo-badge";
-      badge.textContent = "Demo \xB7 fictional experts";
-      title.append(badge);
+      badge.textContent = "Demo";
+      badge.title = "Simulated consultation with fictional experts";
+      badge.setAttribute("aria-label", "Demo with fictional experts");
+      (title.querySelector(".font-semibold") || title).append(badge);
     }
     const actions = link.parentElement;
     actions.classList.add("inbox-original-actions");

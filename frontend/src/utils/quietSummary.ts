@@ -32,6 +32,8 @@ export function quietSummary(main:HTMLElement){
    if(progress)progress.hidden=true;progress=opening;
   }else main.querySelector('.opening-claims')?.remove();
  }
+ if(progress?.dataset.loading==='true'||(!progress&&main.querySelector('.consultation-workspace'))){card.hidden=true;return;}
+ card.hidden=false;
  const hasResults=!!progress?.querySelector('.di-claim');
  const empty=progress?.dataset.empty==='true';
 

@@ -60,7 +60,7 @@ export function createConsultationWorkspace(R: typeof React) {
     };
     return h('section', { className: 'consultation-workspace', 'data-final-round':ordered.length === 3 ? 'true' : undefined, 'aria-label': 'Consultation workspace' },
       h('div', { className: 'cw-title-row' },
-        h('div', { className: 'cw-identity' }, (simulated||p.isDemo)?h('p', { className: 'cw-provenance' }, 'Demo · fictional experts'):null, h('h2', null, displayTitle)),
+        h('div', { className: 'cw-identity' }, h('h2', null, displayTitle), (simulated&&!p.isDemo)?h('span', { className: 'cw-provenance',title:'Simulated consultation with fictional experts','aria-label':'Demo with fictional experts' }, 'Demo'):null),
         p.isDemo ? h('span', {className:'cw-demo-badge'}, 'Synthetic example') : h('div', { className: 'cw-title-actions' },
           button('Invite people', () => { setCopyState(''); setPanel('invite'); }, { className: 'cw-primary' }),
           h('details', { className: 'cw-options' }, h('summary', { 'aria-label': 'Consultation options' }, '•••'),

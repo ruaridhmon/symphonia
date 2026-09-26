@@ -16,7 +16,7 @@ export function enhanceConsultationInbox(main:HTMLElement){
   const rawName=link.getAttribute('aria-label')?.replace(/^Summary\s*/,'')||'Consultation';
   const simulated=/^SIMULATED PANEL\s*[—–-]\s*/i.test(rawName);
   const name=rawName.replace(/^SIMULATED PANEL\s*[—–-]\s*/i,'');
-  if(simulated&&title){const walker=document.createTreeWalker(title,NodeFilter.SHOW_TEXT);let text;while((text=walker.nextNode()))if(text.textContent?.includes('SIMULATED PANEL'))text.textContent=text.textContent.replace(/^SIMULATED PANEL\s*[—–-]\s*/i,'');const badge=document.createElement('span');badge.className='inbox-demo-badge';badge.textContent='Demo · fictional experts';title.append(badge);}
+  if(simulated&&title){const walker=document.createTreeWalker(title,NodeFilter.SHOW_TEXT);let text;while((text=walker.nextNode()))if(text.textContent?.includes('SIMULATED PANEL'))text.textContent=text.textContent.replace(/^SIMULATED PANEL\s*[—–-]\s*/i,'');const badge=document.createElement('span');badge.className='inbox-demo-badge';badge.textContent='Demo';badge.title='Simulated consultation with fictional experts';badge.setAttribute('aria-label','Demo with fictional experts');(title.querySelector('.font-semibold')||title).append(badge);}
   const actions=link.parentElement!;actions.classList.add('inbox-original-actions');
   const more=document.createElement('button');more.type='button';more.className='inbox-more';more.textContent='•••';more.setAttribute('aria-label',`Actions for ${name}`);more.setAttribute('aria-haspopup','dialog');
   const open=()=>{
