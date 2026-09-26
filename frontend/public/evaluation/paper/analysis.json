@@ -1,0 +1,2541 @@
+{
+  "scope": "One scenario; one shared 8-person transcript; four methods; two generation repeats per method. Retrospective, not preregistered. Repeats and claims are not independent scenarios.",
+  "source_sha256": "55d79164c227e2559ff4c9dde642759d6d38ffa07bbc0b23dd94056511e2f85b",
+  "summary": [
+    {
+      "method": "direct",
+      "repeat": 0,
+      "mismatches": 3,
+      "count_l1": 6,
+      "threshold_flips": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "method": "direct",
+      "repeat": 1,
+      "mismatches": 2,
+      "count_l1": 4,
+      "threshold_flips": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "method": "structured",
+      "repeat": 0,
+      "mismatches": 3,
+      "count_l1": 6,
+      "threshold_flips": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "method": "structured",
+      "repeat": 1,
+      "mismatches": 3,
+      "count_l1": 6,
+      "threshold_flips": [
+        0,
+        0,
+        0,
+        2,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "method": "staged",
+      "repeat": 0,
+      "mismatches": 1,
+      "count_l1": 2,
+      "threshold_flips": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "method": "staged",
+      "repeat": 1,
+      "mismatches": 2,
+      "count_l1": 2,
+      "threshold_flips": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "method": "reference_fed",
+      "repeat": 0,
+      "mismatches": 0,
+      "count_l1": 0,
+      "threshold_flips": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "method": "reference_fed",
+      "repeat": 1,
+      "mismatches": 0,
+      "count_l1": 0,
+      "threshold_flips": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C1",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C1: 27.4% chronic absenteeism rate. One participant (P002) supports based on S2; seven find insufficient evidence due to lack of independently verified administrative data. The claim is unresolved."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C2",
+      "recorded": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        6,
+        1,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C2: Chronic absenteeism below 15%. Six participants support based on unverified report S902, acknowledging weak evidence. P002 opposes citing S2 which reports rates well above 15%. The supporting evidence is uncorroborated and directly contradicted by at least one source."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C3",
+      "recorded": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        6
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C3: 41% higher return-to-attendance rate for alerted students. P001 and P002 support based on S3 and S2 respectively. Six participants find insufficient evidence due to lack of direct data or methodological disputes (S4). The effect size is not independently confirmed across participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C4",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C4: No difference between alerted and non-alerted students. Seven participants oppose; one (P004) supports based on weak source S906. Consensus is that some positive effect exists, though its magnitude after adjustment is disputed."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C5",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C5: No significant reduction for work-schedule-conflict subgroup. Only P001 supports based on S3/S5. Seven participants find insufficient evidence as no subgroup-specific data was available to them."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C6",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C6: 53% reduction for transportation-barrier subgroup. Only P001 supports based on S3. Seven participants find insufficient evidence. The claim cannot be broadly corroborated."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C7",
+      "recorded": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        4
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C7: Elementary 19.1%, high school 34.8% chronic absenteeism. Four participants support citing S6; four find insufficient evidence lacking direct data. Where evidence exists, it consistently supports these rates."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C8",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C8: High-school absenteeism lower than elementary. Three support based on unverified S914; four oppose citing S6 which shows the opposite. The stronger evidence (S6) contradicts the claim."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C9",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C9: Westbrook 6% increase attributed to alert fatigue. All eight participants find insufficient evidence. S7 reports the outcome but causal attribution is contested and population differences confound interpretation."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C10",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C10: Hardale 44% decrease. All eight find insufficient evidence. Generalisability to Veldoria is unconfirmed due to income and baseline differences."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C11",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C11: Implementation fidelity fully explains divergence. Four support, four oppose. S7 and S8 note fidelity was self-reported and not independently audited; population differences remain a plausible alternative."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C12",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C12: Selection confounding best explains Veldoria-Westbrook divergence. All eight find insufficient evidence. S4 and S8 discuss volunteer-school bias but the proxy for staff motivation is unvalidated and causality is not established."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C13",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C13: Universal rollout as moral obligation. Four support citing equity framing in S6; four oppose noting subgroup null findings and contested evidence. No factual consensus supports a universal mandate."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C14",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C14: Targeted rollout excluding work-schedule-conflict group. Three support citing fiscal responsibility; four oppose citing equity and stigma concerns. Evidence on subgroup effects is too thin for most participants to adjudicate."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/0/baseline",
+      "method": "direct",
+      "repeat": 0,
+      "claim": "C15",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C15: UAAS inherently violates privacy and should never be deployed. Seven oppose; one (P005) supports. S8 identifies significant privacy concerns but does not recommend an absolute ban. Near-consensus that proportional safeguards are preferable to prohibition."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C1",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C1: 27.4% chronic absenteeism rate. One participant (P002) supports based on S2; seven found insufficient evidence. The rate is unverifiable for most participants due to lack of direct administrative data."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C2",
+      "recorded": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        6,
+        1,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C2: Absenteeism below 15%. Six participants support based on unverified report S902, but P002 opposes citing S2 which reports rates well above 15%. Supporters acknowledge weak evidential status. The two claims (C1 and C2) are mutually contradictory."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C3",
+      "recorded": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        6
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C3: 41% higher return-to-attendance rate for alerted students. P001 and P002 support based on S3 and S2 respectively; six found insufficient evidence due to lack of direct data or methodological disputes (S4)."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C4",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C4: No difference between alerted and non-alerted students. Seven participants oppose; one (P004) supports weakly via S906. S4's reanalysis suggesting reduced effect is disputed methodologically. Strong consensus against no-difference claim."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C5",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C5: No significant SMS alert effect for caregiver work-schedule conflict subgroup. Only P001 supports citing S3/S5; seven found insufficient evidence. Subgroup data unavailable to most participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C6",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C6: 53% reduction for transportation-barrier subgroup. Only P001 supports citing S3; seven found insufficient evidence. Subgroup-specific data not available to most participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C7",
+      "recorded": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        4
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C7: Elementary 19.1%, high school 34.8%. Four participants support based on S6; four found insufficient evidence lacking direct grade-band data. Where available, S6 is considered reliable."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C8",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C8: High-school absenteeism lower than elementary. Three support based on unverified S914; four oppose citing S6 showing the opposite. S6 evidence is stronger, indicating high-school rates exceed elementary rates."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C9",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C9: Westbrook 6% absenteeism increase attributed to alert fatigue. All eight participants found insufficient evidence. S7 reports the outcome but causal attribution is contested and population differences confound interpretation."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C10",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C10: Hardale 44% absenteeism decrease. All eight found insufficient evidence. S7 reports the result but higher income and lower baseline absenteeism limit generalisability to Veldoria."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C11",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C11: Implementation fidelity fully explains divergence. Four support, four oppose. S7 and S8 note fidelity was self-reported and not independently audited; both population and fidelity differences remain plausible."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C12",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C12: Selection confounding best explains Veldoria-Westbrook divergence. All eight found insufficient evidence. S4 and S8 discuss volunteer-school bias but the proxy for staff motivation is unvalidated and causality unestablished."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C13",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C13: Universal rollout as moral obligation. Four support citing equity framing in S6; four oppose noting subgroup null findings and contested evidence. No consensus on whether moral obligation overrides evidence gaps."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C14",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C14: Targeted rollout excluding work-schedule conflict subgroup. Four support citing fiscal responsibility; four oppose citing equity and stigma concerns. Evidence on subgroup effects is limited for most participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/direct/anthropic/claude-opus-4.6/1/baseline",
+      "method": "direct",
+      "repeat": 1,
+      "claim": "C15",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C15: UAAS inherently violates privacy and should never be deployed. Seven oppose; one (P005) supports. S8 identifies significant privacy concerns but does not recommend absolute prohibition. Strong consensus that proportional safeguards suffice."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C1",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C1 (27.4% chronic absenteeism rate): 1 participant (P002) supports based on S2; 7 find insufficient evidence due to lack of direct administrative data. Only P002 had access to S2 confirming the figure. Wide evidential gap across participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C2",
+      "recorded": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        6,
+        1,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C2 (rate below 15%): 6 participants support based solely on unverified report S902, acknowledging weak evidence. P002 opposes citing S2 showing rate well above 15%. The majority belief rests on an uncorroborated source contradicted by P002's stronger evidence."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C3",
+      "recorded": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        6
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C3 (41% higher return rate for alerted students): P001 and P002 support with high confidence citing S3 and S2 respectively. 6 participants find insufficient evidence, lacking direct access to pilot data. Methodological disputes (S4) noted but not decisive for supporters."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C4",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C4 (no difference between alerted and non-alerted): 7 participants oppose; pilot data show meaningful differences. P004 alone supports based on weak source S906. S4's reanalysis suggesting reduced effect is noted but its methodology is disputed and unvalidated."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C5",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C5 (no significant reduction for work-schedule subgroup): Only P001 supports citing S3/S5. 7 participants find insufficient evidence, lacking subgroup-specific data. The claim remains unverifiable for most participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C6",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C6 (53% reduction for transportation subgroup): Only P001 supports citing S3. 7 participants find insufficient evidence. Subgroup data were unavailable to most participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C7",
+      "recorded": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        4
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C7 (19.1% elementary, 34.8% high school): 4 participants support citing S6 as reliable. 4 find insufficient evidence lacking direct grade-band data. Those with S6 access report high confidence."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C8",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C8 (high school lower than elementary): 4 participants oppose citing S6 showing the opposite. 3 support based on unverified S914. S6 evidence is stronger, indicating high-school absenteeism exceeds elementary."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C9",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C9 (Westbrook 6% increase attributed to alert fatigue): All 8 participants find insufficient evidence. S7 reports the outcome but causal attribution to alert fatigue and distrust is contested and not independently verified."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C10",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C10 (Hardale 44% decrease): All 8 find insufficient evidence. S7 reports the result but Hardale's higher income and lower baseline absenteeism limit generalisability to Veldoria."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C11",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C11 (fidelity fully explains divergence): 4 support, 4 oppose. Supporters hold assigned beliefs; opponents note S7/S8 acknowledge fidelity was self-reported and not independently audited, and population differences remain plausible."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C12",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C12 (selection confounding best explains Veldoria-Westbrook gap): All 8 find insufficient evidence. S4 and S8 discuss volunteer-school bias but the proxy for staff motivation is unvalidated and causality is not established."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C13",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C13 (universal rollout as moral obligation): 4 support citing equity framing in S6; 4 oppose noting subgroup null findings, contested evidence, and potential unintended consequences. Deep normative disagreement persists."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C14",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C14 (targeted rollout): 3 support citing fiscal responsibility and subgroup evidence; 4 oppose citing equity/stigma concerns. P001 opposes both universal and targeted, finding evidence mixed. Disagreement reflects value tensions."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "method": "structured",
+      "repeat": 0,
+      "claim": "C15",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C15 (inherent privacy violation, never deploy): 7 oppose; S8 finds privacy concerns significant but not inherently prohibitive. Only P005 supports an absolute ban based on personal conviction. Near-consensus that proportional safeguards suffice."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C1",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C1 (27.4% chronic absenteeism rate): 1 participant (P002) supports based on S2; 7 find insufficient evidence due to lack of direct administrative data. Only P002 had access to S2 confirming the figure. Wide evidential gap across participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C2",
+      "recorded": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        6,
+        1,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C2 (rate below 15%): 6 participants support based solely on unverified report S902, acknowledging weak evidence. P002 opposes citing S2 showing rate well above 15%. The majority's support rests on an uncorroborated source contradicted by P002's stronger evidence."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C3",
+      "recorded": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        6
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C3 (41% higher return rate for alerted students): P001 and P002 support with high confidence citing S3 and S2. Six participants find insufficient evidence lacking direct pilot data. Methodological disputes (S4) noted but supporters maintain original findings are reliable."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C4",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C4 (no difference between alerted and non-alerted): 7 participants oppose; pilot data show meaningful differences. P004 alone supports based on weak source S906. S4's reanalysis suggesting reduced effect is disputed and not independently validated. Strong consensus against no-difference claim."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C5",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C5 (no significant SMS effect for work-schedule subgroup): Only P001 supports citing S3 and S5. Seven participants find insufficient evidence as no subgroup-specific data were available to them. Claim cannot be broadly confirmed."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C6",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C6 (53% reduction for transportation-barrier subgroup): Only P001 supports citing S3. Seven participants find insufficient evidence. The claimed effect is large but unverifiable by most participants."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C7",
+      "recorded": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        4
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C7 (19.1% elementary, 34.8% high-school rates): 4 participants support citing S6 as reliable. 4 find insufficient evidence lacking direct grade-band data. Among supporters, confidence is high (90%)."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C8",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C8 (high-school rate lower than elementary): 3 support based on unverified S914; 4 oppose citing S6 showing the opposite. S6 reports high-school rate (34.8%) exceeds elementary (19.1%). Supporters acknowledge weak evidence; opposers hold stronger sourcing."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C9",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C9 (Westbrook 6% increase attributed to alert fatigue): All 8 participants find insufficient evidence. S7 reports the outcome but causal attribution to alert fatigue and distrust is contested and confounded by population differences."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C10",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C10 (Hardale 44% decrease): All 8 find insufficient evidence. S7 reports the result but higher income and lower baseline absenteeism limit generalisability to Veldoria."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C11",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C11 (implementation fidelity fully explains divergence): Evenly split 4-4. Supporters hold assigned beliefs despite acknowledging lack of independent audit. Opposers note S7 and S8 state fidelity alone cannot fully explain the contradiction; population characteristics also plausible."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C12",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C12 (selection confounding best explains Veldoria-Westbrook gap): All 8 find insufficient evidence. S4 and S8 discuss volunteer-school bias but methodology is disputed and causality unestablished."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C13",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C13 (universal rollout as moral obligation): Evenly split 4-4. Supporters cite S6's equity framing. Opposers argue evidence gaps, subgroup null findings, and potential unintended consequences undermine a blanket moral obligation."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C14",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "C14 (targeted rollout by absence driver): 3 support citing fiscal responsibility and evidence; 4 oppose citing equity and stigma risks. P001 finds evidence for harm mixed. Disagreement reflects tension between evidence-based targeting and equity concerns."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/1/baseline",
+      "method": "structured",
+      "repeat": 1,
+      "claim": "C15",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "C15 (UAAS inherently violates privacy, should never be deployed): 7 oppose; only P005 supports. S8 identifies significant privacy concerns but stops short of recommending absolute prohibition. Near-consensus that proportional safeguards are preferable to a categorical ban."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C1",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The chronic absenteeism rate (\u226510% of days missed) was 27.4% among all K-12 students in Veldoria USD during 2031-32."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C2",
+      "recorded": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        6,
+        1,
+        1
+      ],
+      "mismatch": true,
+      "l1": 2,
+      "support_delta": -1,
+      "quote": "The chronic absenteeism rate was below 15% in Veldoria USD during 2031-32."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C3",
+      "recorded": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        6
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Among chronically absent students receiving automated SMS alerts during the 2030-31 pilot, the rate of returning to \u22649% absence was 41% higher than among comparable non-alerted students."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C4",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The SMS alert intervention produced no difference in return-to-attendance rates compared with non-alerted students."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C5",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Among students whose primary absence driver was caregiver work-schedule conflict (~38% of pilot), SMS alerts produced no statistically significant reduction in chronic absenteeism versus controls."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C6",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Among students whose primary absence driver was transportation barriers (~22% of pilot), SMS alerts reduced chronic absenteeism by 53% relative to controls."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C7",
+      "recorded": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        4
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Elementary (K-5) chronic absenteeism was 19.1% and high-school (9-12) was 34.8% in Veldoria USD during 2031-32."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C8",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "High-school chronic absenteeism was lower than elementary in Veldoria USD during 2031-32."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C9",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "In Westbrook, an equivalent automated alert intervention during 2029-30 was associated with a 6% increase in chronic absenteeism relative to controls."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C10",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "In Hardale, a higher-income district, an equivalent intervention during 2029-30 was associated with a 44% decrease in chronic absenteeism relative to controls."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C11",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The Westbrook-Hardale outcome divergence is fully explained by implementation fidelity differences rather than population characteristics."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C12",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The Veldoria-Westbrook divergence is best explained by selection confounding from volunteer schools with more motivated staff."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C13",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Veldoria USD should adopt universal rollout of automated attendance alert systems for all students regardless of absence driver."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C14",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Veldoria USD should adopt targeted rollout restricted to students whose absence driver is not caregiver work-schedule conflict."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/0/baseline",
+      "method": "staged",
+      "repeat": 0,
+      "claim": "C15",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Automated attendance alert systems inherently violate student privacy and should never be deployed in public schools."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C1",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The chronic absenteeism rate (\u226510% of days missed) was 27.4% among all K-12 students in Veldoria USD during 2031-32."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C2",
+      "recorded": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        6,
+        1,
+        0
+      ],
+      "mismatch": true,
+      "l1": 1,
+      "support_delta": -1,
+      "quote": "The chronic absenteeism rate was below 15% among all K-12 students in Veldoria USD during 2031-32."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C3",
+      "recorded": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        6
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Among chronically absent students receiving automated SMS alerts during the 2030-31 pilot, the rate of returning to \u22649% absence was 41% higher than among comparable non-alerted students."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C4",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "After adjusting for staff motivation, SMS alerts produced no difference in return-to-attendance rates compared with non-alerted students."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C5",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Among students whose primary absence driver was caregiver work-schedule conflict, SMS alerts produced no statistically significant reduction in chronic absenteeism."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C6",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Among students whose primary absence driver was transportation barriers, SMS alerts reduced chronic absenteeism by 53% relative to controls."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C7",
+      "recorded": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        4
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Elementary (K-5) chronic absenteeism was 19.1% and high-school (9-12) was 34.8% in Veldoria USD during 2031-32."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C8",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        0
+      ],
+      "mismatch": true,
+      "l1": 1,
+      "support_delta": -1,
+      "quote": "High-school chronic absenteeism was lower than elementary chronic absenteeism in Veldoria USD during 2031-32."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C9",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "In Westbrook, an equivalent automated alert intervention was associated with a 6% increase in chronic absenteeism relative to controls."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C10",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "In Hardale, an equivalent automated alert intervention was associated with a 44% decrease in chronic absenteeism relative to controls."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C11",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The divergence between Westbrook and Hardale results is fully explained by implementation fidelity differences rather than population characteristics."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C12",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The Veldoria pilot's positive result is best explained by selection confounding from volunteer schools with more motivated staff."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C13",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Veldoria USD should adopt universal UAAS rollout for all students because reducing chronic absenteeism is a moral obligation."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C14",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Veldoria USD should restrict UAAS rollout to students whose absence driver is not caregiver work-schedule conflict."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/staged/anthropic/claude-opus-4.6/1/baseline",
+      "method": "staged",
+      "repeat": 1,
+      "claim": "C15",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Automated attendance alert systems inherently violate student privacy and should never be deployed in public schools."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C1",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "One participant with direct source access (S2) supports the 27.4% rate; seven others lacked evidence to confirm or refute it. The claim is supported but with very limited corroboration and high individual uncertainty."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C2",
+      "recorded": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        7,
+        1,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Seven participants supported this claim based on an unverified report (S902), but one participant with access to S2 directly opposed it, reporting absenteeism well above 15%. The claim is classified as opposed by the more reliable source."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C3",
+      "recorded": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        6
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Two participants with pilot data (S2, S3) support the 41% higher return rate. Six others lacked direct evidence. The claim is supported but contested by methodological concerns raised in a reanalysis (S4), which disputes the effect after adjustment."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C4",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Seven participants opposed this no-difference claim; one supported it based on a weak source (S906). The low mean probability (0.22) indicates strong collective disbelief. The original pilot data and most assessments find a meaningful difference between groups."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C5",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "One participant with subgroup data (S3, S5) supports the null finding for this subgroup. Seven others lacked subgroup-specific evidence. High individual entropy reflects genuine uncertainty about this subgroup result."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C6",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "One participant with subgroup data (S3) supports the 53% reduction for transportation-barrier students. Seven others lacked direct evidence. The claim is supported but rests on a single source with limited corroboration."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C7",
+      "recorded": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        4
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Four participants with access to S6 support these grade-band rates. Four others lacked evidence. The claim is supported by a single reliable source showing substantially higher absenteeism among high-school students."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C8",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "This claim is substantively disputed: four participants oppose it citing S6 (showing high-school rates higher), while four support it based on an unverified report (S914). The reliable source (S6) contradicts the claim. High between-participant dispersion reflects genuine disagreement driven by differing source access."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C9",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "All eight participants found insufficient evidence to confirm this claim. While S7 reports the result, causal attribution to alert fatigue and caregiver distrust is contested, and population differences from Veldoria limit interpretation."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C10",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "All eight participants found insufficient evidence. S7 reports the result, but Hardale's higher income and lower baseline absenteeism limit generalisability to Veldoria. Near-maximum entropy reflects maximal uncertainty."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C11",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Substantive disagreement: four participants support and four oppose this explanation. The highest between-participant dispersion in the dataset (0.35) reflects genuine interpretive conflict. Fidelity data were self-reported and unaudited, leaving the question unresolved."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C12",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "All eight participants found insufficient evidence. Maximum entropy and zero dispersion indicate complete uncertainty. The selection-confounding hypothesis is plausible but unconfirmed; the adjustment methodology in S4 is disputed."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C13",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Evenly split normative claim: four support universal rollout citing equity obligations (S6), four oppose citing insufficient evidence of universal efficacy and potential unintended consequences. This is a values disagreement, not resolvable by evidence alone."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C14",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Evenly split: four support targeting based on subgroup null findings and fiscal responsibility; four oppose citing equity concerns and stigmatization risks. The subgroup evidence supporting targeting rests on limited sources."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/0/baseline",
+      "method": "reference_fed",
+      "repeat": 0,
+      "claim": "C15",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Strong majority (7 of 8) oppose an absolute privacy-based prohibition. One participant supports it. S8 identifies significant privacy concerns but does not recommend an outright ban, favouring proportional safeguards instead."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C1",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "One participant (with access to S2) confirmed the 27.4% rate; seven others lacked direct evidence to verify it. The claim is supported by one source but most panellists could not independently corroborate the figure."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C2",
+      "recorded": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        7,
+        1,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Seven participants supported this claim based on an unverified report (S902), while one participant with access to S2 opposed it, citing data showing absenteeism well above 15%. The claim is opposed by the more reliable source."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C3",
+      "recorded": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        6
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Two participants with access to pilot data (S2, S3) supported the 41% effect; six found insufficient evidence. The claim is supported but most panellists lacked the relevant sources to confirm it, and a disputed reanalysis (S4) questions the effect size."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C4",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Seven participants opposed this no-difference claim; one supported it based on a weak source (S906). The panel's low mean probability (0.22) indicates strong collective doubt. The claim remains unresolved due to conflicting methodologies between the original pilot report and a disputed reanalysis."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C5",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "One participant with subgroup data supported the null finding for this subgroup; seven lacked direct evidence. The claim is supported by available subgroup analyses showing alerts were ineffective when absence was driven by caregiver work-schedule conflicts."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C6",
+      "recorded": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        7
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "One participant with subgroup data supported the 53% reduction for transportation-barrier students; seven lacked direct evidence. The claim is supported but verified by only one panellist with access to the relevant pilot subgroup analysis."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C7",
+      "recorded": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        4
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Four participants with access to S6 supported these grade-band rates; four lacked evidence. The claim is supported by a reliable source showing substantially higher absenteeism among high-school students than elementary students."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C8",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The panel was evenly split: four supported this claim based on an unverified report (S914), while four opposed it citing reliable data (S6) showing the opposite. Substantive disagreement exists, but the stronger evidence (S6) indicates high-school absenteeism exceeded elementary rates."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C9",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "All eight participants found insufficient evidence. While S7 reports the Westbrook outcome, causal attribution to alert fatigue is contested and population differences from Veldoria limit interpretation. Very high individual entropy reflects near-maximum uncertainty."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C10",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "All eight participants found insufficient evidence. Hardale's higher income and lower baseline absenteeism limit generalisability to Veldoria. The panel expressed near-maximum uncertainty about this claim."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C11",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The panel was evenly split with substantive disagreement and high between-participant dispersion (0.35). Fidelity data were self-reported and unaudited. Both population characteristics and implementation fidelity remain plausible explanations; the claim is unresolved."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C12",
+      "recorded": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        8
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "All eight participants found insufficient evidence. The selection-confounding hypothesis is plausible but unproven; the staff-motivation proxy used in the reanalysis (S4) lacks independent validation. Maximum entropy and zero dispersion reflect uniform uncertainty."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C13",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The panel was evenly split on this normative claim. Supporters cited equity obligations; opponents noted that evidence does not support effectiveness across all absence-driver subgroups and that universal deployment may waste resources where alerts show no effect."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C14",
+      "recorded": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "The panel was evenly split. Supporters cited fiscal responsibility and evidence of null effects for the work-schedule subgroup. Opponents raised concerns about equity, stigmatisation, and the difficulty of accurately classifying absence drivers."
+    },
+    {
+      "run_id": "pilot-000/A/v8/identical_transcript/8/500/reference_fed/anthropic/claude-opus-4.6/1/baseline",
+      "method": "reference_fed",
+      "repeat": 1,
+      "claim": "C15",
+      "recorded": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        7,
+        0
+      ],
+      "mismatch": false,
+      "l1": 0,
+      "support_delta": 0,
+      "quote": "Seven of eight participants opposed this absolute prohibition. While S8 identifies significant privacy concerns, most panellists concluded these can be addressed through proportional safeguards rather than a categorical ban. One participant maintained that privacy risks are inherently prohibitive."
+    }
+  ],
+  "inventory_counts": {
+    "failed": 15,
+    "complete": 16,
+    "scheduled": 12
+  }
+}

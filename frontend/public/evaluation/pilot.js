@@ -19,7 +19,7 @@ function render(){
  $('trace').replaceChildren(el('p','The assistant authored these claims from the opening responses. This is a traceability record, not an independent extraction score.'),...c.claims.map((claim,j)=>el('p',`${j+1}. ${claim} Source: openings P01–P08; evidence reference ${c.claim_sources[j]}.`)));
  $('evidence').replaceChildren(...c.evidence.map(t=>el('p',t)),...c.people.map(p=>{const d=el('details'),s=el('summary',`${p.id} · private packet`);d.append(s,el('p',p.private_evidence.join('\n\n')||'No direct outcome evidence supplied. Initial beliefs are explicitly unverified.'));return d;}));
 }
-function page(name){if(!['integrity','consultations','figures','tests','methods'].includes(name))name='integrity';document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!==name);document.querySelectorAll('[data-page]').forEach(b=>{if(b.dataset.page===name)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});}
+function page(name){if(!['paper','integrity','consultations','figures','tests','methods'].includes(name))name='paper';document.querySelectorAll('main>section').forEach(s=>s.hidden=s.id!==name);document.querySelectorAll('[data-page]').forEach(b=>{if(b.dataset.page===name)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});}
 document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.page;page(b.dataset.page)});
 window.addEventListener('hashchange',()=>page(location.hash.slice(1)));
 document.querySelectorAll('[data-round]').forEach(b=>b.onclick=()=>{round=Number(b.dataset.round);render()});$('scenario').onchange=render;$('arm').onchange=render;
