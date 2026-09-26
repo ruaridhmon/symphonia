@@ -15,7 +15,7 @@ SUMMARY=obj({'narrative':STRING,'audit':array(AUDIT)})
 ALIGNMENT=obj({'alignments':array(obj({'display_id':STRING,'reference_ids':array(STRING),'relation':{'type':'string','enum':['exact','split','merge','changed','new']},'reason':STRING}))})
 DECISION=obj({'action':{'type':'string','enum':['universal_rollout','targeted_rollout','defer']},'justification':STRING,'decoded_facts':obj({k:{'type':['boolean','null']} for k in ('reliable_subgroup_harm','benefit_supported','warning_only_unsupported')})})
 def scoring_schema(ids):
-    schema=obj({'claims':obj({cid:obj({'narrative':{'$ref':'#/$defs/surface'},'audit':{'$ref':'#/$defs/surface'}}) for cid in ids}),'unsupported_assertions':array(obj({'surface':STRING,'text':STRING,'reason':STRING}))})
+    schema=obj({'claims':obj({cid:obj({'narrative':{'$ref':'#/$defs/surface'},'audit':{'$ref':'#/$defs/surface'},'audit_row_indices':array({'type':'integer'})}) for cid in ids})})
     wire_surface=obj({**{k:{'type':'string','enum':['yes','no','unclear']} for k in ('present','meaning_correct','conditions_correct','panel_status_correct','evidential_status_correct')},'span':STRING,'counts':array({'type':'number'}),'direction':{'type':'string','enum':['support','oppose','none']},'unanimous':{'type':'boolean'},'uncertainty_label':{'type':'string','enum':['uncertainty','disagreement','both','neither']}})
     schema['$defs']={'surface':wire_surface}
     return schema

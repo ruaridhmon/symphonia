@@ -1,5 +1,6 @@
 """Frozen product path, explicit common export adapter, and comparison methods."""
 import html,json,re
+import tiktoken
 from pathlib import Path
 from typing import Any
 from .reference import reference
@@ -21,8 +22,8 @@ def clean_reference(table):
 def openings(panel):return [{'participant_id':p['participant_id'],'text':p['realised']['opening']} for p in panel['people']]
 
 def transcript(w,panel,round_number=3):
-    return {'policy_question':w['policy_question'],'opening':openings(panel),'claims':[{'id':c['id'],'text':c['text'],'type':c['type']} for c in w['claims']],
-            'rounds':{str(r):[{'participant_id':p['participant_id'],'answers':p['realised'][f'round{r}']} for p in panel['people']] for r in range(2,round_number+1)}}
+    return {'policy_question':w['policy_question'],'opening':[] if panel.get('transcript_scope')=='round3_only' else openings(panel),'claims':[{'id':c['id'],'text':c['text'],'type':c['type']} for c in w['claims']],
+            'rounds':{str(r):[{'participant_id':p['participant_id'],'answers':p['realised'][f'round{r}']} for p in panel['people']] for r in ([3] if panel.get('transcript_scope')=='round3_only' else range(2,round_number+1))}}
 
 def native(client,run_id,model,question,material,questions_override=None,responses_override=None):
     responses=[{'email':r.get('participant_id',f'P{i+1}'),'answers':{'q1':{'position':r.get('text',json.dumps(r,ensure_ascii=False))}}} for i,r in enumerate(material)]
@@ -49,7 +50,7 @@ def extract_native_claims(formatted):
 
 def extract(client,run_id,model,method,w,panel):
     if method=='symphonia':
-        raw=native(client,run_id,model,w['policy_question'],openings(panel))
+        raw=native(client,run_id+'/extraction',model,w['policy_question'],openings(panel))
         return {'claims':extract_native_claims(raw['html']),'native':raw}
     if method=='reference_fed':
         # Diagnostic exact realised opening mentions, not unexpressed assignments.
@@ -57,15 +58,23 @@ def extract(client,run_id,model,method,w,panel):
         for m,out in panel['validation']+panel['repair_validation']:
             for p in out['participants']:expressed.update(p['expressed_claim_ids'])
         return {'claims':[{'id':'D'+str(i+1),'text':c['text']} for i,c in enumerate(w['claims']) if c['id'] in expressed]}
-    instruction='Extract the atomic propositions actually expressed in these independent contributions. Do not infer consensus from mention frequency. No gold list exists in your inputs. Preserve population, conditions and timeframe. Return JSON {claims:[{id:D1...,text}]}.'
+    instruction='Extract the distinct atomic POLICY propositions actually expressed in these independent contributions. Merge repeated mentions of the same proposition. Return the proposition itself, not an assertion about who believes it: for example, output "X reduces absence in population Y", not "P001 believes X reduces absence". Do not combine a policy proposition with its speaker attribution or an evaluation of its evidence. Do not infer consensus from mention frequency. No gold list exists in your inputs. Preserve population, conditions and timeframe. Return JSON {claims:[{id:D1...,text}]}.'
     if method in ('structured','staged'):instruction+=' '+STRUCTURED
     return client.call(run_id+'/extraction',model,instruction,{'question':w['policy_question'],'contributions':openings(panel)},max_tokens=4500)
 
-ALIGN='''Align anonymous displayed propositions to reference propositions by meaning, including population, condition and timeframe. Return JSON {alignments:[{display_id,reference_ids,relation,reason}]}. One row for every displayed ID. relation is exact/split/merge/changed/new. Use exact only when one whole proposition is semantically equivalent; missing or added conditions are changed. Never match on ID or superficial wording. Split/merged propositions must retain all reference links. These results control vote replay: mismatches must not receive reference votes.'''
+ALIGN='''Align anonymous displayed propositions to reference propositions by meaning, including population, condition and timeframe. Return JSON {alignments:[{display_id,reference_ids,relation,reason}]}. One row for every displayed ID. Keep each reason under 25 words. relation is exact/split/merge/changed/new. Use exact only when one whole proposition is semantically equivalent; missing or added conditions are changed. Never match on ID or superficial wording. A statement that "P001 believes X" is NOT the policy proposition X; it is a statement about a belief. Do not strip speaker attribution to manufacture an exact match. A proposition combined with an extra stance or evidence assertion is changed, not exact. Split/merged propositions must retain all reference links. These results control vote replay: mismatches must not receive reference votes.'''
 
 def align(client,run_id,claims,w,judges):
     source=[{'id':c['id'],'text':c['text'],'conditions':c['conditions']} for c in w['claims']]
-    all_labels=[client.call(run_id+'/align/'+m,m,ALIGN,{'reference':source,'displayed':claims},max_tokens=4500,schema=ALIGNMENT) for m in judges]
+    def one(m):
+        labels=[]
+        for start in range(0,len(claims),5):
+            batch=claims[start:start+5]
+            out=client.call(run_id+'/align/'+m+'/'+str(start),m,ALIGN,{'reference':source,'displayed':batch},max_tokens=2400,schema=ALIGNMENT)
+            if {x['display_id'] for x in out['alignments']}!={x['id'] for x in batch}:raise ValueError('Incomplete semantic alignment')
+            labels.extend(out['alignments'])
+        return {'alignments':labels}
+    all_labels=client.parallel(one,judges)
     mapping={}
     for c in claims:
         labels=[next((x for x in out['alignments'] if x['display_id']==c['id']),{}) for out in all_labels]
@@ -113,7 +122,10 @@ def summarise(client,run_id,model,method,material,words=500,rows=15,exact_table=
     result['intermediates']=intermediates;result['narrative_word_count']=len(result['narrative'].split())
     result['word_limit_exceeded']=result['narrative_word_count']>words
     result['audit_row_limit_exceeded']=len(result['audit'])>rows
+    result['audit_row_word_limit_exceeded']=any(len(json.dumps(row,ensure_ascii=False).split())>100 for row in result['audit'])
     result['audit_character_count']=len(json.dumps(result['audit'],ensure_ascii=False))
+    result['audit_token_count']=len(tiktoken.get_encoding('cl100k_base').encode(json.dumps(result['audit'],ensure_ascii=False)))
+    result['audit_tokenizer']='cl100k_base common measurement; provider-native totals remain in raw usage'
     return result
 
 

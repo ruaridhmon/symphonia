@@ -1,5 +1,5 @@
 """Generate and validate private fictional worlds and realised participants."""
-import random
+import random,json
 from .client import digest,CallFailure
 from .schemas import OPENING,JUDGMENTS,VALIDATION
 from .scoring import panel_status,uncertainty
@@ -146,7 +146,7 @@ def panel(client,w,n,model='openai/gpt-4.1'):
                 opening_packet={**private,'assigned':[a for a in private['assigned'] if a['id'] in private['opening_claim_ids']]}
                 opening_packet['correction_feedback']=feedback
                 opening=client.call(pid+f'/opening/{attempt}',model,'Return ONLY JSON {opening,expressed_claim_ids}. You are one fictional participant. Aim for 180 whitespace-separated words, with a hard maximum of 230 and minimum of 150. Use compact shared context rather than repeating scope in every sentence. Write on exactly the supplied opening_claim_ids, expressing the assigned round2 stance for each and its conditions. Use only the private evidence. Insufficient evidence is a stance to express, not agreement or opposition. Supporting a claim means affirming its proposition, even if the proposition itself opposes an intervention. Do not assert unobserved facts. Do not describe other participants. You may cite any relevant supplied sources without needing to cite every source. Use the requested style. Assigned stances may deliberately be mistaken beliefs; express them as personal beliefs without changing them or inventing evidence. If evidence conflicts, acknowledge it while retaining the assigned belief.',opening_packet,max_tokens=1400,schema=OPENING)
-                judgments=client.call(pid+f'/judgments/{attempt}',model,'Return ONLY JSON {round2,round3}. '+PARTICIPANT_PROMPT+' Do not return an opening in this call. Each round MUST contain one row for each of round_claim_ids; copy the exact assigned round-specific stance. State probability for factual claims even when evidence is insufficient. The explicit round2_stance and round3_stance fields are authoritative BELIEF assignments: copy them even if sources contradict the claim; acknowledge conflicting observations in the reason without silently changing the assigned belief.',{**private,'correction_feedback':feedback},max_tokens=6500,schema=JUDGMENTS)
+                judgments=client.call(pid+f'/judgments/{attempt}',model,'Return ONLY JSON {round2,round3}. '+PARTICIPANT_PROMPT+' Do not return an opening in this call. Each round MUST contain one row for each of round_claim_ids; copy the exact assigned round-specific stance. State probability for factual claims even when evidence is insufficient. The explicit round2_stance and round3_stance fields are authoritative BELIEF assignments: copy them even if sources contradict the claim; acknowledge conflicting observations in the reason without silently changing the assigned belief.',{**private,'correction_feedback':feedback},max_tokens=6500 if len(private['assigned'])<=15 else 14000,schema=JUDGMENTS)
                 p={**opening,**{k:judgments[k] for k in ('round2','round3')}}
                 validate_participant(p,private)
                 return {'participant_id':private['participant_id'],'private':private,'realised':p,'generation_attempt':attempt}
@@ -201,6 +201,11 @@ def accepted_world(client,phase,slot,count=15):
         index=slot+120*replacement
         try:
             w=world(client,phase,index,count)
+            duplicates=[]
+            for path in (client.store.root/'reference').glob('*.json'):
+                other=json.loads(path.read_text())
+                if other['map_id']!=w['map_id'] and other.get('graph_signature')==w['graph_signature']:duplicates.append(other['map_id'])
+            if duplicates:raise CallFailure('Duplicate source-link graph: '+','.join(duplicates))
             client.store.put(f'exclusions/{phase}-{slot:03d}.json',{'slot':slot,'selected':w['map_id'],'rejected':exclusions,'rule':'increment candidate seed by 120, retaining policy setting, at most five candidates'})
             return w
         except CallFailure as exc:exclusions.append({'candidate':index,'reason':str(exc)})
@@ -220,3 +225,14 @@ def reconcile_validation(panel):
     panel['validation_rule']='Both negative semantic evaluations trigger the single regeneration; disagreements or ambiguous fields are retained as disputed. Both evaluations remain available. Numeric and source-ID validation is mandatory.'
     panel['validated']=not panel['rejected_participants']
     return panel
+
+
+def opening_ids(panel):
+    latest={}
+    for model,out in panel['validation']+panel['repair_validation']:
+        for row in out['participants']:latest.setdefault(row['participant_id'],{})[model]=set(row['expressed_claim_ids'])
+    definite=set();possible=set()
+    for labels in latest.values():
+        values=list(labels.values())
+        if len(values)==2:definite|=values[0]&values[1];possible|=values[0]|values[1]
+    return definite,possible-definite

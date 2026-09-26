@@ -2,7 +2,7 @@
 import http.server,os,re
 from google.cloud import storage
 BUCKET=os.environ.get('EVALUATION_BUCKET','symphonia-dev-488613-evaluations')
-PREFIX=os.environ.get('EVALUATION_PREFIX','synthetic-20260926')+'/report/'
+PREFIX=os.environ.get('EVALUATION_PREFIX','synthetic-20260926')+'/'+os.environ.get('EVALUATION_REPORT_FOLDER','report')+'/'
 client=storage.Client()
 class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):

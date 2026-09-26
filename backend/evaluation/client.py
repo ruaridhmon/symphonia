@@ -106,9 +106,19 @@ class Client:
                     return output
                 except (urllib.error.HTTPError,urllib.error.URLError,TimeoutError,ConnectionError) as exc:
                     code=getattr(exc,'code',None)
+                    detail=''
+                    if isinstance(exc,urllib.error.HTTPError):
+                        try:
+                            error=json.loads(exc.read()).get('error',{})
+                            detail=str(error.get('message',''))
+                            raw=error.get('metadata',{}).get('raw')
+                            if raw:
+                                parsed=json.loads(raw);detail+=': '+str(parsed.get('error',parsed).get('message',''))
+                        except Exception:pass
+                    detail=detail.replace(self.key,'[redacted]')[:1000]
                     if record['attempts'] and record['attempts'][-1]['attempt']==attempt+1:
-                        record['attempts'][-1].update(error=type(exc).__name__,http_status=code)
-                    else:record['attempts'].append({'attempt':attempt+1,'latency_seconds':time.time()-started,'error':type(exc).__name__,'http_status':code})
+                        record['attempts'][-1].update(error=type(exc).__name__,http_status=code,error_detail=detail)
+                    else:record['attempts'].append({'attempt':attempt+1,'latency_seconds':time.time()-started,'error':type(exc).__name__,'http_status':code,'error_detail':detail})
                     if attempt==0 and (code is None or code in (408,429,500,502,503,504)):
                         time.sleep(3);continue
                     raise CallFailure('Technical failure '+run_id) from None
