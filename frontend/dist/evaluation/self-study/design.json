@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "name": "Assistant self-evaluation of the three-round workflow",
+  "scope": "Exploratory, unblinded self-evaluation in one Codex conversation. Not Symphonia's provider model and not an independent multi-model study.",
+  "inputs": "The three saved authored platform scenarios and their final feedback-arm records; 4 claims and 8 fictional identities per scenario.",
+  "primary_methods": [
+    "assistant structured summary"
+  ],
+  "compression_word_limits": [
+    250,
+    500,
+    1000
+  ],
+  "panel_sizes": [
+    8,
+    32,
+    64
+  ],
+  "panel_size_rule": "Larger panels tile the existing eight records 4x or 8x under new synthetic IDs. This tests input volume, not new independent experts or evidence.",
+  "minority_panel_size": 32,
+  "minority_counts": [
+    1,
+    4,
+    8
+  ],
+  "minority_evidence": [
+    "supported",
+    "unsupported",
+    "absent"
+  ],
+  "perturbations": [
+    "reverse order",
+    "paraphrase",
+    "verbosity",
+    "prestige labels",
+    "repeat statement",
+    "shared-source supporters",
+    "new contradictory evidence",
+    "remove observation"
+  ],
+  "ablations": [
+    "remove qualification",
+    "remove probabilities",
+    "remove provenance",
+    "remove reconsideration"
+  ],
+  "scoring": {
+    "strict_fidelity": "Present, meaning, conditions, panel status and evidential status must all be correct. Self-assessed with output evidence spans; not independent semantic validation.",
+    "consensus": "80% directional support among all valid evaluations, including unable-to-judge; at least 80% response coverage. Narrative false consensus coded separately.",
+    "distribution": "Base-2 Jensen-Shannon divergence between explicit reported and reference counts. Omitted/unassessable claims have penalty 1 in a separately labelled composite score.",
+    "uncertainty": "Directly authored factual probability elicitation supplement, not confidence conversion. Mean individual binary entropy versus entropy of mean minus mean entropy. Normative claim excluded.",
+    "decision": "Assistant chooses only from supplied options under an explicit constructed objective; loss minus minimum loss gives regret. Same-context, unblinded reader; no independent readers.",
+    "inference": "No hypothesis tests or population confidence intervals: only three hand-authored scenarios in one context. No fabricated repetitions, model-family replication, or errors."
+  },
+  "cost": "Zero OpenRouter calls. Report recorded OpenRouter cost as zero; Codex account consumption and token cost are not measured.",
+  "stage_test": "Extraction, round-two feedback and final synthesis evaluated on the baseline eight-person scenario. Downstream stages receive saved round-specific ratings, not newly generated independent participants.",
+  "deliverables": "Five multi-panel figures, per-run full inputs/output/audit/decision, source CSV/JSON, vector SVG/PDF and 600 dpi PNG; existing consultations remain unchanged."
+}

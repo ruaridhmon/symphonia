@@ -1,0 +1,18 @@
+{
+  "runs": 87,
+  "scenarios": 3,
+  "fresh_model_calls": 0,
+  "openrouter_calls": 0,
+  "methods": 1,
+  "self_coded": true,
+  "independent_model_families": 0,
+  "design_sha256": "938b2186f987730e270e26d5589f1d811316096a7086c91fa17073b5378bcba6",
+  "scope": "Actual authored texts plus deterministic count rendering and self-scoring; response templates are shared where meanings match. Not fresh independent prompt runs.",
+  "kinds": {
+    "core": 15,
+    "stage": 9,
+    "perturbation": 24,
+    "ablation": 12,
+    "minority": 27
+  }
+}

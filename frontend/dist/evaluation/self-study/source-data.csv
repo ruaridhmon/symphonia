@@ -1,0 +1,88 @@
+id,scenario,kind,variant,word_limit,actual_words,panel_size,minority_count,strict_fidelity,omission_rate,distortion_rate,false_consensus_rate,distribution_jsd,composite_distribution_distortion,probability_coverage,provenance_coverage,decision_regret,openrouter_cost_usd
+attendance/core/n8-words250,attendance,core,n8-words250,250,155,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/core/n8-words500,attendance,core,n8-words500,500,243,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/core/n8-words1000,attendance,core,n8-words1000,1000,407,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/core/n32-words500,attendance,core,n32-words500,500,243,32,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/core/n64-words500,attendance,core,n64-words500,500,243,64,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/stage/extraction,attendance,stage,extraction,,,0,,,0,0,,,,,,,0
+attendance/stage/feedback,attendance,stage,feedback,500,155,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+attendance/stage/final-synthesis,attendance,stage,final synthesis,500,155,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/perturbation/reverse-order,attendance,perturbation,reverse order,500,171,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/perturbation/paraphrase,attendance,perturbation,paraphrase,500,174,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/perturbation/verbosity,attendance,perturbation,verbosity,500,173,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/perturbation/prestige-labels,attendance,perturbation,prestige labels,500,172,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/perturbation/repeat-statement,attendance,perturbation,repeat statement,500,172,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/perturbation/shared-source-supporters,attendance,perturbation,shared-source supporters,500,184,10,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/perturbation/new-contradictory-evidence,attendance,perturbation,new contradictory evidence,500,193,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/perturbation/remove-observation,attendance,perturbation,remove observation,500,188,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+attendance/ablation/remove-qualification,attendance,ablation,remove qualification,500,186,8,,0.75,0.25,0.0,0.0,0.0,0.25,1.0,1,,0
+attendance/ablation/remove-probabilities,attendance,ablation,remove probabilities,500,183,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+attendance/ablation/remove-provenance,attendance,ablation,remove provenance,500,191,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,0,,0
+attendance/ablation/remove-reconsideration,attendance,ablation,remove reconsideration,500,190,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+attendance/minority/supported-1,attendance,minority,supported,,,32,1,,,,,,,,,0,0
+attendance/minority/supported-4,attendance,minority,supported,,,32,4,,,,,,,,,0,0
+attendance/minority/supported-8,attendance,minority,supported,,,32,8,,,,,,,,,0,0
+attendance/minority/unsupported-1,attendance,minority,unsupported,,,32,1,,,,,,,,,0,0
+attendance/minority/unsupported-4,attendance,minority,unsupported,,,32,4,,,,,,,,,0,0
+attendance/minority/unsupported-8,attendance,minority,unsupported,,,32,8,,,,,,,,,0,0
+attendance/minority/absent-1,attendance,minority,absent,,,32,0,,,,,,,,,0,0
+attendance/minority/absent-4,attendance,minority,absent,,,32,0,,,,,,,,,0,0
+attendance/minority/absent-8,attendance,minority,absent,,,32,0,,,,,,,,,0,0
+health/core/n8-words250,health,core,n8-words250,250,157,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/core/n8-words500,health,core,n8-words500,500,237,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/core/n8-words1000,health,core,n8-words1000,1000,407,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/core/n32-words500,health,core,n32-words500,500,237,32,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/core/n64-words500,health,core,n64-words500,500,237,64,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/stage/extraction,health,stage,extraction,,,0,,,0,0,,,,,,,0
+health/stage/feedback,health,stage,feedback,500,157,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+health/stage/final-synthesis,health,stage,final synthesis,500,157,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/perturbation/reverse-order,health,perturbation,reverse order,500,173,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/perturbation/paraphrase,health,perturbation,paraphrase,500,176,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/perturbation/verbosity,health,perturbation,verbosity,500,175,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/perturbation/prestige-labels,health,perturbation,prestige labels,500,174,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/perturbation/repeat-statement,health,perturbation,repeat statement,500,174,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/perturbation/shared-source-supporters,health,perturbation,shared-source supporters,500,186,10,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/perturbation/new-contradictory-evidence,health,perturbation,new contradictory evidence,500,203,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/perturbation/remove-observation,health,perturbation,remove observation,500,182,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+health/ablation/remove-qualification,health,ablation,remove qualification,500,180,8,,0.75,0.25,0.0,0.0,0.0,0.25,1.0,1,,0
+health/ablation/remove-probabilities,health,ablation,remove probabilities,500,185,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+health/ablation/remove-provenance,health,ablation,remove provenance,500,193,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,0,,0
+health/ablation/remove-reconsideration,health,ablation,remove reconsideration,500,192,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+health/minority/supported-1,health,minority,supported,,,32,1,,,,,,,,,0,0
+health/minority/supported-4,health,minority,supported,,,32,4,,,,,,,,,0,0
+health/minority/supported-8,health,minority,supported,,,32,8,,,,,,,,,0,0
+health/minority/unsupported-1,health,minority,unsupported,,,32,1,,,,,,,,,0,0
+health/minority/unsupported-4,health,minority,unsupported,,,32,4,,,,,,,,,0,0
+health/minority/unsupported-8,health,minority,unsupported,,,32,8,,,,,,,,,0,0
+health/minority/absent-1,health,minority,absent,,,32,0,,,,,,,,,0,0
+health/minority/absent-4,health,minority,absent,,,32,0,,,,,,,,,0,0
+health/minority/absent-8,health,minority,absent,,,32,0,,,,,,,,,0,0
+release/core/n8-words250,release,core,n8-words250,250,162,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/core/n8-words500,release,core,n8-words500,500,234,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/core/n8-words1000,release,core,n8-words1000,1000,405,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/core/n32-words500,release,core,n32-words500,500,234,32,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/core/n64-words500,release,core,n64-words500,500,234,64,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/stage/extraction,release,stage,extraction,,,0,,,0,0,,,,,,,0
+release/stage/feedback,release,stage,feedback,500,162,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+release/stage/final-synthesis,release,stage,final synthesis,500,162,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/perturbation/reverse-order,release,perturbation,reverse order,500,178,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/perturbation/paraphrase,release,perturbation,paraphrase,500,181,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/perturbation/verbosity,release,perturbation,verbosity,500,180,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/perturbation/prestige-labels,release,perturbation,prestige labels,500,179,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/perturbation/repeat-statement,release,perturbation,repeat statement,500,179,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/perturbation/shared-source-supporters,release,perturbation,shared-source supporters,500,191,10,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/perturbation/new-contradictory-evidence,release,perturbation,new contradictory evidence,500,199,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/perturbation/remove-observation,release,perturbation,remove observation,500,191,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,1,,0
+release/ablation/remove-qualification,release,ablation,remove qualification,500,189,8,,0.75,0.25,0.0,0.0,0.0,0.25,1.0,1,,0
+release/ablation/remove-probabilities,release,ablation,remove probabilities,500,190,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+release/ablation/remove-provenance,release,ablation,remove provenance,500,198,8,,1.0,0.0,0.0,0.0,0.0,0.0,1.0,0,,0
+release/ablation/remove-reconsideration,release,ablation,remove reconsideration,500,197,8,,1.0,0.0,0.0,0.0,0.0,0.0,0.0,1,,0
+release/minority/supported-1,release,minority,supported,,,32,1,,,,,,,,,0,0
+release/minority/supported-4,release,minority,supported,,,32,4,,,,,,,,,0,0
+release/minority/supported-8,release,minority,supported,,,32,8,,,,,,,,,0,0
+release/minority/unsupported-1,release,minority,unsupported,,,32,1,,,,,,,,,0,0
+release/minority/unsupported-4,release,minority,unsupported,,,32,4,,,,,,,,,0,0
+release/minority/unsupported-8,release,minority,unsupported,,,32,8,,,,,,,,,0,0
+release/minority/absent-1,release,minority,absent,,,32,0,,,,,,,,,0,0
+release/minority/absent-4,release,minority,absent,,,32,0,,,,,,,,,0,0
+release/minority/absent-8,release,minority,absent,,,32,0,,,,,,,,,0,0
