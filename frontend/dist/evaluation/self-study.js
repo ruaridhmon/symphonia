@@ -8,6 +8,14 @@
  ['Robustness and mechanism','Reviewed perturbations, information-deletion controls and recorded OpenRouter cost versus fidelity. Equivalent-input cases reuse reviewed text. Independent model replication was intentionally not run.']
  ];
  get('figure-list').replaceChildren(...figures.map(([title,caption],i)=>{const a=node('article',undefined,'figure'),file=`self-study/figure-${i+1}`;a.append(node('h3',`${i+1}. ${title}`));const img=node('img');img.src=file+'.svg';img.alt=title+'. '+caption;img.loading='lazy';a.append(img,node('p',caption));const links=node('div',undefined,'downloads');for(const [label,ext,download] of [['Open full-size figure ↗','svg',false],['SVG','svg',true],['PDF','pdf',true],['PNG · 600 dpi','png',true]]){const l=node('a',label);l.href=file+'.'+ext;if(download)l.download=`figure-${i+1}.${ext}`;else{l.target='_blank';l.rel='noopener'}links.append(l)}a.append(links);return a}));
+
+ const originalFigures=[
+ ['01-design','The study, with provenance','The original three-round pilot design: three authored scenarios, eight fictional people per scenario and feedback versus no-feedback arms.'],
+ ['02-ratings','What the panel said, before and after','Original recorded stance counts for each claim, round and feedback condition. Each bar contains eight saved ratings.'],
+ ['03-trajectories','Every individual change','Original participant-level round-two to round-three transitions. Stable views remain visible alongside changes.'],
+ ['04-factual','Factual judgments and uncertainty','Original descriptive correctness and uncertainty plots. These are authored trajectories, not independent estimates of feedback effects.']
+ ];
+ get('pilot-figure-list').replaceChildren(...originalFigures.map(([file,title,caption],i)=>{const a=node('article',undefined,'figure');a.append(node('h3',`${i+1}. ${title}`));const img=node('img');img.src=`pilot-data/${file}.svg`;img.alt=title+'. '+caption;img.loading='lazy';a.append(img,node('p',caption));const links=node('div',undefined,'downloads');for(const [label,ext,download] of [['Open full-size figure ↗','svg',false],['SVG','svg',true],['PDF','pdf',true],['PNG · 600 dpi','png',true]]){const l=node('a',label);l.href=`pilot-data/${file}.${ext}`;if(download)l.download=`${file}.${ext}`;else{l.target='_blank';l.rel='noopener'}links.append(l)}a.append(links);return a}));
  let runs=[];
  const labels={attendance:'School attendance',health:'Community health',release:'After release'};
  function variants(){const candidates=runs.filter(r=>r.scenario===get('test-scenario').value&&r.kind===get('test-kind').value);get('test-variant').replaceChildren(...candidates.map(r=>{const o=node('option',r.variant+(r.kind==='minority'?` · assigned ${r.assigned_count}/32`:''));o.value=r.id;return o}));render();}
