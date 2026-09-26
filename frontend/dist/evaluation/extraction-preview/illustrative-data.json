@@ -1,0 +1,2887 @@
+{
+  "status": "SIMULATED DESIGN PREVIEW \u2014 NOT EXPERIMENTAL RESULTS",
+  "seed": 413,
+  "bandwidth": 0.045,
+  "points": [
+    {
+      "id": "ILLUSTRATION-001",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 108,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.75
+    },
+    {
+      "id": "ILLUSTRATION-002",
+      "reference_claims": 100,
+      "faithfully_retained": 90,
+      "extracted_claims": 106,
+      "faithfully_supported": 90,
+      "coverage": 0.9,
+      "faithfulness": 0.8490566037735849
+    },
+    {
+      "id": "ILLUSTRATION-003",
+      "reference_claims": 100,
+      "faithfully_retained": 68,
+      "extracted_claims": 88,
+      "faithfully_supported": 68,
+      "coverage": 0.68,
+      "faithfulness": 0.7727272727272727
+    },
+    {
+      "id": "ILLUSTRATION-004",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 88,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.875
+    },
+    {
+      "id": "ILLUSTRATION-005",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 95,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.8842105263157894
+    },
+    {
+      "id": "ILLUSTRATION-006",
+      "reference_claims": 100,
+      "faithfully_retained": 94,
+      "extracted_claims": 99,
+      "faithfully_supported": 94,
+      "coverage": 0.94,
+      "faithfulness": 0.9494949494949495
+    },
+    {
+      "id": "ILLUSTRATION-007",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 98,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.8571428571428571
+    },
+    {
+      "id": "ILLUSTRATION-008",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 98,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.8571428571428571
+    },
+    {
+      "id": "ILLUSTRATION-009",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 107,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.7476635514018691
+    },
+    {
+      "id": "ILLUSTRATION-010",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 88,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.8636363636363636
+    },
+    {
+      "id": "ILLUSTRATION-011",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 84,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.8690476190476191
+    },
+    {
+      "id": "ILLUSTRATION-012",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 91,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.8901098901098901
+    },
+    {
+      "id": "ILLUSTRATION-013",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 91,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.945054945054945
+    },
+    {
+      "id": "ILLUSTRATION-014",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 88,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.9090909090909091
+    },
+    {
+      "id": "ILLUSTRATION-015",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 109,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.8165137614678899
+    },
+    {
+      "id": "ILLUSTRATION-016",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 103,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.7961165048543689
+    },
+    {
+      "id": "ILLUSTRATION-017",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 93,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.8064516129032258
+    },
+    {
+      "id": "ILLUSTRATION-018",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 92,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.9239130434782609
+    },
+    {
+      "id": "ILLUSTRATION-019",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 89,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8764044943820225
+    },
+    {
+      "id": "ILLUSTRATION-020",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 86,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8953488372093024
+    },
+    {
+      "id": "ILLUSTRATION-021",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 88,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.8522727272727273
+    },
+    {
+      "id": "ILLUSTRATION-022",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 81,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.9506172839506173
+    },
+    {
+      "id": "ILLUSTRATION-023",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 88,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.8295454545454546
+    },
+    {
+      "id": "ILLUSTRATION-024",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 90,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.9444444444444444
+    },
+    {
+      "id": "ILLUSTRATION-025",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 95,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.8736842105263158
+    },
+    {
+      "id": "ILLUSTRATION-026",
+      "reference_claims": 100,
+      "faithfully_retained": 74,
+      "extracted_claims": 86,
+      "faithfully_supported": 74,
+      "coverage": 0.74,
+      "faithfulness": 0.8604651162790697
+    },
+    {
+      "id": "ILLUSTRATION-027",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 79,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.9746835443037974
+    },
+    {
+      "id": "ILLUSTRATION-028",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 81,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.9259259259259259
+    },
+    {
+      "id": "ILLUSTRATION-029",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 99,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.7373737373737373
+    },
+    {
+      "id": "ILLUSTRATION-030",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 94,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.8617021276595744
+    },
+    {
+      "id": "ILLUSTRATION-031",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 86,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.9534883720930233
+    },
+    {
+      "id": "ILLUSTRATION-032",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 93,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.8494623655913979
+    },
+    {
+      "id": "ILLUSTRATION-033",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 89,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.9213483146067416
+    },
+    {
+      "id": "ILLUSTRATION-034",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 87,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.8620689655172413
+    },
+    {
+      "id": "ILLUSTRATION-035",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 101,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.8217821782178217
+    },
+    {
+      "id": "ILLUSTRATION-036",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 95,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8210526315789474
+    },
+    {
+      "id": "ILLUSTRATION-037",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 95,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.8736842105263158
+    },
+    {
+      "id": "ILLUSTRATION-038",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 92,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.9130434782608695
+    },
+    {
+      "id": "ILLUSTRATION-039",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 90,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.8444444444444444
+    },
+    {
+      "id": "ILLUSTRATION-040",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 102,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.7941176470588235
+    },
+    {
+      "id": "ILLUSTRATION-041",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 80,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.9875
+    },
+    {
+      "id": "ILLUSTRATION-042",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 88,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.875
+    },
+    {
+      "id": "ILLUSTRATION-043",
+      "reference_claims": 100,
+      "faithfully_retained": 74,
+      "extracted_claims": 88,
+      "faithfully_supported": 74,
+      "coverage": 0.74,
+      "faithfulness": 0.8409090909090909
+    },
+    {
+      "id": "ILLUSTRATION-044",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 97,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.8350515463917526
+    },
+    {
+      "id": "ILLUSTRATION-045",
+      "reference_claims": 100,
+      "faithfully_retained": 65,
+      "extracted_claims": 75,
+      "faithfully_supported": 65,
+      "coverage": 0.65,
+      "faithfulness": 0.8666666666666667
+    },
+    {
+      "id": "ILLUSTRATION-046",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 89,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.8426966292134831
+    },
+    {
+      "id": "ILLUSTRATION-047",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 102,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.7450980392156863
+    },
+    {
+      "id": "ILLUSTRATION-048",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 89,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.8426966292134831
+    },
+    {
+      "id": "ILLUSTRATION-049",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 89,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8764044943820225
+    },
+    {
+      "id": "ILLUSTRATION-050",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 92,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8369565217391305
+    },
+    {
+      "id": "ILLUSTRATION-051",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 86,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.8837209302325582
+    },
+    {
+      "id": "ILLUSTRATION-052",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 102,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.7352941176470589
+    },
+    {
+      "id": "ILLUSTRATION-053",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 95,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8210526315789474
+    },
+    {
+      "id": "ILLUSTRATION-054",
+      "reference_claims": 100,
+      "faithfully_retained": 87,
+      "extracted_claims": 103,
+      "faithfully_supported": 87,
+      "coverage": 0.87,
+      "faithfulness": 0.8446601941747572
+    },
+    {
+      "id": "ILLUSTRATION-055",
+      "reference_claims": 100,
+      "faithfully_retained": 93,
+      "extracted_claims": 106,
+      "faithfully_supported": 93,
+      "coverage": 0.93,
+      "faithfulness": 0.8773584905660378
+    },
+    {
+      "id": "ILLUSTRATION-056",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 89,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.9101123595505618
+    },
+    {
+      "id": "ILLUSTRATION-057",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 99,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.7878787878787878
+    },
+    {
+      "id": "ILLUSTRATION-058",
+      "reference_claims": 100,
+      "faithfully_retained": 63,
+      "extracted_claims": 74,
+      "faithfully_supported": 63,
+      "coverage": 0.63,
+      "faithfulness": 0.8513513513513513
+    },
+    {
+      "id": "ILLUSTRATION-059",
+      "reference_claims": 100,
+      "faithfully_retained": 68,
+      "extracted_claims": 76,
+      "faithfully_supported": 68,
+      "coverage": 0.68,
+      "faithfulness": 0.8947368421052632
+    },
+    {
+      "id": "ILLUSTRATION-060",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 100,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.76
+    },
+    {
+      "id": "ILLUSTRATION-061",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 92,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.9021739130434783
+    },
+    {
+      "id": "ILLUSTRATION-062",
+      "reference_claims": 100,
+      "faithfully_retained": 91,
+      "extracted_claims": 92,
+      "faithfully_supported": 91,
+      "coverage": 0.91,
+      "faithfulness": 0.9891304347826086
+    },
+    {
+      "id": "ILLUSTRATION-063",
+      "reference_claims": 100,
+      "faithfully_retained": 72,
+      "extracted_claims": 89,
+      "faithfully_supported": 72,
+      "coverage": 0.72,
+      "faithfulness": 0.8089887640449438
+    },
+    {
+      "id": "ILLUSTRATION-064",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 93,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.9032258064516129
+    },
+    {
+      "id": "ILLUSTRATION-065",
+      "reference_claims": 100,
+      "faithfully_retained": 87,
+      "extracted_claims": 100,
+      "faithfully_supported": 87,
+      "coverage": 0.87,
+      "faithfulness": 0.87
+    },
+    {
+      "id": "ILLUSTRATION-066",
+      "reference_claims": 100,
+      "faithfully_retained": 70,
+      "extracted_claims": 93,
+      "faithfully_supported": 70,
+      "coverage": 0.7,
+      "faithfulness": 0.7526881720430108
+    },
+    {
+      "id": "ILLUSTRATION-067",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 92,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.9021739130434783
+    },
+    {
+      "id": "ILLUSTRATION-068",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 90,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.8777777777777778
+    },
+    {
+      "id": "ILLUSTRATION-069",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 86,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8953488372093024
+    },
+    {
+      "id": "ILLUSTRATION-070",
+      "reference_claims": 100,
+      "faithfully_retained": 88,
+      "extracted_claims": 100,
+      "faithfully_supported": 88,
+      "coverage": 0.88,
+      "faithfulness": 0.88
+    },
+    {
+      "id": "ILLUSTRATION-071",
+      "reference_claims": 100,
+      "faithfully_retained": 87,
+      "extracted_claims": 101,
+      "faithfully_supported": 87,
+      "coverage": 0.87,
+      "faithfulness": 0.8613861386138614
+    },
+    {
+      "id": "ILLUSTRATION-072",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 95,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.8947368421052632
+    },
+    {
+      "id": "ILLUSTRATION-073",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 88,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.875
+    },
+    {
+      "id": "ILLUSTRATION-074",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 103,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.8640776699029126
+    },
+    {
+      "id": "ILLUSTRATION-075",
+      "reference_claims": 100,
+      "faithfully_retained": 68,
+      "extracted_claims": 84,
+      "faithfully_supported": 68,
+      "coverage": 0.68,
+      "faithfulness": 0.8095238095238095
+    },
+    {
+      "id": "ILLUSTRATION-076",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 84,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.9166666666666666
+    },
+    {
+      "id": "ILLUSTRATION-077",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 88,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.8295454545454546
+    },
+    {
+      "id": "ILLUSTRATION-078",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 97,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.8556701030927835
+    },
+    {
+      "id": "ILLUSTRATION-079",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 95,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.9052631578947369
+    },
+    {
+      "id": "ILLUSTRATION-080",
+      "reference_claims": 100,
+      "faithfully_retained": 91,
+      "extracted_claims": 108,
+      "faithfully_supported": 91,
+      "coverage": 0.91,
+      "faithfulness": 0.8425925925925926
+    },
+    {
+      "id": "ILLUSTRATION-081",
+      "reference_claims": 100,
+      "faithfully_retained": 87,
+      "extracted_claims": 111,
+      "faithfully_supported": 87,
+      "coverage": 0.87,
+      "faithfulness": 0.7837837837837838
+    },
+    {
+      "id": "ILLUSTRATION-082",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 106,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.7358490566037735
+    },
+    {
+      "id": "ILLUSTRATION-083",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 100,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.8
+    },
+    {
+      "id": "ILLUSTRATION-084",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 84,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.9047619047619048
+    },
+    {
+      "id": "ILLUSTRATION-085",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 104,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.8076923076923077
+    },
+    {
+      "id": "ILLUSTRATION-086",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 91,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8461538461538461
+    },
+    {
+      "id": "ILLUSTRATION-087",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 86,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.9186046511627907
+    },
+    {
+      "id": "ILLUSTRATION-088",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 91,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.9230769230769231
+    },
+    {
+      "id": "ILLUSTRATION-089",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 90,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.9333333333333333
+    },
+    {
+      "id": "ILLUSTRATION-090",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 101,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.8316831683168316
+    },
+    {
+      "id": "ILLUSTRATION-091",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 94,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.776595744680851
+    },
+    {
+      "id": "ILLUSTRATION-092",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 87,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.9425287356321839
+    },
+    {
+      "id": "ILLUSTRATION-093",
+      "reference_claims": 100,
+      "faithfully_retained": 70,
+      "extracted_claims": 86,
+      "faithfully_supported": 70,
+      "coverage": 0.7,
+      "faithfulness": 0.813953488372093
+    },
+    {
+      "id": "ILLUSTRATION-094",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 97,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.865979381443299
+    },
+    {
+      "id": "ILLUSTRATION-095",
+      "reference_claims": 100,
+      "faithfully_retained": 90,
+      "extracted_claims": 100,
+      "faithfully_supported": 90,
+      "coverage": 0.9,
+      "faithfulness": 0.9
+    },
+    {
+      "id": "ILLUSTRATION-096",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 99,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.797979797979798
+    },
+    {
+      "id": "ILLUSTRATION-097",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 94,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.8723404255319149
+    },
+    {
+      "id": "ILLUSTRATION-098",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 103,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.8640776699029126
+    },
+    {
+      "id": "ILLUSTRATION-099",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 97,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.7938144329896907
+    },
+    {
+      "id": "ILLUSTRATION-100",
+      "reference_claims": 100,
+      "faithfully_retained": 92,
+      "extracted_claims": 102,
+      "faithfully_supported": 92,
+      "coverage": 0.92,
+      "faithfulness": 0.9019607843137255
+    },
+    {
+      "id": "ILLUSTRATION-101",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 87,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8850574712643678
+    },
+    {
+      "id": "ILLUSTRATION-102",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 86,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.9186046511627907
+    },
+    {
+      "id": "ILLUSTRATION-103",
+      "reference_claims": 100,
+      "faithfully_retained": 88,
+      "extracted_claims": 93,
+      "faithfully_supported": 88,
+      "coverage": 0.88,
+      "faithfulness": 0.946236559139785
+    },
+    {
+      "id": "ILLUSTRATION-104",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 91,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8461538461538461
+    },
+    {
+      "id": "ILLUSTRATION-105",
+      "reference_claims": 100,
+      "faithfully_retained": 92,
+      "extracted_claims": 99,
+      "faithfully_supported": 92,
+      "coverage": 0.92,
+      "faithfulness": 0.9292929292929293
+    },
+    {
+      "id": "ILLUSTRATION-106",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 101,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.801980198019802
+    },
+    {
+      "id": "ILLUSTRATION-107",
+      "reference_claims": 100,
+      "faithfully_retained": 90,
+      "extracted_claims": 107,
+      "faithfully_supported": 90,
+      "coverage": 0.9,
+      "faithfulness": 0.8411214953271028
+    },
+    {
+      "id": "ILLUSTRATION-108",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 90,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.8888888888888888
+    },
+    {
+      "id": "ILLUSTRATION-109",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 104,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.8557692307692307
+    },
+    {
+      "id": "ILLUSTRATION-110",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 94,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.8617021276595744
+    },
+    {
+      "id": "ILLUSTRATION-111",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 91,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.8901098901098901
+    },
+    {
+      "id": "ILLUSTRATION-112",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 88,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.9090909090909091
+    },
+    {
+      "id": "ILLUSTRATION-113",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 87,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.9885057471264368
+    },
+    {
+      "id": "ILLUSTRATION-114",
+      "reference_claims": 100,
+      "faithfully_retained": 66,
+      "extracted_claims": 84,
+      "faithfully_supported": 66,
+      "coverage": 0.66,
+      "faithfulness": 0.7857142857142857
+    },
+    {
+      "id": "ILLUSTRATION-115",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 109,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.7798165137614679
+    },
+    {
+      "id": "ILLUSTRATION-116",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 89,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8764044943820225
+    },
+    {
+      "id": "ILLUSTRATION-117",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 101,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.8415841584158416
+    },
+    {
+      "id": "ILLUSTRATION-118",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 92,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8478260869565217
+    },
+    {
+      "id": "ILLUSTRATION-119",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 91,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.9230769230769231
+    },
+    {
+      "id": "ILLUSTRATION-120",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 97,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.8556701030927835
+    },
+    {
+      "id": "ILLUSTRATION-121",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 100,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.86
+    },
+    {
+      "id": "ILLUSTRATION-122",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 92,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.8804347826086957
+    },
+    {
+      "id": "ILLUSTRATION-123",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 100,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.84
+    },
+    {
+      "id": "ILLUSTRATION-124",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 93,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.9139784946236559
+    },
+    {
+      "id": "ILLUSTRATION-125",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 92,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.8913043478260869
+    },
+    {
+      "id": "ILLUSTRATION-126",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 97,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.845360824742268
+    },
+    {
+      "id": "ILLUSTRATION-127",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 104,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.7692307692307693
+    },
+    {
+      "id": "ILLUSTRATION-128",
+      "reference_claims": 100,
+      "faithfully_retained": 72,
+      "extracted_claims": 87,
+      "faithfully_supported": 72,
+      "coverage": 0.72,
+      "faithfulness": 0.8275862068965517
+    },
+    {
+      "id": "ILLUSTRATION-129",
+      "reference_claims": 100,
+      "faithfully_retained": 88,
+      "extracted_claims": 107,
+      "faithfully_supported": 88,
+      "coverage": 0.88,
+      "faithfulness": 0.822429906542056
+    },
+    {
+      "id": "ILLUSTRATION-130",
+      "reference_claims": 100,
+      "faithfully_retained": 87,
+      "extracted_claims": 96,
+      "faithfully_supported": 87,
+      "coverage": 0.87,
+      "faithfulness": 0.90625
+    },
+    {
+      "id": "ILLUSTRATION-131",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 98,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.826530612244898
+    },
+    {
+      "id": "ILLUSTRATION-132",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 113,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.7256637168141593
+    },
+    {
+      "id": "ILLUSTRATION-133",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 102,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.803921568627451
+    },
+    {
+      "id": "ILLUSTRATION-134",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 103,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.8155339805825242
+    },
+    {
+      "id": "ILLUSTRATION-135",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 95,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.8315789473684211
+    },
+    {
+      "id": "ILLUSTRATION-136",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 84,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.8690476190476191
+    },
+    {
+      "id": "ILLUSTRATION-137",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 89,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.9438202247191011
+    },
+    {
+      "id": "ILLUSTRATION-138",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 95,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8105263157894737
+    },
+    {
+      "id": "ILLUSTRATION-139",
+      "reference_claims": 100,
+      "faithfully_retained": 88,
+      "extracted_claims": 103,
+      "faithfully_supported": 88,
+      "coverage": 0.88,
+      "faithfulness": 0.8543689320388349
+    },
+    {
+      "id": "ILLUSTRATION-140",
+      "reference_claims": 100,
+      "faithfully_retained": 74,
+      "extracted_claims": 83,
+      "faithfully_supported": 74,
+      "coverage": 0.74,
+      "faithfulness": 0.891566265060241
+    },
+    {
+      "id": "ILLUSTRATION-141",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 91,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.9120879120879121
+    },
+    {
+      "id": "ILLUSTRATION-142",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 98,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.8163265306122449
+    },
+    {
+      "id": "ILLUSTRATION-143",
+      "reference_claims": 100,
+      "faithfully_retained": 70,
+      "extracted_claims": 74,
+      "faithfully_supported": 70,
+      "coverage": 0.7,
+      "faithfulness": 0.9459459459459459
+    },
+    {
+      "id": "ILLUSTRATION-144",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 98,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.7959183673469388
+    },
+    {
+      "id": "ILLUSTRATION-145",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 102,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.7352941176470589
+    },
+    {
+      "id": "ILLUSTRATION-146",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 87,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.9885057471264368
+    },
+    {
+      "id": "ILLUSTRATION-147",
+      "reference_claims": 100,
+      "faithfully_retained": 93,
+      "extracted_claims": 101,
+      "faithfully_supported": 93,
+      "coverage": 0.93,
+      "faithfulness": 0.9207920792079208
+    },
+    {
+      "id": "ILLUSTRATION-148",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 110,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.8090909090909091
+    },
+    {
+      "id": "ILLUSTRATION-149",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 108,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.8240740740740741
+    },
+    {
+      "id": "ILLUSTRATION-150",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 99,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.8585858585858586
+    },
+    {
+      "id": "ILLUSTRATION-151",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 109,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.7706422018348624
+    },
+    {
+      "id": "ILLUSTRATION-152",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 98,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.8673469387755102
+    },
+    {
+      "id": "ILLUSTRATION-153",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 90,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.9444444444444444
+    },
+    {
+      "id": "ILLUSTRATION-154",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 107,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.8037383177570093
+    },
+    {
+      "id": "ILLUSTRATION-155",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 89,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8651685393258427
+    },
+    {
+      "id": "ILLUSTRATION-156",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 94,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.7978723404255319
+    },
+    {
+      "id": "ILLUSTRATION-157",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 99,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.8484848484848485
+    },
+    {
+      "id": "ILLUSTRATION-158",
+      "reference_claims": 100,
+      "faithfully_retained": 88,
+      "extracted_claims": 109,
+      "faithfully_supported": 88,
+      "coverage": 0.88,
+      "faithfulness": 0.8073394495412844
+    },
+    {
+      "id": "ILLUSTRATION-159",
+      "reference_claims": 100,
+      "faithfully_retained": 95,
+      "extracted_claims": 104,
+      "faithfully_supported": 95,
+      "coverage": 0.95,
+      "faithfulness": 0.9134615384615384
+    },
+    {
+      "id": "ILLUSTRATION-160",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 89,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8651685393258427
+    },
+    {
+      "id": "ILLUSTRATION-161",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 106,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.7075471698113207
+    },
+    {
+      "id": "ILLUSTRATION-162",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 81,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.9259259259259259
+    },
+    {
+      "id": "ILLUSTRATION-163",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 83,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.9397590361445783
+    },
+    {
+      "id": "ILLUSTRATION-164",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 98,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.826530612244898
+    },
+    {
+      "id": "ILLUSTRATION-165",
+      "reference_claims": 100,
+      "faithfully_retained": 92,
+      "extracted_claims": 101,
+      "faithfully_supported": 92,
+      "coverage": 0.92,
+      "faithfulness": 0.9108910891089109
+    },
+    {
+      "id": "ILLUSTRATION-166",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 79,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.9873417721518988
+    },
+    {
+      "id": "ILLUSTRATION-167",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 93,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8387096774193549
+    },
+    {
+      "id": "ILLUSTRATION-168",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 94,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.8723404255319149
+    },
+    {
+      "id": "ILLUSTRATION-169",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 88,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.9772727272727273
+    },
+    {
+      "id": "ILLUSTRATION-170",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 108,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.7592592592592593
+    },
+    {
+      "id": "ILLUSTRATION-171",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 95,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.8947368421052632
+    },
+    {
+      "id": "ILLUSTRATION-172",
+      "reference_claims": 100,
+      "faithfully_retained": 96,
+      "extracted_claims": 98,
+      "faithfully_supported": 96,
+      "coverage": 0.96,
+      "faithfulness": 0.9795918367346939
+    },
+    {
+      "id": "ILLUSTRATION-173",
+      "reference_claims": 100,
+      "faithfully_retained": 87,
+      "extracted_claims": 99,
+      "faithfully_supported": 87,
+      "coverage": 0.87,
+      "faithfulness": 0.8787878787878788
+    },
+    {
+      "id": "ILLUSTRATION-174",
+      "reference_claims": 100,
+      "faithfully_retained": 69,
+      "extracted_claims": 85,
+      "faithfully_supported": 69,
+      "coverage": 0.69,
+      "faithfulness": 0.8117647058823529
+    },
+    {
+      "id": "ILLUSTRATION-175",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 91,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8571428571428571
+    },
+    {
+      "id": "ILLUSTRATION-176",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 94,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.851063829787234
+    },
+    {
+      "id": "ILLUSTRATION-177",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 95,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.8631578947368421
+    },
+    {
+      "id": "ILLUSTRATION-178",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 96,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.78125
+    },
+    {
+      "id": "ILLUSTRATION-179",
+      "reference_claims": 100,
+      "faithfully_retained": 88,
+      "extracted_claims": 101,
+      "faithfully_supported": 88,
+      "coverage": 0.88,
+      "faithfulness": 0.8712871287128713
+    },
+    {
+      "id": "ILLUSTRATION-180",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 90,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.8666666666666667
+    },
+    {
+      "id": "ILLUSTRATION-181",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 107,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.7663551401869159
+    },
+    {
+      "id": "ILLUSTRATION-182",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 85,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.9058823529411765
+    },
+    {
+      "id": "ILLUSTRATION-183",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 90,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.9222222222222223
+    },
+    {
+      "id": "ILLUSTRATION-184",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 90,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.8444444444444444
+    },
+    {
+      "id": "ILLUSTRATION-185",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 95,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.8
+    },
+    {
+      "id": "ILLUSTRATION-186",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 99,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.8484848484848485
+    },
+    {
+      "id": "ILLUSTRATION-187",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 93,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.8064516129032258
+    },
+    {
+      "id": "ILLUSTRATION-188",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 92,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.9239130434782609
+    },
+    {
+      "id": "ILLUSTRATION-189",
+      "reference_claims": 100,
+      "faithfully_retained": 88,
+      "extracted_claims": 105,
+      "faithfully_supported": 88,
+      "coverage": 0.88,
+      "faithfulness": 0.8380952380952381
+    },
+    {
+      "id": "ILLUSTRATION-190",
+      "reference_claims": 100,
+      "faithfully_retained": 70,
+      "extracted_claims": 89,
+      "faithfully_supported": 70,
+      "coverage": 0.7,
+      "faithfulness": 0.7865168539325843
+    },
+    {
+      "id": "ILLUSTRATION-191",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 96,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.8020833333333334
+    },
+    {
+      "id": "ILLUSTRATION-192",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 93,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.8709677419354839
+    },
+    {
+      "id": "ILLUSTRATION-193",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 96,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.84375
+    },
+    {
+      "id": "ILLUSTRATION-194",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 91,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.9120879120879121
+    },
+    {
+      "id": "ILLUSTRATION-195",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 98,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.826530612244898
+    },
+    {
+      "id": "ILLUSTRATION-196",
+      "reference_claims": 100,
+      "faithfully_retained": 91,
+      "extracted_claims": 92,
+      "faithfully_supported": 91,
+      "coverage": 0.91,
+      "faithfulness": 0.9891304347826086
+    },
+    {
+      "id": "ILLUSTRATION-197",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 83,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.927710843373494
+    },
+    {
+      "id": "ILLUSTRATION-198",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 92,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.9021739130434783
+    },
+    {
+      "id": "ILLUSTRATION-199",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 96,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.8645833333333334
+    },
+    {
+      "id": "ILLUSTRATION-200",
+      "reference_claims": 100,
+      "faithfully_retained": 95,
+      "extracted_claims": 99,
+      "faithfully_supported": 95,
+      "coverage": 0.95,
+      "faithfulness": 0.9595959595959596
+    },
+    {
+      "id": "ILLUSTRATION-201",
+      "reference_claims": 100,
+      "faithfully_retained": 67,
+      "extracted_claims": 77,
+      "faithfully_supported": 67,
+      "coverage": 0.67,
+      "faithfulness": 0.8701298701298701
+    },
+    {
+      "id": "ILLUSTRATION-202",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 92,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.967391304347826
+    },
+    {
+      "id": "ILLUSTRATION-203",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 96,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.8958333333333334
+    },
+    {
+      "id": "ILLUSTRATION-204",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 98,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.8367346938775511
+    },
+    {
+      "id": "ILLUSTRATION-205",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 103,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.8640776699029126
+    },
+    {
+      "id": "ILLUSTRATION-206",
+      "reference_claims": 100,
+      "faithfully_retained": 70,
+      "extracted_claims": 88,
+      "faithfully_supported": 70,
+      "coverage": 0.7,
+      "faithfulness": 0.7954545454545454
+    },
+    {
+      "id": "ILLUSTRATION-207",
+      "reference_claims": 100,
+      "faithfully_retained": 95,
+      "extracted_claims": 108,
+      "faithfully_supported": 95,
+      "coverage": 0.95,
+      "faithfulness": 0.8796296296296297
+    },
+    {
+      "id": "ILLUSTRATION-208",
+      "reference_claims": 100,
+      "faithfully_retained": 69,
+      "extracted_claims": 84,
+      "faithfully_supported": 69,
+      "coverage": 0.69,
+      "faithfulness": 0.8214285714285714
+    },
+    {
+      "id": "ILLUSTRATION-209",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 97,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.8556701030927835
+    },
+    {
+      "id": "ILLUSTRATION-210",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 100,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.81
+    },
+    {
+      "id": "ILLUSTRATION-211",
+      "reference_claims": 100,
+      "faithfully_retained": 46,
+      "extracted_claims": 55,
+      "faithfully_supported": 46,
+      "coverage": 0.46,
+      "faithfulness": 0.8363636363636363
+    },
+    {
+      "id": "ILLUSTRATION-212",
+      "reference_claims": 100,
+      "faithfully_retained": 53,
+      "extracted_claims": 57,
+      "faithfully_supported": 53,
+      "coverage": 0.53,
+      "faithfulness": 0.9298245614035088
+    },
+    {
+      "id": "ILLUSTRATION-213",
+      "reference_claims": 100,
+      "faithfully_retained": 34,
+      "extracted_claims": 38,
+      "faithfully_supported": 34,
+      "coverage": 0.34,
+      "faithfulness": 0.8947368421052632
+    },
+    {
+      "id": "ILLUSTRATION-214",
+      "reference_claims": 100,
+      "faithfully_retained": 49,
+      "extracted_claims": 61,
+      "faithfully_supported": 49,
+      "coverage": 0.49,
+      "faithfulness": 0.8032786885245902
+    },
+    {
+      "id": "ILLUSTRATION-215",
+      "reference_claims": 100,
+      "faithfully_retained": 47,
+      "extracted_claims": 58,
+      "faithfully_supported": 47,
+      "coverage": 0.47,
+      "faithfulness": 0.8103448275862069
+    },
+    {
+      "id": "ILLUSTRATION-216",
+      "reference_claims": 100,
+      "faithfully_retained": 52,
+      "extracted_claims": 69,
+      "faithfully_supported": 52,
+      "coverage": 0.52,
+      "faithfulness": 0.7536231884057971
+    },
+    {
+      "id": "ILLUSTRATION-217",
+      "reference_claims": 100,
+      "faithfully_retained": 44,
+      "extracted_claims": 52,
+      "faithfully_supported": 44,
+      "coverage": 0.44,
+      "faithfulness": 0.8461538461538461
+    },
+    {
+      "id": "ILLUSTRATION-218",
+      "reference_claims": 100,
+      "faithfully_retained": 50,
+      "extracted_claims": 55,
+      "faithfully_supported": 50,
+      "coverage": 0.5,
+      "faithfulness": 0.9090909090909091
+    },
+    {
+      "id": "ILLUSTRATION-219",
+      "reference_claims": 100,
+      "faithfully_retained": 50,
+      "extracted_claims": 63,
+      "faithfully_supported": 50,
+      "coverage": 0.5,
+      "faithfulness": 0.7936507936507936
+    },
+    {
+      "id": "ILLUSTRATION-220",
+      "reference_claims": 100,
+      "faithfully_retained": 53,
+      "extracted_claims": 65,
+      "faithfully_supported": 53,
+      "coverage": 0.53,
+      "faithfulness": 0.8153846153846154
+    },
+    {
+      "id": "ILLUSTRATION-221",
+      "reference_claims": 100,
+      "faithfully_retained": 52,
+      "extracted_claims": 56,
+      "faithfully_supported": 52,
+      "coverage": 0.52,
+      "faithfulness": 0.9285714285714286
+    },
+    {
+      "id": "ILLUSTRATION-222",
+      "reference_claims": 100,
+      "faithfully_retained": 56,
+      "extracted_claims": 65,
+      "faithfully_supported": 56,
+      "coverage": 0.56,
+      "faithfulness": 0.8615384615384616
+    },
+    {
+      "id": "ILLUSTRATION-223",
+      "reference_claims": 100,
+      "faithfully_retained": 41,
+      "extracted_claims": 44,
+      "faithfully_supported": 41,
+      "coverage": 0.41,
+      "faithfulness": 0.9318181818181818
+    },
+    {
+      "id": "ILLUSTRATION-224",
+      "reference_claims": 100,
+      "faithfully_retained": 50,
+      "extracted_claims": 57,
+      "faithfully_supported": 50,
+      "coverage": 0.5,
+      "faithfulness": 0.8771929824561403
+    },
+    {
+      "id": "ILLUSTRATION-225",
+      "reference_claims": 100,
+      "faithfully_retained": 59,
+      "extracted_claims": 71,
+      "faithfully_supported": 59,
+      "coverage": 0.59,
+      "faithfulness": 0.8309859154929577
+    },
+    {
+      "id": "ILLUSTRATION-226",
+      "reference_claims": 100,
+      "faithfully_retained": 40,
+      "extracted_claims": 53,
+      "faithfully_supported": 40,
+      "coverage": 0.4,
+      "faithfulness": 0.7547169811320755
+    },
+    {
+      "id": "ILLUSTRATION-227",
+      "reference_claims": 100,
+      "faithfully_retained": 33,
+      "extracted_claims": 42,
+      "faithfully_supported": 33,
+      "coverage": 0.33,
+      "faithfulness": 0.7857142857142857
+    },
+    {
+      "id": "ILLUSTRATION-228",
+      "reference_claims": 100,
+      "faithfully_retained": 42,
+      "extracted_claims": 56,
+      "faithfully_supported": 42,
+      "coverage": 0.42,
+      "faithfulness": 0.75
+    },
+    {
+      "id": "ILLUSTRATION-229",
+      "reference_claims": 100,
+      "faithfully_retained": 43,
+      "extracted_claims": 50,
+      "faithfully_supported": 43,
+      "coverage": 0.43,
+      "faithfulness": 0.86
+    },
+    {
+      "id": "ILLUSTRATION-230",
+      "reference_claims": 100,
+      "faithfully_retained": 52,
+      "extracted_claims": 73,
+      "faithfully_supported": 52,
+      "coverage": 0.52,
+      "faithfulness": 0.7123287671232876
+    },
+    {
+      "id": "ILLUSTRATION-231",
+      "reference_claims": 100,
+      "faithfully_retained": 40,
+      "extracted_claims": 45,
+      "faithfully_supported": 40,
+      "coverage": 0.4,
+      "faithfulness": 0.8888888888888888
+    },
+    {
+      "id": "ILLUSTRATION-232",
+      "reference_claims": 100,
+      "faithfully_retained": 46,
+      "extracted_claims": 56,
+      "faithfully_supported": 46,
+      "coverage": 0.46,
+      "faithfulness": 0.8214285714285714
+    },
+    {
+      "id": "ILLUSTRATION-233",
+      "reference_claims": 100,
+      "faithfully_retained": 41,
+      "extracted_claims": 43,
+      "faithfully_supported": 41,
+      "coverage": 0.41,
+      "faithfulness": 0.9534883720930233
+    },
+    {
+      "id": "ILLUSTRATION-234",
+      "reference_claims": 100,
+      "faithfully_retained": 50,
+      "extracted_claims": 56,
+      "faithfully_supported": 50,
+      "coverage": 0.5,
+      "faithfulness": 0.8928571428571429
+    },
+    {
+      "id": "ILLUSTRATION-235",
+      "reference_claims": 100,
+      "faithfully_retained": 43,
+      "extracted_claims": 49,
+      "faithfully_supported": 43,
+      "coverage": 0.43,
+      "faithfulness": 0.8775510204081632
+    },
+    {
+      "id": "ILLUSTRATION-236",
+      "reference_claims": 100,
+      "faithfully_retained": 56,
+      "extracted_claims": 61,
+      "faithfully_supported": 56,
+      "coverage": 0.56,
+      "faithfulness": 0.9180327868852459
+    },
+    {
+      "id": "ILLUSTRATION-237",
+      "reference_claims": 100,
+      "faithfully_retained": 59,
+      "extracted_claims": 75,
+      "faithfully_supported": 59,
+      "coverage": 0.59,
+      "faithfulness": 0.7866666666666666
+    },
+    {
+      "id": "ILLUSTRATION-238",
+      "reference_claims": 100,
+      "faithfully_retained": 54,
+      "extracted_claims": 65,
+      "faithfully_supported": 54,
+      "coverage": 0.54,
+      "faithfulness": 0.8307692307692308
+    },
+    {
+      "id": "ILLUSTRATION-239",
+      "reference_claims": 100,
+      "faithfully_retained": 52,
+      "extracted_claims": 69,
+      "faithfully_supported": 52,
+      "coverage": 0.52,
+      "faithfulness": 0.7536231884057971
+    },
+    {
+      "id": "ILLUSTRATION-240",
+      "reference_claims": 100,
+      "faithfully_retained": 48,
+      "extracted_claims": 53,
+      "faithfully_supported": 48,
+      "coverage": 0.48,
+      "faithfulness": 0.9056603773584906
+    },
+    {
+      "id": "ILLUSTRATION-241",
+      "reference_claims": 100,
+      "faithfully_retained": 34,
+      "extracted_claims": 39,
+      "faithfully_supported": 34,
+      "coverage": 0.34,
+      "faithfulness": 0.8717948717948718
+    },
+    {
+      "id": "ILLUSTRATION-242",
+      "reference_claims": 100,
+      "faithfully_retained": 55,
+      "extracted_claims": 66,
+      "faithfully_supported": 55,
+      "coverage": 0.55,
+      "faithfulness": 0.8333333333333334
+    },
+    {
+      "id": "ILLUSTRATION-243",
+      "reference_claims": 100,
+      "faithfully_retained": 44,
+      "extracted_claims": 49,
+      "faithfully_supported": 44,
+      "coverage": 0.44,
+      "faithfulness": 0.8979591836734694
+    },
+    {
+      "id": "ILLUSTRATION-244",
+      "reference_claims": 100,
+      "faithfully_retained": 65,
+      "extracted_claims": 73,
+      "faithfully_supported": 65,
+      "coverage": 0.65,
+      "faithfulness": 0.8904109589041096
+    },
+    {
+      "id": "ILLUSTRATION-245",
+      "reference_claims": 100,
+      "faithfully_retained": 57,
+      "extracted_claims": 74,
+      "faithfully_supported": 57,
+      "coverage": 0.57,
+      "faithfulness": 0.7702702702702703
+    },
+    {
+      "id": "ILLUSTRATION-246",
+      "reference_claims": 100,
+      "faithfully_retained": 46,
+      "extracted_claims": 52,
+      "faithfully_supported": 46,
+      "coverage": 0.46,
+      "faithfulness": 0.8846153846153846
+    },
+    {
+      "id": "ILLUSTRATION-247",
+      "reference_claims": 100,
+      "faithfully_retained": 62,
+      "extracted_claims": 74,
+      "faithfully_supported": 62,
+      "coverage": 0.62,
+      "faithfulness": 0.8378378378378378
+    },
+    {
+      "id": "ILLUSTRATION-248",
+      "reference_claims": 100,
+      "faithfully_retained": 44,
+      "extracted_claims": 62,
+      "faithfully_supported": 44,
+      "coverage": 0.44,
+      "faithfulness": 0.7096774193548387
+    },
+    {
+      "id": "ILLUSTRATION-249",
+      "reference_claims": 100,
+      "faithfully_retained": 71,
+      "extracted_claims": 82,
+      "faithfully_supported": 71,
+      "coverage": 0.71,
+      "faithfulness": 0.8658536585365854
+    },
+    {
+      "id": "ILLUSTRATION-250",
+      "reference_claims": 100,
+      "faithfully_retained": 27,
+      "extracted_claims": 31,
+      "faithfully_supported": 27,
+      "coverage": 0.27,
+      "faithfulness": 0.8709677419354839
+    },
+    {
+      "id": "ILLUSTRATION-251",
+      "reference_claims": 100,
+      "faithfully_retained": 44,
+      "extracted_claims": 54,
+      "faithfully_supported": 44,
+      "coverage": 0.44,
+      "faithfulness": 0.8148148148148148
+    },
+    {
+      "id": "ILLUSTRATION-252",
+      "reference_claims": 100,
+      "faithfully_retained": 42,
+      "extracted_claims": 54,
+      "faithfully_supported": 42,
+      "coverage": 0.42,
+      "faithfulness": 0.7777777777777778
+    },
+    {
+      "id": "ILLUSTRATION-253",
+      "reference_claims": 100,
+      "faithfully_retained": 45,
+      "extracted_claims": 53,
+      "faithfully_supported": 45,
+      "coverage": 0.45,
+      "faithfulness": 0.8490566037735849
+    },
+    {
+      "id": "ILLUSTRATION-254",
+      "reference_claims": 100,
+      "faithfully_retained": 43,
+      "extracted_claims": 51,
+      "faithfully_supported": 43,
+      "coverage": 0.43,
+      "faithfulness": 0.8431372549019608
+    },
+    {
+      "id": "ILLUSTRATION-255",
+      "reference_claims": 100,
+      "faithfully_retained": 53,
+      "extracted_claims": 61,
+      "faithfully_supported": 53,
+      "coverage": 0.53,
+      "faithfulness": 0.8688524590163934
+    },
+    {
+      "id": "ILLUSTRATION-256",
+      "reference_claims": 100,
+      "faithfully_retained": 33,
+      "extracted_claims": 39,
+      "faithfully_supported": 33,
+      "coverage": 0.33,
+      "faithfulness": 0.8461538461538461
+    },
+    {
+      "id": "ILLUSTRATION-257",
+      "reference_claims": 100,
+      "faithfully_retained": 41,
+      "extracted_claims": 46,
+      "faithfully_supported": 41,
+      "coverage": 0.41,
+      "faithfulness": 0.8913043478260869
+    },
+    {
+      "id": "ILLUSTRATION-258",
+      "reference_claims": 100,
+      "faithfully_retained": 40,
+      "extracted_claims": 48,
+      "faithfully_supported": 40,
+      "coverage": 0.4,
+      "faithfulness": 0.8333333333333334
+    },
+    {
+      "id": "ILLUSTRATION-259",
+      "reference_claims": 100,
+      "faithfully_retained": 33,
+      "extracted_claims": 43,
+      "faithfully_supported": 33,
+      "coverage": 0.33,
+      "faithfulness": 0.7674418604651163
+    },
+    {
+      "id": "ILLUSTRATION-260",
+      "reference_claims": 100,
+      "faithfully_retained": 47,
+      "extracted_claims": 66,
+      "faithfully_supported": 47,
+      "coverage": 0.47,
+      "faithfulness": 0.7121212121212122
+    },
+    {
+      "id": "ILLUSTRATION-261",
+      "reference_claims": 100,
+      "faithfully_retained": 63,
+      "extracted_claims": 74,
+      "faithfully_supported": 63,
+      "coverage": 0.63,
+      "faithfulness": 0.8513513513513513
+    },
+    {
+      "id": "ILLUSTRATION-262",
+      "reference_claims": 100,
+      "faithfully_retained": 41,
+      "extracted_claims": 50,
+      "faithfully_supported": 41,
+      "coverage": 0.41,
+      "faithfulness": 0.82
+    },
+    {
+      "id": "ILLUSTRATION-263",
+      "reference_claims": 100,
+      "faithfully_retained": 42,
+      "extracted_claims": 56,
+      "faithfully_supported": 42,
+      "coverage": 0.42,
+      "faithfulness": 0.75
+    },
+    {
+      "id": "ILLUSTRATION-264",
+      "reference_claims": 100,
+      "faithfully_retained": 47,
+      "extracted_claims": 55,
+      "faithfully_supported": 47,
+      "coverage": 0.47,
+      "faithfulness": 0.8545454545454545
+    },
+    {
+      "id": "ILLUSTRATION-265",
+      "reference_claims": 100,
+      "faithfully_retained": 40,
+      "extracted_claims": 50,
+      "faithfully_supported": 40,
+      "coverage": 0.4,
+      "faithfulness": 0.8
+    },
+    {
+      "id": "ILLUSTRATION-266",
+      "reference_claims": 100,
+      "faithfully_retained": 50,
+      "extracted_claims": 56,
+      "faithfully_supported": 50,
+      "coverage": 0.5,
+      "faithfulness": 0.8928571428571429
+    },
+    {
+      "id": "ILLUSTRATION-267",
+      "reference_claims": 100,
+      "faithfully_retained": 54,
+      "extracted_claims": 74,
+      "faithfully_supported": 54,
+      "coverage": 0.54,
+      "faithfulness": 0.7297297297297297
+    },
+    {
+      "id": "ILLUSTRATION-268",
+      "reference_claims": 100,
+      "faithfully_retained": 44,
+      "extracted_claims": 53,
+      "faithfully_supported": 44,
+      "coverage": 0.44,
+      "faithfulness": 0.8301886792452831
+    },
+    {
+      "id": "ILLUSTRATION-269",
+      "reference_claims": 100,
+      "faithfully_retained": 39,
+      "extracted_claims": 48,
+      "faithfully_supported": 39,
+      "coverage": 0.39,
+      "faithfulness": 0.8125
+    },
+    {
+      "id": "ILLUSTRATION-270",
+      "reference_claims": 100,
+      "faithfully_retained": 32,
+      "extracted_claims": 39,
+      "faithfully_supported": 32,
+      "coverage": 0.32,
+      "faithfulness": 0.8205128205128205
+    },
+    {
+      "id": "ILLUSTRATION-271",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 244,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.3524590163934426
+    },
+    {
+      "id": "ILLUSTRATION-272",
+      "reference_claims": 100,
+      "faithfully_retained": 74,
+      "extracted_claims": 176,
+      "faithfully_supported": 74,
+      "coverage": 0.74,
+      "faithfulness": 0.42045454545454547
+    },
+    {
+      "id": "ILLUSTRATION-273",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 209,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.37799043062200954
+    },
+    {
+      "id": "ILLUSTRATION-274",
+      "reference_claims": 100,
+      "faithfully_retained": 74,
+      "extracted_claims": 132,
+      "faithfully_supported": 74,
+      "coverage": 0.74,
+      "faithfulness": 0.5606060606060606
+    },
+    {
+      "id": "ILLUSTRATION-275",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 201,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.39800995024875624
+    },
+    {
+      "id": "ILLUSTRATION-276",
+      "reference_claims": 100,
+      "faithfully_retained": 86,
+      "extracted_claims": 200,
+      "faithfully_supported": 86,
+      "coverage": 0.86,
+      "faithfulness": 0.43
+    },
+    {
+      "id": "ILLUSTRATION-277",
+      "reference_claims": 100,
+      "faithfully_retained": 72,
+      "extracted_claims": 110,
+      "faithfully_supported": 72,
+      "coverage": 0.72,
+      "faithfulness": 0.6545454545454545
+    },
+    {
+      "id": "ILLUSTRATION-278",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 171,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.43859649122807015
+    },
+    {
+      "id": "ILLUSTRATION-279",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 183,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.453551912568306
+    },
+    {
+      "id": "ILLUSTRATION-280",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 155,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.5290322580645161
+    },
+    {
+      "id": "ILLUSTRATION-281",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 136,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.5955882352941176
+    },
+    {
+      "id": "ILLUSTRATION-282",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 132,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.5984848484848485
+    },
+    {
+      "id": "ILLUSTRATION-283",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 151,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.543046357615894
+    },
+    {
+      "id": "ILLUSTRATION-284",
+      "reference_claims": 100,
+      "faithfully_retained": 91,
+      "extracted_claims": 147,
+      "faithfully_supported": 91,
+      "coverage": 0.91,
+      "faithfulness": 0.6190476190476191
+    },
+    {
+      "id": "ILLUSTRATION-285",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 134,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.5447761194029851
+    },
+    {
+      "id": "ILLUSTRATION-286",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 256,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.3125
+    },
+    {
+      "id": "ILLUSTRATION-287",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 148,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.5337837837837838
+    },
+    {
+      "id": "ILLUSTRATION-288",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 136,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.5735294117647058
+    },
+    {
+      "id": "ILLUSTRATION-289",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 214,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.38317757009345793
+    },
+    {
+      "id": "ILLUSTRATION-290",
+      "reference_claims": 100,
+      "faithfully_retained": 70,
+      "extracted_claims": 162,
+      "faithfully_supported": 70,
+      "coverage": 0.7,
+      "faithfulness": 0.43209876543209874
+    },
+    {
+      "id": "ILLUSTRATION-291",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 152,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.5197368421052632
+    },
+    {
+      "id": "ILLUSTRATION-292",
+      "reference_claims": 100,
+      "faithfully_retained": 87,
+      "extracted_claims": 183,
+      "faithfully_supported": 87,
+      "coverage": 0.87,
+      "faithfulness": 0.47540983606557374
+    },
+    {
+      "id": "ILLUSTRATION-293",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 171,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.4269005847953216
+    },
+    {
+      "id": "ILLUSTRATION-294",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 185,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.42162162162162165
+    },
+    {
+      "id": "ILLUSTRATION-295",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 207,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.4106280193236715
+    },
+    {
+      "id": "ILLUSTRATION-296",
+      "reference_claims": 100,
+      "faithfully_retained": 79,
+      "extracted_claims": 167,
+      "faithfully_supported": 79,
+      "coverage": 0.79,
+      "faithfulness": 0.47305389221556887
+    },
+    {
+      "id": "ILLUSTRATION-297",
+      "reference_claims": 100,
+      "faithfully_retained": 91,
+      "extracted_claims": 162,
+      "faithfully_supported": 91,
+      "coverage": 0.91,
+      "faithfulness": 0.5617283950617284
+    },
+    {
+      "id": "ILLUSTRATION-298",
+      "reference_claims": 100,
+      "faithfully_retained": 74,
+      "extracted_claims": 146,
+      "faithfully_supported": 74,
+      "coverage": 0.74,
+      "faithfulness": 0.5068493150684932
+    },
+    {
+      "id": "ILLUSTRATION-299",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 276,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.29347826086956524
+    },
+    {
+      "id": "ILLUSTRATION-300",
+      "reference_claims": 100,
+      "faithfully_retained": 71,
+      "extracted_claims": 263,
+      "faithfully_supported": 71,
+      "coverage": 0.71,
+      "faithfulness": 0.26996197718631176
+    },
+    {
+      "id": "ILLUSTRATION-301",
+      "reference_claims": 100,
+      "faithfully_retained": 89,
+      "extracted_claims": 211,
+      "faithfully_supported": 89,
+      "coverage": 0.89,
+      "faithfulness": 0.4218009478672986
+    },
+    {
+      "id": "ILLUSTRATION-302",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 209,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.3923444976076555
+    },
+    {
+      "id": "ILLUSTRATION-303",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 200,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.365
+    },
+    {
+      "id": "ILLUSTRATION-304",
+      "reference_claims": 100,
+      "faithfully_retained": 74,
+      "extracted_claims": 149,
+      "faithfully_supported": 74,
+      "coverage": 0.74,
+      "faithfulness": 0.4966442953020134
+    },
+    {
+      "id": "ILLUSTRATION-305",
+      "reference_claims": 100,
+      "faithfully_retained": 73,
+      "extracted_claims": 154,
+      "faithfully_supported": 73,
+      "coverage": 0.73,
+      "faithfulness": 0.474025974025974
+    },
+    {
+      "id": "ILLUSTRATION-306",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 145,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.5724137931034483
+    },
+    {
+      "id": "ILLUSTRATION-307",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 135,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.5555555555555556
+    },
+    {
+      "id": "ILLUSTRATION-308",
+      "reference_claims": 100,
+      "faithfully_retained": 78,
+      "extracted_claims": 228,
+      "faithfully_supported": 78,
+      "coverage": 0.78,
+      "faithfulness": 0.34210526315789475
+    },
+    {
+      "id": "ILLUSTRATION-309",
+      "reference_claims": 100,
+      "faithfully_retained": 85,
+      "extracted_claims": 183,
+      "faithfully_supported": 85,
+      "coverage": 0.85,
+      "faithfulness": 0.4644808743169399
+    },
+    {
+      "id": "ILLUSTRATION-310",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 153,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.49019607843137253
+    },
+    {
+      "id": "ILLUSTRATION-311",
+      "reference_claims": 100,
+      "faithfully_retained": 77,
+      "extracted_claims": 140,
+      "faithfully_supported": 77,
+      "coverage": 0.77,
+      "faithfulness": 0.55
+    },
+    {
+      "id": "ILLUSTRATION-312",
+      "reference_claims": 100,
+      "faithfully_retained": 76,
+      "extracted_claims": 143,
+      "faithfully_supported": 76,
+      "coverage": 0.76,
+      "faithfulness": 0.5314685314685315
+    },
+    {
+      "id": "ILLUSTRATION-313",
+      "reference_claims": 100,
+      "faithfully_retained": 83,
+      "extracted_claims": 145,
+      "faithfully_supported": 83,
+      "coverage": 0.83,
+      "faithfulness": 0.5724137931034483
+    },
+    {
+      "id": "ILLUSTRATION-314",
+      "reference_claims": 100,
+      "faithfully_retained": 65,
+      "extracted_claims": 170,
+      "faithfully_supported": 65,
+      "coverage": 0.65,
+      "faithfulness": 0.38235294117647056
+    },
+    {
+      "id": "ILLUSTRATION-315",
+      "reference_claims": 100,
+      "faithfully_retained": 80,
+      "extracted_claims": 155,
+      "faithfully_supported": 80,
+      "coverage": 0.8,
+      "faithfulness": 0.5161290322580645
+    },
+    {
+      "id": "ILLUSTRATION-316",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 127,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.5905511811023622
+    },
+    {
+      "id": "ILLUSTRATION-317",
+      "reference_claims": 100,
+      "faithfully_retained": 84,
+      "extracted_claims": 166,
+      "faithfully_supported": 84,
+      "coverage": 0.84,
+      "faithfulness": 0.5060240963855421
+    },
+    {
+      "id": "ILLUSTRATION-318",
+      "reference_claims": 100,
+      "faithfully_retained": 75,
+      "extracted_claims": 172,
+      "faithfully_supported": 75,
+      "coverage": 0.75,
+      "faithfulness": 0.436046511627907
+    },
+    {
+      "id": "ILLUSTRATION-319",
+      "reference_claims": 100,
+      "faithfully_retained": 81,
+      "extracted_claims": 178,
+      "faithfully_supported": 81,
+      "coverage": 0.81,
+      "faithfulness": 0.4550561797752809
+    },
+    {
+      "id": "ILLUSTRATION-320",
+      "reference_claims": 100,
+      "faithfully_retained": 82,
+      "extracted_claims": 187,
+      "faithfully_supported": 82,
+      "coverage": 0.82,
+      "faithfulness": 0.4385026737967914
+    }
+  ]
+}
