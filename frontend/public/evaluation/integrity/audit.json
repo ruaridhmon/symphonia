@@ -1,0 +1,782 @@
+{
+  "summary": {
+    "scope": "Retrospective audit of two archived v7 engineering runs on ONE shared synthetic scenario; eight replayed participants. Not a new model experiment, independent replication, or a live product audit.",
+    "count_mismatches": 12,
+    "count_rows": 15,
+    "final_count_mismatches": 2,
+    "unaccounted_ballots": 16,
+    "coverage": [
+      {
+        "method": "structured",
+        "reference_claims": 15,
+        "display_claims": 60,
+        "accepted_display_claims": 40,
+        "unique_reference_claims": 15
+      },
+      {
+        "method": "symphonia",
+        "reference_claims": 15,
+        "display_claims": 7,
+        "accepted_display_claims": 3,
+        "unique_reference_claims": 3
+      }
+    ],
+    "missing_ballots": 32,
+    "display_ballots": 56,
+    "provenance": [
+      {
+        "method": "structured",
+        "run_id": "pilot-000/A/v7/full_workflow/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+        "file": "b0ac9f0ffdcc8c34d458f5281b7ed85f3f739266cc34f9c487d670f42a07e5ce.json",
+        "sha256": "1167b7630960b1266d56bb9159dd80ed292564ad7daf16dc7cdc231db9f40a0a"
+      },
+      {
+        "method": "symphonia",
+        "run_id": "pilot-000/A/v7/full_workflow/8/500/symphonia/anthropic/claude-opus-4.6/0/baseline",
+        "file": "42b6012e893d037817e2b7ab711bec4e07223eb74728cb3b0e3b93d820f9ada3.json",
+        "sha256": "18e70f05f26442fe6176115f957bda9f55cb370515ddcf71effe271f22751781"
+      }
+    ]
+  },
+  "count_rows": [
+    {
+      "claim": "C1",
+      "actual": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        5
+      ],
+      "delta": [
+        0,
+        0,
+        -2
+      ],
+      "quote": "Chronic absenteeism rate was 27.4% in 2031-32 (C1): P002 supports from S2; P001, P005, P006, P003, P004 find insufficient evidence.",
+      "voters": {
+        "P001": "insufficient_evidence",
+        "P002": "support",
+        "P003": "insufficient_evidence",
+        "P004": "insufficient_evidence",
+        "P005": "insufficient_evidence",
+        "P006": "insufficient_evidence",
+        "P007": "insufficient_evidence",
+        "P008": "insufficient_evidence"
+      },
+      "final_actual": [
+        1,
+        0,
+        7
+      ],
+      "final_reported": [
+        1,
+        0,
+        7
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C2",
+      "actual": [
+        7,
+        1,
+        0
+      ],
+      "reported": [
+        6,
+        1,
+        0
+      ],
+      "delta": [
+        -1,
+        0,
+        0
+      ],
+      "quote": "Chronic absenteeism was below 15% in 2031-32 (C2): Six participants support based on unverified S902; P002 opposes citing S2 showing rates above 15%.",
+      "voters": {
+        "P001": "support",
+        "P002": "oppose",
+        "P003": "support",
+        "P004": "support",
+        "P005": "support",
+        "P006": "support",
+        "P007": "support",
+        "P008": "support"
+      },
+      "final_actual": [
+        7,
+        1,
+        0
+      ],
+      "final_reported": [
+        7,
+        1,
+        0
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C3",
+      "actual": [
+        2,
+        0,
+        6
+      ],
+      "reported": [
+        2,
+        0,
+        5
+      ],
+      "delta": [
+        0,
+        0,
+        -1
+      ],
+      "quote": "Pilot showed 41% higher return-to-attendance rate for alerted students (C3): P001 and P002 support with high confidence; P003, P005, P006, P007, P008 find insufficient evidence or inconclusive.",
+      "voters": {
+        "P001": "support",
+        "P002": "support",
+        "P003": "insufficient_evidence",
+        "P004": "insufficient_evidence",
+        "P005": "insufficient_evidence",
+        "P006": "insufficient_evidence",
+        "P007": "insufficient_evidence",
+        "P008": "insufficient_evidence"
+      },
+      "final_actual": [
+        2,
+        0,
+        6
+      ],
+      "final_reported": [
+        2,
+        0,
+        6
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C4",
+      "actual": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        0,
+        5,
+        0
+      ],
+      "delta": [
+        -1,
+        -2,
+        0
+      ],
+      "quote": "No difference in return-to-attendance between alerted and non-alerted students (C4): All five evaluating participants (P001, P002, P003, P005, P006, P007) oppose this claim, though P006 notes S4 suggests only a small positive effect.",
+      "voters": {
+        "P001": "oppose",
+        "P002": "oppose",
+        "P003": "oppose",
+        "P004": "support",
+        "P005": "oppose",
+        "P006": "oppose",
+        "P007": "oppose",
+        "P008": "oppose"
+      },
+      "final_actual": [
+        1,
+        7,
+        0
+      ],
+      "final_reported": [
+        1,
+        7,
+        0
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C5",
+      "actual": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        6
+      ],
+      "delta": [
+        0,
+        0,
+        -1
+      ],
+      "quote": "SMS alerts had no significant effect on students whose primary absence driver was caregiver work-schedule conflict (C5): Only P001 supports; P002, P003, P004, P005, P006, P007 all find insufficient evidence.",
+      "voters": {
+        "P001": "support",
+        "P002": "insufficient_evidence",
+        "P003": "insufficient_evidence",
+        "P004": "insufficient_evidence",
+        "P005": "insufficient_evidence",
+        "P006": "insufficient_evidence",
+        "P007": "insufficient_evidence",
+        "P008": "insufficient_evidence"
+      },
+      "final_actual": [
+        1,
+        0,
+        7
+      ],
+      "final_reported": [
+        1,
+        0,
+        7
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C6",
+      "actual": [
+        1,
+        0,
+        7
+      ],
+      "reported": [
+        1,
+        0,
+        6
+      ],
+      "delta": [
+        0,
+        0,
+        -1
+      ],
+      "quote": "SMS alerts reduced absenteeism by 53% among students facing transportation barriers (C6): Only P001 supports; P002, P003, P004, P005, P006, P007 all find insufficient evidence.",
+      "voters": {
+        "P001": "support",
+        "P002": "insufficient_evidence",
+        "P003": "insufficient_evidence",
+        "P004": "insufficient_evidence",
+        "P005": "insufficient_evidence",
+        "P006": "insufficient_evidence",
+        "P007": "insufficient_evidence",
+        "P008": "insufficient_evidence"
+      },
+      "final_actual": [
+        1,
+        0,
+        7
+      ],
+      "final_reported": [
+        1,
+        0,
+        7
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C7",
+      "actual": [
+        4,
+        0,
+        4
+      ],
+      "reported": [
+        4,
+        0,
+        3
+      ],
+      "delta": [
+        0,
+        0,
+        -1
+      ],
+      "quote": "Grade-band absenteeism rates (elementary 19.1%, high school 34.8%) in 2031-32 (C7): Four participants support from S6; three find insufficient evidence lacking direct data.",
+      "voters": {
+        "P001": "insufficient_evidence",
+        "P002": "insufficient_evidence",
+        "P003": "insufficient_evidence",
+        "P004": "support",
+        "P005": "support",
+        "P006": "support",
+        "P007": "support",
+        "P008": "insufficient_evidence"
+      },
+      "final_actual": [
+        4,
+        0,
+        4
+      ],
+      "final_reported": [
+        5,
+        0,
+        3
+      ],
+      "final_delta": [
+        1,
+        0,
+        -1
+      ]
+    },
+    {
+      "claim": "C8",
+      "actual": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        3,
+        4,
+        1
+      ],
+      "delta": [
+        -1,
+        0,
+        1
+      ],
+      "quote": "High-school chronic absenteeism was lower than elementary in 2031-32 (C8): P002, P003, P008 support from unverified S914; P004, P005, P006, P007 oppose citing S6 showing the opposite.",
+      "voters": {
+        "P001": "support",
+        "P002": "support",
+        "P003": "support",
+        "P004": "oppose",
+        "P005": "oppose",
+        "P006": "oppose",
+        "P007": "oppose",
+        "P008": "support"
+      },
+      "final_actual": [
+        4,
+        4,
+        0
+      ],
+      "final_reported": [
+        3,
+        5,
+        0
+      ],
+      "final_delta": [
+        -1,
+        1,
+        0
+      ]
+    },
+    {
+      "claim": "C9",
+      "actual": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        6
+      ],
+      "delta": [
+        0,
+        0,
+        -2
+      ],
+      "quote": "Westbrook's 6% absenteeism increase attributable to alert intervention (C9): All six evaluating participants find insufficient evidence due to confounding factors.",
+      "voters": {
+        "P001": "insufficient_evidence",
+        "P002": "insufficient_evidence",
+        "P003": "insufficient_evidence",
+        "P004": "insufficient_evidence",
+        "P005": "insufficient_evidence",
+        "P006": "insufficient_evidence",
+        "P007": "insufficient_evidence",
+        "P008": "insufficient_evidence"
+      },
+      "final_actual": [
+        0,
+        0,
+        8
+      ],
+      "final_reported": [
+        0,
+        0,
+        8
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C10",
+      "actual": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        6
+      ],
+      "delta": [
+        0,
+        0,
+        -2
+      ],
+      "quote": "Hardale's 44% decrease applicable to Veldoria (C10): All six evaluating participants find insufficient evidence.",
+      "voters": {
+        "P001": "insufficient_evidence",
+        "P002": "insufficient_evidence",
+        "P003": "insufficient_evidence",
+        "P004": "insufficient_evidence",
+        "P005": "insufficient_evidence",
+        "P006": "insufficient_evidence",
+        "P007": "insufficient_evidence",
+        "P008": "insufficient_evidence"
+      },
+      "final_actual": [
+        0,
+        0,
+        8
+      ],
+      "final_reported": [
+        0,
+        0,
+        8
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C11",
+      "actual": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "delta": [
+        0,
+        0,
+        0
+      ],
+      "quote": "Implementation fidelity differences fully explain Westbrook-Hardale contradiction (C11): Four support, four oppose. All acknowledge lack of independent audit of fidelity data.",
+      "voters": {
+        "P001": "oppose",
+        "P002": "oppose",
+        "P003": "support",
+        "P004": "support",
+        "P005": "support",
+        "P006": "oppose",
+        "P007": "oppose",
+        "P008": "support"
+      },
+      "final_actual": [
+        4,
+        4,
+        0
+      ],
+      "final_reported": [
+        4,
+        4,
+        0
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C12",
+      "actual": [
+        0,
+        0,
+        8
+      ],
+      "reported": [
+        0,
+        0,
+        7
+      ],
+      "delta": [
+        0,
+        0,
+        -1
+      ],
+      "quote": "Selection confounding best explains Veldoria-Westbrook divergence (C12): All seven evaluating participants find insufficient evidence.",
+      "voters": {
+        "P001": "insufficient_evidence",
+        "P002": "insufficient_evidence",
+        "P003": "insufficient_evidence",
+        "P004": "insufficient_evidence",
+        "P005": "insufficient_evidence",
+        "P006": "insufficient_evidence",
+        "P007": "insufficient_evidence",
+        "P008": "insufficient_evidence"
+      },
+      "final_actual": [
+        0,
+        0,
+        8
+      ],
+      "final_reported": [
+        0,
+        0,
+        8
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C13",
+      "actual": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "delta": [
+        0,
+        0,
+        0
+      ],
+      "quote": "Universal UAAS rollout is a moral obligation (C13): P004, P006, P007, P008 support; P001, P002, P003, P005 oppose, citing subgroup null findings and unintended consequences.",
+      "voters": {
+        "P001": "oppose",
+        "P002": "oppose",
+        "P003": "oppose",
+        "P004": "support",
+        "P005": "oppose",
+        "P006": "support",
+        "P007": "support",
+        "P008": "support"
+      },
+      "final_actual": [
+        4,
+        4,
+        0
+      ],
+      "final_reported": [
+        4,
+        4,
+        0
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C14",
+      "actual": [
+        4,
+        4,
+        0
+      ],
+      "reported": [
+        4,
+        4,
+        0
+      ],
+      "delta": [
+        0,
+        0,
+        0
+      ],
+      "quote": "UAAS should be restricted to certain absence drivers (C14): P002, P005, P007, P008 support targeted rollout; P001, P003, P004, P006 oppose on equity/stigma grounds.",
+      "voters": {
+        "P001": "oppose",
+        "P002": "support",
+        "P003": "oppose",
+        "P004": "oppose",
+        "P005": "support",
+        "P006": "oppose",
+        "P007": "support",
+        "P008": "support"
+      },
+      "final_actual": [
+        4,
+        4,
+        0
+      ],
+      "final_reported": [
+        4,
+        4,
+        0
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "claim": "C15",
+      "actual": [
+        1,
+        7,
+        0
+      ],
+      "reported": [
+        1,
+        6,
+        0
+      ],
+      "delta": [
+        0,
+        -1,
+        0
+      ],
+      "quote": "UAAS inherently violates privacy and should never be deployed (C15): Only P005 supports; P001, P002, P003, P004, P006, P007, P008 oppose, noting S8 recommends safeguards not prohibition.",
+      "voters": {
+        "P001": "oppose",
+        "P002": "oppose",
+        "P003": "oppose",
+        "P004": "oppose",
+        "P005": "support",
+        "P006": "oppose",
+        "P007": "oppose",
+        "P008": "oppose"
+      },
+      "final_actual": [
+        1,
+        7,
+        0
+      ],
+      "final_reported": [
+        1,
+        7,
+        0
+      ],
+      "final_delta": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "missingness": [
+    {
+      "id": "D1",
+      "text": "There is insufficient evidence to confirm the reported 27.4% chronic absenteeism rate in Veldoria USD. None None None",
+      "counts": [
+        0,
+        0,
+        0
+      ],
+      "missing": 8,
+      "final_quote": "Claim 1: No participants (0 of 8) confirmed the reported 27.4% chronic absenteeism rate in Veldoria USD. Evidence was deemed insufficient by the panel."
+    },
+    {
+      "id": "D2",
+      "text": "Chronic absenteeism in Veldoria USD was below 15% in 2031-32, based on an unverified local report. None None None",
+      "counts": [
+        0,
+        0,
+        0
+      ],
+      "missing": 8,
+      "final_quote": "Claim 2: No participants (0 of 8) supported the claim that chronic absenteeism was below 15% in 2031-32. The underlying local report remains unverified."
+    },
+    {
+      "id": "D3",
+      "text": "Alerted students in the 2030-31 pilot had a 41% higher rate of returning to regular attendance than controls. None None",
+      "counts": [
+        2,
+        0,
+        6
+      ],
+      "missing": 0,
+      "final_quote": "Claim 3: 2 of 8 participants agreed that alerted students had a 41% higher return-to-attendance rate than controls. Six participants were unable to judge due to insufficient information. Supporters cited pilot evaluation data (S2). Uncertain participants noted the effect size remains unconfirmed."
+    },
+    {
+      "id": "D4",
+      "text": "The claim that there was no difference in return-to-attendance rates between alerted and non-alerted students is opposed. None None None",
+      "counts": [
+        0,
+        0,
+        0
+      ],
+      "missing": 8,
+      "final_quote": "Claim 4: The null-difference claim (no difference between alerted and non-alerted students) was opposed. No participants (0 of 8) supported it."
+    },
+    {
+      "id": "D5",
+      "text": "SMS alerts did not significantly reduce absenteeism among students whose primary absence driver was caregiver work-schedule conflict. None None",
+      "counts": [
+        1,
+        0,
+        7
+      ],
+      "missing": 0,
+      "final_quote": "Claim 5: 1 of 8 participants agreed SMS alerts did not significantly reduce absenteeism for students whose primary driver was caregiver work-schedule conflict. Seven were unable to judge. No subgroup analysis was available in the main source (S2)."
+    },
+    {
+      "id": "D6",
+      "text": "SMS alerts reduced absenteeism by 53% among students facing transportation barriers. None None",
+      "counts": [
+        1,
+        0,
+        7
+      ],
+      "missing": 0,
+      "final_quote": "Claim 6: 1 of 8 participants agreed SMS alerts reduced absenteeism by 53% among students facing transportation barriers. Seven were unable to judge. No subgroup data for transportation barriers was available in the primary source."
+    },
+    {
+      "id": "D7",
+      "text": "High-school students in Veldoria USD had lower chronic absenteeism than elementary students in 2031-32.",
+      "counts": [
+        0,
+        0,
+        0
+      ],
+      "missing": 8,
+      "final_quote": "Claim 7: No participants (0 of 8) supported the claim that high-school students had lower chronic absenteeism than elementary students in 2031-32. Evidence was insufficient."
+    }
+  ]
+}
