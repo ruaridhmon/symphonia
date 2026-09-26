@@ -1,0 +1,119 @@
+{
+  "status": "pilot_engineering_in_progress",
+  "source_sha256": "d45ceae8ddfb67127c73fbddd632e326246d7894a3ee7fc618ea9a60e423dddc",
+  "dev_base_url": "https://symphonia-dev-488613.web.app/api",
+  "policy_settings": [
+    "school attendance support",
+    "school inclusion",
+    "school health hubs",
+    "preventive healthcare",
+    "youth diversion",
+    "support after release from custody"
+  ],
+  "pilot": {
+    "maps_per_setting": 2,
+    "claims_per_map": 15,
+    "panel_sizes": [
+      8,
+      32
+    ],
+    "word_limits": [
+      500
+    ],
+    "repetitions": 2,
+    "interactive_maps": 6,
+    "interactive_panel_size": 8,
+    "robustness_maps": 12
+  },
+  "main_planning_defaults_not_frozen": {
+    "maps_per_setting": 20,
+    "claims_per_map": 15,
+    "panel_sizes": [
+      8,
+      32,
+      64
+    ],
+    "word_limits": [
+      250,
+      500,
+      1000
+    ],
+    "repetitions": 3,
+    "interactive_maps": 30,
+    "interactive_panel_size": 32,
+    "robustness_minimum_maps": 30
+  },
+  "methods": [
+    "direct",
+    "structured",
+    "staged",
+    "symphonia",
+    "reference_fed"
+  ],
+  "primary_comparator": "structured",
+  "primary_outcomes": [
+    "critical_claim_strict_fidelity",
+    "false_consensus_rate"
+  ],
+  "consensus_threshold": 0.8,
+  "sensitivity_thresholds": [
+    0.7,
+    0.9
+  ],
+  "minimum_response_coverage": 0.8,
+  "bootstrap_resamples": 2000,
+  "bootstrap_unit": "independent_map_stratified_by_policy_setting",
+  "repeat_aggregation": "within_map_and_condition_before_pairing",
+  "primary_multiplicity": "Holm",
+  "composite_missingness_penalties": [
+    1,
+    0.5,
+    0.75
+  ],
+  "technical_retries": 1,
+  "evaluator_validation": {
+    "corruptions": 100,
+    "preserving_edits": 100,
+    "minimum_sensitivity": 0.9,
+    "maximum_false_positive_rate": 0.05,
+    "status": "v4_templated_calibration_passed_all_three_families"
+  },
+  "semantic_evaluator_families_required": 3,
+  "participant_validators_required": 2,
+  "minimum_worthwhile_effects": {
+    "critical_claim_strict_fidelity": 0.1,
+    "false_consensus_rate": 0.05
+  },
+  "spend_limit_usd": 800,
+  "models": {
+    "scenario": "anthropic/claude-sonnet-4.6",
+    "participant": "openai/gpt-4.1",
+    "summariser": "anthropic/claude-opus-4.6",
+    "replication_summariser": "openai/gpt-4.1",
+    "judges": [
+      "openai/gpt-4.1",
+      "anthropic/claude-sonnet-4.6",
+      "google/gemini-2.5-flash"
+    ]
+  },
+  "main_freeze_requires": [
+    "validated_pilot",
+    "accepted_evaluator_calibration",
+    "pilot_based_independent_map_count",
+    "minimum_worthwhile_effects",
+    "exact_models_prompts_and_settings",
+    "prespecified_subsets_and_perturbations",
+    "budget"
+  ],
+  "not_run": [
+    "Experiment A",
+    "Experiment B controlled",
+    "Experiment B free response",
+    "robustness",
+    "ablations",
+    "decision readers",
+    "second summariser family replication"
+  ],
+  "execution_note": "Dev Cloud Run research job executes frozen product helper functions with explicit benchmark instrumentation. It does not create ordinary consultation records. Main specification is not frozen.",
+  "pipeline_version": 4
+}

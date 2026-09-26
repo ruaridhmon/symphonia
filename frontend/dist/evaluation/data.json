@@ -1,0 +1,357 @@
+{
+  "title": "Symphonia synthetic evaluation",
+  "updated_at": 1790446198.260128,
+  "status": {
+    "stage": "pilot_preparation",
+    "updated_at": 1790446198.26002
+  },
+  "synthetic": true,
+  "cost_usd": 13.76420005,
+  "model_calls": 847,
+  "failed_model_calls": 8,
+  "worlds_generated": 12,
+  "validated_panels": 4,
+  "completed_runs": 0,
+  "failed_runs": 6,
+  "scheduled_runs": 6,
+  "interactive_panels": 0,
+  "calibration": {
+    "version": 4,
+    "acceptance": {
+      "sensitivity": 0.9,
+      "false_positive_rate": 0.05
+    },
+    "models": [
+      {
+        "model": "openai/gpt-4.1",
+        "sensitivity": 1.0,
+        "false_positive_rate": 0.0,
+        "accepted": true,
+        "by_type": {
+          "polarity": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "condition": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "support": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "source": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "minority": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          }
+        }
+      },
+      {
+        "model": "anthropic/claude-sonnet-4.6",
+        "sensitivity": 1.0,
+        "false_positive_rate": 0.0,
+        "accepted": true,
+        "by_type": {
+          "polarity": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "condition": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "support": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "source": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "minority": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          }
+        }
+      },
+      {
+        "model": "google/gemini-2.5-flash",
+        "sensitivity": 1.0,
+        "false_positive_rate": 0.0,
+        "accepted": true,
+        "by_type": {
+          "polarity": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "condition": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "support": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "source": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          },
+          "minority": {
+            "sensitivity": 1.0,
+            "false_positive_rate": 0.0
+          }
+        }
+      }
+    ],
+    "accepted": true
+  },
+  "figures": [],
+  "analyses": {
+    "critical_claim_strict_fidelity": {
+      "unavailable": "At least two independent maps per represented stratum required"
+    },
+    "false_consensus_rate": {
+      "unavailable": "At least two independent maps per represented stratum required"
+    },
+    "conservative_failed_fidelity": {
+      "unavailable": "At least two independent maps per represented stratum required"
+    }
+  },
+  "scenarios": [
+    {
+      "id": "pilot-000",
+      "setting": "school attendance support",
+      "question": "Should the Veldoria Unified School District adopt a universal automated attendance-alert system (UAAS) to reduce chronic absenteeism among all enrolled students?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-001",
+      "setting": "school inclusion",
+      "question": "Should the Veralund Unified School District adopt a full-inclusion model for students with moderate learning disabilities (MLD) in mainstream classrooms?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-002",
+      "setting": "school health hubs",
+      "question": "Should the Verantia Unified School District mandate school health hubs in all 47 primary schools to reduce chronic absenteeism attributable to untreated paediatric health conditions?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-003",
+      "setting": "preventive healthcare",
+      "question": "Should the Velundra Regional Health Authority mandate universal screening for subclinical thyroid dysregulation (STD) in adults aged 30–60 using the Heliox-7 salivary assay?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-004",
+      "setting": "youth diversion",
+      "question": "Should the Mirelon City Youth Justice Authority adopt a universal diversion programme (UDP) for all first-time offenders aged 10–17, or a targeted diversion programme (TDP) restricted to low-risk offenders aged 10–14?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-005",
+      "setting": "support after release from custody",
+      "question": "Should the Varenholm Municipal Authority implement a universal post-release support navigator programme for all adults leaving short-term custody, or target it only at those flagged as high-need by intake assessment?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-006",
+      "setting": "school attendance support",
+      "question": "Should the Verantia Unified School District adopt a universal automated attendance-alert system (UAAS) to reduce chronic absenteeism among all enrolled students?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-007",
+      "setting": "school inclusion",
+      "question": "Should the Verantia Unified School District adopt a full inclusion model, placing all students with moderate learning disabilities into general education classrooms with co-teaching support, rather than maintaining dedicated resource rooms?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-008",
+      "setting": "school health hubs",
+      "question": "Should the Verantia Unified School District implement universal school health hubs in all 47 primary schools, or adopt a targeted rollout limited to the 12 highest-need campuses?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-010",
+      "setting": "youth diversion",
+      "question": "Should the Mirelon City Youth Justice Authority implement a universal diversion programme (UDP) for all first-time juvenile offenders aged 10–17, or a targeted diversion programme (TDP) restricted to low-risk offenders only?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-011",
+      "setting": "support after release from custody",
+      "question": "Should the Verantia Regional Authority implement a universal post-release support navigator programme for all adults leaving short-term custody (≤90 days), or target it only to those flagged as high-need at intake?",
+      "claims": 15,
+      "phase": "pilot"
+    },
+    {
+      "id": "pilot-129",
+      "setting": "preventive healthcare",
+      "question": "Should the Velundra Regional Health Authority mandate universal screening for subclinical thyroid dysregulation in adults aged 30–60 using the Ferrox-7 salivary assay?",
+      "claims": 15,
+      "phase": "pilot"
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "pilot-000/A/v3/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "map_id": "pilot-000",
+      "policy_setting": "school attendance support",
+      "phase": "pilot",
+      "method": "structured",
+      "model": "anthropic/claude-opus-4.6",
+      "panel_size": 8,
+      "words": 500,
+      "repeat": 0,
+      "track": "identical_transcript",
+      "variant": "baseline",
+      "status": "failed",
+      "error": "Technical failure pilot-000/A/v3/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline/judge/anthropic/claude-sonnet-4.6",
+      "metrics": {}
+    },
+    {
+      "run_id": "pilot-000/A/identical_transcript/8/500/symphonia/anthropic/claude-opus-4.6/0/baseline",
+      "map_id": "pilot-000",
+      "policy_setting": "school attendance support",
+      "phase": "pilot",
+      "method": "symphonia",
+      "model": "anthropic/claude-opus-4.6",
+      "panel_size": 8,
+      "words": 500,
+      "repeat": 0,
+      "track": "identical_transcript",
+      "variant": "baseline",
+      "status": "failed",
+      "error": "Technical failure pilot-000/A/identical_transcript/8/500/symphonia/anthropic/claude-opus-4.6/0/baseline/judge/anthropic/claude-sonnet-4.6",
+      "metrics": {}
+    },
+    {
+      "run_id": "pilot-000/A/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "map_id": "pilot-000",
+      "policy_setting": "school attendance support",
+      "phase": "pilot",
+      "method": "structured",
+      "model": "anthropic/claude-opus-4.6",
+      "panel_size": 8,
+      "words": 500,
+      "repeat": 0,
+      "track": "identical_transcript",
+      "variant": "baseline",
+      "status": "failed",
+      "error": "Technical failure pilot-000/A/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline/judge/anthropic/claude-sonnet-4.6",
+      "metrics": {}
+    },
+    {
+      "run_id": "pilot-000/A/v2/identical_transcript/8/500/structured/anthropic/claude-opus-4.6/0/baseline",
+      "map_id": "pilot-000",
+      "policy_setting": "school attendance support",
+      "phase": "pilot",
+      "method": "structured",
+      "model": "anthropic/claude-opus-4.6",
+      "panel_size": 8,
+      "words": 500,
+      "repeat": 0,
+      "track": "identical_transcript",
+      "variant": "baseline",
+      "status": "failed",
+      "error": "Incomplete semantic labels",
+      "metrics": {}
+    },
+    {
+      "run_id": "pilot-000/A/v3/identical_transcript/8/500/symphonia/anthropic/claude-opus-4.6/0/baseline",
+      "map_id": "pilot-000",
+      "policy_setting": "school attendance support",
+      "phase": "pilot",
+      "method": "symphonia",
+      "model": "anthropic/claude-opus-4.6",
+      "panel_size": 8,
+      "words": 500,
+      "repeat": 0,
+      "track": "identical_transcript",
+      "variant": "baseline",
+      "status": "failed",
+      "error": "Technical failure pilot-000/A/v3/identical_transcript/8/500/symphonia/anthropic/claude-opus-4.6/0/baseline/judge/anthropic/claude-sonnet-4.6",
+      "metrics": {}
+    },
+    {
+      "run_id": "pilot-000/A/v2/identical_transcript/8/500/symphonia/anthropic/claude-opus-4.6/0/baseline",
+      "map_id": "pilot-000",
+      "policy_setting": "school attendance support",
+      "phase": "pilot",
+      "method": "symphonia",
+      "model": "anthropic/claude-opus-4.6",
+      "panel_size": 8,
+      "words": 500,
+      "repeat": 0,
+      "track": "identical_transcript",
+      "variant": "baseline",
+      "status": "failed",
+      "error": "Incomplete semantic labels",
+      "metrics": {}
+    }
+  ],
+  "limitations": [
+    "All participants and worlds are synthetic; this does not establish human expert behaviour.",
+    "The implemented custom product path caps native synthesis at 12 claims and 2,500 output tokens; a common export adapter is scored separately from native intermediate output.",
+    "Claim correction is not a separately switchable component in the current fixed three-round product. No claim-correction ablation is claimed.",
+    "Generated maps are structurally checked; accepted participant panels additionally require two-model semantic validation.",
+    "Unfinished experiments have no result. Failed and rejected attempts remain in the downloadable record."
+  ],
+  "coverage": [
+    {
+      "name": "Evaluator validation",
+      "status": "passed"
+    },
+    {
+      "name": "12 validated pilot scenarios",
+      "status": "in progress"
+    },
+    {
+      "name": "Experiment A",
+      "status": "in progress"
+    },
+    {
+      "name": "Experiment B",
+      "status": "not run"
+    },
+    {
+      "name": "Main study",
+      "status": "not frozen"
+    },
+    {
+      "name": "Robustness",
+      "status": "not run"
+    },
+    {
+      "name": "Component ablations",
+      "status": "not run"
+    },
+    {
+      "name": "Matched decision conditions",
+      "status": "not run"
+    },
+    {
+      "name": "Processing-budget comparison",
+      "status": "not run"
+    },
+    {
+      "name": "Larger-claim stress test",
+      "status": "not run"
+    }
+  ]
+}

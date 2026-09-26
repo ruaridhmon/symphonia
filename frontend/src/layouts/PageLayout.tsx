@@ -43,6 +43,11 @@ export default function PageLayout() {
         <span aria-label={`Copyright ${new Date().getFullYear()} Symphonia`}>
           © {new Date().getFullYear()} Symphonia · Collaborative Consensus Platform
         </span>
+        {window.location.hostname === 'symphonia-dev-488613.web.app' && (
+          <a href="/evaluation/" data-evaluation-link="true" style={{ marginLeft: 16, color: 'inherit', textDecoration: 'underline' }}>
+            Synthetic evaluation
+          </a>
+        )}
       </footer>
 
       <CommandPalette />

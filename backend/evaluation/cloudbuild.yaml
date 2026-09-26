@@ -1,0 +1,7 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ['build', '-f', 'evaluation/Dockerfile', '-t', 'europe-west2-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/symphonia/evaluation:$BUILD_ID', '.']
+images:
+  - 'europe-west2-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/symphonia/evaluation:$BUILD_ID'
+options:
+  logging: CLOUD_LOGGING_ONLY
