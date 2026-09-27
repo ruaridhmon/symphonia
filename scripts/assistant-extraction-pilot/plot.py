@@ -40,25 +40,28 @@ for x,n in Counter(p['coverage']*100 for p in ps).items():top.vlines(x,0,n,color
 for y,n in Counter(p['faithfulness']*100 for p in ps).items():right.hlines(y,0,n,color=P,lw=3,alpha=.4)
 top.set(xlim=ax.get_xlim(),ylim=(0,24));right.set(ylim=ax.get_ylim(),xlim=(0,24));top.axis('off');right.axis('off')
 f.text(.09,.248,'Coverage: source claims fully preserved / original claims.\nFaithfulness: fully supported claims / extracted claims.',fontsize=8,color=MUTED,linespacing=1.65,va='top')
-# Each row is one source panel, with a shared denominator across the three outcomes.
-b=f.add_axes([.60,.33,.32,.445]);b.set(xlim=(0,100),ylim=(-1,32))
+# One pooled summary per scenario. Extensions encode partial shares, not uncertainty.
+b=f.add_axes([.60,.33,.255,.445]);b.set(xlim=(70,100),ylim=(-.6,3.65))
 names=['Inclusive education','Diagnostic screening','Youth justice','School attendance']
-for i,p in enumerate(ps):
- group=i//6; y=30-group*8-i%6
- if i%6==0:
-  cases=ps[i:i+6]; rate=100*sum(q['faithful'] for q in cases)/sum(q['reference_count'] for q in cases)
-  b.text(0,y+1.15,names[group],fontsize=9,color=INK,va='bottom')
-  b.text(100,y+1.15,f'{rate:.1f}%',fontsize=9,color=P,ha='right',va='bottom')
- full=100*p['faithful']/p['reference_count'];partial=100*p['partial']/p['reference_count']
- b.plot([0,full],[y,y],color=P,lw=1.2,alpha=.40,solid_capstyle='butt')
- b.plot([full,full+partial],[y,y],color=A,lw=2,solid_capstyle='butt')
- b.plot([full+partial,100],[y,y],color=G,lw=1.2,solid_capstyle='butt')
- b.scatter(full,y,s=12,color=P,zorder=3,edgecolor='white',lw=.4)
- if partial:b.scatter(full+partial,y,s=14,facecolor='white',edgecolor=A,lw=.9,zorder=3)
-b.set_xticks([0,25,50,75,100]);b.set_yticks([]);b.set_xlabel('Share of original focal claims (%)',labelpad=10);b.tick_params(length=0,pad=8)
+for group,name in enumerate(names):
+ cases=ps[group*6:group*6+6];den=sum(p['reference_count'] for p in cases)
+ full=100*sum(p['faithful'] for p in cases)/den
+ partial=100*sum(p['partial'] for p in cases)/den
+ omitted=100*sum(len(p['omitted_ids']) for p in cases)/den
+ y=3-group
+ b.text(70,y+.34,name,fontsize=9,color=INK,va='bottom')
+ b.plot([full,full+partial],[y,y],color=A,lw=2,solid_capstyle='round',zorder=3)
+ if partial:
+  b.scatter(full+partial,y,s=42,facecolor='white',edgecolor=A,lw=1.1,zorder=4)
+ b.scatter(full,y,s=100,color=P,zorder=5,edgecolor='white',lw=1)
+ b.text(full,y-.19,f'{full:.1f}%',ha='center',va='top',fontsize=10,color=P)
+ b.text(full+partial/2,y+.12,f'+{partial:.1f}% partial' if partial else 'No partial claims',ha='center',va='bottom',fontsize=8,color=A)
+ b.text(108,y,f'{omitted:.1f}%',ha='center',va='center',fontsize=10,color=MUTED,clip_on=False)
+b.text(108,3.50,'OMITTED',ha='center',fontsize=7,color=MUTED,clip_on=False)
+b.set_xticks([70,80,90,100]);b.set_yticks([]);b.set_xlabel('Share of original focal claims (%)',labelpad=10);b.tick_params(length=0,pad=8)
 for side in ['top','right','left']:b.spines[side].set_visible(False)
 b.set_axisbelow(True);b.grid(axis='x',color='#f0edf4',lw=.6)
-f.text(.60,.248,'Six panels per scenario; headings give pooled coverage.\nFilled: fully preserved. Open: including partial preservation.',fontsize=8,color=MUTED,linespacing=1.65,va='top')
+f.text(.60,.248,'One pooled point per scenario; six panels, 55 source claims.\nAmber adds partial preservation; axis cropped to 70–100%.',fontsize=8,color=MUTED,linespacing=1.65,va='top')
 # Compact pooled strip keeps the common denominator explicit.
 f.text(.075,.184,'c',fontsize=14,weight='bold');f.text(.10,.186,'Source information retained, weakened or omitted',fontsize=11)
 c=f.add_axes([.10,.124,.82,.028]);c.set(xlim=(0,220),ylim=(0,1));c.axis('off')
