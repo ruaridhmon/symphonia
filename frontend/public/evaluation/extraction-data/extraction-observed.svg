@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="720pt" height="684pt" viewBox="0 0 720 684" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-26T20:00:09.174127</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 684 
+L 720 684 
+L 720 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 133.56 519.84 
+L 557.64 519.84 
+L 557.64 95.76 
+L 133.56 95.76 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="PathCollection_1">
+    <defs>
+     <path id="mfe0380bfa6" d="M 0 -4.873397 
+L -1.094146 -1.505963 
+L -4.634876 -1.505963 
+L -1.770365 0.575226 
+L -2.864511 3.942661 
+L -0 1.861472 
+L 2.864511 3.942661 
+L 1.770365 0.575226 
+L 4.634876 -1.505963 
+L 1.094146 -1.505963 
+z
+" style="stroke: #b67637"/>
+    </defs>
+    <g>
+     <use xlink:href="#mfe0380bfa6" x="557.64" y="95.76" style="fill: #b67637; stroke: #b67637"/>
+    </g>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="m5fb1e458b7" d="M 0 0 
+L 0 3.5 
+" style="stroke: #c4bdce; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m5fb1e458b7" x="133.56" y="519.84" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: middle" x="133.56" y="535.197422" transform="rotate(-0 133.56 535.197422)">0%</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#m5fb1e458b7" x="218.376" y="519.84" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: middle" x="218.376" y="535.197422" transform="rotate(-0 218.376 535.197422)">20%</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#m5fb1e458b7" x="303.192" y="519.84" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: middle" x="303.192" y="535.197422" transform="rotate(-0 303.192 535.197422)">40%</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m5fb1e458b7" x="388.008" y="519.84" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: middle" x="388.008" y="535.197422" transform="rotate(-0 388.008 535.197422)">60%</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#m5fb1e458b7" x="472.824" y="519.84" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: middle" x="472.824" y="535.197422" transform="rotate(-0 472.824 535.197422)">80%</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m5fb1e458b7" x="557.64" y="519.84" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: middle" x="557.64" y="535.197422" transform="rotate(-0 557.64 535.197422)">100%</text>
+     </g>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: middle" x="345.6" y="550.198281" transform="rotate(-0 345.6 550.198281)">Coverage of the 15 focal claims</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_7">
+      <defs>
+       <path id="mbf21d6b163" d="M 0 0 
+L -3.5 0 
+" style="stroke: #c4bdce; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#mbf21d6b163" x="133.56" y="519.84" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: end" x="126.56" y="524.018711" transform="rotate(-0 126.56 524.018711)">0%</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#mbf21d6b163" x="133.56" y="435.024" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: end" x="126.56" y="439.202711" transform="rotate(-0 126.56 439.202711)">20%</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_9">
+      <g>
+       <use xlink:href="#mbf21d6b163" x="133.56" y="350.208" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: end" x="126.56" y="354.386711" transform="rotate(-0 126.56 354.386711)">40%</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#mbf21d6b163" x="133.56" y="265.392" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: end" x="126.56" y="269.570711" transform="rotate(-0 126.56 269.570711)">60%</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_11">
+      <g>
+       <use xlink:href="#mbf21d6b163" x="133.56" y="180.576" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: end" x="126.56" y="184.754711" transform="rotate(-0 126.56 184.754711)">80%</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#mbf21d6b163" x="133.56" y="95.76" style="fill: #c4bdce; stroke: #c4bdce; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: end" x="126.56" y="99.938711" transform="rotate(-0 126.56 99.938711)">100%</text>
+     </g>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 11px; font-family: 'Arial', sans-serif; text-anchor: middle" x="88.469453" y="307.8" transform="rotate(-90 88.469453 307.8)">Faithfulness of core claim content</text>
+    </g>
+   </g>
+   <g id="PathCollection_2">
+    <defs>
+     <path id="m7244983e3b" d="M 0 12.247449 
+C 3.248061 12.247449 6.363528 10.95698 8.660254 8.660254 
+C 10.95698 6.363528 12.247449 3.248061 12.247449 0 
+C 12.247449 -3.248061 10.95698 -6.363528 8.660254 -8.660254 
+C 6.363528 -10.95698 3.248061 -12.247449 0 -12.247449 
+C -3.248061 -12.247449 -6.363528 -10.95698 -8.660254 -8.660254 
+C -10.95698 -6.363528 -12.247449 -3.248061 -12.247449 0 
+C -12.247449 3.248061 -10.95698 6.363528 -8.660254 8.660254 
+C -6.363528 10.95698 -3.248061 12.247449 0 12.247449 
+z
+" style="stroke: #665394; stroke-opacity: 0.08"/>
+    </defs>
+    <g clip-path="url(#p5bc7ca98ff)">
+     <use xlink:href="#m7244983e3b" x="303.192" y="156.342857" style="fill: #665394; fill-opacity: 0.08; stroke: #665394; stroke-opacity: 0.08"/>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 133.56 519.84 
+L 133.56 95.76 
+" style="fill: none; stroke: #c4bdce; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 133.56 519.84 
+L 557.64 519.84 
+" style="fill: none; stroke: #c4bdce; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_13">
+    <path d="M 303.192 156.342857 
+L 331.464 95.76 
+" clip-path="url(#p5bc7ca98ff)" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #665394; stroke-width: 2"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 245.221295 217.777417 
+Q 265.801087 181.196884 301.521756 157.441243 
+" style="fill: none; stroke: #665394; stroke-linecap: round"/>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 11px; font-family: 'Arial', sans-serif; fill: #665394" transform="translate(159.0048 230.984992)">Both repeats overlap here</text>
+    <text style="font-size: 11px; font-family: 'Arial', sans-serif; fill: #665394" transform="translate(159.0048 244.188)">6 provisionally faithful cards</text>
+   </g>
+   <g id="patch_6">
+    <path d="M 416.287704 116.139248 
+Q 374.847877 106.183157 333.408049 96.227066 
+" style="fill: none; stroke: #847a91; stroke-linecap: round"/>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 9px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #847a91" x="362.5632" y="125.4456" transform="rotate(-0 362.5632 125.4456)">If the incomplete card passes review</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 10px; font-family: 'Arial', sans-serif; fill: #90652d" transform="translate(496.722287 147.369266)">Complete</text>
+    <text style="font-size: 10px; font-family: 'Arial', sans-serif; fill: #90652d" transform="translate(498.620725 159.372)">&amp; faithful</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 12px; font-family: 'Arial', sans-serif; fill: #4e4658" transform="translate(159.0048 357.2193)">8 focal claims absent</text>
+    <text style="font-size: 12px; font-family: 'Arial', sans-serif; fill: #4e4658" transform="translate(159.0048 376.4568)">1 incomplete claim card</text>
+    <text style="font-size: 12px; font-family: 'Arial', sans-serif; fill: #4e4658" transform="translate(159.0048 396.8568)">2 outputs stopped at the token limit</text>
+   </g>
+   <g id="PathCollection_3">
+    <defs>
+     <path id="mffc8f70fb4" d="M 0 5 
+C 1.326016 5 2.597899 4.473168 3.535534 3.535534 
+C 4.473168 2.597899 5 1.326016 5 0 
+C 5 -1.326016 4.473168 -2.597899 3.535534 -3.535534 
+C 2.597899 -4.473168 1.326016 -5 0 -5 
+C -1.326016 -5 -2.597899 -4.473168 -3.535534 -3.535534 
+C -4.473168 -2.597899 -5 -1.326016 -5 0 
+C -5 1.326016 -4.473168 2.597899 -3.535534 3.535534 
+C -2.597899 4.473168 -1.326016 5 0 5 
+z
+" style="stroke: #665394"/>
+    </defs>
+    <g clip-path="url(#p5bc7ca98ff)">
+     <use xlink:href="#mffc8f70fb4" x="303.192" y="156.342857" style="fill: #665394; stroke: #665394"/>
+    </g>
+   </g>
+   <g id="PathCollection_4">
+    <defs>
+     <path id="m1a722cf1a0" d="M 0 5 
+C 1.326016 5 2.597899 4.473168 3.535534 3.535534 
+C 4.473168 2.597899 5 1.326016 5 0 
+C 5 -1.326016 4.473168 -2.597899 3.535534 -3.535534 
+C 2.597899 -4.473168 1.326016 -5 0 -5 
+C -1.326016 -5 -2.597899 -4.473168 -3.535534 -3.535534 
+C -4.473168 -2.597899 -5 -1.326016 -5 0 
+C -5 1.326016 -4.473168 2.597899 -3.535534 3.535534 
+C -2.597899 4.473168 -1.326016 5 0 5 
+z
+" style="stroke: #665394; stroke-width: 2"/>
+    </defs>
+    <g>
+     <use xlink:href="#m1a722cf1a0" x="331.464" y="95.76" style="fill: #ffffff; stroke: #665394; stroke-width: 2"/>
+    </g>
+   </g>
+  </g>
+  <g id="text_19">
+   <text style="font-weight: 700; font-size: 10px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #665394" x="86.4" y="30.78" transform="rotate(-0 86.4 30.78)">CLAIM EXTRACTION · ARCHIVED NATIVE OUTPUT</text>
+  </g>
+  <g id="text_20">
+   <text style="font-size: 20px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #26222d" x="86.4" y="60.192" transform="rotate(-0 86.4 60.192)">Faithfulness and coverage of saved extractions</text>
+  </g>
+  <g id="text_21">
+   <text style="font-size: 10px; font-family: 'Arial', sans-serif; text-anchor: start; fill: #847a91" x="86.4" y="85.5" transform="rotate(-0 86.4 85.5)">1 consultation · 8 opening responses · 2 extraction repeats · provisional review</text>
+  </g>
+  <g id="text_22">
+   <text style="font-size: 10px; font-family: 'Arial', sans-serif; fill: #625b6b" transform="translate(86.4 563.08)">Filled marker: unresolved card receives no credit (40% coverage; 85.7% faithfulness).</text>
+   <text style="font-size: 10px; font-family: 'Arial', sans-serif; fill: #625b6b" transform="translate(86.4 579.08)">Open marker: unresolved card receives credit (46.7%; 100%). Each endpoint represents</text>
+   <text style="font-size: 10px; font-family: 'Arial', sans-serif; fill: #625b6b" transform="translate(86.4 595.08)">both repeats. The connecting line is an annotation bound, not a confidence interval.</text>
+  </g>
+  <g id="text_23">
+   <text style="font-size: 9px; font-family: 'Arial', sans-serif; fill: #817989" transform="translate(86.4 626.22)">Core claim content only; expert counts and attribution are not scored here. One assistant</text>
+   <text style="font-size: 9px; font-family: 'Arial', sans-serif; fill: #817989" transform="translate(86.4 639.72)">reviewed these labels without blinding. No density estimate from a single consultation.</text>
+   <text style="font-size: 9px; font-family: 'Arial', sans-serif; fill: #817989" transform="translate(86.4 653.22)">Both saved outputs hit the 2,500-token cap; this does not isolate unconstrained extraction ability.</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p5bc7ca98ff">
+   <rect x="133.56" y="95.76" width="424.08" height="424.08"/>
+  </clipPath>
+ </defs>
+</svg>
