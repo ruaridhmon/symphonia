@@ -64,7 +64,7 @@ c.annotate('10 partially preserved',xy=(187,.58),xytext=(170,1.43),ha='right',fo
 f.text(.09,.315,'c   What happened to the 220 original focal-claim occurrences?',fontsize=11)
 f.text(.09,.181,'82.7% fully preserved   +   4.5% partially preserved   +   12.7% omitted  (rounding applies)',fontsize=9,color='#6f647a')
 f.text(.09,.133,'Partial = the main point survives, but a consequential qualification or stance changes. Omitted = no extracted counterpart.\nThe eight-claim cap accounts for the 28 omissions. Grouping fidelity and losses by argument type have not been scored.',fontsize=9,color='#6f647a',linespacing=1.6)
-f.text(.09,.055,'PROVISIONAL SELF-REVIEW. Four synthetic scenarios, 24 two-response panels, one assistant conversation; visible reference IDs.\nThese are assistant outputs, not Symphonia model calls. Grouping must be assessed against original meanings, not the number of output cards.',fontsize=8,color='#887b93',linespacing=1.65)
+f.text(.09,.055,'PROVISIONAL SELF-REVIEW. Four synthetic scenarios, 24 two-response panels, one assistant conversation; visible reference IDs.\nSaved outputs may already merge respondents; grouping loss has not been isolated. These are not Symphonia model calls.',fontsize=8,color='#887b93',linespacing=1.65)
 for ext in ['svg','pdf','png']:f.savefig(OUT/f'assistant-extraction.{ext}',dpi=600,facecolor='white')
 p=OUT/'assistant-extraction.svg';p.write_text('\n'.join(line.rstrip() for line in p.read_text().replace("'DejaVu Sans'","'Arial', sans-serif").splitlines())+'\n')
 plt.close(f)
