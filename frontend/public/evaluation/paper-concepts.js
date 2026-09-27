@@ -12,9 +12,9 @@
  const buttons=figures.map((f,i)=>{const b=el('button');b.type='button';b.append(el('span',f.n),el('strong',f.short));b.onclick=()=>render(i);return b});
  function render(i){const f=figures[i];buttons.forEach((b,j)=>b.setAttribute('aria-pressed',String(i===j)));
  $('concept-title').textContent=f.title;$('concept-question').textContent=f.question;
- const img=$('concept-image');img.src=f.path+'.svg'+(i===5?'?v=waves-1':'');img.alt=f.alt;$('concept-full').href=f.path+'.svg'+(i===5?'?v=waves-1':'');
+ const img=$('concept-image');img.src=f.path+'.svg'+(i===5?'?v=waves-2':'');img.alt=f.alt;$('concept-full').href=f.path+'.svg'+(i===5?'?v=waves-2':'');
  $('concept-read').textContent=f.read;$('concept-experiment').textContent=f.experiment;$('concept-limit').textContent=f.limit;
- $('concept-downloads').replaceChildren(...[['SVG',f.path+'.svg'],['Vector PDF',f.path+'.pdf'],['600 dpi PNG',f.path+'.png'],['Simulated data CSV',f.data]].map(([label,url])=>{const a=el('a',label);a.href=url+(i===5?'?v=waves-1':'');return a}));
+ $('concept-downloads').replaceChildren(...[['SVG',f.path+'.svg'],['Vector PDF',f.path+'.pdf'],['600 dpi PNG',f.path+'.png'],['Simulated data CSV',f.data]].map(([label,url])=>{const a=el('a',label);a.href=url+(i===5?'?v=waves-2':'');return a}));
  }
  $('concept-picker').replaceChildren(...buttons);render(5);
 })();
