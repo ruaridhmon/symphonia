@@ -1,0 +1,601 @@
+design,case,category,retention_pct,label_swap_effect_pp
+retention,1,Majority findings,88.87509602032198,
+retention,2,Majority findings,91.15728802127796,
+retention,3,Majority findings,96.2482647298423,
+retention,4,Majority findings,81.91808513590466,
+retention,5,Majority findings,92.97596585979896,
+retention,6,Majority findings,74.76103176443644,
+retention,7,Majority findings,82.51132663306176,
+retention,8,Majority findings,93.33343378559584,
+retention,9,Majority findings,73.43193248290117,
+retention,10,Majority findings,89.28052470985511,
+retention,11,Majority findings,91.84418483270595,
+retention,12,Majority findings,74.38122894971265,
+retention,13,Majority findings,83.20637160940946,
+retention,14,Majority findings,86.1365153485871,
+retention,15,Majority findings,99.0,
+retention,16,Majority findings,65.5968601465825,
+retention,17,Majority findings,84.32448051298604,
+retention,18,Majority findings,86.62642760505575,
+retention,19,Majority findings,83.2753748476222,
+retention,20,Majority findings,87.86298506992816,
+retention,21,Majority findings,77.94030616397872,
+retention,22,Majority findings,84.6697124439807,
+retention,23,Majority findings,86.14673577054047,
+retention,24,Majority findings,85.50473845714812,
+retention,25,Majority findings,87.8416953158969,
+retention,26,Majority findings,88.25994351160895,
+retention,27,Majority findings,84.18410305048802,
+retention,28,Majority findings,87.05071100219914,
+retention,29,Majority findings,75.87570911058965,
+retention,30,Majority findings,87.51127196584791,
+retention,31,Majority findings,73.89406430665186,
+retention,32,Majority findings,56.777342317940295,
+retention,33,Majority findings,88.93425991542601,
+retention,34,Majority findings,77.38628388583628,
+retention,35,Majority findings,81.22454585333152,
+retention,36,Majority findings,94.65114504164418,
+retention,37,Majority findings,89.93711373092822,
+retention,38,Majority findings,93.51956201707786,
+retention,39,Majority findings,71.3848582399406,
+retention,40,Majority findings,84.44790530993336,
+retention,41,Majority findings,84.75367928819739,
+retention,42,Majority findings,90.79959223999539,
+retention,43,Majority findings,90.88046689376776,
+retention,44,Majority findings,85.36285971094975,
+retention,45,Majority findings,80.36607875111501,
+retention,46,Majority findings,91.70511376210412,
+retention,47,Majority findings,81.11208615170845,
+retention,48,Majority findings,96.85815173118604,
+retention,49,Majority findings,82.92556620830337,
+retention,50,Majority findings,68.82840686824773,
+retention,51,Majority findings,66.50786727653416,
+retention,52,Majority findings,88.22647595085526,
+retention,53,Majority findings,94.1775844932844,
+retention,54,Majority findings,65.4104668674614,
+retention,55,Majority findings,73.07557801573931,
+retention,56,Majority findings,84.9266684611332,
+retention,57,Majority findings,92.15634056263285,
+retention,58,Majority findings,84.70303398624048,
+retention,59,Majority findings,89.6422909079685,
+retention,60,Majority findings,91.1847273708035,
+retention,61,Majority findings,73.23341473634066,
+retention,62,Majority findings,77.27811676465335,
+retention,63,Majority findings,83.5791164593943,
+retention,64,Majority findings,93.29696474176126,
+retention,65,Majority findings,96.28932819073289,
+retention,66,Majority findings,92.62744371516857,
+retention,67,Majority findings,85.6770304153631,
+retention,68,Majority findings,82.94647531128176,
+retention,69,Majority findings,84.49557493337701,
+retention,70,Majority findings,90.85275568837584,
+retention,71,Majority findings,75.74900501618674,
+retention,72,Majority findings,75.39624810611349,
+retention,73,Majority findings,81.79560348091742,
+retention,74,Majority findings,84.06566414637315,
+retention,75,Majority findings,85.2097043420046,
+retention,76,Majority findings,67.82804302562994,
+retention,77,Majority findings,92.91515300561501,
+retention,78,Majority findings,90.00183056745558,
+retention,79,Majority findings,85.36307251964313,
+retention,80,Majority findings,89.68980952759655,
+retention,81,Majority findings,66.79139312301743,
+retention,82,Majority findings,82.49502340747797,
+retention,83,Majority findings,98.88169162028908,
+retention,84,Majority findings,90.77995055038292,
+retention,85,Majority findings,85.56412694877953,
+retention,86,Majority findings,82.47296173720144,
+retention,87,Majority findings,80.39057049033364,
+retention,88,Majority findings,99.0,
+retention,89,Majority findings,79.30445112240437,
+retention,90,Majority findings,90.87211413014371,
+retention,91,Majority findings,84.06664465709044,
+retention,92,Majority findings,87.02811412022042,
+retention,93,Majority findings,92.02508389932645,
+retention,94,Majority findings,74.3223159835658,
+retention,95,Majority findings,83.92987062732342,
+retention,96,Majority findings,92.03333939754214,
+retention,97,Majority findings,80.59646377767422,
+retention,98,Majority findings,99.0,
+retention,99,Majority findings,77.53082968964354,
+retention,100,Majority findings,90.18154427032252,
+retention,101,Majority findings,90.86275092251955,
+retention,102,Majority findings,79.46051843308452,
+retention,103,Majority findings,83.83918950184574,
+retention,104,Majority findings,95.87513485000842,
+retention,105,Majority findings,90.1186183048308,
+retention,106,Majority findings,84.11834119376122,
+retention,107,Majority findings,80.7600484392465,
+retention,108,Majority findings,70.04265775715605,
+retention,109,Majority findings,96.49131648236471,
+retention,110,Majority findings,85.48135867030938,
+retention,111,Majority findings,80.9545178295901,
+retention,112,Majority findings,99.0,
+retention,113,Majority findings,92.10970222668503,
+retention,114,Majority findings,85.32307332366165,
+retention,115,Majority findings,71.26358841276776,
+retention,116,Majority findings,89.12733836242224,
+retention,117,Majority findings,95.21344548902314,
+retention,118,Majority findings,78.98568202893784,
+retention,119,Majority findings,76.07916731719503,
+retention,120,Majority findings,68.75678646776736,
+retention,1,Minority objections,47.22575299715453,
+retention,2,Minority objections,53.60165809327877,
+retention,3,Minority objections,99.0,
+retention,4,Minority objections,52.77090521001069,
+retention,5,Minority objections,57.728407088735544,
+retention,6,Minority objections,36.387275723746754,
+retention,7,Minority objections,47.27405320503405,
+retention,8,Minority objections,61.4930653238994,
+retention,9,Minority objections,37.768416566558194,
+retention,10,Minority objections,74.12100031087529,
+retention,11,Minority objections,60.98118015844125,
+retention,12,Minority objections,54.08287445578243,
+retention,13,Minority objections,57.32543171854248,
+retention,14,Minority objections,77.28838185812123,
+retention,15,Minority objections,89.7542475615846,
+retention,16,Minority objections,48.3962466395881,
+retention,17,Minority objections,60.87092839727769,
+retention,18,Minority objections,70.25842335289198,
+retention,19,Minority objections,50.554770124655114,
+retention,20,Minority objections,36.18727271083959,
+retention,21,Minority objections,66.61336652502675,
+retention,22,Minority objections,63.660514657572776,
+retention,23,Minority objections,63.30969325237102,
+retention,24,Minority objections,81.90530215175161,
+retention,25,Minority objections,39.11943431759822,
+retention,26,Minority objections,70.61241967217762,
+retention,27,Minority objections,71.44091169460303,
+retention,28,Minority objections,64.76564169019713,
+retention,29,Minority objections,61.77603453777303,
+retention,30,Minority objections,54.61494229161547,
+retention,31,Minority objections,37.609038015105284,
+retention,32,Minority objections,48.47322494712807,
+retention,33,Minority objections,22.65247287791,
+retention,34,Minority objections,65.68800408021717,
+retention,35,Minority objections,59.39066469339739,
+retention,36,Minority objections,61.896874882944715,
+retention,37,Minority objections,55.406401996012555,
+retention,38,Minority objections,52.93525799913702,
+retention,39,Minority objections,52.418480167700054,
+retention,40,Minority objections,72.30348565118166,
+retention,41,Minority objections,77.87104991218838,
+retention,42,Minority objections,66.15269607849683,
+retention,43,Minority objections,52.22531096172852,
+retention,44,Minority objections,55.463074572662876,
+retention,45,Minority objections,57.82206260638978,
+retention,46,Minority objections,45.526623304420255,
+retention,47,Minority objections,62.11460728000582,
+retention,48,Minority objections,67.24061466754911,
+retention,49,Minority objections,52.93718060369298,
+retention,50,Minority objections,73.36676060121121,
+retention,51,Minority objections,41.38265522453648,
+retention,52,Minority objections,82.30477552010748,
+retention,53,Minority objections,52.27737858575907,
+retention,54,Minority objections,53.37057425102026,
+retention,55,Minority objections,59.846272713486506,
+retention,56,Minority objections,62.19699800845103,
+retention,57,Minority objections,66.2234973372184,
+retention,58,Minority objections,44.47844300756347,
+retention,59,Minority objections,68.62084533021516,
+retention,60,Minority objections,35.840081550227644,
+retention,61,Minority objections,64.13824548905004,
+retention,62,Minority objections,94.46491752328743,
+retention,63,Minority objections,49.624836048200024,
+retention,64,Minority objections,58.44787472064497,
+retention,65,Minority objections,60.41408502146867,
+retention,66,Minority objections,75.1579841062831,
+retention,67,Minority objections,65.43324304015144,
+retention,68,Minority objections,62.69467421130281,
+retention,69,Minority objections,74.4847428534469,
+retention,70,Minority objections,59.35574339048535,
+retention,71,Minority objections,58.55209245358491,
+retention,72,Minority objections,70.2700131339755,
+retention,73,Minority objections,81.93776632696134,
+retention,74,Minority objections,64.59971641159855,
+retention,75,Minority objections,69.71600325412268,
+retention,76,Minority objections,43.51069420864427,
+retention,77,Minority objections,71.56245469471833,
+retention,78,Minority objections,80.19136021809898,
+retention,79,Minority objections,57.72282827432449,
+retention,80,Minority objections,65.81025746258084,
+retention,81,Minority objections,32.71716746421592,
+retention,82,Minority objections,67.7475204915272,
+retention,83,Minority objections,84.14917284744175,
+retention,84,Minority objections,57.601130527758656,
+retention,85,Minority objections,52.85272310509851,
+retention,86,Minority objections,69.86846028647973,
+retention,87,Minority objections,53.90357576508554,
+retention,88,Minority objections,99.0,
+retention,89,Minority objections,47.80075606534035,
+retention,90,Minority objections,63.284373902857276,
+retention,91,Minority objections,45.687045310973566,
+retention,92,Minority objections,44.417864317161715,
+retention,93,Minority objections,82.72270053440404,
+retention,94,Minority objections,74.86761229929348,
+retention,95,Minority objections,76.83102898852262,
+retention,96,Minority objections,67.00191044087632,
+retention,97,Minority objections,82.63487353998465,
+retention,98,Minority objections,73.6372487131063,
+retention,99,Minority objections,44.55185482402966,
+retention,100,Minority objections,55.61113319747368,
+retention,101,Minority objections,63.49328354770583,
+retention,102,Minority objections,61.79430110464428,
+retention,103,Minority objections,84.58484522826137,
+retention,104,Minority objections,97.18134143013788,
+retention,105,Minority objections,69.63709787851685,
+retention,106,Minority objections,54.76327286252577,
+retention,107,Minority objections,29.733966260049367,
+retention,108,Minority objections,30.564204545447414,
+retention,109,Minority objections,92.97662916453493,
+retention,110,Minority objections,69.1077586797679,
+retention,111,Minority objections,69.77763310274628,
+retention,112,Minority objections,51.90395756581576,
+retention,113,Minority objections,45.27724870286089,
+retention,114,Minority objections,58.676129363677646,
+retention,115,Minority objections,51.897077844182526,
+retention,116,Minority objections,58.68134725803387,
+retention,117,Minority objections,61.77292849844769,
+retention,118,Minority objections,61.24315306619173,
+retention,119,Minority objections,39.090066109716055,
+retention,120,Minority objections,70.2493444443,
+retention,1,Uncertainty,82.1053134623823,
+retention,2,Uncertainty,78.73683787014129,
+retention,3,Uncertainty,73.48757274781207,
+retention,4,Uncertainty,69.55807326051449,
+retention,5,Uncertainty,58.90495845727743,
+retention,6,Uncertainty,35.80263221328553,
+retention,7,Uncertainty,63.11412654760201,
+retention,8,Uncertainty,76.96943474260041,
+retention,9,Uncertainty,68.96266325294602,
+retention,10,Uncertainty,66.37023378773124,
+retention,11,Uncertainty,91.31611434200853,
+retention,12,Uncertainty,51.6842221134421,
+retention,13,Uncertainty,66.20320617142171,
+retention,14,Uncertainty,74.23706812288644,
+retention,15,Uncertainty,86.39079962041309,
+retention,16,Uncertainty,74.88695047987069,
+retention,17,Uncertainty,65.90209115201587,
+retention,18,Uncertainty,75.17087235790018,
+retention,19,Uncertainty,58.634558630851004,
+retention,20,Uncertainty,59.52507954534698,
+retention,21,Uncertainty,44.834082932885146,
+retention,22,Uncertainty,74.7213055605381,
+retention,23,Uncertainty,76.88680280160648,
+retention,24,Uncertainty,66.97772472069475,
+retention,25,Uncertainty,53.88745767332718,
+retention,26,Uncertainty,58.99325987579367,
+retention,27,Uncertainty,63.71355908161444,
+retention,28,Uncertainty,51.189519176874924,
+retention,29,Uncertainty,51.026965361559505,
+retention,30,Uncertainty,77.2015929533764,
+retention,31,Uncertainty,74.62915395762114,
+retention,32,Uncertainty,50.59823665201633,
+retention,33,Uncertainty,90.58945482225444,
+retention,34,Uncertainty,75.09882730191397,
+retention,35,Uncertainty,70.70195822466864,
+retention,36,Uncertainty,77.00760827350636,
+retention,37,Uncertainty,83.62738517538436,
+retention,38,Uncertainty,69.04958172877019,
+retention,39,Uncertainty,53.75845619082247,
+retention,40,Uncertainty,71.0502634727867,
+retention,41,Uncertainty,62.01133683278054,
+retention,42,Uncertainty,70.14435195650705,
+retention,43,Uncertainty,75.30705963177695,
+retention,44,Uncertainty,66.41599207251477,
+retention,45,Uncertainty,64.07528797240461,
+retention,46,Uncertainty,78.63183853970709,
+retention,47,Uncertainty,58.33889180584245,
+retention,48,Uncertainty,89.06160379352087,
+retention,49,Uncertainty,52.52291647216544,
+retention,50,Uncertainty,84.64722297758247,
+retention,51,Uncertainty,48.36104053399556,
+retention,52,Uncertainty,83.95751724819623,
+retention,53,Uncertainty,66.58492348622146,
+retention,54,Uncertainty,58.03302595474948,
+retention,55,Uncertainty,71.29137234099396,
+retention,56,Uncertainty,54.541710533962885,
+retention,57,Uncertainty,77.22194507946993,
+retention,58,Uncertainty,55.90586107735038,
+retention,59,Uncertainty,66.1675377996653,
+retention,60,Uncertainty,85.48622484446287,
+retention,61,Uncertainty,58.04674620255709,
+retention,62,Uncertainty,62.43796585474167,
+retention,63,Uncertainty,58.602701450563856,
+retention,64,Uncertainty,85.06790413393799,
+retention,65,Uncertainty,60.23960646833065,
+retention,66,Uncertainty,64.3253740646121,
+retention,67,Uncertainty,81.83947753851741,
+retention,68,Uncertainty,77.67504409091744,
+retention,69,Uncertainty,62.053861589003496,
+retention,70,Uncertainty,48.60387548197063,
+retention,71,Uncertainty,66.86276652327253,
+retention,72,Uncertainty,81.51639276515557,
+retention,73,Uncertainty,68.38810079718172,
+retention,74,Uncertainty,60.61646667644596,
+retention,75,Uncertainty,75.24995132294774,
+retention,76,Uncertainty,28.77986658382868,
+retention,77,Uncertainty,71.80822196565295,
+retention,78,Uncertainty,91.67575431808406,
+retention,79,Uncertainty,66.02578184115102,
+retention,80,Uncertainty,75.87163380363405,
+retention,81,Uncertainty,76.52582722240852,
+retention,82,Uncertainty,58.96778586884062,
+retention,83,Uncertainty,75.06889212651996,
+retention,84,Uncertainty,61.99034415734205,
+retention,85,Uncertainty,63.418424301556286,
+retention,86,Uncertainty,51.08646124106126,
+retention,87,Uncertainty,88.78461588956255,
+retention,88,Uncertainty,91.67093604750394,
+retention,89,Uncertainty,80.92950080598683,
+retention,90,Uncertainty,76.8775376981553,
+retention,91,Uncertainty,56.02325173132964,
+retention,92,Uncertainty,57.71478033832882,
+retention,93,Uncertainty,72.94877280367982,
+retention,94,Uncertainty,54.29058756504438,
+retention,95,Uncertainty,58.75747019745482,
+retention,96,Uncertainty,70.12626946873618,
+retention,97,Uncertainty,63.14884510038487,
+retention,98,Uncertainty,68.31770428496189,
+retention,99,Uncertainty,54.719239504275336,
+retention,100,Uncertainty,86.46098486360728,
+retention,101,Uncertainty,73.12647372451684,
+retention,102,Uncertainty,56.08536362793075,
+retention,103,Uncertainty,56.967366226242504,
+retention,104,Uncertainty,86.00478973411764,
+retention,105,Uncertainty,84.23025288267095,
+retention,106,Uncertainty,57.36250082190171,
+retention,107,Uncertainty,77.30621970867011,
+retention,108,Uncertainty,51.32916576314561,
+retention,109,Uncertainty,63.765981466066435,
+retention,110,Uncertainty,80.04617570883214,
+retention,111,Uncertainty,80.46146373382705,
+retention,112,Uncertainty,90.46464093306281,
+retention,113,Uncertainty,68.56494841104572,
+retention,114,Uncertainty,79.53952253144902,
+retention,115,Uncertainty,42.80923035002476,
+retention,116,Uncertainty,85.76528858399476,
+retention,117,Uncertainty,76.32742916429089,
+retention,118,Uncertainty,79.08887439299042,
+retention,119,Uncertainty,61.60299688994047,
+retention,120,Uncertainty,71.79479639765393,
+retention,1,Conditions / exceptions,60.61963615432816,
+retention,2,Conditions / exceptions,57.20281797028087,
+retention,3,Conditions / exceptions,68.389661011736,
+retention,4,Conditions / exceptions,72.65874178546431,
+retention,5,Conditions / exceptions,47.24784128112174,
+retention,6,Conditions / exceptions,52.83225247752457,
+retention,7,Conditions / exceptions,53.31573056892839,
+retention,8,Conditions / exceptions,70.71504166281984,
+retention,9,Conditions / exceptions,67.78853039675147,
+retention,10,Conditions / exceptions,55.634929383034006,
+retention,11,Conditions / exceptions,57.47955079723292,
+retention,12,Conditions / exceptions,29.504580228711355,
+retention,13,Conditions / exceptions,41.230235300877425,
+retention,14,Conditions / exceptions,38.93493353828855,
+retention,15,Conditions / exceptions,52.99637410493622,
+retention,16,Conditions / exceptions,62.118123934514955,
+retention,17,Conditions / exceptions,41.39208571024186,
+retention,18,Conditions / exceptions,46.62866281686469,
+retention,19,Conditions / exceptions,36.318618450006205,
+retention,20,Conditions / exceptions,63.83218079414405,
+retention,21,Conditions / exceptions,56.55358740395474,
+retention,22,Conditions / exceptions,75.03791266732013,
+retention,23,Conditions / exceptions,57.479718757924,
+retention,24,Conditions / exceptions,54.890039175619265,
+retention,25,Conditions / exceptions,44.189681980420836,
+retention,26,Conditions / exceptions,55.380761429302254,
+retention,27,Conditions / exceptions,79.14254414994313,
+retention,28,Conditions / exceptions,42.804165327139515,
+retention,29,Conditions / exceptions,62.030704548188844,
+retention,30,Conditions / exceptions,58.93200183488613,
+retention,31,Conditions / exceptions,68.91622150838288,
+retention,32,Conditions / exceptions,52.204796961115456,
+retention,33,Conditions / exceptions,50.14647986288341,
+retention,34,Conditions / exceptions,63.001143112159006,
+retention,35,Conditions / exceptions,65.28271246550032,
+retention,36,Conditions / exceptions,50.213769663218486,
+retention,37,Conditions / exceptions,56.031356606771155,
+retention,38,Conditions / exceptions,63.11985354814492,
+retention,39,Conditions / exceptions,56.707848319719766,
+retention,40,Conditions / exceptions,56.693838717202155,
+retention,41,Conditions / exceptions,66.38694284891389,
+retention,42,Conditions / exceptions,60.19100758035646,
+retention,43,Conditions / exceptions,55.17114113825808,
+retention,44,Conditions / exceptions,43.3420493744779,
+retention,45,Conditions / exceptions,37.22643152910837,
+retention,46,Conditions / exceptions,57.18263737095177,
+retention,47,Conditions / exceptions,34.384495048976135,
+retention,48,Conditions / exceptions,53.13166143302066,
+retention,49,Conditions / exceptions,44.80058179867982,
+retention,50,Conditions / exceptions,47.42248053036181,
+retention,51,Conditions / exceptions,61.84109130088018,
+retention,52,Conditions / exceptions,59.075188463197144,
+retention,53,Conditions / exceptions,56.399214234929886,
+retention,54,Conditions / exceptions,43.62770048768832,
+retention,55,Conditions / exceptions,41.14099096474628,
+retention,56,Conditions / exceptions,47.654158806377474,
+retention,57,Conditions / exceptions,67.11423403464336,
+retention,58,Conditions / exceptions,74.45554675317268,
+retention,59,Conditions / exceptions,46.389305726748645,
+retention,60,Conditions / exceptions,87.89580292902376,
+retention,61,Conditions / exceptions,65.27999407776727,
+retention,62,Conditions / exceptions,40.76811402053175,
+retention,63,Conditions / exceptions,48.3943827061305,
+retention,64,Conditions / exceptions,63.602537498301196,
+retention,65,Conditions / exceptions,58.40788996380083,
+retention,66,Conditions / exceptions,48.68099203464409,
+retention,67,Conditions / exceptions,75.69330751304918,
+retention,68,Conditions / exceptions,50.39647826928141,
+retention,69,Conditions / exceptions,43.02797482321858,
+retention,70,Conditions / exceptions,69.80788490338844,
+retention,71,Conditions / exceptions,44.079965564248184,
+retention,72,Conditions / exceptions,44.16831675211761,
+retention,73,Conditions / exceptions,38.80812282239042,
+retention,74,Conditions / exceptions,65.61546327498115,
+retention,75,Conditions / exceptions,55.86467177150556,
+retention,76,Conditions / exceptions,24.829944164684917,
+retention,77,Conditions / exceptions,62.998162598495135,
+retention,78,Conditions / exceptions,52.75503505257319,
+retention,79,Conditions / exceptions,57.19875731409307,
+retention,80,Conditions / exceptions,57.98226464347989,
+retention,81,Conditions / exceptions,65.7030365439295,
+retention,82,Conditions / exceptions,26.384185675805863,
+retention,83,Conditions / exceptions,60.88573440305187,
+retention,84,Conditions / exceptions,71.71482064616968,
+retention,85,Conditions / exceptions,37.10062640281252,
+retention,86,Conditions / exceptions,56.20586476331776,
+retention,87,Conditions / exceptions,70.023975903978,
+retention,88,Conditions / exceptions,66.48385323823115,
+retention,89,Conditions / exceptions,55.761242527932396,
+retention,90,Conditions / exceptions,65.5001514674293,
+retention,91,Conditions / exceptions,58.36555075141966,
+retention,92,Conditions / exceptions,61.333979804807555,
+retention,93,Conditions / exceptions,48.76555521642859,
+retention,94,Conditions / exceptions,45.69191670613893,
+retention,95,Conditions / exceptions,86.4839727764282,
+retention,96,Conditions / exceptions,59.8605858925654,
+retention,97,Conditions / exceptions,62.18287062319964,
+retention,98,Conditions / exceptions,71.66333795330097,
+retention,99,Conditions / exceptions,63.05488280617832,
+retention,100,Conditions / exceptions,43.593324071404474,
+retention,101,Conditions / exceptions,47.49658424749481,
+retention,102,Conditions / exceptions,45.57906309457994,
+retention,103,Conditions / exceptions,22.99141577480854,
+retention,104,Conditions / exceptions,59.72654617584674,
+retention,105,Conditions / exceptions,69.02729567997227,
+retention,106,Conditions / exceptions,52.130029809616644,
+retention,107,Conditions / exceptions,51.687763231204435,
+retention,108,Conditions / exceptions,69.11764050109169,
+retention,109,Conditions / exceptions,77.06175966893375,
+retention,110,Conditions / exceptions,56.75817225732441,
+retention,111,Conditions / exceptions,54.276925208224334,
+retention,112,Conditions / exceptions,77.77374998380168,
+retention,113,Conditions / exceptions,61.066393213763334,
+retention,114,Conditions / exceptions,61.51641057896088,
+retention,115,Conditions / exceptions,54.238956136434474,
+retention,116,Conditions / exceptions,52.529559102411454,
+retention,117,Conditions / exceptions,58.72539430636309,
+retention,118,Conditions / exceptions,70.8423242145413,
+retention,119,Conditions / exceptions,32.32129030077536,
+retention,120,Conditions / exceptions,37.70180637854794,
+prestige_swap,1,identical evidence,,-3.987411503427513
+prestige_swap,2,identical evidence,,-5.896994446312368
+prestige_swap,3,identical evidence,,-5.856234285486215
+prestige_swap,4,identical evidence,,-10.910584079671414
+prestige_swap,5,identical evidence,,-7.424884960944487
+prestige_swap,6,identical evidence,,-4.545149162235832
+prestige_swap,7,identical evidence,,5.024916981671936
+prestige_swap,8,identical evidence,,-21.780228954658924
+prestige_swap,9,identical evidence,,-3.8483364208335367
+prestige_swap,10,identical evidence,,-13.446013739252422
+prestige_swap,11,identical evidence,,-11.55161017843471
+prestige_swap,12,identical evidence,,3.1948687177460044
+prestige_swap,13,identical evidence,,-4.774748241822913
+prestige_swap,14,identical evidence,,-7.426031248786644
+prestige_swap,15,identical evidence,,-24.303284160818116
+prestige_swap,16,identical evidence,,-9.014718895033726
+prestige_swap,17,identical evidence,,-7.304455263473496
+prestige_swap,18,identical evidence,,-15.20208561057935
+prestige_swap,19,identical evidence,,-9.749353560151727
+prestige_swap,20,identical evidence,,-4.035761471665053
+prestige_swap,21,identical evidence,,-8.625959123385346
+prestige_swap,22,identical evidence,,6.469139495226416
+prestige_swap,23,identical evidence,,-3.1329655835341867
+prestige_swap,24,identical evidence,,6.946046616002563
+prestige_swap,25,identical evidence,,4.242104431582988
+prestige_swap,26,identical evidence,,-6.104102582652162
+prestige_swap,27,identical evidence,,4.300774933358859
+prestige_swap,28,identical evidence,,7.214572119650717
+prestige_swap,29,identical evidence,,8.715916847673485
+prestige_swap,30,identical evidence,,6.871501636900449
+prestige_swap,31,identical evidence,,4.222370004683135
+prestige_swap,32,identical evidence,,3.611266333015541
+prestige_swap,33,identical evidence,,14.238873798496844
+prestige_swap,34,identical evidence,,4.14090339215542
+prestige_swap,35,identical evidence,,-0.7270793172185296
+prestige_swap,36,identical evidence,,3.947450435374985
+prestige_swap,37,identical evidence,,7.988612038475537
+prestige_swap,38,identical evidence,,-0.506567225912371
+prestige_swap,39,identical evidence,,2.2320157769540048
+prestige_swap,40,identical evidence,,13.518045446672526
+prestige_swap,41,identical evidence,,16.811786687447306
+prestige_swap,42,identical evidence,,4.138003256836094
+prestige_swap,43,identical evidence,,10.795051266223176
+prestige_swap,44,identical evidence,,16.655943164520934
+prestige_swap,45,identical evidence,,9.860620011999796
+prestige_swap,46,identical evidence,,-12.05438427481445
+prestige_swap,47,identical evidence,,0.0535572598611026
+prestige_swap,48,identical evidence,,10.292646519428787
+prestige_swap,49,identical evidence,,-1.0621644994073192
+prestige_swap,50,identical evidence,,1.230551493265008
+prestige_swap,51,identical evidence,,16.13060085671337
+prestige_swap,52,identical evidence,,-3.4282496840915164
+prestige_swap,53,identical evidence,,0.48084260197285744
+prestige_swap,54,identical evidence,,17.38822797415091
+prestige_swap,55,identical evidence,,10.037986208607485
+prestige_swap,56,identical evidence,,-0.5020416293172048
+prestige_swap,57,identical evidence,,16.691131638340917
+prestige_swap,58,identical evidence,,10.875323839558433
+prestige_swap,59,identical evidence,,6.94925731605966
+prestige_swap,60,identical evidence,,6.38435739733748
+prestige_swap,61,identical evidence,,-3.9567370766383854
+prestige_swap,62,identical evidence,,18.967554465791512
+prestige_swap,63,identical evidence,,4.824601036009559
+prestige_swap,64,identical evidence,,14.029271540507187
+prestige_swap,65,identical evidence,,0.2680799143397139
+prestige_swap,66,identical evidence,,0.11582715120038745
+prestige_swap,67,identical evidence,,5.048543361873071
+prestige_swap,68,identical evidence,,-2.216417822210026
+prestige_swap,69,identical evidence,,8.011256471288483
+prestige_swap,70,identical evidence,,1.972506745871424
+prestige_swap,71,identical evidence,,-8.545135813645254
+prestige_swap,72,identical evidence,,1.8757882325144006
+prestige_swap,73,identical evidence,,-1.3975615822427394
+prestige_swap,74,identical evidence,,15.601757175434546
+prestige_swap,75,identical evidence,,10.305054115896837
+prestige_swap,76,identical evidence,,11.721496484388172
+prestige_swap,77,identical evidence,,5.219375997498062
+prestige_swap,78,identical evidence,,8.898874034105432
+prestige_swap,79,identical evidence,,3.2707160309182335
+prestige_swap,80,identical evidence,,12.305438800272054
+prestige_swap,81,identical evidence,,-3.0284655678747976
+prestige_swap,82,identical evidence,,5.717788611320797
+prestige_swap,83,identical evidence,,-6.980087270336103
+prestige_swap,84,identical evidence,,-10.059938619310932
+prestige_swap,85,identical evidence,,-0.32536284559389006
+prestige_swap,86,identical evidence,,5.702993634572175
+prestige_swap,87,identical evidence,,0.674491739033189
+prestige_swap,88,identical evidence,,6.300925566859938
+prestige_swap,89,identical evidence,,-3.9617817615619564
+prestige_swap,90,identical evidence,,2.5324015378302893
+prestige_swap,91,identical evidence,,-1.167933545627562
+prestige_swap,92,identical evidence,,5.242388209276006
+prestige_swap,93,identical evidence,,-13.525869376031853
+prestige_swap,94,identical evidence,,8.43645798005989
+prestige_swap,95,identical evidence,,-0.8499476190795459
+prestige_swap,96,identical evidence,,14.46423580980473
+prestige_swap,97,identical evidence,,2.0498377199673214
+prestige_swap,98,identical evidence,,9.119190249329629
+prestige_swap,99,identical evidence,,16.05281227186913
+prestige_swap,100,identical evidence,,7.535574689241703
+prestige_swap,101,identical evidence,,-1.9604813576572893
+prestige_swap,102,identical evidence,,4.5476016974799975
+prestige_swap,103,identical evidence,,12.768514383241845
+prestige_swap,104,identical evidence,,4.0466686671319
+prestige_swap,105,identical evidence,,2.6241508052523006
+prestige_swap,106,identical evidence,,3.5128977602594653
+prestige_swap,107,identical evidence,,2.977983332659392
+prestige_swap,108,identical evidence,,15.175069358676373
+prestige_swap,109,identical evidence,,-8.029917202072072
+prestige_swap,110,identical evidence,,-5.279385871146339
+prestige_swap,111,identical evidence,,-0.2206688994002407
+prestige_swap,112,identical evidence,,-0.7529320335535059
+prestige_swap,113,identical evidence,,-2.4075361062875036
+prestige_swap,114,identical evidence,,13.740386695825187
+prestige_swap,115,identical evidence,,6.481274867246166
+prestige_swap,116,identical evidence,,12.29473497921068
+prestige_swap,117,identical evidence,,-0.81575147975758
+prestige_swap,118,identical evidence,,2.786477359936398
+prestige_swap,119,identical evidence,,-7.53240192609225
+prestige_swap,120,identical evidence,,-3.4632772382101034
