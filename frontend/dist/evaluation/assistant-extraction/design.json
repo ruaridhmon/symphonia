@@ -1,0 +1,13 @@
+{
+  "status": "Frozen before writing extraction outputs in this turn; not preregistered",
+  "extractor": "Assistant in this Codex conversation, not the deployed Symphonia model",
+  "independence": "24 disjoint two-response panels nested within four previously authored synthetic scenarios; one conversation; no independent model invocations or blinded assessment",
+  "prompt": "Extract up to eight distinct focal claims in at most 200 words from the two responses. Preserve critical quantities, populations, conditions, uncertainty and disagreement. Describe positions as positions, not established truth. Do not invent claims. Use shared panel context where stated. Return a numbered list of atomic claims.",
+  "reference_scope": "Original inline claim IDs remain visible; this is not a blinded extraction test. Unique preassigned focal claim IDs declared expressed by the archived response generator, checked against source text during assistant review. Incidental assertions are outside this coverage denominator. Gold labels are not independent or exhaustive.",
+  "scoring": "Unblinded assistant semantic review per extracted claim with source quotes and focal-ID mapping. Each unique reference receives credit at most once, and only from a faithful extraction. Faithfulness = faithful extracted claims / extracted claims. All generated panels and outputs are retained, including shortfalls.",
+  "panels": 24,
+  "scenarios": 4,
+  "max_claims": 8,
+  "max_words": 200,
+  "new_openrouter_calls": 0
+}

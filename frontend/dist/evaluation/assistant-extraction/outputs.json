@@ -1,0 +1,242 @@
+{
+  "pilot-001-01": [
+    "P01 supports a 14-percentage-point primary-MLD literacy gain under Veralund benchmarking, classes of at most 22 and at least 60% co-teacher coverage.",
+    "P01 considers evidence insufficient for a 31% reduction in MLD anxiety-related school refusal.",
+    "P01 tentatively supports a nine-point neurotypical literacy decline from an unverified report lacking class-size and co-teacher controls.",
+    "Both respondents lack evidence for unchanged neurotypical literacy with at least 60% co-teacher coverage.",
+    "Both support no significant secondary-MLD literacy improvement, associated with low co-teacher coverage and larger classes.",
+    "Both lack reliable evidence about anxiety outcomes in the MLD subgroup with co-occurring anxiety disorders.",
+    "P02 reports teacher confidence recovered by second-semester end; teachers with at least 12 hours' prior training avoided the initial dip.",
+    "P02 supports a 0.8-standard-deviation social-belonging gain for MLD students aged 8\u201312."
+  ],
+  "pilot-001-02": [
+    "P03 supports a one-year 0.8-standard-deviation belonging gain for MLD students aged 8\u201312 under full inclusion versus pull-out placement.",
+    "Both support a one-year 0.4-standard-deviation belonging decline for secondary MLD students aged 13\u201317, linked to secondary-school peer dynamics.",
+    "P03 reports teacher confidence recovered by second-semester end; at least 12 hours' prior training prevented the initial decline.",
+    "P03 rejects a permanent 22% teacher-attrition increase: administrative sources show no significant inclusion-attributable increase.",
+    "Both regard post-secondary employment effects as unknown because follow-up outcomes are unavailable.",
+    "P04 supports an 18% two-year school-refusal increase versus pull-out placement for MLD students aged 8\u201312 with anxiety disorders, a 19% subgroup.",
+    "P04 describes stakeholder disagreement over whether literacy gains justify rollout despite subgroup harms; P03 characterizes disagreement as normative, not factual.",
+    "P04 endorses full inclusion as an ethical dignity right."
+  ],
+  "pilot-001-03": [
+    "Both provisionally accept a nine-point, two-year neurotypical literacy decline under inclusion versus non-inclusion, based on an unverified report lacking confounder controls.",
+    "P05 lacks evidence on MLD school refusal; P06 supports a 31% two-year reduction for ages 8\u201312 from a randomized study.",
+    "P05 supports a 14-point, two-year MLD literacy gain under the Veralund benchmark with co-teacher support and capped classes.",
+    "P05 regards cost estimates as insufficiently verified.",
+    "P05 opposes withholding inclusion from the anxiety-disorder subgroup until subgroup benefit is proven.",
+    "P05 endorses default inclusion as a dignity obligation and regards segregation as inherently harmful.",
+    "P06 supports no significant secondary-MLD literacy gain versus pull-out placement, associated with lower co-teacher coverage and larger classes.",
+    "P06 lacks evidence about inclusion's effects on MLD students with co-occurring anxiety."
+  ],
+  "pilot-001-04": [
+    "P07 supports an 18% school-refusal increase for MLD students aged 8\u201312 with anxiety disorders, comprising 19% of the population.",
+    "Both support teacher-confidence recovery by second-semester end, with no initial dip after at least 12 hours' prior professional development.",
+    "Both support a 0.8-standard-deviation belonging gain among primary-age MLD students under inclusion.",
+    "Both reject a permanent 22% teacher-attrition increase; administrative data show no significant increase attributable to inclusion.",
+    "P07 supports no significant secondary-MLD literacy improvement under low co-teacher coverage and large classes.",
+    "P08 supports a 0.4-standard-deviation secondary-school belonging decline, associated with peer-status dynamics.",
+    "P08 regards long-term employment effects as unknown pending longitudinal data due in 2030.",
+    "P08 identifies a normative dispute over whether literacy gains justify inclusion despite subgroup harms."
+  ],
+  "pilot-001-05": [
+    "P09 endorses default inclusion as a dignity obligation regardless of subgroup outcomes; P10 rejects that unconditional obligation.",
+    "P09 supports withholding inclusion from the anxiety-disorder subgroup pending net benefit; P10 opposes withholding it.",
+    "P09 supports a 0.4-standard-deviation secondary-MLD belonging decline versus pull-out placement, linked to peer-status dynamics.",
+    "P09 regards employment effects as unresolved until longitudinal findings expected in 2030.",
+    "Both regard per-pupil cost differences as unverified; P10 specifically cannot judge the contested 12% premium.",
+    "P09 rejects literacy gains alone as sufficient justification for rollout when the anxiety-disorder subgroup suffers harm.",
+    "P10 supports a 14-point, two-year MLD literacy gain versus pull-out placement under Veralund benchmarking and adequate classroom supports.",
+    "P10 tentatively supports a nine-point neurotypical literacy decline from an unverified report lacking class-size and co-teacher controls."
+  ],
+  "pilot-001-06": [
+    "P11 supports a 14-point literacy gain for MLD students aged 8\u201312 under Veralund benchmarking, classes of at most 22 and co-teacher coverage of at least 60%.",
+    "P11 supports a 31% school-refusal reduction for that group, measured by the Veralund Student Wellbeing Survey.",
+    "Both support no significant secondary-MLD literacy improvement, associated with low co-teacher coverage and large classes.",
+    "P11 provisionally accepts a nine-point neurotypical literacy decline, acknowledging unverified and inadequately controlled evidence.",
+    "Both lack sufficient evidence for neurotypical literacy effects with high co-teacher coverage.",
+    "P12 rejects an inclusion-caused permanent 22% attrition increase; administrative data suggest no significant attributable rise.",
+    "P12 reports teacher-confidence recovery within a year, without an initial decline among adequately trained teachers.",
+    "P12 supports increased primary-MLD social belonging, citing a robust study without stating an effect size."
+  ],
+  "pilot-003-01": [
+    "P01 rejects occupationally equivalent assay sensitivity: agricultural workers have 71\u201372% sensitivity versus 88\u201389% in office workers; P02 finds the comparison insufficiently evidenced.",
+    "P01 supports reduced sensitivity with organophosphate exposure; P02 disputes 71% agricultural sensitivity using an explicitly unverified report.",
+    "P01 rejects a false-positive rate below 5%, citing specificity of 0.91 and a reported 9.3% false-positive rate.",
+    "Both lack sufficient evidence about LVX2-associated arrhythmia in THYR-delta carriers.",
+    "P01 supports at least 87% sensitivity under standard conditions, citing estimates of 88\u201389%.",
+    "P01 supports early treatment reducing cardiovascular events.",
+    "P02 supports Draveth's 2.9% false-positive rate, while noting iodine-policy and collection-time confounding.",
+    "P02 lacks age-specific validation for at least 85% sensitivity in adults aged 60\u201375."
+  ],
+  "pilot-003-02": [
+    "Both support morning cortisol interference contributing to false positives; P04 cites pilot assay signals 8\u201314% higher in the morning than midday.",
+    "Both regard restricting collection to 11:00\u201314:00 as unproven to lower false positives below 5%, given small, underpowered pilots.",
+    "P03 supports Draveth's false-positive rate below 3% despite apparently similar climate.",
+    "P03 supports increased LVX2 arrhythmia risk in THYR-delta carriers, citing two studies.",
+    "Both regard iodine policy as an unresolved explanation of regional assay differences because collection time is also uncontrolled.",
+    "P04 endorses universal screening as an obligation if THYR-delta carriers are excluded from LVX2 treatment.",
+    "P04 rejects autonomy-based opposition to mandatory screening, considering benefits and safeguards sufficient justification.",
+    "P04 opposes claimed superior net benefit from targeting non-agricultural workers at midday, citing absent trials and inconclusive economic models."
+  ],
+  "pilot-003-03": [
+    "P05 endorses universal screening as obligatory provided THYR-delta carriers are excluded from LVX2 treatment.",
+    "Both support early LVX2 reducing major cardiovascular events; P06 specifies an 18% relative five-year MACE-3 reduction in adults aged 30\u201360.",
+    "Both support at least 87% assay sensitivity under standard clinical conditions, with P06 citing 88%.",
+    "Both believe false positives are below 5% based on a weak, unverified report.",
+    "P05 opposes claims that targeting non-agricultural workers at midday has superior net benefit, citing insufficient evidence.",
+    "P05 rejects autonomy-based opposition to mandatory screening.",
+    "P06 believes occupational sensitivity differs by at most four percentage points, citing an unverified report.",
+    "P06 lacks sufficient evidence about LVX2-associated arrhythmia in THYR-delta carriers."
+  ],
+  "pilot-003-04": [
+    "P07 believes occupational assay sensitivity differs by at most four percentage points, relying on an unverified report.",
+    "Both regard ten-year cost neutrality of universal screening as unresolved; P08 notes assumptions about current drug prices and stable hospital costs.",
+    "P07 lacks sufficient evidence about arrhythmia risk in THYR-delta carriers.",
+    "Both lack age-specific evidence for at least 85% sensitivity at ages 60\u201375.",
+    "Both support Draveth's false-positive rate below 3%; P07 notes unresolved confounding.",
+    "P08 supports morning cortisol interference during 07:00\u201310:00 contributing to false-positive rates above 5%.",
+    "P08 regards a false-positive rate below 5% from 11:00\u201314:00 collection as unproven without adequately powered prospective validation.",
+    "P08 regards iodine as unproven to fully explain regional assay differences, given absent controlled trials."
+  ],
+  "pilot-003-05": [
+    "P09 supports morning cortisol interference contributing to false-positive rates above 5%.",
+    "P09 regards iodine and collection-time differences as unresolved explanations for regional assay discrepancies.",
+    "P09 regards midday collection as unproven to lower false positives below 5%.",
+    "P09 supports superior net benefit from targeting non-agricultural workers at midday; P10 opposes that claim because comparative trials are absent.",
+    "Both endorse universal screening as obligatory conditional on excluding THYR-delta carriers from LVX2 treatment.",
+    "P09 opposes screening mandates on autonomy grounds despite aggregate benefit; P10 rejects this objection, citing benefits and safeguards.",
+    "P10 supports at least 87% sensitivity under standard clinical conditions, citing 88%.",
+    "P10 supports early LVX2 treatment within six months of a positive assay reducing five-year cardiovascular events."
+  ],
+  "pilot-003-06": [
+    "P11 supports at least 87% assay sensitivity in adults aged 30\u201360 under standard conditions.",
+    "P11 supports early LVX2 treatment after a positive assay reducing five-year cardiovascular events.",
+    "P11 believes false positives are below 5% on the basis of an unverified report.",
+    "P11 believes sensitivity is equivalent across occupations using an unverified report; P12 rejects equivalence using occupational validation studies.",
+    "P11 disputes 71% agricultural sensitivity using an unverified report; P12 supports 71% versus 89% in office workers with organophosphate exposure implicated.",
+    "Both lack sufficient evidence about arrhythmia risk in THYR-delta carriers.",
+    "P12 regards ten-year cost neutrality as unresolved.",
+    "P12 lacks age-specific validation for sensitivity among adults aged 60\u201375."
+  ],
+  "pilot-004-01": [
+    "P01 supports twelve-month re-offending falling from 38% to 21% after structured diversion for first-time Mirelon offenders aged 10\u201314 without prior cautions.",
+    "P01 regards the 41% to 38% decline at ages 15\u201317 as insufficient evidence of meaningful benefit.",
+    "P01 believes diversion works equally across ages 10\u201317, acknowledging an unverified report contradicted by age-stratified data.",
+    "Both lack sufficient evidence about increased re-offending in 10\u201314-year-olds with conduct disorder.",
+    "Both regard eliminating age-group outcome differences by reducing administrative burden as an untested hypothesis.",
+    "P02 supports re-offending falling from 40% to 20% in Fennwick's screened, low-risk 10\u201314-year-olds.",
+    "P02 rejects generalizing Delvara's null result to all older-youth programmes regardless of resources, citing high caseload confounding.",
+    "P02 supports Delvara's universal-diversion null result."
+  ],
+  "pilot-004-02": [
+    "Both support Fennwick's 43% re-offending rate among 15\u201317-year-olds excluded from targeted diversion; P03 compares this with a 42% control rate.",
+    "P03 supports Delvara's twelve-month universal-diversion null result for ages 10\u201317, noting caseloads of 18:1 versus Mirelon's 11:1.",
+    "Both regard programme intensity as an unresolved explanation of Mirelon\u2013Fennwick differences, given competing resource and population explanations without individual-level cross-site data.",
+    "P03 supports a caseload\u2013re-offending association in Mirelon's younger offenders; P04 considers the evidence insufficient for a firm conclusion.",
+    "P03 rejects a statutory prohibition on age exclusions; P04 endorses it under Mirelon's 2018 Act.",
+    "P03 rejects generalizing Delvara's null result irrespective of resources.",
+    "P04 supports projected Mirelon caseload growth from 11 to about 19 under universal expansion.",
+    "P04 endorses universal diversion because withholding support from older youth is unjustifiable harm regardless of effectiveness."
+  ],
+  "pilot-004-03": [
+    "Both support twelve-month re-offending falling from 38% to 21% among first-time 10\u201314-year-olds without prior cautions; P06 explicitly excludes conduct disorder.",
+    "Both regard benefit for first-time 15\u201317-year-olds as insufficiently evidenced.",
+    "Both believe effects are equal across ages 10\u201317 based on an unverified report, acknowledging conflict with age-stratified data.",
+    "Both support increased re-offending from 35% to 52% among 10\u201314-year-olds with conduct disorder; P06 cites antisocial peer-network reinforcement.",
+    "P05 finds insufficient evidence for a resource-competition effect on outcomes.",
+    "P05 supports projected caseload growth from 11 to 19 under expansion.",
+    "P05 endorses universal diversion, treating withholding support from older youth as unjustifiable harm regardless of effectiveness.",
+    "P06 regards eliminating age-group outcome differences by reducing administrative burden as unsupported by empirical evidence."
+  ],
+  "pilot-004-04": [
+    "Both support Fennwick's targeted diversion halving re-offending from 40% to 20% in screened, low-risk 10\u201314-year-olds.",
+    "P07 lacks evidence for 6.2 weekly administrative hours and fewer than three mentoring hours per Mirelon participant.",
+    "P07 supports increased re-offending from 35% to 52% in Mirelon's conduct-disorder subgroup, with possible negative peer effects.",
+    "P07 supports Delvara's universal-diversion null result; P08 considers effectiveness unresolved because caseloads confound interpretation.",
+    "P07 rejects resource-independent generalization of Delvara's null result to ages 15\u201317; P08 supports it using an acknowledged unverified report.",
+    "P07 regards eliminating age-group differences by reducing administrative burden as an untested hypothesis.",
+    "P08 considers age-based exclusions impermissible under Mirelon's 2018 Act, acknowledging differing legal interpretations.",
+    "P08 regards programme intensity as an unresolved explanation of Mirelon\u2013Fennwick differences because population differences also remain plausible."
+  ],
+  "pilot-004-05": [
+    "P09 endorses universal diversion because withholding support from older youth is unjustifiable harm; P10 rejects this, favouring permissible risk-stratified targeting.",
+    "P09 supports Fennwick's twelve-month re-offending rate of 43% for 15\u201317-year-olds excluded from targeted diversion.",
+    "Both support projected Mirelon caseload growth from 11 to about 19 under universal expansion.",
+    "Both lack sufficient evidence for the reported caseload-related re-offending spread among Mirelon's younger participants.",
+    "P09 rejects a statutory requirement for equivalent intervention regardless of age, citing legal counterarguments.",
+    "P09 regards programme intensity as an unresolved explanation of older-youth outcome differences across Mirelon and Fennwick.",
+    "P10 supports twelve-month re-offending falling from 38% to 21% in first-time 10\u201314-year-olds without prior cautions or conduct disorder.",
+    "P10 believes diversion works equally across ages based on an acknowledged unverified report."
+  ],
+  "pilot-004-06": [
+    "P11 supports 34% re-offending among Mirelon's first-time 10\u201314-year-olds with caseworkers handling over 14 cases versus 18% with fewer than ten.",
+    "P11 supports twelve-month re-offending falling from 38% to 21% in first-time 10\u201314-year-olds without prior cautions or conduct disorder.",
+    "P11 supports 6.2 weekly administrative hours per participant leaving fewer than three mentoring hours; P12 considers the time-use evidence insufficient.",
+    "P11 believes effects are equal across ages 10\u201317 based on an acknowledged unverified report contradicted by age-stratified data.",
+    "Both lack sufficient evidence about diversion outcomes for 10\u201314-year-olds with conduct disorder.",
+    "Both regard eliminating age-group differences by reducing administrative burden as untested.",
+    "P12 rejects treating Delvara's null result as proof of resource-independent ineffectiveness for older youth, citing caseload and age-stratification limitations.",
+    "P12 supports Fennwick's targeted diversion reducing re-offending in low-risk 10\u201314-year-olds."
+  ],
+  "pilot-602-01": [
+    "P01 lacks sufficient evidence to verify Verantia's reported 22.4% chronic absenteeism rate.",
+    "P01 lacks documentation for untreated asthma accounting for 38% of medically attributed absences.",
+    "P01 believes dental pain is the leading medical driver at 41%, acknowledging an unverified newsletter report contradicted by primary screening data.",
+    "Both consider evidence for health-hub effectiveness insufficient; P02 notes the observed 6.1-point reduction lacks a robust matched comparison.",
+    "Both consider evidence about persistence beyond 24 months insufficient; P02 notes turnover, supply problems and possible time-series confounding.",
+    "Both regard Drosswick's health-hub findings as weak or non-comparable because implementation differs.",
+    "P02 considers Drosswick\u2013Verantia income comparisons non-comparable because income classification and populations differ.",
+    "P02 regards larger reported absenteeism reductions among low-income pupils as uncertain beyond the limited pilot subgroup analysis."
+  ],
+  "pilot-602-02": [
+    "P03 supports a $312 annual operating cost per pupil excluding capital costs from audited expenditure; P04 considers the figure insufficiently documented.",
+    "Both regard projected district-wide costs of $198 per pupil as unverified, based on a contested, unaudited vendor quote.",
+    "P03 supports 44% lower hub use among non-English-speaking families, 31% of enrolment, linked to language barriers; P04 lacks supporting data.",
+    "P03 supports chronic absenteeism rates of 34.7% among low-income pupils versus 11.2% among higher-income pupils.",
+    "P03 supports pilot reductions of 9.4 percentage points for low-income pupils versus 1.8 for higher-income pupils, with significant heterogeneity.",
+    "Both reject equivalent reductions across income groups as contradicted by pilot heterogeneity.",
+    "P04 endorses equitable health outcomes taking priority over cost-efficiency in rollout policy.",
+    "P04 regards attribution to hubs rather than the concurrent attendance campaign as unresolved because neighbouring-district comparisons do not resolve confounding."
+  ],
+  "pilot-602-03": [
+    "P05 supports a 22.4% primary-pupil chronic absenteeism rate in 2021\u20132023 from validated district data; P06 lacks sufficient evidence to confirm it.",
+    "P05 considers the 38% asthma attribution insufficiently established; P06 supports asthma as the largest medical driver from screening and referral data.",
+    "P05 rejects dental pain as the largest driver; P06 believes the 41% dental figure from an acknowledged unverified, contradictory report.",
+    "P05 regards attribution of improvement to hubs rather than the attendance campaign as unresolved.",
+    "P05 lacks evidence for 44% lower utilisation among non-English-speaking families due to language barriers.",
+    "P05 endorses equitable health outcomes taking priority over cost-efficiency.",
+    "P06 supports a 6.1-percentage-point pilot absenteeism reduction following health hubs.",
+    "P06 supports larger pilot reductions for low-income pupils, 9.4 percentage points versus 1.8 for higher-income pupils."
+  ],
+  "pilot-602-04": [
+    "P07 supports a 6.1-percentage-point absenteeism reduction within 18 months of Verantia hub activation.",
+    "Both support decay of the initial reduction by 24 months; P07 attributes this to staff turnover and medication supply disruptions.",
+    "P07 regards Drosswick's null finding as insufficiently comparable because its hubs use part-time rather than Verantia's full-time staffing.",
+    "Both lack direct evidence for absenteeism rates of 34.7% versus 11.2% across Verantia income groups.",
+    "Both consider cross-district low-income comparisons insufficiently supported because income classifications and populations differ.",
+    "Both lack sufficient direct evidence for differential pilot effects by income.",
+    "P08 supports a $312 annual operating cost per pupil, excluding capital setup costs, from audited pilot expenditure.",
+    "P08 regards projected district-wide costs of $198 per pupil as insufficiently supported by an unaudited, contested vendor quote."
+  ],
+  "pilot-602-05": [
+    "Both lack sufficient evidence for lower health-hub utilisation among non-English-speaking families or its attributed language barriers; P09 cites the proposed 44% gap.",
+    "P09 lacks evidence to verify $312 annual operating costs per pupil without reviewed expenditure and enrolment data.",
+    "P09 regards $198 per-pupil district-wide costs as unverified because the vendor quote is unaudited and contested.",
+    "Both regard attribution of absenteeism reductions to hubs rather than the attendance campaign as unresolved.",
+    "Both oppose an unconditional equity-over-cost obligation, treating fiscal sustainability as a core responsibility.",
+    "P09 considers equivalent effects across income groups unsupported given documented subgroup heterogeneity.",
+    "P10 lacks evidence to confirm a 22.4% overall chronic absenteeism rate.",
+    "P10 believes dental pain accounts for 41% and leads medical causes, acknowledging an unverified newsletter claim contradicted by primary screening data."
+  ],
+  "pilot-602-06": [
+    "P11 lacks sufficient evidence to establish Verantia's overall chronic absenteeism rate.",
+    "P11 lacks corroborated evidence that untreated asthma accounts for the largest share of medical absences.",
+    "P11 believes dental pain is the largest medical driver at 41%, acknowledging an unverified report contradicted by primary screening data.",
+    "Both consider hub effectiveness insufficiently established; P12 notes the reported 6.1-point reduction within 18 months lacks a robust matched comparison.",
+    "Both consider sustainability insufficiently established; P12 notes reported decay beyond 24 months amid staff turnover and supply disruptions.",
+    "Both regard Drosswick's part-time-hub null result as poorly generalizable to Verantia because staffing and populations differ.",
+    "P12 regards Drosswick's lower low-income baseline absenteeism as non-comparable because income classification differs.",
+    "P12 regards greater pilot effects among low-income pupils as insufficiently generalizable beyond the pilot subgroup."
+  ]
+}

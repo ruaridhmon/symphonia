@@ -1,0 +1,62 @@
+{
+"pilot-003-01":[
+"P01 rejects occupationally equivalent assay sensitivity: agricultural workers have 71–72% sensitivity versus 88–89% in office workers; P02 finds the comparison insufficiently evidenced.",
+"P01 supports reduced sensitivity with organophosphate exposure; P02 disputes 71% agricultural sensitivity using an explicitly unverified report.",
+"P01 rejects a false-positive rate below 5%, citing specificity of 0.91 and a reported 9.3% false-positive rate.",
+"Both lack sufficient evidence about LVX2-associated arrhythmia in THYR-delta carriers.",
+"P01 supports at least 87% sensitivity under standard conditions, citing estimates of 88–89%.",
+"P01 supports early treatment reducing cardiovascular events.",
+"P02 supports Draveth's 2.9% false-positive rate, while noting iodine-policy and collection-time confounding.",
+"P02 lacks age-specific validation for at least 85% sensitivity in adults aged 60–75."
+],
+"pilot-003-02":[
+"Both support morning cortisol interference contributing to false positives; P04 cites pilot assay signals 8–14% higher in the morning than midday.",
+"Both regard restricting collection to 11:00–14:00 as unproven to lower false positives below 5%, given small, underpowered pilots.",
+"P03 supports Draveth's false-positive rate below 3% despite apparently similar climate.",
+"P03 supports increased LVX2 arrhythmia risk in THYR-delta carriers, citing two studies.",
+"Both regard iodine policy as an unresolved explanation of regional assay differences because collection time is also uncontrolled.",
+"P04 endorses universal screening as an obligation if THYR-delta carriers are excluded from LVX2 treatment.",
+"P04 rejects autonomy-based opposition to mandatory screening, considering benefits and safeguards sufficient justification.",
+"P04 opposes claimed superior net benefit from targeting non-agricultural workers at midday, citing absent trials and inconclusive economic models."
+],
+"pilot-003-03":[
+"P05 endorses universal screening as obligatory provided THYR-delta carriers are excluded from LVX2 treatment.",
+"Both support early LVX2 reducing major cardiovascular events; P06 specifies an 18% relative five-year MACE-3 reduction in adults aged 30–60.",
+"Both support at least 87% assay sensitivity under standard clinical conditions, with P06 citing 88%.",
+"Both believe false positives are below 5% based on a weak, unverified report.",
+"P05 opposes claims that targeting non-agricultural workers at midday has superior net benefit, citing insufficient evidence.",
+"P05 rejects autonomy-based opposition to mandatory screening.",
+"P06 believes occupational sensitivity differs by at most four percentage points, citing an unverified report.",
+"P06 lacks sufficient evidence about LVX2-associated arrhythmia in THYR-delta carriers."
+],
+"pilot-003-04":[
+"P07 believes occupational assay sensitivity differs by at most four percentage points, relying on an unverified report.",
+"Both regard ten-year cost neutrality of universal screening as unresolved; P08 notes assumptions about current drug prices and stable hospital costs.",
+"P07 lacks sufficient evidence about arrhythmia risk in THYR-delta carriers.",
+"Both lack age-specific evidence for at least 85% sensitivity at ages 60–75.",
+"Both support Draveth's false-positive rate below 3%; P07 notes unresolved confounding.",
+"P08 supports morning cortisol interference during 07:00–10:00 contributing to false-positive rates above 5%.",
+"P08 regards a false-positive rate below 5% from 11:00–14:00 collection as unproven without adequately powered prospective validation.",
+"P08 regards iodine as unproven to fully explain regional assay differences, given absent controlled trials."
+],
+"pilot-003-05":[
+"P09 supports morning cortisol interference contributing to false-positive rates above 5%.",
+"P09 regards iodine and collection-time differences as unresolved explanations for regional assay discrepancies.",
+"P09 regards midday collection as unproven to lower false positives below 5%.",
+"P09 supports superior net benefit from targeting non-agricultural workers at midday; P10 opposes that claim because comparative trials are absent.",
+"Both endorse universal screening as obligatory conditional on excluding THYR-delta carriers from LVX2 treatment.",
+"P09 opposes screening mandates on autonomy grounds despite aggregate benefit; P10 rejects this objection, citing benefits and safeguards.",
+"P10 supports at least 87% sensitivity under standard clinical conditions, citing 88%.",
+"P10 supports early LVX2 treatment within six months of a positive assay reducing five-year cardiovascular events."
+],
+"pilot-003-06":[
+"P11 supports at least 87% assay sensitivity in adults aged 30–60 under standard conditions.",
+"P11 supports early LVX2 treatment after a positive assay reducing five-year cardiovascular events.",
+"P11 believes false positives are below 5% on the basis of an unverified report.",
+"P11 believes sensitivity is equivalent across occupations using an unverified report; P12 rejects equivalence using occupational validation studies.",
+"P11 disputes 71% agricultural sensitivity using an unverified report; P12 supports 71% versus 89% in office workers with organophosphate exposure implicated.",
+"Both lack sufficient evidence about arrhythmia risk in THYR-delta carriers.",
+"P12 regards ten-year cost neutrality as unresolved.",
+"P12 lacks age-specific validation for sensitivity among adults aged 60–75."
+]
+}

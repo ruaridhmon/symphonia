@@ -1,0 +1,62 @@
+{
+"pilot-001-01":[
+"P01 supports a 14-percentage-point primary-MLD literacy gain under Veralund benchmarking, classes of at most 22 and at least 60% co-teacher coverage.",
+"P01 considers evidence insufficient for a 31% reduction in MLD anxiety-related school refusal.",
+"P01 tentatively supports a nine-point neurotypical literacy decline from an unverified report lacking class-size and co-teacher controls.",
+"Both respondents lack evidence for unchanged neurotypical literacy with at least 60% co-teacher coverage.",
+"Both support no significant secondary-MLD literacy improvement, associated with low co-teacher coverage and larger classes.",
+"Both lack reliable evidence about anxiety outcomes in the MLD subgroup with co-occurring anxiety disorders.",
+"P02 reports teacher confidence recovered by second-semester end; teachers with at least 12 hours' prior training avoided the initial dip.",
+"P02 supports a 0.8-standard-deviation social-belonging gain for MLD students aged 8–12."
+],
+"pilot-001-02":[
+"P03 supports a one-year 0.8-standard-deviation belonging gain for MLD students aged 8–12 under full inclusion versus pull-out placement.",
+"Both support a one-year 0.4-standard-deviation belonging decline for secondary MLD students aged 13–17, linked to secondary-school peer dynamics.",
+"P03 reports teacher confidence recovered by second-semester end; at least 12 hours' prior training prevented the initial decline.",
+"P03 rejects a permanent 22% teacher-attrition increase: administrative sources show no significant inclusion-attributable increase.",
+"Both regard post-secondary employment effects as unknown because follow-up outcomes are unavailable.",
+"P04 supports an 18% two-year school-refusal increase versus pull-out placement for MLD students aged 8–12 with anxiety disorders, a 19% subgroup.",
+"P04 describes stakeholder disagreement over whether literacy gains justify rollout despite subgroup harms; P03 characterizes disagreement as normative, not factual.",
+"P04 endorses full inclusion as an ethical dignity right."
+],
+"pilot-001-03":[
+"Both provisionally accept a nine-point, two-year neurotypical literacy decline under inclusion versus non-inclusion, based on an unverified report lacking confounder controls.",
+"P05 lacks evidence on MLD school refusal; P06 supports a 31% two-year reduction for ages 8–12 from a randomized study.",
+"P05 supports a 14-point, two-year MLD literacy gain under the Veralund benchmark with co-teacher support and capped classes.",
+"P05 regards cost estimates as insufficiently verified.",
+"P05 opposes withholding inclusion from the anxiety-disorder subgroup until subgroup benefit is proven.",
+"P05 endorses default inclusion as a dignity obligation and regards segregation as inherently harmful.",
+"P06 supports no significant secondary-MLD literacy gain versus pull-out placement, associated with lower co-teacher coverage and larger classes.",
+"P06 lacks evidence about inclusion's effects on MLD students with co-occurring anxiety."
+],
+"pilot-001-04":[
+"P07 supports an 18% school-refusal increase for MLD students aged 8–12 with anxiety disorders, comprising 19% of the population.",
+"Both support teacher-confidence recovery by second-semester end, with no initial dip after at least 12 hours' prior professional development.",
+"Both support a 0.8-standard-deviation belonging gain among primary-age MLD students under inclusion.",
+"Both reject a permanent 22% teacher-attrition increase; administrative data show no significant increase attributable to inclusion.",
+"P07 supports no significant secondary-MLD literacy improvement under low co-teacher coverage and large classes.",
+"P08 supports a 0.4-standard-deviation secondary-school belonging decline, associated with peer-status dynamics.",
+"P08 regards long-term employment effects as unknown pending longitudinal data due in 2030.",
+"P08 identifies a normative dispute over whether literacy gains justify inclusion despite subgroup harms."
+],
+"pilot-001-05":[
+"P09 endorses default inclusion as a dignity obligation regardless of subgroup outcomes; P10 rejects that unconditional obligation.",
+"P09 supports withholding inclusion from the anxiety-disorder subgroup pending net benefit; P10 opposes withholding it.",
+"P09 supports a 0.4-standard-deviation secondary-MLD belonging decline versus pull-out placement, linked to peer-status dynamics.",
+"P09 regards employment effects as unresolved until longitudinal findings expected in 2030.",
+"Both regard per-pupil cost differences as unverified; P10 specifically cannot judge the contested 12% premium.",
+"P09 rejects literacy gains alone as sufficient justification for rollout when the anxiety-disorder subgroup suffers harm.",
+"P10 supports a 14-point, two-year MLD literacy gain versus pull-out placement under Veralund benchmarking and adequate classroom supports.",
+"P10 tentatively supports a nine-point neurotypical literacy decline from an unverified report lacking class-size and co-teacher controls."
+],
+"pilot-001-06":[
+"P11 supports a 14-point literacy gain for MLD students aged 8–12 under Veralund benchmarking, classes of at most 22 and co-teacher coverage of at least 60%.",
+"P11 supports a 31% school-refusal reduction for that group, measured by the Veralund Student Wellbeing Survey.",
+"Both support no significant secondary-MLD literacy improvement, associated with low co-teacher coverage and large classes.",
+"P11 provisionally accepts a nine-point neurotypical literacy decline, acknowledging unverified and inadequately controlled evidence.",
+"Both lack sufficient evidence for neurotypical literacy effects with high co-teacher coverage.",
+"P12 rejects an inclusion-caused permanent 22% attrition increase; administrative data suggest no significant attributable rise.",
+"P12 reports teacher-confidence recovery within a year, without an initial decline among adequately trained teachers.",
+"P12 supports increased primary-MLD social belonging, citing a robust study without stating an effect size."
+]
+}

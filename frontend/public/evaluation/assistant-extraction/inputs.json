@@ -1,0 +1,1166 @@
+[
+  {
+    "id": "pilot-001-01",
+    "scenario": "pilot-001",
+    "title": "Inclusive education",
+    "people": [
+      {
+        "id": "P01",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P1/opening/0",
+        "original_text": "When considering the adoption of a full-inclusion model for students with moderate learning disabilities (MLD) in Veralund, I support the claim that full inclusion increased standardised literacy scores by 14 percentage points for primary students (C1), as measured under the Veralund Literacy Benchmark with class sizes capped at 22 and co-teacher presence at least 60% (S1, S3). This is a robust finding from a randomised cohort study. However, for the claim that full inclusion reduced anxiety-related school-refusal incidents by 31% (C2), I find insufficient evidence, as I have not directly reviewed the relevant data or sources, though S1 does mention this effect. Regarding neurotypical students, I support the claim (C3) that literacy scores declined by 9 percentage points in inclusion classrooms, based on an unverified local report (S904), but I acknowledge the weak evidential status and lack of controls for co-teacher presence or class size. For the claim that neurotypical students in inclusion classrooms with co-teacher coverage \u226560% showed no significant literacy change (C4), I find insufficient evidence due to lack of direct data. I support the claim (C5) that full inclusion produced no significant literacy improvement for secondary MLD students, as supported by S3 and S6, where co-teacher coverage was low and class sizes larger. For the claim about increased anxiety in MLD students with co-occurring anxiety disorders (C6), I find insufficient evidence.",
+        "text": "When considering the adoption of a full-inclusion model for students with moderate learning disabilities (MLD) in Veralund, I support the claim that full inclusion increased standardised literacy scores by 14 percentage points for primary students (C1), as measured under the Veralund Literacy Benchmark with class sizes capped at 22 and co-teacher presence at least 60% (S1, S3). This is a robust finding from a randomised cohort study. However, for the claim that full inclusion reduced anxiety-related school-refusal incidents by 31% (C2), I find insufficient evidence, as I have not directly reviewed the relevant data or sources, though S1 does mention this effect. Regarding neurotypical students, I support the claim (C3) that literacy scores declined by 9 percentage points in inclusion classrooms, based on an unverified local report (S904), but I acknowledge the weak evidential status and lack of controls for co-teacher presence or class size. For the claim that neurotypical students in inclusion classrooms with co-teacher coverage \u226560% showed no significant literacy change (C4), I find insufficient evidence due to lack of direct data. I support the claim (C5) that full inclusion produced no significant literacy improvement for secondary MLD students, as supported by S3 and S6, where co-teacher coverage was low and class sizes larger. For the claim about increased anxiety in MLD students with co-occurring anxiety disorders (C6), I find insufficient evidence.",
+        "reference_ids": [
+          "C4",
+          "C2",
+          "C1",
+          "C5",
+          "C3",
+          "C6"
+        ],
+        "source_sha256": "1f60c24684cbdd58f703053855eefa330d438880daf74e909cc02d13e3dac1e8"
+      },
+      {
+        "id": "P02",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P2/opening/0",
+        "original_text": "Regarding teacher confidence (C7), I support the claim that instructional confidence among Veralund primary teachers declined in the first semester of full-inclusion implementation but returned to baseline by the end of the second semester. This is directly substantiated by S8, which also notes that teachers with at least 12 hours of pre-implementation professional development did not experience the initial dip. For neurotypical students\u2019 literacy outcomes under full inclusion with \u226560% co-teacher coverage (C4), I find insufficient evidence to confirm or refute the claim, as the private evidence does not address neurotypical student literacy specifically, and the only related report (S904) is unverified. On the impact of full inclusion on students with MLD and co-occurring anxiety (C6), I also find insufficient evidence; none of the reliable sources provide subgroup analysis for this population. I oppose the claim (C8) that full inclusion caused a permanent 22% increase in teacher attrition, as S8 directly contradicts this, showing no significant attrition increase attributable to inclusion. I support the claim (C9) that full inclusion increased peer-reported social belonging for MLD students aged 8\u201312, as S1 reports a 0.8 SD gain. Finally, I support the claim (C5) that full inclusion produced no significant literacy improvement for MLD students aged 13\u201317 in secondary schools, as confirmed by S3 and S6, which attribute this to low co-teacher coverage and large class sizes.",
+        "text": "Regarding teacher confidence (C7), I support the claim that instructional confidence among Veralund primary teachers declined in the first semester of full-inclusion implementation but returned to baseline by the end of the second semester. This is directly substantiated by S8, which also notes that teachers with at least 12 hours of pre-implementation professional development did not experience the initial dip. For neurotypical students\u2019 literacy outcomes under full inclusion with \u226560% co-teacher coverage (C4), I find insufficient evidence to confirm or refute the claim, as the private evidence does not address neurotypical student literacy specifically, and the only related report (S904) is unverified. On the impact of full inclusion on students with MLD and co-occurring anxiety (C6), I also find insufficient evidence; none of the reliable sources provide subgroup analysis for this population. I oppose the claim (C8) that full inclusion caused a permanent 22% increase in teacher attrition, as S8 directly contradicts this, showing no significant attrition increase attributable to inclusion. I support the claim (C9) that full inclusion increased peer-reported social belonging for MLD students aged 8\u201312, as S1 reports a 0.8 SD gain. Finally, I support the claim (C5) that full inclusion produced no significant literacy improvement for MLD students aged 13\u201317 in secondary schools, as confirmed by S3 and S6, which attribute this to low co-teacher coverage and large class sizes.",
+        "reference_ids": [
+          "C7",
+          "C4",
+          "C6",
+          "C8",
+          "C9",
+          "C5"
+        ],
+        "source_sha256": "35590f46eb4b03b65681b4702795f1112d4eec97bd5af337466cfeda83aa326a"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  },
+  {
+    "id": "pilot-001-02",
+    "scenario": "pilot-001",
+    "title": "Inclusive education",
+    "people": [
+      {
+        "id": "P03",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P3/opening/0",
+        "original_text": "Regarding peer-reported social belonging among students with moderate learning disabilities aged 8\u201312 (C9), I support the claim that full-inclusion placement increased scores by 0.8 standard deviations over one academic year compared to pull-out resource-room placement. This is directly substantiated by Halvorsen & Brink (2023, S1), which used a randomized cohort design and found a significant positive effect on social belonging for this age group. For students aged 13\u201317 (C10), I also support the claim that full-inclusion placement decreased peer-reported social belonging by 0.4 standard deviations, as shown in Osei & Lindqvist (2024, S6), who attribute this to distinct secondary-school peer dynamics. On teacher confidence (C7), I support the finding that instructional confidence scores initially declined but returned to baseline by the end of the second semester, with no initial decline among teachers receiving at least 12 hours of pre-implementation professional development, as reported by the district HR office (S8). I oppose the claim of a permanent 22% increase in teacher attrition (C8), since S8 and S9 show no statistically significant increase attributable to inclusion, and the asserted rise is unverified. For long-term post-secondary employment effects (C11), I find insufficient evidence, as no outcome data are yet available. Finally, I oppose the assertion in C12, as the underlying data are accepted by both parties, and the disagreement is normative rather than factual.",
+        "text": "Regarding peer-reported social belonging among students with moderate learning disabilities aged 8\u201312 (C9), I support the claim that full-inclusion placement increased scores by 0.8 standard deviations over one academic year compared to pull-out resource-room placement. This is directly substantiated by Halvorsen & Brink (2023, S1), which used a randomized cohort design and found a significant positive effect on social belonging for this age group. For students aged 13\u201317 (C10), I also support the claim that full-inclusion placement decreased peer-reported social belonging by 0.4 standard deviations, as shown in Osei & Lindqvist (2024, S6), who attribute this to distinct secondary-school peer dynamics. On teacher confidence (C7), I support the finding that instructional confidence scores initially declined but returned to baseline by the end of the second semester, with no initial decline among teachers receiving at least 12 hours of pre-implementation professional development, as reported by the district HR office (S8). I oppose the claim of a permanent 22% increase in teacher attrition (C8), since S8 and S9 show no statistically significant increase attributable to inclusion, and the asserted rise is unverified. For long-term post-secondary employment effects (C11), I find insufficient evidence, as no outcome data are yet available. Finally, I oppose the assertion in C12, as the underlying data are accepted by both parties, and the disagreement is normative rather than factual.",
+        "reference_ids": [
+          "C9",
+          "C11",
+          "C8",
+          "C7",
+          "C10",
+          "C12"
+        ],
+        "source_sha256": "965226f7d9b7d894bd33bfb99c221ac09ed418ba05a952a83881f5bab6c6089a"
+      },
+      {
+        "id": "P04",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P4/opening/0",
+        "original_text": "I support the claim that among students with moderate learning disabilities (MLD) aged 8\u201312 who also have a co-occurring anxiety disorder in Veralund district schools, full-inclusion placement increased anxiety-related school-refusal incidents by 18% over two academic years compared to pull-out resource-room placement (C6). This is substantiated by S2 and S7, which both report this adverse outcome for the 19% anxiety-disorder subgroup, reversing the district-wide trend. For students with MLD aged 13\u201317 in secondary schools, I support that full-inclusion placement decreased peer-reported social belonging scores by 0.4 standard deviations over one academic year compared to pull-out placement (C10), as documented in S6 and S7, with researchers attributing this to unique secondary-school peer dynamics. Regarding the long-term effect of full-inclusion placement on post-secondary employment rates for students with MLD (C11), I find insufficient evidence, as no follow-up data is yet available. I support that the district administration and advocacy network disagree on whether literacy gains justify full-inclusion rollout given subgroup harms (C12), per S2 and S7. I also support both the ethical obligation to provide full inclusion as a dignity right (C13, S7) and, conversely, the obligation to withhold inclusion from the anxiety-disorder subgroup until net benefit is demonstrated (C14, S2, S7). For the cost differential claim (C15), I find insufficient evidence due to contested and unverified estimates.",
+        "text": "I support the claim that among students with moderate learning disabilities (MLD) aged 8\u201312 who also have a co-occurring anxiety disorder in Veralund district schools, full-inclusion placement increased anxiety-related school-refusal incidents by 18% over two academic years compared to pull-out resource-room placement (C6). This is substantiated by S2 and S7, which both report this adverse outcome for the 19% anxiety-disorder subgroup, reversing the district-wide trend. For students with MLD aged 13\u201317 in secondary schools, I support that full-inclusion placement decreased peer-reported social belonging scores by 0.4 standard deviations over one academic year compared to pull-out placement (C10), as documented in S6 and S7, with researchers attributing this to unique secondary-school peer dynamics. Regarding the long-term effect of full-inclusion placement on post-secondary employment rates for students with MLD (C11), I find insufficient evidence, as no follow-up data is yet available. I support that the district administration and advocacy network disagree on whether literacy gains justify full-inclusion rollout given subgroup harms (C12), per S2 and S7. I also support both the ethical obligation to provide full inclusion as a dignity right (C13, S7) and, conversely, the obligation to withhold inclusion from the anxiety-disorder subgroup until net benefit is demonstrated (C14, S2, S7). For the cost differential claim (C15), I find insufficient evidence due to contested and unverified estimates.",
+        "reference_ids": [
+          "C6",
+          "C10",
+          "C11",
+          "C12",
+          "C13",
+          "C14",
+          "C15"
+        ],
+        "source_sha256": "1eb335e7856deb073efc8b98c463ccbe8bdecff835b040014af7c536dd7bf6d1"
+      }
+    ],
+    "reference_ids": [
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-001-03",
+    "scenario": "pilot-001",
+    "title": "Inclusive education",
+    "people": [
+      {
+        "id": "P05",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P5/opening/0",
+        "original_text": "In considering the adoption of a full-inclusion model for students with moderate learning disabilities (MLD) in Veralund, I support the claim that, among neurotypical students aged 8\u201312, literacy scores declined by 9 percentage points in full-inclusion classrooms compared to non-inclusion settings (C3). My belief is based on the unverified local report (S904), and I acknowledge the evidence is weak and lacks controls for co-teacher presence or class size, but I personally accept the finding as likely. Regarding the impact of full inclusion on anxiety-related school-refusal incidents among MLD students (C2), I find insufficient evidence to draw a conclusion, as I have not reviewed direct data on this outcome. However, I do support the claim that, under the Veralund Literacy Benchmark and with co-teacher presence and capped class sizes, full inclusion increased literacy scores for MLD students by 14 percentage points over two years (C1), as shown in high-quality studies (S1, S3). On costs (C15), I find the evidence insufficient, since estimates vary and lack independent verification. Ethically, I oppose withholding full inclusion from MLD students with co-occurring anxiety disorders until subgroup benefit is proven (C14), and I strongly support the view that Veralund has an obligation to provide full inclusion by default, as segregated settings are inherently dignity-violating (C13).",
+        "text": "In considering the adoption of a full-inclusion model for students with moderate learning disabilities (MLD) in Veralund, I support the claim that, among neurotypical students aged 8\u201312, literacy scores declined by 9 percentage points in full-inclusion classrooms compared to non-inclusion settings (C3). My belief is based on the unverified local report (S904), and I acknowledge the evidence is weak and lacks controls for co-teacher presence or class size, but I personally accept the finding as likely. Regarding the impact of full inclusion on anxiety-related school-refusal incidents among MLD students (C2), I find insufficient evidence to draw a conclusion, as I have not reviewed direct data on this outcome. However, I do support the claim that, under the Veralund Literacy Benchmark and with co-teacher presence and capped class sizes, full inclusion increased literacy scores for MLD students by 14 percentage points over two years (C1), as shown in high-quality studies (S1, S3). On costs (C15), I find the evidence insufficient, since estimates vary and lack independent verification. Ethically, I oppose withholding full inclusion from MLD students with co-occurring anxiety disorders until subgroup benefit is proven (C14), and I strongly support the view that Veralund has an obligation to provide full inclusion by default, as segregated settings are inherently dignity-violating (C13).",
+        "reference_ids": [
+          "C3",
+          "C2",
+          "C1",
+          "C15",
+          "C14",
+          "C13"
+        ],
+        "source_sha256": "8daa619f7f1f5d1b4ad92ec0e23d9318886094b8e791c7e996a028a234d6073a"
+      },
+      {
+        "id": "P06",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P6/opening/0",
+        "original_text": "I support the claim that, according to an unverified local report (S904), neurotypical students aged 8\u201312 in Veralund classrooms with full inclusion experienced a 9 percentage point decline in standardised literacy scores over two years compared to non-inclusion classrooms (C3). However, I acknowledge this evidence is weak and lacks controls for co-teacher presence or class size, so my belief is tentative. I support the claim (C2) that full-inclusion placement for students with moderate learning disabilities (MLD) aged 8\u201312 reduced anxiety-related school-refusal incidents by 31% over two years, as measured by the Veralund Student Wellbeing Survey; this is strongly supported by S1, which used a randomised cohort design with high internal validity. I also support the claim (C5) that, among MLD students aged 13\u201317 in secondary schools, full inclusion produced no significant literacy improvement compared to pull-out placement, consistent with S3 and S6, which attribute this to lower co-teacher coverage and larger class sizes. For C4 and C6, I find insufficient evidence: C4\u2019s claim about neurotypical students in inclusion settings with adequate co-teacher coverage lacks direct supporting data, and C6\u2019s assertion regarding MLD students with co-occurring anxiety lacks substantiation.",
+        "text": "I support the claim that, according to an unverified local report (S904), neurotypical students aged 8\u201312 in Veralund classrooms with full inclusion experienced a 9 percentage point decline in standardised literacy scores over two years compared to non-inclusion classrooms (C3). However, I acknowledge this evidence is weak and lacks controls for co-teacher presence or class size, so my belief is tentative. I support the claim (C2) that full-inclusion placement for students with moderate learning disabilities (MLD) aged 8\u201312 reduced anxiety-related school-refusal incidents by 31% over two years, as measured by the Veralund Student Wellbeing Survey; this is strongly supported by S1, which used a randomised cohort design with high internal validity. I also support the claim (C5) that, among MLD students aged 13\u201317 in secondary schools, full inclusion produced no significant literacy improvement compared to pull-out placement, consistent with S3 and S6, which attribute this to lower co-teacher coverage and larger class sizes. For C4 and C6, I find insufficient evidence: C4\u2019s claim about neurotypical students in inclusion settings with adequate co-teacher coverage lacks direct supporting data, and C6\u2019s assertion regarding MLD students with co-occurring anxiety lacks substantiation.",
+        "reference_ids": [
+          "C3",
+          "C2",
+          "C5",
+          "C4",
+          "C6",
+          "C1"
+        ],
+        "source_sha256": "e77193f05abead4c06c0ce8cd394740c41158472475e0ce7b728b3764908d3af"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-001-04",
+    "scenario": "pilot-001",
+    "title": "Inclusive education",
+    "people": [
+      {
+        "id": "P07",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P7/opening/0",
+        "original_text": "I will address each claim in light of the available private evidence. For C6, I support the claim that full-inclusion placement increased anxiety-related school-refusal incidents by 18% among students with moderate learning disabilities (MLD) aged 8\u201312 who also have a co-occurring anxiety disorder. S2 directly reports this effect for the 19% anxiety-disorder subgroup, and both major stakeholder groups accept the empirical finding. For C7, I support the claim that classroom teachers\u2019 self-reported instructional confidence declined significantly in the first semester of full-inclusion implementation but returned to baseline by the end of the second semester. S8 provides administrative data confirming this pattern, with the caveat that teachers who received at least 12 hours of pre-implementation professional development did not experience the initial dip. For C9, I support the claim that full-inclusion placement increased peer-reported social belonging scores by 0.8 standard deviations among MLD students aged 8\u201312, as S1 reports this outcome with high internal validity. For C8, I oppose the claim that full-inclusion implementation caused a permanent 22% increase in teacher attrition rates, since S8 finds no significant attrition increase attributable to inclusion and directly contradicts this assertion. For C5, I support the claim that full-inclusion placement produced no significant literacy improvement among secondary students with MLD, as both S3 and S6 confirm this under conditions of low co-teacher coverage and large class sizes. For C4, I find insufficient evidence to conclude that full inclusion with at least 60% co-teacher coverage had no significant effect on neurotypical students\u2019 literacy scores, as no reliable source directly addresses this outcome; the only available report (S904) is unverified and does not match the specified conditions.",
+        "text": "I will address each claim in light of the available private evidence. For C6, I support the claim that full-inclusion placement increased anxiety-related school-refusal incidents by 18% among students with moderate learning disabilities (MLD) aged 8\u201312 who also have a co-occurring anxiety disorder. S2 directly reports this effect for the 19% anxiety-disorder subgroup, and both major stakeholder groups accept the empirical finding. For C7, I support the claim that classroom teachers\u2019 self-reported instructional confidence declined significantly in the first semester of full-inclusion implementation but returned to baseline by the end of the second semester. S8 provides administrative data confirming this pattern, with the caveat that teachers who received at least 12 hours of pre-implementation professional development did not experience the initial dip. For C9, I support the claim that full-inclusion placement increased peer-reported social belonging scores by 0.8 standard deviations among MLD students aged 8\u201312, as S1 reports this outcome with high internal validity. For C8, I oppose the claim that full-inclusion implementation caused a permanent 22% increase in teacher attrition rates, since S8 finds no significant attrition increase attributable to inclusion and directly contradicts this assertion. For C5, I support the claim that full-inclusion placement produced no significant literacy improvement among secondary students with MLD, as both S3 and S6 confirm this under conditions of low co-teacher coverage and large class sizes. For C4, I find insufficient evidence to conclude that full inclusion with at least 60% co-teacher coverage had no significant effect on neurotypical students\u2019 literacy scores, as no reliable source directly addresses this outcome; the only available report (S904) is unverified and does not match the specified conditions.",
+        "reference_ids": [
+          "C6",
+          "C7",
+          "C9",
+          "C8",
+          "C5",
+          "C4"
+        ],
+        "source_sha256": "0a54125d6e6b10feb27d659ff4c55b5590fcd95dcd083dd27b5650b9b0a3b142"
+      },
+      {
+        "id": "P08",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P8/opening/0",
+        "original_text": "In considering the Veralund district\u2019s full-inclusion model, I support the claim that teacher instructional confidence initially declined but returned to baseline by the end of the second semester (C7). Administrative data (S8) confirm this pattern and further indicate that teachers with at least 12 hours of pre-implementation professional development did not experience the initial dip, supporting the conditional aspect of the claim. I also support the finding that full-inclusion placement increased peer-reported social belonging scores by 0.8 standard deviations for primary-age students with moderate learning disabilities (C9), as demonstrated by a high-quality randomised cohort study (S1) using the Ostmark Social Inclusion Inventory. For secondary students, I support the claim that full inclusion decreased social belonging by 0.4 standard deviations (C10), with researchers attributing this to distinct peer-status dynamics at that level (S6). Regarding the long-term effect of full inclusion on post-secondary employment rates (C11), I find there is insufficient evidence, as longitudinal data will not be available until 2030 (S9). I oppose the assertion that full inclusion caused a permanent 22% increase in teacher attrition (C8), since reliable HR data (S8) show no significant attrition increase attributable to inclusion, contradicting the unverified claim. Finally, I support the existence of a normative disagreement over whether literacy gains justify full inclusion despite subgroup harms (C12), as documented in district planning records (S9).",
+        "text": "In considering the Veralund district\u2019s full-inclusion model, I support the claim that teacher instructional confidence initially declined but returned to baseline by the end of the second semester (C7). Administrative data (S8) confirm this pattern and further indicate that teachers with at least 12 hours of pre-implementation professional development did not experience the initial dip, supporting the conditional aspect of the claim. I also support the finding that full-inclusion placement increased peer-reported social belonging scores by 0.8 standard deviations for primary-age students with moderate learning disabilities (C9), as demonstrated by a high-quality randomised cohort study (S1) using the Ostmark Social Inclusion Inventory. For secondary students, I support the claim that full inclusion decreased social belonging by 0.4 standard deviations (C10), with researchers attributing this to distinct peer-status dynamics at that level (S6). Regarding the long-term effect of full inclusion on post-secondary employment rates (C11), I find there is insufficient evidence, as longitudinal data will not be available until 2030 (S9). I oppose the assertion that full inclusion caused a permanent 22% increase in teacher attrition (C8), since reliable HR data (S8) show no significant attrition increase attributable to inclusion, contradicting the unverified claim. Finally, I support the existence of a normative disagreement over whether literacy gains justify full inclusion despite subgroup harms (C12), as documented in district planning records (S9).",
+        "reference_ids": [
+          "C7",
+          "C9",
+          "C12",
+          "C10",
+          "C11",
+          "C8"
+        ],
+        "source_sha256": "d2628ca68217b83deea09e25fcf6ee8308868994a0e3c059f7029b071180fec5"
+      }
+    ],
+    "reference_ids": [
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12"
+    ]
+  },
+  {
+    "id": "pilot-001-05",
+    "scenario": "pilot-001",
+    "title": "Inclusive education",
+    "people": [
+      {
+        "id": "P09",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P9/opening/0",
+        "original_text": "I strongly believe the Veralund district has an ethical obligation to provide full-inclusion placement as the default for all students with moderate learning disabilities, regardless of subgroup-specific outcome data (C13). This conviction is rooted in the principle that segregated educational settings are inherently dignity-violating, and the symbolic and structural harms of segregation outweigh subgroup outcome variations. Regarding secondary students, I support the finding that full-inclusion placement decreased peer-reported social belonging scores by 0.4 standard deviations compared to pull-out resource-room placement (C10). This effect is attributed to unique peer-status dynamics in secondary schools, which interact with placement type and should be recognized as a population-interaction confound. On the ethical question of withholding full inclusion from students with co-occurring anxiety disorders (C14), I support the view that individual welfare obligations override systemic inclusion goals; thus, full inclusion should be withheld from this subgroup until net benefit is demonstrated. For the long-term effect of full inclusion on post-secondary employment rates (C11), I find the evidence insufficient, as the longitudinal study will not report until 2030. Similarly, the per-pupil cost difference between models (C15) is contested and lacks independently verified data, so I also find insufficient evidence. Finally, I oppose the claim that literacy gains alone justify full-inclusion rollout given adverse outcomes for the anxiety-disorder subgroup (C12), as subgroup harm cannot be outweighed by aggregate benefit.",
+        "text": "I strongly believe the Veralund district has an ethical obligation to provide full-inclusion placement as the default for all students with moderate learning disabilities, regardless of subgroup-specific outcome data (C13). This conviction is rooted in the principle that segregated educational settings are inherently dignity-violating, and the symbolic and structural harms of segregation outweigh subgroup outcome variations. Regarding secondary students, I support the finding that full-inclusion placement decreased peer-reported social belonging scores by 0.4 standard deviations compared to pull-out resource-room placement (C10). This effect is attributed to unique peer-status dynamics in secondary schools, which interact with placement type and should be recognized as a population-interaction confound. On the ethical question of withholding full inclusion from students with co-occurring anxiety disorders (C14), I support the view that individual welfare obligations override systemic inclusion goals; thus, full inclusion should be withheld from this subgroup until net benefit is demonstrated. For the long-term effect of full inclusion on post-secondary employment rates (C11), I find the evidence insufficient, as the longitudinal study will not report until 2030. Similarly, the per-pupil cost difference between models (C15) is contested and lacks independently verified data, so I also find insufficient evidence. Finally, I oppose the claim that literacy gains alone justify full-inclusion rollout given adverse outcomes for the anxiety-disorder subgroup (C12), as subgroup harm cannot be outweighed by aggregate benefit.",
+        "reference_ids": [
+          "C13",
+          "C10",
+          "C14",
+          "C11",
+          "C15",
+          "C12"
+        ],
+        "source_sha256": "9bc58aff8642c641b50514463e97da6201370d51629a6efb3aa6a0df35bb6ce9"
+      },
+      {
+        "id": "P10",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P10/opening/0",
+        "original_text": "I do not believe the district has an ethical obligation to withhold full-inclusion placement from students with moderate learning disabilities and co-occurring anxiety disorders until subgroup-specific net benefit is proven. While individual welfare is important, the available evidence (S1) shows that full inclusion, with adequate co-teacher support and class size limits, reduces anxiety-related school-refusal incidents by 31% and improves literacy outcomes for MLD students. I support the claim that, under the Veralund Literacy Benchmark and with proper classroom supports, full inclusion increased literacy scores by 14 percentage points over two years compared to pull-out placement (S1, S3). Regarding neurotypical students, I support the report that their literacy scores declined by 9 percentage points in inclusion classrooms, but I acknowledge this is based on an unverified local report (S904) and lacks controls for co-teacher presence or class size, so my belief is tentative. On cost, I find the evidence insufficient: the 12% higher per-pupil cost for full inclusion is contested and unverified (S9), so I cannot confidently support or oppose this claim. Finally, I oppose the assertion that the district has an ethical obligation to provide full inclusion as the default regardless of outcome data, as ethical obligations should consider individual welfare and empirical results, not just structural symbolism.",
+        "text": "I do not believe the district has an ethical obligation to withhold full-inclusion placement from students with moderate learning disabilities and co-occurring anxiety disorders until subgroup-specific net benefit is proven. While individual welfare is important, the available evidence (S1) shows that full inclusion, with adequate co-teacher support and class size limits, reduces anxiety-related school-refusal incidents by 31% and improves literacy outcomes for MLD students. I support the claim that, under the Veralund Literacy Benchmark and with proper classroom supports, full inclusion increased literacy scores by 14 percentage points over two years compared to pull-out placement (S1, S3). Regarding neurotypical students, I support the report that their literacy scores declined by 9 percentage points in inclusion classrooms, but I acknowledge this is based on an unverified local report (S904) and lacks controls for co-teacher presence or class size, so my belief is tentative. On cost, I find the evidence insufficient: the 12% higher per-pupil cost for full inclusion is contested and unverified (S9), so I cannot confidently support or oppose this claim. Finally, I oppose the assertion that the district has an ethical obligation to provide full inclusion as the default regardless of outcome data, as ethical obligations should consider individual welfare and empirical results, not just structural symbolism.",
+        "reference_ids": [
+          "C14",
+          "C1",
+          "C3",
+          "C15",
+          "C13",
+          "C2"
+        ],
+        "source_sha256": "be65baef683e8e4a686092de87331ba88f0924e4a7012b67c3a829032e918c80"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-001-06",
+    "scenario": "pilot-001",
+    "title": "Inclusive education",
+    "people": [
+      {
+        "id": "P11",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P11/opening/0",
+        "original_text": "I support the claim that, under the specified conditions (Veralund Literacy Benchmark, class size \u226422, co-teacher present \u226560% of instructional time), full-inclusion placement increased standardised literacy scores by an average of 14 percentage points for students with moderate learning disabilities aged 8\u201312 (C1). This is strongly supported by high-quality evidence from Halvorsen & Brink (S1) and Brink et al. (S3). I also support the claim that full inclusion reduced anxiety-related school-refusal incidents by 31% for this group, as measured by the Veralund Student Wellbeing Survey (C2), again based on robust evidence from S1. For secondary students aged 13\u201317, I support the claim (C5) that full inclusion produced no statistically significant improvement in literacy scores, consistent with S3 and S6, which attribute this to lower co-teacher coverage and larger class sizes. Regarding neurotypical students aged 8\u201312, I support the claim (C3) that literacy scores declined by 9 points under full inclusion, but I acknowledge this is based on an unverified report (S904) and lacks controls for confounding variables. For claims C4 and C6, I find insufficient evidence to take a stance, as no reliable data are available for these specific subgroups or conditions.",
+        "text": "I support the claim that, under the specified conditions (Veralund Literacy Benchmark, class size \u226422, co-teacher present \u226560% of instructional time), full-inclusion placement increased standardised literacy scores by an average of 14 percentage points for students with moderate learning disabilities aged 8\u201312 (C1). This is strongly supported by high-quality evidence from Halvorsen & Brink (S1) and Brink et al. (S3). I also support the claim that full inclusion reduced anxiety-related school-refusal incidents by 31% for this group, as measured by the Veralund Student Wellbeing Survey (C2), again based on robust evidence from S1. For secondary students aged 13\u201317, I support the claim (C5) that full inclusion produced no statistically significant improvement in literacy scores, consistent with S3 and S6, which attribute this to lower co-teacher coverage and larger class sizes. Regarding neurotypical students aged 8\u201312, I support the claim (C3) that literacy scores declined by 9 points under full inclusion, but I acknowledge this is based on an unverified report (S904) and lacks controls for confounding variables. For claims C4 and C6, I find insufficient evidence to take a stance, as no reliable data are available for these specific subgroups or conditions.",
+        "reference_ids": [
+          "C1",
+          "C6",
+          "C2",
+          "C5",
+          "C3",
+          "C4"
+        ],
+        "source_sha256": "797c4e9d6068d2769000881ede1554f2262c39baedce618942550e476964428e"
+      },
+      {
+        "id": "P12",
+        "source_call": "pilot-001/32/openai/gpt-4.1/participant-v8/P12/opening/0",
+        "original_text": "Regarding the impact of full inclusion on neurotypical students\u2019 literacy scores (C4), I find insufficient evidence to draw a firm conclusion. While some data suggest no significant change when co-teacher coverage is high, the evidence base is limited and potentially confounded by co-teacher presence. For teacher attrition (C8), I oppose the claim that full inclusion caused a permanent 22% increase. Reliable administrative data (S8) show no statistically significant rise in departures attributable to inclusion, and the cited increase appears to reflect broader district trends rather than a direct effect. On teacher instructional confidence (C7), I support the claim that confidence initially declined but returned to baseline within a year, with no decline for teachers who received adequate professional development (S8). For students with MLD and co-occurring anxiety (C6), there is insufficient evidence to confirm an 18% increase in school-refusal incidents, as no direct data address this subgroup. I support the finding (C5) that full inclusion did not improve literacy scores for secondary students with MLD, consistent with studies showing low co-teacher coverage and large class sizes (S3, S6). Finally, I support the claim (C9) that full inclusion increased social belonging among primary MLD students, as robust evidence (S1) demonstrates a substantial gain.",
+        "text": "Regarding the impact of full inclusion on neurotypical students\u2019 literacy scores (C4), I find insufficient evidence to draw a firm conclusion. While some data suggest no significant change when co-teacher coverage is high, the evidence base is limited and potentially confounded by co-teacher presence. For teacher attrition (C8), I oppose the claim that full inclusion caused a permanent 22% increase. Reliable administrative data (S8) show no statistically significant rise in departures attributable to inclusion, and the cited increase appears to reflect broader district trends rather than a direct effect. On teacher instructional confidence (C7), I support the claim that confidence initially declined but returned to baseline within a year, with no decline for teachers who received adequate professional development (S8). For students with MLD and co-occurring anxiety (C6), there is insufficient evidence to confirm an 18% increase in school-refusal incidents, as no direct data address this subgroup. I support the finding (C5) that full inclusion did not improve literacy scores for secondary students with MLD, consistent with studies showing low co-teacher coverage and large class sizes (S3, S6). Finally, I support the claim (C9) that full inclusion increased social belonging among primary MLD students, as robust evidence (S1) demonstrates a substantial gain.",
+        "reference_ids": [
+          "C4",
+          "C8",
+          "C7",
+          "C6",
+          "C5",
+          "C9"
+        ],
+        "source_sha256": "50383018a9aad7c760705b5d550b5dbf4095fe179113698ac837be032f13c18f"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  },
+  {
+    "id": "pilot-003-01",
+    "scenario": "pilot-003",
+    "title": "Diagnostic screening",
+    "people": [
+      {
+        "id": "P01",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P1/opening/0",
+        "original_text": "Regarding the Heliox-7 assay\u2019s sensitivity across occupational groups (C5), I oppose the claim of equivalence. Both S2 and S8 provide robust evidence of substantial sensitivity variation: agricultural workers consistently show lower sensitivity (0.71\u20130.72) compared to office workers (0.88\u20130.89), with industrial and healthcare groups intermediate. The difference exceeds 4 percentage points, directly contradicting the claim. Conversely, I support the assertion (C6) that agricultural workers with significant organophosphate exposure experience reduced Heliox-7 sensitivity, as both S2 and S8 independently confirm this finding. For the claim that Heliox-7 produces false-positive STD diagnoses in fewer than 5% of healthy individuals (C2), I must oppose it. S1 reports specificity of 0.91 (false-positive rate ~9%), and S4 documents a 9.3% false-positive rate in Velundra, both exceeding the 5% threshold. On the association between early LVX-2 intervention and increased arrhythmia in THYR-delta carriers (C4), I find insufficient evidence, as no data directly address this subgroup outcome. I support the claim (C1) that Heliox-7 achieves sensitivity \u22650.87 under standard conditions, as S1 and S3 report sensitivity estimates of 0.88\u20130.89. Finally, I support the claim (C3) that early pharmacological intervention reduces cardiovascular events in Heliox-7-positive adults, as demonstrated by the VCPT trial (S3).",
+        "text": "Regarding the Heliox-7 assay\u2019s sensitivity across occupational groups (C5), I oppose the claim of equivalence. Both S2 and S8 provide robust evidence of substantial sensitivity variation: agricultural workers consistently show lower sensitivity (0.71\u20130.72) compared to office workers (0.88\u20130.89), with industrial and healthcare groups intermediate. The difference exceeds 4 percentage points, directly contradicting the claim. Conversely, I support the assertion (C6) that agricultural workers with significant organophosphate exposure experience reduced Heliox-7 sensitivity, as both S2 and S8 independently confirm this finding. For the claim that Heliox-7 produces false-positive STD diagnoses in fewer than 5% of healthy individuals (C2), I must oppose it. S1 reports specificity of 0.91 (false-positive rate ~9%), and S4 documents a 9.3% false-positive rate in Velundra, both exceeding the 5% threshold. On the association between early LVX-2 intervention and increased arrhythmia in THYR-delta carriers (C4), I find insufficient evidence, as no data directly address this subgroup outcome. I support the claim (C1) that Heliox-7 achieves sensitivity \u22650.87 under standard conditions, as S1 and S3 report sensitivity estimates of 0.88\u20130.89. Finally, I support the claim (C3) that early pharmacological intervention reduces cardiovascular events in Heliox-7-positive adults, as demonstrated by the VCPT trial (S3).",
+        "reference_ids": [
+          "C5",
+          "C6",
+          "C2",
+          "C4",
+          "C1",
+          "C3"
+        ],
+        "source_sha256": "0dc23ebc37e2bc59cd2511e6509bd115388c62e8ebd3f3415cf2c16c85e1caeb"
+      },
+      {
+        "id": "P02",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P2/opening/0",
+        "original_text": "I support the claim that in Draveth Province, the Heliox-7 assay has a false-positive rate below 3%, apparently contradicting Velundra findings. This is directly supported by S10, a reliable source documenting a 2.9% false-positive rate in Draveth\u2019s large-scale screening, though the report notes possible confounding from iodine policy and collection timing. For the claim that Heliox-7 sensitivity is comparable (\u226585%) in Velundra adults aged 60\u201375 as in the 30\u201360 cohort, I find insufficient evidence. There is no age-stratified validation data for the older group, so I cannot confidently affirm or oppose this claim. Similarly, regarding the assertion that Heliox-7 sensitivity is equivalent across all major occupational groups in Velundra, I find insufficient evidence; none of the available sources directly address occupational group comparisons or provide relevant stratified sensitivity data. I oppose the claim that Heliox-7 sensitivity drops to 71% in agricultural workers due to organophosphate exposure, as S911 specifically disputes this proposition, even though the report is unverified. For the claim that early LVX-2 intervention in THYR-delta carriers increases arrhythmia incidence, I find insufficient evidence, as no private evidence addresses this subgroup or outcome. Finally, I find insufficient evidence to support or oppose the cost-neutrality of universal Heliox-7 screening, as S6 and S9 both highlight major uncertainties and lack of conclusive data.",
+        "text": "I support the claim that in Draveth Province, the Heliox-7 assay has a false-positive rate below 3%, apparently contradicting Velundra findings. This is directly supported by S10, a reliable source documenting a 2.9% false-positive rate in Draveth\u2019s large-scale screening, though the report notes possible confounding from iodine policy and collection timing. For the claim that Heliox-7 sensitivity is comparable (\u226585%) in Velundra adults aged 60\u201375 as in the 30\u201360 cohort, I find insufficient evidence. There is no age-stratified validation data for the older group, so I cannot confidently affirm or oppose this claim. Similarly, regarding the assertion that Heliox-7 sensitivity is equivalent across all major occupational groups in Velundra, I find insufficient evidence; none of the available sources directly address occupational group comparisons or provide relevant stratified sensitivity data. I oppose the claim that Heliox-7 sensitivity drops to 71% in agricultural workers due to organophosphate exposure, as S911 specifically disputes this proposition, even though the report is unverified. For the claim that early LVX-2 intervention in THYR-delta carriers increases arrhythmia incidence, I find insufficient evidence, as no private evidence addresses this subgroup or outcome. Finally, I find insufficient evidence to support or oppose the cost-neutrality of universal Heliox-7 screening, as S6 and S9 both highlight major uncertainties and lack of conclusive data.",
+        "reference_ids": [
+          "C9",
+          "C8",
+          "C5",
+          "C6",
+          "C4",
+          "C7"
+        ],
+        "source_sha256": "09015f597d014c10d8cdbde9bb00c293f8545d37aaf04d9b01527b988dd455dd"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  },
+  {
+    "id": "pilot-003-02",
+    "scenario": "pilot-003",
+    "title": "Diagnostic screening",
+    "people": [
+      {
+        "id": "P03",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P3/opening/0",
+        "original_text": "This memo addresses key empirical claims relevant to universal Heliox-7 screening for subclinical thyroid dysregulation (STD) in Velundra adults aged 30\u201360. \n\nI support the claim that routine salivary cortisol fluctuations during morning clinic hours systematically elevate Heliox-7 readings, contributing to a false-positive rate above 5% (C11). Reliable evidence (S4, S11) demonstrates that morning cortisol peaks can artificially increase Heliox-7 assay results, and this effect is consistent with observed elevated false-positive rates in Velundra.\n\nRegarding cost-neutrality of universal screening within 10 years (C7), I find insufficient evidence. Economic projections (S6, S9) are highly sensitive to assumptions about false-positive rates and genotyping costs, with no consensus or robust empirical data confirming cost-neutrality.\n\nI support the claim that Draveth Province shows a Heliox-7 false-positive rate below 3%, apparently contradicting Velundra findings (C9). Multiple sources (S4, S10) confirm this low rate in Draveth, despite similar climate, highlighting a real inter-regional discrepancy.\n\nFor the assertion that midday-only collection reduces Velundra\u2019s false-positive rate below 5% (C12), evidence is insufficient. The only available data (S11) are from a small pilot and in vitro studies, lacking prospective validation.\n\nI support the claim that THYR-delta carriers receiving early LVX-2 intervention experience a paradoxical increase in arrhythmia incidence (C4). Two independent studies (S5, S7) confirm this elevated risk.\n\nThere is insufficient evidence to claim Heliox-7 sensitivity \u226585% in adults aged 60\u201375 (C8), as no age-stratified data are available (S1).\n\nFinally, I find insufficient evidence that the Velundra\u2013Draveth false-positive discrepancy is fully explained by salivary iodine concentration rather than assay unreliability (C10), as no controlled trial has isolated these variables (S4, S10).",
+        "text": "This memo addresses key empirical claims relevant to universal Heliox-7 screening for subclinical thyroid dysregulation (STD) in Velundra adults aged 30\u201360. \n\nI support the claim that routine salivary cortisol fluctuations during morning clinic hours systematically elevate Heliox-7 readings, contributing to a false-positive rate above 5% (C11). Reliable evidence (S4, S11) demonstrates that morning cortisol peaks can artificially increase Heliox-7 assay results, and this effect is consistent with observed elevated false-positive rates in Velundra.\n\nRegarding cost-neutrality of universal screening within 10 years (C7), I find insufficient evidence. Economic projections (S6, S9) are highly sensitive to assumptions about false-positive rates and genotyping costs, with no consensus or robust empirical data confirming cost-neutrality.\n\nI support the claim that Draveth Province shows a Heliox-7 false-positive rate below 3%, apparently contradicting Velundra findings (C9). Multiple sources (S4, S10) confirm this low rate in Draveth, despite similar climate, highlighting a real inter-regional discrepancy.\n\nFor the assertion that midday-only collection reduces Velundra\u2019s false-positive rate below 5% (C12), evidence is insufficient. The only available data (S11) are from a small pilot and in vitro studies, lacking prospective validation.\n\nI support the claim that THYR-delta carriers receiving early LVX-2 intervention experience a paradoxical increase in arrhythmia incidence (C4). Two independent studies (S5, S7) confirm this elevated risk.\n\nThere is insufficient evidence to claim Heliox-7 sensitivity \u226585% in adults aged 60\u201375 (C8), as no age-stratified data are available (S1).\n\nFinally, I find insufficient evidence that the Velundra\u2013Draveth false-positive discrepancy is fully explained by salivary iodine concentration rather than assay unreliability (C10), as no controlled trial has isolated these variables (S4, S10).",
+        "reference_ids": [
+          "C11",
+          "C7",
+          "C9",
+          "C12",
+          "C4",
+          "C8",
+          "C10"
+        ],
+        "source_sha256": "03f48b4624cca675de34399af1e642001dee5efdb62a5edf7cc39d08855e52d9"
+      },
+      {
+        "id": "P04",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P4/opening/0",
+        "original_text": "Regarding C11, I support the claim that routine salivary cortisol fluctuations during morning clinic hours systematically elevate Heliox-7 readings, contributing to the observed false-positive rate above 5% in Velundra adults aged 30\u201360. Source S11 provides both in vitro and pilot clinical data showing morning-peak cortisol can elevate Heliox-7 signals by 8\u201314%, and the pilot study observed a higher false-positive rate in morning versus midday collections. For C12, I find insufficient evidence to assert that restricting Heliox-7 sample collection to 11:00\u201314:00 reduces the false-positive rate below 5%. While S11\u2019s pilot data are suggestive, the authors explicitly caution that the sample is underpowered and that a full prospective validation is needed before policy changes. On C14, I support the normative claim that the Velundra Regional Health Authority has an obligation to implement universal STD screening, provided THYR-delta carriers are excluded from LVX-2 treatment, as the majority benefit outweighs minority harm per S9\u2019s ethical panel summary. Conversely, I oppose C15, as I believe the aggregate benefit and feasible safeguards justify state intervention despite autonomy concerns. For C13, I oppose the claim that targeted midday-only screening for non-agricultural workers would yield superior net health benefit, as no direct comparative trial exists and economic projections (S6, S9) remain inconclusive. Finally, for C10, I find insufficient evidence that population-level iodine differences fully explain the regional false-positive rate discrepancy, since S10 does not isolate iodine from collection-time effects and no controlled supplementation trial has been conducted.",
+        "text": "Regarding C11, I support the claim that routine salivary cortisol fluctuations during morning clinic hours systematically elevate Heliox-7 readings, contributing to the observed false-positive rate above 5% in Velundra adults aged 30\u201360. Source S11 provides both in vitro and pilot clinical data showing morning-peak cortisol can elevate Heliox-7 signals by 8\u201314%, and the pilot study observed a higher false-positive rate in morning versus midday collections. For C12, I find insufficient evidence to assert that restricting Heliox-7 sample collection to 11:00\u201314:00 reduces the false-positive rate below 5%. While S11\u2019s pilot data are suggestive, the authors explicitly caution that the sample is underpowered and that a full prospective validation is needed before policy changes. On C14, I support the normative claim that the Velundra Regional Health Authority has an obligation to implement universal STD screening, provided THYR-delta carriers are excluded from LVX-2 treatment, as the majority benefit outweighs minority harm per S9\u2019s ethical panel summary. Conversely, I oppose C15, as I believe the aggregate benefit and feasible safeguards justify state intervention despite autonomy concerns. For C13, I oppose the claim that targeted midday-only screening for non-agricultural workers would yield superior net health benefit, as no direct comparative trial exists and economic projections (S6, S9) remain inconclusive. Finally, for C10, I find insufficient evidence that population-level iodine differences fully explain the regional false-positive rate discrepancy, since S10 does not isolate iodine from collection-time effects and no controlled supplementation trial has been conducted.",
+        "reference_ids": [
+          "C11",
+          "C12",
+          "C14",
+          "C15",
+          "C13",
+          "C10"
+        ],
+        "source_sha256": "b1661449d890f84e373c26d00ea032caca7b7e7e6d4b38fcd642d64e545b28b2"
+      }
+    ],
+    "reference_ids": [
+      "C4",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-003-03",
+    "scenario": "pilot-003",
+    "title": "Diagnostic screening",
+    "people": [
+      {
+        "id": "P05",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P5/opening/0",
+        "original_text": "I support the view that the Velundra Regional Health Authority has an obligation to implement universal STD screening, provided THYR-delta carriers are identified and excluded from LVX-2 treatment (C14). The potential cardiovascular benefit to the majority is substantial, as shown by the VCPT trial (S3), which demonstrated an 18% relative risk reduction in major cardiovascular events for Heliox-7-positive adults treated early with LVX-2 (C3). This supports the effectiveness of early intervention following positive screening. Regarding the accuracy of the Heliox-7 assay, I support that it correctly identifies subclinical thyroid dysregulation in at least 87% of confirmed cases under standard clinic conditions (C1), as confirmed by reliable trial data (S3). I also support the claim that the assay produces false positives in fewer than 5% of healthy individuals (C2), though my belief is based solely on an unverified local report (S902), and I acknowledge this evidence is weak. I oppose the claim that restricting screening to non-agricultural workers and midday hours would yield superior net health benefit (C13), as available evidence is insufficient and does not support this targeted approach. Finally, I oppose the assertion that universal screening should not be mandated on autonomy grounds (C15), as the aggregate benefit, with proper safeguards, justifies the programme.",
+        "text": "I support the view that the Velundra Regional Health Authority has an obligation to implement universal STD screening, provided THYR-delta carriers are identified and excluded from LVX-2 treatment (C14). The potential cardiovascular benefit to the majority is substantial, as shown by the VCPT trial (S3), which demonstrated an 18% relative risk reduction in major cardiovascular events for Heliox-7-positive adults treated early with LVX-2 (C3). This supports the effectiveness of early intervention following positive screening. Regarding the accuracy of the Heliox-7 assay, I support that it correctly identifies subclinical thyroid dysregulation in at least 87% of confirmed cases under standard clinic conditions (C1), as confirmed by reliable trial data (S3). I also support the claim that the assay produces false positives in fewer than 5% of healthy individuals (C2), though my belief is based solely on an unverified local report (S902), and I acknowledge this evidence is weak. I oppose the claim that restricting screening to non-agricultural workers and midday hours would yield superior net health benefit (C13), as available evidence is insufficient and does not support this targeted approach. Finally, I oppose the assertion that universal screening should not be mandated on autonomy grounds (C15), as the aggregate benefit, with proper safeguards, justifies the programme.",
+        "reference_ids": [
+          "C14",
+          "C3",
+          "C13",
+          "C2",
+          "C15",
+          "C1"
+        ],
+        "source_sha256": "ac75def068add22130da388eb2448bc76b7e34d89c68d9294473f2fd607d0351"
+      },
+      {
+        "id": "P06",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P6/opening/0",
+        "original_text": "Based on available evidence, I support the claim that early pharmacological intervention with LVX-2 following a positive Heliox-7 screen significantly reduces cardiovascular event rates over five years among adults aged 30\u201360 in Velundra (C3). The VCPT trial (S3) provides reliable data, showing an 18% relative risk reduction in MACE-3 events, with Heliox-7 sensitivity confirmed at 0.88 under standard clinic conditions. I also support the assertion that Heliox-7 assay sensitivity is equivalent across major occupational groups, with no group-level variation exceeding 4 percentage points (C5), as reported in S908, though I acknowledge this is based on an unverified local report and thus the evidential status is weak. For the claim that sensitivity drops to 71% among agricultural workers with high organophosphate exposure (C6), I find insufficient evidence, as no direct data are available. Regarding specificity, I support the belief that false-positive rates are below 5% in healthy adults (C2), per S902, but again, this is based on an unverified report and should be interpreted cautiously. I support the sensitivity claim of at least 0.87 for Heliox-7 under standard conditions (C1), as confirmed by S3. For the association between LVX-2 and increased arrhythmia in THYR-delta carriers (C4), I find insufficient evidence due to lack of supporting data.",
+        "text": "Based on available evidence, I support the claim that early pharmacological intervention with LVX-2 following a positive Heliox-7 screen significantly reduces cardiovascular event rates over five years among adults aged 30\u201360 in Velundra (C3). The VCPT trial (S3) provides reliable data, showing an 18% relative risk reduction in MACE-3 events, with Heliox-7 sensitivity confirmed at 0.88 under standard clinic conditions. I also support the assertion that Heliox-7 assay sensitivity is equivalent across major occupational groups, with no group-level variation exceeding 4 percentage points (C5), as reported in S908, though I acknowledge this is based on an unverified local report and thus the evidential status is weak. For the claim that sensitivity drops to 71% among agricultural workers with high organophosphate exposure (C6), I find insufficient evidence, as no direct data are available. Regarding specificity, I support the belief that false-positive rates are below 5% in healthy adults (C2), per S902, but again, this is based on an unverified report and should be interpreted cautiously. I support the sensitivity claim of at least 0.87 for Heliox-7 under standard conditions (C1), as confirmed by S3. For the association between LVX-2 and increased arrhythmia in THYR-delta carriers (C4), I find insufficient evidence due to lack of supporting data.",
+        "reference_ids": [
+          "C3",
+          "C5",
+          "C6",
+          "C2",
+          "C1",
+          "C4"
+        ],
+        "source_sha256": "e8f050bdedd7a54ab484d229480f3b9d16f0ed4def40b326fa71ace888bd1f70"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-003-04",
+    "scenario": "pilot-003",
+    "title": "Diagnostic screening",
+    "people": [
+      {
+        "id": "P07",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P7/opening/0",
+        "original_text": "Considering the available evidence, I support the claim that Heliox-7 assay sensitivity is equivalent across the four major occupational groups in Velundra (C5). My belief is based on the unverified local report (S908), which states that sensitivity variation does not exceed 4 percentage points between office, agricultural, industrial, and healthcare workers. Although this report is not independently validated, I personally accept its findings with high conviction, acknowledging the weak evidential status. Regarding the cost-effectiveness of universal Heliox-7 screening (C7), I find the evidence insufficient. The economic projections (S6, S9) are highly sensitive to assumptions about false-positive rates and downstream costs, with scenarios ranging from substantial savings to significant net costs. Therefore, I cannot confidently assert cost-neutrality or savings within 10 years. For the claim that early LVX-2 intervention increases arrhythmia incidence in THYR-delta carriers (C4), I also find insufficient evidence, as no direct data addresses this subgroup or outcome. Similarly, for reduced Heliox-7 sensitivity in agricultural workers with organophosphate exposure (C6), there is no direct evidence to support or refute the claim. For the assertion that Heliox-7 sensitivity remains \u226585% in adults aged 60\u201375 (C8), the lack of age-stratified validation data (S1) leads me to conclude evidence is insufficient. However, I support the claim that Draveth Province shows a Heliox-7 false-positive rate below 3% (C9), as this is corroborated by reliable sources (S4, S10), despite possible confounders.",
+        "text": "Considering the available evidence, I support the claim that Heliox-7 assay sensitivity is equivalent across the four major occupational groups in Velundra (C5). My belief is based on the unverified local report (S908), which states that sensitivity variation does not exceed 4 percentage points between office, agricultural, industrial, and healthcare workers. Although this report is not independently validated, I personally accept its findings with high conviction, acknowledging the weak evidential status. Regarding the cost-effectiveness of universal Heliox-7 screening (C7), I find the evidence insufficient. The economic projections (S6, S9) are highly sensitive to assumptions about false-positive rates and downstream costs, with scenarios ranging from substantial savings to significant net costs. Therefore, I cannot confidently assert cost-neutrality or savings within 10 years. For the claim that early LVX-2 intervention increases arrhythmia incidence in THYR-delta carriers (C4), I also find insufficient evidence, as no direct data addresses this subgroup or outcome. Similarly, for reduced Heliox-7 sensitivity in agricultural workers with organophosphate exposure (C6), there is no direct evidence to support or refute the claim. For the assertion that Heliox-7 sensitivity remains \u226585% in adults aged 60\u201375 (C8), the lack of age-stratified validation data (S1) leads me to conclude evidence is insufficient. However, I support the claim that Draveth Province shows a Heliox-7 false-positive rate below 3% (C9), as this is corroborated by reliable sources (S4, S10), despite possible confounders.",
+        "reference_ids": [
+          "C5",
+          "C7",
+          "C4",
+          "C6",
+          "C9",
+          "C8"
+        ],
+        "source_sha256": "1f8895af12ce66e56db7dc71536cff5f0dd5cfb2d1a7b995a9b54a4db8c54866"
+      },
+      {
+        "id": "P08",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P8/opening/0",
+        "original_text": "This memo addresses the cost and technical performance of Heliox-7 screening in Velundra and Draveth, as well as the impact of collection protocols. \n\nC7: There is insufficient evidence to conclude that universal Heliox-7 screening would be cost-neutral or cost-saving to the Velundra health budget within 10 years, assuming current LVX-2 procurement prices and stable cardiovascular hospitalisation costs. The Velundra Health Economics Unit (S6) projects both possible net savings and net increases, depending on assumptions about false-positive rates and downstream costs. The report explicitly states that evidence is insufficient to determine cost-neutrality without further empirical data on false-positive management costs.\n\nC11: I support that routine salivary cortisol fluctuations during morning clinic hours (07:00\u201310:00) systematically elevate Heliox-7 readings, contributing to the observed false-positive rate above 5%. S11 provides both in vitro and pilot clinical data showing morning cortisol can elevate Heliox-7 signals enough to generate false positives.\n\nC12: There is insufficient evidence that restricting sample collection to 11:00\u201314:00 reduces the false-positive rate below 5% in Velundra. S11\u2019s pilot data are promising but underpowered, and no prospective full-cohort validation exists.\n\nC8: There is insufficient evidence regarding Heliox-7 sensitivity in adults aged 60\u201375 in Velundra, as no age-stratified validation data are available.\n\nC10: There is insufficient evidence to fully attribute the difference in false-positive rates between Velundra and Draveth to population-level salivary iodine concentration, as no controlled cross-population iodine supplementation trial has been conducted (S10).\n\nC9: I support that in Draveth Province, the Heliox-7 assay shows a false-positive rate below 3%, apparently contradicting Velundra findings. S10 documents a 2.9% false-positive rate in Draveth\u2019s routine deployment.",
+        "text": "This memo addresses the cost and technical performance of Heliox-7 screening in Velundra and Draveth, as well as the impact of collection protocols. \n\nC7: There is insufficient evidence to conclude that universal Heliox-7 screening would be cost-neutral or cost-saving to the Velundra health budget within 10 years, assuming current LVX-2 procurement prices and stable cardiovascular hospitalisation costs. The Velundra Health Economics Unit (S6) projects both possible net savings and net increases, depending on assumptions about false-positive rates and downstream costs. The report explicitly states that evidence is insufficient to determine cost-neutrality without further empirical data on false-positive management costs.\n\nC11: I support that routine salivary cortisol fluctuations during morning clinic hours (07:00\u201310:00) systematically elevate Heliox-7 readings, contributing to the observed false-positive rate above 5%. S11 provides both in vitro and pilot clinical data showing morning cortisol can elevate Heliox-7 signals enough to generate false positives.\n\nC12: There is insufficient evidence that restricting sample collection to 11:00\u201314:00 reduces the false-positive rate below 5% in Velundra. S11\u2019s pilot data are promising but underpowered, and no prospective full-cohort validation exists.\n\nC8: There is insufficient evidence regarding Heliox-7 sensitivity in adults aged 60\u201375 in Velundra, as no age-stratified validation data are available.\n\nC10: There is insufficient evidence to fully attribute the difference in false-positive rates between Velundra and Draveth to population-level salivary iodine concentration, as no controlled cross-population iodine supplementation trial has been conducted (S10).\n\nC9: I support that in Draveth Province, the Heliox-7 assay shows a false-positive rate below 3%, apparently contradicting Velundra findings. S10 documents a 2.9% false-positive rate in Draveth\u2019s routine deployment.",
+        "reference_ids": [
+          "C7",
+          "C11",
+          "C12",
+          "C8",
+          "C10",
+          "C9"
+        ],
+        "source_sha256": "8d0e4812cdfe980045c8d27f11dcd789b67b4eb05f235a06484497e8621006c2"
+      }
+    ],
+    "reference_ids": [
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12"
+    ]
+  },
+  {
+    "id": "pilot-003-05",
+    "scenario": "pilot-003",
+    "title": "Diagnostic screening",
+    "people": [
+      {
+        "id": "P09",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P9/opening/0",
+        "original_text": "I believe that among adults aged 30\u201360 in Velundra Region, routine salivary cortisol fluctuations during morning clinic hours do systematically elevate Heliox-7 readings, contributing to the observed false-positive rate above 5%. This is supported by S11, which demonstrates both in vitro and pilot clinical evidence of morning cortisol interference, with a higher false-positive rate in morning versus midday collections. However, regarding the claim that the difference in false-positive rates between Velundra and Draveth Province is fully explained by population-level salivary iodine concentration rather than assay unreliability, I find the evidence insufficient. S10 notes Draveth\u2019s iodine fortification and midday collection protocol but does not isolate the effect of iodine from collection timing, and no controlled cross-population supplementation trial has been conducted. Similarly, I find insufficient evidence to assert that the Heliox-7 false-positive rate is below 5% with exclusive midday collection, as S11\u2019s pilot data is underpowered and lacks prospective validation in a full Velundra cohort. I support the view that a targeted screening programme for non-agricultural workers during midday hours would yield superior net health benefit compared to universal screening, as suggested by S6 and S9. Ethically, I support the obligation for universal STD screening if THYR-delta carriers are excluded, since the majority benefit outweighs minority harm (S9). However, I oppose mandating universal screening on autonomy grounds, as the state should not compel participation in preventive programmes with non-trivial subgroup risks, regardless of aggregate benefit.",
+        "text": "I believe that among adults aged 30\u201360 in Velundra Region, routine salivary cortisol fluctuations during morning clinic hours do systematically elevate Heliox-7 readings, contributing to the observed false-positive rate above 5%. This is supported by S11, which demonstrates both in vitro and pilot clinical evidence of morning cortisol interference, with a higher false-positive rate in morning versus midday collections. However, regarding the claim that the difference in false-positive rates between Velundra and Draveth Province is fully explained by population-level salivary iodine concentration rather than assay unreliability, I find the evidence insufficient. S10 notes Draveth\u2019s iodine fortification and midday collection protocol but does not isolate the effect of iodine from collection timing, and no controlled cross-population supplementation trial has been conducted. Similarly, I find insufficient evidence to assert that the Heliox-7 false-positive rate is below 5% with exclusive midday collection, as S11\u2019s pilot data is underpowered and lacks prospective validation in a full Velundra cohort. I support the view that a targeted screening programme for non-agricultural workers during midday hours would yield superior net health benefit compared to universal screening, as suggested by S6 and S9. Ethically, I support the obligation for universal STD screening if THYR-delta carriers are excluded, since the majority benefit outweighs minority harm (S9). However, I oppose mandating universal screening on autonomy grounds, as the state should not compel participation in preventive programmes with non-trivial subgroup risks, regardless of aggregate benefit.",
+        "reference_ids": [
+          "C11",
+          "C10",
+          "C15",
+          "C12",
+          "C13",
+          "C14"
+        ],
+        "source_sha256": "0f75d6976709f25301371fb86f1fe7812792e580252f671066332f371ef9b41b"
+      },
+      {
+        "id": "P10",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P10/opening/0",
+        "original_text": "I support the claim that the Heliox-7 salivary assay correctly identifies subclinical thyroid dysregulation in at least 87% of confirmed cases under standard clinic conditions, as the VCPT trial (S3) reports a sensitivity of 0.88 in a relevant population. I also support the claim that Heliox-7 has a false-positive rate below 5% (specificity > 0.95) in healthy adults, but my belief is based solely on an unverified local report (S902); I acknowledge this is weak evidence and cannot independently confirm the specificity. Regarding early pharmacological intervention, I support the claim that Heliox-7-positive adults who receive LVX-2 within 6 months experience a statistically significant reduction in cardiovascular events over five years, as shown in the VCPT trial (S3). I oppose the claim that restricting screening to non-agricultural workers and midday hours would yield superior net health benefit compared to universal screening. The available economic modeling (S6) is inconclusive, and no direct comparative trial exists. I support the normative claim that the health authority has an obligation to implement universal STD screening if THYR-delta carriers are excluded from LVX-2 treatment, as the majority benefit outweighs minority harm (S9). I oppose the claim that universal screening should not be mandated on autonomy grounds, since I believe aggregate benefit justifies the intervention when safeguards are in place.",
+        "text": "I support the claim that the Heliox-7 salivary assay correctly identifies subclinical thyroid dysregulation in at least 87% of confirmed cases under standard clinic conditions, as the VCPT trial (S3) reports a sensitivity of 0.88 in a relevant population. I also support the claim that Heliox-7 has a false-positive rate below 5% (specificity > 0.95) in healthy adults, but my belief is based solely on an unverified local report (S902); I acknowledge this is weak evidence and cannot independently confirm the specificity. Regarding early pharmacological intervention, I support the claim that Heliox-7-positive adults who receive LVX-2 within 6 months experience a statistically significant reduction in cardiovascular events over five years, as shown in the VCPT trial (S3). I oppose the claim that restricting screening to non-agricultural workers and midday hours would yield superior net health benefit compared to universal screening. The available economic modeling (S6) is inconclusive, and no direct comparative trial exists. I support the normative claim that the health authority has an obligation to implement universal STD screening if THYR-delta carriers are excluded from LVX-2 treatment, as the majority benefit outweighs minority harm (S9). I oppose the claim that universal screening should not be mandated on autonomy grounds, since I believe aggregate benefit justifies the intervention when safeguards are in place.",
+        "reference_ids": [
+          "C2",
+          "C13",
+          "C14",
+          "C15",
+          "C1",
+          "C3"
+        ],
+        "source_sha256": "67cccd8bb29417f94a02720c6d8ed2e7a294c1dd648a671fdcc801367c877e74"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-003-06",
+    "scenario": "pilot-003",
+    "title": "Diagnostic screening",
+    "people": [
+      {
+        "id": "P11",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P11/opening/0",
+        "original_text": "This memo addresses the accuracy and occupational consistency of the Heliox-7 salivary assay, its clinical impact, and potential risks in specific genetic subgroups under standard clinic conditions in Velundra Region. \n\nI support the claim that Heliox-7 achieves at least 87% sensitivity for detecting subclinical thyroid dysregulation (STD) in adults aged 30\u201360, as confirmed by the VCPT trial (S3), which reported a sensitivity of 0.88 under standard conditions. I also support the assertion that early pharmacological intervention (LVX-2) for Heliox-7-positive individuals leads to a statistically significant reduction in cardiovascular events over five years, based on the same high-quality trial (S3) and supported by economic modeling (S6), though the latter\u2019s conclusions are tentative. \n\nRegarding specificity, I support the claim that false-positive rates remain below 5% in healthy adults, but this belief is based solely on an unverified local report (S902), which I acknowledge is weak evidence. Similarly, I support the claim of equivalent assay sensitivity across occupational groups (S908), again based on unverified but personally convincing reports. \n\nI oppose the claim that sensitivity drops to 71% in agricultural workers due to organophosphate exposure, as an unverified report (S911) disputes this proposition. For the claim regarding increased arrhythmia risk in THYR-delta carriers, I find insufficient evidence to support or oppose it, as no data are available.",
+        "text": "This memo addresses the accuracy and occupational consistency of the Heliox-7 salivary assay, its clinical impact, and potential risks in specific genetic subgroups under standard clinic conditions in Velundra Region. \n\nI support the claim that Heliox-7 achieves at least 87% sensitivity for detecting subclinical thyroid dysregulation (STD) in adults aged 30\u201360, as confirmed by the VCPT trial (S3), which reported a sensitivity of 0.88 under standard conditions. I also support the assertion that early pharmacological intervention (LVX-2) for Heliox-7-positive individuals leads to a statistically significant reduction in cardiovascular events over five years, based on the same high-quality trial (S3) and supported by economic modeling (S6), though the latter\u2019s conclusions are tentative. \n\nRegarding specificity, I support the claim that false-positive rates remain below 5% in healthy adults, but this belief is based solely on an unverified local report (S902), which I acknowledge is weak evidence. Similarly, I support the claim of equivalent assay sensitivity across occupational groups (S908), again based on unverified but personally convincing reports. \n\nI oppose the claim that sensitivity drops to 71% in agricultural workers due to organophosphate exposure, as an unverified report (S911) disputes this proposition. For the claim regarding increased arrhythmia risk in THYR-delta carriers, I find insufficient evidence to support or oppose it, as no data are available.",
+        "reference_ids": [
+          "C2",
+          "C4",
+          "C3",
+          "C5",
+          "C6",
+          "C1"
+        ],
+        "source_sha256": "b760606a0ff3f01f1e4241b73b67060eac3088223b7278a352bc6bcfde0a2929"
+      },
+      {
+        "id": "P12",
+        "source_call": "pilot-003/32/openai/gpt-4.1/participant-v8/P12/opening/0",
+        "original_text": "On the question of whether universal Heliox-7 screening should be mandated in Velundra, I find the evidence for some claims insufficient and for others compelling. For claim C4, regarding increased arrhythmia incidence with early LVX-2 intervention in THYR-delta carriers, I must state there is insufficient evidence; none of the available sources address arrhythmia outcomes specifically in this genetic subgroup, nor do they report paradoxical risk increases. For claim C5, I oppose the assertion that Heliox-7 sensitivity is equivalent across occupational groups. Both S2 and S8 provide robust, replicated evidence of significant sensitivity differences, particularly lower sensitivity in agricultural workers due to organophosphate exposure, with industrial and healthcare groups also showing intermediate values. For claim C6, I support the statement that agricultural workers experience reduced Heliox-7 sensitivity (around 71%) compared to office workers (89%), as documented in both S2 and S8. For claim C7, I again find insufficient evidence to conclude that universal screening would be cost-neutral or cost-saving within 10 years; S6 and S9 highlight major uncertainties in downstream costs and model assumptions. For claim C8, there is insufficient evidence to assert comparable sensitivity in the 60\u201375 age group, as S1 explicitly notes a lack of age-stratified data above 60. For claim C9, I support the finding that Draveth Province shows a false-positive rate below 3%, as confirmed by S4 and S10, despite some unresolved explanatory factors.",
+        "text": "On the question of whether universal Heliox-7 screening should be mandated in Velundra, I find the evidence for some claims insufficient and for others compelling. For claim C4, regarding increased arrhythmia incidence with early LVX-2 intervention in THYR-delta carriers, I must state there is insufficient evidence; none of the available sources address arrhythmia outcomes specifically in this genetic subgroup, nor do they report paradoxical risk increases. For claim C5, I oppose the assertion that Heliox-7 sensitivity is equivalent across occupational groups. Both S2 and S8 provide robust, replicated evidence of significant sensitivity differences, particularly lower sensitivity in agricultural workers due to organophosphate exposure, with industrial and healthcare groups also showing intermediate values. For claim C6, I support the statement that agricultural workers experience reduced Heliox-7 sensitivity (around 71%) compared to office workers (89%), as documented in both S2 and S8. For claim C7, I again find insufficient evidence to conclude that universal screening would be cost-neutral or cost-saving within 10 years; S6 and S9 highlight major uncertainties in downstream costs and model assumptions. For claim C8, there is insufficient evidence to assert comparable sensitivity in the 60\u201375 age group, as S1 explicitly notes a lack of age-stratified data above 60. For claim C9, I support the finding that Draveth Province shows a false-positive rate below 3%, as confirmed by S4 and S10, despite some unresolved explanatory factors.",
+        "reference_ids": [
+          "C4",
+          "C5",
+          "C6",
+          "C7",
+          "C8",
+          "C9"
+        ],
+        "source_sha256": "09cd619006c658e12784e5362d3425d860632bf34e66d860bf146d611467155c"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  },
+  {
+    "id": "pilot-004-01",
+    "scenario": "pilot-004",
+    "title": "Youth justice",
+    "people": [
+      {
+        "id": "P01",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P1/opening/0",
+        "original_text": "Considering the available data, I support the claim that structured diversion activities significantly reduced 12-month re-offending rates among first-time offenders aged 10\u201314 with no prior cautions in Mirelon City (C1). The Comparative Diversion Outcomes Registry (S2) provides reliable evidence for this age group, showing a drop from 38% to 21%. However, for first-time offenders aged 15\u201317 (C2), I find the evidence insufficient to conclude that the same programme meaningfully reduces re-offending, as the reduction from 41% to 38% is marginal and lacks supporting detail or robust analysis. Regarding the claim that the programme reduces re-offending equally across all 10\u201317-year-olds (C3), I support this based on the unverified local report (S904), though I acknowledge its weak evidential status and the contradiction with age-stratified data. For offenders aged 10\u201314 with diagnosed conduct disorder (C4), the evidence is insufficient to confirm that participation increases re-offending, as the sample is small and lacks corroboration. Similarly, there is insufficient evidence (C5) to assess caseworker time allocation, and for the hypothesis that reducing administrative burden would eliminate age-group differences in outcomes (C6), the mechanism is plausible but remains untested.",
+        "text": "Considering the available data, I support the claim that structured diversion activities significantly reduced 12-month re-offending rates among first-time offenders aged 10\u201314 with no prior cautions in Mirelon City (C1). The Comparative Diversion Outcomes Registry (S2) provides reliable evidence for this age group, showing a drop from 38% to 21%. However, for first-time offenders aged 15\u201317 (C2), I find the evidence insufficient to conclude that the same programme meaningfully reduces re-offending, as the reduction from 41% to 38% is marginal and lacks supporting detail or robust analysis. Regarding the claim that the programme reduces re-offending equally across all 10\u201317-year-olds (C3), I support this based on the unverified local report (S904), though I acknowledge its weak evidential status and the contradiction with age-stratified data. For offenders aged 10\u201314 with diagnosed conduct disorder (C4), the evidence is insufficient to confirm that participation increases re-offending, as the sample is small and lacks corroboration. Similarly, there is insufficient evidence (C5) to assess caseworker time allocation, and for the hypothesis that reducing administrative burden would eliminate age-group differences in outcomes (C6), the mechanism is plausible but remains untested.",
+        "reference_ids": [
+          "C2",
+          "C3",
+          "C4",
+          "C6",
+          "C1",
+          "C5"
+        ],
+        "source_sha256": "6c2a2c93600172c902fcbb00d1c7605e00569bcde9a9d34b92cf6a1d9cdcfe79"
+      },
+      {
+        "id": "P02",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P2/opening/0",
+        "original_text": "On the question of caseworker time allocation (C5), I believe there is insufficient evidence to confirm the specific claim that caseworkers in Mirelon City spent 6.2 hours per week per participant on administrative tasks in 2022, leaving fewer than 3 hours for direct mentoring. While time-use logs are referenced, I have not seen direct data or corroborating details to substantiate these precise figures. Similarly, for the claim about increased re-offending rates among 10\u201314-year-olds with conduct disorder participating in structured diversion (C4), the evidence is insufficient. The private evidence I have does not address this specific subgroup or provide outcome data for conduct-disordered youth, so I cannot confidently support or oppose the claim. Regarding the Fennwick Borough result (C9), I support the claim: reliable sources (S2, S10) confirm that a targeted diversion programme for low-risk 10\u201314-year-olds reduced re-offending from 40% to 20%, using validated risk screening. For the inference that Delvara\u2019s null result implies universal diversion is ineffective for 15\u201317-year-olds regardless of resources (C8), I oppose it. S9 specifically critiques this generalisation, noting Delvara\u2019s high caseload as a confounder. I support the Delvara null result itself (C7), as S8 reliably reports no significant reduction in re-offending. For the hypothesis that reducing administrative burden would eliminate the age-group outcome gap in Mirelon (C6), I find the evidence insufficient, as S7 is only a theoretical proposal without empirical testing.",
+        "text": "On the question of caseworker time allocation (C5), I believe there is insufficient evidence to confirm the specific claim that caseworkers in Mirelon City spent 6.2 hours per week per participant on administrative tasks in 2022, leaving fewer than 3 hours for direct mentoring. While time-use logs are referenced, I have not seen direct data or corroborating details to substantiate these precise figures. Similarly, for the claim about increased re-offending rates among 10\u201314-year-olds with conduct disorder participating in structured diversion (C4), the evidence is insufficient. The private evidence I have does not address this specific subgroup or provide outcome data for conduct-disordered youth, so I cannot confidently support or oppose the claim. Regarding the Fennwick Borough result (C9), I support the claim: reliable sources (S2, S10) confirm that a targeted diversion programme for low-risk 10\u201314-year-olds reduced re-offending from 40% to 20%, using validated risk screening. For the inference that Delvara\u2019s null result implies universal diversion is ineffective for 15\u201317-year-olds regardless of resources (C8), I oppose it. S9 specifically critiques this generalisation, noting Delvara\u2019s high caseload as a confounder. I support the Delvara null result itself (C7), as S8 reliably reports no significant reduction in re-offending. For the hypothesis that reducing administrative burden would eliminate the age-group outcome gap in Mirelon (C6), I find the evidence insufficient, as S7 is only a theoretical proposal without empirical testing.",
+        "reference_ids": [
+          "C5",
+          "C4",
+          "C9",
+          "C8",
+          "C7",
+          "C6"
+        ],
+        "source_sha256": "901b0bcb0fa3ac12687f1ed31b17f12ae8b0aac0d7d27585d403a05a10b0310b"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  },
+  {
+    "id": "pilot-004-02",
+    "scenario": "pilot-004",
+    "title": "Youth justice",
+    "people": [
+      {
+        "id": "P03",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P3/opening/0",
+        "original_text": "I support the claim that, in Fennwick Borough, the targeted diversion programme for 15\u201317-year-olds produced a 12-month re-offending rate of 43%, nearly identical to the control group\u2019s 42% (C10). This is directly confirmed by the Fennwick evaluation (S10), which also notes that this age group was not included in the targeted intervention, so the comparison is valid. I also support the finding from Delvara District (C7) that a universal diversion programme for 10\u201317-year-olds did not significantly reduce 12-month re-offending rates, as shown in the RCT (S8); Delvara\u2019s higher caseload ratio (18:1) compared to Mirelon City (11:1) is relevant context. However, I find insufficient evidence to explain the difference between Mirelon City\u2019s modest positive effect for 15\u201317-year-olds and Fennwick\u2019s near-zero effect (C11), since both resource-competition and population-heterogeneity explanations remain plausible and no cross-site individual-level data exist (S7, S9). I support the claim that higher caseworker caseloads in Mirelon City are associated with higher re-offending rates among 10\u201314-year-olds (C13), as shown by the time-use study (S6). I oppose the assertion that Mirelon\u2019s Equity in Justice Act makes age-based programme exclusions impermissible (C12), since legal counsel (S12) provides credible counter-arguments and precedent. I oppose generalising Delvara\u2019s null result to all contexts regardless of resources (C8), as the methodological review (S9) highlights caseload as a confound. Finally, I support the effectiveness of targeted diversion for low-risk 10\u201314-year-olds in Fennwick Borough (C9), as robustly demonstrated in S10 and S2.",
+        "text": "I support the claim that, in Fennwick Borough, the targeted diversion programme for 15\u201317-year-olds produced a 12-month re-offending rate of 43%, nearly identical to the control group\u2019s 42% (C10). This is directly confirmed by the Fennwick evaluation (S10), which also notes that this age group was not included in the targeted intervention, so the comparison is valid. I also support the finding from Delvara District (C7) that a universal diversion programme for 10\u201317-year-olds did not significantly reduce 12-month re-offending rates, as shown in the RCT (S8); Delvara\u2019s higher caseload ratio (18:1) compared to Mirelon City (11:1) is relevant context. However, I find insufficient evidence to explain the difference between Mirelon City\u2019s modest positive effect for 15\u201317-year-olds and Fennwick\u2019s near-zero effect (C11), since both resource-competition and population-heterogeneity explanations remain plausible and no cross-site individual-level data exist (S7, S9). I support the claim that higher caseworker caseloads in Mirelon City are associated with higher re-offending rates among 10\u201314-year-olds (C13), as shown by the time-use study (S6). I oppose the assertion that Mirelon\u2019s Equity in Justice Act makes age-based programme exclusions impermissible (C12), since legal counsel (S12) provides credible counter-arguments and precedent. I oppose generalising Delvara\u2019s null result to all contexts regardless of resources (C8), as the methodological review (S9) highlights caseload as a confound. Finally, I support the effectiveness of targeted diversion for low-risk 10\u201314-year-olds in Fennwick Borough (C9), as robustly demonstrated in S10 and S2.",
+        "reference_ids": [
+          "C10",
+          "C7",
+          "C11",
+          "C13",
+          "C12",
+          "C8",
+          "C9"
+        ],
+        "source_sha256": "f7444e13c457489e50ca29cada4aa01fac3591f894945bbdeb355d95cddf782c"
+      },
+      {
+        "id": "P04",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P4/opening/0",
+        "original_text": "Turning to the evidence, I find that for claim C13, there is insufficient evidence to draw a firm conclusion. While the figures cited\u201434% re-offending for 10\u201314-year-olds with high-caseload caseworkers versus 18% with low caseloads\u2014suggest a resource-competition effect, I lack direct data linking these caseloads to the specific outcomes in Mirelon City, and no source in my possession provides a robust causal analysis. For C14, I support the claim: S9 provides reliable 2023 referral data and staffing levels, projecting that expanding the diversion programme to all 10\u201317-year-olds in Mirelon City would indeed raise average caseloads from 11 to about 19. Regarding C11, I must again state insufficient evidence; both resource-competition and population-heterogeneity explanations remain plausible, and without cross-site individual-level data, I cannot attribute the difference in programme effect between Mirelon and Fennwick solely to programme intensity. For C15, I support the normative position that Mirelon City should adopt a universal diversion programme, as withholding support from any 15\u201317-year-old is, in my view, unjustifiable harm regardless of effectiveness data (S11). For C12, I support the interpretation that statutory obligations prohibit age-based exclusions under the 2018 Act, aligning with the advocacy position in S11. Finally, for C10, I support the factual claim: S10 confirms that in Fennwick, the 15\u201317-year-old untreated comparison group had a 43% re-offending rate, matching the claim\u2019s figures.",
+        "text": "Turning to the evidence, I find that for claim C13, there is insufficient evidence to draw a firm conclusion. While the figures cited\u201434% re-offending for 10\u201314-year-olds with high-caseload caseworkers versus 18% with low caseloads\u2014suggest a resource-competition effect, I lack direct data linking these caseloads to the specific outcomes in Mirelon City, and no source in my possession provides a robust causal analysis. For C14, I support the claim: S9 provides reliable 2023 referral data and staffing levels, projecting that expanding the diversion programme to all 10\u201317-year-olds in Mirelon City would indeed raise average caseloads from 11 to about 19. Regarding C11, I must again state insufficient evidence; both resource-competition and population-heterogeneity explanations remain plausible, and without cross-site individual-level data, I cannot attribute the difference in programme effect between Mirelon and Fennwick solely to programme intensity. For C15, I support the normative position that Mirelon City should adopt a universal diversion programme, as withholding support from any 15\u201317-year-old is, in my view, unjustifiable harm regardless of effectiveness data (S11). For C12, I support the interpretation that statutory obligations prohibit age-based exclusions under the 2018 Act, aligning with the advocacy position in S11. Finally, for C10, I support the factual claim: S10 confirms that in Fennwick, the 15\u201317-year-old untreated comparison group had a 43% re-offending rate, matching the claim\u2019s figures.",
+        "reference_ids": [
+          "C13",
+          "C14",
+          "C11",
+          "C15",
+          "C12",
+          "C10"
+        ],
+        "source_sha256": "c602c74efc69c1c5c0a75921c3e810c88faec71cd6002d2815a6933912a530d7"
+      }
+    ],
+    "reference_ids": [
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-004-03",
+    "scenario": "pilot-004",
+    "title": "Youth justice",
+    "people": [
+      {
+        "id": "P05",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P5/opening/0",
+        "original_text": "I support the claim that structured diversion activities significantly reduced 12-month re-offending rates among first-time offenders aged 10\u201314 with no prior cautions, as shown by reliable registry data (S2) indicating a drop from 38% to 21%. For first-time offenders aged 15\u201317, I find the evidence insufficient to conclude that the same programme meaningfully reduced re-offending, since no direct data is provided and the observed reduction (41% to 38%) is minimal and unsupported by robust evidence. I support the assertion that the programme reduces re-offending equally across all 10\u201317-year-olds, based on the unverified local report (S904), though I acknowledge this is a personal belief given the weak evidential status and conflicting age-stratified data. I also support the claim that, among 10\u201314-year-olds with diagnosed conduct disorder, participation in diversion increased re-offending rates from 35% to 52%, as confirmed by a reliable clinical audit (S4). Regarding the resource-competition effect on outcomes (C13), I find the evidence insufficient, as no direct data is available. I support the projection that expanding the programme would increase average caseworker caseloads from 11 to 19 (S9). Finally, I strongly support the normative position that Mirelon City should adopt universal diversion, as withholding support from 15\u201317-year-olds is unjustifiable harm, regardless of effectiveness data (S11, S12).",
+        "text": "I support the claim that structured diversion activities significantly reduced 12-month re-offending rates among first-time offenders aged 10\u201314 with no prior cautions, as shown by reliable registry data (S2) indicating a drop from 38% to 21%. For first-time offenders aged 15\u201317, I find the evidence insufficient to conclude that the same programme meaningfully reduced re-offending, since no direct data is provided and the observed reduction (41% to 38%) is minimal and unsupported by robust evidence. I support the assertion that the programme reduces re-offending equally across all 10\u201317-year-olds, based on the unverified local report (S904), though I acknowledge this is a personal belief given the weak evidential status and conflicting age-stratified data. I also support the claim that, among 10\u201314-year-olds with diagnosed conduct disorder, participation in diversion increased re-offending rates from 35% to 52%, as confirmed by a reliable clinical audit (S4). Regarding the resource-competition effect on outcomes (C13), I find the evidence insufficient, as no direct data is available. I support the projection that expanding the programme would increase average caseworker caseloads from 11 to 19 (S9). Finally, I strongly support the normative position that Mirelon City should adopt universal diversion, as withholding support from 15\u201317-year-olds is unjustifiable harm, regardless of effectiveness data (S11, S12).",
+        "reference_ids": [
+          "C13",
+          "C15",
+          "C4",
+          "C2",
+          "C3",
+          "C1",
+          "C14"
+        ],
+        "source_sha256": "132ecaf649c690ffe2a969aa1c4eae61edc88c3727f7cf73836cc1459a24f7c1"
+      },
+      {
+        "id": "P06",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P6/opening/0",
+        "original_text": "I support the claim that, for first-time offenders aged 10\u201314 with no prior cautions and excluding those with diagnosed conduct disorder, structured diversion activities in Mirelon City reduced 12-month re-offending rates from 38% to 21% (C1). This is substantiated by reliable registry data (S2) confirming a substantial reduction for this subgroup. Regarding the assertion that the diversion programme reduces re-offending equally across all age groups 10\u201317 (C3), I support this based on the supplied unverified report (S904), though I acknowledge its weak evidential status and the contradiction with age-stratified data. For first-time offenders aged 10\u201314 with diagnosed conduct disorder (C4), I support the claim that participation in diversion increased re-offending rates from 35% to 52%, as this is well-documented in a clinical audit (S4) and attributed to reinforcement of antisocial peer networks. For first-time offenders aged 15\u201317 (C2), I find insufficient evidence to conclude that the programme reduces re-offending, as no reliable data are provided. Similarly, for claims about caseworker time allocation (C5) and the impact of reducing administrative burden on age-group outcomes (C6), I find the evidence insufficient, as the sources are either absent or purely theoretical without empirical support.",
+        "text": "I support the claim that, for first-time offenders aged 10\u201314 with no prior cautions and excluding those with diagnosed conduct disorder, structured diversion activities in Mirelon City reduced 12-month re-offending rates from 38% to 21% (C1). This is substantiated by reliable registry data (S2) confirming a substantial reduction for this subgroup. Regarding the assertion that the diversion programme reduces re-offending equally across all age groups 10\u201317 (C3), I support this based on the supplied unverified report (S904), though I acknowledge its weak evidential status and the contradiction with age-stratified data. For first-time offenders aged 10\u201314 with diagnosed conduct disorder (C4), I support the claim that participation in diversion increased re-offending rates from 35% to 52%, as this is well-documented in a clinical audit (S4) and attributed to reinforcement of antisocial peer networks. For first-time offenders aged 15\u201317 (C2), I find insufficient evidence to conclude that the programme reduces re-offending, as no reliable data are provided. Similarly, for claims about caseworker time allocation (C5) and the impact of reducing administrative burden on age-group outcomes (C6), I find the evidence insufficient, as the sources are either absent or purely theoretical without empirical support.",
+        "reference_ids": [
+          "C1",
+          "C6",
+          "C3",
+          "C5",
+          "C2",
+          "C4"
+        ],
+        "source_sha256": "c2df6b83d8ec4b1b330dccc50b0bcba6a09592ea3a392204205deb13797a7cf3"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-004-04",
+    "scenario": "pilot-004",
+    "title": "Youth justice",
+    "people": [
+      {
+        "id": "P07",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P7/opening/0",
+        "original_text": "I support the claim that, in Fennwick Borough, a targeted diversion programme for low-risk 10\u201314-year-olds reduced 12-month re-offending from 40% to 20%. This is well supported by reliable evaluation data (S2, S10), which also highlight the use of a validated risk-screening tool absent in Mirelon City. Regarding Mirelon City caseworker time use, I find insufficient evidence to confirm that caseworkers spent 6.2 hours weekly on administration and less than 3 hours on direct mentoring. No direct data from logs or systematic study are available to substantiate this claim. For the conduct-disorder subgroup in Mirelon City, I support the finding that structured diversion increased re-offending rates from 35% to 52% (S4), with clinicians noting possible negative peer effects. In Delvara District, I support the claim that a universal diversion programme did not significantly reduce re-offending among 10\u201317-year-olds (S8). However, I oppose the inference that this null result proves universal diversion is ineffective for 15\u201317-year-olds regardless of resources, as the high caseload ratio is a plausible confound (S9). Finally, I find insufficient evidence that reducing administrative burden would eliminate age-group outcome differences, since the mechanism is only theoretically proposed and untested (S7).",
+        "text": "I support the claim that, in Fennwick Borough, a targeted diversion programme for low-risk 10\u201314-year-olds reduced 12-month re-offending from 40% to 20%. This is well supported by reliable evaluation data (S2, S10), which also highlight the use of a validated risk-screening tool absent in Mirelon City. Regarding Mirelon City caseworker time use, I find insufficient evidence to confirm that caseworkers spent 6.2 hours weekly on administration and less than 3 hours on direct mentoring. No direct data from logs or systematic study are available to substantiate this claim. For the conduct-disorder subgroup in Mirelon City, I support the finding that structured diversion increased re-offending rates from 35% to 52% (S4), with clinicians noting possible negative peer effects. In Delvara District, I support the claim that a universal diversion programme did not significantly reduce re-offending among 10\u201317-year-olds (S8). However, I oppose the inference that this null result proves universal diversion is ineffective for 15\u201317-year-olds regardless of resources, as the high caseload ratio is a plausible confound (S9). Finally, I find insufficient evidence that reducing administrative burden would eliminate age-group outcome differences, since the mechanism is only theoretically proposed and untested (S7).",
+        "reference_ids": [
+          "C9",
+          "C5",
+          "C4",
+          "C7",
+          "C8",
+          "C6"
+        ],
+        "source_sha256": "82fb6e189215e1a1b57a2bbb5f024957de6f821f38c0a480186dbe299ad25f6a"
+      },
+      {
+        "id": "P08",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P8/opening/0",
+        "original_text": "Regarding Mirelon City's statutory obligations (C12), I strongly believe the Youth Justice Authority must offer equivalent intervention opportunities to all first-time offenders regardless of age, as required by the 2018 Mirelon Equity in Justice Act. While legal interpretations differ (S11, S12), my conviction is that age-based exclusions are impermissible. On the effectiveness of universal diversion programmes for older youth (C8), I support the view\u2014based on the unverified report (S914)\u2014that Delvara District's null result suggests such programmes are ineffective for 15\u201317-year-olds, regardless of resource levels. However, I acknowledge this evidence is weak and uncorroborated. For targeted diversion among younger offenders (C9), I support the claim that Fennwick Borough's programme halved re-offending rates for low-risk 10\u201314-year-olds (S2, S10), which is robust evidence. For first-time 15\u201317-year-olds in Fennwick (C10), I support the finding that targeted diversion made no difference compared to controls (S10). Concerning Delvara's universal diversion outcome (C7), I find insufficient evidence to conclude effectiveness or ineffectiveness due to confounding factors like higher caseloads. Finally, I see insufficient evidence (C11) to attribute differences between Mirelon and Fennwick to programme intensity alone, as both resource and population explanations remain plausible (S7).",
+        "text": "Regarding Mirelon City's statutory obligations (C12), I strongly believe the Youth Justice Authority must offer equivalent intervention opportunities to all first-time offenders regardless of age, as required by the 2018 Mirelon Equity in Justice Act. While legal interpretations differ (S11, S12), my conviction is that age-based exclusions are impermissible. On the effectiveness of universal diversion programmes for older youth (C8), I support the view\u2014based on the unverified report (S914)\u2014that Delvara District's null result suggests such programmes are ineffective for 15\u201317-year-olds, regardless of resource levels. However, I acknowledge this evidence is weak and uncorroborated. For targeted diversion among younger offenders (C9), I support the claim that Fennwick Borough's programme halved re-offending rates for low-risk 10\u201314-year-olds (S2, S10), which is robust evidence. For first-time 15\u201317-year-olds in Fennwick (C10), I support the finding that targeted diversion made no difference compared to controls (S10). Concerning Delvara's universal diversion outcome (C7), I find insufficient evidence to conclude effectiveness or ineffectiveness due to confounding factors like higher caseloads. Finally, I see insufficient evidence (C11) to attribute differences between Mirelon and Fennwick to programme intensity alone, as both resource and population explanations remain plausible (S7).",
+        "reference_ids": [
+          "C12",
+          "C8",
+          "C9",
+          "C7",
+          "C10",
+          "C11"
+        ],
+        "source_sha256": "646eff31b1228ceb066cde2793472b9d8ce05743cbb61bf5aad9d8aea39d90e3"
+      }
+    ],
+    "reference_ids": [
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12"
+    ]
+  },
+  {
+    "id": "pilot-004-05",
+    "scenario": "pilot-004",
+    "title": "Youth justice",
+    "people": [
+      {
+        "id": "P09",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P9/opening/0",
+        "original_text": "I strongly support the view that Mirelon City should adopt the universal diversion programme, as withholding structured support from any first-time offender aged 15\u201317 constitutes unjustifiable harm, regardless of effectiveness data (C15). The advocacy coalition\u2019s position (S11) aligns with my conviction that justice requires equal access to intervention. Regarding the factual claim about Fennwick Borough (C10), I support it: the evaluation (S10) confirms that among first-time offenders aged 15\u201317, the 12-month re-offending rate was 43% for the untreated comparison group, as this age group was excluded from the targeted programme. For the projection that expanding the diversion programme in Mirelon City would increase average caseworker caseload from 11 to approximately 19 active cases (C14), I support this claim, as it is directly substantiated by referral data and staffing levels in S9. On the claim that higher caseloads among caseworkers for 10\u201314-year-olds in Mirelon City led to higher re-offending rates (C13), I find insufficient evidence: while the figures are plausible, there is no direct source in the provided evidence confirming this specific spread. I oppose the assertion that Mirelon City has a statutory obligation to offer equivalent intervention opportunities regardless of age (C12), as legal counsel (S12) provides credible counterarguments and case precedents. Finally, I find insufficient evidence to explain the difference between Mirelon and Fennwick outcomes for 15\u201317-year-olds solely by programme intensity (C11), since both resource-competition and population-heterogeneity explanations remain viable and no cross-site individual-level data exist (S7, S9).",
+        "text": "I strongly support the view that Mirelon City should adopt the universal diversion programme, as withholding structured support from any first-time offender aged 15\u201317 constitutes unjustifiable harm, regardless of effectiveness data (C15). The advocacy coalition\u2019s position (S11) aligns with my conviction that justice requires equal access to intervention. Regarding the factual claim about Fennwick Borough (C10), I support it: the evaluation (S10) confirms that among first-time offenders aged 15\u201317, the 12-month re-offending rate was 43% for the untreated comparison group, as this age group was excluded from the targeted programme. For the projection that expanding the diversion programme in Mirelon City would increase average caseworker caseload from 11 to approximately 19 active cases (C14), I support this claim, as it is directly substantiated by referral data and staffing levels in S9. On the claim that higher caseloads among caseworkers for 10\u201314-year-olds in Mirelon City led to higher re-offending rates (C13), I find insufficient evidence: while the figures are plausible, there is no direct source in the provided evidence confirming this specific spread. I oppose the assertion that Mirelon City has a statutory obligation to offer equivalent intervention opportunities regardless of age (C12), as legal counsel (S12) provides credible counterarguments and case precedents. Finally, I find insufficient evidence to explain the difference between Mirelon and Fennwick outcomes for 15\u201317-year-olds solely by programme intensity (C11), since both resource-competition and population-heterogeneity explanations remain viable and no cross-site individual-level data exist (S7, S9).",
+        "reference_ids": [
+          "C15",
+          "C13",
+          "C10",
+          "C14",
+          "C12",
+          "C11"
+        ],
+        "source_sha256": "9e27120018cd8ff61fff065e79ea36f617dc89d2fc3d7b3abe35be425278396b"
+      },
+      {
+        "id": "P10",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P10/opening/0",
+        "original_text": "I support the claim that, for first-time offenders aged 10\u201314 with no prior cautions and excluding those with diagnosed conduct disorder, participation in structured diversion activities in Mirelon City reduced 12-month re-offending rates from 38% to 21%. This is substantiated by reliable comparative data (S2), which confirms a substantial reduction in re-offending for this age group. Regarding the normative claim that Mirelon City should adopt a universal diversion programme because withholding support from any 15\u201317-year-old causes unjustifiable harm irrespective of effectiveness data, I oppose this position. The legal and cost-effectiveness analyses (S12) indicate that risk-stratified targeting is both permissible and necessary to maintain programme efficacy, and the assertion of harm is not supported by robust evidence. I support the projection that expanding the diversion programme to all first-time offenders aged 10\u201317 would increase average caseworker caseload from 11 to approximately 19, as this is grounded in reliable referral data and staffing levels (S9). For the claim that high caseloads among 10\u201314-year-olds enrolled in diversion explain a spread in re-offending rates, I find insufficient evidence, as no direct data is provided. I support the unverified report that the programme reduces re-offending equally across all age groups, though I acknowledge its weak evidential status. Finally, for 15\u201317-year-olds, I find insufficient evidence that the programme meaningfully reduces re-offending.",
+        "text": "I support the claim that, for first-time offenders aged 10\u201314 with no prior cautions and excluding those with diagnosed conduct disorder, participation in structured diversion activities in Mirelon City reduced 12-month re-offending rates from 38% to 21%. This is substantiated by reliable comparative data (S2), which confirms a substantial reduction in re-offending for this age group. Regarding the normative claim that Mirelon City should adopt a universal diversion programme because withholding support from any 15\u201317-year-old causes unjustifiable harm irrespective of effectiveness data, I oppose this position. The legal and cost-effectiveness analyses (S12) indicate that risk-stratified targeting is both permissible and necessary to maintain programme efficacy, and the assertion of harm is not supported by robust evidence. I support the projection that expanding the diversion programme to all first-time offenders aged 10\u201317 would increase average caseworker caseload from 11 to approximately 19, as this is grounded in reliable referral data and staffing levels (S9). For the claim that high caseloads among 10\u201314-year-olds enrolled in diversion explain a spread in re-offending rates, I find insufficient evidence, as no direct data is provided. I support the unverified report that the programme reduces re-offending equally across all age groups, though I acknowledge its weak evidential status. Finally, for 15\u201317-year-olds, I find insufficient evidence that the programme meaningfully reduces re-offending.",
+        "reference_ids": [
+          "C1",
+          "C15",
+          "C14",
+          "C13",
+          "C3",
+          "C2"
+        ],
+        "source_sha256": "e1d2d9eaa2e063b2e28b4fd6742a1d96e043b7444b62ad24797b06f76286850c"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-004-06",
+    "scenario": "pilot-004",
+    "title": "Youth justice",
+    "people": [
+      {
+        "id": "P11",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P11/opening/0",
+        "original_text": "I support the claim that, among first-time offenders aged 10\u201314 in Mirelon City, those whose caseworkers managed more than 14 active cases had a 34% re-offending rate compared to 18% for those with fewer than 10 cases (C13). This is directly supported by reliable caseworker time-use data (S6), which also shows that high caseloads reduce direct mentoring time. For claim C1, I support that structured diversion activities reduced 12-month re-offending rates from 38% to 21% for first-time offenders aged 10\u201314 with no prior cautions and no conduct disorder, as confirmed by the Comparative Diversion Outcomes Registry (S2). Regarding C5, I support that caseworkers spent on average 6.2 hours per week per participant on administrative tasks, leaving less than 3 hours for direct mentoring, as shown in S6. For C3, I support the belief that the diversion programme reduces re-offending equally across all 10\u201317-year-olds, based on the unverified local report (S904), though I acknowledge this is weak evidence and contradicted by age-stratified data. For C2, C4, and C6, I find insufficient evidence to support or oppose these claims, as there is either no direct data or only untested theoretical mechanisms.",
+        "text": "I support the claim that, among first-time offenders aged 10\u201314 in Mirelon City, those whose caseworkers managed more than 14 active cases had a 34% re-offending rate compared to 18% for those with fewer than 10 cases (C13). This is directly supported by reliable caseworker time-use data (S6), which also shows that high caseloads reduce direct mentoring time. For claim C1, I support that structured diversion activities reduced 12-month re-offending rates from 38% to 21% for first-time offenders aged 10\u201314 with no prior cautions and no conduct disorder, as confirmed by the Comparative Diversion Outcomes Registry (S2). Regarding C5, I support that caseworkers spent on average 6.2 hours per week per participant on administrative tasks, leaving less than 3 hours for direct mentoring, as shown in S6. For C3, I support the belief that the diversion programme reduces re-offending equally across all 10\u201317-year-olds, based on the unverified local report (S904), though I acknowledge this is weak evidence and contradicted by age-stratified data. For C2, C4, and C6, I find insufficient evidence to support or oppose these claims, as there is either no direct data or only untested theoretical mechanisms.",
+        "reference_ids": [
+          "C13",
+          "C4",
+          "C3",
+          "C2",
+          "C6",
+          "C1",
+          "C5"
+        ],
+        "source_sha256": "58c0ed3298091776c859ece1410a68a3e17c40f5e39f156628a7931421c568fe"
+      },
+      {
+        "id": "P12",
+        "source_call": "pilot-004/32/openai/gpt-4.1/participant-v8/P12/opening/0",
+        "original_text": "I believe there is insufficient evidence to conclude that the null result in Delvara District (C7) implies universal diversion programmes are ineffective for first-time offenders aged 15\u201317 regardless of resource levels (C8). The Delvara evaluation (S8) did not stratify by age and operated with a much higher caseload ratio than Mirelon City. The independent review (S9) specifically highlights that high caseloads may explain the lack of effect and that the findings cannot be generalized to all contexts or age groups. Regarding caseworker time allocation (C5), I also find the evidence insufficient. While time-use logs suggest administrative burden limits direct mentoring, the data are limited to 34 caseworkers and do not directly link time allocation to participant outcomes. For the hypothesis that reducing administrative burden by 50% would eliminate the age-group re-offending gap in Mirelon City (C6), the only support is a theoretical, untested mechanism (S7), so I again find insufficient evidence. For the claim that structured diversion increased re-offending among 10\u201314-year-olds with conduct disorder (C4), the evidence is not available for this specific subgroup, so I cannot support or oppose it. In contrast, I support that Fennwick\u2019s targeted diversion reduced re-offending among low-risk 10\u201314-year-olds (C9), as confirmed by reliable evaluations (S2, S10). I also support that Delvara\u2019s universal diversion produced no significant reduction in re-offending (C7), as shown in the RCT (S8).",
+        "text": "I believe there is insufficient evidence to conclude that the null result in Delvara District (C7) implies universal diversion programmes are ineffective for first-time offenders aged 15\u201317 regardless of resource levels (C8). The Delvara evaluation (S8) did not stratify by age and operated with a much higher caseload ratio than Mirelon City. The independent review (S9) specifically highlights that high caseloads may explain the lack of effect and that the findings cannot be generalized to all contexts or age groups. Regarding caseworker time allocation (C5), I also find the evidence insufficient. While time-use logs suggest administrative burden limits direct mentoring, the data are limited to 34 caseworkers and do not directly link time allocation to participant outcomes. For the hypothesis that reducing administrative burden by 50% would eliminate the age-group re-offending gap in Mirelon City (C6), the only support is a theoretical, untested mechanism (S7), so I again find insufficient evidence. For the claim that structured diversion increased re-offending among 10\u201314-year-olds with conduct disorder (C4), the evidence is not available for this specific subgroup, so I cannot support or oppose it. In contrast, I support that Fennwick\u2019s targeted diversion reduced re-offending among low-risk 10\u201314-year-olds (C9), as confirmed by reliable evaluations (S2, S10). I also support that Delvara\u2019s universal diversion produced no significant reduction in re-offending (C7), as shown in the RCT (S8).",
+        "reference_ids": [
+          "C8",
+          "C5",
+          "C6",
+          "C4",
+          "C9",
+          "C7"
+        ],
+        "source_sha256": "0a7f79387665ef6e234f663139a0805f76249b3bba5a6e7fe7abe8e5e186dce2"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C13"
+    ]
+  },
+  {
+    "id": "pilot-602-01",
+    "scenario": "pilot-602",
+    "title": "School attendance",
+    "people": [
+      {
+        "id": "P01",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P1/opening/0",
+        "original_text": "Regarding the drivers and trends of chronic absenteeism in Verantia USD, I find the available evidence insufficient to confidently affirm most claims. For C1, the reported 22.4% chronic absenteeism rate is based on district registers, but without access to the underlying data or corroborating sources, I cannot verify its accuracy. Similarly, for C2, the assertion that untreated asthma accounts for 38% of medically-attributed absences lacks supporting documentation or cross-verification, so I must also express insufficient evidence. For C3, I personally believe the report that dental pain is the leading medical driver of chronic absenteeism at 41%, as circulated in a district newsletter and referenced in S904, even though this figure contradicts the primary health screening dataset and remains unverified; I acknowledge the weak evidential status but support the claim as my belief. For C4 and C5, regarding the impact and persistence of absenteeism reduction following health hub implementation, the absence of detailed comparative or longitudinal data prevents me from drawing firm conclusions\u2014thus, insufficient evidence. For C6, the Drosswick Charter Network\u2019s report (S6) is weak and not directly comparable, so I again find insufficient evidence.",
+        "text": "Regarding the drivers and trends of chronic absenteeism in Verantia USD, I find the available evidence insufficient to confidently affirm most claims. For C1, the reported 22.4% chronic absenteeism rate is based on district registers, but without access to the underlying data or corroborating sources, I cannot verify its accuracy. Similarly, for C2, the assertion that untreated asthma accounts for 38% of medically-attributed absences lacks supporting documentation or cross-verification, so I must also express insufficient evidence. For C3, I personally believe the report that dental pain is the leading medical driver of chronic absenteeism at 41%, as circulated in a district newsletter and referenced in S904, even though this figure contradicts the primary health screening dataset and remains unverified; I acknowledge the weak evidential status but support the claim as my belief. For C4 and C5, regarding the impact and persistence of absenteeism reduction following health hub implementation, the absence of detailed comparative or longitudinal data prevents me from drawing firm conclusions\u2014thus, insufficient evidence. For C6, the Drosswick Charter Network\u2019s report (S6) is weak and not directly comparable, so I again find insufficient evidence.",
+        "reference_ids": [
+          "C1",
+          "C2",
+          "C3",
+          "C4",
+          "C5",
+          "C6"
+        ],
+        "source_sha256": "b8ce6e0dcc084879cae7d2af8c06b6409672de7e5412ce6d674c3ad350a4a83f"
+      },
+      {
+        "id": "P02",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P2/opening/0",
+        "original_text": "Given the available information, I believe there is insufficient evidence to draw firm conclusions about the effectiveness or equity impacts of school health hubs in reducing chronic absenteeism in Verantia USD. For claim C4, while a 6.1 percentage point drop in absenteeism was observed in the pilot cohort, this was not compared robustly enough to a matched control group, and the small sample size limits generalizability. Regarding C5, the reported decay of the effect after 24 months, attributed to staff turnover and supply issues, further complicates interpretation, and the interrupted time-series analysis may not fully account for confounders. For C6 and C8, the Drosswick Charter Network\u2019s experience is not directly comparable due to differences in hub staffing models, income classification methods, and possible demographic or implementation differences, as noted in the Drosswick internal report (S6). For C7 and C9, while there are clear disparities in absenteeism by income level in Verantia USD, and a larger reduction among low-income students is reported, the subgroup analysis is limited to the pilot cohort and may not reflect district-wide outcomes. Overall, more rigorous, larger-scale evidence is needed.",
+        "text": "Given the available information, I believe there is insufficient evidence to draw firm conclusions about the effectiveness or equity impacts of school health hubs in reducing chronic absenteeism in Verantia USD. For claim C4, while a 6.1 percentage point drop in absenteeism was observed in the pilot cohort, this was not compared robustly enough to a matched control group, and the small sample size limits generalizability. Regarding C5, the reported decay of the effect after 24 months, attributed to staff turnover and supply issues, further complicates interpretation, and the interrupted time-series analysis may not fully account for confounders. For C6 and C8, the Drosswick Charter Network\u2019s experience is not directly comparable due to differences in hub staffing models, income classification methods, and possible demographic or implementation differences, as noted in the Drosswick internal report (S6). For C7 and C9, while there are clear disparities in absenteeism by income level in Verantia USD, and a larger reduction among low-income students is reported, the subgroup analysis is limited to the pilot cohort and may not reflect district-wide outcomes. Overall, more rigorous, larger-scale evidence is needed.",
+        "reference_ids": [
+          "C6",
+          "C4",
+          "C9",
+          "C5",
+          "C8",
+          "C7"
+        ],
+        "source_sha256": "9ac25c8f2e13db667484837a636e8a461357467f8ec26a830d330d5ed3e4ffb4"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  },
+  {
+    "id": "pilot-602-02",
+    "scenario": "pilot-602",
+    "title": "School attendance",
+    "people": [
+      {
+        "id": "P03",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P3/opening/0",
+        "original_text": "When considering the costs and equity implications of health hub expansion in Verantia USD, I support the claim that the current per-pupil annual operating cost is $312 (C11), as this figure is directly substantiated by audited pilot expenditure reports and reflects actual spending, excluding one-time capital costs. However, I find insufficient evidence to support the projection that district-wide rollout would reduce per-pupil costs to $198 (C12); this estimate is based on a vendor quote that has not been independently audited, and the district finance office contests the underlying assumptions. Regarding equity, I support the finding that non-English-speaking families\u2014about 31% of enrolment\u2014had 44% lower health hub utilisation during the pilot (C14), with language barriers such as untranslated consent forms and lack of bilingual staff clearly documented as drivers of this gap. For absenteeism rates, I support the claim that low-income students in Verantia USD experienced a much higher chronic absenteeism rate (34.7%) than higher-income peers (11.2%) (C7), and that health hubs reduced absenteeism more for low-income students (9.4pp) than higher-income students (1.8pp), with statistically significant effect heterogeneity (C9). I oppose the assertion that universal rollout would yield equivalent absenteeism reductions across income strata (C10), as pilot data directly contradict this. Finally, I find insufficient evidence to compare Drosswick\u2019s lower absenteeism rate for low-income students (C8) to Verantia\u2019s, due to incompatible income classification methods and population differences.",
+        "text": "When considering the costs and equity implications of health hub expansion in Verantia USD, I support the claim that the current per-pupil annual operating cost is $312 (C11), as this figure is directly substantiated by audited pilot expenditure reports and reflects actual spending, excluding one-time capital costs. However, I find insufficient evidence to support the projection that district-wide rollout would reduce per-pupil costs to $198 (C12); this estimate is based on a vendor quote that has not been independently audited, and the district finance office contests the underlying assumptions. Regarding equity, I support the finding that non-English-speaking families\u2014about 31% of enrolment\u2014had 44% lower health hub utilisation during the pilot (C14), with language barriers such as untranslated consent forms and lack of bilingual staff clearly documented as drivers of this gap. For absenteeism rates, I support the claim that low-income students in Verantia USD experienced a much higher chronic absenteeism rate (34.7%) than higher-income peers (11.2%) (C7), and that health hubs reduced absenteeism more for low-income students (9.4pp) than higher-income students (1.8pp), with statistically significant effect heterogeneity (C9). I oppose the assertion that universal rollout would yield equivalent absenteeism reductions across income strata (C10), as pilot data directly contradict this. Finally, I find insufficient evidence to compare Drosswick\u2019s lower absenteeism rate for low-income students (C8) to Verantia\u2019s, due to incompatible income classification methods and population differences.",
+        "reference_ids": [
+          "C12",
+          "C11",
+          "C14",
+          "C8",
+          "C9",
+          "C10",
+          "C7"
+        ],
+        "source_sha256": "c20bdec6bc642691466150dc8b5dc65c92d2a58cae6626628ed62df68ac09389"
+      },
+      {
+        "id": "P04",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P4/opening/0",
+        "original_text": "Regarding the board\u2019s obligation (C15), I strongly support the view that equitable health outcomes for all pupils must take precedence over cost-efficiency in health hub rollout policy. This conviction is rooted in the district\u2019s stated equity commitments, which I believe should guide decision-making even when fiscal pressures are present. On the attribution of absenteeism reduction to the health hub intervention rather than the concurrent attendance campaign (C13), I find the evidence insufficient. The only available comparative data (S6) comes from a neighbouring district with different implementation intensity and classification methods, and does not resolve the confounding between interventions in Verantia USD. For the per-pupil annual operating cost of $312 based on the pilot (C11), I also find insufficient evidence; the claim references unaudited pilot budgets, and no direct documentation is provided. Similarly, the projected reduction to $198 per pupil with district-wide rollout (C12) is based on a contested vendor quote and lacks independent audit, so I cannot affirm this figure. The claim that universal rollout would yield equivalent absenteeism reductions across all income strata (C10) is contradicted by documented subgroup heterogeneity and lacks pilot support. Finally, for the reported 44% lower utilisation among non-English-speaking families (C14), I find the evidence insufficient, as no direct utilisation data or documentation of barriers is provided.",
+        "text": "Regarding the board\u2019s obligation (C15), I strongly support the view that equitable health outcomes for all pupils must take precedence over cost-efficiency in health hub rollout policy. This conviction is rooted in the district\u2019s stated equity commitments, which I believe should guide decision-making even when fiscal pressures are present. On the attribution of absenteeism reduction to the health hub intervention rather than the concurrent attendance campaign (C13), I find the evidence insufficient. The only available comparative data (S6) comes from a neighbouring district with different implementation intensity and classification methods, and does not resolve the confounding between interventions in Verantia USD. For the per-pupil annual operating cost of $312 based on the pilot (C11), I also find insufficient evidence; the claim references unaudited pilot budgets, and no direct documentation is provided. Similarly, the projected reduction to $198 per pupil with district-wide rollout (C12) is based on a contested vendor quote and lacks independent audit, so I cannot affirm this figure. The claim that universal rollout would yield equivalent absenteeism reductions across all income strata (C10) is contradicted by documented subgroup heterogeneity and lacks pilot support. Finally, for the reported 44% lower utilisation among non-English-speaking families (C14), I find the evidence insufficient, as no direct utilisation data or documentation of barriers is provided.",
+        "reference_ids": [
+          "C15",
+          "C13",
+          "C11",
+          "C10",
+          "C12",
+          "C14"
+        ],
+        "source_sha256": "5a0f26e750319eb39a732962c22b46fae604c0b29e3259e12e6bc6e3b12eaeb5"
+      }
+    ],
+    "reference_ids": [
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-602-03",
+    "scenario": "pilot-602",
+    "title": "School attendance",
+    "people": [
+      {
+        "id": "P05",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P5/opening/0",
+        "original_text": "This memo addresses key claims regarding chronic absenteeism and health-related drivers in Verantia USD, as well as policy obligations and intervention attribution. I support the claim that chronic absenteeism among primary pupils was 22.4% during 2021\u20132023, as documented in the district\u2019s internal dataset (S1), which is comprehensive and externally validated. However, for the claim that untreated asthma was the single largest identifiable medical driver of chronic absenteeism, accounting for 38% of medically-attributed absences, I find insufficient evidence at this stage. While S1 does report this figure, the attribution methodology and exclusion criteria require further scrutiny to confirm causality and rule out confounding factors. Regarding the assertion that the absenteeism reduction in the pilot cohort is primarily attributable to the health hub intervention rather than the concurrent attendance campaign, I also find insufficient evidence, as residual confounding from campaign implementation intensity remains unresolved (S6). For the claim that health hub utilisation rates among non-English-speaking families were 44% lower due to language barriers, I find insufficient evidence, as no direct data is available. I support the normative claim that the school board is obligated to prioritise equitable health outcomes over cost-efficiency, consistent with the district equity office\u2019s position (S4). I oppose the claim that dental pain was the largest medical driver, as this is contradicted by the reliable S1 dataset.",
+        "text": "This memo addresses key claims regarding chronic absenteeism and health-related drivers in Verantia USD, as well as policy obligations and intervention attribution. I support the claim that chronic absenteeism among primary pupils was 22.4% during 2021\u20132023, as documented in the district\u2019s internal dataset (S1), which is comprehensive and externally validated. However, for the claim that untreated asthma was the single largest identifiable medical driver of chronic absenteeism, accounting for 38% of medically-attributed absences, I find insufficient evidence at this stage. While S1 does report this figure, the attribution methodology and exclusion criteria require further scrutiny to confirm causality and rule out confounding factors. Regarding the assertion that the absenteeism reduction in the pilot cohort is primarily attributable to the health hub intervention rather than the concurrent attendance campaign, I also find insufficient evidence, as residual confounding from campaign implementation intensity remains unresolved (S6). For the claim that health hub utilisation rates among non-English-speaking families were 44% lower due to language barriers, I find insufficient evidence, as no direct data is available. I support the normative claim that the school board is obligated to prioritise equitable health outcomes over cost-efficiency, consistent with the district equity office\u2019s position (S4). I oppose the claim that dental pain was the largest medical driver, as this is contradicted by the reliable S1 dataset.",
+        "reference_ids": [
+          "C2",
+          "C1",
+          "C13",
+          "C14",
+          "C15",
+          "C3"
+        ],
+        "source_sha256": "83ff584449a71f113d1f75b2d9aed0800f32fcf95392196282e9ced96df0b719"
+      },
+      {
+        "id": "P06",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P6/opening/0",
+        "original_text": "Looking at the available information, I find insufficient evidence to confirm the exact chronic absenteeism rate of 22.4% in Verantia USD (C1), as I lack direct, reliable data on this figure. Regarding the claim that untreated asthma is the largest medical driver of chronic absenteeism, accounting for 38% of medically-attributed absences (C2), I support this based on the robust findings from Pellerin et al. (S2), which used nurse referral records and health screening data. For the claim that dental pain accounts for 41% of medically-attributed absences (C3), I personally support it as a belief, but only on the basis of an unverified local report (S904); I acknowledge this is weak evidence and contradicts the primary dataset. I support the finding that health hubs reduced chronic absenteeism by 6.1 percentage points in the pilot cohort (C4), and that the reduction was especially pronounced among low-income students, with a 9.4 percentage point drop compared to 1.8 for higher-income students (C9), both well-supported by S2. However, I have insufficient evidence to confirm that the reduction did not persist beyond 24 months (C5), or to draw conclusions from the Drosswick Charter Network results (C6), given the weak and non-comparable evidence.",
+        "text": "Looking at the available information, I find insufficient evidence to confirm the exact chronic absenteeism rate of 22.4% in Verantia USD (C1), as I lack direct, reliable data on this figure. Regarding the claim that untreated asthma is the largest medical driver of chronic absenteeism, accounting for 38% of medically-attributed absences (C2), I support this based on the robust findings from Pellerin et al. (S2), which used nurse referral records and health screening data. For the claim that dental pain accounts for 41% of medically-attributed absences (C3), I personally support it as a belief, but only on the basis of an unverified local report (S904); I acknowledge this is weak evidence and contradicts the primary dataset. I support the finding that health hubs reduced chronic absenteeism by 6.1 percentage points in the pilot cohort (C4), and that the reduction was especially pronounced among low-income students, with a 9.4 percentage point drop compared to 1.8 for higher-income students (C9), both well-supported by S2. However, I have insufficient evidence to confirm that the reduction did not persist beyond 24 months (C5), or to draw conclusions from the Drosswick Charter Network results (C6), given the weak and non-comparable evidence.",
+        "reference_ids": [
+          "C3",
+          "C6",
+          "C1",
+          "C5",
+          "C4",
+          "C9",
+          "C2"
+        ],
+        "source_sha256": "a400ac07699407879985ce633aac292acec682ee0d5e90dcaf8cd7e3e72e132a"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C9",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-602-04",
+    "scenario": "pilot-602",
+    "title": "School attendance",
+    "people": [
+      {
+        "id": "P07",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P7/opening/0",
+        "original_text": "I support the claim that in the Verantia USD pilot cohort, chronic absenteeism fell by 6.1 percentage points within 18 months of health hub activation (C4), as confirmed by the internal audit (S3). I also support the related claim (C5) that this reduction did not persist beyond 24 months, due to staff turnover and medication supply disruptions, with effect decay documented in both the internal audit (S3) and a synthetic review (S5). Regarding the Drosswick Charter Network\u2019s experience (C6), I find insufficient evidence to draw conclusions about the lack of absenteeism reduction from health hubs, since the staffing model differs (part-time vs. full-time in Verantia) and comparability is contested (S5, S6). For the claim that low-income Verantia students had a 34.7% absenteeism rate versus 11.2% for higher-income peers (C7), I find insufficient evidence, as no private evidence directly supports or details this comparison. Similarly, I find insufficient evidence for the cross-district comparison (C8) of low-income absenteeism rates, since Drosswick uses a different income classification and the populations may not be directly comparable (S6). I also find insufficient evidence for the claim about effect heterogeneity by income within the Verantia pilot (C9), as no private evidence substantiates this subgroup analysis.",
+        "text": "I support the claim that in the Verantia USD pilot cohort, chronic absenteeism fell by 6.1 percentage points within 18 months of health hub activation (C4), as confirmed by the internal audit (S3). I also support the related claim (C5) that this reduction did not persist beyond 24 months, due to staff turnover and medication supply disruptions, with effect decay documented in both the internal audit (S3) and a synthetic review (S5). Regarding the Drosswick Charter Network\u2019s experience (C6), I find insufficient evidence to draw conclusions about the lack of absenteeism reduction from health hubs, since the staffing model differs (part-time vs. full-time in Verantia) and comparability is contested (S5, S6). For the claim that low-income Verantia students had a 34.7% absenteeism rate versus 11.2% for higher-income peers (C7), I find insufficient evidence, as no private evidence directly supports or details this comparison. Similarly, I find insufficient evidence for the cross-district comparison (C8) of low-income absenteeism rates, since Drosswick uses a different income classification and the populations may not be directly comparable (S6). I also find insufficient evidence for the claim about effect heterogeneity by income within the Verantia pilot (C9), as no private evidence substantiates this subgroup analysis.",
+        "reference_ids": [
+          "C8",
+          "C5",
+          "C4",
+          "C6",
+          "C9",
+          "C7"
+        ],
+        "source_sha256": "85165e991d4fda5c0435169d5b1a81cebbfd847c5cb994c67705f0cf0692d13f"
+      },
+      {
+        "id": "P08",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P8/opening/0",
+        "original_text": "I support the claim that the per-pupil annual operating cost of a school health hub in Verantia USD is $312 (C11), as this figure is directly confirmed by the district\u2019s internal audit (S3), which details expenditures from the 2020\u20132022 pilot and excludes capital setup costs. Regarding the assertion that a universal rollout would yield equivalent absenteeism reductions across income strata (C10), I find insufficient evidence: the pilot data indicate significant effect heterogeneity by income (C9), and no robust evidence supports uniform impact. Similarly, for the claim that low-income students in Verantia USD experienced a 34.7% absenteeism rate versus 11.2% for higher-income peers (C7), I find insufficient evidence, as I lack direct access to the relevant attendance registers or supporting documentation. The projected $198 per-pupil cost for district-wide rollout (C12) is also insufficiently supported, since it relies on an unaudited vendor quote and contested assumptions. For the reported differential impact of health hubs by income (C9), I again find insufficient evidence due to lack of direct supporting data. I support the claim that the initial absenteeism reduction decayed by 24 months post-activation (C5), as confirmed by both S3 and S5. Finally, I find insufficient evidence for the Drosswick comparison (C8), given incompatible income proxies and methodological differences.",
+        "text": "I support the claim that the per-pupil annual operating cost of a school health hub in Verantia USD is $312 (C11), as this figure is directly confirmed by the district\u2019s internal audit (S3), which details expenditures from the 2020\u20132022 pilot and excludes capital setup costs. Regarding the assertion that a universal rollout would yield equivalent absenteeism reductions across income strata (C10), I find insufficient evidence: the pilot data indicate significant effect heterogeneity by income (C9), and no robust evidence supports uniform impact. Similarly, for the claim that low-income students in Verantia USD experienced a 34.7% absenteeism rate versus 11.2% for higher-income peers (C7), I find insufficient evidence, as I lack direct access to the relevant attendance registers or supporting documentation. The projected $198 per-pupil cost for district-wide rollout (C12) is also insufficiently supported, since it relies on an unaudited vendor quote and contested assumptions. For the reported differential impact of health hubs by income (C9), I again find insufficient evidence due to lack of direct supporting data. I support the claim that the initial absenteeism reduction decayed by 24 months post-activation (C5), as confirmed by both S3 and S5. Finally, I find insufficient evidence for the Drosswick comparison (C8), given incompatible income proxies and methodological differences.",
+        "reference_ids": [
+          "C11",
+          "C10",
+          "C7",
+          "C12",
+          "C9",
+          "C5",
+          "C8"
+        ],
+        "source_sha256": "314d41d54b65ca67c6161c13774e868503e14744e32e1634209c7713bf1762e1"
+      }
+    ],
+    "reference_ids": [
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9",
+      "C10",
+      "C11",
+      "C12"
+    ]
+  },
+  {
+    "id": "pilot-602-05",
+    "scenario": "pilot-602",
+    "title": "School attendance",
+    "people": [
+      {
+        "id": "P09",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P9/opening/0",
+        "original_text": "Regarding claim C14, I find insufficient evidence to affirm that health hub utilisation rates among non-English-speaking families were 44% lower due to documented barriers. While the claim is plausible and aligns with known access challenges, I have not seen direct pilot data or robust documentation quantifying this utilisation gap or the specific causal mechanisms. For C11, the assertion that the per-pupil annual operating cost of a school health hub is $312, based on the pilot budget, also lacks sufficient evidence in my view. I have not reviewed the audited expenditure reports or the precise enrolment figures used in this calculation, and thus cannot independently verify the accuracy of this cost estimate. Similarly, for C12, the projected reduction to $198 per pupil with district-wide rollout is based on a vendor quote that remains unaudited and is contested by the finance office; I therefore find the evidence insufficient to support this claim. For C13, attributing absenteeism reduction primarily to the health hub intervention rather than the concurrent attendance campaign is unresolved due to potential confounding, as noted in S6. On C15, I oppose the assertion that the board is obligated to prioritise equity over cost-efficiency, as fiscal sustainability is also a core responsibility. Finally, for C10, I find insufficient evidence that absenteeism reductions would be equivalent across all income strata, given documented subgroup heterogeneity.",
+        "text": "Regarding claim C14, I find insufficient evidence to affirm that health hub utilisation rates among non-English-speaking families were 44% lower due to documented barriers. While the claim is plausible and aligns with known access challenges, I have not seen direct pilot data or robust documentation quantifying this utilisation gap or the specific causal mechanisms. For C11, the assertion that the per-pupil annual operating cost of a school health hub is $312, based on the pilot budget, also lacks sufficient evidence in my view. I have not reviewed the audited expenditure reports or the precise enrolment figures used in this calculation, and thus cannot independently verify the accuracy of this cost estimate. Similarly, for C12, the projected reduction to $198 per pupil with district-wide rollout is based on a vendor quote that remains unaudited and is contested by the finance office; I therefore find the evidence insufficient to support this claim. For C13, attributing absenteeism reduction primarily to the health hub intervention rather than the concurrent attendance campaign is unresolved due to potential confounding, as noted in S6. On C15, I oppose the assertion that the board is obligated to prioritise equity over cost-efficiency, as fiscal sustainability is also a core responsibility. Finally, for C10, I find insufficient evidence that absenteeism reductions would be equivalent across all income strata, given documented subgroup heterogeneity.",
+        "reference_ids": [
+          "C14",
+          "C11",
+          "C13",
+          "C12",
+          "C15",
+          "C10"
+        ],
+        "source_sha256": "76cafc4c22bba0be63ac1fb504d7db2d07e3d6dafe1ff6a237e6682a182c135c"
+      },
+      {
+        "id": "P10",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P10/opening/0",
+        "original_text": "Regarding the prevalence and drivers of chronic absenteeism in Verantia USD, I find the available evidence insufficient to confirm the reported overall rate of 22.4% (C1) or to substantiate that untreated asthma accounted for 38% of medically-attributed absences (C2), as I have not seen direct data or corroborating documentation for these figures. Similarly, I cannot confidently assess the claim that health hub interventions, rather than the concurrent district-wide attendance campaign, were primarily responsible for observed absenteeism reductions (C13), due to unresolved confounding and lack of clear attribution in the evidence provided. On the matter of health hub utilisation disparities among families speaking languages other than English (C14), I again find the evidence insufficient, as I have not reviewed primary utilisation data or detailed documentation of barriers. However, I personally support the claim that dental pain was the leading medical driver of chronic absenteeism, accounting for 41% of cases (C3), as reported in a district newsletter, despite acknowledging that this figure contradicts the primary health screening dataset and is based on an unverified source (S904). Finally, I oppose the assertion that the school board is obligated to prioritise equitable health outcomes over cost-efficiency (C15), as I believe fiscal sustainability is a co-equal obligation under the district charter.",
+        "text": "Regarding the prevalence and drivers of chronic absenteeism in Verantia USD, I find the available evidence insufficient to confirm the reported overall rate of 22.4% (C1) or to substantiate that untreated asthma accounted for 38% of medically-attributed absences (C2), as I have not seen direct data or corroborating documentation for these figures. Similarly, I cannot confidently assess the claim that health hub interventions, rather than the concurrent district-wide attendance campaign, were primarily responsible for observed absenteeism reductions (C13), due to unresolved confounding and lack of clear attribution in the evidence provided. On the matter of health hub utilisation disparities among families speaking languages other than English (C14), I again find the evidence insufficient, as I have not reviewed primary utilisation data or detailed documentation of barriers. However, I personally support the claim that dental pain was the leading medical driver of chronic absenteeism, accounting for 41% of cases (C3), as reported in a district newsletter, despite acknowledging that this figure contradicts the primary health screening dataset and is based on an unverified source (S904). Finally, I oppose the assertion that the school board is obligated to prioritise equitable health outcomes over cost-efficiency (C15), as I believe fiscal sustainability is a co-equal obligation under the district charter.",
+        "reference_ids": [
+          "C2",
+          "C14",
+          "C1",
+          "C13",
+          "C3",
+          "C15"
+        ],
+        "source_sha256": "afd7075681a07785471eb3534f6243ff0cdc2bb057f07886eb24646f720ba98d"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C10",
+      "C11",
+      "C12",
+      "C13",
+      "C14",
+      "C15"
+    ]
+  },
+  {
+    "id": "pilot-602-06",
+    "scenario": "pilot-602",
+    "title": "School attendance",
+    "people": [
+      {
+        "id": "P11",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P11/opening/0",
+        "original_text": "Regarding the drivers and impact of chronic absenteeism in Verantia USD, I find the evidence base for most claims insufficient. For C1 and C2, there is not enough direct or corroborated data available to confidently state the overall chronic absenteeism rate or to attribute the largest share of medically-caused absences to untreated asthma. Similarly, for C4 and C5, while reductions in absenteeism following health hub implementation are reported, the lack of robust, independently verified data and the absence of detailed methodological transparency prevent me from drawing firm conclusions about the effectiveness or sustainability of these interventions. For C6, the Drosswick Charter Network\u2019s internal report (S6) suggests no significant absenteeism reduction from their part-time health hub model, but differences in staffing and population comparability, as well as acknowledged methodological limitations, mean this evidence cannot be confidently generalized to Verantia. However, for C3, I personally believe the unverified report (S904) that dental pain was the largest single medical driver of chronic absenteeism (41%), while acknowledging its weak evidential status and the contradiction with primary health screening data. Overall, most claims require stronger evidence for policy decisions.",
+        "text": "Regarding the drivers and impact of chronic absenteeism in Verantia USD, I find the evidence base for most claims insufficient. For C1 and C2, there is not enough direct or corroborated data available to confidently state the overall chronic absenteeism rate or to attribute the largest share of medically-caused absences to untreated asthma. Similarly, for C4 and C5, while reductions in absenteeism following health hub implementation are reported, the lack of robust, independently verified data and the absence of detailed methodological transparency prevent me from drawing firm conclusions about the effectiveness or sustainability of these interventions. For C6, the Drosswick Charter Network\u2019s internal report (S6) suggests no significant absenteeism reduction from their part-time health hub model, but differences in staffing and population comparability, as well as acknowledged methodological limitations, mean this evidence cannot be confidently generalized to Verantia. However, for C3, I personally believe the unverified report (S904) that dental pain was the largest single medical driver of chronic absenteeism (41%), while acknowledging its weak evidential status and the contradiction with primary health screening data. Overall, most claims require stronger evidence for policy decisions.",
+        "reference_ids": [
+          "C3",
+          "C5",
+          "C4",
+          "C1",
+          "C2",
+          "C6"
+        ],
+        "source_sha256": "6a4a081fb4b0834b57fef080718ee2b2b8c5f70fdc5608ae9af43302c8c39b90"
+      },
+      {
+        "id": "P12",
+        "source_call": "pilot-602/32/openai/gpt-4.1/participant-v8/P12/opening/0",
+        "original_text": "Reviewing the available evidence, I find insufficient evidence to draw firm conclusions regarding the impact of health hubs on chronic absenteeism in Verantia USD or the comparability of outcomes across districts. For C4 and C5, while the Verantia pilot cohort saw a 6.1 percentage point drop in chronic absenteeism within 18 months of hub activation, and this effect did not persist beyond 24 months, these findings lack a robust matched comparison group and are subject to confounding factors such as staff turnover and supply disruptions. For C6 and C8, Drosswick Charter Network\u2019s data (S6) indicate no significant absenteeism reduction from their part-time hub model and a much lower baseline absenteeism rate among low-income students compared to Verantia. However, differences in staffing models and income classification methods undermine direct comparability. Regarding C7 and C9, while Verantia data show a strong income gradient in absenteeism and suggest greater hub impact among low-income students, the subgroup analysis is limited to the pilot cohort and may not generalize. Overall, the evidence base is too limited and heterogeneous to support definitive policy action at this time.",
+        "text": "Reviewing the available evidence, I find insufficient evidence to draw firm conclusions regarding the impact of health hubs on chronic absenteeism in Verantia USD or the comparability of outcomes across districts. For C4 and C5, while the Verantia pilot cohort saw a 6.1 percentage point drop in chronic absenteeism within 18 months of hub activation, and this effect did not persist beyond 24 months, these findings lack a robust matched comparison group and are subject to confounding factors such as staff turnover and supply disruptions. For C6 and C8, Drosswick Charter Network\u2019s data (S6) indicate no significant absenteeism reduction from their part-time hub model and a much lower baseline absenteeism rate among low-income students compared to Verantia. However, differences in staffing models and income classification methods undermine direct comparability. Regarding C7 and C9, while Verantia data show a strong income gradient in absenteeism and suggest greater hub impact among low-income students, the subgroup analysis is limited to the pilot cohort and may not generalize. Overall, the evidence base is too limited and heterogeneous to support definitive policy action at this time.",
+        "reference_ids": [
+          "C4",
+          "C5",
+          "C6",
+          "C7",
+          "C8",
+          "C9"
+        ],
+        "source_sha256": "8337344dd0f8920725d798b362022e87676f95f2b9dbfac25ec2e0c03e52ed00"
+      }
+    ],
+    "reference_ids": [
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7",
+      "C8",
+      "C9"
+    ]
+  }
+]

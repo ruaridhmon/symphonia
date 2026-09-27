@@ -1,0 +1,62 @@
+{
+"pilot-602-01":[
+"P01 lacks sufficient evidence to verify Verantia's reported 22.4% chronic absenteeism rate.",
+"P01 lacks documentation for untreated asthma accounting for 38% of medically attributed absences.",
+"P01 believes dental pain is the leading medical driver at 41%, acknowledging an unverified newsletter report contradicted by primary screening data.",
+"Both consider evidence for health-hub effectiveness insufficient; P02 notes the observed 6.1-point reduction lacks a robust matched comparison.",
+"Both consider evidence about persistence beyond 24 months insufficient; P02 notes turnover, supply problems and possible time-series confounding.",
+"Both regard Drosswick's health-hub findings as weak or non-comparable because implementation differs.",
+"P02 considers Drosswick–Verantia income comparisons non-comparable because income classification and populations differ.",
+"P02 regards larger reported absenteeism reductions among low-income pupils as uncertain beyond the limited pilot subgroup analysis."
+],
+"pilot-602-02":[
+"P03 supports a $312 annual operating cost per pupil excluding capital costs from audited expenditure; P04 considers the figure insufficiently documented.",
+"Both regard projected district-wide costs of $198 per pupil as unverified, based on a contested, unaudited vendor quote.",
+"P03 supports 44% lower hub use among non-English-speaking families, 31% of enrolment, linked to language barriers; P04 lacks supporting data.",
+"P03 supports chronic absenteeism rates of 34.7% among low-income pupils versus 11.2% among higher-income pupils.",
+"P03 supports pilot reductions of 9.4 percentage points for low-income pupils versus 1.8 for higher-income pupils, with significant heterogeneity.",
+"Both reject equivalent reductions across income groups as contradicted by pilot heterogeneity.",
+"P04 endorses equitable health outcomes taking priority over cost-efficiency in rollout policy.",
+"P04 regards attribution to hubs rather than the concurrent attendance campaign as unresolved because neighbouring-district comparisons do not resolve confounding."
+],
+"pilot-602-03":[
+"P05 supports a 22.4% primary-pupil chronic absenteeism rate in 2021–2023 from validated district data; P06 lacks sufficient evidence to confirm it.",
+"P05 considers the 38% asthma attribution insufficiently established; P06 supports asthma as the largest medical driver from screening and referral data.",
+"P05 rejects dental pain as the largest driver; P06 believes the 41% dental figure from an acknowledged unverified, contradictory report.",
+"P05 regards attribution of improvement to hubs rather than the attendance campaign as unresolved.",
+"P05 lacks evidence for 44% lower utilisation among non-English-speaking families due to language barriers.",
+"P05 endorses equitable health outcomes taking priority over cost-efficiency.",
+"P06 supports a 6.1-percentage-point pilot absenteeism reduction following health hubs.",
+"P06 supports larger pilot reductions for low-income pupils, 9.4 percentage points versus 1.8 for higher-income pupils."
+],
+"pilot-602-04":[
+"P07 supports a 6.1-percentage-point absenteeism reduction within 18 months of Verantia hub activation.",
+"Both support decay of the initial reduction by 24 months; P07 attributes this to staff turnover and medication supply disruptions.",
+"P07 regards Drosswick's null finding as insufficiently comparable because its hubs use part-time rather than Verantia's full-time staffing.",
+"Both lack direct evidence for absenteeism rates of 34.7% versus 11.2% across Verantia income groups.",
+"Both consider cross-district low-income comparisons insufficiently supported because income classifications and populations differ.",
+"Both lack sufficient direct evidence for differential pilot effects by income.",
+"P08 supports a $312 annual operating cost per pupil, excluding capital setup costs, from audited pilot expenditure.",
+"P08 regards projected district-wide costs of $198 per pupil as insufficiently supported by an unaudited, contested vendor quote."
+],
+"pilot-602-05":[
+"Both lack sufficient evidence for lower health-hub utilisation among non-English-speaking families or its attributed language barriers; P09 cites the proposed 44% gap.",
+"P09 lacks evidence to verify $312 annual operating costs per pupil without reviewed expenditure and enrolment data.",
+"P09 regards $198 per-pupil district-wide costs as unverified because the vendor quote is unaudited and contested.",
+"Both regard attribution of absenteeism reductions to hubs rather than the attendance campaign as unresolved.",
+"Both oppose an unconditional equity-over-cost obligation, treating fiscal sustainability as a core responsibility.",
+"P09 considers equivalent effects across income groups unsupported given documented subgroup heterogeneity.",
+"P10 lacks evidence to confirm a 22.4% overall chronic absenteeism rate.",
+"P10 believes dental pain accounts for 41% and leads medical causes, acknowledging an unverified newsletter claim contradicted by primary screening data."
+],
+"pilot-602-06":[
+"P11 lacks sufficient evidence to establish Verantia's overall chronic absenteeism rate.",
+"P11 lacks corroborated evidence that untreated asthma accounts for the largest share of medical absences.",
+"P11 believes dental pain is the largest medical driver at 41%, acknowledging an unverified report contradicted by primary screening data.",
+"Both consider hub effectiveness insufficiently established; P12 notes the reported 6.1-point reduction within 18 months lacks a robust matched comparison.",
+"Both consider sustainability insufficiently established; P12 notes reported decay beyond 24 months amid staff turnover and supply disruptions.",
+"Both regard Drosswick's part-time-hub null result as poorly generalizable to Verantia because staffing and populations differ.",
+"P12 regards Drosswick's lower low-income baseline absenteeism as non-comparable because income classification differs.",
+"P12 regards greater pilot effects among low-income pupils as insufficiently generalizable beyond the pilot subgroup."
+]
+}
