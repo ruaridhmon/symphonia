@@ -1,70 +1,72 @@
-"""Measured extraction pilot. Exact coordinates and claim counts; no model calls."""
+"""Aggregate information fate from saved pilot judgments. No simulated data or calls."""
 import json
 from pathlib import Path
-from collections import Counter
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'frontend/public/evaluation/assistant-extraction'
-data = json.loads((OUT/'results.json').read_text())
-ps, s = data['panels'], data['summary']
-P, A, G, INK, MUTED = '#7754ad', '#c79256', '#ded8e7', '#322740', '#897c96'
-plt.rcParams.update({'font.family':'DejaVu Sans','font.size':9,'svg.fonttype':'none','pdf.fonttype':42,'axes.edgecolor':'#ded8e7','axes.labelcolor':MUTED,'text.color':INK,'xtick.color':MUTED,'ytick.color':MUTED})
-f = plt.figure(figsize=(12,8.5), facecolor='white')
-f.text(.075,.949,'The shape of information loss',fontsize=22,weight='medium')
-f.text(.075,.908,'24 source panels   /   48 responses   /   220 focal-claim occurrences',fontsize=10,color=MUTED)
-f.text(.075,.838,'a',fontsize=14,weight='bold'); f.text(.1,.839,'Coverage × faithfulness',fontsize=12)
-f.text(.56,.838,'b',fontsize=14,weight='bold'); f.text(.585,.839,'What survives in each panel?',fontsize=12)
-ax=f.add_axes([.09,.33,.36,.445])
-ax.set(xlim=(62,103),ylim=(69,104),xlabel='Original focal claims fully preserved (%)',ylabel='Extracted claims fully supported (%)')
-ax.set_xticks([65,75,85,95,100]);ax.set_yticks([75,80,90,100]);ax.tick_params(length=0,pad=8)
-ax.grid(color='#eeeaf3',lw=.65,zorder=0)
-for side in ['top','right']:ax.spines[side].set_visible(False)
-# Fixed budget loci, clipped by the explicitly cropped axes.
-for n in [9,10]:
- ax.plot([62,800/n],[62*n/8,100],color='#d7cbe5',lw=1,ls=(0,(2,3)),zorder=1)
-counts=Counter((p['coverage']*100,p['faithfulness']*100) for p in ps)
-for (x,y),n in counts.items():
- for extra,alpha in [(850,.018),(460,.035),(180,.055)]:
-  ax.scatter(x,y,s=n*48+extra,color=P,alpha=alpha,edgecolor='none',zorder=2)
- ax.scatter(x,y,s=n*62,color=P,alpha=.86,edgecolor='white',lw=1,zorder=3)
- ax.text(x,y,str(n),ha='center',va='center',fontsize=10,color='white',weight='bold',zorder=4)
-ax.scatter(100,100,marker='+',s=80,color='#a294b1',lw=1)
-ax.text(100,97.3,'Ideal',ha='center',fontsize=8,color=MUTED)
-ax.annotate('All outputs supported;\nsome source claims absent',xy=(88.89,99),xytext=(83,89),fontsize=8,color=P,ha='center',linespacing=1.5,arrowprops={'arrowstyle':'-','color':'#baa6d1','lw':.8})
-ax.text(64,71,'Cropped axes · every panel included',fontsize=8,color=MUTED)
-# Exact marginal marks: height/length encodes number of panels, no KDE.
-top=f.add_axes([.09,.786,.36,.022]); right=f.add_axes([.459,.33,.017,.445])
-for x,n in Counter(p['coverage']*100 for p in ps).items():top.vlines(x,0,n,color=P,lw=3,alpha=.4)
-for y,n in Counter(p['faithfulness']*100 for p in ps).items():right.hlines(y,0,n,color=P,lw=3,alpha=.4)
-top.set(xlim=ax.get_xlim(),ylim=(0,24));right.set(ylim=ax.get_ylim(),xlim=(0,24));top.axis('off');right.axis('off')
-f.text(.09,.248,'Circle area and numeral count panels at identical scores.\nDotted tracks reflect the eight-claim output cap.',fontsize=8,color=MUTED,linespacing=1.65,va='top')
-# Each row is one source panel, with a shared denominator across the three outcomes.
-b=f.add_axes([.60,.33,.32,.445]);b.set(xlim=(0,100),ylim=(-1,32))
+from matplotlib.path import Path as MPath
+from matplotlib.patches import PathPatch
+ROOT=Path(__file__).resolve().parents[2]
+OUT=ROOT/'frontend/public/evaluation/assistant-extraction'
+data=json.loads((OUT/'results.json').read_text());ps=data['panels'];s=data['summary']
+P,A,G,INK,MUTED='#7653ad','#c38b4e','#b6afc2','#30263d','#82768f'
+plt.rcParams.update({'font.family':'DejaVu Sans','font.size':9,'svg.fonttype':'none','pdf.fonttype':42,'text.color':INK,'axes.labelcolor':MUTED,'xtick.color':MUTED,'ytick.color':MUTED})
+f=plt.figure(figsize=(11,8),facecolor='white')
+f.text(.075,.942,'What survives extraction?',fontsize=23)
+f.text(.075,.9,'48 source responses → 192 extracted claims',fontsize=11,color=MUTED)
+f.text(.075,.858,'a',fontsize=12,weight='bold');f.text(.1,.86,'Follow the original meaning',fontsize=11)
+ax=f.add_axes([.075,.385,.85,.445]);ax.set(xlim=(0,1),ylim=(0,1));ax.axis('off')
+# Ribbon height is proportional to focal-claim occurrences at both ends.
+# Curvature is diagram layout, not a trajectory through additional measured stages.
+N=s['reference_occurrences']; unit=.63/N
+full=s['faithful'];partial=s['partial'];omitted=s['omitted_occurrences']
+source_top=.88; source_bottom=source_top-.63
+left=.16;right=.73
+starts=[source_top-full*unit,source_top-(full+partial)*unit,source_bottom]
+ends=[.44,.32,.055]
+for n,lo,ro,col in zip([full,partial,omitted],starts,ends,[P,A,G]):
+ h=n*unit
+ verts=[(left,lo),(left+.27,lo),(right-.27,ro),(right,ro),(right,ro+h),(right-.27,ro+h),(left+.27,lo+h),(left,lo+h),(left,lo)]
+ path=MPath(verts,[MPath.MOVETO,MPath.CURVE4,MPath.CURVE4,MPath.CURVE4,MPath.LINETO,MPath.CURVE4,MPath.CURVE4,MPath.CURVE4,MPath.CLOSEPOLY])
+ patch=PathPatch(path,facecolor='none',edgecolor='none');ax.add_patch(patch)
+ # Subtle gradient is clipped to an exact, constant-width ribbon.
+ from matplotlib.colors import to_rgba
+ rgba=np.zeros((1,400,4));rgba[:,:,:3]=to_rgba(col)[:3];rgba[:,:,3]=np.linspace(.12,.50,400)
+ im=ax.imshow(rgba,extent=(left,right,0,1),origin='lower',aspect='auto',zorder=1);im.set_clip_path(patch)
+ # Crisp boundaries retain shape in print without a dense mesh of artificial paths.
+ for sy,ey in [(lo,ro),(lo+h,ro+h)]:
+  edge=MPath([(left,sy),(left+.27,sy),(right-.27,ey),(right,ey)],[MPath.MOVETO,MPath.CURVE4,MPath.CURVE4,MPath.CURVE4])
+  ax.add_patch(PathPatch(edge,facecolor='none',edgecolor=col,alpha=.5,lw=.65))
+ ax.plot([right,right],[ro,ro+h],color=col,lw=3,solid_capstyle='butt')
+ centre=ro+h/2
+ ax.text(.77,centre+.036,f'{100*n/N:.1f}%',fontsize=23,color=col,va='center')
+ label={full:'Fully preserved',partial:'Partially preserved',omitted:'Omitted'}[n]
+ ax.text(.77,centre-.045,label,fontsize=10,color=INK,va='center')
+ ax.text(.77,centre-.095,f'{n} / {N}',fontsize=8,color=MUTED,va='center')
+ax.plot([left,left],[source_bottom,source_top],color=P,lw=3,alpha=.65)
+ax.text(.12,.605,str(N),fontsize=25,ha='right',color=P)
+ax.text(.12,.55,'Original focal',fontsize=9,ha='right',color=MUTED)
+ax.text(.12,.495,'claim occurrences',fontsize=9,ha='right',color=MUTED)
+ax.text(.16,.975,'SOURCE',fontsize=8,color=MUTED)
+ax.text(.73,.975,'EXTRACTION OUTCOME',fontsize=8,color=MUTED)
+f.text(.075,.372,'Ribbon widths show shares of original focal claims; curves do not imply additional measured stages.',fontsize=8,color=MUTED)
+f.text(.075,.309,'b',fontsize=12,weight='bold');f.text(.1,.31,'Does the pattern hold across scenarios?',fontsize=11)
+# Scenario-level composition provides variation without presenting claims as independent trials.
+b=f.add_axes([.30,.137,.49,.14]);b.set(xlim=(0,100),ylim=(-.6,3.6));b.axis('off')
 names=['Inclusive education','Diagnostic screening','Youth justice','School attendance']
-for i,p in enumerate(ps):
- group=i//6; y=30-group*8-i%6
- if i%6==0:b.text(0,y+1.0,names[group],fontsize=9,color=INK,va='bottom')
- full=100*p['faithful']/p['reference_count'];partial=100*p['partial']/p['reference_count']
- b.plot([0,full],[y,y],color=P,lw=2,alpha=.66,solid_capstyle='butt')
- b.plot([full,full+partial],[y,y],color=A,lw=2.8,solid_capstyle='butt')
- b.plot([full+partial,100],[y,y],color=G,lw=2,solid_capstyle='butt')
- b.scatter(full,y,s=15,color=P,zorder=3,edgecolor='white',lw=.4)
- if partial:b.scatter(full+partial,y,s=17,facecolor='white',edgecolor=A,lw=.9,zorder=3)
- b.text(-3,y,f'{i+1:02}',ha='right',va='center',fontsize=6.5,color='#a497ad')
-b.set_xticks([0,25,50,75,100]);b.set_yticks([]);b.set_xlabel('Share of original focal claims (%)',labelpad=10);b.tick_params(length=0,pad=8)
-for side in ['top','right','left']:b.spines[side].set_visible(False)
-b.set_axisbelow(True);b.grid(axis='x',color='#f0edf4',lw=.6)
-f.text(.60,.248,'One line per panel; grey = no extracted counterpart.\nFilled point: fully preserved. Open point: including partial.',fontsize=8,color=MUTED,linespacing=1.65,va='top')
-# Compact pooled strip keeps the common denominator explicit.
-f.text(.075,.184,'c',fontsize=14,weight='bold');f.text(.10,.186,'Across all 220 focal-claim occurrences',fontsize=11)
-c=f.add_axes([.10,.124,.82,.028]);c.set(xlim=(0,220),ylim=(0,1));c.axis('off')
-for l,w,col in [(0,182,P),(182,10,A),(192,28,G)]:c.barh(.5,w,left=l,height=.8,color=col)
-f.text(.10,.099,'182 fully preserved · 82.7%',color=P,fontsize=9)
-f.text(.45,.099,'10 partial · 4.5%',color=A,fontsize=9)
-f.text(.72,.099,'28 omitted · 12.7%',color=MUTED,fontsize=9)
-f.text(.075,.039,'Assistant-authored synthetic pilot · unblinded self-review · four scenarios, not 24 independent studies.\nThe eight-claim cap accounts for all 28 omissions. Grouping loss was not separately measured.',fontsize=8,color=MUTED,linespacing=1.6)
+for i,(scenario,name) in enumerate(zip(dict.fromkeys(p['scenario'] for p in ps),names)):
+ cases=[p for p in ps if p['scenario']==scenario];den=sum(p['reference_count'] for p in cases)
+ ns=[sum(p['faithful'] for p in cases),sum(p['partial'] for p in cases),sum(len(p['omitted_ids']) for p in cases)]
+ start=0;y=3-i
+ for n,col in zip(ns,[P,A,G]):
+  w=100*n/den;b.barh(y,w,left=start,height=.23,color=col,alpha=.72);start+=w
+ b.text(-3,y,name,ha='right',va='center',fontsize=9)
+ b.text(103,y,f'{100*ns[0]/den:.1f}%',ha='left',va='center',fontsize=9,color=P)
+ b.text(118,y,f'n = {den}',ha='left',va='center',fontsize=8,color=MUTED)
+b.text(0,4.05,'0%',color=MUTED,fontsize=7);b.text(100,4.05,'100%',ha='right',color=MUTED,fontsize=7)
+f.text(.075,.102,'Same colour key; each bar partitions one scenario. Labels report fully preserved shares; n = focal-claim occurrences.',fontsize=8,color=MUTED)
+f.text(.075,.049,'Synthetic assistant pilot · provisional unblinded self-review · 24 panels nested in four scenarios.\nAll 28 omissions are accounted for by the eight-claim cap. Grouping loss has not been isolated.',fontsize=8,color=MUTED,linespacing=1.5)
 for ext in ['svg','pdf','png']:f.savefig(OUT/f'assistant-extraction.{ext}',dpi=600,facecolor='white')
 p=OUT/'assistant-extraction.svg';p.write_text('\n'.join(line.rstrip() for line in p.read_text().replace("'DejaVu Sans'","'Arial', sans-serif").splitlines())+'\n')
 plt.close(f)
