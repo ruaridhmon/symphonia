@@ -1,17 +1,10 @@
 {
-  "status": "ILLUSTRATIVE ONLY",
-  "seed": 92742,
-  "cases": 100,
-  "word_budgets": [
-    0.1,
-    0.2,
-    0.35,
-    0.5,
-    0.7,
-    1.0
-  ],
-  "retention": "12 hypothetical arguments per category per case; beta thresholds with 4.5% structural omissions; nested retention across budgets.",
-  "false_consensus": "Paired uniform latent values and invented length-dependent probabilities; proportions across 100 hypothetical cases; no uncertainty inference.",
-  "example": "Authored vignette, not a quote from an actual consultation.",
+  "status": "ILLUSTRATIVE ONLY; no readers or models evaluated",
+  "seed": 92743,
+  "positions_per_distribution": 240,
+  "mean_construction": "Samples mirrored to impose zero mean in all three distributions, not an experimental finding.",
+  "density": "Gaussian KDE with reflection at -1 and 1; bandwidth 0.085; each curve normalized on [-1,1]; identical horizontal and vertical scales. Decorative shading adds no variable; dashed curves are the original reference.",
+  "interpretation": "Original expert ratings versus hypothetical blinded-reader reconstructions of the expert-position distribution from summaries. Not reader own opinions, not a distribution directly extracted from prose.",
+  "limits": "A toy bimodal scenario, not a claim that every disagreement has two camps. Content of reasons and qualifications requires separate annotation. Ordinal Likert data would require an appropriate discrete display rather than assuming these smooth continuous densities.",
   "new_provider_calls": 0
 }

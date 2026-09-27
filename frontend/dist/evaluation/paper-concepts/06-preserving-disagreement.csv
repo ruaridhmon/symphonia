@@ -1,3001 +1,721 @@
-panel,case,category_or_method,summary_length_pct,retention_pct,false_consensus
-retention,1,Majority arguments,10.0,50.0,
-retention,1,Majority arguments,20.0,50.0,
-retention,1,Majority arguments,35.0,75.0,
-retention,1,Majority arguments,50.0,91.66666666666666,
-retention,1,Majority arguments,70.0,91.66666666666666,
-retention,1,Majority arguments,100.0,91.66666666666666,
-retention,2,Majority arguments,10.0,8.333333333333332,
-retention,2,Majority arguments,20.0,16.666666666666664,
-retention,2,Majority arguments,35.0,50.0,
-retention,2,Majority arguments,50.0,50.0,
-retention,2,Majority arguments,70.0,75.0,
-retention,2,Majority arguments,100.0,91.66666666666666,
-retention,3,Majority arguments,10.0,33.33333333333333,
-retention,3,Majority arguments,20.0,58.333333333333336,
-retention,3,Majority arguments,35.0,66.66666666666666,
-retention,3,Majority arguments,50.0,83.33333333333334,
-retention,3,Majority arguments,70.0,91.66666666666666,
-retention,3,Majority arguments,100.0,100.0,
-retention,4,Majority arguments,10.0,41.66666666666667,
-retention,4,Majority arguments,20.0,50.0,
-retention,4,Majority arguments,35.0,83.33333333333334,
-retention,4,Majority arguments,50.0,91.66666666666666,
-retention,4,Majority arguments,70.0,91.66666666666666,
-retention,4,Majority arguments,100.0,91.66666666666666,
-retention,5,Majority arguments,10.0,25.0,
-retention,5,Majority arguments,20.0,50.0,
-retention,5,Majority arguments,35.0,58.333333333333336,
-retention,5,Majority arguments,50.0,66.66666666666666,
-retention,5,Majority arguments,70.0,91.66666666666666,
-retention,5,Majority arguments,100.0,100.0,
-retention,6,Majority arguments,10.0,33.33333333333333,
-retention,6,Majority arguments,20.0,50.0,
-retention,6,Majority arguments,35.0,58.333333333333336,
-retention,6,Majority arguments,50.0,91.66666666666666,
-retention,6,Majority arguments,70.0,100.0,
-retention,6,Majority arguments,100.0,100.0,
-retention,7,Majority arguments,10.0,33.33333333333333,
-retention,7,Majority arguments,20.0,58.333333333333336,
-retention,7,Majority arguments,35.0,75.0,
-retention,7,Majority arguments,50.0,75.0,
-retention,7,Majority arguments,70.0,91.66666666666666,
-retention,7,Majority arguments,100.0,100.0,
-retention,8,Majority arguments,10.0,58.333333333333336,
-retention,8,Majority arguments,20.0,66.66666666666666,
-retention,8,Majority arguments,35.0,75.0,
-retention,8,Majority arguments,50.0,91.66666666666666,
-retention,8,Majority arguments,70.0,91.66666666666666,
-retention,8,Majority arguments,100.0,91.66666666666666,
-retention,9,Majority arguments,10.0,25.0,
-retention,9,Majority arguments,20.0,33.33333333333333,
-retention,9,Majority arguments,35.0,58.333333333333336,
-retention,9,Majority arguments,50.0,83.33333333333334,
-retention,9,Majority arguments,70.0,83.33333333333334,
-retention,9,Majority arguments,100.0,100.0,
-retention,10,Majority arguments,10.0,41.66666666666667,
-retention,10,Majority arguments,20.0,50.0,
-retention,10,Majority arguments,35.0,66.66666666666666,
-retention,10,Majority arguments,50.0,83.33333333333334,
-retention,10,Majority arguments,70.0,83.33333333333334,
-retention,10,Majority arguments,100.0,91.66666666666666,
-retention,11,Majority arguments,10.0,33.33333333333333,
-retention,11,Majority arguments,20.0,58.333333333333336,
-retention,11,Majority arguments,35.0,66.66666666666666,
-retention,11,Majority arguments,50.0,91.66666666666666,
-retention,11,Majority arguments,70.0,91.66666666666666,
-retention,11,Majority arguments,100.0,91.66666666666666,
-retention,12,Majority arguments,10.0,58.333333333333336,
-retention,12,Majority arguments,20.0,91.66666666666666,
-retention,12,Majority arguments,35.0,91.66666666666666,
-retention,12,Majority arguments,50.0,91.66666666666666,
-retention,12,Majority arguments,70.0,91.66666666666666,
-retention,12,Majority arguments,100.0,100.0,
-retention,13,Majority arguments,10.0,50.0,
-retention,13,Majority arguments,20.0,58.333333333333336,
-retention,13,Majority arguments,35.0,75.0,
-retention,13,Majority arguments,50.0,100.0,
-retention,13,Majority arguments,70.0,100.0,
-retention,13,Majority arguments,100.0,100.0,
-retention,14,Majority arguments,10.0,25.0,
-retention,14,Majority arguments,20.0,41.66666666666667,
-retention,14,Majority arguments,35.0,75.0,
-retention,14,Majority arguments,50.0,83.33333333333334,
-retention,14,Majority arguments,70.0,91.66666666666666,
-retention,14,Majority arguments,100.0,100.0,
-retention,15,Majority arguments,10.0,25.0,
-retention,15,Majority arguments,20.0,58.333333333333336,
-retention,15,Majority arguments,35.0,83.33333333333334,
-retention,15,Majority arguments,50.0,91.66666666666666,
-retention,15,Majority arguments,70.0,91.66666666666666,
-retention,15,Majority arguments,100.0,91.66666666666666,
-retention,16,Majority arguments,10.0,41.66666666666667,
-retention,16,Majority arguments,20.0,50.0,
-retention,16,Majority arguments,35.0,50.0,
-retention,16,Majority arguments,50.0,58.333333333333336,
-retention,16,Majority arguments,70.0,58.333333333333336,
-retention,16,Majority arguments,100.0,91.66666666666666,
-retention,17,Majority arguments,10.0,16.666666666666664,
-retention,17,Majority arguments,20.0,41.66666666666667,
-retention,17,Majority arguments,35.0,75.0,
-retention,17,Majority arguments,50.0,83.33333333333334,
-retention,17,Majority arguments,70.0,91.66666666666666,
-retention,17,Majority arguments,100.0,100.0,
-retention,18,Majority arguments,10.0,25.0,
-retention,18,Majority arguments,20.0,41.66666666666667,
-retention,18,Majority arguments,35.0,50.0,
-retention,18,Majority arguments,50.0,66.66666666666666,
-retention,18,Majority arguments,70.0,100.0,
-retention,18,Majority arguments,100.0,100.0,
-retention,19,Majority arguments,10.0,25.0,
-retention,19,Majority arguments,20.0,58.333333333333336,
-retention,19,Majority arguments,35.0,75.0,
-retention,19,Majority arguments,50.0,83.33333333333334,
-retention,19,Majority arguments,70.0,91.66666666666666,
-retention,19,Majority arguments,100.0,91.66666666666666,
-retention,20,Majority arguments,10.0,16.666666666666664,
-retention,20,Majority arguments,20.0,41.66666666666667,
-retention,20,Majority arguments,35.0,58.333333333333336,
-retention,20,Majority arguments,50.0,58.333333333333336,
-retention,20,Majority arguments,70.0,75.0,
-retention,20,Majority arguments,100.0,91.66666666666666,
-retention,21,Majority arguments,10.0,50.0,
-retention,21,Majority arguments,20.0,75.0,
-retention,21,Majority arguments,35.0,75.0,
-retention,21,Majority arguments,50.0,75.0,
-retention,21,Majority arguments,70.0,91.66666666666666,
-retention,21,Majority arguments,100.0,91.66666666666666,
-retention,22,Majority arguments,10.0,41.66666666666667,
-retention,22,Majority arguments,20.0,58.333333333333336,
-retention,22,Majority arguments,35.0,75.0,
-retention,22,Majority arguments,50.0,91.66666666666666,
-retention,22,Majority arguments,70.0,91.66666666666666,
-retention,22,Majority arguments,100.0,91.66666666666666,
-retention,23,Majority arguments,10.0,25.0,
-retention,23,Majority arguments,20.0,41.66666666666667,
-retention,23,Majority arguments,35.0,75.0,
-retention,23,Majority arguments,50.0,83.33333333333334,
-retention,23,Majority arguments,70.0,100.0,
-retention,23,Majority arguments,100.0,100.0,
-retention,24,Majority arguments,10.0,33.33333333333333,
-retention,24,Majority arguments,20.0,41.66666666666667,
-retention,24,Majority arguments,35.0,75.0,
-retention,24,Majority arguments,50.0,75.0,
-retention,24,Majority arguments,70.0,83.33333333333334,
-retention,24,Majority arguments,100.0,83.33333333333334,
-retention,25,Majority arguments,10.0,33.33333333333333,
-retention,25,Majority arguments,20.0,41.66666666666667,
-retention,25,Majority arguments,35.0,50.0,
-retention,25,Majority arguments,50.0,75.0,
-retention,25,Majority arguments,70.0,91.66666666666666,
-retention,25,Majority arguments,100.0,100.0,
-retention,26,Majority arguments,10.0,16.666666666666664,
-retention,26,Majority arguments,20.0,25.0,
-retention,26,Majority arguments,35.0,33.33333333333333,
-retention,26,Majority arguments,50.0,50.0,
-retention,26,Majority arguments,70.0,66.66666666666666,
-retention,26,Majority arguments,100.0,91.66666666666666,
-retention,27,Majority arguments,10.0,25.0,
-retention,27,Majority arguments,20.0,41.66666666666667,
-retention,27,Majority arguments,35.0,75.0,
-retention,27,Majority arguments,50.0,75.0,
-retention,27,Majority arguments,70.0,83.33333333333334,
-retention,27,Majority arguments,100.0,83.33333333333334,
-retention,28,Majority arguments,10.0,33.33333333333333,
-retention,28,Majority arguments,20.0,41.66666666666667,
-retention,28,Majority arguments,35.0,75.0,
-retention,28,Majority arguments,50.0,83.33333333333334,
-retention,28,Majority arguments,70.0,91.66666666666666,
-retention,28,Majority arguments,100.0,100.0,
-retention,29,Majority arguments,10.0,33.33333333333333,
-retention,29,Majority arguments,20.0,41.66666666666667,
-retention,29,Majority arguments,35.0,66.66666666666666,
-retention,29,Majority arguments,50.0,83.33333333333334,
-retention,29,Majority arguments,70.0,83.33333333333334,
-retention,29,Majority arguments,100.0,83.33333333333334,
-retention,30,Majority arguments,10.0,41.66666666666667,
-retention,30,Majority arguments,20.0,58.333333333333336,
-retention,30,Majority arguments,35.0,83.33333333333334,
-retention,30,Majority arguments,50.0,91.66666666666666,
-retention,30,Majority arguments,70.0,91.66666666666666,
-retention,30,Majority arguments,100.0,100.0,
-retention,31,Majority arguments,10.0,41.66666666666667,
-retention,31,Majority arguments,20.0,66.66666666666666,
-retention,31,Majority arguments,35.0,75.0,
-retention,31,Majority arguments,50.0,83.33333333333334,
-retention,31,Majority arguments,70.0,100.0,
-retention,31,Majority arguments,100.0,100.0,
-retention,32,Majority arguments,10.0,33.33333333333333,
-retention,32,Majority arguments,20.0,41.66666666666667,
-retention,32,Majority arguments,35.0,66.66666666666666,
-retention,32,Majority arguments,50.0,83.33333333333334,
-retention,32,Majority arguments,70.0,91.66666666666666,
-retention,32,Majority arguments,100.0,100.0,
-retention,33,Majority arguments,10.0,25.0,
-retention,33,Majority arguments,20.0,50.0,
-retention,33,Majority arguments,35.0,75.0,
-retention,33,Majority arguments,50.0,83.33333333333334,
-retention,33,Majority arguments,70.0,83.33333333333334,
-retention,33,Majority arguments,100.0,83.33333333333334,
-retention,34,Majority arguments,10.0,33.33333333333333,
-retention,34,Majority arguments,20.0,41.66666666666667,
-retention,34,Majority arguments,35.0,66.66666666666666,
-retention,34,Majority arguments,50.0,83.33333333333334,
-retention,34,Majority arguments,70.0,91.66666666666666,
-retention,34,Majority arguments,100.0,91.66666666666666,
-retention,35,Majority arguments,10.0,16.666666666666664,
-retention,35,Majority arguments,20.0,41.66666666666667,
-retention,35,Majority arguments,35.0,66.66666666666666,
-retention,35,Majority arguments,50.0,83.33333333333334,
-retention,35,Majority arguments,70.0,91.66666666666666,
-retention,35,Majority arguments,100.0,100.0,
-retention,36,Majority arguments,10.0,33.33333333333333,
-retention,36,Majority arguments,20.0,58.333333333333336,
-retention,36,Majority arguments,35.0,91.66666666666666,
-retention,36,Majority arguments,50.0,91.66666666666666,
-retention,36,Majority arguments,70.0,91.66666666666666,
-retention,36,Majority arguments,100.0,91.66666666666666,
-retention,37,Majority arguments,10.0,33.33333333333333,
-retention,37,Majority arguments,20.0,58.333333333333336,
-retention,37,Majority arguments,35.0,58.333333333333336,
-retention,37,Majority arguments,50.0,83.33333333333334,
-retention,37,Majority arguments,70.0,91.66666666666666,
-retention,37,Majority arguments,100.0,91.66666666666666,
-retention,38,Majority arguments,10.0,33.33333333333333,
-retention,38,Majority arguments,20.0,50.0,
-retention,38,Majority arguments,35.0,66.66666666666666,
-retention,38,Majority arguments,50.0,75.0,
-retention,38,Majority arguments,70.0,83.33333333333334,
-retention,38,Majority arguments,100.0,83.33333333333334,
-retention,39,Majority arguments,10.0,16.666666666666664,
-retention,39,Majority arguments,20.0,25.0,
-retention,39,Majority arguments,35.0,58.333333333333336,
-retention,39,Majority arguments,50.0,75.0,
-retention,39,Majority arguments,70.0,83.33333333333334,
-retention,39,Majority arguments,100.0,83.33333333333334,
-retention,40,Majority arguments,10.0,41.66666666666667,
-retention,40,Majority arguments,20.0,58.333333333333336,
-retention,40,Majority arguments,35.0,83.33333333333334,
-retention,40,Majority arguments,50.0,100.0,
-retention,40,Majority arguments,70.0,100.0,
-retention,40,Majority arguments,100.0,100.0,
-retention,41,Majority arguments,10.0,41.66666666666667,
-retention,41,Majority arguments,20.0,41.66666666666667,
-retention,41,Majority arguments,35.0,66.66666666666666,
-retention,41,Majority arguments,50.0,83.33333333333334,
-retention,41,Majority arguments,70.0,83.33333333333334,
-retention,41,Majority arguments,100.0,83.33333333333334,
-retention,42,Majority arguments,10.0,25.0,
-retention,42,Majority arguments,20.0,41.66666666666667,
-retention,42,Majority arguments,35.0,66.66666666666666,
-retention,42,Majority arguments,50.0,83.33333333333334,
-retention,42,Majority arguments,70.0,83.33333333333334,
-retention,42,Majority arguments,100.0,100.0,
-retention,43,Majority arguments,10.0,25.0,
-retention,43,Majority arguments,20.0,41.66666666666667,
-retention,43,Majority arguments,35.0,75.0,
-retention,43,Majority arguments,50.0,75.0,
-retention,43,Majority arguments,70.0,75.0,
-retention,43,Majority arguments,100.0,83.33333333333334,
-retention,44,Majority arguments,10.0,16.666666666666664,
-retention,44,Majority arguments,20.0,50.0,
-retention,44,Majority arguments,35.0,66.66666666666666,
-retention,44,Majority arguments,50.0,66.66666666666666,
-retention,44,Majority arguments,70.0,91.66666666666666,
-retention,44,Majority arguments,100.0,100.0,
-retention,45,Majority arguments,10.0,16.666666666666664,
-retention,45,Majority arguments,20.0,25.0,
-retention,45,Majority arguments,35.0,50.0,
-retention,45,Majority arguments,50.0,75.0,
-retention,45,Majority arguments,70.0,100.0,
-retention,45,Majority arguments,100.0,100.0,
-retention,46,Majority arguments,10.0,16.666666666666664,
-retention,46,Majority arguments,20.0,41.66666666666667,
-retention,46,Majority arguments,35.0,58.333333333333336,
-retention,46,Majority arguments,50.0,75.0,
-retention,46,Majority arguments,70.0,75.0,
-retention,46,Majority arguments,100.0,91.66666666666666,
-retention,47,Majority arguments,10.0,41.66666666666667,
-retention,47,Majority arguments,20.0,50.0,
-retention,47,Majority arguments,35.0,58.333333333333336,
-retention,47,Majority arguments,50.0,75.0,
-retention,47,Majority arguments,70.0,83.33333333333334,
-retention,47,Majority arguments,100.0,100.0,
-retention,48,Majority arguments,10.0,33.33333333333333,
-retention,48,Majority arguments,20.0,41.66666666666667,
-retention,48,Majority arguments,35.0,50.0,
-retention,48,Majority arguments,50.0,58.333333333333336,
-retention,48,Majority arguments,70.0,75.0,
-retention,48,Majority arguments,100.0,100.0,
-retention,49,Majority arguments,10.0,16.666666666666664,
-retention,49,Majority arguments,20.0,33.33333333333333,
-retention,49,Majority arguments,35.0,50.0,
-retention,49,Majority arguments,50.0,58.333333333333336,
-retention,49,Majority arguments,70.0,100.0,
-retention,49,Majority arguments,100.0,100.0,
-retention,50,Majority arguments,10.0,33.33333333333333,
-retention,50,Majority arguments,20.0,41.66666666666667,
-retention,50,Majority arguments,35.0,58.333333333333336,
-retention,50,Majority arguments,50.0,83.33333333333334,
-retention,50,Majority arguments,70.0,100.0,
-retention,50,Majority arguments,100.0,100.0,
-retention,51,Majority arguments,10.0,25.0,
-retention,51,Majority arguments,20.0,66.66666666666666,
-retention,51,Majority arguments,35.0,91.66666666666666,
-retention,51,Majority arguments,50.0,91.66666666666666,
-retention,51,Majority arguments,70.0,100.0,
-retention,51,Majority arguments,100.0,100.0,
-retention,52,Majority arguments,10.0,16.666666666666664,
-retention,52,Majority arguments,20.0,41.66666666666667,
-retention,52,Majority arguments,35.0,58.333333333333336,
-retention,52,Majority arguments,50.0,66.66666666666666,
-retention,52,Majority arguments,70.0,91.66666666666666,
-retention,52,Majority arguments,100.0,100.0,
-retention,53,Majority arguments,10.0,58.333333333333336,
-retention,53,Majority arguments,20.0,83.33333333333334,
-retention,53,Majority arguments,35.0,91.66666666666666,
-retention,53,Majority arguments,50.0,91.66666666666666,
-retention,53,Majority arguments,70.0,100.0,
-retention,53,Majority arguments,100.0,100.0,
-retention,54,Majority arguments,10.0,33.33333333333333,
-retention,54,Majority arguments,20.0,41.66666666666667,
-retention,54,Majority arguments,35.0,50.0,
-retention,54,Majority arguments,50.0,66.66666666666666,
-retention,54,Majority arguments,70.0,83.33333333333334,
-retention,54,Majority arguments,100.0,100.0,
-retention,55,Majority arguments,10.0,16.666666666666664,
-retention,55,Majority arguments,20.0,25.0,
-retention,55,Majority arguments,35.0,41.66666666666667,
-retention,55,Majority arguments,50.0,58.333333333333336,
-retention,55,Majority arguments,70.0,75.0,
-retention,55,Majority arguments,100.0,83.33333333333334,
-retention,56,Majority arguments,10.0,50.0,
-retention,56,Majority arguments,20.0,58.333333333333336,
-retention,56,Majority arguments,35.0,75.0,
-retention,56,Majority arguments,50.0,83.33333333333334,
-retention,56,Majority arguments,70.0,100.0,
-retention,56,Majority arguments,100.0,100.0,
-retention,57,Majority arguments,10.0,16.666666666666664,
-retention,57,Majority arguments,20.0,50.0,
-retention,57,Majority arguments,35.0,58.333333333333336,
-retention,57,Majority arguments,50.0,83.33333333333334,
-retention,57,Majority arguments,70.0,83.33333333333334,
-retention,57,Majority arguments,100.0,91.66666666666666,
-retention,58,Majority arguments,10.0,33.33333333333333,
-retention,58,Majority arguments,20.0,58.333333333333336,
-retention,58,Majority arguments,35.0,91.66666666666666,
-retention,58,Majority arguments,50.0,100.0,
-retention,58,Majority arguments,70.0,100.0,
-retention,58,Majority arguments,100.0,100.0,
-retention,59,Majority arguments,10.0,16.666666666666664,
-retention,59,Majority arguments,20.0,25.0,
-retention,59,Majority arguments,35.0,41.66666666666667,
-retention,59,Majority arguments,50.0,66.66666666666666,
-retention,59,Majority arguments,70.0,91.66666666666666,
-retention,59,Majority arguments,100.0,91.66666666666666,
-retention,60,Majority arguments,10.0,25.0,
-retention,60,Majority arguments,20.0,33.33333333333333,
-retention,60,Majority arguments,35.0,50.0,
-retention,60,Majority arguments,50.0,75.0,
-retention,60,Majority arguments,70.0,75.0,
-retention,60,Majority arguments,100.0,83.33333333333334,
-retention,61,Majority arguments,10.0,58.333333333333336,
-retention,61,Majority arguments,20.0,66.66666666666666,
-retention,61,Majority arguments,35.0,75.0,
-retention,61,Majority arguments,50.0,83.33333333333334,
-retention,61,Majority arguments,70.0,91.66666666666666,
-retention,61,Majority arguments,100.0,100.0,
-retention,62,Majority arguments,10.0,41.66666666666667,
-retention,62,Majority arguments,20.0,41.66666666666667,
-retention,62,Majority arguments,35.0,66.66666666666666,
-retention,62,Majority arguments,50.0,83.33333333333334,
-retention,62,Majority arguments,70.0,83.33333333333334,
-retention,62,Majority arguments,100.0,83.33333333333334,
-retention,63,Majority arguments,10.0,50.0,
-retention,63,Majority arguments,20.0,66.66666666666666,
-retention,63,Majority arguments,35.0,75.0,
-retention,63,Majority arguments,50.0,83.33333333333334,
-retention,63,Majority arguments,70.0,83.33333333333334,
-retention,63,Majority arguments,100.0,83.33333333333334,
-retention,64,Majority arguments,10.0,41.66666666666667,
-retention,64,Majority arguments,20.0,41.66666666666667,
-retention,64,Majority arguments,35.0,66.66666666666666,
-retention,64,Majority arguments,50.0,75.0,
-retention,64,Majority arguments,70.0,83.33333333333334,
-retention,64,Majority arguments,100.0,91.66666666666666,
-retention,65,Majority arguments,10.0,25.0,
-retention,65,Majority arguments,20.0,41.66666666666667,
-retention,65,Majority arguments,35.0,75.0,
-retention,65,Majority arguments,50.0,75.0,
-retention,65,Majority arguments,70.0,91.66666666666666,
-retention,65,Majority arguments,100.0,100.0,
-retention,66,Majority arguments,10.0,33.33333333333333,
-retention,66,Majority arguments,20.0,58.333333333333336,
-retention,66,Majority arguments,35.0,75.0,
-retention,66,Majority arguments,50.0,91.66666666666666,
-retention,66,Majority arguments,70.0,91.66666666666666,
-retention,66,Majority arguments,100.0,100.0,
-retention,67,Majority arguments,10.0,16.666666666666664,
-retention,67,Majority arguments,20.0,50.0,
-retention,67,Majority arguments,35.0,83.33333333333334,
-retention,67,Majority arguments,50.0,91.66666666666666,
-retention,67,Majority arguments,70.0,91.66666666666666,
-retention,67,Majority arguments,100.0,100.0,
-retention,68,Majority arguments,10.0,25.0,
-retention,68,Majority arguments,20.0,50.0,
-retention,68,Majority arguments,35.0,75.0,
-retention,68,Majority arguments,50.0,75.0,
-retention,68,Majority arguments,70.0,91.66666666666666,
-retention,68,Majority arguments,100.0,91.66666666666666,
-retention,69,Majority arguments,10.0,25.0,
-retention,69,Majority arguments,20.0,41.66666666666667,
-retention,69,Majority arguments,35.0,58.333333333333336,
-retention,69,Majority arguments,50.0,58.333333333333336,
-retention,69,Majority arguments,70.0,75.0,
-retention,69,Majority arguments,100.0,100.0,
-retention,70,Majority arguments,10.0,50.0,
-retention,70,Majority arguments,20.0,58.333333333333336,
-retention,70,Majority arguments,35.0,83.33333333333334,
-retention,70,Majority arguments,50.0,91.66666666666666,
-retention,70,Majority arguments,70.0,91.66666666666666,
-retention,70,Majority arguments,100.0,100.0,
-retention,71,Majority arguments,10.0,50.0,
-retention,71,Majority arguments,20.0,66.66666666666666,
-retention,71,Majority arguments,35.0,83.33333333333334,
-retention,71,Majority arguments,50.0,91.66666666666666,
-retention,71,Majority arguments,70.0,100.0,
-retention,71,Majority arguments,100.0,100.0,
-retention,72,Majority arguments,10.0,16.666666666666664,
-retention,72,Majority arguments,20.0,25.0,
-retention,72,Majority arguments,35.0,75.0,
-retention,72,Majority arguments,50.0,83.33333333333334,
-retention,72,Majority arguments,70.0,91.66666666666666,
-retention,72,Majority arguments,100.0,100.0,
-retention,73,Majority arguments,10.0,41.66666666666667,
-retention,73,Majority arguments,20.0,41.66666666666667,
-retention,73,Majority arguments,35.0,83.33333333333334,
-retention,73,Majority arguments,50.0,83.33333333333334,
-retention,73,Majority arguments,70.0,100.0,
-retention,73,Majority arguments,100.0,100.0,
-retention,74,Majority arguments,10.0,33.33333333333333,
-retention,74,Majority arguments,20.0,33.33333333333333,
-retention,74,Majority arguments,35.0,58.333333333333336,
-retention,74,Majority arguments,50.0,75.0,
-retention,74,Majority arguments,70.0,75.0,
-retention,74,Majority arguments,100.0,91.66666666666666,
-retention,75,Majority arguments,10.0,25.0,
-retention,75,Majority arguments,20.0,33.33333333333333,
-retention,75,Majority arguments,35.0,66.66666666666666,
-retention,75,Majority arguments,50.0,83.33333333333334,
-retention,75,Majority arguments,70.0,100.0,
-retention,75,Majority arguments,100.0,100.0,
-retention,76,Majority arguments,10.0,33.33333333333333,
-retention,76,Majority arguments,20.0,66.66666666666666,
-retention,76,Majority arguments,35.0,83.33333333333334,
-retention,76,Majority arguments,50.0,100.0,
-retention,76,Majority arguments,70.0,100.0,
-retention,76,Majority arguments,100.0,100.0,
-retention,77,Majority arguments,10.0,50.0,
-retention,77,Majority arguments,20.0,58.333333333333336,
-retention,77,Majority arguments,35.0,75.0,
-retention,77,Majority arguments,50.0,83.33333333333334,
-retention,77,Majority arguments,70.0,91.66666666666666,
-retention,77,Majority arguments,100.0,100.0,
-retention,78,Majority arguments,10.0,33.33333333333333,
-retention,78,Majority arguments,20.0,50.0,
-retention,78,Majority arguments,35.0,66.66666666666666,
-retention,78,Majority arguments,50.0,66.66666666666666,
-retention,78,Majority arguments,70.0,83.33333333333334,
-retention,78,Majority arguments,100.0,83.33333333333334,
-retention,79,Majority arguments,10.0,41.66666666666667,
-retention,79,Majority arguments,20.0,50.0,
-retention,79,Majority arguments,35.0,75.0,
-retention,79,Majority arguments,50.0,75.0,
-retention,79,Majority arguments,70.0,100.0,
-retention,79,Majority arguments,100.0,100.0,
-retention,80,Majority arguments,10.0,25.0,
-retention,80,Majority arguments,20.0,50.0,
-retention,80,Majority arguments,35.0,50.0,
-retention,80,Majority arguments,50.0,66.66666666666666,
-retention,80,Majority arguments,70.0,66.66666666666666,
-retention,80,Majority arguments,100.0,91.66666666666666,
-retention,81,Majority arguments,10.0,33.33333333333333,
-retention,81,Majority arguments,20.0,75.0,
-retention,81,Majority arguments,35.0,91.66666666666666,
-retention,81,Majority arguments,50.0,91.66666666666666,
-retention,81,Majority arguments,70.0,91.66666666666666,
-retention,81,Majority arguments,100.0,100.0,
-retention,82,Majority arguments,10.0,16.666666666666664,
-retention,82,Majority arguments,20.0,25.0,
-retention,82,Majority arguments,35.0,41.66666666666667,
-retention,82,Majority arguments,50.0,66.66666666666666,
-retention,82,Majority arguments,70.0,91.66666666666666,
-retention,82,Majority arguments,100.0,91.66666666666666,
-retention,83,Majority arguments,10.0,41.66666666666667,
-retention,83,Majority arguments,20.0,41.66666666666667,
-retention,83,Majority arguments,35.0,58.333333333333336,
-retention,83,Majority arguments,50.0,58.333333333333336,
-retention,83,Majority arguments,70.0,75.0,
-retention,83,Majority arguments,100.0,100.0,
-retention,84,Majority arguments,10.0,50.0,
-retention,84,Majority arguments,20.0,50.0,
-retention,84,Majority arguments,35.0,58.333333333333336,
-retention,84,Majority arguments,50.0,66.66666666666666,
-retention,84,Majority arguments,70.0,100.0,
-retention,84,Majority arguments,100.0,100.0,
-retention,85,Majority arguments,10.0,50.0,
-retention,85,Majority arguments,20.0,58.333333333333336,
-retention,85,Majority arguments,35.0,58.333333333333336,
-retention,85,Majority arguments,50.0,75.0,
-retention,85,Majority arguments,70.0,75.0,
-retention,85,Majority arguments,100.0,91.66666666666666,
-retention,86,Majority arguments,10.0,41.66666666666667,
-retention,86,Majority arguments,20.0,66.66666666666666,
-retention,86,Majority arguments,35.0,75.0,
-retention,86,Majority arguments,50.0,83.33333333333334,
-retention,86,Majority arguments,70.0,91.66666666666666,
-retention,86,Majority arguments,100.0,100.0,
-retention,87,Majority arguments,10.0,33.33333333333333,
-retention,87,Majority arguments,20.0,58.333333333333336,
-retention,87,Majority arguments,35.0,66.66666666666666,
-retention,87,Majority arguments,50.0,66.66666666666666,
-retention,87,Majority arguments,70.0,83.33333333333334,
-retention,87,Majority arguments,100.0,100.0,
-retention,88,Majority arguments,10.0,25.0,
-retention,88,Majority arguments,20.0,33.33333333333333,
-retention,88,Majority arguments,35.0,50.0,
-retention,88,Majority arguments,50.0,75.0,
-retention,88,Majority arguments,70.0,83.33333333333334,
-retention,88,Majority arguments,100.0,91.66666666666666,
-retention,89,Majority arguments,10.0,58.333333333333336,
-retention,89,Majority arguments,20.0,83.33333333333334,
-retention,89,Majority arguments,35.0,91.66666666666666,
-retention,89,Majority arguments,50.0,91.66666666666666,
-retention,89,Majority arguments,70.0,91.66666666666666,
-retention,89,Majority arguments,100.0,100.0,
-retention,90,Majority arguments,10.0,33.33333333333333,
-retention,90,Majority arguments,20.0,50.0,
-retention,90,Majority arguments,35.0,58.333333333333336,
-retention,90,Majority arguments,50.0,66.66666666666666,
-retention,90,Majority arguments,70.0,75.0,
-retention,90,Majority arguments,100.0,75.0,
-retention,91,Majority arguments,10.0,16.666666666666664,
-retention,91,Majority arguments,20.0,33.33333333333333,
-retention,91,Majority arguments,35.0,50.0,
-retention,91,Majority arguments,50.0,66.66666666666666,
-retention,91,Majority arguments,70.0,75.0,
-retention,91,Majority arguments,100.0,91.66666666666666,
-retention,92,Majority arguments,10.0,41.66666666666667,
-retention,92,Majority arguments,20.0,58.333333333333336,
-retention,92,Majority arguments,35.0,58.333333333333336,
-retention,92,Majority arguments,50.0,83.33333333333334,
-retention,92,Majority arguments,70.0,83.33333333333334,
-retention,92,Majority arguments,100.0,100.0,
-retention,93,Majority arguments,10.0,16.666666666666664,
-retention,93,Majority arguments,20.0,41.66666666666667,
-retention,93,Majority arguments,35.0,58.333333333333336,
-retention,93,Majority arguments,50.0,75.0,
-retention,93,Majority arguments,70.0,75.0,
-retention,93,Majority arguments,100.0,83.33333333333334,
-retention,94,Majority arguments,10.0,25.0,
-retention,94,Majority arguments,20.0,58.333333333333336,
-retention,94,Majority arguments,35.0,83.33333333333334,
-retention,94,Majority arguments,50.0,83.33333333333334,
-retention,94,Majority arguments,70.0,100.0,
-retention,94,Majority arguments,100.0,100.0,
-retention,95,Majority arguments,10.0,16.666666666666664,
-retention,95,Majority arguments,20.0,25.0,
-retention,95,Majority arguments,35.0,50.0,
-retention,95,Majority arguments,50.0,66.66666666666666,
-retention,95,Majority arguments,70.0,83.33333333333334,
-retention,95,Majority arguments,100.0,91.66666666666666,
-retention,96,Majority arguments,10.0,33.33333333333333,
-retention,96,Majority arguments,20.0,66.66666666666666,
-retention,96,Majority arguments,35.0,75.0,
-retention,96,Majority arguments,50.0,75.0,
-retention,96,Majority arguments,70.0,75.0,
-retention,96,Majority arguments,100.0,83.33333333333334,
-retention,97,Majority arguments,10.0,33.33333333333333,
-retention,97,Majority arguments,20.0,41.66666666666667,
-retention,97,Majority arguments,35.0,75.0,
-retention,97,Majority arguments,50.0,83.33333333333334,
-retention,97,Majority arguments,70.0,100.0,
-retention,97,Majority arguments,100.0,100.0,
-retention,98,Majority arguments,10.0,33.33333333333333,
-retention,98,Majority arguments,20.0,41.66666666666667,
-retention,98,Majority arguments,35.0,83.33333333333334,
-retention,98,Majority arguments,50.0,91.66666666666666,
-retention,98,Majority arguments,70.0,91.66666666666666,
-retention,98,Majority arguments,100.0,100.0,
-retention,99,Majority arguments,10.0,33.33333333333333,
-retention,99,Majority arguments,20.0,50.0,
-retention,99,Majority arguments,35.0,75.0,
-retention,99,Majority arguments,50.0,75.0,
-retention,99,Majority arguments,70.0,83.33333333333334,
-retention,99,Majority arguments,100.0,91.66666666666666,
-retention,100,Majority arguments,10.0,50.0,
-retention,100,Majority arguments,20.0,58.333333333333336,
-retention,100,Majority arguments,35.0,83.33333333333334,
-retention,100,Majority arguments,50.0,91.66666666666666,
-retention,100,Majority arguments,70.0,91.66666666666666,
-retention,100,Majority arguments,100.0,100.0,
-retention,1,Minority objections,10.0,8.333333333333332,
-retention,1,Minority objections,20.0,33.33333333333333,
-retention,1,Minority objections,35.0,41.66666666666667,
-retention,1,Minority objections,50.0,66.66666666666666,
-retention,1,Minority objections,70.0,83.33333333333334,
-retention,1,Minority objections,100.0,91.66666666666666,
-retention,2,Minority objections,10.0,16.666666666666664,
-retention,2,Minority objections,20.0,33.33333333333333,
-retention,2,Minority objections,35.0,41.66666666666667,
-retention,2,Minority objections,50.0,58.333333333333336,
-retention,2,Minority objections,70.0,75.0,
-retention,2,Minority objections,100.0,83.33333333333334,
-retention,3,Minority objections,10.0,25.0,
-retention,3,Minority objections,20.0,33.33333333333333,
-retention,3,Minority objections,35.0,83.33333333333334,
-retention,3,Minority objections,50.0,83.33333333333334,
-retention,3,Minority objections,70.0,83.33333333333334,
-retention,3,Minority objections,100.0,100.0,
-retention,4,Minority objections,10.0,25.0,
-retention,4,Minority objections,20.0,41.66666666666667,
-retention,4,Minority objections,35.0,41.66666666666667,
-retention,4,Minority objections,50.0,83.33333333333334,
-retention,4,Minority objections,70.0,83.33333333333334,
-retention,4,Minority objections,100.0,100.0,
-retention,5,Minority objections,10.0,8.333333333333332,
-retention,5,Minority objections,20.0,33.33333333333333,
-retention,5,Minority objections,35.0,50.0,
-retention,5,Minority objections,50.0,75.0,
-retention,5,Minority objections,70.0,83.33333333333334,
-retention,5,Minority objections,100.0,100.0,
-retention,6,Minority objections,10.0,25.0,
-retention,6,Minority objections,20.0,41.66666666666667,
-retention,6,Minority objections,35.0,58.333333333333336,
-retention,6,Minority objections,50.0,83.33333333333334,
-retention,6,Minority objections,70.0,83.33333333333334,
-retention,6,Minority objections,100.0,100.0,
-retention,7,Minority objections,10.0,25.0,
-retention,7,Minority objections,20.0,33.33333333333333,
-retention,7,Minority objections,35.0,41.66666666666667,
-retention,7,Minority objections,50.0,58.333333333333336,
-retention,7,Minority objections,70.0,75.0,
-retention,7,Minority objections,100.0,91.66666666666666,
-retention,8,Minority objections,10.0,25.0,
-retention,8,Minority objections,20.0,25.0,
-retention,8,Minority objections,35.0,33.33333333333333,
-retention,8,Minority objections,50.0,41.66666666666667,
-retention,8,Minority objections,70.0,41.66666666666667,
-retention,8,Minority objections,100.0,91.66666666666666,
-retention,9,Minority objections,10.0,33.33333333333333,
-retention,9,Minority objections,20.0,50.0,
-retention,9,Minority objections,35.0,66.66666666666666,
-retention,9,Minority objections,50.0,83.33333333333334,
-retention,9,Minority objections,70.0,83.33333333333334,
-retention,9,Minority objections,100.0,100.0,
-retention,10,Minority objections,10.0,8.333333333333332,
-retention,10,Minority objections,20.0,8.333333333333332,
-retention,10,Minority objections,35.0,25.0,
-retention,10,Minority objections,50.0,50.0,
-retention,10,Minority objections,70.0,66.66666666666666,
-retention,10,Minority objections,100.0,91.66666666666666,
-retention,11,Minority objections,10.0,33.33333333333333,
-retention,11,Minority objections,20.0,41.66666666666667,
-retention,11,Minority objections,35.0,50.0,
-retention,11,Minority objections,50.0,66.66666666666666,
-retention,11,Minority objections,70.0,75.0,
-retention,11,Minority objections,100.0,100.0,
-retention,12,Minority objections,10.0,41.66666666666667,
-retention,12,Minority objections,20.0,50.0,
-retention,12,Minority objections,35.0,58.333333333333336,
-retention,12,Minority objections,50.0,75.0,
-retention,12,Minority objections,70.0,83.33333333333334,
-retention,12,Minority objections,100.0,100.0,
-retention,13,Minority objections,10.0,41.66666666666667,
-retention,13,Minority objections,20.0,50.0,
-retention,13,Minority objections,35.0,66.66666666666666,
-retention,13,Minority objections,50.0,75.0,
-retention,13,Minority objections,70.0,75.0,
-retention,13,Minority objections,100.0,100.0,
-retention,14,Minority objections,10.0,16.666666666666664,
-retention,14,Minority objections,20.0,25.0,
-retention,14,Minority objections,35.0,41.66666666666667,
-retention,14,Minority objections,50.0,58.333333333333336,
-retention,14,Minority objections,70.0,58.333333333333336,
-retention,14,Minority objections,100.0,91.66666666666666,
-retention,15,Minority objections,10.0,25.0,
-retention,15,Minority objections,20.0,25.0,
-retention,15,Minority objections,35.0,50.0,
-retention,15,Minority objections,50.0,75.0,
-retention,15,Minority objections,70.0,83.33333333333334,
-retention,15,Minority objections,100.0,83.33333333333334,
-retention,16,Minority objections,10.0,25.0,
-retention,16,Minority objections,20.0,33.33333333333333,
-retention,16,Minority objections,35.0,41.66666666666667,
-retention,16,Minority objections,50.0,50.0,
-retention,16,Minority objections,70.0,58.333333333333336,
-retention,16,Minority objections,100.0,83.33333333333334,
-retention,17,Minority objections,10.0,16.666666666666664,
-retention,17,Minority objections,20.0,25.0,
-retention,17,Minority objections,35.0,33.33333333333333,
-retention,17,Minority objections,50.0,41.66666666666667,
-retention,17,Minority objections,70.0,66.66666666666666,
-retention,17,Minority objections,100.0,100.0,
-retention,18,Minority objections,10.0,16.666666666666664,
-retention,18,Minority objections,20.0,25.0,
-retention,18,Minority objections,35.0,33.33333333333333,
-retention,18,Minority objections,50.0,33.33333333333333,
-retention,18,Minority objections,70.0,66.66666666666666,
-retention,18,Minority objections,100.0,100.0,
-retention,19,Minority objections,10.0,16.666666666666664,
-retention,19,Minority objections,20.0,41.66666666666667,
-retention,19,Minority objections,35.0,50.0,
-retention,19,Minority objections,50.0,66.66666666666666,
-retention,19,Minority objections,70.0,83.33333333333334,
-retention,19,Minority objections,100.0,91.66666666666666,
-retention,20,Minority objections,10.0,33.33333333333333,
-retention,20,Minority objections,20.0,58.333333333333336,
-retention,20,Minority objections,35.0,75.0,
-retention,20,Minority objections,50.0,91.66666666666666,
-retention,20,Minority objections,70.0,91.66666666666666,
-retention,20,Minority objections,100.0,100.0,
-retention,21,Minority objections,10.0,25.0,
-retention,21,Minority objections,20.0,33.33333333333333,
-retention,21,Minority objections,35.0,50.0,
-retention,21,Minority objections,50.0,75.0,
-retention,21,Minority objections,70.0,75.0,
-retention,21,Minority objections,100.0,100.0,
-retention,22,Minority objections,10.0,33.33333333333333,
-retention,22,Minority objections,20.0,58.333333333333336,
-retention,22,Minority objections,35.0,91.66666666666666,
-retention,22,Minority objections,50.0,100.0,
-retention,22,Minority objections,70.0,100.0,
-retention,22,Minority objections,100.0,100.0,
-retention,23,Minority objections,10.0,50.0,
-retention,23,Minority objections,20.0,58.333333333333336,
-retention,23,Minority objections,35.0,66.66666666666666,
-retention,23,Minority objections,50.0,75.0,
-retention,23,Minority objections,70.0,91.66666666666666,
-retention,23,Minority objections,100.0,100.0,
-retention,24,Minority objections,10.0,33.33333333333333,
-retention,24,Minority objections,20.0,41.66666666666667,
-retention,24,Minority objections,35.0,50.0,
-retention,24,Minority objections,50.0,58.333333333333336,
-retention,24,Minority objections,70.0,91.66666666666666,
-retention,24,Minority objections,100.0,100.0,
-retention,25,Minority objections,10.0,16.666666666666664,
-retention,25,Minority objections,20.0,25.0,
-retention,25,Minority objections,35.0,41.66666666666667,
-retention,25,Minority objections,50.0,58.333333333333336,
-retention,25,Minority objections,70.0,66.66666666666666,
-retention,25,Minority objections,100.0,75.0,
-retention,26,Minority objections,10.0,41.66666666666667,
-retention,26,Minority objections,20.0,50.0,
-retention,26,Minority objections,35.0,66.66666666666666,
-retention,26,Minority objections,50.0,75.0,
-retention,26,Minority objections,70.0,83.33333333333334,
-retention,26,Minority objections,100.0,100.0,
-retention,27,Minority objections,10.0,25.0,
-retention,27,Minority objections,20.0,50.0,
-retention,27,Minority objections,35.0,50.0,
-retention,27,Minority objections,50.0,58.333333333333336,
-retention,27,Minority objections,70.0,75.0,
-retention,27,Minority objections,100.0,91.66666666666666,
-retention,28,Minority objections,10.0,25.0,
-retention,28,Minority objections,20.0,33.33333333333333,
-retention,28,Minority objections,35.0,33.33333333333333,
-retention,28,Minority objections,50.0,50.0,
-retention,28,Minority objections,70.0,66.66666666666666,
-retention,28,Minority objections,100.0,91.66666666666666,
-retention,29,Minority objections,10.0,8.333333333333332,
-retention,29,Minority objections,20.0,25.0,
-retention,29,Minority objections,35.0,41.66666666666667,
-retention,29,Minority objections,50.0,50.0,
-retention,29,Minority objections,70.0,58.333333333333336,
-retention,29,Minority objections,100.0,100.0,
-retention,30,Minority objections,10.0,25.0,
-retention,30,Minority objections,20.0,41.66666666666667,
-retention,30,Minority objections,35.0,66.66666666666666,
-retention,30,Minority objections,50.0,66.66666666666666,
-retention,30,Minority objections,70.0,91.66666666666666,
-retention,30,Minority objections,100.0,100.0,
-retention,31,Minority objections,10.0,8.333333333333332,
-retention,31,Minority objections,20.0,33.33333333333333,
-retention,31,Minority objections,35.0,58.333333333333336,
-retention,31,Minority objections,50.0,83.33333333333334,
-retention,31,Minority objections,70.0,91.66666666666666,
-retention,31,Minority objections,100.0,100.0,
-retention,32,Minority objections,10.0,25.0,
-retention,32,Minority objections,20.0,25.0,
-retention,32,Minority objections,35.0,41.66666666666667,
-retention,32,Minority objections,50.0,58.333333333333336,
-retention,32,Minority objections,70.0,75.0,
-retention,32,Minority objections,100.0,91.66666666666666,
-retention,33,Minority objections,10.0,16.666666666666664,
-retention,33,Minority objections,20.0,41.66666666666667,
-retention,33,Minority objections,35.0,41.66666666666667,
-retention,33,Minority objections,50.0,66.66666666666666,
-retention,33,Minority objections,70.0,91.66666666666666,
-retention,33,Minority objections,100.0,100.0,
-retention,34,Minority objections,10.0,16.666666666666664,
-retention,34,Minority objections,20.0,25.0,
-retention,34,Minority objections,35.0,50.0,
-retention,34,Minority objections,50.0,66.66666666666666,
-retention,34,Minority objections,70.0,83.33333333333334,
-retention,34,Minority objections,100.0,100.0,
-retention,35,Minority objections,10.0,25.0,
-retention,35,Minority objections,20.0,41.66666666666667,
-retention,35,Minority objections,35.0,50.0,
-retention,35,Minority objections,50.0,66.66666666666666,
-retention,35,Minority objections,70.0,75.0,
-retention,35,Minority objections,100.0,100.0,
-retention,36,Minority objections,10.0,50.0,
-retention,36,Minority objections,20.0,50.0,
-retention,36,Minority objections,35.0,58.333333333333336,
-retention,36,Minority objections,50.0,66.66666666666666,
-retention,36,Minority objections,70.0,75.0,
-retention,36,Minority objections,100.0,100.0,
-retention,37,Minority objections,10.0,25.0,
-retention,37,Minority objections,20.0,25.0,
-retention,37,Minority objections,35.0,41.66666666666667,
-retention,37,Minority objections,50.0,66.66666666666666,
-retention,37,Minority objections,70.0,83.33333333333334,
-retention,37,Minority objections,100.0,100.0,
-retention,38,Minority objections,10.0,25.0,
-retention,38,Minority objections,20.0,25.0,
-retention,38,Minority objections,35.0,25.0,
-retention,38,Minority objections,50.0,58.333333333333336,
-retention,38,Minority objections,70.0,83.33333333333334,
-retention,38,Minority objections,100.0,91.66666666666666,
-retention,39,Minority objections,10.0,25.0,
-retention,39,Minority objections,20.0,41.66666666666667,
-retention,39,Minority objections,35.0,41.66666666666667,
-retention,39,Minority objections,50.0,50.0,
-retention,39,Minority objections,70.0,75.0,
-retention,39,Minority objections,100.0,91.66666666666666,
-retention,40,Minority objections,10.0,16.666666666666664,
-retention,40,Minority objections,20.0,25.0,
-retention,40,Minority objections,35.0,33.33333333333333,
-retention,40,Minority objections,50.0,50.0,
-retention,40,Minority objections,70.0,66.66666666666666,
-retention,40,Minority objections,100.0,83.33333333333334,
-retention,41,Minority objections,10.0,16.666666666666664,
-retention,41,Minority objections,20.0,33.33333333333333,
-retention,41,Minority objections,35.0,33.33333333333333,
-retention,41,Minority objections,50.0,58.333333333333336,
-retention,41,Minority objections,70.0,91.66666666666666,
-retention,41,Minority objections,100.0,100.0,
-retention,42,Minority objections,10.0,41.66666666666667,
-retention,42,Minority objections,20.0,50.0,
-retention,42,Minority objections,35.0,66.66666666666666,
-retention,42,Minority objections,50.0,83.33333333333334,
-retention,42,Minority objections,70.0,91.66666666666666,
-retention,42,Minority objections,100.0,100.0,
-retention,43,Minority objections,10.0,33.33333333333333,
-retention,43,Minority objections,20.0,41.66666666666667,
-retention,43,Minority objections,35.0,66.66666666666666,
-retention,43,Minority objections,50.0,66.66666666666666,
-retention,43,Minority objections,70.0,83.33333333333334,
-retention,43,Minority objections,100.0,100.0,
-retention,44,Minority objections,10.0,25.0,
-retention,44,Minority objections,20.0,25.0,
-retention,44,Minority objections,35.0,33.33333333333333,
-retention,44,Minority objections,50.0,58.333333333333336,
-retention,44,Minority objections,70.0,66.66666666666666,
-retention,44,Minority objections,100.0,83.33333333333334,
-retention,45,Minority objections,10.0,33.33333333333333,
-retention,45,Minority objections,20.0,41.66666666666667,
-retention,45,Minority objections,35.0,50.0,
-retention,45,Minority objections,50.0,83.33333333333334,
-retention,45,Minority objections,70.0,91.66666666666666,
-retention,45,Minority objections,100.0,100.0,
-retention,46,Minority objections,10.0,25.0,
-retention,46,Minority objections,20.0,41.66666666666667,
-retention,46,Minority objections,35.0,50.0,
-retention,46,Minority objections,50.0,66.66666666666666,
-retention,46,Minority objections,70.0,75.0,
-retention,46,Minority objections,100.0,100.0,
-retention,47,Minority objections,10.0,8.333333333333332,
-retention,47,Minority objections,20.0,25.0,
-retention,47,Minority objections,35.0,50.0,
-retention,47,Minority objections,50.0,66.66666666666666,
-retention,47,Minority objections,70.0,91.66666666666666,
-retention,47,Minority objections,100.0,100.0,
-retention,48,Minority objections,10.0,25.0,
-retention,48,Minority objections,20.0,41.66666666666667,
-retention,48,Minority objections,35.0,58.333333333333336,
-retention,48,Minority objections,50.0,66.66666666666666,
-retention,48,Minority objections,70.0,66.66666666666666,
-retention,48,Minority objections,100.0,100.0,
-retention,49,Minority objections,10.0,33.33333333333333,
-retention,49,Minority objections,20.0,41.66666666666667,
-retention,49,Minority objections,35.0,50.0,
-retention,49,Minority objections,50.0,58.333333333333336,
-retention,49,Minority objections,70.0,66.66666666666666,
-retention,49,Minority objections,100.0,91.66666666666666,
-retention,50,Minority objections,10.0,33.33333333333333,
-retention,50,Minority objections,20.0,33.33333333333333,
-retention,50,Minority objections,35.0,66.66666666666666,
-retention,50,Minority objections,50.0,66.66666666666666,
-retention,50,Minority objections,70.0,91.66666666666666,
-retention,50,Minority objections,100.0,100.0,
-retention,51,Minority objections,10.0,0.0,
-retention,51,Minority objections,20.0,33.33333333333333,
-retention,51,Minority objections,35.0,41.66666666666667,
-retention,51,Minority objections,50.0,66.66666666666666,
-retention,51,Minority objections,70.0,66.66666666666666,
-retention,51,Minority objections,100.0,91.66666666666666,
-retention,52,Minority objections,10.0,25.0,
-retention,52,Minority objections,20.0,33.33333333333333,
-retention,52,Minority objections,35.0,41.66666666666667,
-retention,52,Minority objections,50.0,50.0,
-retention,52,Minority objections,70.0,58.333333333333336,
-retention,52,Minority objections,100.0,100.0,
-retention,53,Minority objections,10.0,25.0,
-retention,53,Minority objections,20.0,33.33333333333333,
-retention,53,Minority objections,35.0,50.0,
-retention,53,Minority objections,50.0,58.333333333333336,
-retention,53,Minority objections,70.0,83.33333333333334,
-retention,53,Minority objections,100.0,100.0,
-retention,54,Minority objections,10.0,25.0,
-retention,54,Minority objections,20.0,41.66666666666667,
-retention,54,Minority objections,35.0,66.66666666666666,
-retention,54,Minority objections,50.0,91.66666666666666,
-retention,54,Minority objections,70.0,100.0,
-retention,54,Minority objections,100.0,100.0,
-retention,55,Minority objections,10.0,8.333333333333332,
-retention,55,Minority objections,20.0,16.666666666666664,
-retention,55,Minority objections,35.0,33.33333333333333,
-retention,55,Minority objections,50.0,50.0,
-retention,55,Minority objections,70.0,75.0,
-retention,55,Minority objections,100.0,91.66666666666666,
-retention,56,Minority objections,10.0,33.33333333333333,
-retention,56,Minority objections,20.0,41.66666666666667,
-retention,56,Minority objections,35.0,50.0,
-retention,56,Minority objections,50.0,58.333333333333336,
-retention,56,Minority objections,70.0,91.66666666666666,
-retention,56,Minority objections,100.0,91.66666666666666,
-retention,57,Minority objections,10.0,33.33333333333333,
-retention,57,Minority objections,20.0,41.66666666666667,
-retention,57,Minority objections,35.0,83.33333333333334,
-retention,57,Minority objections,50.0,100.0,
-retention,57,Minority objections,70.0,100.0,
-retention,57,Minority objections,100.0,100.0,
-retention,58,Minority objections,10.0,8.333333333333332,
-retention,58,Minority objections,20.0,16.666666666666664,
-retention,58,Minority objections,35.0,25.0,
-retention,58,Minority objections,50.0,33.33333333333333,
-retention,58,Minority objections,70.0,50.0,
-retention,58,Minority objections,100.0,100.0,
-retention,59,Minority objections,10.0,50.0,
-retention,59,Minority objections,20.0,83.33333333333334,
-retention,59,Minority objections,35.0,83.33333333333334,
-retention,59,Minority objections,50.0,83.33333333333334,
-retention,59,Minority objections,70.0,100.0,
-retention,59,Minority objections,100.0,100.0,
-retention,60,Minority objections,10.0,8.333333333333332,
-retention,60,Minority objections,20.0,33.33333333333333,
-retention,60,Minority objections,35.0,41.66666666666667,
-retention,60,Minority objections,50.0,58.333333333333336,
-retention,60,Minority objections,70.0,75.0,
-retention,60,Minority objections,100.0,100.0,
-retention,61,Minority objections,10.0,25.0,
-retention,61,Minority objections,20.0,41.66666666666667,
-retention,61,Minority objections,35.0,41.66666666666667,
-retention,61,Minority objections,50.0,41.66666666666667,
-retention,61,Minority objections,70.0,66.66666666666666,
-retention,61,Minority objections,100.0,100.0,
-retention,62,Minority objections,10.0,25.0,
-retention,62,Minority objections,20.0,41.66666666666667,
-retention,62,Minority objections,35.0,75.0,
-retention,62,Minority objections,50.0,83.33333333333334,
-retention,62,Minority objections,70.0,91.66666666666666,
-retention,62,Minority objections,100.0,91.66666666666666,
-retention,63,Minority objections,10.0,25.0,
-retention,63,Minority objections,20.0,33.33333333333333,
-retention,63,Minority objections,35.0,41.66666666666667,
-retention,63,Minority objections,50.0,50.0,
-retention,63,Minority objections,70.0,83.33333333333334,
-retention,63,Minority objections,100.0,91.66666666666666,
-retention,64,Minority objections,10.0,33.33333333333333,
-retention,64,Minority objections,20.0,41.66666666666667,
-retention,64,Minority objections,35.0,58.333333333333336,
-retention,64,Minority objections,50.0,58.333333333333336,
-retention,64,Minority objections,70.0,83.33333333333334,
-retention,64,Minority objections,100.0,100.0,
-retention,65,Minority objections,10.0,25.0,
-retention,65,Minority objections,20.0,33.33333333333333,
-retention,65,Minority objections,35.0,58.333333333333336,
-retention,65,Minority objections,50.0,83.33333333333334,
-retention,65,Minority objections,70.0,100.0,
-retention,65,Minority objections,100.0,100.0,
-retention,66,Minority objections,10.0,33.33333333333333,
-retention,66,Minority objections,20.0,41.66666666666667,
-retention,66,Minority objections,35.0,58.333333333333336,
-retention,66,Minority objections,50.0,58.333333333333336,
-retention,66,Minority objections,70.0,75.0,
-retention,66,Minority objections,100.0,100.0,
-retention,67,Minority objections,10.0,25.0,
-retention,67,Minority objections,20.0,41.66666666666667,
-retention,67,Minority objections,35.0,58.333333333333336,
-retention,67,Minority objections,50.0,58.333333333333336,
-retention,67,Minority objections,70.0,66.66666666666666,
-retention,67,Minority objections,100.0,100.0,
-retention,68,Minority objections,10.0,16.666666666666664,
-retention,68,Minority objections,20.0,33.33333333333333,
-retention,68,Minority objections,35.0,41.66666666666667,
-retention,68,Minority objections,50.0,75.0,
-retention,68,Minority objections,70.0,83.33333333333334,
-retention,68,Minority objections,100.0,100.0,
-retention,69,Minority objections,10.0,33.33333333333333,
-retention,69,Minority objections,20.0,58.333333333333336,
-retention,69,Minority objections,35.0,75.0,
-retention,69,Minority objections,50.0,83.33333333333334,
-retention,69,Minority objections,70.0,91.66666666666666,
-retention,69,Minority objections,100.0,100.0,
-retention,70,Minority objections,10.0,33.33333333333333,
-retention,70,Minority objections,20.0,50.0,
-retention,70,Minority objections,35.0,58.333333333333336,
-retention,70,Minority objections,50.0,66.66666666666666,
-retention,70,Minority objections,70.0,66.66666666666666,
-retention,70,Minority objections,100.0,100.0,
-retention,71,Minority objections,10.0,16.666666666666664,
-retention,71,Minority objections,20.0,16.666666666666664,
-retention,71,Minority objections,35.0,25.0,
-retention,71,Minority objections,50.0,41.66666666666667,
-retention,71,Minority objections,70.0,66.66666666666666,
-retention,71,Minority objections,100.0,83.33333333333334,
-retention,72,Minority objections,10.0,41.66666666666667,
-retention,72,Minority objections,20.0,41.66666666666667,
-retention,72,Minority objections,35.0,41.66666666666667,
-retention,72,Minority objections,50.0,58.333333333333336,
-retention,72,Minority objections,70.0,91.66666666666666,
-retention,72,Minority objections,100.0,100.0,
-retention,73,Minority objections,10.0,16.666666666666664,
-retention,73,Minority objections,20.0,25.0,
-retention,73,Minority objections,35.0,33.33333333333333,
-retention,73,Minority objections,50.0,41.66666666666667,
-retention,73,Minority objections,70.0,66.66666666666666,
-retention,73,Minority objections,100.0,91.66666666666666,
-retention,74,Minority objections,10.0,8.333333333333332,
-retention,74,Minority objections,20.0,16.666666666666664,
-retention,74,Minority objections,35.0,50.0,
-retention,74,Minority objections,50.0,58.333333333333336,
-retention,74,Minority objections,70.0,83.33333333333334,
-retention,74,Minority objections,100.0,100.0,
-retention,75,Minority objections,10.0,33.33333333333333,
-retention,75,Minority objections,20.0,58.333333333333336,
-retention,75,Minority objections,35.0,83.33333333333334,
-retention,75,Minority objections,50.0,83.33333333333334,
-retention,75,Minority objections,70.0,91.66666666666666,
-retention,75,Minority objections,100.0,100.0,
-retention,76,Minority objections,10.0,0.0,
-retention,76,Minority objections,20.0,25.0,
-retention,76,Minority objections,35.0,25.0,
-retention,76,Minority objections,50.0,58.333333333333336,
-retention,76,Minority objections,70.0,75.0,
-retention,76,Minority objections,100.0,100.0,
-retention,77,Minority objections,10.0,33.33333333333333,
-retention,77,Minority objections,20.0,58.333333333333336,
-retention,77,Minority objections,35.0,66.66666666666666,
-retention,77,Minority objections,50.0,75.0,
-retention,77,Minority objections,70.0,75.0,
-retention,77,Minority objections,100.0,100.0,
-retention,78,Minority objections,10.0,25.0,
-retention,78,Minority objections,20.0,33.33333333333333,
-retention,78,Minority objections,35.0,50.0,
-retention,78,Minority objections,50.0,50.0,
-retention,78,Minority objections,70.0,58.333333333333336,
-retention,78,Minority objections,100.0,91.66666666666666,
-retention,79,Minority objections,10.0,16.666666666666664,
-retention,79,Minority objections,20.0,50.0,
-retention,79,Minority objections,35.0,58.333333333333336,
-retention,79,Minority objections,50.0,66.66666666666666,
-retention,79,Minority objections,70.0,91.66666666666666,
-retention,79,Minority objections,100.0,100.0,
-retention,80,Minority objections,10.0,16.666666666666664,
-retention,80,Minority objections,20.0,25.0,
-retention,80,Minority objections,35.0,41.66666666666667,
-retention,80,Minority objections,50.0,50.0,
-retention,80,Minority objections,70.0,83.33333333333334,
-retention,80,Minority objections,100.0,100.0,
-retention,81,Minority objections,10.0,16.666666666666664,
-retention,81,Minority objections,20.0,41.66666666666667,
-retention,81,Minority objections,35.0,50.0,
-retention,81,Minority objections,50.0,58.333333333333336,
-retention,81,Minority objections,70.0,66.66666666666666,
-retention,81,Minority objections,100.0,100.0,
-retention,82,Minority objections,10.0,25.0,
-retention,82,Minority objections,20.0,25.0,
-retention,82,Minority objections,35.0,50.0,
-retention,82,Minority objections,50.0,66.66666666666666,
-retention,82,Minority objections,70.0,83.33333333333334,
-retention,82,Minority objections,100.0,100.0,
-retention,83,Minority objections,10.0,41.66666666666667,
-retention,83,Minority objections,20.0,50.0,
-retention,83,Minority objections,35.0,66.66666666666666,
-retention,83,Minority objections,50.0,83.33333333333334,
-retention,83,Minority objections,70.0,91.66666666666666,
-retention,83,Minority objections,100.0,100.0,
-retention,84,Minority objections,10.0,41.66666666666667,
-retention,84,Minority objections,20.0,50.0,
-retention,84,Minority objections,35.0,50.0,
-retention,84,Minority objections,50.0,58.333333333333336,
-retention,84,Minority objections,70.0,66.66666666666666,
-retention,84,Minority objections,100.0,100.0,
-retention,85,Minority objections,10.0,8.333333333333332,
-retention,85,Minority objections,20.0,16.666666666666664,
-retention,85,Minority objections,35.0,33.33333333333333,
-retention,85,Minority objections,50.0,58.333333333333336,
-retention,85,Minority objections,70.0,66.66666666666666,
-retention,85,Minority objections,100.0,100.0,
-retention,86,Minority objections,10.0,8.333333333333332,
-retention,86,Minority objections,20.0,25.0,
-retention,86,Minority objections,35.0,50.0,
-retention,86,Minority objections,50.0,58.333333333333336,
-retention,86,Minority objections,70.0,66.66666666666666,
-retention,86,Minority objections,100.0,100.0,
-retention,87,Minority objections,10.0,16.666666666666664,
-retention,87,Minority objections,20.0,33.33333333333333,
-retention,87,Minority objections,35.0,58.333333333333336,
-retention,87,Minority objections,50.0,66.66666666666666,
-retention,87,Minority objections,70.0,91.66666666666666,
-retention,87,Minority objections,100.0,100.0,
-retention,88,Minority objections,10.0,16.666666666666664,
-retention,88,Minority objections,20.0,33.33333333333333,
-retention,88,Minority objections,35.0,50.0,
-retention,88,Minority objections,50.0,58.333333333333336,
-retention,88,Minority objections,70.0,58.333333333333336,
-retention,88,Minority objections,100.0,91.66666666666666,
-retention,89,Minority objections,10.0,41.66666666666667,
-retention,89,Minority objections,20.0,50.0,
-retention,89,Minority objections,35.0,75.0,
-retention,89,Minority objections,50.0,91.66666666666666,
-retention,89,Minority objections,70.0,91.66666666666666,
-retention,89,Minority objections,100.0,100.0,
-retention,90,Minority objections,10.0,25.0,
-retention,90,Minority objections,20.0,33.33333333333333,
-retention,90,Minority objections,35.0,75.0,
-retention,90,Minority objections,50.0,83.33333333333334,
-retention,90,Minority objections,70.0,91.66666666666666,
-retention,90,Minority objections,100.0,100.0,
-retention,91,Minority objections,10.0,25.0,
-retention,91,Minority objections,20.0,25.0,
-retention,91,Minority objections,35.0,41.66666666666667,
-retention,91,Minority objections,50.0,58.333333333333336,
-retention,91,Minority objections,70.0,83.33333333333334,
-retention,91,Minority objections,100.0,100.0,
-retention,92,Minority objections,10.0,50.0,
-retention,92,Minority objections,20.0,75.0,
-retention,92,Minority objections,35.0,83.33333333333334,
-retention,92,Minority objections,50.0,100.0,
-retention,92,Minority objections,70.0,100.0,
-retention,92,Minority objections,100.0,100.0,
-retention,93,Minority objections,10.0,25.0,
-retention,93,Minority objections,20.0,50.0,
-retention,93,Minority objections,35.0,66.66666666666666,
-retention,93,Minority objections,50.0,75.0,
-retention,93,Minority objections,70.0,75.0,
-retention,93,Minority objections,100.0,83.33333333333334,
-retention,94,Minority objections,10.0,16.666666666666664,
-retention,94,Minority objections,20.0,25.0,
-retention,94,Minority objections,35.0,58.333333333333336,
-retention,94,Minority objections,50.0,75.0,
-retention,94,Minority objections,70.0,83.33333333333334,
-retention,94,Minority objections,100.0,100.0,
-retention,95,Minority objections,10.0,25.0,
-retention,95,Minority objections,20.0,25.0,
-retention,95,Minority objections,35.0,50.0,
-retention,95,Minority objections,50.0,75.0,
-retention,95,Minority objections,70.0,83.33333333333334,
-retention,95,Minority objections,100.0,91.66666666666666,
-retention,96,Minority objections,10.0,0.0,
-retention,96,Minority objections,20.0,8.333333333333332,
-retention,96,Minority objections,35.0,25.0,
-retention,96,Minority objections,50.0,33.33333333333333,
-retention,96,Minority objections,70.0,58.333333333333336,
-retention,96,Minority objections,100.0,91.66666666666666,
-retention,97,Minority objections,10.0,25.0,
-retention,97,Minority objections,20.0,25.0,
-retention,97,Minority objections,35.0,33.33333333333333,
-retention,97,Minority objections,50.0,58.333333333333336,
-retention,97,Minority objections,70.0,83.33333333333334,
-retention,97,Minority objections,100.0,91.66666666666666,
-retention,98,Minority objections,10.0,16.666666666666664,
-retention,98,Minority objections,20.0,16.666666666666664,
-retention,98,Minority objections,35.0,25.0,
-retention,98,Minority objections,50.0,50.0,
-retention,98,Minority objections,70.0,66.66666666666666,
-retention,98,Minority objections,100.0,83.33333333333334,
-retention,99,Minority objections,10.0,33.33333333333333,
-retention,99,Minority objections,20.0,58.333333333333336,
-retention,99,Minority objections,35.0,66.66666666666666,
-retention,99,Minority objections,50.0,75.0,
-retention,99,Minority objections,70.0,83.33333333333334,
-retention,99,Minority objections,100.0,91.66666666666666,
-retention,100,Minority objections,10.0,16.666666666666664,
-retention,100,Minority objections,20.0,25.0,
-retention,100,Minority objections,35.0,33.33333333333333,
-retention,100,Minority objections,50.0,41.66666666666667,
-retention,100,Minority objections,70.0,50.0,
-retention,100,Minority objections,100.0,91.66666666666666,
-retention,1,Conditional positions,10.0,8.333333333333332,
-retention,1,Conditional positions,20.0,16.666666666666664,
-retention,1,Conditional positions,35.0,25.0,
-retention,1,Conditional positions,50.0,50.0,
-retention,1,Conditional positions,70.0,66.66666666666666,
-retention,1,Conditional positions,100.0,100.0,
-retention,2,Conditional positions,10.0,16.666666666666664,
-retention,2,Conditional positions,20.0,33.33333333333333,
-retention,2,Conditional positions,35.0,58.333333333333336,
-retention,2,Conditional positions,50.0,58.333333333333336,
-retention,2,Conditional positions,70.0,66.66666666666666,
-retention,2,Conditional positions,100.0,100.0,
-retention,3,Conditional positions,10.0,33.33333333333333,
-retention,3,Conditional positions,20.0,50.0,
-retention,3,Conditional positions,35.0,50.0,
-retention,3,Conditional positions,50.0,50.0,
-retention,3,Conditional positions,70.0,58.333333333333336,
-retention,3,Conditional positions,100.0,100.0,
-retention,4,Conditional positions,10.0,16.666666666666664,
-retention,4,Conditional positions,20.0,25.0,
-retention,4,Conditional positions,35.0,50.0,
-retention,4,Conditional positions,50.0,58.333333333333336,
-retention,4,Conditional positions,70.0,75.0,
-retention,4,Conditional positions,100.0,83.33333333333334,
-retention,5,Conditional positions,10.0,33.33333333333333,
-retention,5,Conditional positions,20.0,33.33333333333333,
-retention,5,Conditional positions,35.0,41.66666666666667,
-retention,5,Conditional positions,50.0,58.333333333333336,
-retention,5,Conditional positions,70.0,58.333333333333336,
-retention,5,Conditional positions,100.0,91.66666666666666,
-retention,6,Conditional positions,10.0,16.666666666666664,
-retention,6,Conditional positions,20.0,25.0,
-retention,6,Conditional positions,35.0,41.66666666666667,
-retention,6,Conditional positions,50.0,58.333333333333336,
-retention,6,Conditional positions,70.0,75.0,
-retention,6,Conditional positions,100.0,100.0,
-retention,7,Conditional positions,10.0,25.0,
-retention,7,Conditional positions,20.0,41.66666666666667,
-retention,7,Conditional positions,35.0,50.0,
-retention,7,Conditional positions,50.0,50.0,
-retention,7,Conditional positions,70.0,75.0,
-retention,7,Conditional positions,100.0,100.0,
-retention,8,Conditional positions,10.0,25.0,
-retention,8,Conditional positions,20.0,25.0,
-retention,8,Conditional positions,35.0,25.0,
-retention,8,Conditional positions,50.0,33.33333333333333,
-retention,8,Conditional positions,70.0,66.66666666666666,
-retention,8,Conditional positions,100.0,91.66666666666666,
-retention,9,Conditional positions,10.0,0.0,
-retention,9,Conditional positions,20.0,8.333333333333332,
-retention,9,Conditional positions,35.0,33.33333333333333,
-retention,9,Conditional positions,50.0,33.33333333333333,
-retention,9,Conditional positions,70.0,50.0,
-retention,9,Conditional positions,100.0,83.33333333333334,
-retention,10,Conditional positions,10.0,8.333333333333332,
-retention,10,Conditional positions,20.0,33.33333333333333,
-retention,10,Conditional positions,35.0,66.66666666666666,
-retention,10,Conditional positions,50.0,66.66666666666666,
-retention,10,Conditional positions,70.0,75.0,
-retention,10,Conditional positions,100.0,91.66666666666666,
-retention,11,Conditional positions,10.0,33.33333333333333,
-retention,11,Conditional positions,20.0,50.0,
-retention,11,Conditional positions,35.0,66.66666666666666,
-retention,11,Conditional positions,50.0,75.0,
-retention,11,Conditional positions,70.0,75.0,
-retention,11,Conditional positions,100.0,91.66666666666666,
-retention,12,Conditional positions,10.0,16.666666666666664,
-retention,12,Conditional positions,20.0,25.0,
-retention,12,Conditional positions,35.0,50.0,
-retention,12,Conditional positions,50.0,50.0,
-retention,12,Conditional positions,70.0,58.333333333333336,
-retention,12,Conditional positions,100.0,100.0,
-retention,13,Conditional positions,10.0,16.666666666666664,
-retention,13,Conditional positions,20.0,33.33333333333333,
-retention,13,Conditional positions,35.0,41.66666666666667,
-retention,13,Conditional positions,50.0,58.333333333333336,
-retention,13,Conditional positions,70.0,83.33333333333334,
-retention,13,Conditional positions,100.0,100.0,
-retention,14,Conditional positions,10.0,0.0,
-retention,14,Conditional positions,20.0,33.33333333333333,
-retention,14,Conditional positions,35.0,41.66666666666667,
-retention,14,Conditional positions,50.0,58.333333333333336,
-retention,14,Conditional positions,70.0,66.66666666666666,
-retention,14,Conditional positions,100.0,100.0,
-retention,15,Conditional positions,10.0,25.0,
-retention,15,Conditional positions,20.0,41.66666666666667,
-retention,15,Conditional positions,35.0,50.0,
-retention,15,Conditional positions,50.0,66.66666666666666,
-retention,15,Conditional positions,70.0,66.66666666666666,
-retention,15,Conditional positions,100.0,91.66666666666666,
-retention,16,Conditional positions,10.0,16.666666666666664,
-retention,16,Conditional positions,20.0,16.666666666666664,
-retention,16,Conditional positions,35.0,33.33333333333333,
-retention,16,Conditional positions,50.0,58.333333333333336,
-retention,16,Conditional positions,70.0,66.66666666666666,
-retention,16,Conditional positions,100.0,100.0,
-retention,17,Conditional positions,10.0,16.666666666666664,
-retention,17,Conditional positions,20.0,25.0,
-retention,17,Conditional positions,35.0,33.33333333333333,
-retention,17,Conditional positions,50.0,41.66666666666667,
-retention,17,Conditional positions,70.0,50.0,
-retention,17,Conditional positions,100.0,91.66666666666666,
-retention,18,Conditional positions,10.0,16.666666666666664,
-retention,18,Conditional positions,20.0,41.66666666666667,
-retention,18,Conditional positions,35.0,58.333333333333336,
-retention,18,Conditional positions,50.0,58.333333333333336,
-retention,18,Conditional positions,70.0,83.33333333333334,
-retention,18,Conditional positions,100.0,83.33333333333334,
-retention,19,Conditional positions,10.0,8.333333333333332,
-retention,19,Conditional positions,20.0,25.0,
-retention,19,Conditional positions,35.0,25.0,
-retention,19,Conditional positions,50.0,33.33333333333333,
-retention,19,Conditional positions,70.0,58.333333333333336,
-retention,19,Conditional positions,100.0,100.0,
-retention,20,Conditional positions,10.0,0.0,
-retention,20,Conditional positions,20.0,8.333333333333332,
-retention,20,Conditional positions,35.0,33.33333333333333,
-retention,20,Conditional positions,50.0,58.333333333333336,
-retention,20,Conditional positions,70.0,75.0,
-retention,20,Conditional positions,100.0,100.0,
-retention,21,Conditional positions,10.0,33.33333333333333,
-retention,21,Conditional positions,20.0,41.66666666666667,
-retention,21,Conditional positions,35.0,41.66666666666667,
-retention,21,Conditional positions,50.0,50.0,
-retention,21,Conditional positions,70.0,66.66666666666666,
-retention,21,Conditional positions,100.0,91.66666666666666,
-retention,22,Conditional positions,10.0,16.666666666666664,
-retention,22,Conditional positions,20.0,33.33333333333333,
-retention,22,Conditional positions,35.0,50.0,
-retention,22,Conditional positions,50.0,50.0,
-retention,22,Conditional positions,70.0,50.0,
-retention,22,Conditional positions,100.0,66.66666666666666,
-retention,23,Conditional positions,10.0,8.333333333333332,
-retention,23,Conditional positions,20.0,25.0,
-retention,23,Conditional positions,35.0,41.66666666666667,
-retention,23,Conditional positions,50.0,58.333333333333336,
-retention,23,Conditional positions,70.0,75.0,
-retention,23,Conditional positions,100.0,91.66666666666666,
-retention,24,Conditional positions,10.0,16.666666666666664,
-retention,24,Conditional positions,20.0,41.66666666666667,
-retention,24,Conditional positions,35.0,50.0,
-retention,24,Conditional positions,50.0,66.66666666666666,
-retention,24,Conditional positions,70.0,75.0,
-retention,24,Conditional positions,100.0,100.0,
-retention,25,Conditional positions,10.0,16.666666666666664,
-retention,25,Conditional positions,20.0,41.66666666666667,
-retention,25,Conditional positions,35.0,58.333333333333336,
-retention,25,Conditional positions,50.0,75.0,
-retention,25,Conditional positions,70.0,83.33333333333334,
-retention,25,Conditional positions,100.0,91.66666666666666,
-retention,26,Conditional positions,10.0,25.0,
-retention,26,Conditional positions,20.0,33.33333333333333,
-retention,26,Conditional positions,35.0,50.0,
-retention,26,Conditional positions,50.0,66.66666666666666,
-retention,26,Conditional positions,70.0,75.0,
-retention,26,Conditional positions,100.0,91.66666666666666,
-retention,27,Conditional positions,10.0,8.333333333333332,
-retention,27,Conditional positions,20.0,16.666666666666664,
-retention,27,Conditional positions,35.0,25.0,
-retention,27,Conditional positions,50.0,41.66666666666667,
-retention,27,Conditional positions,70.0,58.333333333333336,
-retention,27,Conditional positions,100.0,100.0,
-retention,28,Conditional positions,10.0,33.33333333333333,
-retention,28,Conditional positions,20.0,41.66666666666667,
-retention,28,Conditional positions,35.0,58.333333333333336,
-retention,28,Conditional positions,50.0,66.66666666666666,
-retention,28,Conditional positions,70.0,83.33333333333334,
-retention,28,Conditional positions,100.0,100.0,
-retention,29,Conditional positions,10.0,16.666666666666664,
-retention,29,Conditional positions,20.0,16.666666666666664,
-retention,29,Conditional positions,35.0,41.66666666666667,
-retention,29,Conditional positions,50.0,50.0,
-retention,29,Conditional positions,70.0,66.66666666666666,
-retention,29,Conditional positions,100.0,100.0,
-retention,30,Conditional positions,10.0,33.33333333333333,
-retention,30,Conditional positions,20.0,41.66666666666667,
-retention,30,Conditional positions,35.0,58.333333333333336,
-retention,30,Conditional positions,50.0,66.66666666666666,
-retention,30,Conditional positions,70.0,91.66666666666666,
-retention,30,Conditional positions,100.0,100.0,
-retention,31,Conditional positions,10.0,25.0,
-retention,31,Conditional positions,20.0,33.33333333333333,
-retention,31,Conditional positions,35.0,50.0,
-retention,31,Conditional positions,50.0,50.0,
-retention,31,Conditional positions,70.0,66.66666666666666,
-retention,31,Conditional positions,100.0,91.66666666666666,
-retention,32,Conditional positions,10.0,16.666666666666664,
-retention,32,Conditional positions,20.0,41.66666666666667,
-retention,32,Conditional positions,35.0,66.66666666666666,
-retention,32,Conditional positions,50.0,66.66666666666666,
-retention,32,Conditional positions,70.0,66.66666666666666,
-retention,32,Conditional positions,100.0,100.0,
-retention,33,Conditional positions,10.0,50.0,
-retention,33,Conditional positions,20.0,50.0,
-retention,33,Conditional positions,35.0,75.0,
-retention,33,Conditional positions,50.0,83.33333333333334,
-retention,33,Conditional positions,70.0,83.33333333333334,
-retention,33,Conditional positions,100.0,100.0,
-retention,34,Conditional positions,10.0,25.0,
-retention,34,Conditional positions,20.0,33.33333333333333,
-retention,34,Conditional positions,35.0,50.0,
-retention,34,Conditional positions,50.0,50.0,
-retention,34,Conditional positions,70.0,66.66666666666666,
-retention,34,Conditional positions,100.0,100.0,
-retention,35,Conditional positions,10.0,16.666666666666664,
-retention,35,Conditional positions,20.0,25.0,
-retention,35,Conditional positions,35.0,25.0,
-retention,35,Conditional positions,50.0,41.66666666666667,
-retention,35,Conditional positions,70.0,41.66666666666667,
-retention,35,Conditional positions,100.0,100.0,
-retention,36,Conditional positions,10.0,16.666666666666664,
-retention,36,Conditional positions,20.0,16.666666666666664,
-retention,36,Conditional positions,35.0,25.0,
-retention,36,Conditional positions,50.0,33.33333333333333,
-retention,36,Conditional positions,70.0,58.333333333333336,
-retention,36,Conditional positions,100.0,100.0,
-retention,37,Conditional positions,10.0,8.333333333333332,
-retention,37,Conditional positions,20.0,16.666666666666664,
-retention,37,Conditional positions,35.0,25.0,
-retention,37,Conditional positions,50.0,33.33333333333333,
-retention,37,Conditional positions,70.0,33.33333333333333,
-retention,37,Conditional positions,100.0,83.33333333333334,
-retention,38,Conditional positions,10.0,33.33333333333333,
-retention,38,Conditional positions,20.0,33.33333333333333,
-retention,38,Conditional positions,35.0,50.0,
-retention,38,Conditional positions,50.0,50.0,
-retention,38,Conditional positions,70.0,66.66666666666666,
-retention,38,Conditional positions,100.0,100.0,
-retention,39,Conditional positions,10.0,8.333333333333332,
-retention,39,Conditional positions,20.0,8.333333333333332,
-retention,39,Conditional positions,35.0,8.333333333333332,
-retention,39,Conditional positions,50.0,33.33333333333333,
-retention,39,Conditional positions,70.0,50.0,
-retention,39,Conditional positions,100.0,100.0,
-retention,40,Conditional positions,10.0,8.333333333333332,
-retention,40,Conditional positions,20.0,50.0,
-retention,40,Conditional positions,35.0,58.333333333333336,
-retention,40,Conditional positions,50.0,66.66666666666666,
-retention,40,Conditional positions,70.0,91.66666666666666,
-retention,40,Conditional positions,100.0,100.0,
-retention,41,Conditional positions,10.0,8.333333333333332,
-retention,41,Conditional positions,20.0,25.0,
-retention,41,Conditional positions,35.0,33.33333333333333,
-retention,41,Conditional positions,50.0,50.0,
-retention,41,Conditional positions,70.0,75.0,
-retention,41,Conditional positions,100.0,100.0,
-retention,42,Conditional positions,10.0,16.666666666666664,
-retention,42,Conditional positions,20.0,50.0,
-retention,42,Conditional positions,35.0,50.0,
-retention,42,Conditional positions,50.0,50.0,
-retention,42,Conditional positions,70.0,75.0,
-retention,42,Conditional positions,100.0,100.0,
-retention,43,Conditional positions,10.0,8.333333333333332,
-retention,43,Conditional positions,20.0,16.666666666666664,
-retention,43,Conditional positions,35.0,25.0,
-retention,43,Conditional positions,50.0,33.33333333333333,
-retention,43,Conditional positions,70.0,66.66666666666666,
-retention,43,Conditional positions,100.0,91.66666666666666,
-retention,44,Conditional positions,10.0,16.666666666666664,
-retention,44,Conditional positions,20.0,25.0,
-retention,44,Conditional positions,35.0,25.0,
-retention,44,Conditional positions,50.0,41.66666666666667,
-retention,44,Conditional positions,70.0,41.66666666666667,
-retention,44,Conditional positions,100.0,83.33333333333334,
-retention,45,Conditional positions,10.0,16.666666666666664,
-retention,45,Conditional positions,20.0,25.0,
-retention,45,Conditional positions,35.0,50.0,
-retention,45,Conditional positions,50.0,50.0,
-retention,45,Conditional positions,70.0,50.0,
-retention,45,Conditional positions,100.0,100.0,
-retention,46,Conditional positions,10.0,16.666666666666664,
-retention,46,Conditional positions,20.0,41.66666666666667,
-retention,46,Conditional positions,35.0,58.333333333333336,
-retention,46,Conditional positions,50.0,66.66666666666666,
-retention,46,Conditional positions,70.0,66.66666666666666,
-retention,46,Conditional positions,100.0,100.0,
-retention,47,Conditional positions,10.0,8.333333333333332,
-retention,47,Conditional positions,20.0,16.666666666666664,
-retention,47,Conditional positions,35.0,41.66666666666667,
-retention,47,Conditional positions,50.0,66.66666666666666,
-retention,47,Conditional positions,70.0,83.33333333333334,
-retention,47,Conditional positions,100.0,100.0,
-retention,48,Conditional positions,10.0,0.0,
-retention,48,Conditional positions,20.0,8.333333333333332,
-retention,48,Conditional positions,35.0,16.666666666666664,
-retention,48,Conditional positions,50.0,25.0,
-retention,48,Conditional positions,70.0,50.0,
-retention,48,Conditional positions,100.0,100.0,
-retention,49,Conditional positions,10.0,8.333333333333332,
-retention,49,Conditional positions,20.0,25.0,
-retention,49,Conditional positions,35.0,33.33333333333333,
-retention,49,Conditional positions,50.0,41.66666666666667,
-retention,49,Conditional positions,70.0,50.0,
-retention,49,Conditional positions,100.0,75.0,
-retention,50,Conditional positions,10.0,16.666666666666664,
-retention,50,Conditional positions,20.0,16.666666666666664,
-retention,50,Conditional positions,35.0,25.0,
-retention,50,Conditional positions,50.0,41.66666666666667,
-retention,50,Conditional positions,70.0,58.333333333333336,
-retention,50,Conditional positions,100.0,91.66666666666666,
-retention,51,Conditional positions,10.0,16.666666666666664,
-retention,51,Conditional positions,20.0,16.666666666666664,
-retention,51,Conditional positions,35.0,33.33333333333333,
-retention,51,Conditional positions,50.0,58.333333333333336,
-retention,51,Conditional positions,70.0,66.66666666666666,
-retention,51,Conditional positions,100.0,100.0,
-retention,52,Conditional positions,10.0,33.33333333333333,
-retention,52,Conditional positions,20.0,50.0,
-retention,52,Conditional positions,35.0,58.333333333333336,
-retention,52,Conditional positions,50.0,58.333333333333336,
-retention,52,Conditional positions,70.0,83.33333333333334,
-retention,52,Conditional positions,100.0,91.66666666666666,
-retention,53,Conditional positions,10.0,8.333333333333332,
-retention,53,Conditional positions,20.0,25.0,
-retention,53,Conditional positions,35.0,33.33333333333333,
-retention,53,Conditional positions,50.0,50.0,
-retention,53,Conditional positions,70.0,75.0,
-retention,53,Conditional positions,100.0,100.0,
-retention,54,Conditional positions,10.0,16.666666666666664,
-retention,54,Conditional positions,20.0,25.0,
-retention,54,Conditional positions,35.0,41.66666666666667,
-retention,54,Conditional positions,50.0,50.0,
-retention,54,Conditional positions,70.0,66.66666666666666,
-retention,54,Conditional positions,100.0,100.0,
-retention,55,Conditional positions,10.0,0.0,
-retention,55,Conditional positions,20.0,8.333333333333332,
-retention,55,Conditional positions,35.0,25.0,
-retention,55,Conditional positions,50.0,41.66666666666667,
-retention,55,Conditional positions,70.0,58.333333333333336,
-retention,55,Conditional positions,100.0,91.66666666666666,
-retention,56,Conditional positions,10.0,33.33333333333333,
-retention,56,Conditional positions,20.0,33.33333333333333,
-retention,56,Conditional positions,35.0,33.33333333333333,
-retention,56,Conditional positions,50.0,41.66666666666667,
-retention,56,Conditional positions,70.0,58.333333333333336,
-retention,56,Conditional positions,100.0,100.0,
-retention,57,Conditional positions,10.0,50.0,
-retention,57,Conditional positions,20.0,58.333333333333336,
-retention,57,Conditional positions,35.0,75.0,
-retention,57,Conditional positions,50.0,75.0,
-retention,57,Conditional positions,70.0,83.33333333333334,
-retention,57,Conditional positions,100.0,100.0,
-retention,58,Conditional positions,10.0,33.33333333333333,
-retention,58,Conditional positions,20.0,41.66666666666667,
-retention,58,Conditional positions,35.0,50.0,
-retention,58,Conditional positions,50.0,50.0,
-retention,58,Conditional positions,70.0,66.66666666666666,
-retention,58,Conditional positions,100.0,100.0,
-retention,59,Conditional positions,10.0,8.333333333333332,
-retention,59,Conditional positions,20.0,16.666666666666664,
-retention,59,Conditional positions,35.0,33.33333333333333,
-retention,59,Conditional positions,50.0,50.0,
-retention,59,Conditional positions,70.0,66.66666666666666,
-retention,59,Conditional positions,100.0,91.66666666666666,
-retention,60,Conditional positions,10.0,16.666666666666664,
-retention,60,Conditional positions,20.0,33.33333333333333,
-retention,60,Conditional positions,35.0,41.66666666666667,
-retention,60,Conditional positions,50.0,66.66666666666666,
-retention,60,Conditional positions,70.0,66.66666666666666,
-retention,60,Conditional positions,100.0,100.0,
-retention,61,Conditional positions,10.0,16.666666666666664,
-retention,61,Conditional positions,20.0,33.33333333333333,
-retention,61,Conditional positions,35.0,50.0,
-retention,61,Conditional positions,50.0,58.333333333333336,
-retention,61,Conditional positions,70.0,58.333333333333336,
-retention,61,Conditional positions,100.0,100.0,
-retention,62,Conditional positions,10.0,16.666666666666664,
-retention,62,Conditional positions,20.0,33.33333333333333,
-retention,62,Conditional positions,35.0,41.66666666666667,
-retention,62,Conditional positions,50.0,50.0,
-retention,62,Conditional positions,70.0,75.0,
-retention,62,Conditional positions,100.0,100.0,
-retention,63,Conditional positions,10.0,16.666666666666664,
-retention,63,Conditional positions,20.0,16.666666666666664,
-retention,63,Conditional positions,35.0,33.33333333333333,
-retention,63,Conditional positions,50.0,41.66666666666667,
-retention,63,Conditional positions,70.0,58.333333333333336,
-retention,63,Conditional positions,100.0,100.0,
-retention,64,Conditional positions,10.0,25.0,
-retention,64,Conditional positions,20.0,25.0,
-retention,64,Conditional positions,35.0,50.0,
-retention,64,Conditional positions,50.0,58.333333333333336,
-retention,64,Conditional positions,70.0,66.66666666666666,
-retention,64,Conditional positions,100.0,100.0,
-retention,65,Conditional positions,10.0,8.333333333333332,
-retention,65,Conditional positions,20.0,25.0,
-retention,65,Conditional positions,35.0,41.66666666666667,
-retention,65,Conditional positions,50.0,66.66666666666666,
-retention,65,Conditional positions,70.0,75.0,
-retention,65,Conditional positions,100.0,91.66666666666666,
-retention,66,Conditional positions,10.0,16.666666666666664,
-retention,66,Conditional positions,20.0,25.0,
-retention,66,Conditional positions,35.0,33.33333333333333,
-retention,66,Conditional positions,50.0,41.66666666666667,
-retention,66,Conditional positions,70.0,58.333333333333336,
-retention,66,Conditional positions,100.0,100.0,
-retention,67,Conditional positions,10.0,33.33333333333333,
-retention,67,Conditional positions,20.0,41.66666666666667,
-retention,67,Conditional positions,35.0,50.0,
-retention,67,Conditional positions,50.0,50.0,
-retention,67,Conditional positions,70.0,58.333333333333336,
-retention,67,Conditional positions,100.0,91.66666666666666,
-retention,68,Conditional positions,10.0,16.666666666666664,
-retention,68,Conditional positions,20.0,25.0,
-retention,68,Conditional positions,35.0,41.66666666666667,
-retention,68,Conditional positions,50.0,50.0,
-retention,68,Conditional positions,70.0,50.0,
-retention,68,Conditional positions,100.0,83.33333333333334,
-retention,69,Conditional positions,10.0,25.0,
-retention,69,Conditional positions,20.0,25.0,
-retention,69,Conditional positions,35.0,50.0,
-retention,69,Conditional positions,50.0,58.333333333333336,
-retention,69,Conditional positions,70.0,75.0,
-retention,69,Conditional positions,100.0,100.0,
-retention,70,Conditional positions,10.0,0.0,
-retention,70,Conditional positions,20.0,25.0,
-retention,70,Conditional positions,35.0,50.0,
-retention,70,Conditional positions,50.0,58.333333333333336,
-retention,70,Conditional positions,70.0,58.333333333333336,
-retention,70,Conditional positions,100.0,91.66666666666666,
-retention,71,Conditional positions,10.0,16.666666666666664,
-retention,71,Conditional positions,20.0,25.0,
-retention,71,Conditional positions,35.0,25.0,
-retention,71,Conditional positions,50.0,25.0,
-retention,71,Conditional positions,70.0,50.0,
-retention,71,Conditional positions,100.0,83.33333333333334,
-retention,72,Conditional positions,10.0,8.333333333333332,
-retention,72,Conditional positions,20.0,8.333333333333332,
-retention,72,Conditional positions,35.0,8.333333333333332,
-retention,72,Conditional positions,50.0,66.66666666666666,
-retention,72,Conditional positions,70.0,66.66666666666666,
-retention,72,Conditional positions,100.0,91.66666666666666,
-retention,73,Conditional positions,10.0,8.333333333333332,
-retention,73,Conditional positions,20.0,16.666666666666664,
-retention,73,Conditional positions,35.0,33.33333333333333,
-retention,73,Conditional positions,50.0,41.66666666666667,
-retention,73,Conditional positions,70.0,75.0,
-retention,73,Conditional positions,100.0,100.0,
-retention,74,Conditional positions,10.0,33.33333333333333,
-retention,74,Conditional positions,20.0,41.66666666666667,
-retention,74,Conditional positions,35.0,58.333333333333336,
-retention,74,Conditional positions,50.0,58.333333333333336,
-retention,74,Conditional positions,70.0,66.66666666666666,
-retention,74,Conditional positions,100.0,91.66666666666666,
-retention,75,Conditional positions,10.0,25.0,
-retention,75,Conditional positions,20.0,33.33333333333333,
-retention,75,Conditional positions,35.0,41.66666666666667,
-retention,75,Conditional positions,50.0,66.66666666666666,
-retention,75,Conditional positions,70.0,83.33333333333334,
-retention,75,Conditional positions,100.0,100.0,
-retention,76,Conditional positions,10.0,25.0,
-retention,76,Conditional positions,20.0,58.333333333333336,
-retention,76,Conditional positions,35.0,58.333333333333336,
-retention,76,Conditional positions,50.0,66.66666666666666,
-retention,76,Conditional positions,70.0,83.33333333333334,
-retention,76,Conditional positions,100.0,100.0,
-retention,77,Conditional positions,10.0,8.333333333333332,
-retention,77,Conditional positions,20.0,25.0,
-retention,77,Conditional positions,35.0,41.66666666666667,
-retention,77,Conditional positions,50.0,41.66666666666667,
-retention,77,Conditional positions,70.0,58.333333333333336,
-retention,77,Conditional positions,100.0,100.0,
-retention,78,Conditional positions,10.0,8.333333333333332,
-retention,78,Conditional positions,20.0,16.666666666666664,
-retention,78,Conditional positions,35.0,33.33333333333333,
-retention,78,Conditional positions,50.0,58.333333333333336,
-retention,78,Conditional positions,70.0,83.33333333333334,
-retention,78,Conditional positions,100.0,91.66666666666666,
-retention,79,Conditional positions,10.0,16.666666666666664,
-retention,79,Conditional positions,20.0,16.666666666666664,
-retention,79,Conditional positions,35.0,33.33333333333333,
-retention,79,Conditional positions,50.0,41.66666666666667,
-retention,79,Conditional positions,70.0,58.333333333333336,
-retention,79,Conditional positions,100.0,100.0,
-retention,80,Conditional positions,10.0,16.666666666666664,
-retention,80,Conditional positions,20.0,33.33333333333333,
-retention,80,Conditional positions,35.0,33.33333333333333,
-retention,80,Conditional positions,50.0,41.66666666666667,
-retention,80,Conditional positions,70.0,58.333333333333336,
-retention,80,Conditional positions,100.0,100.0,
-retention,81,Conditional positions,10.0,25.0,
-retention,81,Conditional positions,20.0,33.33333333333333,
-retention,81,Conditional positions,35.0,58.333333333333336,
-retention,81,Conditional positions,50.0,66.66666666666666,
-retention,81,Conditional positions,70.0,75.0,
-retention,81,Conditional positions,100.0,100.0,
-retention,82,Conditional positions,10.0,33.33333333333333,
-retention,82,Conditional positions,20.0,41.66666666666667,
-retention,82,Conditional positions,35.0,66.66666666666666,
-retention,82,Conditional positions,50.0,66.66666666666666,
-retention,82,Conditional positions,70.0,75.0,
-retention,82,Conditional positions,100.0,100.0,
-retention,83,Conditional positions,10.0,8.333333333333332,
-retention,83,Conditional positions,20.0,25.0,
-retention,83,Conditional positions,35.0,33.33333333333333,
-retention,83,Conditional positions,50.0,41.66666666666667,
-retention,83,Conditional positions,70.0,41.66666666666667,
-retention,83,Conditional positions,100.0,100.0,
-retention,84,Conditional positions,10.0,8.333333333333332,
-retention,84,Conditional positions,20.0,25.0,
-retention,84,Conditional positions,35.0,33.33333333333333,
-retention,84,Conditional positions,50.0,50.0,
-retention,84,Conditional positions,70.0,50.0,
-retention,84,Conditional positions,100.0,91.66666666666666,
-retention,85,Conditional positions,10.0,8.333333333333332,
-retention,85,Conditional positions,20.0,16.666666666666664,
-retention,85,Conditional positions,35.0,25.0,
-retention,85,Conditional positions,50.0,33.33333333333333,
-retention,85,Conditional positions,70.0,41.66666666666667,
-retention,85,Conditional positions,100.0,83.33333333333334,
-retention,86,Conditional positions,10.0,16.666666666666664,
-retention,86,Conditional positions,20.0,25.0,
-retention,86,Conditional positions,35.0,33.33333333333333,
-retention,86,Conditional positions,50.0,50.0,
-retention,86,Conditional positions,70.0,66.66666666666666,
-retention,86,Conditional positions,100.0,100.0,
-retention,87,Conditional positions,10.0,0.0,
-retention,87,Conditional positions,20.0,25.0,
-retention,87,Conditional positions,35.0,41.66666666666667,
-retention,87,Conditional positions,50.0,50.0,
-retention,87,Conditional positions,70.0,83.33333333333334,
-retention,87,Conditional positions,100.0,100.0,
-retention,88,Conditional positions,10.0,0.0,
-retention,88,Conditional positions,20.0,16.666666666666664,
-retention,88,Conditional positions,35.0,16.666666666666664,
-retention,88,Conditional positions,50.0,25.0,
-retention,88,Conditional positions,70.0,58.333333333333336,
-retention,88,Conditional positions,100.0,100.0,
-retention,89,Conditional positions,10.0,16.666666666666664,
-retention,89,Conditional positions,20.0,41.66666666666667,
-retention,89,Conditional positions,35.0,41.66666666666667,
-retention,89,Conditional positions,50.0,41.66666666666667,
-retention,89,Conditional positions,70.0,58.333333333333336,
-retention,89,Conditional positions,100.0,91.66666666666666,
-retention,90,Conditional positions,10.0,16.666666666666664,
-retention,90,Conditional positions,20.0,33.33333333333333,
-retention,90,Conditional positions,35.0,41.66666666666667,
-retention,90,Conditional positions,50.0,41.66666666666667,
-retention,90,Conditional positions,70.0,41.66666666666667,
-retention,90,Conditional positions,100.0,91.66666666666666,
-retention,91,Conditional positions,10.0,8.333333333333332,
-retention,91,Conditional positions,20.0,25.0,
-retention,91,Conditional positions,35.0,33.33333333333333,
-retention,91,Conditional positions,50.0,41.66666666666667,
-retention,91,Conditional positions,70.0,58.333333333333336,
-retention,91,Conditional positions,100.0,91.66666666666666,
-retention,92,Conditional positions,10.0,16.666666666666664,
-retention,92,Conditional positions,20.0,16.666666666666664,
-retention,92,Conditional positions,35.0,33.33333333333333,
-retention,92,Conditional positions,50.0,50.0,
-retention,92,Conditional positions,70.0,66.66666666666666,
-retention,92,Conditional positions,100.0,91.66666666666666,
-retention,93,Conditional positions,10.0,41.66666666666667,
-retention,93,Conditional positions,20.0,41.66666666666667,
-retention,93,Conditional positions,35.0,50.0,
-retention,93,Conditional positions,50.0,58.333333333333336,
-retention,93,Conditional positions,70.0,58.333333333333336,
-retention,93,Conditional positions,100.0,100.0,
-retention,94,Conditional positions,10.0,25.0,
-retention,94,Conditional positions,20.0,33.33333333333333,
-retention,94,Conditional positions,35.0,41.66666666666667,
-retention,94,Conditional positions,50.0,75.0,
-retention,94,Conditional positions,70.0,75.0,
-retention,94,Conditional positions,100.0,91.66666666666666,
-retention,95,Conditional positions,10.0,8.333333333333332,
-retention,95,Conditional positions,20.0,25.0,
-retention,95,Conditional positions,35.0,58.333333333333336,
-retention,95,Conditional positions,50.0,75.0,
-retention,95,Conditional positions,70.0,75.0,
-retention,95,Conditional positions,100.0,91.66666666666666,
-retention,96,Conditional positions,10.0,33.33333333333333,
-retention,96,Conditional positions,20.0,50.0,
-retention,96,Conditional positions,35.0,66.66666666666666,
-retention,96,Conditional positions,50.0,75.0,
-retention,96,Conditional positions,70.0,91.66666666666666,
-retention,96,Conditional positions,100.0,100.0,
-retention,97,Conditional positions,10.0,33.33333333333333,
-retention,97,Conditional positions,20.0,41.66666666666667,
-retention,97,Conditional positions,35.0,58.333333333333336,
-retention,97,Conditional positions,50.0,75.0,
-retention,97,Conditional positions,70.0,91.66666666666666,
-retention,97,Conditional positions,100.0,100.0,
-retention,98,Conditional positions,10.0,8.333333333333332,
-retention,98,Conditional positions,20.0,33.33333333333333,
-retention,98,Conditional positions,35.0,41.66666666666667,
-retention,98,Conditional positions,50.0,41.66666666666667,
-retention,98,Conditional positions,70.0,58.333333333333336,
-retention,98,Conditional positions,100.0,91.66666666666666,
-retention,99,Conditional positions,10.0,8.333333333333332,
-retention,99,Conditional positions,20.0,41.66666666666667,
-retention,99,Conditional positions,35.0,41.66666666666667,
-retention,99,Conditional positions,50.0,58.333333333333336,
-retention,99,Conditional positions,70.0,83.33333333333334,
-retention,99,Conditional positions,100.0,100.0,
-retention,100,Conditional positions,10.0,0.0,
-retention,100,Conditional positions,20.0,25.0,
-retention,100,Conditional positions,35.0,25.0,
-retention,100,Conditional positions,50.0,41.66666666666667,
-retention,100,Conditional positions,70.0,75.0,
-retention,100,Conditional positions,100.0,100.0,
-false_consensus,1,Ordinary summary,10.0,,1
-false_consensus,1,Ordinary summary,20.0,,1
-false_consensus,1,Ordinary summary,35.0,,1
-false_consensus,1,Ordinary summary,50.0,,1
-false_consensus,1,Ordinary summary,70.0,,0
-false_consensus,1,Ordinary summary,100.0,,0
-false_consensus,2,Ordinary summary,10.0,,0
-false_consensus,2,Ordinary summary,20.0,,0
-false_consensus,2,Ordinary summary,35.0,,0
-false_consensus,2,Ordinary summary,50.0,,0
-false_consensus,2,Ordinary summary,70.0,,0
-false_consensus,2,Ordinary summary,100.0,,0
-false_consensus,3,Ordinary summary,10.0,,1
-false_consensus,3,Ordinary summary,20.0,,1
-false_consensus,3,Ordinary summary,35.0,,0
-false_consensus,3,Ordinary summary,50.0,,0
-false_consensus,3,Ordinary summary,70.0,,0
-false_consensus,3,Ordinary summary,100.0,,0
-false_consensus,4,Ordinary summary,10.0,,0
-false_consensus,4,Ordinary summary,20.0,,0
-false_consensus,4,Ordinary summary,35.0,,0
-false_consensus,4,Ordinary summary,50.0,,0
-false_consensus,4,Ordinary summary,70.0,,0
-false_consensus,4,Ordinary summary,100.0,,0
-false_consensus,5,Ordinary summary,10.0,,1
-false_consensus,5,Ordinary summary,20.0,,0
-false_consensus,5,Ordinary summary,35.0,,0
-false_consensus,5,Ordinary summary,50.0,,0
-false_consensus,5,Ordinary summary,70.0,,0
-false_consensus,5,Ordinary summary,100.0,,0
-false_consensus,6,Ordinary summary,10.0,,0
-false_consensus,6,Ordinary summary,20.0,,0
-false_consensus,6,Ordinary summary,35.0,,0
-false_consensus,6,Ordinary summary,50.0,,0
-false_consensus,6,Ordinary summary,70.0,,0
-false_consensus,6,Ordinary summary,100.0,,0
-false_consensus,7,Ordinary summary,10.0,,0
-false_consensus,7,Ordinary summary,20.0,,0
-false_consensus,7,Ordinary summary,35.0,,0
-false_consensus,7,Ordinary summary,50.0,,0
-false_consensus,7,Ordinary summary,70.0,,0
-false_consensus,7,Ordinary summary,100.0,,0
-false_consensus,8,Ordinary summary,10.0,,1
-false_consensus,8,Ordinary summary,20.0,,0
-false_consensus,8,Ordinary summary,35.0,,0
-false_consensus,8,Ordinary summary,50.0,,0
-false_consensus,8,Ordinary summary,70.0,,0
-false_consensus,8,Ordinary summary,100.0,,0
-false_consensus,9,Ordinary summary,10.0,,1
-false_consensus,9,Ordinary summary,20.0,,1
-false_consensus,9,Ordinary summary,35.0,,0
-false_consensus,9,Ordinary summary,50.0,,0
-false_consensus,9,Ordinary summary,70.0,,0
-false_consensus,9,Ordinary summary,100.0,,0
-false_consensus,10,Ordinary summary,10.0,,0
-false_consensus,10,Ordinary summary,20.0,,0
-false_consensus,10,Ordinary summary,35.0,,0
-false_consensus,10,Ordinary summary,50.0,,0
-false_consensus,10,Ordinary summary,70.0,,0
-false_consensus,10,Ordinary summary,100.0,,0
-false_consensus,11,Ordinary summary,10.0,,0
-false_consensus,11,Ordinary summary,20.0,,0
-false_consensus,11,Ordinary summary,35.0,,0
-false_consensus,11,Ordinary summary,50.0,,0
-false_consensus,11,Ordinary summary,70.0,,0
-false_consensus,11,Ordinary summary,100.0,,0
-false_consensus,12,Ordinary summary,10.0,,0
-false_consensus,12,Ordinary summary,20.0,,0
-false_consensus,12,Ordinary summary,35.0,,0
-false_consensus,12,Ordinary summary,50.0,,0
-false_consensus,12,Ordinary summary,70.0,,0
-false_consensus,12,Ordinary summary,100.0,,0
-false_consensus,13,Ordinary summary,10.0,,0
-false_consensus,13,Ordinary summary,20.0,,0
-false_consensus,13,Ordinary summary,35.0,,0
-false_consensus,13,Ordinary summary,50.0,,0
-false_consensus,13,Ordinary summary,70.0,,0
-false_consensus,13,Ordinary summary,100.0,,0
-false_consensus,14,Ordinary summary,10.0,,0
-false_consensus,14,Ordinary summary,20.0,,0
-false_consensus,14,Ordinary summary,35.0,,0
-false_consensus,14,Ordinary summary,50.0,,0
-false_consensus,14,Ordinary summary,70.0,,0
-false_consensus,14,Ordinary summary,100.0,,0
-false_consensus,15,Ordinary summary,10.0,,0
-false_consensus,15,Ordinary summary,20.0,,0
-false_consensus,15,Ordinary summary,35.0,,0
-false_consensus,15,Ordinary summary,50.0,,0
-false_consensus,15,Ordinary summary,70.0,,0
-false_consensus,15,Ordinary summary,100.0,,0
-false_consensus,16,Ordinary summary,10.0,,0
-false_consensus,16,Ordinary summary,20.0,,0
-false_consensus,16,Ordinary summary,35.0,,0
-false_consensus,16,Ordinary summary,50.0,,0
-false_consensus,16,Ordinary summary,70.0,,0
-false_consensus,16,Ordinary summary,100.0,,0
-false_consensus,17,Ordinary summary,10.0,,0
-false_consensus,17,Ordinary summary,20.0,,0
-false_consensus,17,Ordinary summary,35.0,,0
-false_consensus,17,Ordinary summary,50.0,,0
-false_consensus,17,Ordinary summary,70.0,,0
-false_consensus,17,Ordinary summary,100.0,,0
-false_consensus,18,Ordinary summary,10.0,,1
-false_consensus,18,Ordinary summary,20.0,,1
-false_consensus,18,Ordinary summary,35.0,,1
-false_consensus,18,Ordinary summary,50.0,,1
-false_consensus,18,Ordinary summary,70.0,,0
-false_consensus,18,Ordinary summary,100.0,,0
-false_consensus,19,Ordinary summary,10.0,,0
-false_consensus,19,Ordinary summary,20.0,,0
-false_consensus,19,Ordinary summary,35.0,,0
-false_consensus,19,Ordinary summary,50.0,,0
-false_consensus,19,Ordinary summary,70.0,,0
-false_consensus,19,Ordinary summary,100.0,,0
-false_consensus,20,Ordinary summary,10.0,,0
-false_consensus,20,Ordinary summary,20.0,,0
-false_consensus,20,Ordinary summary,35.0,,0
-false_consensus,20,Ordinary summary,50.0,,0
-false_consensus,20,Ordinary summary,70.0,,0
-false_consensus,20,Ordinary summary,100.0,,0
-false_consensus,21,Ordinary summary,10.0,,0
-false_consensus,21,Ordinary summary,20.0,,0
-false_consensus,21,Ordinary summary,35.0,,0
-false_consensus,21,Ordinary summary,50.0,,0
-false_consensus,21,Ordinary summary,70.0,,0
-false_consensus,21,Ordinary summary,100.0,,0
-false_consensus,22,Ordinary summary,10.0,,1
-false_consensus,22,Ordinary summary,20.0,,1
-false_consensus,22,Ordinary summary,35.0,,1
-false_consensus,22,Ordinary summary,50.0,,1
-false_consensus,22,Ordinary summary,70.0,,1
-false_consensus,22,Ordinary summary,100.0,,0
-false_consensus,23,Ordinary summary,10.0,,0
-false_consensus,23,Ordinary summary,20.0,,0
-false_consensus,23,Ordinary summary,35.0,,0
-false_consensus,23,Ordinary summary,50.0,,0
-false_consensus,23,Ordinary summary,70.0,,0
-false_consensus,23,Ordinary summary,100.0,,0
-false_consensus,24,Ordinary summary,10.0,,0
-false_consensus,24,Ordinary summary,20.0,,0
-false_consensus,24,Ordinary summary,35.0,,0
-false_consensus,24,Ordinary summary,50.0,,0
-false_consensus,24,Ordinary summary,70.0,,0
-false_consensus,24,Ordinary summary,100.0,,0
-false_consensus,25,Ordinary summary,10.0,,0
-false_consensus,25,Ordinary summary,20.0,,0
-false_consensus,25,Ordinary summary,35.0,,0
-false_consensus,25,Ordinary summary,50.0,,0
-false_consensus,25,Ordinary summary,70.0,,0
-false_consensus,25,Ordinary summary,100.0,,0
-false_consensus,26,Ordinary summary,10.0,,0
-false_consensus,26,Ordinary summary,20.0,,0
-false_consensus,26,Ordinary summary,35.0,,0
-false_consensus,26,Ordinary summary,50.0,,0
-false_consensus,26,Ordinary summary,70.0,,0
-false_consensus,26,Ordinary summary,100.0,,0
-false_consensus,27,Ordinary summary,10.0,,0
-false_consensus,27,Ordinary summary,20.0,,0
-false_consensus,27,Ordinary summary,35.0,,0
-false_consensus,27,Ordinary summary,50.0,,0
-false_consensus,27,Ordinary summary,70.0,,0
-false_consensus,27,Ordinary summary,100.0,,0
-false_consensus,28,Ordinary summary,10.0,,0
-false_consensus,28,Ordinary summary,20.0,,0
-false_consensus,28,Ordinary summary,35.0,,0
-false_consensus,28,Ordinary summary,50.0,,0
-false_consensus,28,Ordinary summary,70.0,,0
-false_consensus,28,Ordinary summary,100.0,,0
-false_consensus,29,Ordinary summary,10.0,,1
-false_consensus,29,Ordinary summary,20.0,,1
-false_consensus,29,Ordinary summary,35.0,,1
-false_consensus,29,Ordinary summary,50.0,,1
-false_consensus,29,Ordinary summary,70.0,,0
-false_consensus,29,Ordinary summary,100.0,,0
-false_consensus,30,Ordinary summary,10.0,,1
-false_consensus,30,Ordinary summary,20.0,,1
-false_consensus,30,Ordinary summary,35.0,,0
-false_consensus,30,Ordinary summary,50.0,,0
-false_consensus,30,Ordinary summary,70.0,,0
-false_consensus,30,Ordinary summary,100.0,,0
-false_consensus,31,Ordinary summary,10.0,,1
-false_consensus,31,Ordinary summary,20.0,,1
-false_consensus,31,Ordinary summary,35.0,,1
-false_consensus,31,Ordinary summary,50.0,,1
-false_consensus,31,Ordinary summary,70.0,,0
-false_consensus,31,Ordinary summary,100.0,,0
-false_consensus,32,Ordinary summary,10.0,,0
-false_consensus,32,Ordinary summary,20.0,,0
-false_consensus,32,Ordinary summary,35.0,,0
-false_consensus,32,Ordinary summary,50.0,,0
-false_consensus,32,Ordinary summary,70.0,,0
-false_consensus,32,Ordinary summary,100.0,,0
-false_consensus,33,Ordinary summary,10.0,,0
-false_consensus,33,Ordinary summary,20.0,,0
-false_consensus,33,Ordinary summary,35.0,,0
-false_consensus,33,Ordinary summary,50.0,,0
-false_consensus,33,Ordinary summary,70.0,,0
-false_consensus,33,Ordinary summary,100.0,,0
-false_consensus,34,Ordinary summary,10.0,,0
-false_consensus,34,Ordinary summary,20.0,,0
-false_consensus,34,Ordinary summary,35.0,,0
-false_consensus,34,Ordinary summary,50.0,,0
-false_consensus,34,Ordinary summary,70.0,,0
-false_consensus,34,Ordinary summary,100.0,,0
-false_consensus,35,Ordinary summary,10.0,,1
-false_consensus,35,Ordinary summary,20.0,,1
-false_consensus,35,Ordinary summary,35.0,,1
-false_consensus,35,Ordinary summary,50.0,,1
-false_consensus,35,Ordinary summary,70.0,,1
-false_consensus,35,Ordinary summary,100.0,,1
-false_consensus,36,Ordinary summary,10.0,,0
-false_consensus,36,Ordinary summary,20.0,,0
-false_consensus,36,Ordinary summary,35.0,,0
-false_consensus,36,Ordinary summary,50.0,,0
-false_consensus,36,Ordinary summary,70.0,,0
-false_consensus,36,Ordinary summary,100.0,,0
-false_consensus,37,Ordinary summary,10.0,,1
-false_consensus,37,Ordinary summary,20.0,,1
-false_consensus,37,Ordinary summary,35.0,,1
-false_consensus,37,Ordinary summary,50.0,,0
-false_consensus,37,Ordinary summary,70.0,,0
-false_consensus,37,Ordinary summary,100.0,,0
-false_consensus,38,Ordinary summary,10.0,,0
-false_consensus,38,Ordinary summary,20.0,,0
-false_consensus,38,Ordinary summary,35.0,,0
-false_consensus,38,Ordinary summary,50.0,,0
-false_consensus,38,Ordinary summary,70.0,,0
-false_consensus,38,Ordinary summary,100.0,,0
-false_consensus,39,Ordinary summary,10.0,,0
-false_consensus,39,Ordinary summary,20.0,,0
-false_consensus,39,Ordinary summary,35.0,,0
-false_consensus,39,Ordinary summary,50.0,,0
-false_consensus,39,Ordinary summary,70.0,,0
-false_consensus,39,Ordinary summary,100.0,,0
-false_consensus,40,Ordinary summary,10.0,,0
-false_consensus,40,Ordinary summary,20.0,,0
-false_consensus,40,Ordinary summary,35.0,,0
-false_consensus,40,Ordinary summary,50.0,,0
-false_consensus,40,Ordinary summary,70.0,,0
-false_consensus,40,Ordinary summary,100.0,,0
-false_consensus,41,Ordinary summary,10.0,,0
-false_consensus,41,Ordinary summary,20.0,,0
-false_consensus,41,Ordinary summary,35.0,,0
-false_consensus,41,Ordinary summary,50.0,,0
-false_consensus,41,Ordinary summary,70.0,,0
-false_consensus,41,Ordinary summary,100.0,,0
-false_consensus,42,Ordinary summary,10.0,,0
-false_consensus,42,Ordinary summary,20.0,,0
-false_consensus,42,Ordinary summary,35.0,,0
-false_consensus,42,Ordinary summary,50.0,,0
-false_consensus,42,Ordinary summary,70.0,,0
-false_consensus,42,Ordinary summary,100.0,,0
-false_consensus,43,Ordinary summary,10.0,,0
-false_consensus,43,Ordinary summary,20.0,,0
-false_consensus,43,Ordinary summary,35.0,,0
-false_consensus,43,Ordinary summary,50.0,,0
-false_consensus,43,Ordinary summary,70.0,,0
-false_consensus,43,Ordinary summary,100.0,,0
-false_consensus,44,Ordinary summary,10.0,,1
-false_consensus,44,Ordinary summary,20.0,,0
-false_consensus,44,Ordinary summary,35.0,,0
-false_consensus,44,Ordinary summary,50.0,,0
-false_consensus,44,Ordinary summary,70.0,,0
-false_consensus,44,Ordinary summary,100.0,,0
-false_consensus,45,Ordinary summary,10.0,,0
-false_consensus,45,Ordinary summary,20.0,,0
-false_consensus,45,Ordinary summary,35.0,,0
-false_consensus,45,Ordinary summary,50.0,,0
-false_consensus,45,Ordinary summary,70.0,,0
-false_consensus,45,Ordinary summary,100.0,,0
-false_consensus,46,Ordinary summary,10.0,,1
-false_consensus,46,Ordinary summary,20.0,,1
-false_consensus,46,Ordinary summary,35.0,,1
-false_consensus,46,Ordinary summary,50.0,,1
-false_consensus,46,Ordinary summary,70.0,,0
-false_consensus,46,Ordinary summary,100.0,,0
-false_consensus,47,Ordinary summary,10.0,,0
-false_consensus,47,Ordinary summary,20.0,,0
-false_consensus,47,Ordinary summary,35.0,,0
-false_consensus,47,Ordinary summary,50.0,,0
-false_consensus,47,Ordinary summary,70.0,,0
-false_consensus,47,Ordinary summary,100.0,,0
-false_consensus,48,Ordinary summary,10.0,,1
-false_consensus,48,Ordinary summary,20.0,,1
-false_consensus,48,Ordinary summary,35.0,,1
-false_consensus,48,Ordinary summary,50.0,,1
-false_consensus,48,Ordinary summary,70.0,,1
-false_consensus,48,Ordinary summary,100.0,,0
-false_consensus,49,Ordinary summary,10.0,,0
-false_consensus,49,Ordinary summary,20.0,,0
-false_consensus,49,Ordinary summary,35.0,,0
-false_consensus,49,Ordinary summary,50.0,,0
-false_consensus,49,Ordinary summary,70.0,,0
-false_consensus,49,Ordinary summary,100.0,,0
-false_consensus,50,Ordinary summary,10.0,,1
-false_consensus,50,Ordinary summary,20.0,,1
-false_consensus,50,Ordinary summary,35.0,,0
-false_consensus,50,Ordinary summary,50.0,,0
-false_consensus,50,Ordinary summary,70.0,,0
-false_consensus,50,Ordinary summary,100.0,,0
-false_consensus,51,Ordinary summary,10.0,,0
-false_consensus,51,Ordinary summary,20.0,,0
-false_consensus,51,Ordinary summary,35.0,,0
-false_consensus,51,Ordinary summary,50.0,,0
-false_consensus,51,Ordinary summary,70.0,,0
-false_consensus,51,Ordinary summary,100.0,,0
-false_consensus,52,Ordinary summary,10.0,,0
-false_consensus,52,Ordinary summary,20.0,,0
-false_consensus,52,Ordinary summary,35.0,,0
-false_consensus,52,Ordinary summary,50.0,,0
-false_consensus,52,Ordinary summary,70.0,,0
-false_consensus,52,Ordinary summary,100.0,,0
-false_consensus,53,Ordinary summary,10.0,,1
-false_consensus,53,Ordinary summary,20.0,,1
-false_consensus,53,Ordinary summary,35.0,,0
-false_consensus,53,Ordinary summary,50.0,,0
-false_consensus,53,Ordinary summary,70.0,,0
-false_consensus,53,Ordinary summary,100.0,,0
-false_consensus,54,Ordinary summary,10.0,,0
-false_consensus,54,Ordinary summary,20.0,,0
-false_consensus,54,Ordinary summary,35.0,,0
-false_consensus,54,Ordinary summary,50.0,,0
-false_consensus,54,Ordinary summary,70.0,,0
-false_consensus,54,Ordinary summary,100.0,,0
-false_consensus,55,Ordinary summary,10.0,,0
-false_consensus,55,Ordinary summary,20.0,,0
-false_consensus,55,Ordinary summary,35.0,,0
-false_consensus,55,Ordinary summary,50.0,,0
-false_consensus,55,Ordinary summary,70.0,,0
-false_consensus,55,Ordinary summary,100.0,,0
-false_consensus,56,Ordinary summary,10.0,,0
-false_consensus,56,Ordinary summary,20.0,,0
-false_consensus,56,Ordinary summary,35.0,,0
-false_consensus,56,Ordinary summary,50.0,,0
-false_consensus,56,Ordinary summary,70.0,,0
-false_consensus,56,Ordinary summary,100.0,,0
-false_consensus,57,Ordinary summary,10.0,,0
-false_consensus,57,Ordinary summary,20.0,,0
-false_consensus,57,Ordinary summary,35.0,,0
-false_consensus,57,Ordinary summary,50.0,,0
-false_consensus,57,Ordinary summary,70.0,,0
-false_consensus,57,Ordinary summary,100.0,,0
-false_consensus,58,Ordinary summary,10.0,,0
-false_consensus,58,Ordinary summary,20.0,,0
-false_consensus,58,Ordinary summary,35.0,,0
-false_consensus,58,Ordinary summary,50.0,,0
-false_consensus,58,Ordinary summary,70.0,,0
-false_consensus,58,Ordinary summary,100.0,,0
-false_consensus,59,Ordinary summary,10.0,,0
-false_consensus,59,Ordinary summary,20.0,,0
-false_consensus,59,Ordinary summary,35.0,,0
-false_consensus,59,Ordinary summary,50.0,,0
-false_consensus,59,Ordinary summary,70.0,,0
-false_consensus,59,Ordinary summary,100.0,,0
-false_consensus,60,Ordinary summary,10.0,,0
-false_consensus,60,Ordinary summary,20.0,,0
-false_consensus,60,Ordinary summary,35.0,,0
-false_consensus,60,Ordinary summary,50.0,,0
-false_consensus,60,Ordinary summary,70.0,,0
-false_consensus,60,Ordinary summary,100.0,,0
-false_consensus,61,Ordinary summary,10.0,,0
-false_consensus,61,Ordinary summary,20.0,,0
-false_consensus,61,Ordinary summary,35.0,,0
-false_consensus,61,Ordinary summary,50.0,,0
-false_consensus,61,Ordinary summary,70.0,,0
-false_consensus,61,Ordinary summary,100.0,,0
-false_consensus,62,Ordinary summary,10.0,,0
-false_consensus,62,Ordinary summary,20.0,,0
-false_consensus,62,Ordinary summary,35.0,,0
-false_consensus,62,Ordinary summary,50.0,,0
-false_consensus,62,Ordinary summary,70.0,,0
-false_consensus,62,Ordinary summary,100.0,,0
-false_consensus,63,Ordinary summary,10.0,,1
-false_consensus,63,Ordinary summary,20.0,,1
-false_consensus,63,Ordinary summary,35.0,,1
-false_consensus,63,Ordinary summary,50.0,,1
-false_consensus,63,Ordinary summary,70.0,,0
-false_consensus,63,Ordinary summary,100.0,,0
-false_consensus,64,Ordinary summary,10.0,,1
-false_consensus,64,Ordinary summary,20.0,,1
-false_consensus,64,Ordinary summary,35.0,,1
-false_consensus,64,Ordinary summary,50.0,,1
-false_consensus,64,Ordinary summary,70.0,,1
-false_consensus,64,Ordinary summary,100.0,,0
-false_consensus,65,Ordinary summary,10.0,,1
-false_consensus,65,Ordinary summary,20.0,,0
-false_consensus,65,Ordinary summary,35.0,,0
-false_consensus,65,Ordinary summary,50.0,,0
-false_consensus,65,Ordinary summary,70.0,,0
-false_consensus,65,Ordinary summary,100.0,,0
-false_consensus,66,Ordinary summary,10.0,,1
-false_consensus,66,Ordinary summary,20.0,,1
-false_consensus,66,Ordinary summary,35.0,,1
-false_consensus,66,Ordinary summary,50.0,,0
-false_consensus,66,Ordinary summary,70.0,,0
-false_consensus,66,Ordinary summary,100.0,,0
-false_consensus,67,Ordinary summary,10.0,,0
-false_consensus,67,Ordinary summary,20.0,,0
-false_consensus,67,Ordinary summary,35.0,,0
-false_consensus,67,Ordinary summary,50.0,,0
-false_consensus,67,Ordinary summary,70.0,,0
-false_consensus,67,Ordinary summary,100.0,,0
-false_consensus,68,Ordinary summary,10.0,,0
-false_consensus,68,Ordinary summary,20.0,,0
-false_consensus,68,Ordinary summary,35.0,,0
-false_consensus,68,Ordinary summary,50.0,,0
-false_consensus,68,Ordinary summary,70.0,,0
-false_consensus,68,Ordinary summary,100.0,,0
-false_consensus,69,Ordinary summary,10.0,,0
-false_consensus,69,Ordinary summary,20.0,,0
-false_consensus,69,Ordinary summary,35.0,,0
-false_consensus,69,Ordinary summary,50.0,,0
-false_consensus,69,Ordinary summary,70.0,,0
-false_consensus,69,Ordinary summary,100.0,,0
-false_consensus,70,Ordinary summary,10.0,,0
-false_consensus,70,Ordinary summary,20.0,,0
-false_consensus,70,Ordinary summary,35.0,,0
-false_consensus,70,Ordinary summary,50.0,,0
-false_consensus,70,Ordinary summary,70.0,,0
-false_consensus,70,Ordinary summary,100.0,,0
-false_consensus,71,Ordinary summary,10.0,,0
-false_consensus,71,Ordinary summary,20.0,,0
-false_consensus,71,Ordinary summary,35.0,,0
-false_consensus,71,Ordinary summary,50.0,,0
-false_consensus,71,Ordinary summary,70.0,,0
-false_consensus,71,Ordinary summary,100.0,,0
-false_consensus,72,Ordinary summary,10.0,,0
-false_consensus,72,Ordinary summary,20.0,,0
-false_consensus,72,Ordinary summary,35.0,,0
-false_consensus,72,Ordinary summary,50.0,,0
-false_consensus,72,Ordinary summary,70.0,,0
-false_consensus,72,Ordinary summary,100.0,,0
-false_consensus,73,Ordinary summary,10.0,,0
-false_consensus,73,Ordinary summary,20.0,,0
-false_consensus,73,Ordinary summary,35.0,,0
-false_consensus,73,Ordinary summary,50.0,,0
-false_consensus,73,Ordinary summary,70.0,,0
-false_consensus,73,Ordinary summary,100.0,,0
-false_consensus,74,Ordinary summary,10.0,,0
-false_consensus,74,Ordinary summary,20.0,,0
-false_consensus,74,Ordinary summary,35.0,,0
-false_consensus,74,Ordinary summary,50.0,,0
-false_consensus,74,Ordinary summary,70.0,,0
-false_consensus,74,Ordinary summary,100.0,,0
-false_consensus,75,Ordinary summary,10.0,,0
-false_consensus,75,Ordinary summary,20.0,,0
-false_consensus,75,Ordinary summary,35.0,,0
-false_consensus,75,Ordinary summary,50.0,,0
-false_consensus,75,Ordinary summary,70.0,,0
-false_consensus,75,Ordinary summary,100.0,,0
-false_consensus,76,Ordinary summary,10.0,,0
-false_consensus,76,Ordinary summary,20.0,,0
-false_consensus,76,Ordinary summary,35.0,,0
-false_consensus,76,Ordinary summary,50.0,,0
-false_consensus,76,Ordinary summary,70.0,,0
-false_consensus,76,Ordinary summary,100.0,,0
-false_consensus,77,Ordinary summary,10.0,,0
-false_consensus,77,Ordinary summary,20.0,,0
-false_consensus,77,Ordinary summary,35.0,,0
-false_consensus,77,Ordinary summary,50.0,,0
-false_consensus,77,Ordinary summary,70.0,,0
-false_consensus,77,Ordinary summary,100.0,,0
-false_consensus,78,Ordinary summary,10.0,,0
-false_consensus,78,Ordinary summary,20.0,,0
-false_consensus,78,Ordinary summary,35.0,,0
-false_consensus,78,Ordinary summary,50.0,,0
-false_consensus,78,Ordinary summary,70.0,,0
-false_consensus,78,Ordinary summary,100.0,,0
-false_consensus,79,Ordinary summary,10.0,,0
-false_consensus,79,Ordinary summary,20.0,,0
-false_consensus,79,Ordinary summary,35.0,,0
-false_consensus,79,Ordinary summary,50.0,,0
-false_consensus,79,Ordinary summary,70.0,,0
-false_consensus,79,Ordinary summary,100.0,,0
-false_consensus,80,Ordinary summary,10.0,,0
-false_consensus,80,Ordinary summary,20.0,,0
-false_consensus,80,Ordinary summary,35.0,,0
-false_consensus,80,Ordinary summary,50.0,,0
-false_consensus,80,Ordinary summary,70.0,,0
-false_consensus,80,Ordinary summary,100.0,,0
-false_consensus,81,Ordinary summary,10.0,,0
-false_consensus,81,Ordinary summary,20.0,,0
-false_consensus,81,Ordinary summary,35.0,,0
-false_consensus,81,Ordinary summary,50.0,,0
-false_consensus,81,Ordinary summary,70.0,,0
-false_consensus,81,Ordinary summary,100.0,,0
-false_consensus,82,Ordinary summary,10.0,,0
-false_consensus,82,Ordinary summary,20.0,,0
-false_consensus,82,Ordinary summary,35.0,,0
-false_consensus,82,Ordinary summary,50.0,,0
-false_consensus,82,Ordinary summary,70.0,,0
-false_consensus,82,Ordinary summary,100.0,,0
-false_consensus,83,Ordinary summary,10.0,,1
-false_consensus,83,Ordinary summary,20.0,,0
-false_consensus,83,Ordinary summary,35.0,,0
-false_consensus,83,Ordinary summary,50.0,,0
-false_consensus,83,Ordinary summary,70.0,,0
-false_consensus,83,Ordinary summary,100.0,,0
-false_consensus,84,Ordinary summary,10.0,,0
-false_consensus,84,Ordinary summary,20.0,,0
-false_consensus,84,Ordinary summary,35.0,,0
-false_consensus,84,Ordinary summary,50.0,,0
-false_consensus,84,Ordinary summary,70.0,,0
-false_consensus,84,Ordinary summary,100.0,,0
-false_consensus,85,Ordinary summary,10.0,,0
-false_consensus,85,Ordinary summary,20.0,,0
-false_consensus,85,Ordinary summary,35.0,,0
-false_consensus,85,Ordinary summary,50.0,,0
-false_consensus,85,Ordinary summary,70.0,,0
-false_consensus,85,Ordinary summary,100.0,,0
-false_consensus,86,Ordinary summary,10.0,,0
-false_consensus,86,Ordinary summary,20.0,,0
-false_consensus,86,Ordinary summary,35.0,,0
-false_consensus,86,Ordinary summary,50.0,,0
-false_consensus,86,Ordinary summary,70.0,,0
-false_consensus,86,Ordinary summary,100.0,,0
-false_consensus,87,Ordinary summary,10.0,,0
-false_consensus,87,Ordinary summary,20.0,,0
-false_consensus,87,Ordinary summary,35.0,,0
-false_consensus,87,Ordinary summary,50.0,,0
-false_consensus,87,Ordinary summary,70.0,,0
-false_consensus,87,Ordinary summary,100.0,,0
-false_consensus,88,Ordinary summary,10.0,,0
-false_consensus,88,Ordinary summary,20.0,,0
-false_consensus,88,Ordinary summary,35.0,,0
-false_consensus,88,Ordinary summary,50.0,,0
-false_consensus,88,Ordinary summary,70.0,,0
-false_consensus,88,Ordinary summary,100.0,,0
-false_consensus,89,Ordinary summary,10.0,,0
-false_consensus,89,Ordinary summary,20.0,,0
-false_consensus,89,Ordinary summary,35.0,,0
-false_consensus,89,Ordinary summary,50.0,,0
-false_consensus,89,Ordinary summary,70.0,,0
-false_consensus,89,Ordinary summary,100.0,,0
-false_consensus,90,Ordinary summary,10.0,,1
-false_consensus,90,Ordinary summary,20.0,,1
-false_consensus,90,Ordinary summary,35.0,,1
-false_consensus,90,Ordinary summary,50.0,,1
-false_consensus,90,Ordinary summary,70.0,,1
-false_consensus,90,Ordinary summary,100.0,,1
-false_consensus,91,Ordinary summary,10.0,,0
-false_consensus,91,Ordinary summary,20.0,,0
-false_consensus,91,Ordinary summary,35.0,,0
-false_consensus,91,Ordinary summary,50.0,,0
-false_consensus,91,Ordinary summary,70.0,,0
-false_consensus,91,Ordinary summary,100.0,,0
-false_consensus,92,Ordinary summary,10.0,,0
-false_consensus,92,Ordinary summary,20.0,,0
-false_consensus,92,Ordinary summary,35.0,,0
-false_consensus,92,Ordinary summary,50.0,,0
-false_consensus,92,Ordinary summary,70.0,,0
-false_consensus,92,Ordinary summary,100.0,,0
-false_consensus,93,Ordinary summary,10.0,,1
-false_consensus,93,Ordinary summary,20.0,,1
-false_consensus,93,Ordinary summary,35.0,,1
-false_consensus,93,Ordinary summary,50.0,,1
-false_consensus,93,Ordinary summary,70.0,,1
-false_consensus,93,Ordinary summary,100.0,,0
-false_consensus,94,Ordinary summary,10.0,,0
-false_consensus,94,Ordinary summary,20.0,,0
-false_consensus,94,Ordinary summary,35.0,,0
-false_consensus,94,Ordinary summary,50.0,,0
-false_consensus,94,Ordinary summary,70.0,,0
-false_consensus,94,Ordinary summary,100.0,,0
-false_consensus,95,Ordinary summary,10.0,,0
-false_consensus,95,Ordinary summary,20.0,,0
-false_consensus,95,Ordinary summary,35.0,,0
-false_consensus,95,Ordinary summary,50.0,,0
-false_consensus,95,Ordinary summary,70.0,,0
-false_consensus,95,Ordinary summary,100.0,,0
-false_consensus,96,Ordinary summary,10.0,,0
-false_consensus,96,Ordinary summary,20.0,,0
-false_consensus,96,Ordinary summary,35.0,,0
-false_consensus,96,Ordinary summary,50.0,,0
-false_consensus,96,Ordinary summary,70.0,,0
-false_consensus,96,Ordinary summary,100.0,,0
-false_consensus,97,Ordinary summary,10.0,,0
-false_consensus,97,Ordinary summary,20.0,,0
-false_consensus,97,Ordinary summary,35.0,,0
-false_consensus,97,Ordinary summary,50.0,,0
-false_consensus,97,Ordinary summary,70.0,,0
-false_consensus,97,Ordinary summary,100.0,,0
-false_consensus,98,Ordinary summary,10.0,,0
-false_consensus,98,Ordinary summary,20.0,,0
-false_consensus,98,Ordinary summary,35.0,,0
-false_consensus,98,Ordinary summary,50.0,,0
-false_consensus,98,Ordinary summary,70.0,,0
-false_consensus,98,Ordinary summary,100.0,,0
-false_consensus,99,Ordinary summary,10.0,,1
-false_consensus,99,Ordinary summary,20.0,,0
-false_consensus,99,Ordinary summary,35.0,,0
-false_consensus,99,Ordinary summary,50.0,,0
-false_consensus,99,Ordinary summary,70.0,,0
-false_consensus,99,Ordinary summary,100.0,,0
-false_consensus,100,Ordinary summary,10.0,,1
-false_consensus,100,Ordinary summary,20.0,,1
-false_consensus,100,Ordinary summary,35.0,,0
-false_consensus,100,Ordinary summary,50.0,,0
-false_consensus,100,Ordinary summary,70.0,,0
-false_consensus,100,Ordinary summary,100.0,,0
-false_consensus,1,Explicit dissent,10.0,,1
-false_consensus,1,Explicit dissent,20.0,,0
-false_consensus,1,Explicit dissent,35.0,,0
-false_consensus,1,Explicit dissent,50.0,,0
-false_consensus,1,Explicit dissent,70.0,,0
-false_consensus,1,Explicit dissent,100.0,,0
-false_consensus,2,Explicit dissent,10.0,,0
-false_consensus,2,Explicit dissent,20.0,,0
-false_consensus,2,Explicit dissent,35.0,,0
-false_consensus,2,Explicit dissent,50.0,,0
-false_consensus,2,Explicit dissent,70.0,,0
-false_consensus,2,Explicit dissent,100.0,,0
-false_consensus,3,Explicit dissent,10.0,,0
-false_consensus,3,Explicit dissent,20.0,,0
-false_consensus,3,Explicit dissent,35.0,,0
-false_consensus,3,Explicit dissent,50.0,,0
-false_consensus,3,Explicit dissent,70.0,,0
-false_consensus,3,Explicit dissent,100.0,,0
-false_consensus,4,Explicit dissent,10.0,,0
-false_consensus,4,Explicit dissent,20.0,,0
-false_consensus,4,Explicit dissent,35.0,,0
-false_consensus,4,Explicit dissent,50.0,,0
-false_consensus,4,Explicit dissent,70.0,,0
-false_consensus,4,Explicit dissent,100.0,,0
-false_consensus,5,Explicit dissent,10.0,,0
-false_consensus,5,Explicit dissent,20.0,,0
-false_consensus,5,Explicit dissent,35.0,,0
-false_consensus,5,Explicit dissent,50.0,,0
-false_consensus,5,Explicit dissent,70.0,,0
-false_consensus,5,Explicit dissent,100.0,,0
-false_consensus,6,Explicit dissent,10.0,,0
-false_consensus,6,Explicit dissent,20.0,,0
-false_consensus,6,Explicit dissent,35.0,,0
-false_consensus,6,Explicit dissent,50.0,,0
-false_consensus,6,Explicit dissent,70.0,,0
-false_consensus,6,Explicit dissent,100.0,,0
-false_consensus,7,Explicit dissent,10.0,,0
-false_consensus,7,Explicit dissent,20.0,,0
-false_consensus,7,Explicit dissent,35.0,,0
-false_consensus,7,Explicit dissent,50.0,,0
-false_consensus,7,Explicit dissent,70.0,,0
-false_consensus,7,Explicit dissent,100.0,,0
-false_consensus,8,Explicit dissent,10.0,,0
-false_consensus,8,Explicit dissent,20.0,,0
-false_consensus,8,Explicit dissent,35.0,,0
-false_consensus,8,Explicit dissent,50.0,,0
-false_consensus,8,Explicit dissent,70.0,,0
-false_consensus,8,Explicit dissent,100.0,,0
-false_consensus,9,Explicit dissent,10.0,,0
-false_consensus,9,Explicit dissent,20.0,,0
-false_consensus,9,Explicit dissent,35.0,,0
-false_consensus,9,Explicit dissent,50.0,,0
-false_consensus,9,Explicit dissent,70.0,,0
-false_consensus,9,Explicit dissent,100.0,,0
-false_consensus,10,Explicit dissent,10.0,,0
-false_consensus,10,Explicit dissent,20.0,,0
-false_consensus,10,Explicit dissent,35.0,,0
-false_consensus,10,Explicit dissent,50.0,,0
-false_consensus,10,Explicit dissent,70.0,,0
-false_consensus,10,Explicit dissent,100.0,,0
-false_consensus,11,Explicit dissent,10.0,,0
-false_consensus,11,Explicit dissent,20.0,,0
-false_consensus,11,Explicit dissent,35.0,,0
-false_consensus,11,Explicit dissent,50.0,,0
-false_consensus,11,Explicit dissent,70.0,,0
-false_consensus,11,Explicit dissent,100.0,,0
-false_consensus,12,Explicit dissent,10.0,,0
-false_consensus,12,Explicit dissent,20.0,,0
-false_consensus,12,Explicit dissent,35.0,,0
-false_consensus,12,Explicit dissent,50.0,,0
-false_consensus,12,Explicit dissent,70.0,,0
-false_consensus,12,Explicit dissent,100.0,,0
-false_consensus,13,Explicit dissent,10.0,,0
-false_consensus,13,Explicit dissent,20.0,,0
-false_consensus,13,Explicit dissent,35.0,,0
-false_consensus,13,Explicit dissent,50.0,,0
-false_consensus,13,Explicit dissent,70.0,,0
-false_consensus,13,Explicit dissent,100.0,,0
-false_consensus,14,Explicit dissent,10.0,,0
-false_consensus,14,Explicit dissent,20.0,,0
-false_consensus,14,Explicit dissent,35.0,,0
-false_consensus,14,Explicit dissent,50.0,,0
-false_consensus,14,Explicit dissent,70.0,,0
-false_consensus,14,Explicit dissent,100.0,,0
-false_consensus,15,Explicit dissent,10.0,,0
-false_consensus,15,Explicit dissent,20.0,,0
-false_consensus,15,Explicit dissent,35.0,,0
-false_consensus,15,Explicit dissent,50.0,,0
-false_consensus,15,Explicit dissent,70.0,,0
-false_consensus,15,Explicit dissent,100.0,,0
-false_consensus,16,Explicit dissent,10.0,,0
-false_consensus,16,Explicit dissent,20.0,,0
-false_consensus,16,Explicit dissent,35.0,,0
-false_consensus,16,Explicit dissent,50.0,,0
-false_consensus,16,Explicit dissent,70.0,,0
-false_consensus,16,Explicit dissent,100.0,,0
-false_consensus,17,Explicit dissent,10.0,,0
-false_consensus,17,Explicit dissent,20.0,,0
-false_consensus,17,Explicit dissent,35.0,,0
-false_consensus,17,Explicit dissent,50.0,,0
-false_consensus,17,Explicit dissent,70.0,,0
-false_consensus,17,Explicit dissent,100.0,,0
-false_consensus,18,Explicit dissent,10.0,,1
-false_consensus,18,Explicit dissent,20.0,,1
-false_consensus,18,Explicit dissent,35.0,,0
-false_consensus,18,Explicit dissent,50.0,,0
-false_consensus,18,Explicit dissent,70.0,,0
-false_consensus,18,Explicit dissent,100.0,,0
-false_consensus,19,Explicit dissent,10.0,,0
-false_consensus,19,Explicit dissent,20.0,,0
-false_consensus,19,Explicit dissent,35.0,,0
-false_consensus,19,Explicit dissent,50.0,,0
-false_consensus,19,Explicit dissent,70.0,,0
-false_consensus,19,Explicit dissent,100.0,,0
-false_consensus,20,Explicit dissent,10.0,,0
-false_consensus,20,Explicit dissent,20.0,,0
-false_consensus,20,Explicit dissent,35.0,,0
-false_consensus,20,Explicit dissent,50.0,,0
-false_consensus,20,Explicit dissent,70.0,,0
-false_consensus,20,Explicit dissent,100.0,,0
-false_consensus,21,Explicit dissent,10.0,,0
-false_consensus,21,Explicit dissent,20.0,,0
-false_consensus,21,Explicit dissent,35.0,,0
-false_consensus,21,Explicit dissent,50.0,,0
-false_consensus,21,Explicit dissent,70.0,,0
-false_consensus,21,Explicit dissent,100.0,,0
-false_consensus,22,Explicit dissent,10.0,,1
-false_consensus,22,Explicit dissent,20.0,,1
-false_consensus,22,Explicit dissent,35.0,,1
-false_consensus,22,Explicit dissent,50.0,,1
-false_consensus,22,Explicit dissent,70.0,,0
-false_consensus,22,Explicit dissent,100.0,,0
-false_consensus,23,Explicit dissent,10.0,,0
-false_consensus,23,Explicit dissent,20.0,,0
-false_consensus,23,Explicit dissent,35.0,,0
-false_consensus,23,Explicit dissent,50.0,,0
-false_consensus,23,Explicit dissent,70.0,,0
-false_consensus,23,Explicit dissent,100.0,,0
-false_consensus,24,Explicit dissent,10.0,,0
-false_consensus,24,Explicit dissent,20.0,,0
-false_consensus,24,Explicit dissent,35.0,,0
-false_consensus,24,Explicit dissent,50.0,,0
-false_consensus,24,Explicit dissent,70.0,,0
-false_consensus,24,Explicit dissent,100.0,,0
-false_consensus,25,Explicit dissent,10.0,,0
-false_consensus,25,Explicit dissent,20.0,,0
-false_consensus,25,Explicit dissent,35.0,,0
-false_consensus,25,Explicit dissent,50.0,,0
-false_consensus,25,Explicit dissent,70.0,,0
-false_consensus,25,Explicit dissent,100.0,,0
-false_consensus,26,Explicit dissent,10.0,,0
-false_consensus,26,Explicit dissent,20.0,,0
-false_consensus,26,Explicit dissent,35.0,,0
-false_consensus,26,Explicit dissent,50.0,,0
-false_consensus,26,Explicit dissent,70.0,,0
-false_consensus,26,Explicit dissent,100.0,,0
-false_consensus,27,Explicit dissent,10.0,,0
-false_consensus,27,Explicit dissent,20.0,,0
-false_consensus,27,Explicit dissent,35.0,,0
-false_consensus,27,Explicit dissent,50.0,,0
-false_consensus,27,Explicit dissent,70.0,,0
-false_consensus,27,Explicit dissent,100.0,,0
-false_consensus,28,Explicit dissent,10.0,,0
-false_consensus,28,Explicit dissent,20.0,,0
-false_consensus,28,Explicit dissent,35.0,,0
-false_consensus,28,Explicit dissent,50.0,,0
-false_consensus,28,Explicit dissent,70.0,,0
-false_consensus,28,Explicit dissent,100.0,,0
-false_consensus,29,Explicit dissent,10.0,,1
-false_consensus,29,Explicit dissent,20.0,,1
-false_consensus,29,Explicit dissent,35.0,,1
-false_consensus,29,Explicit dissent,50.0,,0
-false_consensus,29,Explicit dissent,70.0,,0
-false_consensus,29,Explicit dissent,100.0,,0
-false_consensus,30,Explicit dissent,10.0,,0
-false_consensus,30,Explicit dissent,20.0,,0
-false_consensus,30,Explicit dissent,35.0,,0
-false_consensus,30,Explicit dissent,50.0,,0
-false_consensus,30,Explicit dissent,70.0,,0
-false_consensus,30,Explicit dissent,100.0,,0
-false_consensus,31,Explicit dissent,10.0,,1
-false_consensus,31,Explicit dissent,20.0,,1
-false_consensus,31,Explicit dissent,35.0,,0
-false_consensus,31,Explicit dissent,50.0,,0
-false_consensus,31,Explicit dissent,70.0,,0
-false_consensus,31,Explicit dissent,100.0,,0
-false_consensus,32,Explicit dissent,10.0,,0
-false_consensus,32,Explicit dissent,20.0,,0
-false_consensus,32,Explicit dissent,35.0,,0
-false_consensus,32,Explicit dissent,50.0,,0
-false_consensus,32,Explicit dissent,70.0,,0
-false_consensus,32,Explicit dissent,100.0,,0
-false_consensus,33,Explicit dissent,10.0,,0
-false_consensus,33,Explicit dissent,20.0,,0
-false_consensus,33,Explicit dissent,35.0,,0
-false_consensus,33,Explicit dissent,50.0,,0
-false_consensus,33,Explicit dissent,70.0,,0
-false_consensus,33,Explicit dissent,100.0,,0
-false_consensus,34,Explicit dissent,10.0,,0
-false_consensus,34,Explicit dissent,20.0,,0
-false_consensus,34,Explicit dissent,35.0,,0
-false_consensus,34,Explicit dissent,50.0,,0
-false_consensus,34,Explicit dissent,70.0,,0
-false_consensus,34,Explicit dissent,100.0,,0
-false_consensus,35,Explicit dissent,10.0,,1
-false_consensus,35,Explicit dissent,20.0,,1
-false_consensus,35,Explicit dissent,35.0,,1
-false_consensus,35,Explicit dissent,50.0,,1
-false_consensus,35,Explicit dissent,70.0,,1
-false_consensus,35,Explicit dissent,100.0,,1
-false_consensus,36,Explicit dissent,10.0,,0
-false_consensus,36,Explicit dissent,20.0,,0
-false_consensus,36,Explicit dissent,35.0,,0
-false_consensus,36,Explicit dissent,50.0,,0
-false_consensus,36,Explicit dissent,70.0,,0
-false_consensus,36,Explicit dissent,100.0,,0
-false_consensus,37,Explicit dissent,10.0,,0
-false_consensus,37,Explicit dissent,20.0,,0
-false_consensus,37,Explicit dissent,35.0,,0
-false_consensus,37,Explicit dissent,50.0,,0
-false_consensus,37,Explicit dissent,70.0,,0
-false_consensus,37,Explicit dissent,100.0,,0
-false_consensus,38,Explicit dissent,10.0,,0
-false_consensus,38,Explicit dissent,20.0,,0
-false_consensus,38,Explicit dissent,35.0,,0
-false_consensus,38,Explicit dissent,50.0,,0
-false_consensus,38,Explicit dissent,70.0,,0
-false_consensus,38,Explicit dissent,100.0,,0
-false_consensus,39,Explicit dissent,10.0,,0
-false_consensus,39,Explicit dissent,20.0,,0
-false_consensus,39,Explicit dissent,35.0,,0
-false_consensus,39,Explicit dissent,50.0,,0
-false_consensus,39,Explicit dissent,70.0,,0
-false_consensus,39,Explicit dissent,100.0,,0
-false_consensus,40,Explicit dissent,10.0,,0
-false_consensus,40,Explicit dissent,20.0,,0
-false_consensus,40,Explicit dissent,35.0,,0
-false_consensus,40,Explicit dissent,50.0,,0
-false_consensus,40,Explicit dissent,70.0,,0
-false_consensus,40,Explicit dissent,100.0,,0
-false_consensus,41,Explicit dissent,10.0,,0
-false_consensus,41,Explicit dissent,20.0,,0
-false_consensus,41,Explicit dissent,35.0,,0
-false_consensus,41,Explicit dissent,50.0,,0
-false_consensus,41,Explicit dissent,70.0,,0
-false_consensus,41,Explicit dissent,100.0,,0
-false_consensus,42,Explicit dissent,10.0,,0
-false_consensus,42,Explicit dissent,20.0,,0
-false_consensus,42,Explicit dissent,35.0,,0
-false_consensus,42,Explicit dissent,50.0,,0
-false_consensus,42,Explicit dissent,70.0,,0
-false_consensus,42,Explicit dissent,100.0,,0
-false_consensus,43,Explicit dissent,10.0,,0
-false_consensus,43,Explicit dissent,20.0,,0
-false_consensus,43,Explicit dissent,35.0,,0
-false_consensus,43,Explicit dissent,50.0,,0
-false_consensus,43,Explicit dissent,70.0,,0
-false_consensus,43,Explicit dissent,100.0,,0
-false_consensus,44,Explicit dissent,10.0,,0
-false_consensus,44,Explicit dissent,20.0,,0
-false_consensus,44,Explicit dissent,35.0,,0
-false_consensus,44,Explicit dissent,50.0,,0
-false_consensus,44,Explicit dissent,70.0,,0
-false_consensus,44,Explicit dissent,100.0,,0
-false_consensus,45,Explicit dissent,10.0,,0
-false_consensus,45,Explicit dissent,20.0,,0
-false_consensus,45,Explicit dissent,35.0,,0
-false_consensus,45,Explicit dissent,50.0,,0
-false_consensus,45,Explicit dissent,70.0,,0
-false_consensus,45,Explicit dissent,100.0,,0
-false_consensus,46,Explicit dissent,10.0,,1
-false_consensus,46,Explicit dissent,20.0,,1
-false_consensus,46,Explicit dissent,35.0,,0
-false_consensus,46,Explicit dissent,50.0,,0
-false_consensus,46,Explicit dissent,70.0,,0
-false_consensus,46,Explicit dissent,100.0,,0
-false_consensus,47,Explicit dissent,10.0,,0
-false_consensus,47,Explicit dissent,20.0,,0
-false_consensus,47,Explicit dissent,35.0,,0
-false_consensus,47,Explicit dissent,50.0,,0
-false_consensus,47,Explicit dissent,70.0,,0
-false_consensus,47,Explicit dissent,100.0,,0
-false_consensus,48,Explicit dissent,10.0,,1
-false_consensus,48,Explicit dissent,20.0,,1
-false_consensus,48,Explicit dissent,35.0,,1
-false_consensus,48,Explicit dissent,50.0,,1
-false_consensus,48,Explicit dissent,70.0,,0
-false_consensus,48,Explicit dissent,100.0,,0
-false_consensus,49,Explicit dissent,10.0,,0
-false_consensus,49,Explicit dissent,20.0,,0
-false_consensus,49,Explicit dissent,35.0,,0
-false_consensus,49,Explicit dissent,50.0,,0
-false_consensus,49,Explicit dissent,70.0,,0
-false_consensus,49,Explicit dissent,100.0,,0
-false_consensus,50,Explicit dissent,10.0,,0
-false_consensus,50,Explicit dissent,20.0,,0
-false_consensus,50,Explicit dissent,35.0,,0
-false_consensus,50,Explicit dissent,50.0,,0
-false_consensus,50,Explicit dissent,70.0,,0
-false_consensus,50,Explicit dissent,100.0,,0
-false_consensus,51,Explicit dissent,10.0,,0
-false_consensus,51,Explicit dissent,20.0,,0
-false_consensus,51,Explicit dissent,35.0,,0
-false_consensus,51,Explicit dissent,50.0,,0
-false_consensus,51,Explicit dissent,70.0,,0
-false_consensus,51,Explicit dissent,100.0,,0
-false_consensus,52,Explicit dissent,10.0,,0
-false_consensus,52,Explicit dissent,20.0,,0
-false_consensus,52,Explicit dissent,35.0,,0
-false_consensus,52,Explicit dissent,50.0,,0
-false_consensus,52,Explicit dissent,70.0,,0
-false_consensus,52,Explicit dissent,100.0,,0
-false_consensus,53,Explicit dissent,10.0,,0
-false_consensus,53,Explicit dissent,20.0,,0
-false_consensus,53,Explicit dissent,35.0,,0
-false_consensus,53,Explicit dissent,50.0,,0
-false_consensus,53,Explicit dissent,70.0,,0
-false_consensus,53,Explicit dissent,100.0,,0
-false_consensus,54,Explicit dissent,10.0,,0
-false_consensus,54,Explicit dissent,20.0,,0
-false_consensus,54,Explicit dissent,35.0,,0
-false_consensus,54,Explicit dissent,50.0,,0
-false_consensus,54,Explicit dissent,70.0,,0
-false_consensus,54,Explicit dissent,100.0,,0
-false_consensus,55,Explicit dissent,10.0,,0
-false_consensus,55,Explicit dissent,20.0,,0
-false_consensus,55,Explicit dissent,35.0,,0
-false_consensus,55,Explicit dissent,50.0,,0
-false_consensus,55,Explicit dissent,70.0,,0
-false_consensus,55,Explicit dissent,100.0,,0
-false_consensus,56,Explicit dissent,10.0,,0
-false_consensus,56,Explicit dissent,20.0,,0
-false_consensus,56,Explicit dissent,35.0,,0
-false_consensus,56,Explicit dissent,50.0,,0
-false_consensus,56,Explicit dissent,70.0,,0
-false_consensus,56,Explicit dissent,100.0,,0
-false_consensus,57,Explicit dissent,10.0,,0
-false_consensus,57,Explicit dissent,20.0,,0
-false_consensus,57,Explicit dissent,35.0,,0
-false_consensus,57,Explicit dissent,50.0,,0
-false_consensus,57,Explicit dissent,70.0,,0
-false_consensus,57,Explicit dissent,100.0,,0
-false_consensus,58,Explicit dissent,10.0,,0
-false_consensus,58,Explicit dissent,20.0,,0
-false_consensus,58,Explicit dissent,35.0,,0
-false_consensus,58,Explicit dissent,50.0,,0
-false_consensus,58,Explicit dissent,70.0,,0
-false_consensus,58,Explicit dissent,100.0,,0
-false_consensus,59,Explicit dissent,10.0,,0
-false_consensus,59,Explicit dissent,20.0,,0
-false_consensus,59,Explicit dissent,35.0,,0
-false_consensus,59,Explicit dissent,50.0,,0
-false_consensus,59,Explicit dissent,70.0,,0
-false_consensus,59,Explicit dissent,100.0,,0
-false_consensus,60,Explicit dissent,10.0,,0
-false_consensus,60,Explicit dissent,20.0,,0
-false_consensus,60,Explicit dissent,35.0,,0
-false_consensus,60,Explicit dissent,50.0,,0
-false_consensus,60,Explicit dissent,70.0,,0
-false_consensus,60,Explicit dissent,100.0,,0
-false_consensus,61,Explicit dissent,10.0,,0
-false_consensus,61,Explicit dissent,20.0,,0
-false_consensus,61,Explicit dissent,35.0,,0
-false_consensus,61,Explicit dissent,50.0,,0
-false_consensus,61,Explicit dissent,70.0,,0
-false_consensus,61,Explicit dissent,100.0,,0
-false_consensus,62,Explicit dissent,10.0,,0
-false_consensus,62,Explicit dissent,20.0,,0
-false_consensus,62,Explicit dissent,35.0,,0
-false_consensus,62,Explicit dissent,50.0,,0
-false_consensus,62,Explicit dissent,70.0,,0
-false_consensus,62,Explicit dissent,100.0,,0
-false_consensus,63,Explicit dissent,10.0,,1
-false_consensus,63,Explicit dissent,20.0,,1
-false_consensus,63,Explicit dissent,35.0,,1
-false_consensus,63,Explicit dissent,50.0,,0
-false_consensus,63,Explicit dissent,70.0,,0
-false_consensus,63,Explicit dissent,100.0,,0
-false_consensus,64,Explicit dissent,10.0,,1
-false_consensus,64,Explicit dissent,20.0,,1
-false_consensus,64,Explicit dissent,35.0,,1
-false_consensus,64,Explicit dissent,50.0,,1
-false_consensus,64,Explicit dissent,70.0,,0
-false_consensus,64,Explicit dissent,100.0,,0
-false_consensus,65,Explicit dissent,10.0,,0
-false_consensus,65,Explicit dissent,20.0,,0
-false_consensus,65,Explicit dissent,35.0,,0
-false_consensus,65,Explicit dissent,50.0,,0
-false_consensus,65,Explicit dissent,70.0,,0
-false_consensus,65,Explicit dissent,100.0,,0
-false_consensus,66,Explicit dissent,10.0,,0
-false_consensus,66,Explicit dissent,20.0,,0
-false_consensus,66,Explicit dissent,35.0,,0
-false_consensus,66,Explicit dissent,50.0,,0
-false_consensus,66,Explicit dissent,70.0,,0
-false_consensus,66,Explicit dissent,100.0,,0
-false_consensus,67,Explicit dissent,10.0,,0
-false_consensus,67,Explicit dissent,20.0,,0
-false_consensus,67,Explicit dissent,35.0,,0
-false_consensus,67,Explicit dissent,50.0,,0
-false_consensus,67,Explicit dissent,70.0,,0
-false_consensus,67,Explicit dissent,100.0,,0
-false_consensus,68,Explicit dissent,10.0,,0
-false_consensus,68,Explicit dissent,20.0,,0
-false_consensus,68,Explicit dissent,35.0,,0
-false_consensus,68,Explicit dissent,50.0,,0
-false_consensus,68,Explicit dissent,70.0,,0
-false_consensus,68,Explicit dissent,100.0,,0
-false_consensus,69,Explicit dissent,10.0,,0
-false_consensus,69,Explicit dissent,20.0,,0
-false_consensus,69,Explicit dissent,35.0,,0
-false_consensus,69,Explicit dissent,50.0,,0
-false_consensus,69,Explicit dissent,70.0,,0
-false_consensus,69,Explicit dissent,100.0,,0
-false_consensus,70,Explicit dissent,10.0,,0
-false_consensus,70,Explicit dissent,20.0,,0
-false_consensus,70,Explicit dissent,35.0,,0
-false_consensus,70,Explicit dissent,50.0,,0
-false_consensus,70,Explicit dissent,70.0,,0
-false_consensus,70,Explicit dissent,100.0,,0
-false_consensus,71,Explicit dissent,10.0,,0
-false_consensus,71,Explicit dissent,20.0,,0
-false_consensus,71,Explicit dissent,35.0,,0
-false_consensus,71,Explicit dissent,50.0,,0
-false_consensus,71,Explicit dissent,70.0,,0
-false_consensus,71,Explicit dissent,100.0,,0
-false_consensus,72,Explicit dissent,10.0,,0
-false_consensus,72,Explicit dissent,20.0,,0
-false_consensus,72,Explicit dissent,35.0,,0
-false_consensus,72,Explicit dissent,50.0,,0
-false_consensus,72,Explicit dissent,70.0,,0
-false_consensus,72,Explicit dissent,100.0,,0
-false_consensus,73,Explicit dissent,10.0,,0
-false_consensus,73,Explicit dissent,20.0,,0
-false_consensus,73,Explicit dissent,35.0,,0
-false_consensus,73,Explicit dissent,50.0,,0
-false_consensus,73,Explicit dissent,70.0,,0
-false_consensus,73,Explicit dissent,100.0,,0
-false_consensus,74,Explicit dissent,10.0,,0
-false_consensus,74,Explicit dissent,20.0,,0
-false_consensus,74,Explicit dissent,35.0,,0
-false_consensus,74,Explicit dissent,50.0,,0
-false_consensus,74,Explicit dissent,70.0,,0
-false_consensus,74,Explicit dissent,100.0,,0
-false_consensus,75,Explicit dissent,10.0,,0
-false_consensus,75,Explicit dissent,20.0,,0
-false_consensus,75,Explicit dissent,35.0,,0
-false_consensus,75,Explicit dissent,50.0,,0
-false_consensus,75,Explicit dissent,70.0,,0
-false_consensus,75,Explicit dissent,100.0,,0
-false_consensus,76,Explicit dissent,10.0,,0
-false_consensus,76,Explicit dissent,20.0,,0
-false_consensus,76,Explicit dissent,35.0,,0
-false_consensus,76,Explicit dissent,50.0,,0
-false_consensus,76,Explicit dissent,70.0,,0
-false_consensus,76,Explicit dissent,100.0,,0
-false_consensus,77,Explicit dissent,10.0,,0
-false_consensus,77,Explicit dissent,20.0,,0
-false_consensus,77,Explicit dissent,35.0,,0
-false_consensus,77,Explicit dissent,50.0,,0
-false_consensus,77,Explicit dissent,70.0,,0
-false_consensus,77,Explicit dissent,100.0,,0
-false_consensus,78,Explicit dissent,10.0,,0
-false_consensus,78,Explicit dissent,20.0,,0
-false_consensus,78,Explicit dissent,35.0,,0
-false_consensus,78,Explicit dissent,50.0,,0
-false_consensus,78,Explicit dissent,70.0,,0
-false_consensus,78,Explicit dissent,100.0,,0
-false_consensus,79,Explicit dissent,10.0,,0
-false_consensus,79,Explicit dissent,20.0,,0
-false_consensus,79,Explicit dissent,35.0,,0
-false_consensus,79,Explicit dissent,50.0,,0
-false_consensus,79,Explicit dissent,70.0,,0
-false_consensus,79,Explicit dissent,100.0,,0
-false_consensus,80,Explicit dissent,10.0,,0
-false_consensus,80,Explicit dissent,20.0,,0
-false_consensus,80,Explicit dissent,35.0,,0
-false_consensus,80,Explicit dissent,50.0,,0
-false_consensus,80,Explicit dissent,70.0,,0
-false_consensus,80,Explicit dissent,100.0,,0
-false_consensus,81,Explicit dissent,10.0,,0
-false_consensus,81,Explicit dissent,20.0,,0
-false_consensus,81,Explicit dissent,35.0,,0
-false_consensus,81,Explicit dissent,50.0,,0
-false_consensus,81,Explicit dissent,70.0,,0
-false_consensus,81,Explicit dissent,100.0,,0
-false_consensus,82,Explicit dissent,10.0,,0
-false_consensus,82,Explicit dissent,20.0,,0
-false_consensus,82,Explicit dissent,35.0,,0
-false_consensus,82,Explicit dissent,50.0,,0
-false_consensus,82,Explicit dissent,70.0,,0
-false_consensus,82,Explicit dissent,100.0,,0
-false_consensus,83,Explicit dissent,10.0,,0
-false_consensus,83,Explicit dissent,20.0,,0
-false_consensus,83,Explicit dissent,35.0,,0
-false_consensus,83,Explicit dissent,50.0,,0
-false_consensus,83,Explicit dissent,70.0,,0
-false_consensus,83,Explicit dissent,100.0,,0
-false_consensus,84,Explicit dissent,10.0,,0
-false_consensus,84,Explicit dissent,20.0,,0
-false_consensus,84,Explicit dissent,35.0,,0
-false_consensus,84,Explicit dissent,50.0,,0
-false_consensus,84,Explicit dissent,70.0,,0
-false_consensus,84,Explicit dissent,100.0,,0
-false_consensus,85,Explicit dissent,10.0,,0
-false_consensus,85,Explicit dissent,20.0,,0
-false_consensus,85,Explicit dissent,35.0,,0
-false_consensus,85,Explicit dissent,50.0,,0
-false_consensus,85,Explicit dissent,70.0,,0
-false_consensus,85,Explicit dissent,100.0,,0
-false_consensus,86,Explicit dissent,10.0,,0
-false_consensus,86,Explicit dissent,20.0,,0
-false_consensus,86,Explicit dissent,35.0,,0
-false_consensus,86,Explicit dissent,50.0,,0
-false_consensus,86,Explicit dissent,70.0,,0
-false_consensus,86,Explicit dissent,100.0,,0
-false_consensus,87,Explicit dissent,10.0,,0
-false_consensus,87,Explicit dissent,20.0,,0
-false_consensus,87,Explicit dissent,35.0,,0
-false_consensus,87,Explicit dissent,50.0,,0
-false_consensus,87,Explicit dissent,70.0,,0
-false_consensus,87,Explicit dissent,100.0,,0
-false_consensus,88,Explicit dissent,10.0,,0
-false_consensus,88,Explicit dissent,20.0,,0
-false_consensus,88,Explicit dissent,35.0,,0
-false_consensus,88,Explicit dissent,50.0,,0
-false_consensus,88,Explicit dissent,70.0,,0
-false_consensus,88,Explicit dissent,100.0,,0
-false_consensus,89,Explicit dissent,10.0,,0
-false_consensus,89,Explicit dissent,20.0,,0
-false_consensus,89,Explicit dissent,35.0,,0
-false_consensus,89,Explicit dissent,50.0,,0
-false_consensus,89,Explicit dissent,70.0,,0
-false_consensus,89,Explicit dissent,100.0,,0
-false_consensus,90,Explicit dissent,10.0,,1
-false_consensus,90,Explicit dissent,20.0,,1
-false_consensus,90,Explicit dissent,35.0,,1
-false_consensus,90,Explicit dissent,50.0,,1
-false_consensus,90,Explicit dissent,70.0,,1
-false_consensus,90,Explicit dissent,100.0,,1
-false_consensus,91,Explicit dissent,10.0,,0
-false_consensus,91,Explicit dissent,20.0,,0
-false_consensus,91,Explicit dissent,35.0,,0
-false_consensus,91,Explicit dissent,50.0,,0
-false_consensus,91,Explicit dissent,70.0,,0
-false_consensus,91,Explicit dissent,100.0,,0
-false_consensus,92,Explicit dissent,10.0,,0
-false_consensus,92,Explicit dissent,20.0,,0
-false_consensus,92,Explicit dissent,35.0,,0
-false_consensus,92,Explicit dissent,50.0,,0
-false_consensus,92,Explicit dissent,70.0,,0
-false_consensus,92,Explicit dissent,100.0,,0
-false_consensus,93,Explicit dissent,10.0,,1
-false_consensus,93,Explicit dissent,20.0,,1
-false_consensus,93,Explicit dissent,35.0,,1
-false_consensus,93,Explicit dissent,50.0,,1
-false_consensus,93,Explicit dissent,70.0,,1
-false_consensus,93,Explicit dissent,100.0,,0
-false_consensus,94,Explicit dissent,10.0,,0
-false_consensus,94,Explicit dissent,20.0,,0
-false_consensus,94,Explicit dissent,35.0,,0
-false_consensus,94,Explicit dissent,50.0,,0
-false_consensus,94,Explicit dissent,70.0,,0
-false_consensus,94,Explicit dissent,100.0,,0
-false_consensus,95,Explicit dissent,10.0,,0
-false_consensus,95,Explicit dissent,20.0,,0
-false_consensus,95,Explicit dissent,35.0,,0
-false_consensus,95,Explicit dissent,50.0,,0
-false_consensus,95,Explicit dissent,70.0,,0
-false_consensus,95,Explicit dissent,100.0,,0
-false_consensus,96,Explicit dissent,10.0,,0
-false_consensus,96,Explicit dissent,20.0,,0
-false_consensus,96,Explicit dissent,35.0,,0
-false_consensus,96,Explicit dissent,50.0,,0
-false_consensus,96,Explicit dissent,70.0,,0
-false_consensus,96,Explicit dissent,100.0,,0
-false_consensus,97,Explicit dissent,10.0,,0
-false_consensus,97,Explicit dissent,20.0,,0
-false_consensus,97,Explicit dissent,35.0,,0
-false_consensus,97,Explicit dissent,50.0,,0
-false_consensus,97,Explicit dissent,70.0,,0
-false_consensus,97,Explicit dissent,100.0,,0
-false_consensus,98,Explicit dissent,10.0,,0
-false_consensus,98,Explicit dissent,20.0,,0
-false_consensus,98,Explicit dissent,35.0,,0
-false_consensus,98,Explicit dissent,50.0,,0
-false_consensus,98,Explicit dissent,70.0,,0
-false_consensus,98,Explicit dissent,100.0,,0
-false_consensus,99,Explicit dissent,10.0,,0
-false_consensus,99,Explicit dissent,20.0,,0
-false_consensus,99,Explicit dissent,35.0,,0
-false_consensus,99,Explicit dissent,50.0,,0
-false_consensus,99,Explicit dissent,70.0,,0
-false_consensus,99,Explicit dissent,100.0,,0
-false_consensus,100,Explicit dissent,10.0,,0
-false_consensus,100,Explicit dissent,20.0,,0
-false_consensus,100,Explicit dissent,35.0,,0
-false_consensus,100,Explicit dissent,50.0,,0
-false_consensus,100,Explicit dissent,70.0,,0
-false_consensus,100,Explicit dissent,100.0,,0
+illustration,position_id,position
+original,1,-0.8370139223576629
+original,2,-0.414445649508407
+original,3,-0.5816842724328072
+original,4,-0.4744136110519436
+original,5,-0.7324173700459572
+original,6,-0.4941931841404273
+original,7,-0.5772556656643516
+original,8,-0.6309254138193656
+original,9,-0.7008703322285379
+original,10,-0.8022989738560721
+original,11,-0.6554107741031995
+original,12,-0.517631175715502
+original,13,-0.733387036899135
+original,14,-0.591447975912464
+original,15,-0.476907811174197
+original,16,-0.8110753314334552
+original,17,-0.5733888455842368
+original,18,-0.6653001549961307
+original,19,-0.4711399231280233
+original,20,-0.5836637297083924
+original,21,-0.6196334551878105
+original,22,-0.6407765163711854
+original,23,-0.48954086720261614
+original,24,-0.4466221111159884
+original,25,-0.6856373497688618
+original,26,-0.57317289480038
+original,27,-0.44543735802613454
+original,28,-0.5323358324935403
+original,29,-0.5803068776535617
+original,30,-0.6854601965461518
+original,31,-0.5754224661594989
+original,32,-0.5901159784622082
+original,33,-0.6043566533548134
+original,34,-0.6150942514824443
+original,35,-0.6409867168651405
+original,36,-0.6978094107723506
+original,37,-0.5581219684546967
+original,38,-0.4732145952604613
+original,39,-0.4083339820278
+original,40,-0.6069938163929446
+original,41,-0.5026618375552497
+original,42,-0.43927026333186037
+original,43,-0.6639686288781756
+original,44,-0.4764543358453027
+original,45,-0.6026478387963116
+original,46,-0.6011204142555359
+original,47,-0.3808202980854435
+original,48,-0.4870528791876803
+original,49,-0.6715423119575152
+original,50,-0.7540140410548425
+original,51,-0.5678128205405245
+original,52,-0.4213562662733203
+original,53,-0.5018329296814593
+original,54,-0.5606292476906026
+original,55,-0.412491245758297
+original,56,-0.624100244724044
+original,57,-0.6274901388786424
+original,58,-0.693697914655287
+original,59,-0.7716940033209378
+original,60,-0.8199930010270715
+original,61,-0.8881087520395294
+original,62,-0.6229408551024519
+original,63,-0.4840313698220645
+original,64,-0.6055247597084271
+original,65,-0.6701535239279226
+original,66,-0.5672818268256208
+original,67,-0.5388033668339214
+original,68,-0.713865487650228
+original,69,-0.80444155818984
+original,70,-0.6528948382857173
+original,71,-0.3259110652039582
+original,72,-0.44597736533094307
+original,73,-0.6720886552301392
+original,74,-0.6968129640344234
+original,75,-0.8059570765709835
+original,76,-0.5419333084857911
+original,77,-0.8763658711361273
+original,78,-0.6482794155792467
+original,79,-0.6260701131483366
+original,80,-0.5709223225352604
+original,81,-0.6751025281625612
+original,82,-0.6011683714456615
+original,83,-0.5791316208482818
+original,84,-0.4989816817741281
+original,85,-0.5953307389324775
+original,86,-0.28744821235800166
+original,87,-0.6657023174802413
+original,88,-0.5264644700578399
+original,89,-0.8683574868523987
+original,90,-0.6685418795831112
+original,91,-0.5440792867396225
+original,92,-0.6147665194853225
+original,93,-0.7064125381539424
+original,94,-0.529192287389972
+original,95,-0.5708912040847565
+original,96,-0.4489827198300698
+original,97,-0.6963398573467573
+original,98,-0.39253027932595097
+original,99,-0.6050888749246216
+original,100,-0.522474323889672
+original,101,-0.561613595351744
+original,102,-0.6630882418016063
+original,103,-0.4689192469755369
+original,104,-0.44934451182101337
+original,105,-0.5660358334920658
+original,106,-0.5177458254184513
+original,107,-0.4688717443207326
+original,108,-0.7032885666080331
+original,109,-0.9527397295819141
+original,110,-0.5428034516552086
+original,111,-0.454219454393024
+original,112,-0.627822476777199
+original,113,-0.42432114753922834
+original,114,-0.4863364838077945
+original,115,-0.6213345353990918
+original,116,-0.404562886049263
+original,117,-0.7452323896969646
+original,118,-0.6302584692956217
+original,119,-0.5918671344295956
+original,120,-0.29673917050660825
+original,121,0.8370139223576629
+original,122,0.414445649508407
+original,123,0.5816842724328072
+original,124,0.4744136110519436
+original,125,0.7324173700459572
+original,126,0.4941931841404273
+original,127,0.5772556656643516
+original,128,0.6309254138193656
+original,129,0.7008703322285379
+original,130,0.8022989738560721
+original,131,0.6554107741031995
+original,132,0.517631175715502
+original,133,0.733387036899135
+original,134,0.591447975912464
+original,135,0.476907811174197
+original,136,0.8110753314334552
+original,137,0.5733888455842368
+original,138,0.6653001549961307
+original,139,0.4711399231280233
+original,140,0.5836637297083924
+original,141,0.6196334551878105
+original,142,0.6407765163711854
+original,143,0.48954086720261614
+original,144,0.4466221111159884
+original,145,0.6856373497688618
+original,146,0.57317289480038
+original,147,0.44543735802613454
+original,148,0.5323358324935403
+original,149,0.5803068776535617
+original,150,0.6854601965461518
+original,151,0.5754224661594989
+original,152,0.5901159784622082
+original,153,0.6043566533548134
+original,154,0.6150942514824443
+original,155,0.6409867168651405
+original,156,0.6978094107723506
+original,157,0.5581219684546967
+original,158,0.4732145952604613
+original,159,0.4083339820278
+original,160,0.6069938163929446
+original,161,0.5026618375552497
+original,162,0.43927026333186037
+original,163,0.6639686288781756
+original,164,0.4764543358453027
+original,165,0.6026478387963116
+original,166,0.6011204142555359
+original,167,0.3808202980854435
+original,168,0.4870528791876803
+original,169,0.6715423119575152
+original,170,0.7540140410548425
+original,171,0.5678128205405245
+original,172,0.4213562662733203
+original,173,0.5018329296814593
+original,174,0.5606292476906026
+original,175,0.412491245758297
+original,176,0.624100244724044
+original,177,0.6274901388786424
+original,178,0.693697914655287
+original,179,0.7716940033209378
+original,180,0.8199930010270715
+original,181,0.8881087520395294
+original,182,0.6229408551024519
+original,183,0.4840313698220645
+original,184,0.6055247597084271
+original,185,0.6701535239279226
+original,186,0.5672818268256208
+original,187,0.5388033668339214
+original,188,0.713865487650228
+original,189,0.80444155818984
+original,190,0.6528948382857173
+original,191,0.3259110652039582
+original,192,0.44597736533094307
+original,193,0.6720886552301392
+original,194,0.6968129640344234
+original,195,0.8059570765709835
+original,196,0.5419333084857911
+original,197,0.8763658711361273
+original,198,0.6482794155792467
+original,199,0.6260701131483366
+original,200,0.5709223225352604
+original,201,0.6751025281625612
+original,202,0.6011683714456615
+original,203,0.5791316208482818
+original,204,0.4989816817741281
+original,205,0.5953307389324775
+original,206,0.28744821235800166
+original,207,0.6657023174802413
+original,208,0.5264644700578399
+original,209,0.8683574868523987
+original,210,0.6685418795831112
+original,211,0.5440792867396225
+original,212,0.6147665194853225
+original,213,0.7064125381539424
+original,214,0.529192287389972
+original,215,0.5708912040847565
+original,216,0.4489827198300698
+original,217,0.6963398573467573
+original,218,0.39253027932595097
+original,219,0.6050888749246216
+original,220,0.522474323889672
+original,221,0.561613595351744
+original,222,0.6630882418016063
+original,223,0.4689192469755369
+original,224,0.44934451182101337
+original,225,0.5660358334920658
+original,226,0.5177458254184513
+original,227,0.4688717443207326
+original,228,0.7032885666080331
+original,229,0.9527397295819141
+original,230,0.5428034516552086
+original,231,0.454219454393024
+original,232,0.627822476777199
+original,233,0.42432114753922834
+original,234,0.4863364838077945
+original,235,0.6213345353990918
+original,236,0.404562886049263
+original,237,0.7452323896969646
+original,238,0.6302584692956217
+original,239,0.5918671344295956
+original,240,0.29673917050660825
+flattened_reconstruction,1,-0.08789022600385378
+flattened_reconstruction,2,0.00637061275826761
+flattened_reconstruction,3,0.07782782431347893
+flattened_reconstruction,4,0.3997460354624673
+flattened_reconstruction,5,0.2968139293925413
+flattened_reconstruction,6,0.046566193407129024
+flattened_reconstruction,7,0.06853300580898516
+flattened_reconstruction,8,0.04840291771404152
+flattened_reconstruction,9,0.044371299466587785
+flattened_reconstruction,10,-0.1885220419103112
+flattened_reconstruction,11,-0.10577360496665722
+flattened_reconstruction,12,-0.337566740806431
+flattened_reconstruction,13,-0.16774687216383405
+flattened_reconstruction,14,0.010959310208063091
+flattened_reconstruction,15,0.3523639288797661
+flattened_reconstruction,16,0.29840745620737524
+flattened_reconstruction,17,-0.07969495906923034
+flattened_reconstruction,18,0.19676924295935747
+flattened_reconstruction,19,0.0639428302747367
+flattened_reconstruction,20,0.011916659582682487
+flattened_reconstruction,21,0.010571099227762119
+flattened_reconstruction,22,0.20774402449965265
+flattened_reconstruction,23,0.04020920489267914
+flattened_reconstruction,24,-0.019955426635931032
+flattened_reconstruction,25,-0.021970874439147466
+flattened_reconstruction,26,0.08371209982009706
+flattened_reconstruction,27,-0.2959130797743748
+flattened_reconstruction,28,0.11035782432214288
+flattened_reconstruction,29,-0.10118643247634683
+flattened_reconstruction,30,0.5933975186754747
+flattened_reconstruction,31,0.04774969140193332
+flattened_reconstruction,32,-0.01485490252378805
+flattened_reconstruction,33,-0.00018338709574892316
+flattened_reconstruction,34,-0.12192811020999793
+flattened_reconstruction,35,0.034248705391459
+flattened_reconstruction,36,0.011362516036268507
+flattened_reconstruction,37,0.2606453901683114
+flattened_reconstruction,38,-0.012577165295706494
+flattened_reconstruction,39,-0.1661624582229887
+flattened_reconstruction,40,-0.1938542161716287
+flattened_reconstruction,41,0.012515832436404292
+flattened_reconstruction,42,-0.09037752367226456
+flattened_reconstruction,43,0.3518442158563953
+flattened_reconstruction,44,-0.13347753292746314
+flattened_reconstruction,45,-0.06269842935019611
+flattened_reconstruction,46,-0.07677568284064497
+flattened_reconstruction,47,-0.4911489787276025
+flattened_reconstruction,48,0.08859633916175969
+flattened_reconstruction,49,0.10485006916964686
+flattened_reconstruction,50,-0.2650346452059288
+flattened_reconstruction,51,0.030994395325278933
+flattened_reconstruction,52,0.4491153252520384
+flattened_reconstruction,53,-0.10803761843517111
+flattened_reconstruction,54,-0.44733292871957664
+flattened_reconstruction,55,0.07115999331626038
+flattened_reconstruction,56,-0.07860254635150135
+flattened_reconstruction,57,-0.25019097142245306
+flattened_reconstruction,58,-0.00627126510646165
+flattened_reconstruction,59,-0.05121099339251387
+flattened_reconstruction,60,0.16511936697872895
+flattened_reconstruction,61,0.14093026629836852
+flattened_reconstruction,62,0.025402843093377824
+flattened_reconstruction,63,0.09469283889972926
+flattened_reconstruction,64,0.06459312578629607
+flattened_reconstruction,65,-0.2267296242827022
+flattened_reconstruction,66,0.07426421747047271
+flattened_reconstruction,67,0.08660353346699731
+flattened_reconstruction,68,0.054408149080725526
+flattened_reconstruction,69,-0.16568470286047307
+flattened_reconstruction,70,0.27669210556122414
+flattened_reconstruction,71,0.3079541035303157
+flattened_reconstruction,72,-0.007740096206749703
+flattened_reconstruction,73,-0.06419561104787061
+flattened_reconstruction,74,-0.15426715399521032
+flattened_reconstruction,75,-0.05333795980150403
+flattened_reconstruction,76,-0.3169672237182186
+flattened_reconstruction,77,-0.045550252465521045
+flattened_reconstruction,78,-0.2314560313129389
+flattened_reconstruction,79,-0.23026596668072538
+flattened_reconstruction,80,-0.061172944188524474
+flattened_reconstruction,81,0.09143540233127598
+flattened_reconstruction,82,0.14288259942408982
+flattened_reconstruction,83,-0.02912834704942608
+flattened_reconstruction,84,0.3958701744406489
+flattened_reconstruction,85,0.00909955067277696
+flattened_reconstruction,86,0.042171695134803074
+flattened_reconstruction,87,-0.021454809255830223
+flattened_reconstruction,88,0.15275652473497606
+flattened_reconstruction,89,0.007153873951112146
+flattened_reconstruction,90,0.307252387599678
+flattened_reconstruction,91,0.05785068114870385
+flattened_reconstruction,92,0.3529563155483676
+flattened_reconstruction,93,-0.010785182690276405
+flattened_reconstruction,94,0.28690581793683195
+flattened_reconstruction,95,-0.08440458068411302
+flattened_reconstruction,96,0.17184985283844115
+flattened_reconstruction,97,-0.1661703270194183
+flattened_reconstruction,98,0.04934986437044395
+flattened_reconstruction,99,0.0661123738973167
+flattened_reconstruction,100,-0.07462366804800558
+flattened_reconstruction,101,-0.08051248205082101
+flattened_reconstruction,102,0.1607093012547246
+flattened_reconstruction,103,-0.09452862835325106
+flattened_reconstruction,104,-0.2991474870593528
+flattened_reconstruction,105,-0.21186448159976543
+flattened_reconstruction,106,-0.0725677985207702
+flattened_reconstruction,107,0.060159785006925745
+flattened_reconstruction,108,-0.10317077832730767
+flattened_reconstruction,109,-0.16222361677113425
+flattened_reconstruction,110,-0.17360486640046366
+flattened_reconstruction,111,-0.11694336733921352
+flattened_reconstruction,112,-0.022327209732454563
+flattened_reconstruction,113,-0.1026116051851092
+flattened_reconstruction,114,0.03558872595110028
+flattened_reconstruction,115,0.010160963768216383
+flattened_reconstruction,116,0.14749098551151243
+flattened_reconstruction,117,-0.06606155070075417
+flattened_reconstruction,118,-0.013153227813216479
+flattened_reconstruction,119,0.059266330954137816
+flattened_reconstruction,120,-0.006318184034248691
+flattened_reconstruction,121,0.08789022600385378
+flattened_reconstruction,122,-0.00637061275826761
+flattened_reconstruction,123,-0.07782782431347893
+flattened_reconstruction,124,-0.3997460354624673
+flattened_reconstruction,125,-0.2968139293925413
+flattened_reconstruction,126,-0.046566193407129024
+flattened_reconstruction,127,-0.06853300580898516
+flattened_reconstruction,128,-0.04840291771404152
+flattened_reconstruction,129,-0.044371299466587785
+flattened_reconstruction,130,0.1885220419103112
+flattened_reconstruction,131,0.10577360496665722
+flattened_reconstruction,132,0.337566740806431
+flattened_reconstruction,133,0.16774687216383405
+flattened_reconstruction,134,-0.010959310208063091
+flattened_reconstruction,135,-0.3523639288797661
+flattened_reconstruction,136,-0.29840745620737524
+flattened_reconstruction,137,0.07969495906923034
+flattened_reconstruction,138,-0.19676924295935747
+flattened_reconstruction,139,-0.0639428302747367
+flattened_reconstruction,140,-0.011916659582682487
+flattened_reconstruction,141,-0.010571099227762119
+flattened_reconstruction,142,-0.20774402449965265
+flattened_reconstruction,143,-0.04020920489267914
+flattened_reconstruction,144,0.019955426635931032
+flattened_reconstruction,145,0.021970874439147466
+flattened_reconstruction,146,-0.08371209982009706
+flattened_reconstruction,147,0.2959130797743748
+flattened_reconstruction,148,-0.11035782432214288
+flattened_reconstruction,149,0.10118643247634683
+flattened_reconstruction,150,-0.5933975186754747
+flattened_reconstruction,151,-0.04774969140193332
+flattened_reconstruction,152,0.01485490252378805
+flattened_reconstruction,153,0.00018338709574892316
+flattened_reconstruction,154,0.12192811020999793
+flattened_reconstruction,155,-0.034248705391459
+flattened_reconstruction,156,-0.011362516036268507
+flattened_reconstruction,157,-0.2606453901683114
+flattened_reconstruction,158,0.012577165295706494
+flattened_reconstruction,159,0.1661624582229887
+flattened_reconstruction,160,0.1938542161716287
+flattened_reconstruction,161,-0.012515832436404292
+flattened_reconstruction,162,0.09037752367226456
+flattened_reconstruction,163,-0.3518442158563953
+flattened_reconstruction,164,0.13347753292746314
+flattened_reconstruction,165,0.06269842935019611
+flattened_reconstruction,166,0.07677568284064497
+flattened_reconstruction,167,0.4911489787276025
+flattened_reconstruction,168,-0.08859633916175969
+flattened_reconstruction,169,-0.10485006916964686
+flattened_reconstruction,170,0.2650346452059288
+flattened_reconstruction,171,-0.030994395325278933
+flattened_reconstruction,172,-0.4491153252520384
+flattened_reconstruction,173,0.10803761843517111
+flattened_reconstruction,174,0.44733292871957664
+flattened_reconstruction,175,-0.07115999331626038
+flattened_reconstruction,176,0.07860254635150135
+flattened_reconstruction,177,0.25019097142245306
+flattened_reconstruction,178,0.00627126510646165
+flattened_reconstruction,179,0.05121099339251387
+flattened_reconstruction,180,-0.16511936697872895
+flattened_reconstruction,181,-0.14093026629836852
+flattened_reconstruction,182,-0.025402843093377824
+flattened_reconstruction,183,-0.09469283889972926
+flattened_reconstruction,184,-0.06459312578629607
+flattened_reconstruction,185,0.2267296242827022
+flattened_reconstruction,186,-0.07426421747047271
+flattened_reconstruction,187,-0.08660353346699731
+flattened_reconstruction,188,-0.054408149080725526
+flattened_reconstruction,189,0.16568470286047307
+flattened_reconstruction,190,-0.27669210556122414
+flattened_reconstruction,191,-0.3079541035303157
+flattened_reconstruction,192,0.007740096206749703
+flattened_reconstruction,193,0.06419561104787061
+flattened_reconstruction,194,0.15426715399521032
+flattened_reconstruction,195,0.05333795980150403
+flattened_reconstruction,196,0.3169672237182186
+flattened_reconstruction,197,0.045550252465521045
+flattened_reconstruction,198,0.2314560313129389
+flattened_reconstruction,199,0.23026596668072538
+flattened_reconstruction,200,0.061172944188524474
+flattened_reconstruction,201,-0.09143540233127598
+flattened_reconstruction,202,-0.14288259942408982
+flattened_reconstruction,203,0.02912834704942608
+flattened_reconstruction,204,-0.3958701744406489
+flattened_reconstruction,205,-0.00909955067277696
+flattened_reconstruction,206,-0.042171695134803074
+flattened_reconstruction,207,0.021454809255830223
+flattened_reconstruction,208,-0.15275652473497606
+flattened_reconstruction,209,-0.007153873951112146
+flattened_reconstruction,210,-0.307252387599678
+flattened_reconstruction,211,-0.05785068114870385
+flattened_reconstruction,212,-0.3529563155483676
+flattened_reconstruction,213,0.010785182690276405
+flattened_reconstruction,214,-0.28690581793683195
+flattened_reconstruction,215,0.08440458068411302
+flattened_reconstruction,216,-0.17184985283844115
+flattened_reconstruction,217,0.1661703270194183
+flattened_reconstruction,218,-0.04934986437044395
+flattened_reconstruction,219,-0.0661123738973167
+flattened_reconstruction,220,0.07462366804800558
+flattened_reconstruction,221,0.08051248205082101
+flattened_reconstruction,222,-0.1607093012547246
+flattened_reconstruction,223,0.09452862835325106
+flattened_reconstruction,224,0.2991474870593528
+flattened_reconstruction,225,0.21186448159976543
+flattened_reconstruction,226,0.0725677985207702
+flattened_reconstruction,227,-0.060159785006925745
+flattened_reconstruction,228,0.10317077832730767
+flattened_reconstruction,229,0.16222361677113425
+flattened_reconstruction,230,0.17360486640046366
+flattened_reconstruction,231,0.11694336733921352
+flattened_reconstruction,232,0.022327209732454563
+flattened_reconstruction,233,0.1026116051851092
+flattened_reconstruction,234,-0.03558872595110028
+flattened_reconstruction,235,-0.010160963768216383
+flattened_reconstruction,236,-0.14749098551151243
+flattened_reconstruction,237,0.06606155070075417
+flattened_reconstruction,238,0.013153227813216479
+flattened_reconstruction,239,-0.059266330954137816
+flattened_reconstruction,240,0.006318184034248691
+preserved_reconstruction,1,-0.7802264828857735
+preserved_reconstruction,2,-0.5000637375710197
+preserved_reconstruction,3,-0.5922488089021397
+preserved_reconstruction,4,-0.45625535206958556
+preserved_reconstruction,5,-0.7599461285544491
+preserved_reconstruction,6,-0.43933890431595635
+preserved_reconstruction,7,-0.5765749246400025
+preserved_reconstruction,8,-0.5813658931677633
+preserved_reconstruction,9,-0.6490006222759606
+preserved_reconstruction,10,-0.8133628934316466
+preserved_reconstruction,11,-0.4760569126726214
+preserved_reconstruction,12,-0.57427715220692
+preserved_reconstruction,13,-0.6912913843766432
+preserved_reconstruction,14,-0.5400285395427452
+preserved_reconstruction,15,-0.4559100810053387
+preserved_reconstruction,16,-0.6068986477832474
+preserved_reconstruction,17,-0.49606257435257983
+preserved_reconstruction,18,-0.6782444284088376
+preserved_reconstruction,19,-0.4713727135232219
+preserved_reconstruction,20,-0.5426749342924767
+preserved_reconstruction,21,-0.6164274095954669
+preserved_reconstruction,22,-0.6986367279135131
+preserved_reconstruction,23,-0.41331470563138023
+preserved_reconstruction,24,-0.46164910137157217
+preserved_reconstruction,25,-0.6901983105362978
+preserved_reconstruction,26,-0.49009320144467555
+preserved_reconstruction,27,-0.36266683584925263
+preserved_reconstruction,28,-0.5377511246665712
+preserved_reconstruction,29,-0.5027525777411118
+preserved_reconstruction,30,-0.7937639961121007
+preserved_reconstruction,31,-0.6117812146032039
+preserved_reconstruction,32,-0.6348354678351176
+preserved_reconstruction,33,-0.6388775391396322
+preserved_reconstruction,34,-0.5637805454082024
+preserved_reconstruction,35,-0.6421522341650499
+preserved_reconstruction,36,-0.6051435741220206
+preserved_reconstruction,37,-0.5246176563406959
+preserved_reconstruction,38,-0.4399448418144798
+preserved_reconstruction,39,-0.3847752165010342
+preserved_reconstruction,40,-0.533005434054949
+preserved_reconstruction,41,-0.5390515218419747
+preserved_reconstruction,42,-0.4738839150289377
+preserved_reconstruction,43,-0.6755576171596412
+preserved_reconstruction,44,-0.4070091396022774
+preserved_reconstruction,45,-0.6860569902574016
+preserved_reconstruction,46,-0.5570347074988485
+preserved_reconstruction,47,-0.414814304659265
+preserved_reconstruction,48,-0.5313961555289182
+preserved_reconstruction,49,-0.6954685006103963
+preserved_reconstruction,50,-0.6003141477992144
+preserved_reconstruction,51,-0.5302376292516171
+preserved_reconstruction,52,-0.3758701601365608
+preserved_reconstruction,53,-0.5129213192940029
+preserved_reconstruction,54,-0.5256811373131727
+preserved_reconstruction,55,-0.4385438661017752
+preserved_reconstruction,56,-0.5808384236288103
+preserved_reconstruction,57,-0.6096484304617966
+preserved_reconstruction,58,-0.6214531647505535
+preserved_reconstruction,59,-0.7535555615143319
+preserved_reconstruction,60,-0.7605153579021242
+preserved_reconstruction,61,-0.7383576731186472
+preserved_reconstruction,62,-0.6236978741335809
+preserved_reconstruction,63,-0.4005713019680318
+preserved_reconstruction,64,-0.555799997693712
+preserved_reconstruction,65,-0.60077459641451
+preserved_reconstruction,66,-0.5006543310651413
+preserved_reconstruction,67,-0.4767709039065518
+preserved_reconstruction,68,-0.7336584231017182
+preserved_reconstruction,69,-0.7990713521532055
+preserved_reconstruction,70,-0.7034804561839196
+preserved_reconstruction,71,-0.3216924884658434
+preserved_reconstruction,72,-0.3766101724678352
+preserved_reconstruction,73,-0.6584597588239012
+preserved_reconstruction,74,-0.6278635450040202
+preserved_reconstruction,75,-0.7592337717954081
+preserved_reconstruction,76,-0.55193540337844
+preserved_reconstruction,77,-0.8395054173507288
+preserved_reconstruction,78,-0.6231327930699013
+preserved_reconstruction,79,-0.6201381281159166
+preserved_reconstruction,80,-0.47842578856652246
+preserved_reconstruction,81,-0.7105935283495161
+preserved_reconstruction,82,-0.6442335911663458
+preserved_reconstruction,83,-0.5704798688142501
+preserved_reconstruction,84,-0.4549231631210994
+preserved_reconstruction,85,-0.5142569118632478
+preserved_reconstruction,86,-0.3031106438872874
+preserved_reconstruction,87,-0.6688966329279578
+preserved_reconstruction,88,-0.470643424572897
+preserved_reconstruction,89,-0.8906131637105434
+preserved_reconstruction,90,-0.6314273967622106
+preserved_reconstruction,91,-0.6097670370129675
+preserved_reconstruction,92,-0.5634814224271222
+preserved_reconstruction,93,-0.5827194118338347
+preserved_reconstruction,94,-0.6618652872507188
+preserved_reconstruction,95,-0.5744375420674869
+preserved_reconstruction,96,-0.45948173039308793
+preserved_reconstruction,97,-0.639906756588224
+preserved_reconstruction,98,-0.39261938594224227
+preserved_reconstruction,99,-0.4364552174134598
+preserved_reconstruction,100,-0.40712183147550757
+preserved_reconstruction,101,-0.4982010410622601
+preserved_reconstruction,102,-0.5760363419045781
+preserved_reconstruction,103,-0.4052373718384635
+preserved_reconstruction,104,-0.4046741131601993
+preserved_reconstruction,105,-0.5495618903209677
+preserved_reconstruction,106,-0.5757033317661887
+preserved_reconstruction,107,-0.4477923875740517
+preserved_reconstruction,108,-0.6692626451585892
+preserved_reconstruction,109,-0.9513452229686589
+preserved_reconstruction,110,-0.6237786349536781
+preserved_reconstruction,111,-0.4664497179189452
+preserved_reconstruction,112,-0.49314590754442733
+preserved_reconstruction,113,-0.42824205258594955
+preserved_reconstruction,114,-0.3559250433224229
+preserved_reconstruction,115,-0.6162158579965503
+preserved_reconstruction,116,-0.3824639385631697
+preserved_reconstruction,117,-0.7147358979184483
+preserved_reconstruction,118,-0.5626918766211902
+preserved_reconstruction,119,-0.6063372608132734
+preserved_reconstruction,120,-0.3616045692268054
+preserved_reconstruction,121,0.7802264828857735
+preserved_reconstruction,122,0.5000637375710197
+preserved_reconstruction,123,0.5922488089021397
+preserved_reconstruction,124,0.45625535206958556
+preserved_reconstruction,125,0.7599461285544491
+preserved_reconstruction,126,0.43933890431595635
+preserved_reconstruction,127,0.5765749246400025
+preserved_reconstruction,128,0.5813658931677633
+preserved_reconstruction,129,0.6490006222759606
+preserved_reconstruction,130,0.8133628934316466
+preserved_reconstruction,131,0.4760569126726214
+preserved_reconstruction,132,0.57427715220692
+preserved_reconstruction,133,0.6912913843766432
+preserved_reconstruction,134,0.5400285395427452
+preserved_reconstruction,135,0.4559100810053387
+preserved_reconstruction,136,0.6068986477832474
+preserved_reconstruction,137,0.49606257435257983
+preserved_reconstruction,138,0.6782444284088376
+preserved_reconstruction,139,0.4713727135232219
+preserved_reconstruction,140,0.5426749342924767
+preserved_reconstruction,141,0.6164274095954669
+preserved_reconstruction,142,0.6986367279135131
+preserved_reconstruction,143,0.41331470563138023
+preserved_reconstruction,144,0.46164910137157217
+preserved_reconstruction,145,0.6901983105362978
+preserved_reconstruction,146,0.49009320144467555
+preserved_reconstruction,147,0.36266683584925263
+preserved_reconstruction,148,0.5377511246665712
+preserved_reconstruction,149,0.5027525777411118
+preserved_reconstruction,150,0.7937639961121007
+preserved_reconstruction,151,0.6117812146032039
+preserved_reconstruction,152,0.6348354678351176
+preserved_reconstruction,153,0.6388775391396322
+preserved_reconstruction,154,0.5637805454082024
+preserved_reconstruction,155,0.6421522341650499
+preserved_reconstruction,156,0.6051435741220206
+preserved_reconstruction,157,0.5246176563406959
+preserved_reconstruction,158,0.4399448418144798
+preserved_reconstruction,159,0.3847752165010342
+preserved_reconstruction,160,0.533005434054949
+preserved_reconstruction,161,0.5390515218419747
+preserved_reconstruction,162,0.4738839150289377
+preserved_reconstruction,163,0.6755576171596412
+preserved_reconstruction,164,0.4070091396022774
+preserved_reconstruction,165,0.6860569902574016
+preserved_reconstruction,166,0.5570347074988485
+preserved_reconstruction,167,0.414814304659265
+preserved_reconstruction,168,0.5313961555289182
+preserved_reconstruction,169,0.6954685006103963
+preserved_reconstruction,170,0.6003141477992144
+preserved_reconstruction,171,0.5302376292516171
+preserved_reconstruction,172,0.3758701601365608
+preserved_reconstruction,173,0.5129213192940029
+preserved_reconstruction,174,0.5256811373131727
+preserved_reconstruction,175,0.4385438661017752
+preserved_reconstruction,176,0.5808384236288103
+preserved_reconstruction,177,0.6096484304617966
+preserved_reconstruction,178,0.6214531647505535
+preserved_reconstruction,179,0.7535555615143319
+preserved_reconstruction,180,0.7605153579021242
+preserved_reconstruction,181,0.7383576731186472
+preserved_reconstruction,182,0.6236978741335809
+preserved_reconstruction,183,0.4005713019680318
+preserved_reconstruction,184,0.555799997693712
+preserved_reconstruction,185,0.60077459641451
+preserved_reconstruction,186,0.5006543310651413
+preserved_reconstruction,187,0.4767709039065518
+preserved_reconstruction,188,0.7336584231017182
+preserved_reconstruction,189,0.7990713521532055
+preserved_reconstruction,190,0.7034804561839196
+preserved_reconstruction,191,0.3216924884658434
+preserved_reconstruction,192,0.3766101724678352
+preserved_reconstruction,193,0.6584597588239012
+preserved_reconstruction,194,0.6278635450040202
+preserved_reconstruction,195,0.7592337717954081
+preserved_reconstruction,196,0.55193540337844
+preserved_reconstruction,197,0.8395054173507288
+preserved_reconstruction,198,0.6231327930699013
+preserved_reconstruction,199,0.6201381281159166
+preserved_reconstruction,200,0.47842578856652246
+preserved_reconstruction,201,0.7105935283495161
+preserved_reconstruction,202,0.6442335911663458
+preserved_reconstruction,203,0.5704798688142501
+preserved_reconstruction,204,0.4549231631210994
+preserved_reconstruction,205,0.5142569118632478
+preserved_reconstruction,206,0.3031106438872874
+preserved_reconstruction,207,0.6688966329279578
+preserved_reconstruction,208,0.470643424572897
+preserved_reconstruction,209,0.8906131637105434
+preserved_reconstruction,210,0.6314273967622106
+preserved_reconstruction,211,0.6097670370129675
+preserved_reconstruction,212,0.5634814224271222
+preserved_reconstruction,213,0.5827194118338347
+preserved_reconstruction,214,0.6618652872507188
+preserved_reconstruction,215,0.5744375420674869
+preserved_reconstruction,216,0.45948173039308793
+preserved_reconstruction,217,0.639906756588224
+preserved_reconstruction,218,0.39261938594224227
+preserved_reconstruction,219,0.4364552174134598
+preserved_reconstruction,220,0.40712183147550757
+preserved_reconstruction,221,0.4982010410622601
+preserved_reconstruction,222,0.5760363419045781
+preserved_reconstruction,223,0.4052373718384635
+preserved_reconstruction,224,0.4046741131601993
+preserved_reconstruction,225,0.5495618903209677
+preserved_reconstruction,226,0.5757033317661887
+preserved_reconstruction,227,0.4477923875740517
+preserved_reconstruction,228,0.6692626451585892
+preserved_reconstruction,229,0.9513452229686589
+preserved_reconstruction,230,0.6237786349536781
+preserved_reconstruction,231,0.4664497179189452
+preserved_reconstruction,232,0.49314590754442733
+preserved_reconstruction,233,0.42824205258594955
+preserved_reconstruction,234,0.3559250433224229
+preserved_reconstruction,235,0.6162158579965503
+preserved_reconstruction,236,0.3824639385631697
+preserved_reconstruction,237,0.7147358979184483
+preserved_reconstruction,238,0.5626918766211902
+preserved_reconstruction,239,0.6063372608132734
+preserved_reconstruction,240,0.3616045692268054

@@ -7,8 +7,8 @@ assert len(w.pages)==6
 w.write(str(o/'all-six-figure-concepts.pdf'))
 shutil.copy2(ROOT/'scripts/paper-figure-concepts/build.py',o/'build.py')
 with zipfile.ZipFile(o/'design-bundle.zip','w',zipfile.ZIP_DEFLATED) as z:
- for f in o.iterdir():
-  if f.name!='design-bundle.zip':z.write(f,'paper-concepts/'+f.name)
+ for f in o.rglob('*'):
+  if f.is_file() and f.name!='design-bundle.zip':z.write(f,'paper-concepts/'+str(f.relative_to(o)))
  for f in (root/'extraction-preview').iterdir():z.write(f,'extraction-preview/'+f.name)
  for f in [ROOT/'scripts/extraction-map/build.py',*Path(__file__).parent.glob('*.py')]:z.write(f,str(f.relative_to(ROOT)))
  z.writestr('README.txt','ILLUSTRATIVE DESIGNS ONLY. No experimental results. Seeds and invented distribution parameters are in the scripts. To regenerate from the extracted root: install numpy, matplotlib and pypdf, then run python scripts/extraction-map/build.py and python scripts/paper-figure-concepts/build.py, then python scripts/paper-figure-concepts/disagreement.py. Generated assets are written to frontend/public/evaluation/. The combined PDF concatenates the six vector PDFs in numerical order. No provider APIs are called.\n')

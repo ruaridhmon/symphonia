@@ -24,9 +24,9 @@
     },
     {
       "id": "06-preserving-disagreement",
-      "simulated_rows": 3000,
-      "seed": 92742,
-      "status": "ILLUSTRATIVE ONLY; see 06-design.json and disagreement.py"
+      "simulated_rows": 720,
+      "seed": 92743,
+      "status": "ILLUSTRATIVE WAVE DESIGN ONLY; previous line design retained in archive/"
     }
   ],
   "simulation": "Gaussian and beta draws with deliberately chosen shifts; parameters are in build.py. KDE bandwidths specified there. No inference, efficacy claims or provider calls."
