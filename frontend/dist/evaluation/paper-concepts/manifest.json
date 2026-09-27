@@ -21,6 +21,12 @@
       "id": "05-decision-consequences",
       "simulated_rows": 120,
       "status": "ILLUSTRATIVE DESIGN ONLY; no models or participants evaluated"
+    },
+    {
+      "id": "06-preserving-disagreement",
+      "simulated_rows": 3000,
+      "seed": 92742,
+      "status": "ILLUSTRATIVE ONLY; see 06-design.json and disagreement.py"
     }
   ],
   "simulation": "Gaussian and beta draws with deliberately chosen shifts; parameters are in build.py. KDE bandwidths specified there. No inference, efficacy claims or provider calls."

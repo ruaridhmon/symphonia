@@ -1,0 +1,17 @@
+{
+  "status": "ILLUSTRATIVE ONLY",
+  "seed": 92742,
+  "cases": 100,
+  "word_budgets": [
+    0.1,
+    0.2,
+    0.35,
+    0.5,
+    0.7,
+    1.0
+  ],
+  "retention": "12 hypothetical arguments per category per case; beta thresholds with 4.5% structural omissions; nested retention across budgets.",
+  "false_consensus": "Paired uniform latent values and invented length-dependent probabilities; proportions across 100 hypothetical cases; no uncertainty inference.",
+  "example": "Authored vignette, not a quote from an actual consultation.",
+  "new_provider_calls": 0
+}
