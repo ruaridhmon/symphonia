@@ -1,0 +1,6 @@
+{
+  "status": "ILLUSTRATIVE ONLY",
+  "a": "Separate constructed five-point rating counts; 20 participants per example per round. No individual transition records.",
+  "b_c": "Existing 04-deliberation.csv; constructed scores, not derived from ballots. Panel c uses exactly the peer-feedback cases in b.",
+  "model_calls": 0
+}

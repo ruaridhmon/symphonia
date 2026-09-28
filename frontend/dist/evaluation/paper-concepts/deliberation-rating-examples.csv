@@ -1,0 +1,31 @@
+example,round,rating,count,status
+Persistent disagreement,Round 2,1,8,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 2,2,2,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 2,3,0,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 2,4,2,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 2,5,8,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 3,1,7,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 3,2,3,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 3,3,0,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 3,4,3,SIMULATED EXAMPLE; separate from panels b and c
+Persistent disagreement,Round 3,5,7,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 2,1,6,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 2,2,4,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 2,3,0,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 2,4,4,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 2,5,6,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 3,1,0,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 3,2,2,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 3,3,3,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 3,4,10,SIMULATED EXAMPLE; separate from panels b and c
+Convergence,Round 3,5,5,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 2,1,2,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 2,2,5,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 2,3,6,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 2,4,5,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 2,5,2,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 3,1,7,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 3,2,2,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 3,3,2,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 3,4,2,SIMULATED EXAMPLE; separate from panels b and c
+Growing polarisation,Round 3,5,7,SIMULATED EXAMPLE; separate from panels b and c
