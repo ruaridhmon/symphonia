@@ -332,4 +332,4 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 .delphi-insights .di-confidence-detail{position:absolute;z-index:20;top:24px;left:0;width:260px;max-width:75vw;padding:14px;background:var(--background,#fff);border:1px solid var(--border,#ddd);border-radius:10px;box-shadow:0 8px 24px #00000012;white-space:normal;font-size:12px;line-height:1.5;color:var(--foreground,#222)}
 .delphi-insights .di-confidence-detail p{margin:5px 0}
 .delphi-insights .di-confidence-note{font-size:11px;color:var(--muted-foreground)}
-@media(max-width:600px){.delphi-insights .di-legend .di-stance-group{flex-basis:100%}.delphi-insights .di-confidence-detail{left:auto;right:0}}
+@media(max-width:600px){.delphi-insights .di-legend .di-stance-group{flex-basis:100%}.delphi-insights .di-confidence-detail{position:fixed;left:16px;right:16px;top:auto;bottom:20px;width:auto;max-width:none;max-height:65vh;overflow:auto}}
