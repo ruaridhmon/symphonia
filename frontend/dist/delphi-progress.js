@@ -291,6 +291,12 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           trigger.setAttribute("aria-label", `${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);
           disclosure.append(trigger);
           const body = node("div", "", "di-confidence-detail");
+          const close = button("Close", () => {
+            disclosure.open = false;
+            trigger.focus();
+          });
+          close.style.cssText = "float:right;border:0;background:transparent;font:inherit;cursor:pointer;padding:0 0 6px 10px";
+          body.append(close);
           body.append(node("strong", `${stanceLabels[i]} \xB7 confidence`), node("p", `${values.length} of ${n} recorded a confidence rating.`));
           confidenceLabels.forEach((label2, j) => body.append(node("p", `${label2} \xB7 ${values.filter((v) => v === j).length}`)));
           body.append(node("p", "High = very or extremely; moderate = moderately; low = slightly or not at all. A label requires more than half of recorded confidence ratings; otherwise mixed. Confidence is self-reported certainty, not correctness.", "di-confidence-note"));

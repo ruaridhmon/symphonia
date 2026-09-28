@@ -62,7 +62,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
         const label=!values.length?'Confidence not recorded':high>values.length/2?'High confidence':low>values.length/2?'Low confidence':moderate>values.length/2?'Moderate confidence':'Mixed confidence';
         const disclosure=node('details','','di-confidence') as HTMLDetailsElement;disclosure.dataset.key=`${row.key}:confidence:${i}`;disclosure.open=priorOpen.has(disclosure.dataset.key);
         const trigger=node('summary',label+(values.length&&values.length<n?` (${values.length}/${n})`:''));trigger.setAttribute('aria-label',`${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);disclosure.append(trigger);
-        const body=node('div','','di-confidence-detail');body.append(node('strong',`${stanceLabels[i]} · confidence`),node('p',`${values.length} of ${n} recorded a confidence rating.`));
+        const body=node('div','','di-confidence-detail');const close=button('Close',()=>{disclosure.open=false;trigger.focus();});close.style.cssText='float:right;border:0;background:transparent;font:inherit;cursor:pointer;padding:0 0 6px 10px';body.append(close);body.append(node('strong',`${stanceLabels[i]} · confidence`),node('p',`${values.length} of ${n} recorded a confidence rating.`));
         confidenceLabels.forEach((label,j)=>body.append(node('p',`${label} · ${values.filter(v=>v===j).length}`)));
         body.append(node('p','High = very or extremely; moderate = moderately; low = slightly or not at all. A label requires more than half of recorded confidence ratings; otherwise mixed. Confidence is self-reported certainty, not correctness.','di-confidence-note'));disclosure.append(body);item.append(disclosure);
       }
