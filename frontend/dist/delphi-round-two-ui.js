@@ -31,6 +31,8 @@
     }, extra);
   }
 
+  var confidenceOptions = ['Not at all confident', 'Slightly confident', 'Moderately confident', 'Very confident', 'Extremely confident'];
+
   function questionsFor(claims) {
     var responseOptions = ['Strongly agree', 'Agree', 'Neither agree nor disagree', 'Disagree', 'Strongly disagree', 'Unable to judge — need more information'];
     return claims.reduce(function (questions, claim) {
@@ -38,12 +40,22 @@
       var sectionTitle = 'Claim ' + claim.number + ': ' + claim.title;
       return questions.concat([
         baseQuestion({
-          label: 'Your response',
+          label: 'How much do you agree with this claim?',
+          helpText: 'Choose one position. Neither agree nor disagree is different from being unable to judge.',
           questionId: prefix + '_response',
           sectionTitle: sectionTitle,
           inputType: 'single_select',
           options: responseOptions,
           optional: false,
+        }),
+        baseQuestion({
+          label: 'How confident are you in your rating?',
+          helpText: 'How sure are you of the position you selected? Confidence is separate from agreement. Leave blank if you cannot assess it.',
+          questionId: prefix + '_confidence',
+          sectionTitle: sectionTitle,
+          inputType: 'single_select',
+          options: confidenceOptions.slice(),
+          optional: true,
         }),
         baseQuestion({
           label: 'Explain your position',
@@ -80,7 +92,7 @@
       if (baseline) {
         var planner = await import('/delphi-progress.js?v=2');
         frozenQuestions = planner.buildFixedDelphiRound(baseline, rounds, await api.a(Number(formId)));
-        claims = frozenQuestions.filter(function(q){return q && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options};});
+        claims = frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId === q.questionId.replace(/_response$/, '_confidence');}) || {}).options};});
       }
     } catch (error) {window.alert('Could not load the fixed claim set. Please retry.');return;}
 
@@ -154,7 +166,7 @@
         }
         input.addEventListener('change', function () {
           previewAnswers[previewIndex] = option;
-          preview.querySelectorAll('label').forEach(function (item) {
+          preview.querySelectorAll('label:has(input[name="delphi-preview-rating"])').forEach(function (item) {
             var selected = item.querySelector('input').checked;
             item.style.borderColor = selected ? '#58cc02' : 'var(--border)';
             item.style.background = selected ? 'color-mix(in srgb,#58cc02 8%,var(--background))' : 'var(--background)';
@@ -164,6 +176,25 @@
         highlight();
         preview.appendChild(label);
       });
+      var confidenceChoices = frozenQuestions ? claim.confidenceOptions : confidenceOptions;
+      if (confidenceChoices) {
+        var confidenceHeading = document.createElement('p');
+        confidenceHeading.textContent = 'How confident are you in your rating? (optional)';
+        confidenceHeading.style.cssText = 'font-size:15px;font-weight:600;margin:20px 0 6px';
+        preview.appendChild(confidenceHeading);
+        var confidenceHelp = document.createElement('p');
+        confidenceHelp.textContent = 'Confidence is separate from agreement. Leave blank if you cannot assess it.';
+        confidenceHelp.style.cssText = 'font-size:13px;color:var(--muted-foreground);margin:0 0 8px';
+        preview.appendChild(confidenceHelp);
+        confidenceChoices.forEach(function(option) {
+          var label = document.createElement('label');
+          label.style.cssText = 'display:flex;align-items:center;gap:10px;min-height:44px;font-size:15px';
+          var radio = document.createElement('input');radio.type='radio';radio.name='delphi-preview-confidence';
+          radio.checked=previewAnswers['confidence-'+previewIndex]===option;
+          radio.addEventListener('change',function(){previewAnswers['confidence-'+previewIndex]=option;});
+          label.append(radio,document.createTextNode(option));preview.appendChild(label);
+        });
+      }
       var comment = document.createElement('textarea');
       comment.rows = 1;
       comment.placeholder = 'Why do you agree or disagree? Share the reasoning or evidence behind your answer.';
@@ -356,9 +387,9 @@
     ).join(' ');
     var roundTwoQuestions =
       /Having reviewed the group feedback/i.test(prompts) ||
-      (/Your response/i.test(prompts) && /Comments or clarification/i.test(prompts));
+      (/Your response|How much do you agree with this claim/i.test(prompts) && /Comments or clarification|Explain your position/i.test(prompts));
     return buttons.length > 0 &&
-      (/\bRound\s*2\b/i.test(text) || roundTwoQuestions);
+      (/\bRound\s*[23]\b/i.test(text) || roundTwoQuestions);
   }
 
   function installStyles() {
@@ -410,7 +441,7 @@
 
   function enhanceComment(question) {
     if (question.dataset.delphiCommentReady === 'true') return;
-    if (!/Comments or clarification/i.test(clean(question.textContent))) return;
+    if (!/Comments or clarification|Justify your position|What led you to this view|Explain your position/i.test(clean(question.textContent))) return;
 
     var textarea = question.querySelector('textarea');
     if (!textarea) return;
@@ -458,7 +489,7 @@
     return Array.prototype.some.call(
       document.querySelectorAll('input[type="radio"]'),
       function (input) {
-        return input.checked && input.offsetParent !== null;
+        return input.checked && input.offsetParent !== null && !/_confidence$/.test(input.name) && !/How confident are you in your rating/i.test(clean(input.closest('[data-question-key]')?.textContent));
       }
     );
   }

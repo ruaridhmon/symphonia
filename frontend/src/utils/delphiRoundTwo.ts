@@ -10,6 +10,8 @@ export interface DelphiClaim {
   total: number | null;
 }
 
+export const CONFIDENCE_OPTIONS = ['Not at all confident', 'Slightly confident', 'Moderately confident', 'Very confident', 'Extremely confident'];
+
 const RATING_OPTIONS = [
   'Strongly agree',
   'Agree',
@@ -100,13 +102,23 @@ export function buildDelphiRoundTwoQuestions(synthesisHtml: string): QuestionInp
     const sectionTitle = `Claim ${claim.number}: ${claim.text}`;
     return [
       baseQuestion({
-        label: 'Your response',
+        label: 'How much do you agree with this claim?',
+        helpText: 'Choose one position. Neither agree nor disagree is different from being unable to judge.',
         questionId: `${prefix}_response`,
         sectionTitle,
         groupPrompt: groupFeedback(claim),
         inputType: 'single_select',
         options: RATING_OPTIONS,
         optional: false,
+      }),
+      baseQuestion({
+        label: 'How confident are you in your rating?',
+        helpText: 'How sure are you of the position you selected? Confidence is separate from agreement. Leave blank if you cannot assess it.',
+        questionId: `${prefix}_confidence`,
+        sectionTitle,
+        inputType: 'single_select',
+        options: [...CONFIDENCE_OPTIONS],
+        optional: true,
       }),
       baseQuestion({
         label: 'Explain your position',

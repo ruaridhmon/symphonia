@@ -120,7 +120,7 @@ test('single-claim follow-up works; leaving cleans up the fixed participant cont
   } finally { dom.window.close(); }
 });
 
-test('setup activates on internal navigation and creates exactly two fields per claim', async () => {
+test('setup activates on internal navigation and creates separate agreement, confidence and justification per claim', async () => {
   const dom = page();
   try {
     const { window } = dom;
@@ -140,7 +140,7 @@ test('setup activates on internal navigation and creates exactly two fields per 
     assert.ok(modal);
     assert.match(modal.textContent, /Set up next Delphi round/);
     assert.doesNotMatch(modal.textContent, /Round Two|Round 2|Add question/);
-    assert.equal(modal.querySelectorAll('input[type=radio]').length, 6);
+    assert.equal(modal.querySelectorAll('input[type=radio]').length, 11);
     assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 1/);
     Array.from(modal.querySelectorAll('button')).find(button => button.textContent === 'Continue').click();
     assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 2/);
@@ -149,9 +149,12 @@ test('setup activates on internal navigation and creates exactly two fields per 
     await settle();
     assert.equal(request.url, '/api/forms/14/next_round');
     assert.equal(request.body.expected_round_number, 1);
-    assert.equal(request.body.questions.length, 4);
+    assert.equal(request.body.questions.length, 6);
     assert.equal(request.body.questions[0].options.length, 6);
     assert.equal(request.body.questions[1].optional, true);
+    assert.equal(request.body.questions[1].questionId, 'claim_1_confidence');
+    assert.equal(request.body.questions[1].options.length, 5);
+    assert.equal(request.body.questions[2].questionId, 'claim_1_comment');
     assert.equal(request.body.context_settings.intro_body, 'Review the previous feedback.');
     assert.equal(modal.querySelector('[data-start]').disabled, false);
   } finally { dom.window.close(); }
@@ -189,4 +192,23 @@ test('returning participants see only matching previous feedback, collapsed and 
     assert.doesNotMatch(feedback.textContent, /Do not show/);
     assert.equal(feedback.querySelector('img'), null);
   } finally { dom.window.close(); }
+});
+
+
+test('confidence alone does not satisfy agreement; new justification remains visible', async () => {
+ const dom=page('/public/session/new-confidence');
+ try {
+  participant(dom.window,1);
+  const doc=dom.window.document;
+  doc.querySelector('[data-question-key="q1"] span').textContent='How much do you agree with this claim?';
+  doc.querySelector('[data-question-key="q2"] span').textContent='Explain your position';
+  const confidence=doc.createElement('div');confidence.setAttribute('data-question-key','q3');
+  confidence.innerHTML='<p>How confident are you in your rating?</p><label><input type="radio" name="claim_1_confidence" checked>Very confident</label>';
+  doc.querySelector('section').append(confidence);
+  await settle();
+  assert.ok(doc.querySelector('.delphi-r2-composer'));
+  assert.equal(doc.querySelector('#delphi-round-two-next').disabled,true);
+  const agreement=doc.querySelector('input[name="rating"]');agreement.checked=true;agreement.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
+  assert.equal(doc.querySelector('#delphi-round-two-next').disabled,false);
+ } finally {dom.window.close();}
 });

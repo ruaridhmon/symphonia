@@ -12,3 +12,14 @@ it('prevents a fourth round and a duplicate third round',()=>{
  expect(()=>buildFixedDelphiRound({...r,round_number:3},[r],[])).toThrow();
  expect(()=>buildFixedDelphiRound(r,[r,{...r,id:3,round_number:3}],[])).toThrow();
 });
+
+import {buildDelphiRoundTwoQuestions} from './delphiRoundTwo';
+it('carries agreement and separate confidence unchanged into round three',()=>{
+ const generated=buildDelphiRoundTwoQuestions('<p>Claim 1: <strong>Keep this claim.</strong></p>');
+ const baseline={...r,questions:generated} as Round;
+ const result=buildFixedDelphiRound(baseline,[baseline],[]);
+ expect(result).toHaveLength(3);
+ const {groupPrompt: _feedback,...fixed}=generated[0] as Record<string,unknown>;
+ expect(result[0]).toMatchObject(fixed);
+ expect(result[1]).toEqual(generated[1]);
+});
