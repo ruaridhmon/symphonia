@@ -102,8 +102,7 @@ export function buildDelphiRoundTwoQuestions(synthesisHtml: string): QuestionInp
     const sectionTitle = `Claim ${claim.number}: ${claim.text}`;
     return [
       baseQuestion({
-        label: 'How much do you agree with this claim?',
-        helpText: 'Choose one position. Neither agree nor disagree is different from being unable to judge.',
+        label: 'Your view',
         questionId: `${prefix}_response`,
         sectionTitle,
         groupPrompt: groupFeedback(claim),
@@ -112,8 +111,7 @@ export function buildDelphiRoundTwoQuestions(synthesisHtml: string): QuestionInp
         optional: false,
       }),
       baseQuestion({
-        label: 'How confident are you in your rating?',
-        helpText: 'How sure are you of the position you selected? Confidence is separate from agreement. Leave blank if you cannot assess it.',
+        label: 'Confidence in your rating',
         questionId: `${prefix}_confidence`,
         sectionTitle,
         inputType: 'single_select',

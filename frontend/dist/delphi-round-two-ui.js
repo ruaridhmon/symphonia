@@ -40,8 +40,7 @@
       var sectionTitle = 'Claim ' + claim.number + ': ' + claim.title;
       return questions.concat([
         baseQuestion({
-          label: 'How much do you agree with this claim?',
-          helpText: 'Choose one position. Neither agree nor disagree is different from being unable to judge.',
+          label: 'Your view',
           questionId: prefix + '_response',
           sectionTitle: sectionTitle,
           inputType: 'single_select',
@@ -49,8 +48,7 @@
           optional: false,
         }),
         baseQuestion({
-          label: 'How confident are you in your rating?',
-          helpText: 'How sure are you of the position you selected? Confidence is separate from agreement. Leave blank if you cannot assess it.',
+          label: 'Confidence in your rating',
           questionId: prefix + '_confidence',
           sectionTitle: sectionTitle,
           inputType: 'single_select',
@@ -179,13 +177,9 @@
       var confidenceChoices = frozenQuestions ? claim.confidenceOptions : confidenceOptions;
       if (confidenceChoices) {
         var confidenceHeading = document.createElement('p');
-        confidenceHeading.textContent = 'How confident are you in your rating? (optional)';
+        confidenceHeading.textContent = 'Confidence in your rating (optional)';
         confidenceHeading.style.cssText = 'font-size:15px;font-weight:600;margin:20px 0 6px';
         preview.appendChild(confidenceHeading);
-        var confidenceHelp = document.createElement('p');
-        confidenceHelp.textContent = 'Confidence is separate from agreement. Leave blank if you cannot assess it.';
-        confidenceHelp.style.cssText = 'font-size:13px;color:var(--muted-foreground);margin:0 0 8px';
-        preview.appendChild(confidenceHelp);
         confidenceChoices.forEach(function(option) {
           var label = document.createElement('label');
           label.style.cssText = 'display:flex;align-items:center;gap:10px;min-height:44px;font-size:15px';
@@ -387,7 +381,7 @@
     ).join(' ');
     var roundTwoQuestions =
       /Having reviewed the group feedback/i.test(prompts) ||
-      (/Your response|How much do you agree with this claim/i.test(prompts) && /Comments or clarification|Explain your position/i.test(prompts));
+      (/Your response|Your view|How much do you agree with this claim/i.test(prompts) && /Comments or clarification|Explain your position/i.test(prompts));
     return buttons.length > 0 &&
       (/\bRound\s*[23]\b/i.test(text) || roundTwoQuestions);
   }
@@ -489,7 +483,7 @@
     return Array.prototype.some.call(
       document.querySelectorAll('input[type="radio"]'),
       function (input) {
-        return input.checked && input.offsetParent !== null && !/_confidence$/.test(input.name) && !/How confident are you in your rating/i.test(clean(input.closest('[data-question-key]')?.textContent));
+        return input.checked && input.offsetParent !== null && !/_confidence$/.test(input.name) && !/How confident are you in your rating|Confidence in your rating/i.test(clean(input.closest('[data-question-key]')?.textContent));
       }
     );
   }
@@ -582,6 +576,7 @@
           element.tagName === 'P') {
         element.classList.add('delphi-r2-helper');
       }
+      if (element.tagName === 'P' && /^(Choose one position\.|How sure are you of the position you selected\?)/.test(value)) element.classList.add('delphi-r2-helper');
       if (value === 'Selected') element.classList.add('delphi-r2-selected');
       if (/^No option selected yet\.?$/i.test(value)) {
         element.classList.add('delphi-r2-empty-selection');

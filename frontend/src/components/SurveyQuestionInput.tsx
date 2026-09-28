@@ -293,7 +293,7 @@ export default function SurveyQuestionInput({
     return (
       <div style={previewOnly ? { pointerEvents: 'none' } : undefined}>
         {renderHelpText(question.helpText)}
-        {!value.position.trim() ? (
+        {!value.position.trim() && !question.questionId?.startsWith('claim_') ? (
           <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
             No option selected yet.
           </p>
@@ -442,7 +442,7 @@ export default function SurveyQuestionInput({
     return (
       <div style={previewOnly ? { pointerEvents: 'none' } : undefined}>
         {renderHelpText(question.helpText)}
-        {!value.position.trim() ? (
+        {!value.position.trim() && !question.questionId?.startsWith('claim_') ? (
           <p className="mb-2 text-xs" style={{ color: 'var(--muted-foreground)' }}>
             No option selected yet.
           </p>
