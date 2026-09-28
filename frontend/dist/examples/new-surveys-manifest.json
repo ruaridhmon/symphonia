@@ -1,0 +1,38 @@
+[
+  {
+    "id": "clinical-ai",
+    "title": "Who should have the final say when AI triages patients?",
+    "form_id": 29,
+    "rounds": 3,
+    "fictional_participants": 6,
+    "saved_submissions": 18,
+    "status": "Assistant-authored simulation; not empirical results"
+  },
+  {
+    "id": "assessment-ai",
+    "title": "Should universities replace essays in the age of AI?",
+    "form_id": 30,
+    "rounds": 3,
+    "fictional_participants": 6,
+    "saved_submissions": 18,
+    "status": "Assistant-authored simulation; not empirical results"
+  },
+  {
+    "id": "coastal-futures",
+    "title": "Protect the coastline\u2014or help communities move?",
+    "form_id": 31,
+    "rounds": 3,
+    "fictional_participants": 6,
+    "saved_submissions": 18,
+    "status": "Assistant-authored simulation; not empirical results"
+  },
+  {
+    "id": "school-phones",
+    "title": "A phone-free school day\u2014with whose exceptions?",
+    "form_id": 32,
+    "rounds": 3,
+    "fictional_participants": 6,
+    "saved_submissions": 18,
+    "status": "Assistant-authored simulation; not empirical results"
+  }
+]

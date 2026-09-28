@@ -1,0 +1,1141 @@
+{
+  "provenance": "Assistant-authored fictional simulations. Positions, confidence and changes are scripted; no real experts or model evaluation. No OpenRouter calls.",
+  "scenarios": [
+    {
+      "id": "clinical-ai",
+      "title": "Who should have the final say when AI triages patients?",
+      "question": "Where should an AI triage system assist clinicians, and where must people retain control?",
+      "claims": [
+        "AI may prioritise routine referrals only when a clinician can override its recommendation.",
+        "Patients must be told when AI materially influences the priority of their referral.",
+        "An independent subgroup performance audit must be completed before deployment.",
+        "Emergency referrals must never be downgraded solely on an AI recommendation."
+      ],
+      "feedback": "The nursing lead distinguished a usable override from a nominal one; the rural practitioner raised limited audit samples. Participants retained disagreement about the audit threshold rather than treating disclosure as consent.",
+      "people": [
+        {
+          "id": "clinical-ai-p1",
+          "role": "Emergency physician",
+          "opening": "Safety depends on escalation working during a busy shift. An override preserves clinical responsibility while allowing useful assistance. Disclosure gives patients a route to question an unexpected delay. An aggregate score can conceal unequal performance across patient groups. Urgent clinical concern should not be overruled by an automated score.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Agree",
+              "Strongly agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "An override preserves clinical responsibility while allowing useful assistance. Safety depends on escalation working during a busy shift.",
+              "Disclosure gives patients a route to question an unexpected delay. Safety depends on escalation working during a busy shift.",
+              "An aggregate score can conceal unequal performance across patient groups. Safety depends on escalation working during a busy shift.",
+              "Urgent clinical concern should not be overruled by an automated score. Safety depends on escalation working during a busy shift."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Strongly agree",
+              "Strongly agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. An override preserves clinical responsibility while allowing useful assistance. Safety depends on escalation working during a busy shift.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Disclosure gives patients a route to question an unexpected delay. Safety depends on escalation working during a busy shift.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An aggregate score can conceal unequal performance across patient groups. Safety depends on escalation working during a busy shift.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Urgent clinical concern should not be overruled by an automated score. Safety depends on escalation working during a busy shift."
+            ]
+          }
+        },
+        {
+          "id": "clinical-ai-p2",
+          "role": "Patient advocate",
+          "opening": "Patients need an understandable explanation and a real appeal route. An override is insufficient if workload makes review nominal. Disclosure gives patients a route to question an unexpected delay. An aggregate score can conceal unequal performance across patient groups. Urgent clinical concern should not be overruled by an automated score.",
+          "round2": {
+            "votes": [
+              "Neither agree nor disagree",
+              "Strongly agree",
+              "Strongly agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Moderately confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I see a case for both sides. An override is insufficient if workload makes review nominal. Patients need an understandable explanation and a real appeal route.",
+              "Disclosure gives patients a route to question an unexpected delay. Patients need an understandable explanation and a real appeal route.",
+              "An aggregate score can conceal unequal performance across patient groups. Patients need an understandable explanation and a real appeal route.",
+              "Urgent clinical concern should not be overruled by an automated score. Patients need an understandable explanation and a real appeal route."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Strongly agree",
+              "Strongly agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I changed my rating after reviewing the panel\u2019s reasons. An override preserves clinical responsibility while allowing useful assistance. Patients need an understandable explanation and a real appeal route.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Disclosure gives patients a route to question an unexpected delay. Patients need an understandable explanation and a real appeal route.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An aggregate score can conceal unequal performance across patient groups. Patients need an understandable explanation and a real appeal route.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Urgent clinical concern should not be overruled by an automated score. Patients need an understandable explanation and a real appeal route."
+            ]
+          }
+        },
+        {
+          "id": "clinical-ai-p3",
+          "role": "Rural general practitioner",
+          "opening": "Small services need workable safeguards with limited staff. An override preserves clinical responsibility while allowing useful assistance. A generic disclosure can confuse patients without explaining the actual decision. A mandatory audit can delay useful tools where subgroup samples are small. Urgent clinical concern should not be overruled by an automated score.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Neither agree nor disagree",
+              "Neither agree nor disagree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Moderately confident",
+              "Moderately confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "An override preserves clinical responsibility while allowing useful assistance. Small services need workable safeguards with limited staff.",
+              "I see a case for both sides. A generic disclosure can confuse patients without explaining the actual decision. Small services need workable safeguards with limited staff.",
+              "I see a case for both sides. A mandatory audit can delay useful tools where subgroup samples are small. Small services need workable safeguards with limited staff.",
+              "Urgent clinical concern should not be overruled by an automated score. Small services need workable safeguards with limited staff."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Agree",
+              "Neither agree nor disagree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. An override preserves clinical responsibility while allowing useful assistance. Small services need workable safeguards with limited staff.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Disclosure gives patients a route to question an unexpected delay. Small services need workable safeguards with limited staff.",
+              "I retain my rating after reviewing the panel\u2019s reasons. I see a case for both sides. A mandatory audit can delay useful tools where subgroup samples are small. Small services need workable safeguards with limited staff.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Urgent clinical concern should not be overruled by an automated score. Small services need workable safeguards with limited staff."
+            ]
+          }
+        },
+        {
+          "id": "clinical-ai-p4",
+          "role": "Clinical AI researcher",
+          "opening": "Validation should distinguish model errors from workflow failures. An override preserves clinical responsibility while allowing useful assistance. Disclosure gives patients a route to question an unexpected delay. An aggregate score can conceal unequal performance across patient groups. Urgent clinical concern should not be overruled by an automated score.",
+          "round2": {
+            "votes": [
+              "Strongly agree",
+              "Agree",
+              "Strongly agree",
+              "Agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "An override preserves clinical responsibility while allowing useful assistance. Validation should distinguish model errors from workflow failures.",
+              "Disclosure gives patients a route to question an unexpected delay. Validation should distinguish model errors from workflow failures.",
+              "An aggregate score can conceal unequal performance across patient groups. Validation should distinguish model errors from workflow failures.",
+              "Urgent clinical concern should not be overruled by an automated score. Validation should distinguish model errors from workflow failures."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Agree",
+              "Strongly agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I changed my rating after reviewing the panel\u2019s reasons. An override preserves clinical responsibility while allowing useful assistance. Validation should distinguish model errors from workflow failures.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Disclosure gives patients a route to question an unexpected delay. Validation should distinguish model errors from workflow failures.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An aggregate score can conceal unequal performance across patient groups. Validation should distinguish model errors from workflow failures.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Urgent clinical concern should not be overruled by an automated score. Validation should distinguish model errors from workflow failures."
+            ]
+          }
+        },
+        {
+          "id": "clinical-ai-p5",
+          "role": "Nursing lead",
+          "opening": "A nominal human override is not enough without time and authority. An override is insufficient if workload makes review nominal. Disclosure gives patients a route to question an unexpected delay. An aggregate score can conceal unequal performance across patient groups. Urgent clinical concern should not be overruled by an automated score.",
+          "round2": {
+            "votes": [
+              "Disagree",
+              "Strongly agree",
+              "Agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "An override is insufficient if workload makes review nominal. A nominal human override is not enough without time and authority.",
+              "Disclosure gives patients a route to question an unexpected delay. A nominal human override is not enough without time and authority.",
+              "An aggregate score can conceal unequal performance across patient groups. A nominal human override is not enough without time and authority.",
+              "Urgent clinical concern should not be overruled by an automated score. A nominal human override is not enough without time and authority."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Disagree",
+              "Strongly agree",
+              "Strongly agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. An override is insufficient if workload makes review nominal. A nominal human override is not enough without time and authority.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Disclosure gives patients a route to question an unexpected delay. A nominal human override is not enough without time and authority.",
+              "I changed my rating after reviewing the panel\u2019s reasons. An aggregate score can conceal unequal performance across patient groups. A nominal human override is not enough without time and authority.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Urgent clinical concern should not be overruled by an automated score. A nominal human override is not enough without time and authority."
+            ]
+          }
+        },
+        {
+          "id": "clinical-ai-p6",
+          "role": "Hospital operations lead",
+          "opening": "Queue delays also harm patients and must be monitored. An override preserves clinical responsibility while allowing useful assistance. A generic disclosure can confuse patients without explaining the actual decision. A mandatory audit can delay useful tools where subgroup samples are small. Urgent clinical concern should not be overruled by an automated score.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Neither agree nor disagree",
+              "Disagree",
+              "Agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Moderately confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "An override preserves clinical responsibility while allowing useful assistance. Queue delays also harm patients and must be monitored.",
+              "I see a case for both sides. A generic disclosure can confuse patients without explaining the actual decision. Queue delays also harm patients and must be monitored.",
+              "A mandatory audit can delay useful tools where subgroup samples are small. Queue delays also harm patients and must be monitored.",
+              "Urgent clinical concern should not be overruled by an automated score. Queue delays also harm patients and must be monitored."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Agree",
+              "Neither agree nor disagree",
+              "Agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. An override preserves clinical responsibility while allowing useful assistance. Queue delays also harm patients and must be monitored.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Disclosure gives patients a route to question an unexpected delay. Queue delays also harm patients and must be monitored.",
+              "I changed my rating after reviewing the panel\u2019s reasons. I see a case for both sides. A mandatory audit can delay useful tools where subgroup samples are small. Queue delays also harm patients and must be monitored.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Urgent clinical concern should not be overruled by an automated score. Queue delays also harm patients and must be monitored."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "assessment-ai",
+      "title": "Should universities replace essays in the age of AI?",
+      "question": "How should universities assess learning when students can use generative AI?",
+      "claims": [
+        "Students may use generative AI in assessed coursework if its role is disclosed.",
+        "Every degree must include an assessment where students explain their own reasoning orally.",
+        "AI-detector scores alone must never establish academic misconduct.",
+        "All take-home essays should be replaced with supervised examinations."
+      ],
+      "feedback": "The disability adviser identified accessibility limits to a universal oral requirement. The humanities lecturer explained what would be lost by replacing all essays. The panel increasingly opposed the blanket replacement while preserving disagreement about oral assessment.",
+      "people": [
+        {
+          "id": "assessment-ai-p1",
+          "role": "Undergraduate representative",
+          "opening": "Assessment should reward learning rather than access to expensive tools. Disclosure makes permitted assistance inspectable. An oral explanation can reveal whether a student understands their work. A detector score is not direct evidence of who authored a passage. Replacing every essay removes valuable research and revision skills.",
+          "round2": {
+            "votes": [
+              "Strongly agree",
+              "Agree",
+              "Strongly agree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Disclosure makes permitted assistance inspectable. Assessment should reward learning rather than access to expensive tools.",
+              "An oral explanation can reveal whether a student understands their work. Assessment should reward learning rather than access to expensive tools.",
+              "A detector score is not direct evidence of who authored a passage. Assessment should reward learning rather than access to expensive tools.",
+              "Replacing every essay removes valuable research and revision skills. Assessment should reward learning rather than access to expensive tools."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Strongly agree",
+              "Agree",
+              "Strongly agree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Disclosure makes permitted assistance inspectable. Assessment should reward learning rather than access to expensive tools.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An oral explanation can reveal whether a student understands their work. Assessment should reward learning rather than access to expensive tools.",
+              "I retain my rating after reviewing the panel\u2019s reasons. A detector score is not direct evidence of who authored a passage. Assessment should reward learning rather than access to expensive tools.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Replacing every essay removes valuable research and revision skills. Assessment should reward learning rather than access to expensive tools."
+            ]
+          }
+        },
+        {
+          "id": "assessment-ai-p2",
+          "role": "Disability adviser",
+          "opening": "Students need accessible ways to demonstrate understanding. Disclosure makes permitted assistance inspectable. Oral assessment can disadvantage anxious or disabled students unless alternatives exist. A detector score is not direct evidence of who authored a passage. Replacing every essay removes valuable research and revision skills.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Disagree",
+              "Strongly agree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Disclosure makes permitted assistance inspectable. Students need accessible ways to demonstrate understanding.",
+              "Oral assessment can disadvantage anxious or disabled students unless alternatives exist. Students need accessible ways to demonstrate understanding.",
+              "A detector score is not direct evidence of who authored a passage. Students need accessible ways to demonstrate understanding.",
+              "Replacing every essay removes valuable research and revision skills. Students need accessible ways to demonstrate understanding."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Disagree",
+              "Strongly agree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Disclosure makes permitted assistance inspectable. Students need accessible ways to demonstrate understanding.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Oral assessment can disadvantage anxious or disabled students unless alternatives exist. Students need accessible ways to demonstrate understanding.",
+              "I retain my rating after reviewing the panel\u2019s reasons. A detector score is not direct evidence of who authored a passage. Students need accessible ways to demonstrate understanding.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Replacing every essay removes valuable research and revision skills. Students need accessible ways to demonstrate understanding."
+            ]
+          }
+        },
+        {
+          "id": "assessment-ai-p3",
+          "role": "Humanities lecturer",
+          "opening": "Extended writing develops reasoning through revision. Disclosure does not establish which reasoning belongs to the student. An oral explanation can reveal whether a student understands their work. A detector score is not direct evidence of who authored a passage. Replacing every essay removes valuable research and revision skills.",
+          "round2": {
+            "votes": [
+              "Disagree",
+              "Agree",
+              "Strongly agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Disclosure does not establish which reasoning belongs to the student. Extended writing develops reasoning through revision.",
+              "An oral explanation can reveal whether a student understands their work. Extended writing develops reasoning through revision.",
+              "A detector score is not direct evidence of who authored a passage. Extended writing develops reasoning through revision.",
+              "Replacing every essay removes valuable research and revision skills. Extended writing develops reasoning through revision."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Neither agree nor disagree",
+              "Agree",
+              "Strongly agree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I changed my rating after reviewing the panel\u2019s reasons. I see a case for both sides. Disclosure does not establish which reasoning belongs to the student. Extended writing develops reasoning through revision.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An oral explanation can reveal whether a student understands their work. Extended writing develops reasoning through revision.",
+              "I retain my rating after reviewing the panel\u2019s reasons. A detector score is not direct evidence of who authored a passage. Extended writing develops reasoning through revision.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Replacing every essay removes valuable research and revision skills. Extended writing develops reasoning through revision."
+            ]
+          }
+        },
+        {
+          "id": "assessment-ai-p4",
+          "role": "Computer science lecturer",
+          "opening": "Students must learn to critique tools they will encounter at work. Disclosure makes permitted assistance inspectable. An oral explanation can reveal whether a student understands their work. A detector score is not direct evidence of who authored a passage. Replacing every essay removes valuable research and revision skills.",
+          "round2": {
+            "votes": [
+              "Strongly agree",
+              "Strongly agree",
+              "Agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Disclosure makes permitted assistance inspectable. Students must learn to critique tools they will encounter at work.",
+              "An oral explanation can reveal whether a student understands their work. Students must learn to critique tools they will encounter at work.",
+              "A detector score is not direct evidence of who authored a passage. Students must learn to critique tools they will encounter at work.",
+              "Replacing every essay removes valuable research and revision skills. Students must learn to critique tools they will encounter at work."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Strongly agree",
+              "Agree",
+              "Strongly agree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Disclosure makes permitted assistance inspectable. Students must learn to critique tools they will encounter at work.",
+              "I changed my rating after reviewing the panel\u2019s reasons. An oral explanation can reveal whether a student understands their work. Students must learn to critique tools they will encounter at work.",
+              "I changed my rating after reviewing the panel\u2019s reasons. A detector score is not direct evidence of who authored a passage. Students must learn to critique tools they will encounter at work.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Replacing every essay removes valuable research and revision skills. Students must learn to critique tools they will encounter at work."
+            ]
+          }
+        },
+        {
+          "id": "assessment-ai-p5",
+          "role": "Academic integrity officer",
+          "opening": "Misconduct decisions need reviewable evidence and a fair process. Disclosure does not establish which reasoning belongs to the student. An oral explanation can reveal whether a student understands their work. A detector score is not direct evidence of who authored a passage. Replacing every essay removes valuable research and revision skills.",
+          "round2": {
+            "votes": [
+              "Neither agree nor disagree",
+              "Agree",
+              "Agree",
+              "Neither agree nor disagree"
+            ],
+            "confidence": [
+              "Moderately confident",
+              "Very confident",
+              "Very confident",
+              "Moderately confident"
+            ],
+            "reasons": [
+              "I see a case for both sides. Disclosure does not establish which reasoning belongs to the student. Misconduct decisions need reviewable evidence and a fair process.",
+              "An oral explanation can reveal whether a student understands their work. Misconduct decisions need reviewable evidence and a fair process.",
+              "A detector score is not direct evidence of who authored a passage. Misconduct decisions need reviewable evidence and a fair process.",
+              "I see a case for both sides. Replacing every essay removes valuable research and revision skills. Misconduct decisions need reviewable evidence and a fair process."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Agree",
+              "Strongly agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I changed my rating after reviewing the panel\u2019s reasons. Disclosure makes permitted assistance inspectable. Misconduct decisions need reviewable evidence and a fair process.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An oral explanation can reveal whether a student understands their work. Misconduct decisions need reviewable evidence and a fair process.",
+              "I changed my rating after reviewing the panel\u2019s reasons. A detector score is not direct evidence of who authored a passage. Misconduct decisions need reviewable evidence and a fair process.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Replacing every essay removes valuable research and revision skills. Misconduct decisions need reviewable evidence and a fair process."
+            ]
+          }
+        },
+        {
+          "id": "assessment-ai-p6",
+          "role": "Assessment director",
+          "opening": "Any new assessment format must work at large cohort sizes. Disclosure makes permitted assistance inspectable. Oral assessment can disadvantage anxious or disabled students unless alternatives exist. A detector score is not direct evidence of who authored a passage. Supervision constrains undisclosed assistance.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Neither agree nor disagree",
+              "Strongly agree",
+              "Agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Moderately confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Disclosure makes permitted assistance inspectable. Any new assessment format must work at large cohort sizes.",
+              "I see a case for both sides. Oral assessment can disadvantage anxious or disabled students unless alternatives exist. Any new assessment format must work at large cohort sizes.",
+              "A detector score is not direct evidence of who authored a passage. Any new assessment format must work at large cohort sizes.",
+              "Supervision constrains undisclosed assistance. Any new assessment format must work at large cohort sizes."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Neither agree nor disagree",
+              "Strongly agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Moderately confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Disclosure makes permitted assistance inspectable. Any new assessment format must work at large cohort sizes.",
+              "I retain my rating after reviewing the panel\u2019s reasons. I see a case for both sides. Oral assessment can disadvantage anxious or disabled students unless alternatives exist. Any new assessment format must work at large cohort sizes.",
+              "I retain my rating after reviewing the panel\u2019s reasons. A detector score is not direct evidence of who authored a passage. Any new assessment format must work at large cohort sizes.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Replacing every essay removes valuable research and revision skills. Any new assessment format must work at large cohort sizes."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "coastal-futures",
+      "title": "Protect the coastline\u2014or help communities move?",
+      "question": "How should a coastal town balance flood protection, voluntary relocation and fairness?",
+      "claims": [
+        "Residents in repeatedly flooded homes should be offered voluntary relocation grants.",
+        "Publicly funded coastal defences should be prioritised using property values alone.",
+        "Any relocation programme must include support for renters as well as owners.",
+        "New housing should be prohibited in the highest-risk flood zone."
+      ],
+      "feedback": "The tenant organiser exposed the gap between property compensation and displacement costs. Participants rejected property value as the sole criterion more strongly, but housing-supply concerns sustained disagreement about a building prohibition.",
+      "people": [
+        {
+          "id": "coastal-futures-p1",
+          "role": "Long-term resident",
+          "opening": "Relocation can break relationships built over decades. A nominal choice is not voluntary when services are withdrawn first. Property values alone privilege wealthy places and miss community losses. Renters also lose homes, social networks and access to services. A blanket prohibition may worsen shortages where few alternative sites exist.",
+          "round2": {
+            "votes": [
+              "Disagree",
+              "Strongly disagree",
+              "Agree",
+              "Neither agree nor disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Moderately confident"
+            ],
+            "reasons": [
+              "A nominal choice is not voluntary when services are withdrawn first. Relocation can break relationships built over decades.",
+              "Property values alone privilege wealthy places and miss community losses. Relocation can break relationships built over decades.",
+              "Renters also lose homes, social networks and access to services. Relocation can break relationships built over decades.",
+              "I see a case for both sides. A blanket prohibition may worsen shortages where few alternative sites exist. Relocation can break relationships built over decades."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Neither agree nor disagree",
+              "Strongly disagree",
+              "Strongly agree",
+              "Neither agree nor disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Extremely confident",
+              "Moderately confident"
+            ],
+            "reasons": [
+              "I changed my rating after reviewing the panel\u2019s reasons. I see a case for both sides. A nominal choice is not voluntary when services are withdrawn first. Relocation can break relationships built over decades.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Property values alone privilege wealthy places and miss community losses. Relocation can break relationships built over decades.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Renters also lose homes, social networks and access to services. Relocation can break relationships built over decades.",
+              "I retain my rating after reviewing the panel\u2019s reasons. I see a case for both sides. A blanket prohibition may worsen shortages where few alternative sites exist. Relocation can break relationships built over decades."
+            ]
+          }
+        },
+        {
+          "id": "coastal-futures-p2",
+          "role": "Tenant organiser",
+          "opening": "Compensation must not stop at the legal owner of a building. A voluntary option lets households plan before repeated emergencies. Property values alone privilege wealthy places and miss community losses. Renters also lose homes, social networks and access to services. Avoiding new exposure can reduce future displacement.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Strongly disagree",
+              "Strongly agree",
+              "Agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "A voluntary option lets households plan before repeated emergencies. Compensation must not stop at the legal owner of a building.",
+              "Property values alone privilege wealthy places and miss community losses. Compensation must not stop at the legal owner of a building.",
+              "Renters also lose homes, social networks and access to services. Compensation must not stop at the legal owner of a building.",
+              "Avoiding new exposure can reduce future displacement. Compensation must not stop at the legal owner of a building."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Strongly disagree",
+              "Strongly agree",
+              "Agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. A voluntary option lets households plan before repeated emergencies. Compensation must not stop at the legal owner of a building.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Property values alone privilege wealthy places and miss community losses. Compensation must not stop at the legal owner of a building.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Renters also lose homes, social networks and access to services. Compensation must not stop at the legal owner of a building.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Avoiding new exposure can reduce future displacement. Compensation must not stop at the legal owner of a building."
+            ]
+          }
+        },
+        {
+          "id": "coastal-futures-p3",
+          "role": "Coastal engineer",
+          "opening": "Defences have maintenance limits and cannot remove every risk. A voluntary option lets households plan before repeated emergencies. Property values alone privilege wealthy places and miss community losses. Renters also lose homes, social networks and access to services. Avoiding new exposure can reduce future displacement.",
+          "round2": {
+            "votes": [
+              "Strongly agree",
+              "Disagree",
+              "Agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "A voluntary option lets households plan before repeated emergencies. Defences have maintenance limits and cannot remove every risk.",
+              "Property values alone privilege wealthy places and miss community losses. Defences have maintenance limits and cannot remove every risk.",
+              "Renters also lose homes, social networks and access to services. Defences have maintenance limits and cannot remove every risk.",
+              "Avoiding new exposure can reduce future displacement. Defences have maintenance limits and cannot remove every risk."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Strongly agree",
+              "Strongly disagree",
+              "Strongly agree",
+              "Strongly agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. A voluntary option lets households plan before repeated emergencies. Defences have maintenance limits and cannot remove every risk.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Property values alone privilege wealthy places and miss community losses. Defences have maintenance limits and cannot remove every risk.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Renters also lose homes, social networks and access to services. Defences have maintenance limits and cannot remove every risk.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Avoiding new exposure can reduce future displacement. Defences have maintenance limits and cannot remove every risk."
+            ]
+          }
+        },
+        {
+          "id": "coastal-futures-p4",
+          "role": "Local business owner",
+          "opening": "Schools, jobs and customers must remain viable during transition. A nominal choice is not voluntary when services are withdrawn first. Property values alone privilege wealthy places and miss community losses. A renter support programme needs clear eligibility to avoid excluding informal tenants. A blanket prohibition may worsen shortages where few alternative sites exist.",
+          "round2": {
+            "votes": [
+              "Neither agree nor disagree",
+              "Neither agree nor disagree",
+              "Neither agree nor disagree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Moderately confident",
+              "Moderately confident",
+              "Moderately confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I see a case for both sides. A nominal choice is not voluntary when services are withdrawn first. Schools, jobs and customers must remain viable during transition.",
+              "I see a case for both sides. Property values alone privilege wealthy places and miss community losses. Schools, jobs and customers must remain viable during transition.",
+              "I see a case for both sides. A renter support programme needs clear eligibility to avoid excluding informal tenants. Schools, jobs and customers must remain viable during transition.",
+              "A blanket prohibition may worsen shortages where few alternative sites exist. Schools, jobs and customers must remain viable during transition."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Neither agree nor disagree",
+              "Disagree",
+              "Agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. I see a case for both sides. A nominal choice is not voluntary when services are withdrawn first. Schools, jobs and customers must remain viable during transition.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Property values alone privilege wealthy places and miss community losses. Schools, jobs and customers must remain viable during transition.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Renters also lose homes, social networks and access to services. Schools, jobs and customers must remain viable during transition.",
+              "I retain my rating after reviewing the panel\u2019s reasons. A blanket prohibition may worsen shortages where few alternative sites exist. Schools, jobs and customers must remain viable during transition."
+            ]
+          }
+        },
+        {
+          "id": "coastal-futures-p5",
+          "role": "Council housing officer",
+          "opening": "Affordable alternatives are needed before restricting new supply. A voluntary option lets households plan before repeated emergencies. Property values alone privilege wealthy places and miss community losses. Renters also lose homes, social networks and access to services. A blanket prohibition may worsen shortages where few alternative sites exist.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Disagree",
+              "Strongly agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "A voluntary option lets households plan before repeated emergencies. Affordable alternatives are needed before restricting new supply.",
+              "Property values alone privilege wealthy places and miss community losses. Affordable alternatives are needed before restricting new supply.",
+              "Renters also lose homes, social networks and access to services. Affordable alternatives are needed before restricting new supply.",
+              "A blanket prohibition may worsen shortages where few alternative sites exist. Affordable alternatives are needed before restricting new supply."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Strongly disagree",
+              "Strongly agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. A voluntary option lets households plan before repeated emergencies. Affordable alternatives are needed before restricting new supply.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Property values alone privilege wealthy places and miss community losses. Affordable alternatives are needed before restricting new supply.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Renters also lose homes, social networks and access to services. Affordable alternatives are needed before restricting new supply.",
+              "I retain my rating after reviewing the panel\u2019s reasons. A blanket prohibition may worsen shortages where few alternative sites exist. Affordable alternatives are needed before restricting new supply."
+            ]
+          }
+        },
+        {
+          "id": "coastal-futures-p6",
+          "role": "Public finance analyst",
+          "opening": "The town should make distributional trade-offs explicit. A voluntary option lets households plan before repeated emergencies. Property values alone privilege wealthy places and miss community losses. Renters also lose homes, social networks and access to services. Avoiding new exposure can reduce future displacement.",
+          "round2": {
+            "votes": [
+              "Strongly agree",
+              "Neither agree nor disagree",
+              "Agree",
+              "Agree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Moderately confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "A voluntary option lets households plan before repeated emergencies. The town should make distributional trade-offs explicit.",
+              "I see a case for both sides. Property values alone privilege wealthy places and miss community losses. The town should make distributional trade-offs explicit.",
+              "Renters also lose homes, social networks and access to services. The town should make distributional trade-offs explicit.",
+              "Avoiding new exposure can reduce future displacement. The town should make distributional trade-offs explicit."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Strongly agree",
+              "Disagree",
+              "Strongly agree",
+              "Agree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. A voluntary option lets households plan before repeated emergencies. The town should make distributional trade-offs explicit.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Property values alone privilege wealthy places and miss community losses. The town should make distributional trade-offs explicit.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Renters also lose homes, social networks and access to services. The town should make distributional trade-offs explicit.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Avoiding new exposure can reduce future displacement. The town should make distributional trade-offs explicit."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "school-phones",
+      "title": "A phone-free school day\u2014with whose exceptions?",
+      "question": "What smartphone policy balances attention, safety, accessibility and student autonomy?",
+      "claims": [
+        "Personal smartphones should be stored away during lessons.",
+        "Students must retain access to a phone when required by an agreed medical or accessibility plan.",
+        "Schools should prohibit personal smartphone use during every break and lunchtime.",
+        "Schools should use routine searches of students\u2019 phones to enforce the policy."
+      ],
+      "feedback": "The nurse clarified that exceptions are adjustments rather than privileges. The student representative separated lesson boundaries from break-time autonomy. Routine searches lost support, while the full-day rule remained contested.",
+      "people": [
+        {
+          "id": "school-phones-p1",
+          "role": "Student representative",
+          "opening": "Students should have a voice in rules that govern their daily lives. Putting phones away can create a predictable classroom boundary. An agreed adjustment makes the rule compatible with individual needs. Breaks are different from lessons and allow students to practise autonomy. Routine access to private messages is disproportionate to a classroom rule.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Strongly agree",
+              "Strongly disagree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Putting phones away can create a predictable classroom boundary. Students should have a voice in rules that govern their daily lives.",
+              "An agreed adjustment makes the rule compatible with individual needs. Students should have a voice in rules that govern their daily lives.",
+              "Breaks are different from lessons and allow students to practise autonomy. Students should have a voice in rules that govern their daily lives.",
+              "Routine access to private messages is disproportionate to a classroom rule. Students should have a voice in rules that govern their daily lives."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Strongly agree",
+              "Strongly disagree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Putting phones away can create a predictable classroom boundary. Students should have a voice in rules that govern their daily lives.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An agreed adjustment makes the rule compatible with individual needs. Students should have a voice in rules that govern their daily lives.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Breaks are different from lessons and allow students to practise autonomy. Students should have a voice in rules that govern their daily lives.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Routine access to private messages is disproportionate to a classroom rule. Students should have a voice in rules that govern their daily lives."
+            ]
+          }
+        },
+        {
+          "id": "school-phones-p2",
+          "role": "Classroom teacher",
+          "opening": "Consistent rules reduce repeated negotiation during lessons. Putting phones away can create a predictable classroom boundary. An agreed adjustment makes the rule compatible with individual needs. A full-day rule is simpler to administer consistently. Routine access to private messages is disproportionate to a classroom rule.",
+          "round2": {
+            "votes": [
+              "Strongly agree",
+              "Agree",
+              "Strongly agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Putting phones away can create a predictable classroom boundary. Consistent rules reduce repeated negotiation during lessons.",
+              "An agreed adjustment makes the rule compatible with individual needs. Consistent rules reduce repeated negotiation during lessons.",
+              "A full-day rule is simpler to administer consistently. Consistent rules reduce repeated negotiation during lessons.",
+              "Routine access to private messages is disproportionate to a classroom rule. Consistent rules reduce repeated negotiation during lessons."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Strongly agree",
+              "Strongly agree",
+              "Agree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Putting phones away can create a predictable classroom boundary. Consistent rules reduce repeated negotiation during lessons.",
+              "I changed my rating after reviewing the panel\u2019s reasons. An agreed adjustment makes the rule compatible with individual needs. Consistent rules reduce repeated negotiation during lessons.",
+              "I changed my rating after reviewing the panel\u2019s reasons. A full-day rule is simpler to administer consistently. Consistent rules reduce repeated negotiation during lessons.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Routine access to private messages is disproportionate to a classroom rule. Consistent rules reduce repeated negotiation during lessons."
+            ]
+          }
+        },
+        {
+          "id": "school-phones-p3",
+          "role": "Parent representative",
+          "opening": "Families need a reliable way to contact children in exceptional circumstances. Putting phones away can create a predictable classroom boundary. An agreed adjustment makes the rule compatible with individual needs. Breaks are different from lessons and allow students to practise autonomy. Routine access to private messages is disproportionate to a classroom rule.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Strongly agree",
+              "Neither agree nor disagree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Moderately confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Putting phones away can create a predictable classroom boundary. Families need a reliable way to contact children in exceptional circumstances.",
+              "An agreed adjustment makes the rule compatible with individual needs. Families need a reliable way to contact children in exceptional circumstances.",
+              "I see a case for both sides. Breaks are different from lessons and allow students to practise autonomy. Families need a reliable way to contact children in exceptional circumstances.",
+              "Routine access to private messages is disproportionate to a classroom rule. Families need a reliable way to contact children in exceptional circumstances."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Strongly agree",
+              "Disagree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Putting phones away can create a predictable classroom boundary. Families need a reliable way to contact children in exceptional circumstances.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An agreed adjustment makes the rule compatible with individual needs. Families need a reliable way to contact children in exceptional circumstances.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Breaks are different from lessons and allow students to practise autonomy. Families need a reliable way to contact children in exceptional circumstances.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Routine access to private messages is disproportionate to a classroom rule. Families need a reliable way to contact children in exceptional circumstances."
+            ]
+          }
+        },
+        {
+          "id": "school-phones-p4",
+          "role": "School nurse",
+          "opening": "Medical access must be dependable without publicly identifying a condition. Putting phones away can create a predictable classroom boundary. An agreed adjustment makes the rule compatible with individual needs. Breaks are different from lessons and allow students to practise autonomy. Routine access to private messages is disproportionate to a classroom rule.",
+          "round2": {
+            "votes": [
+              "Agree",
+              "Strongly agree",
+              "Disagree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "Putting phones away can create a predictable classroom boundary. Medical access must be dependable without publicly identifying a condition.",
+              "An agreed adjustment makes the rule compatible with individual needs. Medical access must be dependable without publicly identifying a condition.",
+              "Breaks are different from lessons and allow students to practise autonomy. Medical access must be dependable without publicly identifying a condition.",
+              "Routine access to private messages is disproportionate to a classroom rule. Medical access must be dependable without publicly identifying a condition."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Agree",
+              "Strongly agree",
+              "Disagree",
+              "Strongly disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Putting phones away can create a predictable classroom boundary. Medical access must be dependable without publicly identifying a condition.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An agreed adjustment makes the rule compatible with individual needs. Medical access must be dependable without publicly identifying a condition.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Breaks are different from lessons and allow students to practise autonomy. Medical access must be dependable without publicly identifying a condition.",
+              "I retain my rating after reviewing the panel\u2019s reasons. Routine access to private messages is disproportionate to a classroom rule. Medical access must be dependable without publicly identifying a condition."
+            ]
+          }
+        },
+        {
+          "id": "school-phones-p5",
+          "role": "Safeguarding lead",
+          "opening": "Intervention should be proportionate and protect private information. Putting phones away can create a predictable classroom boundary. An agreed adjustment makes the rule compatible with individual needs. A full-day rule is simpler to administer consistently. Routine access to private messages is disproportionate to a classroom rule.",
+          "round2": {
+            "votes": [
+              "Strongly agree",
+              "Strongly agree",
+              "Agree",
+              "Neither agree nor disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Moderately confident"
+            ],
+            "reasons": [
+              "Putting phones away can create a predictable classroom boundary. Intervention should be proportionate and protect private information.",
+              "An agreed adjustment makes the rule compatible with individual needs. Intervention should be proportionate and protect private information.",
+              "A full-day rule is simpler to administer consistently. Intervention should be proportionate and protect private information.",
+              "I see a case for both sides. Routine access to private messages is disproportionate to a classroom rule. Intervention should be proportionate and protect private information."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Strongly agree",
+              "Strongly agree",
+              "Neither agree nor disagree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Very confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Putting phones away can create a predictable classroom boundary. Intervention should be proportionate and protect private information.",
+              "I retain my rating after reviewing the panel\u2019s reasons. An agreed adjustment makes the rule compatible with individual needs. Intervention should be proportionate and protect private information.",
+              "I changed my rating after reviewing the panel\u2019s reasons. I see a case for both sides. Breaks are different from lessons and allow students to practise autonomy. Intervention should be proportionate and protect private information.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Routine access to private messages is disproportionate to a classroom rule. Intervention should be proportionate and protect private information."
+            ]
+          }
+        },
+        {
+          "id": "school-phones-p6",
+          "role": "Headteacher",
+          "opening": "A policy needs to be workable without creating a disciplinary spiral. Putting phones away can create a predictable classroom boundary. An agreed adjustment makes the rule compatible with individual needs. A full-day rule is simpler to administer consistently. Routine access to private messages is disproportionate to a classroom rule.",
+          "round2": {
+            "votes": [
+              "Strongly agree",
+              "Agree",
+              "Strongly agree",
+              "Neither agree nor disagree"
+            ],
+            "confidence": [
+              "Very confident",
+              "Very confident",
+              "Very confident",
+              "Moderately confident"
+            ],
+            "reasons": [
+              "Putting phones away can create a predictable classroom boundary. A policy needs to be workable without creating a disciplinary spiral.",
+              "An agreed adjustment makes the rule compatible with individual needs. A policy needs to be workable without creating a disciplinary spiral.",
+              "A full-day rule is simpler to administer consistently. A policy needs to be workable without creating a disciplinary spiral.",
+              "I see a case for both sides. Routine access to private messages is disproportionate to a classroom rule. A policy needs to be workable without creating a disciplinary spiral."
+            ]
+          },
+          "round3": {
+            "votes": [
+              "Strongly agree",
+              "Strongly agree",
+              "Agree",
+              "Disagree"
+            ],
+            "confidence": [
+              "Extremely confident",
+              "Very confident",
+              "Extremely confident",
+              "Very confident"
+            ],
+            "reasons": [
+              "I retain my rating after reviewing the panel\u2019s reasons. Putting phones away can create a predictable classroom boundary. A policy needs to be workable without creating a disciplinary spiral.",
+              "I changed my rating after reviewing the panel\u2019s reasons. An agreed adjustment makes the rule compatible with individual needs. A policy needs to be workable without creating a disciplinary spiral.",
+              "I changed my rating after reviewing the panel\u2019s reasons. A full-day rule is simpler to administer consistently. A policy needs to be workable without creating a disciplinary spiral.",
+              "I changed my rating after reviewing the panel\u2019s reasons. Routine access to private messages is disproportionate to a classroom rule. A policy needs to be workable without creating a disciplinary spiral."
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
