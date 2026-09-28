@@ -1,0 +1,11 @@
+{
+  "seed": 290928,
+  "participants_per_panel": 100,
+  "panels": 8,
+  "total_independent_simulated_participants": 800,
+  "source": "scripts/plot-illustrative-trajectories.py",
+  "status": "Entirely illustrative, independent of saved dev survey fixtures",
+  "scale": "Ordinal categories encoded 1\u20135; means descriptive only",
+  "display_jitter": "Horizontal +/-0.12, vertical +/-0.12; not added to source data",
+  "calls_or_platform_writes": 0
+}
