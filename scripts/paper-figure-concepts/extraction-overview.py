@@ -99,9 +99,21 @@ for i,(cat,col) in enumerate(zip(['Majority findings','Minority objections','Unc
  c.scatter(v,y-.12-point_rng.uniform(0,.18,len(v)),s=7,color=col,alpha=.27,linewidths=0,zorder=2)
  lo,med,hi=np.quantile(v,[.25,.5,.75]);c.plot([lo,hi],[y-.19]*2,color=col,lw=2.5,solid_capstyle='round',zorder=3);c.scatter(med,y-.19,s=28,color=col,edgecolor='white',lw=.8,zorder=4);c.text(0,y+.54,cat,fontsize=8.7,color=col)
 c.set_xticks([0,25,50,75,100]);c.set_xlabel('Original information retained (%)',fontsize=9,labelpad=7);c.spines['left'].set_visible(False);c.spines['bottom'].set_color('#ded8e5');c.tick_params(length=0,labelsize=8)
-f.text(.075,.117,'a  320 explicitly simulated before–after pairs; same axes and density scale at both stages. Contours enclose 50% / 90% of each simulated density.',fontsize=8,color=M)
-f.text(.075,.089,'b  Saved self-reviewed pilot: six panels per scenario.   c  Separate simulated information types; dot and line = median and middle 50%.',fontsize=8,color=M)
-f.text(.075,.052,'The paired design holds each extraction fixed and evaluates both endpoints against the same original source. Transitions are invented, not estimated.',fontsize=8,color=P)
-f.text(.075,.025,'Unchanged pairs illustrate faithful merging; other pairs illustrate possible losses or removal of unsupported content. Pilot omissions reflect its eight-claim cap.',fontsize=8,color=M)
+# Publication-style caption travels with SVG, PDF and PNG exports.
+import textwrap
+caption=(
+ 'a, Coverage and faithfulness before grouping (purple) and after grouping (orange), shown for the same 320 simulated consultations. '
+ 'Coverage measures how much original claim content is retained; faithfulness measures whether the resulting claims preserve the source meaning. '
+ 'Both maps use identical axes and density normalisation. Contours enclose 50% and 90% of each estimated density; marginal curves show each metric separately. '
+ 'The grouping changes are constructed illustrations, not measured effects. '
+ 'b, Saved assistant-pilot retention across four synthetic scenarios (six panels and 55 reference-claim occurrences per scenario). '
+ 'Purple marks full preservation, amber adds partial preservation, and the pale remainder represents omissions. '
+ 'Judgments were unblinded self-review; all omissions reflect the eight-claim cap. '
+ 'c, Illustrative retention distributions for four information types, using a separate 120 simulated cases per type. '
+ 'Faint points show individual cases; prominent dots and horizontal segments show medians and interquartile ranges, not confidence intervals. '
+ 'These panels do not establish a measured grouping effect or independently validated platform performance.'
+)
+f.text(.075,.130,'Figure 1 | Preserving meaning from expert responses to grouped claims.',fontsize=10,weight='bold',color=INK)
+f.text(.075,.113,textwrap.fill(caption,width=157),fontsize=8.2,color='#625b6c',va='top',linespacing=1.5)
 for ext in ['svg','pdf','png']:f.savefig(OUT/f'extraction-overview.{ext}',dpi=600,facecolor='white')
 p=OUT/'extraction-overview.svg';p.write_text('\n'.join(x.rstrip() for x in p.read_text().replace("'DejaVu Sans'","'Arial', sans-serif").splitlines())+'\n')
