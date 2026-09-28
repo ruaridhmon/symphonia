@@ -1,0 +1,41 @@
+{
+  "status": "Saved assistant pilot; provisional unblinded self-review",
+  "scenarios": [
+    {
+      "scenario": "pilot-001",
+      "name": "Inclusive education",
+      "panels": 6,
+      "reference_occurrences": 55,
+      "fully_preserved": 43,
+      "partial": 5,
+      "omitted": 7
+    },
+    {
+      "scenario": "pilot-003",
+      "name": "Diagnostic screening",
+      "panels": 6,
+      "reference_occurrences": 55,
+      "fully_preserved": 46,
+      "partial": 2,
+      "omitted": 7
+    },
+    {
+      "scenario": "pilot-004",
+      "name": "Youth justice",
+      "panels": 6,
+      "reference_occurrences": 55,
+      "fully_preserved": 45,
+      "partial": 3,
+      "omitted": 7
+    },
+    {
+      "scenario": "pilot-602",
+      "name": "School attendance",
+      "panels": 6,
+      "reference_occurrences": 55,
+      "fully_preserved": 48,
+      "partial": 0,
+      "omitted": 7
+    }
+  ]
+}
