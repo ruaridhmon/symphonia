@@ -332,8 +332,8 @@ body.ux-builder main form > div:last-child { padding-top:20px; }
 .delphi-insights .di-confidence>summary:hover{color:var(--foreground);text-decoration:underline;text-underline-offset:3px}
 .delphi-insights .di-confidence>summary::-webkit-details-marker{display:none}
 .delphi-insights .di-confidence>summary:focus-visible{outline:2px solid #137c70;outline-offset:3px}
-.delphi-insights .di-confidence-detail{position:fixed;inset:0;margin:auto;box-sizing:border-box;width:320px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);overflow:auto;padding:20px;background:var(--background,#fff);border:1px solid var(--border,#ddd);border-radius:14px;box-shadow:0 16px 64px #00000026;white-space:normal;font-size:12px;line-height:1.5;color:var(--foreground,#222)}
-.delphi-insights .di-confidence-detail::backdrop{background:rgb(15 23 42 / 18%)}
+.delphi-insights .di-confidence-detail{position:fixed;inset:auto;margin:0;box-sizing:border-box;width:300px;max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);overflow:auto;padding:20px;background:var(--background,#fff);border:1px solid var(--border,#ddd);border-radius:14px;box-shadow:0 16px 64px #00000026;white-space:normal;font-size:12px;line-height:1.5;color:var(--foreground,#222)}
+.delphi-insights .di-confidence-detail::backdrop{background:transparent}
 .delphi-insights .di-confidence-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .delphi-insights .di-confidence-header strong{font-size:13px;font-weight:600}
 .delphi-insights .di-confidence-close{border:0;background:transparent;color:var(--muted-foreground);font-size:21px;line-height:1;cursor:pointer;width:30px;height:30px;margin:-6px -6px -6px 0;border-radius:6px}

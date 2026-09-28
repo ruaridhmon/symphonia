@@ -293,6 +293,19 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           const body = document.createElement("dialog");
           body.className = "di-confidence-detail";
           body.setAttribute("aria-label", `Confidence among people who ${stanceLabels[i].toLowerCase()}`);
+          const position = () => {
+            if (!body.open) return;
+            const viewport = window.visualViewport;
+            const leftEdge = (viewport?.offsetLeft || 0) + 12, topEdge = (viewport?.offsetTop || 0) + 12;
+            const rightEdge = leftEdge + (viewport?.width || window.innerWidth) - 24, bottomEdge = topEdge + (viewport?.height || window.innerHeight) - 24;
+            body.style.maxWidth = `${rightEdge - leftEdge}px`;
+            body.style.maxHeight = `${bottomEdge - topEdge}px`;
+            const anchor = trigger.getBoundingClientRect(), box = body.getBoundingClientRect();
+            const below = bottomEdge - anchor.bottom - 8, above = anchor.top - topEdge - 8;
+            const top = below >= box.height || below >= above ? anchor.bottom + 8 : anchor.top - box.height - 8;
+            body.style.left = `${Math.max(leftEdge, Math.min(anchor.left, rightEdge - box.width))}px`;
+            body.style.top = `${Math.max(topEdge, Math.min(top, bottomEdge - box.height))}px`;
+          };
           const dismiss = () => {
             body.close();
             disclosure.open = false;
@@ -303,9 +316,16 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
             root.querySelectorAll(".di-confidence dialog[open]").forEach((d) => d.close());
             disclosure.open = true;
             body.showModal();
+            position();
+            window.addEventListener("resize", position);
+            window.addEventListener("scroll", position, true);
+            window.visualViewport?.addEventListener("resize", position);
           };
           body.onclose = () => {
             disclosure.open = false;
+            window.removeEventListener("resize", position);
+            window.removeEventListener("scroll", position, true);
+            window.visualViewport?.removeEventListener("resize", position);
           };
           body.oncancel = (e) => {
             e.preventDefault();
@@ -338,6 +358,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           });
           body.append(distribution);
           const method = node("details", "", "di-confidence-method");
+          method.addEventListener("toggle", position);
           method.append(node("summary", "How this is summarised"), node("p", "High: very or extremely. Moderate: moderately. Low: slightly or not at all. The label describes more than half of recorded answers; otherwise mixed. Missing answers are excluded. This is self-reported certainty, not correctness."));
           body.append(method);
           disclosure.append(body);

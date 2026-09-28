@@ -63,9 +63,21 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
         const disclosure=node('details','','di-confidence') as HTMLDetailsElement;disclosure.dataset.key=`${row.key}:confidence:${i}`;disclosure.open=false;
         const trigger=node('summary',label+(values.length&&values.length<n?` (${values.length}/${n})`:''));trigger.setAttribute('aria-label',`${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);disclosure.append(trigger);
         const body=document.createElement('dialog');body.className='di-confidence-detail';body.setAttribute('aria-label',`Confidence among people who ${stanceLabels[i].toLowerCase()}`);
+        const position=()=>{
+          if(!body.open)return;
+          const viewport=window.visualViewport;
+          const leftEdge=(viewport?.offsetLeft||0)+12,topEdge=(viewport?.offsetTop||0)+12;
+          const rightEdge=leftEdge+(viewport?.width||window.innerWidth)-24,bottomEdge=topEdge+(viewport?.height||window.innerHeight)-24;
+          body.style.maxWidth=`${rightEdge-leftEdge}px`;body.style.maxHeight=`${bottomEdge-topEdge}px`;
+          const anchor=trigger.getBoundingClientRect(),box=body.getBoundingClientRect();
+          const below=bottomEdge-anchor.bottom-8,above=anchor.top-topEdge-8;
+          const top=below>=box.height||below>=above?anchor.bottom+8:anchor.top-box.height-8;
+          body.style.left=`${Math.max(leftEdge,Math.min(anchor.left,rightEdge-box.width))}px`;
+          body.style.top=`${Math.max(topEdge,Math.min(top,bottomEdge-box.height))}px`;
+        };
         const dismiss=()=>{body.close();disclosure.open=false;trigger.focus();};
-        trigger.onclick=e=>{e.preventDefault();root.querySelectorAll<HTMLDialogElement>('.di-confidence dialog[open]').forEach(d=>d.close());disclosure.open=true;body.showModal();};
-        body.onclose=()=>{disclosure.open=false;};
+        trigger.onclick=e=>{e.preventDefault();root.querySelectorAll<HTMLDialogElement>('.di-confidence dialog[open]').forEach(d=>d.close());disclosure.open=true;body.showModal();position();window.addEventListener('resize',position);window.addEventListener('scroll',position,true);window.visualViewport?.addEventListener('resize',position);};
+        body.onclose=()=>{disclosure.open=false;window.removeEventListener('resize',position);window.removeEventListener('scroll',position,true);window.visualViewport?.removeEventListener('resize',position);};
         body.oncancel=e=>{e.preventDefault();dismiss();};
         body.onclick=e=>{if(e.target===body){const r=body.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dismiss();}};
         const header=node('div','','di-confidence-header');
@@ -78,7 +90,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
           const track=node('span','','di-confidence-track');track.setAttribute('aria-hidden','true');const fill=node('span');fill.style.width=`${values.length?100*total/values.length:0}%`;track.append(fill);
           line.append(node('span',label.replace(' confident','')),track,node('span',String(total),'di-confidence-count'));distribution.append(line);
         });body.append(distribution);
-        const method=node('details','','di-confidence-method');method.append(node('summary','How this is summarised'),node('p','High: very or extremely. Moderate: moderately. Low: slightly or not at all. The label describes more than half of recorded answers; otherwise mixed. Missing answers are excluded. This is self-reported certainty, not correctness.'));body.append(method);disclosure.append(body);item.append(disclosure);
+        const method=node('details','','di-confidence-method');method.addEventListener('toggle',position);method.append(node('summary','How this is summarised'),node('p','High: very or extremely. Moderate: moderately. Low: slightly or not at all. The label describes more than half of recorded answers; otherwise mixed. Missing answers are excluded. This is self-reported certainty, not correctness.'));body.append(method);disclosure.append(body);item.append(disclosure);
       }
       legend.append(item);
     }});rating.append(legend);
