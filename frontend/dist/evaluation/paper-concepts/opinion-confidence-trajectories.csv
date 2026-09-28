@@ -1,0 +1,193 @@
+form_id,scenario,participant,claim_number,claim,round,opinion,confidence,shown_in_figure
+29,clinical-ai,clinical-ai-p1,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,2,Agree,Very confident,True
+29,clinical-ai,clinical-ai-p1,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,3,Agree,Extremely confident,True
+29,clinical-ai,clinical-ai-p2,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,2,Neither agree nor disagree,Moderately confident,True
+29,clinical-ai,clinical-ai-p2,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,3,Agree,Extremely confident,True
+29,clinical-ai,clinical-ai-p3,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,2,Agree,Very confident,True
+29,clinical-ai,clinical-ai-p3,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,3,Agree,Extremely confident,True
+29,clinical-ai,clinical-ai-p4,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,2,Strongly agree,Very confident,True
+29,clinical-ai,clinical-ai-p4,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,3,Agree,Extremely confident,True
+29,clinical-ai,clinical-ai-p5,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,2,Disagree,Very confident,True
+29,clinical-ai,clinical-ai-p5,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,3,Disagree,Extremely confident,True
+29,clinical-ai,clinical-ai-p6,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,2,Agree,Very confident,True
+29,clinical-ai,clinical-ai-p6,1,AI may prioritise routine referrals only when a clinician can override its recommendation.,3,Agree,Extremely confident,True
+29,clinical-ai,clinical-ai-p1,2,Patients must be told when AI materially influences the priority of their referral.,2,Agree,Very confident,True
+29,clinical-ai,clinical-ai-p1,2,Patients must be told when AI materially influences the priority of their referral.,3,Strongly agree,Very confident,True
+29,clinical-ai,clinical-ai-p2,2,Patients must be told when AI materially influences the priority of their referral.,2,Strongly agree,Very confident,True
+29,clinical-ai,clinical-ai-p2,2,Patients must be told when AI materially influences the priority of their referral.,3,Strongly agree,Very confident,True
+29,clinical-ai,clinical-ai-p3,2,Patients must be told when AI materially influences the priority of their referral.,2,Neither agree nor disagree,Moderately confident,True
+29,clinical-ai,clinical-ai-p3,2,Patients must be told when AI materially influences the priority of their referral.,3,Agree,Very confident,True
+29,clinical-ai,clinical-ai-p4,2,Patients must be told when AI materially influences the priority of their referral.,2,Agree,Very confident,True
+29,clinical-ai,clinical-ai-p4,2,Patients must be told when AI materially influences the priority of their referral.,3,Agree,Very confident,True
+29,clinical-ai,clinical-ai-p5,2,Patients must be told when AI materially influences the priority of their referral.,2,Strongly agree,Very confident,True
+29,clinical-ai,clinical-ai-p5,2,Patients must be told when AI materially influences the priority of their referral.,3,Strongly agree,Very confident,True
+29,clinical-ai,clinical-ai-p6,2,Patients must be told when AI materially influences the priority of their referral.,2,Neither agree nor disagree,Moderately confident,True
+29,clinical-ai,clinical-ai-p6,2,Patients must be told when AI materially influences the priority of their referral.,3,Agree,Very confident,True
+29,clinical-ai,clinical-ai-p1,3,An independent subgroup performance audit must be completed before deployment.,2,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p1,3,An independent subgroup performance audit must be completed before deployment.,3,Strongly agree,Extremely confident,False
+29,clinical-ai,clinical-ai-p2,3,An independent subgroup performance audit must be completed before deployment.,2,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p2,3,An independent subgroup performance audit must be completed before deployment.,3,Strongly agree,Extremely confident,False
+29,clinical-ai,clinical-ai-p3,3,An independent subgroup performance audit must be completed before deployment.,2,Neither agree nor disagree,Moderately confident,False
+29,clinical-ai,clinical-ai-p3,3,An independent subgroup performance audit must be completed before deployment.,3,Neither agree nor disagree,Very confident,False
+29,clinical-ai,clinical-ai-p4,3,An independent subgroup performance audit must be completed before deployment.,2,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p4,3,An independent subgroup performance audit must be completed before deployment.,3,Strongly agree,Extremely confident,False
+29,clinical-ai,clinical-ai-p5,3,An independent subgroup performance audit must be completed before deployment.,2,Agree,Very confident,False
+29,clinical-ai,clinical-ai-p5,3,An independent subgroup performance audit must be completed before deployment.,3,Strongly agree,Extremely confident,False
+29,clinical-ai,clinical-ai-p6,3,An independent subgroup performance audit must be completed before deployment.,2,Disagree,Very confident,False
+29,clinical-ai,clinical-ai-p6,3,An independent subgroup performance audit must be completed before deployment.,3,Neither agree nor disagree,Very confident,False
+29,clinical-ai,clinical-ai-p1,4,Emergency referrals must never be downgraded solely on an AI recommendation.,2,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p1,4,Emergency referrals must never be downgraded solely on an AI recommendation.,3,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p2,4,Emergency referrals must never be downgraded solely on an AI recommendation.,2,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p2,4,Emergency referrals must never be downgraded solely on an AI recommendation.,3,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p3,4,Emergency referrals must never be downgraded solely on an AI recommendation.,2,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p3,4,Emergency referrals must never be downgraded solely on an AI recommendation.,3,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p4,4,Emergency referrals must never be downgraded solely on an AI recommendation.,2,Agree,Very confident,False
+29,clinical-ai,clinical-ai-p4,4,Emergency referrals must never be downgraded solely on an AI recommendation.,3,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p5,4,Emergency referrals must never be downgraded solely on an AI recommendation.,2,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p5,4,Emergency referrals must never be downgraded solely on an AI recommendation.,3,Strongly agree,Very confident,False
+29,clinical-ai,clinical-ai-p6,4,Emergency referrals must never be downgraded solely on an AI recommendation.,2,Agree,Very confident,False
+29,clinical-ai,clinical-ai-p6,4,Emergency referrals must never be downgraded solely on an AI recommendation.,3,Agree,Very confident,False
+30,assessment-ai,assessment-ai-p1,1,Students may use generative AI in assessed coursework if its role is disclosed.,2,Strongly agree,Very confident,True
+30,assessment-ai,assessment-ai-p1,1,Students may use generative AI in assessed coursework if its role is disclosed.,3,Strongly agree,Extremely confident,True
+30,assessment-ai,assessment-ai-p2,1,Students may use generative AI in assessed coursework if its role is disclosed.,2,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p2,1,Students may use generative AI in assessed coursework if its role is disclosed.,3,Agree,Extremely confident,True
+30,assessment-ai,assessment-ai-p3,1,Students may use generative AI in assessed coursework if its role is disclosed.,2,Disagree,Very confident,True
+30,assessment-ai,assessment-ai-p3,1,Students may use generative AI in assessed coursework if its role is disclosed.,3,Neither agree nor disagree,Very confident,True
+30,assessment-ai,assessment-ai-p4,1,Students may use generative AI in assessed coursework if its role is disclosed.,2,Strongly agree,Very confident,True
+30,assessment-ai,assessment-ai-p4,1,Students may use generative AI in assessed coursework if its role is disclosed.,3,Strongly agree,Extremely confident,True
+30,assessment-ai,assessment-ai-p5,1,Students may use generative AI in assessed coursework if its role is disclosed.,2,Neither agree nor disagree,Moderately confident,True
+30,assessment-ai,assessment-ai-p5,1,Students may use generative AI in assessed coursework if its role is disclosed.,3,Agree,Extremely confident,True
+30,assessment-ai,assessment-ai-p6,1,Students may use generative AI in assessed coursework if its role is disclosed.,2,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p6,1,Students may use generative AI in assessed coursework if its role is disclosed.,3,Agree,Extremely confident,True
+30,assessment-ai,assessment-ai-p1,2,Every degree must include an assessment where students explain their own reasoning orally.,2,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p1,2,Every degree must include an assessment where students explain their own reasoning orally.,3,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p2,2,Every degree must include an assessment where students explain their own reasoning orally.,2,Disagree,Very confident,True
+30,assessment-ai,assessment-ai-p2,2,Every degree must include an assessment where students explain their own reasoning orally.,3,Disagree,Very confident,True
+30,assessment-ai,assessment-ai-p3,2,Every degree must include an assessment where students explain their own reasoning orally.,2,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p3,2,Every degree must include an assessment where students explain their own reasoning orally.,3,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p4,2,Every degree must include an assessment where students explain their own reasoning orally.,2,Strongly agree,Very confident,True
+30,assessment-ai,assessment-ai-p4,2,Every degree must include an assessment where students explain their own reasoning orally.,3,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p5,2,Every degree must include an assessment where students explain their own reasoning orally.,2,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p5,2,Every degree must include an assessment where students explain their own reasoning orally.,3,Agree,Very confident,True
+30,assessment-ai,assessment-ai-p6,2,Every degree must include an assessment where students explain their own reasoning orally.,2,Neither agree nor disagree,Moderately confident,True
+30,assessment-ai,assessment-ai-p6,2,Every degree must include an assessment where students explain their own reasoning orally.,3,Neither agree nor disagree,Moderately confident,True
+30,assessment-ai,assessment-ai-p1,3,AI-detector scores alone must never establish academic misconduct.,2,Strongly agree,Very confident,False
+30,assessment-ai,assessment-ai-p1,3,AI-detector scores alone must never establish academic misconduct.,3,Strongly agree,Extremely confident,False
+30,assessment-ai,assessment-ai-p2,3,AI-detector scores alone must never establish academic misconduct.,2,Strongly agree,Very confident,False
+30,assessment-ai,assessment-ai-p2,3,AI-detector scores alone must never establish academic misconduct.,3,Strongly agree,Extremely confident,False
+30,assessment-ai,assessment-ai-p3,3,AI-detector scores alone must never establish academic misconduct.,2,Strongly agree,Very confident,False
+30,assessment-ai,assessment-ai-p3,3,AI-detector scores alone must never establish academic misconduct.,3,Strongly agree,Extremely confident,False
+30,assessment-ai,assessment-ai-p4,3,AI-detector scores alone must never establish academic misconduct.,2,Agree,Very confident,False
+30,assessment-ai,assessment-ai-p4,3,AI-detector scores alone must never establish academic misconduct.,3,Strongly agree,Extremely confident,False
+30,assessment-ai,assessment-ai-p5,3,AI-detector scores alone must never establish academic misconduct.,2,Agree,Very confident,False
+30,assessment-ai,assessment-ai-p5,3,AI-detector scores alone must never establish academic misconduct.,3,Strongly agree,Extremely confident,False
+30,assessment-ai,assessment-ai-p6,3,AI-detector scores alone must never establish academic misconduct.,2,Strongly agree,Very confident,False
+30,assessment-ai,assessment-ai-p6,3,AI-detector scores alone must never establish academic misconduct.,3,Strongly agree,Extremely confident,False
+30,assessment-ai,assessment-ai-p1,4,All take-home essays should be replaced with supervised examinations.,2,Strongly disagree,Very confident,False
+30,assessment-ai,assessment-ai-p1,4,All take-home essays should be replaced with supervised examinations.,3,Strongly disagree,Very confident,False
+30,assessment-ai,assessment-ai-p2,4,All take-home essays should be replaced with supervised examinations.,2,Strongly disagree,Very confident,False
+30,assessment-ai,assessment-ai-p2,4,All take-home essays should be replaced with supervised examinations.,3,Strongly disagree,Very confident,False
+30,assessment-ai,assessment-ai-p3,4,All take-home essays should be replaced with supervised examinations.,2,Disagree,Very confident,False
+30,assessment-ai,assessment-ai-p3,4,All take-home essays should be replaced with supervised examinations.,3,Strongly disagree,Very confident,False
+30,assessment-ai,assessment-ai-p4,4,All take-home essays should be replaced with supervised examinations.,2,Disagree,Very confident,False
+30,assessment-ai,assessment-ai-p4,4,All take-home essays should be replaced with supervised examinations.,3,Strongly disagree,Very confident,False
+30,assessment-ai,assessment-ai-p5,4,All take-home essays should be replaced with supervised examinations.,2,Neither agree nor disagree,Moderately confident,False
+30,assessment-ai,assessment-ai-p5,4,All take-home essays should be replaced with supervised examinations.,3,Disagree,Very confident,False
+30,assessment-ai,assessment-ai-p6,4,All take-home essays should be replaced with supervised examinations.,2,Agree,Very confident,False
+30,assessment-ai,assessment-ai-p6,4,All take-home essays should be replaced with supervised examinations.,3,Disagree,Very confident,False
+31,coastal-futures,coastal-futures-p1,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,2,Disagree,Very confident,True
+31,coastal-futures,coastal-futures-p1,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,3,Neither agree nor disagree,Very confident,True
+31,coastal-futures,coastal-futures-p2,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,2,Agree,Very confident,True
+31,coastal-futures,coastal-futures-p2,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,3,Agree,Extremely confident,True
+31,coastal-futures,coastal-futures-p3,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,2,Strongly agree,Very confident,True
+31,coastal-futures,coastal-futures-p3,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,3,Strongly agree,Extremely confident,True
+31,coastal-futures,coastal-futures-p4,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,2,Neither agree nor disagree,Moderately confident,True
+31,coastal-futures,coastal-futures-p4,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,3,Neither agree nor disagree,Very confident,True
+31,coastal-futures,coastal-futures-p5,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,2,Agree,Very confident,True
+31,coastal-futures,coastal-futures-p5,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,3,Agree,Extremely confident,True
+31,coastal-futures,coastal-futures-p6,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,2,Strongly agree,Very confident,True
+31,coastal-futures,coastal-futures-p6,1,Residents in repeatedly flooded homes should be offered voluntary relocation grants.,3,Strongly agree,Extremely confident,True
+31,coastal-futures,coastal-futures-p1,2,Publicly funded coastal defences should be prioritised using property values alone.,2,Strongly disagree,Very confident,True
+31,coastal-futures,coastal-futures-p1,2,Publicly funded coastal defences should be prioritised using property values alone.,3,Strongly disagree,Very confident,True
+31,coastal-futures,coastal-futures-p2,2,Publicly funded coastal defences should be prioritised using property values alone.,2,Strongly disagree,Very confident,True
+31,coastal-futures,coastal-futures-p2,2,Publicly funded coastal defences should be prioritised using property values alone.,3,Strongly disagree,Very confident,True
+31,coastal-futures,coastal-futures-p3,2,Publicly funded coastal defences should be prioritised using property values alone.,2,Disagree,Very confident,True
+31,coastal-futures,coastal-futures-p3,2,Publicly funded coastal defences should be prioritised using property values alone.,3,Strongly disagree,Very confident,True
+31,coastal-futures,coastal-futures-p4,2,Publicly funded coastal defences should be prioritised using property values alone.,2,Neither agree nor disagree,Moderately confident,True
+31,coastal-futures,coastal-futures-p4,2,Publicly funded coastal defences should be prioritised using property values alone.,3,Disagree,Very confident,True
+31,coastal-futures,coastal-futures-p5,2,Publicly funded coastal defences should be prioritised using property values alone.,2,Disagree,Very confident,True
+31,coastal-futures,coastal-futures-p5,2,Publicly funded coastal defences should be prioritised using property values alone.,3,Strongly disagree,Very confident,True
+31,coastal-futures,coastal-futures-p6,2,Publicly funded coastal defences should be prioritised using property values alone.,2,Neither agree nor disagree,Moderately confident,True
+31,coastal-futures,coastal-futures-p6,2,Publicly funded coastal defences should be prioritised using property values alone.,3,Disagree,Very confident,True
+31,coastal-futures,coastal-futures-p1,3,Any relocation programme must include support for renters as well as owners.,2,Agree,Very confident,False
+31,coastal-futures,coastal-futures-p1,3,Any relocation programme must include support for renters as well as owners.,3,Strongly agree,Extremely confident,False
+31,coastal-futures,coastal-futures-p2,3,Any relocation programme must include support for renters as well as owners.,2,Strongly agree,Very confident,False
+31,coastal-futures,coastal-futures-p2,3,Any relocation programme must include support for renters as well as owners.,3,Strongly agree,Extremely confident,False
+31,coastal-futures,coastal-futures-p3,3,Any relocation programme must include support for renters as well as owners.,2,Agree,Very confident,False
+31,coastal-futures,coastal-futures-p3,3,Any relocation programme must include support for renters as well as owners.,3,Strongly agree,Extremely confident,False
+31,coastal-futures,coastal-futures-p4,3,Any relocation programme must include support for renters as well as owners.,2,Neither agree nor disagree,Moderately confident,False
+31,coastal-futures,coastal-futures-p4,3,Any relocation programme must include support for renters as well as owners.,3,Agree,Extremely confident,False
+31,coastal-futures,coastal-futures-p5,3,Any relocation programme must include support for renters as well as owners.,2,Strongly agree,Very confident,False
+31,coastal-futures,coastal-futures-p5,3,Any relocation programme must include support for renters as well as owners.,3,Strongly agree,Extremely confident,False
+31,coastal-futures,coastal-futures-p6,3,Any relocation programme must include support for renters as well as owners.,2,Agree,Very confident,False
+31,coastal-futures,coastal-futures-p6,3,Any relocation programme must include support for renters as well as owners.,3,Strongly agree,Extremely confident,False
+31,coastal-futures,coastal-futures-p1,4,New housing should be prohibited in the highest-risk flood zone.,2,Neither agree nor disagree,Moderately confident,False
+31,coastal-futures,coastal-futures-p1,4,New housing should be prohibited in the highest-risk flood zone.,3,Neither agree nor disagree,Moderately confident,False
+31,coastal-futures,coastal-futures-p2,4,New housing should be prohibited in the highest-risk flood zone.,2,Agree,Very confident,False
+31,coastal-futures,coastal-futures-p2,4,New housing should be prohibited in the highest-risk flood zone.,3,Agree,Very confident,False
+31,coastal-futures,coastal-futures-p3,4,New housing should be prohibited in the highest-risk flood zone.,2,Strongly agree,Very confident,False
+31,coastal-futures,coastal-futures-p3,4,New housing should be prohibited in the highest-risk flood zone.,3,Strongly agree,Very confident,False
+31,coastal-futures,coastal-futures-p4,4,New housing should be prohibited in the highest-risk flood zone.,2,Disagree,Very confident,False
+31,coastal-futures,coastal-futures-p4,4,New housing should be prohibited in the highest-risk flood zone.,3,Disagree,Very confident,False
+31,coastal-futures,coastal-futures-p5,4,New housing should be prohibited in the highest-risk flood zone.,2,Disagree,Very confident,False
+31,coastal-futures,coastal-futures-p5,4,New housing should be prohibited in the highest-risk flood zone.,3,Disagree,Very confident,False
+31,coastal-futures,coastal-futures-p6,4,New housing should be prohibited in the highest-risk flood zone.,2,Agree,Very confident,False
+31,coastal-futures,coastal-futures-p6,4,New housing should be prohibited in the highest-risk flood zone.,3,Agree,Very confident,False
+32,school-phones,school-phones-p1,1,Personal smartphones should be stored away during lessons.,2,Agree,Very confident,True
+32,school-phones,school-phones-p1,1,Personal smartphones should be stored away during lessons.,3,Agree,Extremely confident,True
+32,school-phones,school-phones-p2,1,Personal smartphones should be stored away during lessons.,2,Strongly agree,Very confident,True
+32,school-phones,school-phones-p2,1,Personal smartphones should be stored away during lessons.,3,Strongly agree,Extremely confident,True
+32,school-phones,school-phones-p3,1,Personal smartphones should be stored away during lessons.,2,Agree,Very confident,True
+32,school-phones,school-phones-p3,1,Personal smartphones should be stored away during lessons.,3,Agree,Extremely confident,True
+32,school-phones,school-phones-p4,1,Personal smartphones should be stored away during lessons.,2,Agree,Very confident,True
+32,school-phones,school-phones-p4,1,Personal smartphones should be stored away during lessons.,3,Agree,Extremely confident,True
+32,school-phones,school-phones-p5,1,Personal smartphones should be stored away during lessons.,2,Strongly agree,Very confident,True
+32,school-phones,school-phones-p5,1,Personal smartphones should be stored away during lessons.,3,Strongly agree,Extremely confident,True
+32,school-phones,school-phones-p6,1,Personal smartphones should be stored away during lessons.,2,Strongly agree,Very confident,True
+32,school-phones,school-phones-p6,1,Personal smartphones should be stored away during lessons.,3,Strongly agree,Extremely confident,True
+32,school-phones,school-phones-p1,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,2,Strongly agree,Very confident,True
+32,school-phones,school-phones-p1,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,3,Strongly agree,Very confident,True
+32,school-phones,school-phones-p2,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,2,Agree,Very confident,True
+32,school-phones,school-phones-p2,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,3,Strongly agree,Very confident,True
+32,school-phones,school-phones-p3,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,2,Strongly agree,Very confident,True
+32,school-phones,school-phones-p3,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,3,Strongly agree,Very confident,True
+32,school-phones,school-phones-p4,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,2,Strongly agree,Very confident,True
+32,school-phones,school-phones-p4,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,3,Strongly agree,Very confident,True
+32,school-phones,school-phones-p5,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,2,Strongly agree,Very confident,True
+32,school-phones,school-phones-p5,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,3,Strongly agree,Very confident,True
+32,school-phones,school-phones-p6,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,2,Agree,Very confident,True
+32,school-phones,school-phones-p6,2,Students must retain access to a phone when required by an agreed medical or accessibility plan.,3,Strongly agree,Very confident,True
+32,school-phones,school-phones-p1,3,Schools should prohibit personal smartphone use during every break and lunchtime.,2,Strongly disagree,Very confident,False
+32,school-phones,school-phones-p1,3,Schools should prohibit personal smartphone use during every break and lunchtime.,3,Strongly disagree,Extremely confident,False
+32,school-phones,school-phones-p2,3,Schools should prohibit personal smartphone use during every break and lunchtime.,2,Strongly agree,Very confident,False
+32,school-phones,school-phones-p2,3,Schools should prohibit personal smartphone use during every break and lunchtime.,3,Agree,Extremely confident,False
+32,school-phones,school-phones-p3,3,Schools should prohibit personal smartphone use during every break and lunchtime.,2,Neither agree nor disagree,Moderately confident,False
+32,school-phones,school-phones-p3,3,Schools should prohibit personal smartphone use during every break and lunchtime.,3,Disagree,Extremely confident,False
+32,school-phones,school-phones-p4,3,Schools should prohibit personal smartphone use during every break and lunchtime.,2,Disagree,Very confident,False
+32,school-phones,school-phones-p4,3,Schools should prohibit personal smartphone use during every break and lunchtime.,3,Disagree,Extremely confident,False
+32,school-phones,school-phones-p5,3,Schools should prohibit personal smartphone use during every break and lunchtime.,2,Agree,Very confident,False
+32,school-phones,school-phones-p5,3,Schools should prohibit personal smartphone use during every break and lunchtime.,3,Neither agree nor disagree,Very confident,False
+32,school-phones,school-phones-p6,3,Schools should prohibit personal smartphone use during every break and lunchtime.,2,Strongly agree,Very confident,False
+32,school-phones,school-phones-p6,3,Schools should prohibit personal smartphone use during every break and lunchtime.,3,Agree,Extremely confident,False
+32,school-phones,school-phones-p1,4,Schools should use routine searches of students’ phones to enforce the policy.,2,Strongly disagree,Very confident,False
+32,school-phones,school-phones-p1,4,Schools should use routine searches of students’ phones to enforce the policy.,3,Strongly disagree,Very confident,False
+32,school-phones,school-phones-p2,4,Schools should use routine searches of students’ phones to enforce the policy.,2,Disagree,Very confident,False
+32,school-phones,school-phones-p2,4,Schools should use routine searches of students’ phones to enforce the policy.,3,Strongly disagree,Very confident,False
+32,school-phones,school-phones-p3,4,Schools should use routine searches of students’ phones to enforce the policy.,2,Disagree,Very confident,False
+32,school-phones,school-phones-p3,4,Schools should use routine searches of students’ phones to enforce the policy.,3,Strongly disagree,Very confident,False
+32,school-phones,school-phones-p4,4,Schools should use routine searches of students’ phones to enforce the policy.,2,Strongly disagree,Very confident,False
+32,school-phones,school-phones-p4,4,Schools should use routine searches of students’ phones to enforce the policy.,3,Strongly disagree,Very confident,False
+32,school-phones,school-phones-p5,4,Schools should use routine searches of students’ phones to enforce the policy.,2,Neither agree nor disagree,Moderately confident,False
+32,school-phones,school-phones-p5,4,Schools should use routine searches of students’ phones to enforce the policy.,3,Disagree,Very confident,False
+32,school-phones,school-phones-p6,4,Schools should use routine searches of students’ phones to enforce the policy.,2,Neither agree nor disagree,Moderately confident,False
+32,school-phones,school-phones-p6,4,Schools should use routine searches of students’ phones to enforce the policy.,3,Disagree,Very confident,False

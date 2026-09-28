@@ -1,0 +1,17 @@
+{
+  "source": "scripts/fixtures/new-dev-surveys.json",
+  "forms": [
+    29,
+    30,
+    31,
+    32
+  ],
+  "status": "Authored simulations saved via normal dev APIs; not empirical participant evidence",
+  "selection": "First two claims in fixture order from each consultation",
+  "participants_per_consultation": 6,
+  "plotted_claims": 8,
+  "plotted_paired_trajectories_per_row": 48,
+  "bold_line": "Median on five ordered categories; midpoint medians may fall between categories",
+  "jitter": "Horizontal only, same participant offset at both rounds",
+  "model_calls": 0
+}
