@@ -43,24 +43,30 @@ for i,(arm,col) in enumerate([('No feedback',P),('Peer feedback',T)]):
  subset=[r for r in rows if r['arm']==arm]
  assert len(subset)==100,(arm,len(subset))
  x=np.array([float(r['r2_disagreement_pct']) for r in subset]);y=np.array([float(r['r3_disagreement_pct']) for r in subset])
- ax=f.add_axes([.075+i*.30,.315,.25,.24]);cloud(ax,x,y,(0,100),(0,100),col,6,6)
- ax.plot([0,100],[0,100],color=M,lw=.7,ls=(0,(3,3)))
- ax.set(aspect='equal',xticks=[0,50,100],yticks=[0,50,100],xlabel='Round 2 disagreement (%)')
- if i==0:ax.set_ylabel('Round 3 disagreement (%)')
+ ax=f.add_axes([.075+i*.30,.315,.25,.24])
+ for first,last in zip(x,y):
+  ax.plot([0,1],[first,last],c=col,alpha=.16,lw=.75,zorder=2)
+ ax.scatter(np.zeros(len(x)),x,s=7,c=col,alpha=.24,lw=0,zorder=3)
+ ax.scatter(np.ones(len(y)),y,s=7,c=col,alpha=.24,lw=0,zorder=3)
+ means=[x.mean(),y.mean()]
+ ax.plot([0,1],means,c=col,lw=2.7,marker='o',ms=6,markeredgecolor='white',markeredgewidth=1,zorder=5)
+ for pos,value in enumerate(means):ax.annotate(f'{value:.1f}%',(pos,value),xytext=(-8 if pos==0 else 8,9),textcoords='offset points',ha='right' if pos==0 else 'left',fontsize=8,color=col,zorder=6)
+ ax.set(xlim=(-.25,1.25),ylim=(0,100),xticks=[0,1],xticklabels=['Round 2','Round 3'],yticks=[0,25,50,75,100])
+ ax.set_ylabel('Disagreement (%)' if i==0 else '')
  ax.set_title(arm,loc='left',fontsize=10,color=col,pad=10)
- ax.text(.04,.91,'More disagreement',transform=ax.transAxes,fontsize=7,color=M)
- ax.text(.96,.05,'Less disagreement',transform=ax.transAxes,fontsize=7,color=M,ha='right')
+ ax.grid(axis='y',color='#eeeaf2',lw=.55,zorder=0);ax.set_axisbelow(True)
+ ax.tick_params(labelsize=8);ax.spines['bottom'].set_visible(False);ax.tick_params(axis='x',length=0,pad=8)
 subset=[r for r in rows if r['arm']=='Peer feedback'];x=np.array([float(r['delta_disagreement_pp']) for r in subset]);y=np.array([float(r['delta_accuracy_pp']) for r in subset])
 ax=f.add_axes([.695,.315,.25,.24]);cloud(ax,x,y,(-50,50),(-50,50),T,5,5);ax.set_aspect('equal')
 ax.axhline(0,c=M,lw=.7);ax.axvline(0,c=M,lw=.7)
 ax.set(xticks=[-50,0,50],yticks=[-50,0,50],xlabel='Change in disagreement (pp)',ylabel='Change in accuracy (pp)');ax.set_title('Peer feedback · factual tasks',loc='left',fontsize=10,color=T,pad=10)
 ax.text(.04,.94,'Converge + improve',transform=ax.transAxes,fontsize=7,color=T,va='top');ax.text(.04,.04,'Converge + worsen',transform=ax.transAxes,fontsize=7,color=A)
-f.text(.075,.263,'100 simulated consultations per arm · diagonal = no change',fontsize=8,color=M)
+f.text(.075,.263,'Fine line = one consultation · bold line = mean · 100 simulated pairs per arm',fontsize=8,color=M)
 f.text(.695,.263,'Same feedback cases as b · pp = percentage points',fontsize=8,color=M)
 f.text(.075,.210,'Figure 2 | Distinguishing opinion change, convergence and factual improvement.',fontsize=11,weight='bold')
 caption=('a, Three constructed examples show round-two and round-three rating distributions for 20 hypothetical participants per example. Lines join discrete proportions and are not continuous belief densities. These examples illustrate possible patterns; they were not selected from the consultations in b–c. '
-'b, Each point represents one simulated consultation, compared before and after feedback or repeat rating without feedback. Points below the diagonal indicate reduced disagreement. Scores are reused from the existing illustrative deliberation dataset (100 cases per arm); they were constructed directly, not calculated from recorded ballots. '
-'c, The same simulated feedback cases show changes in disagreement and factual accuracy. Convergence can accompany improvement or worsening; accuracy is meaningful only for questions with assessable answers. Contours in b–c enclose 50% and 90% of each estimated density and are descriptive, not confidence intervals. '
+'b, Each fine line connects the same simulated consultation in rounds two and three; descending lines indicate reduced disagreement. Bold lines and labelled endpoints show arithmetic means, not uncertainty intervals. Feedback and no-feedback panels share identical scales. These are consultation-level trajectories, not individual participant ratings. Scores are reused from the existing illustrative deliberation dataset (100 cases per arm); they were constructed directly, not calculated from recorded ballots. '
+'c, The same simulated feedback cases show changes in disagreement and factual accuracy. Convergence can accompany improvement or worsening; accuracy is meaningful only for questions with assessable answers. Contours in c enclose 50% and 90% of each estimated density and are descriptive, not confidence intervals. '
 'For a real experiment, randomise consultations to feedback or no feedback, retain identical claims and scales, prespecify the disagreement measure, and compare matched participants while reporting attrition. These simulations demonstrate the figure design and do not establish a causal feedback effect.')
 f.text(.075,.184,textwrap.fill(caption,155),fontsize=8.3,color='#514b58',va='top',linespacing=1.55)
 with (O/'deliberation-rating-examples.csv').open('w') as fp:
