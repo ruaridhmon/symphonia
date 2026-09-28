@@ -4,6 +4,6 @@
   "pairs": 320,
   "before_source": "extraction-preview/illustrative-data.json",
   "after_rule": "40% unchanged; 40% constructed loss in both metrics; 20% higher faithfulness with small coverage loss. Effects deliberately chosen, not estimated.",
-  "density": "Separate before and after densities; same bandwidth, colour scale and marginal scale; contours enclose 50% and 90% at each stage",
+  "density": "Separate before and after densities; same bandwidth, density normalisation and marginal scale; purple before, orange after; contours enclose 50% and 90% at each stage",
   "reference": "Both endpoints use the same original source reference; input extraction is held fixed within each constructed pair."
 }
