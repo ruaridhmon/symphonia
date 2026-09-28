@@ -15,6 +15,20 @@ for x,y in xy:
  for xr in [x,-x,2-x]:
   for yr in [y,-y,2-y]:z+=np.exp(-((xx-xr)**2+(yy-yr)**2)/(2*h*h))
 z/=z.sum();rank=np.sort(z.ravel())[::-1];mass=rank.cumsum();levels=[rank[np.searchsorted(mass,q)] for q in [.9,.5]]
+# Explicitly invented grouping transitions. These are not measured or fitted effects.
+rng=np.random.default_rng(928501)
+after=xy.copy();mode=np.arange(len(xy))%5
+for i in range(len(xy)):
+ if mode[i] in [1,2]:
+  after[i]=np.maximum(.025,xy[i]-[rng.uniform(.055,.16),rng.uniform(.035,.14)])
+ elif mode[i]==3:
+  after[i]=[max(.025,xy[i,0]-rng.uniform(.01,.05)),min(.99,xy[i,1]+rng.uniform(.03,.12))]
+ # Modes 0 and 4 demonstrate equivalent merging with unchanged fidelity.
+with (OUT/'grouping-design-pairs.csv').open('w') as fp:
+ writer=csv.writer(fp);writer.writerow(['id','status','before_coverage','before_faithfulness','after_coverage','after_faithfulness','constructed_transition'])
+ for i,(before,post) in enumerate(zip(xy,after)):
+  writer.writerow([points[i]['id'],'SIMULATED DESIGN ONLY',*before,*post,'unchanged' if mode[i] in [0,4] else 'loss' if mode[i] in [1,2] else 'unsupported_content_removed'])
+(OUT/'grouping-design.json').write_text(json.dumps({'status':'SIMULATED DESIGN ONLY; no grouping outputs evaluated','seed':928501,'pairs':320,'before_source':'extraction-preview/illustrative-data.json','after_rule':'40% unchanged; 40% constructed loss in both metrics; 20% higher faithfulness with small coverage loss. Effects deliberately chosen, not estimated.','density':'Original before-grouping coordinates only','reference':'Both endpoints use the same original source reference; input extraction is held fixed within each constructed pair.'},indent=2)+'\n')
 P='#665394';A='#bd784d';G='#ddd7e5';M='#81778c';INK='#302a39'
 plt.rcParams.update({'font.family':'DejaVu Sans','font.size':10,'svg.fonttype':'none','pdf.fonttype':42,'axes.spines.top':False,'axes.spines.right':False,'axes.edgecolor':'#b8b2bd','text.color':INK,'xtick.color':M,'ytick.color':M})
 f=plt.figure(figsize=(14,10),facecolor='white')
@@ -24,17 +38,29 @@ f.text(.36,.929,'Extracted claims',fontsize=10,color=M)
 f.text(.69,.929,'Grouped claims for round 2',fontsize=10,color=M)
 for start,end in [(.22,.34),(.495,.67)]:
  f.add_artist(FancyArrowPatch((start,.934),(end,.934),transform=f.transFigure,arrowstyle='->',mutation_scale=9,lw=.8,color='#b7a8cb'))
-f.text(.075,.891,'a',fontsize=13,weight='bold');f.text(.096,.893,'Responses → final claim set',fontsize=11);f.text(.505,.893,'ILLUSTRATIVE',fontsize=8,color=A,ha='right')
+f.text(.075,.891,'a',fontsize=13,weight='bold');f.text(.096,.893,'Before → after grouping',fontsize=11);f.text(.505,.893,'ILLUSTRATIVE',fontsize=8,color=A,ha='right')
 ax=f.add_axes([.075,.205,.43,.602]);top=f.add_axes([.075,.850,.43,.03]);right=f.add_axes([.522,.205,.035,.602])
 cmap=LinearSegmentedColormap.from_list('ink',['#ffffff','#f5f1fa','#e7ddf1','#c3b0dc','#9b81bd'])
 ax.contourf(xx,yy,z,levels=np.linspace(0,z.max(),24),cmap=cmap,zorder=1)
-ax.scatter(xy[:,0],xy[:,1],s=10,c=P,alpha=.23,linewidths=0,zorder=2)
+for before,post in zip(xy,after):ax.plot([before[0],post[0]],[before[1],post[1]],color=A,alpha=.16,lw=.6,zorder=2)
+ax.scatter(xy[:,0],xy[:,1],s=12,facecolors='white',edgecolors=P,alpha=.35,linewidths=.5,zorder=3)
+ax.scatter(after[:,0],after[:,1],s=11,c=A,alpha=.37,linewidths=0,zorder=3)
+# Highlight three links to make direction readable without giving each pair an arrowhead.
+for target in [(0.84,0.84),(0.52,0.85),(0.84,0.45)]:
+ candidates=np.where(mode==1)[0];i=candidates[np.argmin(np.sum((xy[candidates]-target)**2,axis=1))]
+ ax.annotate('',xy=after[i],xytext=xy[i],arrowprops={'arrowstyle':'->','color':A,'lw':1.5,'mutation_scale':12},zorder=6)
+ ax.scatter(*xy[i],s=35,facecolors='white',edgecolors=P,lw=1,zorder=7)
+ ax.scatter(*after[i],s=28,c=A,edgecolors='white',lw=.5,zorder=7)
+ax.scatter([],[],s=30,facecolors='white',edgecolors=P,label='Before grouping')
+ax.scatter([],[],s=28,c=A,label='After grouping')
+ax.legend(loc='lower left',bbox_to_anchor=(.015,.12),frameon=False,fontsize=9,handletextpad=.5,labelspacing=.8)
+ax.text(.035,.06,'Linked endpoints = same consultation\nArrows show illustrative grouping changes',fontsize=8,color=M,linespacing=1.5)
 cs=ax.contour(xx,yy,z,levels=levels,colors=[P,P],linewidths=[.9,1.5],alpha=.85,zorder=3)
 ax.clabel(cs,fmt={levels[0]:'90% density',levels[1]:'50% density'},fontsize=9,inline=True)
 ax.scatter([1],[1],s=95,marker='*',c='#b67637',zorder=5,clip_on=False)
 ax.annotate('Complete & faithful',xy=(1,1),xytext=(.63,1.045),fontsize=10,color='#725632',arrowprops=dict(arrowstyle='-',color='#b67637'),annotation_clip=False)
-ax.text(.035,.955,'Faithful, but incomplete',fontsize=10,color='#746989',va='top');ax.text(.97,.07,'More unsupported or\naltered extractions',fontsize=10,color='#746989',ha='right')
-ax.set(xlim=(0,1),ylim=(0,1),xlabel='Coverage of original claims',ylabel='Faithfulness of final claims');ax.set_aspect('equal');ax.xaxis.set_major_formatter(PercentFormatter(1));ax.yaxis.set_major_formatter(PercentFormatter(1));ax.set_xticks(np.linspace(0,1,6));ax.set_yticks(np.linspace(0,1,6))
+ax.text(.035,.955,'Faithful, but incomplete',fontsize=10,color='#746989',va='top');ax.text(.97,.30,'Loss of coverage\nand faithfulness',fontsize=9,color=A,ha='right')
+ax.set(xlim=(0,1),ylim=(0,1),xlabel='Coverage of original claims',ylabel='Faithfulness of claims at each stage');ax.set_aspect('equal');ax.xaxis.set_major_formatter(PercentFormatter(1));ax.yaxis.set_major_formatter(PercentFormatter(1));ax.set_xticks(np.linspace(0,1,6));ax.set_yticks(np.linspace(0,1,6))
 top.fill_between(grid,z.sum(axis=0),color='#d8d0e7',alpha=.65);top.plot(grid,z.sum(axis=0),c=P,lw=1.2);right.fill_betweenx(grid,0,z.sum(axis=1),color='#d8d0e7',alpha=.65);right.plot(z.sum(axis=1),grid,c=P,lw=1.2)
 top.set_xlim(0,1);right.set_ylim(0,1)
 for a in [top,right]:a.axis('off')
@@ -57,9 +83,9 @@ for i,cat in enumerate(['Majority findings','Minority objections','Uncertainty',
  c.fill_between(g,y,y+den*7,color=P,alpha=.13,lw=0);c.plot(g,y+den*7,color=P,lw=1);c.vlines(v,y-.05,y-.015,color=P,alpha=.18,lw=.6)
  lo,med,hi=np.quantile(v,[.25,.5,.75]);c.plot([lo,hi],[y-.13]*2,color=P,lw=2);c.scatter(med,y-.13,s=18,color=P,edgecolor='white',lw=.5,zorder=4);c.text(0,y+.47,cat,fontsize=8)
 c.set_xticks([0,25,50,75,100]);c.set_xlabel('Original information retained (%)',fontsize=9,labelpad=7);c.spines['left'].set_visible(False);c.tick_params(length=0,labelsize=8)
-f.text(.075,.117,'a  320 simulated consultations; contours show density, not uncertainty.   b  Six panels and 55 focal-claim occurrences per scenario.',fontsize=9,color=M)
-f.text(.075,.089,'c  120 separate simulated cases per type; dot and line show median and middle 50%. Panels do not share a measured cohort.',fontsize=9,color=M)
-f.text(.075,.052,'Grouping-only comparison: hold extracted claims fixed and score their grouped version. Separate stage outputs are not available in this pilot.',fontsize=9,color=P)
-f.text(.075,.025,'The eight-claim cap accounts for all 28 pilot omissions. No grouping-specific score is inferred; illustrative panels remain design examples.',fontsize=9,color=M)
+f.text(.075,.117,'a  320 explicitly simulated before–after pairs; contours and marginal curves describe BEFORE grouping only. No grouping experiment was run.',fontsize=9,color=M)
+f.text(.075,.089,'b  Saved self-reviewed pilot: six panels per scenario.   c  Separate simulated information types; dot and line = median and middle 50%.',fontsize=9,color=M)
+f.text(.075,.052,'The paired design holds each extraction fixed and evaluates both endpoints against the same original source. Transitions are invented, not estimated.',fontsize=9,color=P)
+f.text(.075,.025,'Unchanged pairs illustrate faithful merging; other pairs illustrate possible losses or removal of unsupported content. Pilot omissions reflect its eight-claim cap.',fontsize=9,color=M)
 for ext in ['svg','pdf','png']:f.savefig(OUT/f'extraction-overview.{ext}',dpi=600,facecolor='white')
 p=OUT/'extraction-overview.svg';p.write_text('\n'.join(x.rstrip() for x in p.read_text().replace("'DejaVu Sans'","'Arial', sans-serif").splitlines())+'\n')

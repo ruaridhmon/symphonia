@@ -1,0 +1,9 @@
+{
+  "status": "SIMULATED DESIGN ONLY; no grouping outputs evaluated",
+  "seed": 928501,
+  "pairs": 320,
+  "before_source": "extraction-preview/illustrative-data.json",
+  "after_rule": "40% unchanged; 40% constructed loss in both metrics; 20% higher faithfulness with small coverage loss. Effects deliberately chosen, not estimated.",
+  "density": "Original before-grouping coordinates only",
+  "reference": "Both endpoints use the same original source reference; input extraction is held fixed within each constructed pair."
+}
