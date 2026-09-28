@@ -1,0 +1,9 @@
+{
+  "status": "ILLUSTRATIVE ONLY",
+  "source": "02-selective-loss.csv",
+  "filter": "design == retention",
+  "cases_per_type": 120,
+  "map_data_are_separate": true,
+  "kde_bandwidth_percentage_points": 4.5,
+  "summary": "median and interquartile range; not confidence intervals"
+}
