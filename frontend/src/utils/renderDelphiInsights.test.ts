@@ -57,3 +57,16 @@ it('summarises changes only for comparable rated claims',()=>{
  renderDelphiInsights(root,round,[round],responses(['Agree']));
  expect(root.querySelector('.di-change-overview')).toBeNull();
 });
+
+it('reveals confidence distribution by stance and exposes partial response counts',()=>{
+ const root=document.createElement('section');document.body.append(root);
+ const current={...round,questions:[...questions,{questionId:'confidence',sectionTitle:'Exact claim',label:'Confidence in your rating',inputType:'single_select',options:['Very confident']}]};
+ const data=responses(['Agree','Agree','Disagree']);data[0].responses[0].answers.q2={position:'Very confident'};
+ renderDelphiInsights(root,current,[current],data);
+ const details=root.querySelector('details.di-confidence') as HTMLDetailsElement;
+ expect(details.querySelector('summary')!.textContent).toBe('High confidence (1/2)');
+ expect(details.textContent).toContain('1 of 2 recorded');expect(details.textContent).toContain('Very confident · 1');
+ details.querySelector('summary')!.click();expect(details.open).toBe(true);
+ renderDelphiInsights(root,current,[current],data);expect(root.querySelector('details.di-confidence')!.hasAttribute('open')).toBe(true);
+ expect(root.querySelector('.di-score')!.textContent).toBe('67%agree');
+});

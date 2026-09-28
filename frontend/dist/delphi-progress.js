@@ -26,6 +26,7 @@ function coerceAnswerPosition(value) {
 
 // src/utils/delphiProgress.ts
 var stanceLabels = ["Agree", "Disagree", "Neutral", "Unable to judge", "Unrecognised", "Not answered"];
+var confidenceLabels = ["Not at all confident", "Slightly confident", "Moderately confident", "Very confident", "Extremely confident"];
 function stance(value) {
   const v = value.trim().toLowerCase();
   if (["strongly agree", "agree"].includes(v)) return 0;
@@ -69,6 +70,8 @@ function ratingProgress(round, rounds, responses) {
       return [{ round: r.round_number, votes: v, n, percent: n ? 100 * v[0] / n : null }];
     });
     const commentIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify|what led|explain your position/i.test(String(p.label)));
+    const confidenceIndex = round.questions.findIndex((p) => typeof p === "object" && p !== null && !!q.sectionTitle && p.sectionTitle === q.sectionTitle && /^Confidence in your rating$/i.test(String(p.label)));
+    const confidenceQuestion = round.questions[confidenceIndex];
     const stableEmails = (rs) => {
       const map = /* @__PURE__ */ new Map();
       const duplicate = /* @__PURE__ */ new Set();
@@ -93,9 +96,11 @@ function ratingProgress(round, rounds, responses) {
       }
       const commentQuestion = round.questions[commentIndex];
       const comment = commentIndex >= 0 ? coerceAnswerPosition(r.answers[`q${commentIndex + 1}`] ?? r.answers[String(typeof commentQuestion === "object" ? commentQuestion.questionId : "")]) : "";
-      return { participant: `Response ${i + 1}`, position, group: stance(position), comment, before: comparable ? before : null, changed: comparable && stance(before) !== stance(position) };
+      const confidence = confidenceIndex >= 0 ? coerceAnswerPosition(r.answers[`q${confidenceIndex + 1}`] ?? r.answers[String(typeof confidenceQuestion === "object" ? confidenceQuestion.questionId : "")]) : "";
+      return { confidence, participant: `Response ${i + 1}`, position, group: stance(position), comment, before: comparable ? before : null, changed: comparable && stance(before) !== stance(position) };
     });
     return [{
+      hasConfidence: confidenceIndex >= 0,
       history,
       evidence,
       matched,
@@ -268,10 +273,30 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     const legend = node("div", "", "di-legend");
     row.votes.forEach((n, i) => {
       if (n || i < 2) {
-        const item = node("span", `${n} ${stanceLabels[i].toLowerCase()}`);
+        const item = node("span", "", "di-stance-group");
+        const count = node("span", `${n} ${stanceLabels[i].toLowerCase()}`);
         const dot = node("i");
         dot.style.background = colors[i];
-        item.prepend(dot);
+        count.prepend(dot);
+        item.append(count);
+        if (n && i < 4 && row.hasConfidence) {
+          const group = row.evidence.filter((e) => e.group === i);
+          const values = group.map((e) => confidenceLabels.indexOf(e.confidence)).filter((v) => v >= 0);
+          const high = values.filter((v) => v >= 3).length, low = values.filter((v) => v <= 1).length, moderate = values.filter((v) => v === 2).length;
+          const label = !values.length ? "Confidence not recorded" : high > values.length / 2 ? "High confidence" : low > values.length / 2 ? "Low confidence" : moderate > values.length / 2 ? "Moderate confidence" : "Mixed confidence";
+          const disclosure = node("details", "", "di-confidence");
+          disclosure.dataset.key = `${row.key}:confidence:${i}`;
+          disclosure.open = priorOpen.has(disclosure.dataset.key);
+          const trigger = node("summary", label + (values.length && values.length < n ? ` (${values.length}/${n})` : ""));
+          trigger.setAttribute("aria-label", `${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);
+          disclosure.append(trigger);
+          const body = node("div", "", "di-confidence-detail");
+          body.append(node("strong", `${stanceLabels[i]} \xB7 confidence`), node("p", `${values.length} of ${n} recorded a confidence rating.`));
+          confidenceLabels.forEach((label2, j) => body.append(node("p", `${label2} \xB7 ${values.filter((v) => v === j).length}`)));
+          body.append(node("p", "High = very or extremely; moderate = moderately; low = slightly or not at all. A label requires more than half of recorded confidence ratings; otherwise mixed. Confidence is self-reported certainty, not correctness.", "di-confidence-note"));
+          disclosure.append(body);
+          item.append(disclosure);
+        }
         legend.append(item);
       }
     });

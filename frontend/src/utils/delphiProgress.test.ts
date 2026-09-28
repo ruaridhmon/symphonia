@@ -52,3 +52,9 @@ it('matches returning identities, preserves reasons and excludes ambiguous dupli
   current.responses.push({...current.responses[0],id:22});
   expect(ratingProgress(rounds[1],rounds,[prior,current])[0].matched).toBe(1);
 });
+
+it('pairs confidence with the same respondent and claim without changing agreement counts',()=>{
+ const round=makeRound(2);round.questions=[question,{questionId:'claim_1_confidence',sectionTitle:question.sectionTitle,label:'Confidence in your rating',inputType:'single_select',options:['Very confident','Slightly confident']}];
+ const data=votes(2,['Agree','Disagree','Agree']);data.responses[0].answers.q2={position:'Very confident'};data.responses[1].answers.claim_1_confidence={position:'Slightly confident'};
+ const [row]=ratingProgress(round,[round],[data]);expect(row.votes).toEqual([2,1,0,0,0,0]);expect(row.evidence.map(e=>[e.group,e.confidence])).toEqual([[0,'Very confident'],[1,'Slightly confident'],[0,'']]);
+});

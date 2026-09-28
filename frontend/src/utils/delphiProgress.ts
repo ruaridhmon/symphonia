@@ -3,6 +3,7 @@ import type { Round, RoundWithResponses } from '../types/summary';
 
 type Question = string | Record<string, unknown>;
 export const stanceLabels = ['Agree', 'Disagree', 'Neutral', 'Unable to judge', 'Unrecognised', 'Not answered'] as const;
+export const confidenceLabels = ['Not at all confident','Slightly confident','Moderately confident','Very confident','Extremely confident'];
 export type VoteCounts = [number, number, number, number, number, number];
 
 export function stance(value: string): number {
@@ -54,6 +55,8 @@ export function ratingProgress(round: Round, rounds: Round[], responses: RoundWi
       return [{round:r.round_number, votes:v, n, percent:n ? 100*v[0]/n : null}];
     });
     const commentIndex = round.questions.findIndex(p => typeof p === 'object' && p !== null && p.sectionTitle === q.sectionTitle && !!q.sectionTitle && /comment|clarification|justify|what led|explain your position/i.test(String(p.label)));
+    const confidenceIndex = round.questions.findIndex(p => typeof p === 'object' && p !== null && !!q.sectionTitle && p.sectionTitle === q.sectionTitle && /^Confidence in your rating$/i.test(String(p.label)));
+    const confidenceQuestion = round.questions[confidenceIndex];
     const stableEmails = (rs: RoundWithResponses | undefined) => {
       const map = new Map<string, typeof rs extends undefined ? never : import('../types/summary').StructuredResponse>();
       const duplicate = new Set<string>();
@@ -71,9 +74,10 @@ export function ratingProgress(round: Round, rounds: Round[], responses: RoundWi
       if(comparable) { matched++; if(stance(before)!==stance(position)) changed++; }
       const commentQuestion = round.questions[commentIndex];
       const comment = commentIndex >= 0 ? coerceAnswerPosition(r.answers[`q${commentIndex+1}`] ?? r.answers[String(typeof commentQuestion === 'object' ? commentQuestion.questionId : '')]) : '';
-      return {participant:`Response ${i+1}`,position,group:stance(position),comment,before:comparable ? before : null,changed:comparable && stance(before)!==stance(position)};
+      const confidence = confidenceIndex >= 0 ? coerceAnswerPosition(r.answers[`q${confidenceIndex+1}`] ?? r.answers[String(typeof confidenceQuestion === 'object' ? confidenceQuestion.questionId : '')]) : '';
+      return {confidence,participant:`Response ${i+1}`,position,group:stance(position),comment,before:comparable ? before : null,changed:comparable && stance(before)!==stance(position)};
     });
-    return [{ history, evidence, matched, changed, key: String(q.questionId || index), label: String(q.sectionTitle || q.label), votes, answered, percent,
+    return [{ hasConfidence:confidenceIndex>=0, history, evidence, matched, changed, key: String(q.questionId || index), label: String(q.sectionTitle || q.label), votes, answered, percent,
       previousRound: previous?.round_number,
       delta: percent !== null && prior && priorAnswered ? percent - 100 * prior[0] / priorAnswered : null,
       previousAnswered: priorAnswered }];

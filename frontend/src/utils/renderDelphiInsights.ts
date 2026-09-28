@@ -1,6 +1,6 @@
 import { renderDelphiPlanner } from './renderDelphiPlanner';
 import type { Round, RoundWithResponses } from '../types/summary';
-import { ratingProgress, stanceLabels, synthesisProvenanceNote } from './delphiProgress';
+import { confidenceLabels, ratingProgress, stanceLabels, synthesisProvenanceNote } from './delphiProgress';
 const colors = ['#137c70','#b34d60','#94a3b8','#c28a2a','#8b5fbf','#e2e8f0'];
 const node = (tag:string,text='',cls='') => { const n=document.createElement(tag); n.textContent=text; n.className=cls; return n; };
 const button = (label:string,run:()=>void) => { const b=node('button',label) as HTMLButtonElement;b.type='button';b.onclick=run;return b; };
@@ -51,7 +51,23 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     const bar=node('div','','di-bar');bar.setAttribute('aria-hidden','true');
     // Denominator matches the displayed percentage; omissions are reported separately.
     row.votes.slice(0,5).forEach((n,i)=>{if(n&&row.answered){const part=node('span');part.style.width=`${n/row.answered*100}%`;part.style.background=colors[i];bar.append(part);}});rating.append(bar);
-    const legend=node('div','','di-legend');row.votes.forEach((n,i)=>{if(n||i<2){const item=node('span',`${n} ${stanceLabels[i].toLowerCase()}`);const dot=node('i');dot.style.background=colors[i];item.prepend(dot);legend.append(item);}});rating.append(legend);
+    const legend=node('div','','di-legend');
+    row.votes.forEach((n,i)=>{if(n||i<2){
+      const item=node('span','','di-stance-group');
+      const count=node('span',`${n} ${stanceLabels[i].toLowerCase()}`);const dot=node('i');dot.style.background=colors[i];count.prepend(dot);item.append(count);
+      if(n&&i<4&&row.hasConfidence){
+        const group=row.evidence.filter(e=>e.group===i);
+        const values=group.map(e=>confidenceLabels.indexOf(e.confidence)).filter(v=>v>=0);
+        const high=values.filter(v=>v>=3).length,low=values.filter(v=>v<=1).length,moderate=values.filter(v=>v===2).length;
+        const label=!values.length?'Confidence not recorded':high>values.length/2?'High confidence':low>values.length/2?'Low confidence':moderate>values.length/2?'Moderate confidence':'Mixed confidence';
+        const disclosure=node('details','','di-confidence') as HTMLDetailsElement;disclosure.dataset.key=`${row.key}:confidence:${i}`;disclosure.open=priorOpen.has(disclosure.dataset.key);
+        const trigger=node('summary',label+(values.length&&values.length<n?` (${values.length}/${n})`:''));trigger.setAttribute('aria-label',`${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);disclosure.append(trigger);
+        const body=node('div','','di-confidence-detail');body.append(node('strong',`${stanceLabels[i]} · confidence`),node('p',`${values.length} of ${n} recorded a confidence rating.`));
+        confidenceLabels.forEach((label,j)=>body.append(node('p',`${label} · ${values.filter(v=>v===j).length}`)));
+        body.append(node('p','High = very or extremely; moderate = moderately; low = slightly or not at all. A label requires more than half of recorded confidence ratings; otherwise mixed. Confidence is self-reported certainty, not correctness.','di-confidence-note'));disclosure.append(body);item.append(disclosure);
+      }
+      legend.append(item);
+    }});rating.append(legend);
     if(row.history.filter(h=>h.n>0).length>1) {
       const previous=row.history.filter(h=>h.n>0).at(-2)!;
       const trend=node('div','','di-trend');
