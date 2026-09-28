@@ -64,8 +64,8 @@ it('reveals confidence distribution by stance and exposes partial response count
  const data=responses(['Agree','Agree','Disagree']);data[0].responses[0].answers.q2={position:'Very confident'};
  renderDelphiInsights(root,current,[current],data);
  const details=root.querySelector('details.di-confidence') as HTMLDetailsElement;
- expect(details.querySelector('summary')!.textContent).toBe('High confidence (1/2)');
- expect(details.textContent).toContain('1 of 2 recorded');expect(details.textContent).toContain('Very confident · 1');
+ expect(details.querySelector('summary')!.textContent).toBe('high confidence (1/2)');
+ expect(details.textContent).toContain('1 of 2 answered');expect(details.querySelector('[aria-label="Very confident: 1"]')).not.toBeNull();
  details.querySelector('summary')!.click();expect(details.open).toBe(true);
  renderDelphiInsights(root,current,[current],data);expect(root.querySelector('details.di-confidence')!.hasAttribute('open')).toBe(true);
  expect(root.querySelector('.di-score')!.textContent).toBe('67%agree');

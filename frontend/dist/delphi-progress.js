@@ -283,23 +283,51 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           const group = row.evidence.filter((e) => e.group === i);
           const values = group.map((e) => confidenceLabels.indexOf(e.confidence)).filter((v) => v >= 0);
           const high = values.filter((v) => v >= 3).length, low = values.filter((v) => v <= 1).length, moderate = values.filter((v) => v === 2).length;
-          const label = !values.length ? "Confidence not recorded" : high > values.length / 2 ? "High confidence" : low > values.length / 2 ? "Low confidence" : moderate > values.length / 2 ? "Moderate confidence" : "Mixed confidence";
+          const label = !values.length ? "confidence not recorded" : high > values.length / 2 ? "high confidence" : low > values.length / 2 ? "low confidence" : moderate > values.length / 2 ? "moderate confidence" : "mixed confidence";
           const disclosure = node("details", "", "di-confidence");
           disclosure.dataset.key = `${row.key}:confidence:${i}`;
           disclosure.open = priorOpen.has(disclosure.dataset.key);
           const trigger = node("summary", label + (values.length && values.length < n ? ` (${values.length}/${n})` : ""));
           trigger.setAttribute("aria-label", `${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);
           disclosure.append(trigger);
+          trigger.onclick = () => {
+            root.querySelectorAll(".di-confidence[open]").forEach((d) => {
+              if (d !== disclosure) d.open = false;
+            });
+          };
+          disclosure.onkeydown = (e) => {
+            if (e.key === "Escape") {
+              disclosure.open = false;
+              trigger.focus();
+            }
+          };
           const body = node("div", "", "di-confidence-detail");
-          const close = button("Close", () => {
+          const header = node("div", "", "di-confidence-header");
+          const close = button("\xD7", () => {
             disclosure.open = false;
             trigger.focus();
           });
-          close.style.cssText = "float:right;border:0;background:transparent;font:inherit;cursor:pointer;padding:0 0 6px 10px";
-          body.append(close);
-          body.append(node("strong", `${stanceLabels[i]} \xB7 confidence`), node("p", `${values.length} of ${n} recorded a confidence rating.`));
-          confidenceLabels.forEach((label2, j) => body.append(node("p", `${label2} \xB7 ${values.filter((v) => v === j).length}`)));
-          body.append(node("p", "High = very or extremely; moderate = moderately; low = slightly or not at all. A label requires more than half of recorded confidence ratings; otherwise mixed. Confidence is self-reported certainty, not correctness.", "di-confidence-note"));
+          close.className = "di-confidence-close";
+          close.setAttribute("aria-label", "Close confidence");
+          header.append(node("strong", `Confidence \xB7 ${stanceLabels[i].toLowerCase()}`), close);
+          body.append(header, node("p", `${values.length} of ${n} answered`, "di-confidence-subtitle"));
+          const distribution = node("div", "", "di-confidence-distribution");
+          confidenceLabels.forEach((label2, j) => {
+            const total = values.filter((v) => v === j).length;
+            const line = node("div", "", "di-confidence-level");
+            line.setAttribute("aria-label", `${label2}: ${total}`);
+            const track = node("span", "", "di-confidence-track");
+            track.setAttribute("aria-hidden", "true");
+            const fill = node("span");
+            fill.style.width = `${values.length ? 100 * total / values.length : 0}%`;
+            track.append(fill);
+            line.append(node("span", label2.replace(" confident", "")), track, node("span", String(total), "di-confidence-count"));
+            distribution.append(line);
+          });
+          body.append(distribution);
+          const method = node("details", "", "di-confidence-method");
+          method.append(node("summary", "How this is summarised"), node("p", "High: very or extremely. Moderate: moderately. Low: slightly or not at all. The label describes more than half of recorded answers; otherwise mixed. Missing answers are excluded. This is self-reported certainty, not correctness."));
+          body.append(method);
           disclosure.append(body);
           item.append(disclosure);
         }
