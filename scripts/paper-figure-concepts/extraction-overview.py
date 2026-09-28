@@ -66,23 +66,32 @@ top.set_xlim(0,1);right.set_ylim(0,1)
 for a in [top,right]:a.axis('off')
 f.text(.625,.891,'b',fontsize=13,weight='bold');f.text(.646,.893,'How much meaning survives?',fontsize=11)
 f.text(.646,.866,'SAVED PILOT · UNBLINDED SELF-REVIEW',fontsize=8,color=P)
-b=f.add_axes([.646,.588,.305,.245]);b.set(xlim=(0,100),ylim=(-.5,3.65));b.set_yticks([])
+b=f.add_axes([.646,.608,.305,.225]);b.set(xlim=(0,100),ylim=(-.4,3.65));b.set_yticks([])
 ps=json.loads((BASE/'assistant-extraction/results.json').read_text())['panels'];names=['Inclusive education','Diagnostic screening','Youth justice','School attendance']
 for i,name in enumerate(names):
- cases=ps[i*6:i*6+6];den=sum(p['reference_count'] for p in cases);counts=[sum(p['faithful'] for p in cases),sum(p['partial'] for p in cases),sum(len(p['omitted_ids']) for p in cases)];y=3-i;left=0
- b.text(0,y+.25,name,fontsize=9)
- for n,col in zip(counts,[P,A,G]):b.plot([left,left+100*n/den],[y,y],color=col,lw=5,solid_capstyle='butt');left+=100*n/den
- b.text(100,y+.25,f'{100*counts[0]/den:.1f}% fully preserved',ha='right',fontsize=8,color=P)
-b.set_xticks([0,25,50,75,100]);b.set_xlabel('Share of original focal claims (%)',fontsize=9,labelpad=7);b.tick_params(length=0,labelsize=8);b.spines['left'].set_visible(False)
-for x,label,col in [(.646,'● Fully preserved',P),(.773,'● Partial',A),(.864,'● Omitted',M)]:f.text(x,.525,label,fontsize=8,color=col)
-f.text(.625,.468,'c',fontsize=13,weight='bold');f.text(.646,.470,'Which information is lost?',fontsize=11);f.text(.646,.445,'ILLUSTRATIVE · INFORMATION TYPES',fontsize=8,color=A)
-c=f.add_axes([.646,.205,.305,.205]);c.set(xlim=(0,100),ylim=(-.35,3.85));c.set_yticks([]);g=np.linspace(0,100,400)
+ cases=ps[i*6:i*6+6];den=sum(p['reference_count'] for p in cases);counts=[sum(p['faithful'] for p in cases),sum(p['partial'] for p in cases),sum(len(p['omitted_ids']) for p in cases)];y=3-i
+ full,partial=100*np.array(counts[:2])/den
+ b.text(0,y+.27,name,fontsize=9.3)
+ b.text(100,y+.27,f'{full:.1f}%',ha='right',fontsize=10,color=P,weight='medium')
+ b.plot([0,100],[y,y],color='#eeeaf2',lw=3,solid_capstyle='round',zorder=1)
+ b.plot([0,full],[y,y],color=P,lw=2.5,solid_capstyle='round',zorder=2)
+ b.plot([full,full+partial],[y,y],color=A,lw=2.5,solid_capstyle='round',zorder=3)
+ b.scatter(full+partial,y,s=24,facecolors='white',edgecolors=A,lw=1.1,zorder=4)
+ b.scatter(full,y,s=35,facecolors=P,edgecolors='white',lw=.8,zorder=5)
+ b.scatter(100,y,s=9,color='#cbc3d4',zorder=3)
+b.set_xticks([0,25,50,75,100]);b.set_xlabel('Original claims retained (%)',fontsize=9,labelpad=7);b.tick_params(length=0,labelsize=8);b.spines['left'].set_visible(False);b.spines['bottom'].set_color('#ded8e5')
+for x,label,col in [(.646,'● Full',P),(.723,'○ + partial',A),(.825,'— Omitted remainder',M)]:f.text(x,.55,label,fontsize=8,color=col)
+f.text(.625,.490,'c',fontsize=13,weight='bold');f.text(.646,.492,'Which information is lost?',fontsize=11);f.text(.646,.467,'ILLUSTRATIVE · INFORMATION TYPES',fontsize=8,color=A)
+c=f.add_axes([.646,.205,.305,.235]);c.set(xlim=(0,100),ylim=(-.48,3.8));c.set_yticks([]);g=np.linspace(0,100,400)
 rows=[r for r in csv.DictReader((OUT/'02-selective-loss.csv').open()) if r['design']=='retention']
-for i,cat in enumerate(['Majority findings','Minority objections','Uncertainty','Conditions / exceptions']):
+# Restore the selective-loss palette and individual observations; jitter changes y only.
+point_rng=np.random.default_rng(928502)
+for i,(cat,col) in enumerate(zip(['Majority findings','Minority objections','Uncertainty','Conditions / exceptions'],[P,'#398b88',P,A])):
  y=3-i;v=np.array([float(r['retention_pct']) for r in rows if r['category']==cat]);den=sum(np.exp(-.5*((g[:,None]-u[None,:])/4.5)**2).mean(axis=1) for u in [v,-v,200-v])/(4.5*np.sqrt(2*np.pi))
- c.fill_between(g,y,y+den*7,color=P,alpha=.13,lw=0);c.plot(g,y+den*7,color=P,lw=1);c.vlines(v,y-.05,y-.015,color=P,alpha=.18,lw=.6)
- lo,med,hi=np.quantile(v,[.25,.5,.75]);c.plot([lo,hi],[y-.13]*2,color=P,lw=2);c.scatter(med,y-.13,s=18,color=P,edgecolor='white',lw=.5,zorder=4);c.text(0,y+.47,cat,fontsize=8)
-c.set_xticks([0,25,50,75,100]);c.set_xlabel('Original information retained (%)',fontsize=9,labelpad=7);c.spines['left'].set_visible(False);c.tick_params(length=0,labelsize=8)
+ c.fill_between(g,y+.025,y+.025+den*9,color=col,alpha=.15,lw=0);c.plot(g,y+.025+den*9,color=col,lw=1.1)
+ c.scatter(v,y-.12-point_rng.uniform(0,.18,len(v)),s=7,color=col,alpha=.27,linewidths=0,zorder=2)
+ lo,med,hi=np.quantile(v,[.25,.5,.75]);c.plot([lo,hi],[y-.19]*2,color=col,lw=2.5,solid_capstyle='round',zorder=3);c.scatter(med,y-.19,s=28,color=col,edgecolor='white',lw=.8,zorder=4);c.text(0,y+.54,cat,fontsize=8.7,color=col)
+c.set_xticks([0,25,50,75,100]);c.set_xlabel('Original information retained (%)',fontsize=9,labelpad=7);c.spines['left'].set_visible(False);c.spines['bottom'].set_color('#ded8e5');c.tick_params(length=0,labelsize=8)
 f.text(.075,.117,'a  320 explicitly simulated before–after pairs; contours and marginal curves describe BEFORE grouping only. No grouping experiment was run.',fontsize=9,color=M)
 f.text(.075,.089,'b  Saved self-reviewed pilot: six panels per scenario.   c  Separate simulated information types; dot and line = median and middle 50%.',fontsize=9,color=M)
 f.text(.075,.052,'The paired design holds each extraction fixed and evaluates both endpoints against the same original source. Transitions are invented, not estimated.',fontsize=9,color=P)
