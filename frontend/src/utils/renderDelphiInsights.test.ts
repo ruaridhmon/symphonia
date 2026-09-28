@@ -1,4 +1,4 @@
-import {afterEach, expect, it} from 'vitest';
+import {afterEach, expect, it, vi} from 'vitest';
 import {renderDelphiInsights} from './renderDelphiInsights';
 import {unifyClaims} from './unifiedClaims';
 import type {Round, RoundWithResponses} from '../types/summary';
@@ -66,7 +66,8 @@ it('reveals confidence distribution by stance and exposes partial response count
  const details=root.querySelector('details.di-confidence') as HTMLDetailsElement;
  expect(details.querySelector('summary')!.textContent).toBe('high confidence (1/2)');
  expect(details.textContent).toContain('1 of 2 answered');expect(details.querySelector('[aria-label="Very confident: 1"]')).not.toBeNull();
- details.querySelector('summary')!.click();expect(details.open).toBe(true);
- renderDelphiInsights(root,current,[current],data);expect(root.querySelector('details.di-confidence')!.hasAttribute('open')).toBe(true);
+ const dialog=details.querySelector('dialog')!;dialog.showModal=vi.fn(()=>dialog.setAttribute('open',''));dialog.close=vi.fn(()=>dialog.removeAttribute('open'));
+ details.querySelector('summary')!.click();expect(dialog.showModal).toHaveBeenCalled();expect(details.open).toBe(true);
+ (dialog.querySelector('button') as HTMLButtonElement).click();expect(dialog.close).toHaveBeenCalled();expect(details.open).toBe(false);
  expect(root.querySelector('.di-score')!.textContent).toBe('67%agree');
 });

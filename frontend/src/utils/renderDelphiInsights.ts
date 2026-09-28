@@ -60,13 +60,16 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
         const values=group.map(e=>confidenceLabels.indexOf(e.confidence)).filter(v=>v>=0);
         const high=values.filter(v=>v>=3).length,low=values.filter(v=>v<=1).length,moderate=values.filter(v=>v===2).length;
         const label=!values.length?'confidence not recorded':high>values.length/2?'high confidence':low>values.length/2?'low confidence':moderate>values.length/2?'moderate confidence':'mixed confidence';
-        const disclosure=node('details','','di-confidence') as HTMLDetailsElement;disclosure.dataset.key=`${row.key}:confidence:${i}`;disclosure.open=priorOpen.has(disclosure.dataset.key);
+        const disclosure=node('details','','di-confidence') as HTMLDetailsElement;disclosure.dataset.key=`${row.key}:confidence:${i}`;disclosure.open=false;
         const trigger=node('summary',label+(values.length&&values.length<n?` (${values.length}/${n})`:''));trigger.setAttribute('aria-label',`${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);disclosure.append(trigger);
-        trigger.onclick=()=>{root.querySelectorAll<HTMLDetailsElement>('.di-confidence[open]').forEach(d=>{if(d!==disclosure)d.open=false;});};
-        disclosure.onkeydown=e=>{if(e.key==='Escape'){disclosure.open=false;trigger.focus();}};
-        const body=node('div','','di-confidence-detail');
+        const body=document.createElement('dialog');body.className='di-confidence-detail';body.setAttribute('aria-label',`Confidence among people who ${stanceLabels[i].toLowerCase()}`);
+        const dismiss=()=>{body.close();disclosure.open=false;trigger.focus();};
+        trigger.onclick=e=>{e.preventDefault();root.querySelectorAll<HTMLDialogElement>('.di-confidence dialog[open]').forEach(d=>d.close());disclosure.open=true;body.showModal();};
+        body.onclose=()=>{disclosure.open=false;};
+        body.oncancel=e=>{e.preventDefault();dismiss();};
+        body.onclick=e=>{if(e.target===body){const r=body.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dismiss();}};
         const header=node('div','','di-confidence-header');
-        const close=button('×',()=>{disclosure.open=false;trigger.focus();});close.className='di-confidence-close';close.setAttribute('aria-label','Close confidence');
+        const close=button('×',dismiss);close.className='di-confidence-close';close.setAttribute('aria-label','Close confidence');
         header.append(node('strong',`Confidence · ${stanceLabels[i].toLowerCase()}`),close);body.append(header,node('p',`${values.length} of ${n} answered`,'di-confidence-subtitle'));
         const distribution=node('div','','di-confidence-distribution');
         confidenceLabels.forEach((label,j)=>{
