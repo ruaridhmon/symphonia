@@ -18,3 +18,8 @@ it('shows the open question instead of a generic section heading and hides empty
  const rows=responseSections([{label:'What should we do?',sectionTitle:'Section 1',inputType:'textarea'}],{q1:{position:'Keep it simple.',citations:[],expertNominations:[]}});
  expect(rows[0].title).toBe('What should we do?');expect(rows[0].blocks).toEqual([{label:'',text:'Keep it simple.'}]);
 });
+
+it('keeps separate confidence with its claim without replacing the agreement rating',()=>{
+ const rows=responseSections([q[0],{questionId:'claim_1_confidence',sectionTitle:q[0].sectionTitle,label:'Confidence in your rating',inputType:'single_select',options:['Very confident']},q[1]],{q1:{position:'Agree'},q2:{position:'Very confident'},q3:{position:'My reason'}});
+ expect(rows).toEqual([{title:'A precise claim',rating:'Agree',blocks:[{label:'Confidence',text:'Very confident'},{label:'Reasoning',text:'My reason'}]}]);
+});
