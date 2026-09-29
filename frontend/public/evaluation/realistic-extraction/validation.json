@@ -1,0 +1,882 @@
+{
+  "quote_flags": [
+    {
+      "panel": "coast-1-8",
+      "stage": "extract",
+      "atom": "A18",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-4",
+      "stage": "extract",
+      "atom": "A2",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-4",
+      "stage": "extract",
+      "atom": "A3",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-4",
+      "stage": "extract",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-4",
+      "stage": "extract",
+      "atom": "A5",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-4",
+      "stage": "extract",
+      "atom": "A6",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-4",
+      "stage": "extract",
+      "atom": "A8",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-4",
+      "stage": "extract",
+      "atom": "A12",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A2",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A3",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A5",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A6",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A8",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A10",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A11",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A12",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A13",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A14",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A15",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A16",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A17",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A18",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A19",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A21",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A22",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A23",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "extract",
+      "atom": "A24",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "group",
+      "atom": "A6",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "group",
+      "atom": "A9",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "group",
+      "atom": "A19",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "education-1-8",
+      "stage": "group",
+      "atom": "A21",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-4",
+      "stage": "extract",
+      "atom": "A7",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A1",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A2",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A3",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A5",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A7",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A8",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A9",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A10",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A12",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A13",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A14",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A16",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A17",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A18",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A19",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A20",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A22",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A23",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "extract",
+      "atom": "A24",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A1",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A2",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A3",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A5",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A6",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A7",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A8",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A9",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A10",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A11",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A12",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A13",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A14",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A15",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A16",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A17",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A18",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A19",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A20",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A21",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A22",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A23",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A24",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "health-1-8",
+      "stage": "group",
+      "atom": "A8",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "health-1-8",
+      "stage": "group",
+      "atom": "A13",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "health-1-8",
+      "stage": "group",
+      "atom": "A16",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "health-1-8",
+      "stage": "group",
+      "atom": "A23",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "health-1-8",
+      "stage": "group",
+      "atom": "A24",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-4",
+      "stage": "extract",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-4",
+      "stage": "group",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-4",
+      "stage": "group",
+      "atom": "A7",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "extract",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "extract",
+      "atom": "A7",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "extract",
+      "atom": "A14",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "extract",
+      "atom": "A21",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "extract",
+      "atom": "A22",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "extract",
+      "atom": "A23",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "extract",
+      "atom": "A24",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A6",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A7",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A8",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A9",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A10",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A11",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A12",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A13",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A14",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A15",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A16",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A17",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A18",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A19",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A20",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A21",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A22",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A23",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "phones-1-8",
+      "stage": "group",
+      "atom": "A24",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A1",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A2",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A3",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A5",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A6",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A7",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A8",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A9",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A10",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A11",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "extract",
+      "atom": "A12",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A1",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A2",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A3",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A4",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A5",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A6",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A7",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A8",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A9",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A10",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A12",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A13",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A14",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A15",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A16",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A17",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A19",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A20",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A21",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A22",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A23",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    },
+    {
+      "panel": "transport-1-8",
+      "stage": "extract",
+      "atom": "A24",
+      "issue": "Judge evidence is not a contiguous verbatim quote; inspect original output."
+    }
+  ],
+  "source_quotes": "All reference quotes checked as exact substrings of their source participant",
+  "semantic_validation": "Model-judged; not independently human validated"
+}

@@ -1,0 +1,25 @@
+id,topic,size,stage,coverage,faithfulness,position,qualification,quantity,minority,uncertainty
+coast-1-4,Coastal relocation,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+coast-1-4,Coastal relocation,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+coast-1-8,Coastal relocation,8,extract,0.9583333333333334,0.9629629629629629,1.0,0.75,,1.0,1.0
+coast-1-8,Coastal relocation,8,group,0.8333333333333334,1.0,0.8181818181818182,0.75,,0.8571428571428571,1.0
+education-1-4,AI in university assessment,4,extract,0.9166666666666666,1.0,1.0,,,0.6666666666666666,1.0
+education-1-4,AI in university assessment,4,group,1.0,1.0,1.0,,,1.0,1.0
+education-1-8,AI in university assessment,8,extract,1.0,1.0,1.0,,1.0,1.0,1.0
+education-1-8,AI in university assessment,8,group,1.0,1.0,1.0,,1.0,1.0,1.0
+energy-1-4,Home energy retrofit,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+energy-1-4,Home energy retrofit,4,group,0.9166666666666666,1.0,1.0,1.0,,1.0,0.6666666666666666
+energy-1-8,Home energy retrofit,8,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+energy-1-8,Home energy retrofit,8,group,1.0,1.0,1.0,1.0,,1.0,1.0
+health-1-4,AI referral triage,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+health-1-4,AI referral triage,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+health-1-8,AI referral triage,8,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+health-1-8,AI referral triage,8,group,1.0,1.0,1.0,1.0,,1.0,1.0
+phones-1-4,School smartphones,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+phones-1-4,School smartphones,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+phones-1-8,School smartphones,8,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+phones-1-8,School smartphones,8,group,1.0,1.0,1.0,1.0,,1.0,1.0
+transport-1-4,Urban transport,4,extract,0.9166666666666666,0.9583333333333334,0.8333333333333334,,,1.0,1.0
+transport-1-4,Urban transport,4,group,1.0,1.0,1.0,,,1.0,1.0
+transport-1-8,Urban transport,8,extract,1.0,1.0,1.0,,,1.0,1.0
+transport-1-8,Urban transport,8,group,1.0,1.0,1.0,,,1.0,1.0

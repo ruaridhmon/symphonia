@@ -1,0 +1,34 @@
+{
+  "panel_pairs": 12,
+  "topics": 6,
+  "sizes": [
+    4,
+    8
+  ],
+  "replicates": 1,
+  "source": "Model-authored naturalistic synthetic paragraphs; references generated with inputs and frozen before extraction",
+  "limitations": [
+    "Not human data; source references are model authored and may omit meaning",
+    "Nested sizes, six topic panels; similar meanings from different speakers may contribute separate reference units",
+    "Benchmark prompts, not deployed platform pipeline",
+    "Separate model judge; not human validated",
+    "Eight-claim grouping cap changes compression pressure with panel size"
+  ],
+  "budget": "Original run plus conservative new reservations below $9.50; $10 user cap",
+  "extractor": "openai/gpt-4.1-mini",
+  "judge": "openai/gpt-4.1",
+  "prices": {
+    "openai/gpt-4.1-mini": {
+      "prompt": "0.0000004",
+      "completion": "0.0000016",
+      "web_search": "0.01",
+      "input_cache_read": "0.0000001"
+    },
+    "openai/gpt-4.1": {
+      "prompt": "0.000002",
+      "completion": "0.000008",
+      "web_search": "0.01",
+      "input_cache_read": "0.0000005"
+    }
+  }
+}

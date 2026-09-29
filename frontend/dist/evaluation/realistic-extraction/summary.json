@@ -1,0 +1,30 @@
+{
+  "completed_pairs": 12,
+  "planned_pairs": 12,
+  "calls": 55,
+  "provider_reported_usd": 0.438774,
+  "cumulative_usd": 1.0353531999999999,
+  "unconfirmed_call_reservation_usd": 0.011448799999999999,
+  "conservative_budget_usd": 5.1975288,
+  "limitations": [
+    "Not human data; source references are model authored and may omit meaning",
+    "Nested sizes, six topic panels; similar meanings from different speakers may contribute separate reference units",
+    "Benchmark prompts, not deployed platform pipeline",
+    "Separate model judge; not human validated",
+    "Eight-claim grouping cap changes compression pressure with panel size",
+    "Coverage denominator is participant-linked reference units, not the deduplicated atom set used in the easy baseline; comparisons are descriptive.",
+    "Source perspectives may be aligned; this is not a comprehensive disagreement stress test.",
+    "Targeted assistant review found disputed judge penalties; raw scores remain unchanged and require independent adjudication.",
+    "146 judge evidence snippets are not exact contiguous quotes; original outputs and flags are available."
+  ],
+  "stage_means": {
+    "extract": {
+      "coverage": 0.9826388888888888,
+      "faithfulness": 0.9934413580246914
+    },
+    "group": {
+      "coverage": 0.9791666666666666,
+      "faithfulness": 1.0
+    }
+  }
+}
