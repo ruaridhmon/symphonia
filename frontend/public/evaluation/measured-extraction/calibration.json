@@ -1,0 +1,110 @@
+[
+  {
+    "condition": "preserved",
+    "output": [
+      {
+        "id": "E1",
+        "text": "The trial enrolled 60 households."
+      },
+      {
+        "id": "E2",
+        "text": "The trial does not establish long-term benefits."
+      }
+    ],
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "retained",
+          "quote": "The trial enrolled 60 households."
+        },
+        {
+          "id": "A2",
+          "status": "retained",
+          "quote": "The trial does not establish long-term benefits."
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "faithful",
+          "reason": "The claim is fully supported by the source and retains the original meaning."
+        },
+        {
+          "id": "E2",
+          "status": "faithful",
+          "reason": "The claim is fully supported by the source and retains the original meaning and qualification regarding long-term benefits."
+        }
+      ]
+    }
+  },
+  {
+    "condition": "omitted",
+    "output": [
+      {
+        "id": "E1",
+        "text": "The trial enrolled 60 households."
+      }
+    ],
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "retained",
+          "quote": "The trial enrolled 60 households."
+        },
+        {
+          "id": "A2",
+          "status": "lost",
+          "quote": ""
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "faithful",
+          "reason": "The claim is fully supported by the source and retains the full meaning of the corresponding atom."
+        }
+      ]
+    }
+  },
+  {
+    "condition": "distorted",
+    "output": [
+      {
+        "id": "E1",
+        "text": "The trial enrolled 600 households."
+      },
+      {
+        "id": "E2",
+        "text": "The trial establishes long-term benefits."
+      }
+    ],
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "lost",
+          "quote": ""
+        },
+        {
+          "id": "A2",
+          "status": "lost",
+          "quote": ""
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "altered",
+          "reason": "The output claim changes the number of enrolled households from 60 (source) to 600, which is not supported."
+        },
+        {
+          "id": "E2",
+          "status": "altered",
+          "reason": "The output claim asserts that the trial establishes long-term benefits, whereas the source states it does not."
+        }
+      ]
+    }
+  }
+]

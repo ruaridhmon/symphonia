@@ -1,0 +1,44 @@
+{
+  "completed_pairs": 36,
+  "planned_pairs": 36,
+  "provider_reported_usd": 0.5965792,
+  "reserved_usd": 6.0065272,
+  "calls": 147,
+  "status": "Real model calls on controlled synthetic responses; provisional model-judged assessment",
+  "limitations": [
+    "Templated source paragraphs with repeated propositions; not natural expert responses",
+    "Sizes nested within topic and replicate",
+    "Extraction and grouping use a benchmark prompt, not the deployed platform synthesis pipeline",
+    "Separate model judge is not a human-validated gold standard",
+    "Eight-claim grouping cap is a designed compression constraint, not an isolated causal estimate",
+    "Panel size changes repetition and sometimes the source proposition set; size effects are descriptive, not isolated causal effects"
+  ],
+  "stage_means": {
+    "extract": {
+      "coverage": 0.989969135802469,
+      "faithfulness": 0.989969135802469,
+      "partial": 0.006558641975308642,
+      "output_claims": 10.416666666666666
+    },
+    "group": {
+      "coverage": 0.9758698092031425,
+      "faithfulness": 0.9686507936507938,
+      "partial": 0.02413019079685746,
+      "output_claims": 6.722222222222222
+    }
+  },
+  "size_means": {
+    "4": {
+      "extract": 0.9699074074074074,
+      "group": 0.9699074074074074
+    },
+    "8": {
+      "extract": 1.0,
+      "group": 0.9715909090909091
+    },
+    "16": {
+      "extract": 1.0,
+      "group": 0.986111111111111
+    }
+  }
+}

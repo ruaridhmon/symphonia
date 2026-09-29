@@ -1,0 +1,194 @@
+{
+  "unresolved_quote_flags": 0,
+  "checked_stage_audits": 72,
+  "quote_review_flags": [
+    {
+      "panel": "coast-1-8",
+      "stage": "group",
+      "atom": "A10",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "Review requests ... are not a measure of policy effectiveness.",
+      "review": {
+        "output_claim": "G5",
+        "decision": "Ellipsis replaced by full output text; semantic rating unchanged."
+      }
+    },
+    {
+      "panel": "energy-2-16",
+      "stage": "group",
+      "atom": "A10",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "Review requests ... are not a measure of policy effectiveness.",
+      "review": {
+        "output_claim": "G2",
+        "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+      }
+    },
+    {
+      "panel": "education-1-16",
+      "stage": "group",
+      "atom": "A8",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "cannot establish lasting learning benefits ... beyond the one-term trial period",
+      "review": {
+        "output_claim": "G6",
+        "decision": "Ellipsis replaced by full output text; semantic rating unchanged."
+      }
+    },
+    {
+      "panel": "education-1-16",
+      "stage": "group",
+      "atom": "A12",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "cannot establish lasting learning benefits ... especially beyond the one-term trial period",
+      "review": {
+        "output_claim": "G6",
+        "decision": "Ellipsis replaced by full output text; semantic rating unchanged."
+      }
+    },
+    {
+      "panel": "health-2-16",
+      "stage": "extract",
+      "atom": "A11",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "A minority objection is that implementation may exclude people who cannot complete online forms.",
+      "review": {
+        "output_claim": "E4",
+        "decision": "Quote corrected to full output text; semantic rating unchanged."
+      }
+    },
+    {
+      "panel": "health-2-4",
+      "stage": "extract",
+      "atom": "A9",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "In this fictional ai referral triage pilot, 18 of 60 respondents requested a review.",
+      "review": {
+        "output_claim": "E3",
+        "decision": "Quote corrected to full output text; semantic rating unchanged."
+      }
+    },
+    {
+      "panel": "transport-1-4",
+      "stage": "group",
+      "atom": "A6",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "Step-free boarding ... must be available at every trial stop",
+      "review": {
+        "output_claim": "G1",
+        "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+      }
+    },
+    {
+      "panel": "coast-2-16",
+      "stage": "group",
+      "atom": "A5",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "Relocation is only voluntary if essential services remain during the decision period",
+      "review": {
+        "output_claim": "G2",
+        "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+      }
+    },
+    {
+      "panel": "coast-2-16",
+      "stage": "group",
+      "atom": "A7",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "Restrictions require an affordable housing alternative",
+      "review": {
+        "output_claim": "G4",
+        "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+      }
+    },
+    {
+      "panel": "coast-2-16",
+      "stage": "group",
+      "atom": "A8",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "A flood model provides uncertain projections rather than exact dates",
+      "review": {
+        "output_claim": "G1",
+        "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+      }
+    },
+    {
+      "panel": "coast-2-16",
+      "stage": "group",
+      "atom": "A9",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "In this fictional coastal relocation pilot, 18 of 60 respondents requested a review",
+      "review": {
+        "output_claim": "G7",
+        "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+      }
+    },
+    {
+      "panel": "coast-2-16",
+      "stage": "group",
+      "atom": "A10",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "The review requests are not a measure of policy effectiveness",
+      "review": {
+        "output_claim": "G7",
+        "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+      }
+    },
+    {
+      "panel": "coast-1-4",
+      "stage": "group",
+      "atom": "A10",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "Review requests ... are not a measure of policy effectiveness",
+      "review": {
+        "output_claim": "G5",
+        "decision": "Ellipsis replaced by full output text; semantic rating unchanged."
+      }
+    },
+    {
+      "panel": "energy-1-8",
+      "stage": "group",
+      "atom": "A8",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "Evidence is insufficient ... to establish equipment lifetime based on one winter of monitoring.",
+      "review": {
+        "output_claim": "G5",
+        "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+      }
+    },
+    {
+      "panel": "phones-1-16",
+      "stage": "group",
+      "atom": "A7",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "Students should be consulted ... before sanctions are set",
+      "review": {
+        "output_claim": "G2",
+        "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+      }
+    },
+    {
+      "panel": "phones-1-16",
+      "stage": "group",
+      "atom": "A8",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "the two-week pilot ... does not establish ... effects on exam attainment",
+      "review": {
+        "output_claim": "G5",
+        "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+      }
+    },
+    {
+      "panel": "phones-1-16",
+      "stage": "group",
+      "atom": "A12",
+      "issue": "Quoted evidence not one contiguous verbatim span; manual review required",
+      "quote": "The available evidence ... does not establish whether benefits persist after the pilot ends",
+      "review": {
+        "output_claim": "G5",
+        "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+      }
+    }
+  ],
+  "budget_reservations_usd": 6.006527200000001
+}

@@ -1,0 +1,70 @@
+{
+  "health-2-16/extract/A11": {
+    "output_claim": "E4",
+    "decision": "Quote corrected to full output text; semantic rating unchanged."
+  },
+  "health-2-4/extract/A9": {
+    "output_claim": "E3",
+    "decision": "Quote corrected to full output text; semantic rating unchanged."
+  },
+  "coast-1-8/group/A10": {
+    "output_claim": "G5",
+    "decision": "Ellipsis replaced by full output text; semantic rating unchanged."
+  },
+  "coast-1-4/group/A10": {
+    "output_claim": "G5",
+    "decision": "Ellipsis replaced by full output text; semantic rating unchanged."
+  },
+  "education-1-16/group/A8": {
+    "output_claim": "G6",
+    "decision": "Ellipsis replaced by full output text; semantic rating unchanged."
+  },
+  "education-1-16/group/A12": {
+    "output_claim": "G6",
+    "decision": "Ellipsis replaced by full output text; semantic rating unchanged."
+  },
+  "coast-2-16/group/A5": {
+    "output_claim": "G2",
+    "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+  },
+  "coast-2-16/group/A7": {
+    "output_claim": "G4",
+    "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+  },
+  "coast-2-16/group/A8": {
+    "output_claim": "G1",
+    "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+  },
+  "coast-2-16/group/A9": {
+    "output_claim": "G7",
+    "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+  },
+  "coast-2-16/group/A10": {
+    "output_claim": "G7",
+    "decision": "Judge paraphrase replaced with full matching output statement; original assessment retained for audit."
+  },
+  "phones-1-16/group/A7": {
+    "output_claim": "G2",
+    "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+  },
+  "phones-1-16/group/A8": {
+    "output_claim": "G5",
+    "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+  },
+  "phones-1-16/group/A12": {
+    "output_claim": "G5",
+    "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+  },
+  "transport-1-4/group/A6": {
+    "output_claim": "G1",
+    "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+  },
+  "energy-2-16/group/A10": {
+    "output_claim": "G2",
+    "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+  },
+  "energy-1-8/group/A8": {
+    "output_claim": "G5",
+    "decision": "Ellipsis replaced by full output statement; original semantic rating retained."
+  }
+}

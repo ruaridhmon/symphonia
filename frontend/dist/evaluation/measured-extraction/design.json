@@ -1,0 +1,32 @@
+{
+  "date": "2026-09-29",
+  "topics": 6,
+  "sizes": [
+    4,
+    8,
+    16
+  ],
+  "replicates": 2,
+  "panel_pairs": 36,
+  "extractor": "openai/gpt-4.1-mini",
+  "judge": "openai/gpt-4.1",
+  "group_budget": 8,
+  "source": "Controlled assistant-authored synthetic paragraphs with exact source atoms; no human participants",
+  "nested": "Sizes nested within topic and replicate; not 36 independent populations",
+  "scoring": "Model-judged provisional semantic assessment, not independently human validated",
+  "budget": "Cumulative conservative reservations <=9.5 USD, no automatic retries; user cap 10 USD",
+  "prices": {
+    "openai/gpt-4.1-mini": {
+      "prompt": "0.0000004",
+      "completion": "0.0000016",
+      "web_search": "0.01",
+      "input_cache_read": "0.0000001"
+    },
+    "openai/gpt-4.1": {
+      "prompt": "0.000002",
+      "completion": "0.000008",
+      "web_search": "0.01",
+      "input_cache_read": "0.0000005"
+    }
+  }
+}
