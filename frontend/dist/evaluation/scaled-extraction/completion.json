@@ -1,0 +1,113 @@
+{
+  "status": "Stopped; completed valid pairs published, no further calls running",
+  "errors": [
+    {
+      "panel": [
+        3,
+        0
+      ],
+      "error": "Output or source schema validation failed; see raw artifacts."
+    },
+    {
+      "panel": [
+        5,
+        0
+      ],
+      "error": "Output truncated"
+    },
+    {
+      "panel": [
+        6,
+        0
+      ],
+      "error": "Invalid source quote"
+    },
+    {
+      "panel": [
+        0,
+        1
+      ],
+      "error": "Invalid source quote"
+    },
+    {
+      "panel": [
+        9,
+        0
+      ],
+      "error": "Output truncated"
+    },
+    {
+      "panel": [
+        4,
+        1
+      ],
+      "error": "Invalid source quote"
+    },
+    {
+      "panel": [
+        5,
+        1
+      ],
+      "error": "Invalid source quote"
+    },
+    {
+      "panel": [
+        8,
+        1
+      ],
+      "error": "Invalid source quote"
+    },
+    {
+      "panel": [
+        6,
+        1
+      ],
+      "error": "Output truncated"
+    },
+    {
+      "panel": [
+        0,
+        2
+      ],
+      "error": "Invalid source quote"
+    },
+    {
+      "panel": [
+        8,
+        2
+      ],
+      "error": "Invalid source quote"
+    },
+    {
+      "panel": [
+        2,
+        3
+      ],
+      "error": "Invalid source quote"
+    },
+    {
+      "panel": [
+        8,
+        3
+      ],
+      "error": "[Errno 54] Connection reset by peer"
+    },
+    {
+      "panel": [
+        9,
+        3
+      ],
+      "error": "[Errno 54] Connection reset by peer"
+    },
+    {
+      "panel": [
+        7,
+        3
+      ],
+      "error": "Final request stalled beyond 12 minutes; process stopped without retry. Four-person pair is retained; eight/twelve-person pairs incomplete."
+    }
+  ],
+  "finished": 1790779579.774749,
+  "recorded_usd": 2.5341528000000006,
+  "unconfirmed_reservations_usd": 0.37294479999999997
+}

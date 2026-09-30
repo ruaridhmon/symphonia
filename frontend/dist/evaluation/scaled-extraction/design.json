@@ -1,0 +1,62 @@
+{
+  "planned_pairs": 120,
+  "independent_source_panels": 40,
+  "sizes": [
+    4,
+    8,
+    12
+  ],
+  "topics": [
+    "AI referral triage",
+    "University AI assessment",
+    "Coastal relocation",
+    "School smartphone restrictions",
+    "Urban congestion charging",
+    "Home energy retrofit",
+    "Water-use restrictions",
+    "Remote working in public services",
+    "Community renewable energy",
+    "Public facial recognition"
+  ],
+  "contexts": [
+    "Resource-constrained rural authority",
+    "Diverse metropolitan district",
+    "Small institution with an ageing population",
+    "Rapidly growing regional centre"
+  ],
+  "models": {
+    "generator": "openai/gpt-4.1-mini",
+    "extractor": "openai/gpt-4.1-mini",
+    "judge": "openai/gpt-4.1",
+    "audit": "openai/gpt-4.1"
+  },
+  "grouping_cap": 8,
+  "reference": "Two participant-linked meanings per person, generated alongside text and frozen before extraction; not human ground truth",
+  "budget_new_usd": 4,
+  "budget_original_usd": 10,
+  "previous_recorded_usd": 1.0353532,
+  "previous_unconfirmed_reserve_usd": 0.0114488,
+  "prices": {
+    "openai/gpt-4.1": {
+      "prompt": "0.000002",
+      "completion": "0.000008",
+      "web_search": "0.01",
+      "input_cache_read": "0.0000005"
+    },
+    "openai/gpt-4.1-mini": {
+      "prompt": "0.0000004",
+      "completion": "0.0000016",
+      "web_search": "0.01",
+      "input_cache_read": "0.0000001"
+    }
+  },
+  "limitations": [
+    "Benchmark prompts, not deployed platform pipeline",
+    "Source and references model-authored",
+    "Nested sizes are dependent; only 40 independent source panels planned",
+    "Judge is calibrated on eight basic controls, not human validated",
+    "Two reference meanings per person may miss source detail",
+    "Eight-statement cap changes compression pressure with input length"
+  ],
+  "rubric": "Assess ONLY semantic meaning against the supplied references and source paragraphs. Paraphrase and merging are allowed. retained = every essential element of a reference remains in the output, even across multiple claims; partial = some essential element is genuinely missing; lost = absent or contradicted. Do not penalize a fully preserved meaning just because words changed or examples were added; assess unsupported additions separately under output faithfulness. A condition, negation, population restriction, number, or uncertainty qualifier is essential. Opposing positions must remain distinct, not become panel consensus. Return {\"atoms\":[{\"id\":\"A1\",\"status\":\"retained|partial|lost\",\"evidence_ids\":[\"E1\"],\"reason\":\"specific missing element, or why fully preserved\"}],\"claims\":[{\"id\":\"E1\",\"status\":\"faithful|altered|unsupported\",\"reason\":\"specific\"}]}. Status values must be one single allowed value, never the pipe-separated list. All IDs must occur exactly once. Evidence IDs must refer to output claims; [] if no support. faithful means ALL meaning is supported by original source; altered means changes scope, stance or certainty; unsupported means invented content. Do not score plausibility or truth in the real world."
+}

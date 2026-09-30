@@ -1,0 +1,215 @@
+[
+  {
+    "name": "paraphrase",
+    "source": "AI triage should be used only for low-risk adults and every decision needs clinician review.",
+    "output": "Use AI triage solely for adults at low risk, with a clinician reviewing each decision.",
+    "expected": "retained",
+    "expected_faithfulness": "faithful",
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "retained",
+          "evidence_ids": [
+            "E1"
+          ],
+          "reason": "All essential elements are present: restriction to low-risk adults and requirement for clinician review of every decision."
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "faithful",
+          "reason": "The claim accurately reflects the source, maintaining the population restriction (low-risk adults) and the necessity for clinician review of every decision."
+        }
+      ]
+    },
+    "passed": true
+  },
+  {
+    "name": "condition_removed",
+    "source": "AI triage should be used only for low-risk adults and every decision needs clinician review.",
+    "output": "AI triage should be used for adults.",
+    "expected": "partial",
+    "expected_faithfulness": "altered",
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "partial",
+          "evidence_ids": [
+            "E1"
+          ],
+          "reason": "The output omits the essential restriction to 'low-risk' adults and the requirement for clinician review of every decision."
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "altered",
+          "reason": "The claim removes the 'low-risk' qualifier and the need for clinician review, thus broadening the scope and omitting essential conditions from the original source."
+        }
+      ]
+    },
+    "passed": true
+  },
+  {
+    "name": "number_changed",
+    "source": "Eighteen of sixty households requested review.",
+    "output": "Eighteen of six hundred households requested review.",
+    "expected": "lost",
+    "expected_faithfulness": "altered",
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "lost",
+          "evidence_ids": [
+            "E1"
+          ],
+          "reason": "The output changes the number of households from sixty to six hundred, which is an essential element."
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "altered",
+          "reason": "The output alters the original meaning by changing 'sixty' to 'six hundred', which changes the scope of the claim."
+        }
+      ]
+    },
+    "passed": true
+  },
+  {
+    "name": "uncertainty_reversed",
+    "source": "The pilot cannot establish whether benefits last.",
+    "output": "The pilot establishes lasting benefits.",
+    "expected": "lost",
+    "expected_faithfulness": "altered",
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "lost",
+          "evidence_ids": [
+            "E1"
+          ],
+          "reason": "The output claim asserts that the pilot establishes lasting benefits, whereas the reference explicitly states that the pilot cannot establish whether benefits last. This is a direct contradiction, so the essential element (uncertainty about lasting benefits) is lost."
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "altered",
+          "reason": "The output reverses the meaning of the source by claiming the pilot establishes lasting benefits, while the source says it cannot establish this."
+        }
+      ]
+    },
+    "passed": true
+  },
+  {
+    "name": "opposition_erased",
+    "source": "One expert opposes relocation even if compensation is offered.",
+    "output": "All experts support relocation if compensation is offered.",
+    "expected": "lost",
+    "expected_faithfulness": "altered",
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "lost",
+          "evidence_ids": [
+            "E1"
+          ],
+          "reason": "The reference states that one expert opposes relocation even if compensation is offered, but the output claim asserts that all experts support relocation if compensation is offered. This directly contradicts the essential element that at least one expert is opposed."
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "altered",
+          "reason": "The output claim changes the stance from opposition by one expert to unanimous support, which is not supported by the source."
+        }
+      ]
+    },
+    "passed": true
+  },
+  {
+    "name": "irrelevant",
+    "source": "Renters without written leases must be eligible for compensation.",
+    "output": "The scheme should build a website.",
+    "expected": "lost",
+    "expected_faithfulness": "unsupported",
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "lost",
+          "evidence_ids": []
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "unsupported",
+          "reason": "The claim about building a website is not mentioned or supported by the reference, which only discusses compensation eligibility for renters without written leases."
+        }
+      ]
+    },
+    "passed": true
+  },
+  {
+    "name": "scope_preserved",
+    "source": "Only overnight staff should receive the extra payment.",
+    "output": "The additional payment should be restricted to staff working overnight.",
+    "expected": "retained",
+    "expected_faithfulness": "faithful",
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "retained",
+          "evidence_ids": [
+            "E1"
+          ],
+          "reason": "The output preserves the restriction that only overnight staff are eligible for the extra payment, matching the reference's essential meaning."
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "faithful",
+          "reason": "The claim accurately restates the source's meaning, specifying that the extra payment is limited to overnight staff."
+        }
+      ]
+    },
+    "passed": true
+  },
+  {
+    "name": "omitted_qualification",
+    "source": "Support the trial only if an accessible alternative remains free.",
+    "output": "Support the trial.",
+    "expected": "partial",
+    "expected_faithfulness": "altered",
+    "judge": {
+      "atoms": [
+        {
+          "id": "A1",
+          "status": "partial",
+          "evidence_ids": [
+            "E1"
+          ],
+          "reason": "The essential condition that support is contingent on an accessible alternative remaining free is missing from the output."
+        }
+      ],
+      "claims": [
+        {
+          "id": "E1",
+          "status": "altered",
+          "reason": "The output omits the conditional requirement and presents support as unconditional, which changes the meaning."
+        }
+      ]
+    },
+    "passed": true
+  }
+]

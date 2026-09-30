@@ -1,0 +1,153 @@
+id,topic,size,replicate,stage,coverage,faithfulness,position,qualification,quantity,minority,uncertainty
+v2-t01-c1-n12,AI referral triage,12,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t01-c1-n12,AI referral triage,12,1,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t01-c1-n4,AI referral triage,4,1,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t01-c1-n4,AI referral triage,4,1,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t01-c1-n8,AI referral triage,8,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t01-c1-n8,AI referral triage,8,1,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t01-c4-n12,AI referral triage,12,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t01-c4-n12,AI referral triage,12,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t01-c4-n4,AI referral triage,4,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t01-c4-n4,AI referral triage,4,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t01-c4-n8,AI referral triage,8,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t01-c4-n8,AI referral triage,8,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c1-n12,University AI assessment,12,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c1-n12,University AI assessment,12,1,group,0.9166666666666666,1.0,1.0,1.0,0.0,1.0,0.75
+v2-t02-c1-n4,University AI assessment,4,1,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t02-c1-n4,University AI assessment,4,1,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t02-c1-n8,University AI assessment,8,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c1-n8,University AI assessment,8,1,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c2-n12,University AI assessment,12,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c2-n12,University AI assessment,12,2,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c2-n4,University AI assessment,4,2,extract,1.0,1.0,1.0,1.0,,,1.0
+v2-t02-c2-n4,University AI assessment,4,2,group,1.0,1.0,1.0,1.0,,,1.0
+v2-t02-c2-n8,University AI assessment,8,2,extract,1.0,1.0,1.0,1.0,1.0,,1.0
+v2-t02-c2-n8,University AI assessment,8,2,group,1.0,1.0,1.0,1.0,1.0,,1.0
+v2-t02-c3-n12,University AI assessment,12,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c3-n12,University AI assessment,12,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c3-n4,University AI assessment,4,3,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t02-c3-n4,University AI assessment,4,3,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t02-c3-n8,University AI assessment,8,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c3-n8,University AI assessment,8,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c4-n12,University AI assessment,12,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c4-n12,University AI assessment,12,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c4-n4,University AI assessment,4,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t02-c4-n4,University AI assessment,4,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t02-c4-n8,University AI assessment,8,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t02-c4-n8,University AI assessment,8,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c1-n12,Coastal relocation,12,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c1-n12,Coastal relocation,12,1,group,0.9583333333333334,1.0,0.8571428571428571,1.0,1.0,1.0,1.0
+v2-t03-c1-n4,Coastal relocation,4,1,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t03-c1-n4,Coastal relocation,4,1,group,0.75,0.8333333333333334,0.3333333333333333,1.0,,1.0,1.0
+v2-t03-c1-n8,Coastal relocation,8,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c1-n8,Coastal relocation,8,1,group,0.75,0.8,0.6,0.6666666666666666,1.0,1.0,1.0
+v2-t03-c2-n12,Coastal relocation,12,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c2-n12,Coastal relocation,12,2,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c2-n4,Coastal relocation,4,2,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t03-c2-n4,Coastal relocation,4,2,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t03-c2-n8,Coastal relocation,8,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c2-n8,Coastal relocation,8,2,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c3-n12,Coastal relocation,12,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c3-n12,Coastal relocation,12,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c3-n4,Coastal relocation,4,3,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t03-c3-n4,Coastal relocation,4,3,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t03-c3-n8,Coastal relocation,8,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t03-c3-n8,Coastal relocation,8,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c2-n12,School smartphone restrictions,12,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c2-n12,School smartphone restrictions,12,2,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c2-n4,School smartphone restrictions,4,2,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t04-c2-n4,School smartphone restrictions,4,2,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t04-c2-n8,School smartphone restrictions,8,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c2-n8,School smartphone restrictions,8,2,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c3-n12,School smartphone restrictions,12,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c3-n12,School smartphone restrictions,12,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c3-n4,School smartphone restrictions,4,3,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t04-c3-n4,School smartphone restrictions,4,3,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t04-c3-n8,School smartphone restrictions,8,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c3-n8,School smartphone restrictions,8,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c4-n12,School smartphone restrictions,12,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c4-n12,School smartphone restrictions,12,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c4-n4,School smartphone restrictions,4,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t04-c4-n4,School smartphone restrictions,4,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t04-c4-n8,School smartphone restrictions,8,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t04-c4-n8,School smartphone restrictions,8,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t05-c1-n12,Urban congestion charging,12,1,extract,1.0,1.0,1.0,,1.0,1.0,1.0
+v2-t05-c1-n12,Urban congestion charging,12,1,group,1.0,1.0,1.0,,1.0,1.0,1.0
+v2-t05-c1-n4,Urban congestion charging,4,1,extract,1.0,1.0,1.0,,,1.0,1.0
+v2-t05-c1-n4,Urban congestion charging,4,1,group,1.0,1.0,1.0,,,1.0,1.0
+v2-t05-c1-n8,Urban congestion charging,8,1,extract,1.0,1.0,1.0,,1.0,1.0,1.0
+v2-t05-c1-n8,Urban congestion charging,8,1,group,1.0,1.0,1.0,,1.0,1.0,1.0
+v2-t05-c3-n12,Urban congestion charging,12,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t05-c3-n12,Urban congestion charging,12,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t05-c3-n4,Urban congestion charging,4,3,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t05-c3-n4,Urban congestion charging,4,3,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t05-c3-n8,Urban congestion charging,8,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t05-c3-n8,Urban congestion charging,8,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t05-c4-n12,Urban congestion charging,12,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t05-c4-n12,Urban congestion charging,12,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t05-c4-n4,Urban congestion charging,4,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t05-c4-n4,Urban congestion charging,4,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t05-c4-n8,Urban congestion charging,8,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t05-c4-n8,Urban congestion charging,8,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t06-c3-n12,Home energy retrofit,12,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t06-c3-n12,Home energy retrofit,12,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t06-c3-n4,Home energy retrofit,4,3,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t06-c3-n4,Home energy retrofit,4,3,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t06-c3-n8,Home energy retrofit,8,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t06-c3-n8,Home energy retrofit,8,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t06-c4-n12,Home energy retrofit,12,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t06-c4-n12,Home energy retrofit,12,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t06-c4-n4,Home energy retrofit,4,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t06-c4-n4,Home energy retrofit,4,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t06-c4-n8,Home energy retrofit,8,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t06-c4-n8,Home energy retrofit,8,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t07-c3-n12,Water-use restrictions,12,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t07-c3-n12,Water-use restrictions,12,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t07-c3-n4,Water-use restrictions,4,3,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t07-c3-n4,Water-use restrictions,4,3,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t07-c3-n8,Water-use restrictions,8,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t07-c3-n8,Water-use restrictions,8,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t07-c4-n12,Water-use restrictions,12,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t07-c4-n12,Water-use restrictions,12,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t07-c4-n4,Water-use restrictions,4,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t07-c4-n4,Water-use restrictions,4,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t07-c4-n8,Water-use restrictions,8,4,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t07-c4-n8,Water-use restrictions,8,4,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c1-n12,Remote working in public services,12,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c1-n12,Remote working in public services,12,1,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c1-n4,Remote working in public services,4,1,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t08-c1-n4,Remote working in public services,4,1,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t08-c1-n8,Remote working in public services,8,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c1-n8,Remote working in public services,8,1,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c2-n12,Remote working in public services,12,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c2-n12,Remote working in public services,12,2,group,0.625,0.875,0.5,0.5,1.0,1.0,1.0
+v2-t08-c2-n4,Remote working in public services,4,2,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t08-c2-n4,Remote working in public services,4,2,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t08-c2-n8,Remote working in public services,8,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c2-n8,Remote working in public services,8,2,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c3-n12,Remote working in public services,12,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c3-n12,Remote working in public services,12,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c3-n4,Remote working in public services,4,3,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t08-c3-n4,Remote working in public services,4,3,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t08-c3-n8,Remote working in public services,8,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c3-n8,Remote working in public services,8,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t08-c4-n4,Remote working in public services,4,4,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t08-c4-n4,Remote working in public services,4,4,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t09-c1-n12,Community renewable energy,12,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t09-c1-n12,Community renewable energy,12,1,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t09-c1-n4,Community renewable energy,4,1,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t09-c1-n4,Community renewable energy,4,1,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t09-c1-n8,Community renewable energy,8,1,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t09-c1-n8,Community renewable energy,8,1,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t10-c2-n12,Public facial recognition,12,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t10-c2-n12,Public facial recognition,12,2,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t10-c2-n4,Public facial recognition,4,2,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t10-c2-n4,Public facial recognition,4,2,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t10-c2-n8,Public facial recognition,8,2,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t10-c2-n8,Public facial recognition,8,2,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t10-c3-n12,Public facial recognition,12,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t10-c3-n12,Public facial recognition,12,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t10-c3-n4,Public facial recognition,4,3,extract,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t10-c3-n4,Public facial recognition,4,3,group,1.0,1.0,1.0,1.0,,1.0,1.0
+v2-t10-c3-n8,Public facial recognition,8,3,extract,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+v2-t10-c3-n8,Public facial recognition,8,3,group,1.0,1.0,1.0,1.0,1.0,1.0,1.0

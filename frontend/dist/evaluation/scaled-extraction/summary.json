@@ -1,0 +1,32 @@
+{
+  "completed_pairs": 76,
+  "planned_pairs": 120,
+  "calls": 428,
+  "provider_reported_usd": 2.5341528,
+  "cumulative_usd": 3.5695060000000005,
+  "unconfirmed_call_reservation_usd": 0.38439359999999995,
+  "independent_source_panels": 26,
+  "limitations": [
+    "Benchmark prompts, not deployed platform pipeline",
+    "Source and references model-authored",
+    "Nested sizes are dependent; only 40 independent source panels planned",
+    "Judge is calibrated on eight basic controls, not human validated",
+    "Two reference meanings per person may miss source detail",
+    "Eight-statement cap changes compression pressure with input length",
+    "Cheaper evaluator failed controls; stronger evaluator passed eight basic checks. This is not independent human validation.",
+    "Incomplete and failed panels are excluded from plotted scores and reported in completion records.",
+    "Input generation and earlier malformed-response attempts also count toward the displayed spending.",
+    "Source snippets with only a terminal punctuation mismatch were trimmed to exact substrings; originals remain recorded."
+  ],
+  "stage_means": {
+    "extract": {
+      "coverage": 1.0,
+      "faithfulness": 1.0
+    },
+    "group": {
+      "coverage": 0.9868421052631579,
+      "faithfulness": 0.9935307017543858
+    }
+  },
+  "failed_source_panels": 15
+}
