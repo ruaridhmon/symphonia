@@ -62,5 +62,7 @@ export function quietSummary(main:HTMLElement){
   current.claims.setAttribute('aria-pressed',String(!current.open));current.button.setAttribute('aria-pressed',String(current.open));
   if(progress)progress.hidden=current.open;
  }
+ current.claims.onclick=()=>{current.open=false;sync();};
+ current.button.onclick=()=>{current.open=true;sync();};
  sync();
 }

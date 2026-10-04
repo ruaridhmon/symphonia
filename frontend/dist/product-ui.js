@@ -134,6 +134,14 @@ function quietSummary(main) {
     current.button.setAttribute("aria-pressed", String(current.open));
     if (progress) progress.hidden = current.open;
   }
+  current.claims.onclick = () => {
+    current.open = false;
+    sync();
+  };
+  current.button.onclick = () => {
+    current.open = true;
+    sync();
+  };
   sync();
 }
 

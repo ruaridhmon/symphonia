@@ -38,3 +38,10 @@ it('uses reasoning as the first-round default while keeping original claims acce
  expect(main.querySelector('.opening-claims')).toBeNull();expect(main.querySelector('.summary-switch button')).toHaveTextContent('Reasoning');expect(main.querySelector<HTMLElement>('#delphi-recorded-progress')!.hidden).toBe(false);
  main.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();expect(main.querySelector<HTMLElement>('.card')!.hidden).toBe(false);expect(main.querySelector('.ProseMirror')).toHaveTextContent('Claim 1: Preserve the claim');
 });
+it('retargets controls when a claim-only draft gains a reasoning map',()=>{
+ document.body.innerHTML='<main><section id="delphi-recorded-progress"></section><section class="card"><h2>Round 1 synthesis</h2><div class="ProseMirror"><p>Claim 1: A claim</p></div></section></main>';
+ const main=document.querySelector('main')!,progress=main.querySelector<HTMLElement>('#delphi-recorded-progress')!;quietSummary(main);
+ progress.innerHTML='<section class="rf-workspace">Saved map</section>';quietSummary(main);
+ main.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();expect(progress.hidden).toBe(true);
+ main.querySelector<HTMLButtonElement>('.summary-switch button')!.click();expect(progress.hidden).toBe(false);
+});
