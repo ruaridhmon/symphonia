@@ -1,5 +1,7 @@
 import json
+
 import pytest
+
 from core.reasoning import parse_reasoning_output
 
 RESPONSES=[{'response_id':15,'answers':{'q1':{'position':'Phones interrupt lessons. Put them away during lessons, with medical exceptions.'}}},{'response_id':16,'answers':{'q1':{'position':'A whole-day ban would make travel less safe.'}}}]
@@ -32,7 +34,7 @@ def test_invalid_json_does_not_produce_a_draft():
     with pytest.raises(ValueError):parse_reasoning_output('not JSON',RESPONSES)
 
 def test_provided_map_is_versioned_scoped_and_does_not_change_claims(client,admin_headers,participant_headers):
-    from tests.conftest import create_form,submit_response
+    from tests.conftest import create_form, submit_response
     form=create_form(client,admin_headers,questions=['Your view?'])
     submit_response(client,participant_headers,form['id'],RESPONSES[0]['answers'])
     rid=client.get(f"/forms/{form['id']}/rounds",headers=admin_headers).json()[0]['id']
@@ -53,8 +55,9 @@ def test_provided_map_is_versioned_scoped_and_does_not_change_claims(client,admi
 
 def test_first_round_simple_generates_graph_in_one_call(client,admin_headers,participant_headers,monkeypatch):
     from types import SimpleNamespace
+
     from core import routes
-    from tests.conftest import create_form,submit_response
+    from tests.conftest import create_form, submit_response
     form=create_form(client,admin_headers,questions=['Your view?'])
     submit_response(client,participant_headers,form['id'],RESPONSES[0]['answers'])
     rid=client.get(f"/forms/{form['id']}/rounds",headers=admin_headers).json()[0]['id']

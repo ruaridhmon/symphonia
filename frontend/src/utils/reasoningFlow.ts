@@ -1,5 +1,6 @@
 import type { ReasoningGraph, ReasoningNode } from '../types/synthesis';
 const el=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.textContent=text;e.className=cls;return e;};
+let wireId=0;
 const observers=new WeakMap<HTMLElement,ResizeObserver>();
 export function clearReasoningFlow(root:HTMLElement){observers.get(root)?.disconnect();observers.delete(root);}
 /** Read-only view: assumptions never become rating questions or recorded votes. */
@@ -45,9 +46,12 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph){
    }
   }
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.classList.add('rf-wires');svg.setAttribute('aria-hidden','true');diagram.prepend(svg);
+  const markerId='rf-arrow-'+(++wireId);
   const draw=()=>{
     const box=diagram.getBoundingClientRect();if(!box.width)return;
     svg.setAttribute('width',String(diagram.scrollWidth));svg.setAttribute('height',String(diagram.scrollHeight));svg.replaceChildren();
+    const defs=document.createElementNS(svg.namespaceURI,'defs'),marker=document.createElementNS(svg.namespaceURI,'marker'),tip=document.createElementNS(svg.namespaceURI,'path');
+    marker.setAttribute('id',markerId);marker.setAttribute('viewBox','0 0 6 6');marker.setAttribute('refX','6');marker.setAttribute('refY','3');marker.setAttribute('markerWidth','5');marker.setAttribute('markerHeight','5');marker.setAttribute('orient','auto');tip.setAttribute('d','M 0 0 L 6 3 L 0 6');tip.setAttribute('fill','#baa9cb');marker.append(tip);defs.append(marker);svg.append(defs);
     const vertical=getComputedStyle(diagram).gridTemplateColumns.split(' ').length===1;
     for(const edge of flow.edges){
       const cards=Array.from(diagram.querySelectorAll<HTMLElement>('[data-rf-node]'));
@@ -57,7 +61,7 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph){
       const x2=(vertical?b.left+b.width/2:b.left)-box.left,y2=(vertical?b.top:b.top+b.height/2)-box.top;
       const path=document.createElementNS(svg.namespaceURI,'path');
       path.setAttribute('d',vertical?`M ${x1} ${y1} C ${x1} ${(y1+y2)/2}, ${x2} ${(y1+y2)/2}, ${x2} ${y2}`:`M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}`);
-      path.setAttribute('fill','none');path.setAttribute('stroke',edge.relation==='challenges'?'#bd7883':'#baa9cb');path.setAttribute('stroke-width','1.4');
+      path.setAttribute('marker-end',`url(#${markerId})`);path.setAttribute('fill','none');path.setAttribute('stroke',edge.relation==='challenges'?'#bd7883':'#baa9cb');path.setAttribute('stroke-width','1.4');
       if(flow.nodes.some(n=>(n.id===edge.from||n.id===edge.to)&&n.kind==='assumption'))path.setAttribute('stroke-dasharray','4 4');
       svg.append(path);
     }
