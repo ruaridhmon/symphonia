@@ -68,3 +68,9 @@ def test_first_round_simple_generates_graph_in_one_call(client,admin_headers,par
     assert result.status_code==200,result.text
     assert len(calls)==1 and calls[0]['model']=='test/model'
     assert len(result.json()['synthesis_json']['reasoning_graph']['flows'])==1
+
+
+def test_unanchored_inferences_are_not_a_response_map():
+    p=payload();f=p['reasoning_flows'][0]
+    f['nodes']=[f['nodes'][1]];f['edges']=[]
+    assert parse(p)['flows']==[]

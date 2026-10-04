@@ -89,9 +89,14 @@ def parse_reasoning_output(content: str, responses: list[dict]) -> tuple[str, di
                     n['source_text'] = next(s for s in source if _normalise(quote) in _normalise(s))
                 condition = item.get('condition')
                 if isinstance(condition, str) and condition.strip():
-                    n['condition'] = condition.strip()[:600]
+
+                    if len(condition.strip()) > 600:
+                        raise ValueError('Qualification too long; do not truncate meaning')
+                    n['condition'] = condition.strip()
                 seen.add(ident)
                 nodes.append(n)
+            if not any(n['kind'] != 'assumption' for n in nodes):
+                raise ValueError('A flow must be anchored to a stated contribution')
             edges, pairs = [], set()
             for edge in candidate.get('edges', []):
                 a, b, relation = edge['from'], edge['to'], edge['relation']

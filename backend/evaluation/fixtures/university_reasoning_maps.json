@@ -1,0 +1,264 @@
+{
+  "provenance": "Assistant-authored interpretation of six saved synthetic demo responses; not independently expert-confirmed. Selected arguments, not exhaustive extraction.",
+  "form_id": 30,
+  "round_id": 57,
+  "reasoning_flows": [
+    {
+      "response_number": 1,
+      "title": "Make learning visible, not purchasing power",
+      "nodes": [
+        {
+          "id": "a",
+          "kind": "premise",
+          "text": "Disclosure makes permitted assistance inspectable.",
+          "quote": "Disclosure makes permitted assistance inspectable."
+        },
+        {
+          "id": "b",
+          "kind": "premise",
+          "text": "An oral explanation can reveal whether a student understands their work.",
+          "quote": "An oral explanation can reveal whether a student understands their work."
+        },
+        {
+          "id": "c",
+          "kind": "assumption",
+          "text": "Inspecting assistance and understanding could help distinguish learning from tool access.",
+          "question": "Would disclosure and an oral explanation actually separate learning from unequal access to tools?"
+        },
+        {
+          "id": "d",
+          "kind": "recommendation",
+          "text": "Assessment should reward learning rather than access to expensive tools.",
+          "quote": "Assessment should reward learning rather than access to expensive tools."
+        }
+      ],
+      "edges": [
+        {
+          "from": "a",
+          "to": "c",
+          "relation": "supports"
+        },
+        {
+          "from": "b",
+          "to": "c",
+          "relation": "supports"
+        },
+        {
+          "from": "c",
+          "to": "d",
+          "relation": "supports"
+        }
+      ]
+    },
+    {
+      "response_number": 2,
+      "title": "Accessibility limits a uniform oral-assessment rule",
+      "nodes": [
+        {
+          "id": "a",
+          "kind": "premise",
+          "text": "Oral assessment can disadvantage anxious or disabled students unless alternatives exist.",
+          "quote": "Oral assessment can disadvantage anxious or disabled students unless alternatives exist.",
+          "condition": "The concern is conditional on alternatives being unavailable."
+        },
+        {
+          "id": "b",
+          "kind": "assumption",
+          "text": "A single oral format may not offer an equitable way to demonstrate understanding.",
+          "question": "Which alternatives would let students demonstrate comparable understanding?"
+        },
+        {
+          "id": "c",
+          "kind": "recommendation",
+          "text": "Students need accessible ways to demonstrate understanding.",
+          "quote": "Students need accessible ways to demonstrate understanding."
+        }
+      ],
+      "edges": [
+        {
+          "from": "a",
+          "to": "b",
+          "relation": "supports"
+        },
+        {
+          "from": "b",
+          "to": "c",
+          "relation": "supports"
+        }
+      ]
+    },
+    {
+      "response_number": 3,
+      "title": "Keep extended writing; add a check on understanding",
+      "nodes": [
+        {
+          "id": "a",
+          "kind": "premise",
+          "text": "Extended writing develops reasoning through revision.",
+          "quote": "Extended writing develops reasoning through revision."
+        },
+        {
+          "id": "b",
+          "kind": "premise",
+          "text": "Disclosure does not establish which reasoning belongs to the student.",
+          "quote": "Disclosure does not establish which reasoning belongs to the student."
+        },
+        {
+          "id": "c",
+          "kind": "premise",
+          "text": "Replacing every essay removes valuable research and revision skills.",
+          "quote": "Replacing every essay removes valuable research and revision skills."
+        },
+        {
+          "id": "d",
+          "kind": "premise",
+          "text": "An oral explanation can reveal whether a student understands their work.",
+          "quote": "An oral explanation can reveal whether a student understands their work."
+        }
+      ],
+      "edges": [
+        {
+          "from": "a",
+          "to": "c",
+          "relation": "supports"
+        },
+        {
+          "from": "b",
+          "to": "d",
+          "relation": "motivates"
+        }
+      ]
+    },
+    {
+      "response_number": 4,
+      "title": "Workplace preparation needs inspectable assistance",
+      "nodes": [
+        {
+          "id": "a",
+          "kind": "recommendation",
+          "text": "Students must learn to critique tools they will encounter at work.",
+          "quote": "Students must learn to critique tools they will encounter at work."
+        },
+        {
+          "id": "b",
+          "kind": "assumption",
+          "text": "Learning to critique AI may require opportunities to use it with safeguards.",
+          "question": "Do you mean students should practise using AI, or could they learn to critique it without using it in assessed work?"
+        },
+        {
+          "id": "c",
+          "kind": "premise",
+          "text": "Disclosure makes permitted assistance inspectable.",
+          "quote": "Disclosure makes permitted assistance inspectable."
+        },
+        {
+          "id": "d",
+          "kind": "premise",
+          "text": "An oral explanation can reveal whether a student understands their work.",
+          "quote": "An oral explanation can reveal whether a student understands their work."
+        }
+      ],
+      "edges": [
+        {
+          "from": "a",
+          "to": "b",
+          "relation": "motivates"
+        },
+        {
+          "from": "c",
+          "to": "b",
+          "relation": "qualifies"
+        },
+        {
+          "from": "d",
+          "to": "b",
+          "relation": "qualifies"
+        }
+      ]
+    },
+    {
+      "response_number": 5,
+      "title": "A detector score needs an evidential bridge",
+      "nodes": [
+        {
+          "id": "a",
+          "kind": "premise",
+          "text": "A detector score is not direct evidence of who authored a passage.",
+          "quote": "A detector score is not direct evidence of who authored a passage."
+        },
+        {
+          "id": "b",
+          "kind": "assumption",
+          "text": "A score alone may be insufficient to justify a misconduct finding.",
+          "question": "What corroborating evidence would you require before making a misconduct finding?"
+        },
+        {
+          "id": "c",
+          "kind": "recommendation",
+          "text": "Misconduct decisions need reviewable evidence and a fair process.",
+          "quote": "Misconduct decisions need reviewable evidence and a fair process."
+        }
+      ],
+      "edges": [
+        {
+          "from": "a",
+          "to": "b",
+          "relation": "supports"
+        },
+        {
+          "from": "b",
+          "to": "c",
+          "relation": "supports"
+        }
+      ]
+    },
+    {
+      "response_number": 6,
+      "title": "Supervision has to work for diverse, large cohorts",
+      "nodes": [
+        {
+          "id": "a",
+          "kind": "premise",
+          "text": "Supervision constrains undisclosed assistance.",
+          "quote": "Supervision constrains undisclosed assistance."
+        },
+        {
+          "id": "b",
+          "kind": "premise",
+          "text": "Oral assessment can disadvantage anxious or disabled students unless alternatives exist.",
+          "quote": "Oral assessment can disadvantage anxious or disabled students unless alternatives exist.",
+          "condition": "Preserve the need for alternatives."
+        },
+        {
+          "id": "c",
+          "kind": "assumption",
+          "text": "A supervised assessment approach needs accessible alternatives that can be delivered at scale.",
+          "question": "Which alternatives could be offered fairly and feasibly across a large cohort?"
+        },
+        {
+          "id": "d",
+          "kind": "recommendation",
+          "text": "Any new assessment format must work at large cohort sizes.",
+          "quote": "Any new assessment format must work at large cohort sizes."
+        }
+      ],
+      "edges": [
+        {
+          "from": "a",
+          "to": "c",
+          "relation": "motivates"
+        },
+        {
+          "from": "b",
+          "to": "c",
+          "relation": "qualifies"
+        },
+        {
+          "from": "d",
+          "to": "c",
+          "relation": "qualifies"
+        }
+      ]
+    }
+  ]
+}
