@@ -67,6 +67,7 @@ export interface EmergentInsight {
 /* ── Full Synthesis JSON Structure ── */
 
 export interface SynthesisData {
+  reasoning_graph?: ReasoningGraph;
   agreements: Agreement[];
   disagreements: Disagreement[];
   nuances: Nuance[];
@@ -85,4 +86,24 @@ export interface SynthesisData {
   summary_order?: string[];
   /** Facilitator-selected visual treatment for the synthesis panel */
   synthesis_background?: 'default' | 'paper' | 'soft' | string;
+}
+
+export interface ReasoningNode {
+  id: string;
+  kind: 'premise' | 'recommendation' | 'assumption';
+  text: string;
+  quote?: string;
+  source_text?: string;
+  condition?: string;
+  question?: string;
+  confirmed?: false;
+}
+export interface ReasoningGraph {
+  status?: "model_interpretation" | "provided_interpretation" | "authored_example";
+  version: 1;
+  response_count: number;
+  mapped_response_count: number;
+  rejected_flow_count: number;
+  flows: {id:string; title:string; response_number:number; response_id?:number;
+    nodes:ReasoningNode[]; edges:{from:string;to:string;relation:'supports'|'qualifies'|'challenges'|'motivates'}[];}[];
 }

@@ -32,3 +32,9 @@ it('does not flash full prose before claims finish loading and restores it on fa
  quietSummary(main);expect(card.hidden).toBe(true);
  progress.dataset.loading='false';quietSummary(main);expect(card.hidden).toBe(false);
 });
+it('uses reasoning as the first-round default while keeping original claims accessible',()=>{
+ document.body.innerHTML='<main><section id="delphi-recorded-progress"><section class="rf-workspace">A saved reasoning map</section></section><section class="card"><h2>Round 1 synthesis</h2><div class="ProseMirror"><p>Claim 1: Preserve the claim</p></div></section></main>';
+ const main=document.querySelector('main')!;quietSummary(main);quietSummary(main);
+ expect(main.querySelector('.opening-claims')).toBeNull();expect(main.querySelector('.summary-switch button')).toHaveTextContent('Reasoning');expect(main.querySelector<HTMLElement>('#delphi-recorded-progress')!.hidden).toBe(false);
+ main.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();expect(main.querySelector<HTMLElement>('.card')!.hidden).toBe(false);expect(main.querySelector('.ProseMirror')).toHaveTextContent('Claim 1: Preserve the claim');
+});

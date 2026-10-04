@@ -17,7 +17,9 @@ function quietSummary(main) {
   for (const stale of main.querySelectorAll(".opening-claims")) {
     if (stale.dataset.owner !== card.id || !/^Round 1 synthesis$|^Synthesis for Round 1$/.test(heading.textContent || "")) stale.remove();
   }
-  if (/^Round 1 synthesis$|^Synthesis for Round 1$/.test(heading.textContent || "")) {
+  const hasReasoning = !!progress?.querySelector(".rf-workspace");
+  if (hasReasoning) main.querySelector(".opening-claims")?.remove();
+  if (!hasReasoning && /^Round 1 synthesis$|^Synthesis for Round 1$/.test(heading.textContent || "")) {
     const claims = Array.from(card.querySelectorAll(".ProseMirror p,.ProseMirror h3,.claim-evidence-claim-heading")).map((n) => (n.textContent || "").trim()).filter((text) => /^Claim\s+\d+:\s*\S/i.test(text));
     const unique = [...new Set(claims.map((text) => text.replace(/^Claim\s+\d+:\s*/i, "")))];
     if (unique.length) {
@@ -74,7 +76,7 @@ function quietSummary(main) {
     return;
   }
   card.hidden = false;
-  const hasResults = !!progress?.querySelector(".di-claim");
+  const hasResults = !!progress?.querySelector(".di-claim,.rf-workspace");
   const empty = progress?.dataset.empty === "true";
   let state = states.get(card);
   if (!hasResults && !empty) {
@@ -117,9 +119,11 @@ function quietSummary(main) {
     state.open = false;
   }
   if (card.classList.contains("unified-editing")) state.open = true;
+  const label = hasReasoning ? "Reasoning" : hasResults ? "Claims" : "Overview";
+  if (state.claims.textContent !== label) state.claims.textContent = label;
   const current = state;
   function sync() {
-    const text = empty ? "Write a summary" : "Full summary";
+    const text = hasReasoning ? "Claims & full summary" : empty ? "Write a summary" : "Full summary";
     if (current.button.textContent !== text) current.button.textContent = text;
     const expanded = String(current.open);
     if (current.button.getAttribute("aria-expanded") !== expanded) current.button.setAttribute("aria-expanded", expanded);

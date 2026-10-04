@@ -2914,6 +2914,7 @@ async def synthesise_committee(
     response_dicts = [
         {
             "answers": r.answers,
+            "response_id": r.id,
             "email": r.user.email if r.user else f"Expert {i}",
         }
         for i, r in enumerate(responses)
@@ -3445,6 +3446,46 @@ class GenerateSynthesisVersionPayload(BaseModel):
     mode: str = "human_only"
     summary_options: dict[str, bool] | None = None
     prompt: str | None = None
+
+
+from .reasoning import REASONING_PROMPT, parse_reasoning_output
+
+class ReasoningMapPayload(BaseModel):
+    expected_synthesis: str
+    reasoning_flows: list[dict[str, Any]]
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/reasoning", tags=["Synthesis"])
+@limiter.limit(CRUD_LIMIT)
+def save_reasoning_map(request: Request, form_id: int, round_id: int,
+                       payload: ReasoningMapPayload, db: Session = Depends(get_db),
+                       user: User = Depends(require_platform_admin)):
+    """Attach a provided interpretation as a new version; never change claims or ratings."""
+    row = db.query(RoundModel).filter(RoundModel.id == round_id, RoundModel.form_id == form_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Round not found")
+    if row.round_number != 1:
+        raise HTTPException(status_code=409, detail="Reasoning maps belong to round 1 only")
+    if not row.synthesis or row.synthesis != payload.expected_synthesis:
+        raise HTTPException(status_code=409, detail="The synthesis has changed. Reload before saving the map.")
+    responses = db.query(Response).filter(Response.round_id == round_id).order_by(Response.created_at.asc()).all()
+    material = [{"answers": r.answers, "response_id": r.id} for r in responses]
+    _, graph = parse_reasoning_output(json.dumps({"claims_text": row.synthesis,
+        "reasoning_flows": payload.reasoning_flows}), material)
+    if not graph["flows"] or graph["rejected_flow_count"]:
+        raise HTTPException(status_code=422, detail="Every map must have valid connections and exact quotes from its specified response.")
+    graph["status"] = "provided_interpretation"
+    data = {**(row.synthesis_json or {}), "narrative": row.synthesis, "reasoning_graph": graph}
+    versions = db.query(SynthesisVersion).filter(SynthesisVersion.round_id == round_id).all()
+    version_number = max((v.version for v in versions), default=0) + 1
+    for version in versions:
+        version.is_active = False
+    version = SynthesisVersion(round_id=round_id, version=version_number, synthesis=row.synthesis,
+        synthesis_json=data, strategy="reasoning_map", is_active=True)
+    db.add(version)
+    row.synthesis_json = data
+    db.commit()
+    return {"round_id": round_id, "version": version_number, "synthesis_json": data}
 
 
 CUSTOM_SYNTHESIS_BASELINE_PROMPT = """Create a terse claim list. No waffle.
@@ -4061,8 +4102,9 @@ async def _run_custom_synthesis(
         if prompt
         else CUSTOM_SYNTHESIS_BASELINE_PROMPT
     )
+    reasoning_guidance = "\n\n" + REASONING_PROMPT if round_number == 1 else ""
     user_prompt = f"""Synthesis instruction:
-{facilitator_instruction}
+{facilitator_instruction}{reasoning_guidance}
 
 Use only the consultation material below. Preserve disagreement and uncertainty. Do not invent evidence or consensus.
 {guidance_section}
@@ -4076,7 +4118,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             asyncio.to_thread(
                 client.chat.completions.create,
                 model=resolved_model,
-                max_tokens=2500,
+                max_tokens=6500 if round_number == 1 else 2500,
                 temperature=0.2,
                 messages=[
                     {
@@ -4089,7 +4131,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                     {"role": "user", "content": user_prompt},
                 ],
             ),
-            timeout=45,
+            timeout=90 if round_number == 1 else 45,
         )
     except asyncio.TimeoutError as exc:
         raise HTTPException(
@@ -4103,14 +4145,22 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             detail=f"Custom synthesis failed: {_sanitize_error_message(str(exc))}",
         ) from exc
 
+    output = completion.choices[0].message.content or ""
+    reasoning_graph = None
+    if round_number == 1:
+        try:
+            output, reasoning_graph = parse_reasoning_output(output, response_dicts)
+        except (ValueError, TypeError) as exc:
+            raise HTTPException(status_code=502, detail="The model returned an incomplete reasoning draft. The previous synthesis has been kept. Try generating again.") from exc
     synthesis_text = _format_custom_claim_list(
-        completion.choices[0].message.content or "",
+        output,
         questions=questions,
         response_dicts=response_dicts,
     )
     synthesis_json_data = _merge_summary_display_preferences(
         {
             "narrative": synthesis_text,
+            **({"reasoning_graph": reasoning_graph} if reasoning_graph is not None else {}),
             "confidence_map": {"overall": 0.5},
             "agreements": [],
             "disagreements": [],
@@ -4287,13 +4337,14 @@ async def generate_synthesis_for_round(
     response_dicts = [
         {
             "answers": r.answers,
+            "response_id": r.id,
             "email": r.user.email if r.user else f"Expert {i}",
         }
         for i, r in enumerate(responses)
     ]
     round_number = round_obj.round_number
 
-    if strategy == "custom" and synthesis_mode_env != "mock" and api_key:
+    if (strategy == "custom" or (round_number == 1 and strategy == "simple")) and synthesis_mode_env != "mock" and api_key:
         return await _run_custom_synthesis(
             form_id=form_id,
             round_id=round_id,

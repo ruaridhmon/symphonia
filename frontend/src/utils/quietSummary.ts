@@ -13,7 +13,9 @@ export function quietSummary(main:HTMLElement){
  for(const stale of main.querySelectorAll<HTMLElement>('.opening-claims')){
   if(stale.dataset.owner!==card.id||!/^Round 1 synthesis$|^Synthesis for Round 1$/.test(heading!.textContent||''))stale.remove();
  }
- if(/^Round 1 synthesis$|^Synthesis for Round 1$/.test(heading!.textContent||'')){
+ const hasReasoning=!!progress?.querySelector('.rf-workspace');
+ if(hasReasoning)main.querySelector('.opening-claims')?.remove();
+ if(!hasReasoning && /^Round 1 synthesis$|^Synthesis for Round 1$/.test(heading!.textContent||'')){
   // Only explicit numbered claims in saved prose become candidate rows; never infer votes.
   const claims=Array.from(card.querySelectorAll<HTMLElement>('.ProseMirror p,.ProseMirror h3,.claim-evidence-claim-heading'))
    .map(n=>(n.textContent||'').trim()).filter(text=>/^Claim\s+\d+:\s*\S/i.test(text));
@@ -34,7 +36,7 @@ export function quietSummary(main:HTMLElement){
  }
  if(progress?.dataset.loading==='true'||(!progress&&main.querySelector('.consultation-workspace'))){card.hidden=true;return;}
  card.hidden=false;
- const hasResults=!!progress?.querySelector('.di-claim');
+ const hasResults=!!progress?.querySelector('.di-claim,.rf-workspace');
  const empty=progress?.dataset.empty==='true';
 
  let state=states.get(card);
@@ -48,9 +50,11 @@ export function quietSummary(main:HTMLElement){
  if(state.round!==round){state.round=round;state.open=false;}
  // Existing edit actions must remain usable, including editing initiated elsewhere.
  if(card.classList.contains('unified-editing'))state.open=true;
+ const label=hasReasoning?'Reasoning':hasResults?'Claims':'Overview';
+ if(state.claims.textContent!==label)state.claims.textContent=label;
  const current=state;
  function sync(){
-  const text=empty?'Write a summary':'Full summary';
+  const text=hasReasoning?'Claims & full summary':empty?'Write a summary':'Full summary';
   if(current.button.textContent!==text)current.button.textContent=text;
   const expanded=String(current.open);if(current.button.getAttribute('aria-expanded')!==expanded)current.button.setAttribute('aria-expanded',expanded);
   if(card!.hidden===current.open)card!.hidden=!current.open;

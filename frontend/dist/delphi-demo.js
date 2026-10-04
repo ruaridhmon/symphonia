@@ -2350,6 +2350,183 @@ var research_ai_results_default = {
   ]
 };
 
+// src/utils/reasoningFlow.ts
+var el = (tag, text = "", cls = "") => {
+  const e = document.createElement(tag);
+  e.textContent = text;
+  e.className = cls;
+  return e;
+};
+var observers = /* @__PURE__ */ new WeakMap();
+function clearReasoningFlow(root) {
+  observers.get(root)?.disconnect();
+  observers.delete(root);
+}
+function renderReasoningFlow(root, graph) {
+  clearReasoningFlow(root);
+  const flows = graph.flows;
+  const remembered = root.dataset.reasoningFlow;
+  const section = el("section", "", "rf-workspace");
+  section.setAttribute("aria-label", "First-round reasoning");
+  const head = el("header", "", "rf-header");
+  head.append(el("h2", "Claims & reasoning"), el("p", "Follow each contribution from its premises to its conclusion. Dashed cards make the unstated steps visible."));
+  section.append(head);
+  const counts2 = el("div", `${graph.mapped_response_count} of ${graph.response_count} responses represented \xB7 ${flows.length} argument${flows.length === 1 ? "" : "s"}`, "rf-coverage");
+  section.append(counts2);
+  if (graph.rejected_flow_count) counts2.append(el("span", ` \xB7 ${graph.rejected_flow_count} map${graph.rejected_flow_count === 1 ? " was" : "s were"} withheld because source or structure checks failed.`));
+  section.append(el("p", (graph.status === "provided_interpretation" ? "Provided interpretation" : graph.status === "authored_example" ? "Illustrative interpretation" : "AI interpretation") + " \xB7 source quotes are matched to saved responses; meaning and connections still need review. Assumptions are unconfirmed.", "rf-provenance"));
+  if (!flows.length) {
+    section.append(el("p", "No source-linked reasoning maps were saved for this draft. Open Claims & full summary to review the claim list."));
+    root.append(section);
+    return;
+  }
+  const nav = el("nav", "", "rf-tabs");
+  nav.setAttribute("aria-label", "Expert reasoning flows");
+  section.append(nav);
+  const legend = el("div", "", "rf-legend");
+  for (const [cls, label] of [["premise", "Stated premise"], ["recommendation", "Stated recommendation"], ["assumption", "Inferred assumption"]]) legend.append(el("span", label, "rf-key rf-" + cls));
+  section.append(legend);
+  const canvas = el("div", "", "rf-canvas");
+  const detail = el("section", "", "rf-detail");
+  detail.setAttribute("aria-live", "polite");
+  section.append(canvas, detail);
+  const caption = el("p", "Arrows describe a proposed logical connection, not a sequence in time or proof of causation. Separate expert contributions remain separate. These are selected arguments, not a guarantee that every statement is represented.", "rf-caption");
+  section.append(caption);
+  const show = (index) => {
+    const flow = flows[index];
+    root.dataset.reasoningFlow = flow.id;
+    canvas.replaceChildren();
+    detail.replaceChildren();
+    nav.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === index)));
+    const title = el("div", "", "rf-flow-title");
+    title.append(el("h3", flow.title), el("span", `Response ${flow.response_number}`));
+    canvas.append(title);
+    const diagram = el("div", "", "rf-diagram");
+    canvas.append(diagram);
+    const labels = new Map(flow.nodes.map((n, i) => [n.id, String.fromCharCode(65 + i)]));
+    const select = (n) => {
+      root.dataset.reasoningNode = n.id;
+      diagram.querySelectorAll("[data-rf-node]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rfNode === n.id)));
+      detail.replaceChildren();
+      detail.classList.toggle("rf-inferred-detail", n.kind === "assumption");
+      detail.append(el("div", n.kind === "assumption" ? "INFERRED \xB7 UNCONFIRMED" : `SOURCE \xB7 RESPONSE ${flow.response_number}`, "rf-eyebrow"), el("h4", n.kind === "assumption" ? "A step to check with the expert" : "The expert\u2019s words"));
+      if (n.kind === "assumption") detail.append(el("p", n.text), el("blockquote", n.question || "Ask the expert to clarify this connection."), el("p", "This bridge is an interpretation. It is not attributed to the expert and is not part of the rating questionnaire.", "rf-small"));
+      else {
+        detail.append(el("blockquote", n.quote || ""));
+        if (n.condition) detail.append(el("p", "Qualification: " + n.condition, "rf-qualification"));
+        if (n.source_text && n.source_text !== n.quote) {
+          const context = document.createElement("details");
+          context.append(el("summary", "Read the source in context"), el("p", n.source_text));
+          detail.append(context);
+        }
+      }
+      const links = flow.edges.filter((e) => e.from === n.id || e.to === n.id);
+      if (links.length) {
+        const list = el("div", "", "rf-connections");
+        list.append(el("span", "Connections \xB7 interpretation", "rf-small"));
+        for (const edge of links) {
+          const other = flow.nodes.find((t) => t.id === (edge.from === n.id ? edge.to : edge.from));
+          if (!other) continue;
+          const b = document.createElement("button");
+          b.type = "button";
+          b.textContent = `${labels.get(edge.from)} ${edge.relation} ${labels.get(edge.to)} \xB7 ${other.text}`;
+          b.onclick = () => select(other);
+          list.append(b);
+        }
+        detail.append(list);
+      }
+    };
+    const levels = /* @__PURE__ */ new Map();
+    for (const n of flow.nodes) {
+      const incoming = flow.edges.filter((e) => e.to === n.id);
+      levels.set(n.id, incoming.length ? Math.max(...incoming.map((e) => (levels.get(e.from) ?? 0) + 1)) : 0);
+    }
+    const max = Math.max(...levels.values());
+    diagram.style.setProperty("--rf-columns", String(max + 1));
+    for (let level = 0; level <= max; level++) {
+      const column = el("div", "", "rf-column");
+      diagram.append(column);
+      for (const n of flow.nodes.filter((n2) => levels.get(n2.id) === level)) {
+        const card = el("div", "", "rf-step");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "rf-node rf-" + n.kind;
+        b.dataset.rfNode = n.id;
+        b.setAttribute("aria-pressed", "false");
+        b.append(el("span", `${labels.get(n.id)} / ${n.kind === "assumption" ? "INFERRED ASSUMPTION" : n.kind === "premise" ? "STATED PREMISE" : "STATED RECOMMENDATION"}`, "rf-eyebrow"), el("strong", n.text));
+        if (n.condition) b.append(el("span", n.condition, "rf-condition"));
+        b.append(el("span", n.kind === "assumption" ? "Not stated \xB7 needs checking" : "Inspect source \u2197", "rf-node-foot"));
+        b.onclick = () => select(n);
+        card.append(b);
+        const outgoing = flow.edges.filter((e) => e.from === n.id);
+        if (outgoing.length) {
+          const links = el("div", "", "rf-arrows");
+          for (const edge of outgoing) {
+            const link = document.createElement("button");
+            link.type = "button";
+            link.textContent = `${edge.relation} \u2192 ${labels.get(edge.to)}`;
+            link.setAttribute("aria-label", `${labels.get(n.id)} ${edge.relation} ${labels.get(edge.to)}. Inspect connected step`);
+            link.onclick = () => {
+              const target = flow.nodes.find((t) => t.id === edge.to);
+              if (target) select(target);
+            };
+            links.append(link);
+          }
+          card.append(links);
+        }
+        column.append(card);
+      }
+    }
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("rf-wires");
+    svg.setAttribute("aria-hidden", "true");
+    diagram.prepend(svg);
+    const draw2 = () => {
+      const box = diagram.getBoundingClientRect();
+      if (!box.width) return;
+      svg.setAttribute("width", String(diagram.scrollWidth));
+      svg.setAttribute("height", String(diagram.scrollHeight));
+      svg.replaceChildren();
+      const vertical = getComputedStyle(diagram).gridTemplateColumns.split(" ").length === 1;
+      for (const edge of flow.edges) {
+        const cards = Array.from(diagram.querySelectorAll("[data-rf-node]"));
+        const from = cards.find((c) => c.dataset.rfNode === edge.from), to = cards.find((c) => c.dataset.rfNode === edge.to);
+        if (!from || !to) continue;
+        const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+        const x1 = (vertical ? a.left + a.width / 2 : a.right) - box.left, y1 = (vertical ? a.bottom : a.top + a.height / 2) - box.top;
+        const x2 = (vertical ? b.left + b.width / 2 : b.left) - box.left, y2 = (vertical ? b.top : b.top + b.height / 2) - box.top;
+        const path = document.createElementNS(svg.namespaceURI, "path");
+        path.setAttribute("d", vertical ? `M ${x1} ${y1} C ${x1} ${(y1 + y2) / 2}, ${x2} ${(y1 + y2) / 2}, ${x2} ${y2}` : `M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}`);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", edge.relation === "challenges" ? "#bd7883" : "#baa9cb");
+        path.setAttribute("stroke-width", "1.4");
+        if (flow.nodes.some((n) => (n.id === edge.from || n.id === edge.to) && n.kind === "assumption")) path.setAttribute("stroke-dasharray", "4 4");
+        svg.append(path);
+      }
+    };
+    observers.get(root)?.disconnect();
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(draw2);
+      observer.observe(diagram);
+      observers.set(root, observer);
+    }
+    requestAnimationFrame(draw2);
+    select(flow.nodes.find((n) => n.id === root.dataset.reasoningNode) || flow.nodes[0]);
+  };
+  flows.forEach((flow, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.append(el("span", `Response ${flow.response_number}`), el("strong", flow.title));
+    b.onclick = () => {
+      delete root.dataset.reasoningNode;
+      show(i);
+    };
+    nav.append(b);
+  });
+  root.append(section);
+  show(Math.max(0, flows.findIndex((f) => f.id === remembered)));
+}
+
 // src/utils/answers.ts
 function isRecord(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -2492,44 +2669,44 @@ function buildFixedDelphiRound(round, rounds, responses) {
 }
 
 // src/utils/renderDelphiPlanner.ts
-var el = (tag, text = "") => {
+var el2 = (tag, text = "") => {
   const n = document.createElement(tag);
   n.textContent = text;
   return n;
 };
 function renderDelphiPlanner(root, round, rounds, responses, publish) {
   if (round.round_number >= 3) return;
-  const box = el("div");
+  const box = el2("div");
   box.className = "di-planner";
   root.append(box);
   if (round.round_number !== 2) return;
-  const detail = el("details");
-  detail.append(el("summary", "Preview round 3 \xB7 Final ratings"), el("p", "All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and explain their reasoning."));
+  const detail = el2("details");
+  detail.append(el2("summary", "Preview round 3 \xB7 Final ratings"), el2("p", "All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and explain their reasoning."));
   box.append(detail);
   try {
     const questions = buildFixedDelphiRound(round, rounds.filter((r) => r.round_number <= 2), responses);
     questions.filter((q) => typeof q === "object" && Array.isArray(q.options)).forEach((q) => {
       if (typeof q === "string") return;
-      const item = el("details");
-      item.append(el("summary", String(q.sectionTitle || q.label)), el("p", String(q.groupPrompt)), el("p", q.options.join(" \xB7 ")), el("p", "Explain your position \u2014 why do you agree or disagree? Share the reasoning or evidence behind your answer."));
+      const item = el2("details");
+      item.append(el2("summary", String(q.sectionTitle || q.label)), el2("p", String(q.groupPrompt)), el2("p", q.options.join(" \xB7 ")), el2("p", "Explain your position \u2014 why do you agree or disagree? Share the reasoning or evidence behind your answer."));
       detail.append(item);
     });
     if (publish && !rounds.some((r) => r.round_number >= 3)) {
-      const open = el("button", "Open round 3");
+      const open = el2("button", "Open round 3");
       open.type = "button";
       open.onclick = async () => {
         open.disabled = true;
         try {
           await publish(questions);
         } catch (e) {
-          detail.append(el("p", e.message));
+          detail.append(el2("p", e.message));
           open.disabled = false;
         }
       };
       detail.append(open);
-    } else detail.append(el("p", rounds.some((r) => r.round_number >= 3) ? "Round 3 already exists." : "Simulation preview only."));
+    } else detail.append(el2("p", rounds.some((r) => r.round_number >= 3) ? "Round 3 already exists." : "Simulation preview only."));
   } catch (e) {
-    detail.append(el("p", e.message));
+    detail.append(el2("p", e.message));
   }
 }
 
@@ -2557,6 +2734,7 @@ function category(row) {
   return "Divided";
 }
 function renderDelphiInsights(root, round, rounds, responses, refresh, publish) {
+  clearReasoningFlow(root);
   const rows = ratingProgress(round, rounds, responses);
   const priorOpen = new Set(Array.from(root.querySelectorAll("details[open]")).map((d) => d.dataset.key));
   delete root.dataset.filter;
@@ -2575,6 +2753,17 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   root.dataset.empty = String(actual === 0);
   const note = synthesisProvenanceNote(round, rounds);
   if (note) root.append(node("p", note, "di-warning"));
+  if (round.round_number === 1 && !rows.length) {
+    const graph = round.synthesis_json?.reasoning_graph;
+    if (graph?.version === 1 && round.synthesis_json?.narrative === round.synthesis) {
+      renderReasoningFlow(root, graph);
+      return;
+    }
+    if (actual && round.synthesis) {
+      root.append(node("p", "This saved draft contains claims only. Generate a new draft with Simple or Custom instructions to include source-linked reasoning and inferred assumptions.", "di-empty"));
+      return;
+    }
+  }
   if (!rows.length) {
     root.append(node("p", actual === 0 ? "No responses yet for this round. Responses will appear here as participants submit them." : round.round_number === 1 ? "This round gathers independent views. Extract claims from the responses before setting up the rating round." : "There are no comparable claim ratings in this round. Review the written responses or synthesis below.", "di-empty"));
     return;
@@ -2778,14 +2967,14 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
 
 // src/legacy/delphiDemo.ts
 var example = public_ai_results_default;
-var el2 = (tag, text = "", cls = "") => {
+var el3 = (tag, text = "", cls = "") => {
   const n = document.createElement(tag);
   n.textContent = text;
   n.className = cls;
   return n;
 };
 var btn = (text, fn) => {
-  const n = el2("button", text);
+  const n = el3("button", text);
   n.type = "button";
   n.onclick = fn;
   return n;
@@ -2793,23 +2982,23 @@ var btn = (text, fn) => {
 var selected = 3;
 function draw(root) {
   root.replaceChildren();
-  const top = el2("div", "", "demo-topline");
-  top.append(el2("span", "SYNTHETIC DELPHI \xB7 8 FICTIONAL EXPERTS", "di-eyebrow"));
+  const top = el3("div", "", "demo-topline");
+  top.append(el3("span", "SYNTHETIC DELPHI \xB7 8 FICTIONAL EXPERTS", "di-eyebrow"));
   const standalone = location.pathname.startsWith("/examples/");
-  const back = el2("a", standalone ? "Dashboard" : "Back to consultation");
+  const back = el3("a", standalone ? "Dashboard" : "Back to consultation");
   back.href = standalone ? "/" : location.pathname;
   top.append(back);
   root.append(top);
-  root.append(el2("h2", example.fixture.title, "demo-title"));
-  root.append(el2("p", "1. Share ideas \xB7 2. Rate the claims \xB7 3. Review and rate again. The claims stay the same; the reasoning can develop.", "demo-deck"));
-  const provenance = el2("details", "", "demo-protocol");
-  provenance.append(el2("summary", "About this simulation"));
-  provenance.append(el2("p", example.fixture.method + " The 24 submissions were processed by an isolated test instance of the application. This is a saved demonstration, separate from live consultation responses."));
-  provenance.append(el2("p", "Protocol: eight returning participants; 80% agreement or disagreement, with uncertainty included; all eight responses required. Stop after three rounds and report unresolved claims. Claims stay unchanged between rating rounds."));
+  root.append(el3("h2", example.fixture.title, "demo-title"));
+  root.append(el3("p", "1. Share ideas \xB7 2. Rate the claims \xB7 3. Review and rate again. The claims stay the same; the reasoning can develop.", "demo-deck"));
+  const provenance = el3("details", "", "demo-protocol");
+  provenance.append(el3("summary", "About this simulation"));
+  provenance.append(el3("p", example.fixture.method + " The 24 submissions were processed by an isolated test instance of the application. This is a saved demonstration, separate from live consultation responses."));
+  provenance.append(el3("p", "Protocol: eight returning participants; 80% agreement or disagreement, with uncertainty included; all eight responses required. Stop after three rounds and report unresolved claims. Claims stay unchanged between rating rounds."));
   root.append(provenance);
-  const nav = el2("nav", "", "demo-rounds");
+  const nav = el3("nav", "", "demo-rounds");
   nav.setAttribute("aria-label", "Simulation rounds");
-  const label = el2("label", "Viewing round ");
+  const label = el3("label", "Viewing round ");
   const select = document.createElement("select");
   select.setAttribute("aria-label", "Simulation round");
   example.rounds.forEach((r) => {
@@ -2826,51 +3015,51 @@ function draw(root) {
   label.append(select);
   nav.append(label);
   root.append(nav);
-  const narrative = el2("div", "", "demo-narrative");
+  const narrative = el3("div", "", "demo-narrative");
   if (selected === 1) {
-    narrative.append(el2("h3", "Different starting points"), el2("p", "Eight roles bring different priorities: capacity, fairness, worker protection, fiscal flexibility and public accountability. Four candidate claims are distilled from their proposals; no agreement percentage is inferred from these paragraphs."));
+    narrative.append(el3("h3", "Different starting points"), el3("p", "Eight roles bring different priorities: capacity, fairness, worker protection, fiscal flexibility and public accountability. Four candidate claims are distilled from their proposals; no agreement percentage is inferred from these paragraphs."));
   }
   if (selected === 2) {
-    narrative.append(el2("h3", "The first ratings reveal the fault lines"), el2("p", "Human appeals have broad support. The staffing earmark splits the panel evenly. Five respondents favour universal model disclosure, while others question whether it is the right route to accountability."));
+    narrative.append(el3("h3", "The first ratings reveal the fault lines"), el3("p", "Human appeals have broad support. The staffing earmark splits the panel evenly. Five respondents favour universal model disclosure, while others question whether it is the right route to accountability."));
   }
   if (selected === 3) {
-    narrative.append(el2("h3", "Common ground, with questions still open"), el2("p", "All eight support human appeal; seven reject universal model disclosure. Routine automation gains support but remains below the threshold. The staffing earmark stays split 4\u20134: protecting staff versus keeping budgets flexible."));
+    narrative.append(el3("h3", "Common ground, with questions still open"), el3("p", "All eight support human appeal; seven reject universal model disclosure. Routine automation gains support but remains below the threshold. The staffing earmark stays split 4\u20134: protecting staff versus keeping budgets flexible."));
   }
   if (example.fixture.narratives) {
-    narrative.replaceChildren(el2("h3", ["Independent starting points", "Where opinions differ", "What the panel learned"][selected - 1]), el2("p", example.fixture.narratives[selected - 1]));
+    narrative.replaceChildren(el3("h3", ["Independent starting points", "Where opinions differ", "What the panel learned"][selected - 1]), el3("p", example.fixture.narratives[selected - 1]));
   }
   root.append(narrative);
   if (selected === 3) {
-    const matrix = el2("details", "", "demo-matrix");
-    matrix.append(el2("summary", "See the eight perspectives side by side"));
-    const table = el2("table");
-    table.append(el2("caption", "Round 2 \u2192 Round 3. Fictional roles; original claims unchanged."));
-    const head = el2("tr");
+    const matrix = el3("details", "", "demo-matrix");
+    matrix.append(el3("summary", "See the eight perspectives side by side"));
+    const table = el3("table");
+    table.append(el3("caption", "Round 2 \u2192 Round 3. Fictional roles; original claims unchanged."));
+    const head = el3("tr");
     ["Perspective", ...example.fixture.short_labels || ["Human appeal", "Routine automation", "Staffing earmark", "Full model release"]].forEach((t) => {
-      const th = el2("th", t);
+      const th = el3("th", t);
       th.setAttribute("scope", "col");
       head.append(th);
     });
-    const thead = el2("thead");
+    const thead = el3("thead");
     thead.append(head);
     table.append(thead);
-    const tbody = el2("tbody");
+    const tbody = el3("tbody");
     example.fixture.experts.forEach((e) => {
-      const row = el2("tr");
-      const label2 = el2("th", e.role);
+      const row = el3("tr");
+      const label2 = el3("th", e.role);
       label2.setAttribute("scope", "row");
       row.append(label2);
       e.round3.votes.forEach((v, i) => {
         const short = (x) => x.startsWith("Unable") ? "Unsure" : x;
         const before = e.round2.votes[i];
-        const cell = el2("td", before === v ? short(v) : `${short(before)} \u2192 ${short(v)}`);
+        const cell = el3("td", before === v ? short(v) : `${short(before)} \u2192 ${short(v)}`);
         if (before !== v) cell.className = "demo-vote-changed";
         row.append(cell);
       });
       tbody.append(row);
     });
     table.append(tbody);
-    const scroll = el2("div", "", "demo-table-scroll");
+    const scroll = el3("div", "", "demo-table-scroll");
     scroll.tabIndex = 0;
     scroll.setAttribute("role", "region");
     scroll.setAttribute("aria-label", "Perspective ratings, scroll horizontally on small screens");
@@ -2879,24 +3068,24 @@ function draw(root) {
     root.append(matrix);
   }
   if (selected === 1) {
-    const proposals = el2("div", "", "demo-proposals");
+    const proposals = el3("div", "", "demo-proposals");
     example.fixture.experts.forEach((e, i) => {
-      const d = el2("details");
-      d.append(el2("summary", `Perspective ${i + 1} \xB7 ${e.role}`), el2("p", e.proposal));
+      const d = el3("details");
+      d.append(el3("summary", `Perspective ${i + 1} \xB7 ${e.role}`), el3("p", e.proposal));
       proposals.append(d);
     });
     root.append(proposals);
-    const claims = el2("section", "", "demo-candidates");
-    claims.append(el2("h3", "Four claims for the next round"));
-    example.fixture.claims.forEach((c, i) => claims.append(el2("p", `${i + 1}. ${c}`)));
+    const claims = el3("section", "", "demo-candidates");
+    claims.append(el3("h3", "Four claims for the next round"));
+    example.fixture.claims.forEach((c, i) => claims.append(el3("p", `${i + 1}. ${c}`)));
     root.append(claims);
   } else {
-    const results = el2("section");
+    const results = el3("section");
     results.setAttribute("aria-label", "Synthetic Delphi results");
     renderDelphiInsights(results, example.rounds[selected - 1], example.rounds, example.responses);
     root.append(results);
   }
-  const footer = el2("div", "", "demo-footer");
+  const footer = el3("div", "", "demo-footer");
   if (selected > 1) footer.append(btn("Previous round", () => {
     selected--;
     draw(root);
@@ -2931,7 +3120,7 @@ function sync() {
       const empty = values.length === 4 && values.every((v) => v.textContent?.trim() === "0") && !analysis.querySelector(".structured-section-header");
       analysis.classList.toggle("di-empty-analysis", empty);
       const existing = analysis.querySelector(".di-analysis-empty");
-      if (empty && !existing) analysis.prepend(el2("p", "No structured analysis items are available for this synthesis. See recorded participant ratings in the Synthesis view.", "di-analysis-empty"));
+      if (empty && !existing) analysis.prepend(el3("p", "No structured analysis items are available for this synthesis. See recorded participant ratings in the Synthesis view.", "di-analysis-empty"));
       if (!empty) existing?.remove();
     }
   }
@@ -2946,7 +3135,7 @@ function sync() {
     root = null;
   }
   if (active && main && !root) {
-    root = el2("section", "", "demo-workspace");
+    root = el3("section", "", "demo-workspace");
     root.id = "delphi-demo-workspace";
     root.dataset.example = demoKey || "";
     selected = 3;
@@ -2959,7 +3148,7 @@ function sync() {
   const researchRoute = /^\/admin\/form\/18(?:\/summary)?\/?$/.test(location.pathname);
   if (!researchRoute || requested) document.getElementById("research-example-link")?.remove();
   if (researchRoute && !requested && main && !document.getElementById("research-example-link")) {
-    const link = el2("a", "Explore the completed synthetic example \u2192", "demo-dashboard-link");
+    const link = el3("a", "Explore the completed synthetic example \u2192", "demo-dashboard-link");
     link.id = "research-example-link";
     link.href = "/examples/research-ai.html";
     main.prepend(link);
@@ -2967,10 +3156,10 @@ function sync() {
   const dashboard = location.pathname === "/" && Array.from(main?.querySelectorAll("h1") || []).some((h) => h.textContent === "Consultations");
   if (!dashboard) document.getElementById("delphi-demo-link")?.remove();
   if (dashboard && !document.getElementById("delphi-demo-link")) {
-    const link = el2("a", "", "demo-dashboard-link");
+    const link = el3("a", "", "demo-dashboard-link");
     link.id = "delphi-demo-link";
     link.href = "/examples/research-ai.html";
-    link.append(el2("strong", "Explore an example \u2192"), el2("span", "Demo \xB7 8 fictional experts"));
+    link.append(el3("strong", "Explore an example \u2192"), el3("span", "Demo \xB7 8 fictional experts"));
     main.append(link);
   }
 }
