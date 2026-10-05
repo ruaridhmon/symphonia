@@ -1,6 +1,6 @@
 // Dev-only presentation archive. No consultation records are deleted or rewritten.
 (()=>{
- if(!['symphonia-dev-488613.web.app','localhost','127.0.0.1'].includes(location.hostname))return;
+ if(!['symphonia-dev-488613.web.app','localhost','127.0.0.1'].includes(location.hostname)&&!/^symphonia-dev-488613--[a-z0-9-]+\.web\.app$/.test(location.hostname))return;
  const old=new Set([20,23,24,25,26,27,28]);let expanded=false,scheduled=false;
  const style=document.createElement('style');style.textContent='[data-earlier-example][hidden],#delphi-demo-link{display:none!important}#earlier-surveys-toggle{margin:18px 0;padding:10px 14px;background:var(--background);color:var(--muted-foreground);border:1px solid var(--border);border-radius:10px;font:inherit;font-size:13px;min-height:44px}';document.head.append(style);
  function sync(){

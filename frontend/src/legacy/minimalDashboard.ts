@@ -1,3 +1,5 @@
+export {};
+
 /**
  * Legacy dev-dashboard compatibility layer.
  *
@@ -25,9 +27,39 @@ function relabelButton(button: HTMLButtonElement | null, label: string): void {
 
 function markHeader(): void {
   const header = Array.from(document.querySelectorAll<HTMLElement>('header'))
-    .find((candidate) => candidate.querySelector('img[src*="logo-mark.png"]'));
+    .find(candidate => candidate.querySelector('img[src*="logo-mark.png"]'));
   if (!header) return;
-  header.classList.add('symphonia-minimal-header');
+  header.classList.add('symphonia-shell-header');
+  header.parentElement?.classList.add('symphonia-shell');
+  const account = header.querySelector<HTMLButtonElement>('button[aria-haspopup="menu"]');
+  account?.classList.add('symphonia-account-trigger');
+  account?.parentElement?.classList.add('symphonia-account');
+  let navigation = header.querySelector<HTMLElement>('.symphonia-shell-navigation');
+  if (!navigation) {
+    navigation = document.createElement('nav');
+    navigation.className = 'symphonia-shell-navigation';
+    navigation.setAttribute('aria-label', 'Workspace');
+    const home = document.createElement('a');
+    home.href = '/';
+    home.textContent = 'Consultations';
+    navigation.append(home);
+    header.append(navigation);
+  }
+  const home = navigation.querySelector('a[href="/"]')!;
+  if (location.pathname === '/') home.setAttribute('aria-current', 'page');
+  else home.removeAttribute('aria-current');
+  const canCreate = !!findButton(/^new(?: consultation)?$/i) || location.pathname.startsWith('/admin/');
+  const existing = navigation.querySelector('a[href="/admin/forms/new"]');
+  if (canCreate && !existing) {
+    const create = document.createElement('a');
+    create.href = '/admin/forms/new';
+    create.textContent = 'New consultation';
+    navigation.append(create);
+  }
+  if (existing) {
+    if (location.pathname === '/admin/forms/new') existing.setAttribute('aria-current', 'page');
+    else existing.removeAttribute('aria-current');
+  }
 }
 
 function nearestCard(node: Element | null): HTMLElement | null {
@@ -43,11 +75,11 @@ function nearestCard(node: Element | null): HTMLElement | null {
 }
 
 function markAdminDashboard(): boolean {
-  const newButton = findButton(/^new consultation$/i);
+  const newButton = findButton(/^new(?: consultation)?$/i);
   const joinButton = findButton(/^(join|enter).*code|^join consultation$/i);
-  if (!newButton || !newButton.closest('section')) return false;
+  if (!newButton) return false;
 
-  const section = newButton.closest<HTMLElement>('section');
+  const section = newButton.closest<HTMLElement>('section, main');
   if (!section) return false;
   section.classList.add('symphonia-minimal-dashboard', 'symphonia-admin-home');
 
@@ -55,7 +87,8 @@ function markAdminDashboard(): boolean {
     .find((heading) => /^consultations$/i.test(cleanText(heading.textContent)));
   title?.classList.add('symphonia-redundant-title');
 
-  relabelButton(newButton, 'New');
+  relabelButton(newButton, 'New consultation');
+  newButton.classList.add('symphonia-create-action');
   if (joinButton) relabelButton(joinButton, 'Join');
 
   const search = section.querySelector<HTMLInputElement>(
@@ -83,7 +116,7 @@ function markExpertDashboard(): void {
     .find((heading) => /^my consultations$/i.test(cleanText(heading.textContent)));
   if (!joinHeading && !listHeading) return;
 
-  const section = (joinHeading || listHeading)?.closest<HTMLElement>('section');
+  const section = (joinHeading || listHeading)?.closest<HTMLElement>('section, main');
   section?.classList.add('symphonia-minimal-dashboard', 'symphonia-expert-home');
 
   if (joinHeading) {

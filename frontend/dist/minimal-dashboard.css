@@ -1,133 +1,98 @@
-/* Minimal authenticated home, compatible with the committed dev dist mirror. */
-.symphonia-minimal-header {
-  border-bottom-color: transparent !important;
-  box-shadow: none !important;
-  background: color-mix(in srgb, var(--background) 94%, transparent) !important;
-  backdrop-filter: blur(14px) !important;
+/* One restrained workspace shell shared by source and the preserved dev mirror. */
+#root .symphonia-shell { --shell-width:184px;padding-left:var(--shell-width);min-width:0; }
+#root .symphonia-shell > .symphonia-shell-header {
+  position:fixed!important;inset:0 auto 0 0!important;width:var(--shell-width);height:100dvh;
+  border:0!important;box-shadow:none!important;backdrop-filter:none!important;
+  background:color-mix(in srgb,var(--muted) 68%,var(--background))!important;z-index:40;
 }
-.symphonia-minimal-header > div {
-  min-height: 44px !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  max-width: 64rem !important;
+#root .symphonia-shell > .symphonia-shell-header > div:first-child {
+  display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+  max-width:none!important;min-height:0!important;margin:0!important;padding:24px 16px!important;
 }
-.symphonia-minimal-header h1 { display: none !important; }
-.symphonia-minimal-header img[src*="logo-mark.png"] {
-  height: 22px !important;
-  width: auto !important;
+#root .symphonia-shell-header button[aria-label="Go to home"],
+#root .symphonia-shell-header button[aria-label="Go to dashboard"] {
+  min-height:32px;justify-content:flex-start;gap:0!important;padding:0 10px!important;
+  font-size:15px!important;font-weight:550!important;letter-spacing:-.025em;
 }
-
-.symphonia-minimal-dashboard {
-  padding-top: 12px !important;
-  padding-bottom: 28px !important;
+#root .symphonia-shell-header button[aria-label="Go to home"] img,
+#root .symphonia-shell-header button[aria-label="Go to dashboard"] img { display:none!important; }
+#root .symphonia-shell-header button[aria-label="Go to home"] h1,
+#root .symphonia-shell-header button[aria-label="Go to dashboard"] span {
+  display:block!important;font-size:15px!important;font-weight:550!important;letter-spacing:-.025em;
 }
-.symphonia-minimal-dashboard > div {
-  max-width: 58rem !important;
+#root .symphonia-shell-navigation { display:flex;flex-direction:column;gap:4px;padding:12px 16px; }
+#root .symphonia-shell-navigation a { display:flex;align-items:center;min-height:40px;padding:8px 10px;border-radius:7px;font-size:13px;color:var(--muted-foreground);text-decoration:none; }
+#root .symphonia-shell-navigation a:hover { color:var(--foreground);background:color-mix(in srgb,var(--border) 42%,transparent); }
+#root .symphonia-shell-navigation a[aria-current="page"] { color:var(--foreground);background:color-mix(in srgb,var(--border) 52%,transparent);font-weight:500; }
+#root .symphonia-shell-header > div:first-child > nav,
+#root .symphonia-shell-header > div:first-child > div:has(button[aria-haspopup="menu"]) {
+  display:flex!important;position:absolute;bottom:18px;left:16px;right:16px;
 }
-.symphonia-redundant-title { display: none !important; }
-
-.symphonia-admin-home > div > .mb-8 {
-  margin-bottom: 20px !important;
-  align-items: center !important;
-}
-.symphonia-admin-home > div > .mb-8 > div:last-child {
-  gap: 18px !important;
-}
-.symphonia-admin-home > div > .mb-8 button {
-  min-height: 32px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: var(--foreground) !important;
-  font-size: 0.875rem !important;
-  font-weight: 550 !important;
-}
-.symphonia-admin-home > div > .mb-8 button + button {
-  color: var(--muted-foreground) !important;
-}
-
-.symphonia-minimal-search {
-  margin-top: 0 !important;
-  max-width: 14rem !important;
-}
-.symphonia-minimal-search input {
-  height: 2.25rem !important;
-  border-radius: 9px !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.symphonia-flat-list,
-.symphonia-flat-empty,
-.symphonia-join-card,
-.symphonia-list-card {
-  background: transparent !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-.symphonia-flat-list { overflow: visible !important; }
-.symphonia-flat-table thead { display: none !important; }
-.symphonia-flat-table tbody tr {
-  background: transparent !important;
-}
-.symphonia-flat-table tbody td {
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 58%, transparent) !important;
-  padding-top: 15px !important;
-  padding-bottom: 15px !important;
-}
-.symphonia-flat-table tbody tr:last-child td { border-bottom: 0 !important; }
-
-.symphonia-expert-home .symphonia-join-card,
-.symphonia-expert-home .symphonia-list-card {
-  padding: 0 !important;
-}
-.symphonia-expert-home .symphonia-join-card {
-  margin-bottom: 18px !important;
-}
-.symphonia-join-form {
-  display: flex !important;
-  gap: 8px !important;
-  align-items: flex-start !important;
-}
-.symphonia-join-form > div { flex: 1 1 auto !important; }
-.symphonia-join-form input {
-  height: 38px !important;
-  border-radius: 9px !important;
-  background: transparent !important;
-}
-.symphonia-join-form button[type="submit"] {
-  width: auto !important;
-  min-width: 56px !important;
-  height: 38px !important;
-  padding-inline: 12px !important;
-  background: transparent !important;
-  border: 1px solid var(--border) !important;
-  color: var(--foreground) !important;
-}
-.symphonia-list-card ul {
-  gap: 0 !important;
-}
-.symphonia-list-card li.form-item {
-  border: 0 !important;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 58%, transparent) !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  padding: 15px 0 !important;
-}
-
-@media (max-width: 639px) {
-  .symphonia-minimal-header > div { min-height: 42px !important; }
-  .symphonia-minimal-dashboard { padding-top: 8px !important; }
-  .symphonia-admin-home > div > .mb-8 {
-    flex-direction: row !important;
-    gap: 12px !important;
-  }
-  .symphonia-minimal-search { max-width: none !important; }
-  .symphonia-join-form { flex-direction: row !important; }
-  .symphonia-flat-empty {
-    padding: 44px 0 !important;
-  }
+#root .symphonia-shell-header .symphonia-account-trigger { border:0!important;background:transparent!important;border-radius:7px!important;min-height:44px;padding:6px!important;gap:9px!important; }
+#root .symphonia-shell-header .symphonia-account-trigger::after { content:'Account';font-size:12px;color:var(--muted-foreground); }
+#root .symphonia-shell-header .symphonia-account-trigger > svg { display:none; }
+#root .symphonia-shell-header .symphonia-account-trigger > span { width:28px;height:28px;font-size:10px;letter-spacing:0; }
+#root .symphonia-shell-header .symphonia-account > [role="menu"] { top:auto!important;bottom:calc(100% + 8px);left:0;right:auto!important;width:260px;max-width:calc(100vw - 32px);border-radius:10px!important; }
+#root .symphonia-shell-header button[aria-controls="mobile-nav-menu"],
+#root .symphonia-shell-header #mobile-nav-menu { display:none!important; }
+#root .symphonia-shell > footer { border:0!important;background:none!important;padding:16px!important;font-size:10px!important;opacity:.5; }
+#root .symphonia-shell > main.product-dashboard { max-width:960px!important;padding:48px 32px 40px!important; }
+#root .symphonia-shell > main.product-summary { padding-top:40px!important; }
+#root .symphonia-shell > main.product-summary > div > a:first-child { display:none; }
+.symphonia-minimal-dashboard { padding:0!important; }
+#root .symphonia-minimal-dashboard > div { max-width:none!important;padding:0!important; }
+#root .symphonia-admin-home h1.symphonia-redundant-title { display:block!important;position:static!important;width:auto!important;height:auto!important;clip-path:none!important;overflow:visible!important;margin:0 0 20px!important;font-size:22px!important;line-height:1.3!important;font-weight:550!important;letter-spacing:-.025em!important; }
+.symphonia-admin-home > div > .mb-8 { margin-bottom:16px!important;gap:20px;align-items:flex-end!important; }
+.symphonia-admin-home > div > .mb-8 > div:first-child { flex:1;min-width:0; }
+.symphonia-admin-home > div > .mb-8 > div:last-child { gap:12px!important; }
+.symphonia-admin-home > div > .mb-8 button { min-height:40px!important;padding:8px 10px!important;border:0!important;border-radius:7px!important;background:transparent!important;box-shadow:none!important;color:var(--muted-foreground)!important;font-size:13px!important; }
+#root .symphonia-admin-home .symphonia-create-action { display:none!important; }
+.symphonia-minimal-search { margin:0!important;width:min(100%,360px)!important;max-width:none!important;min-width:0; }
+#root .symphonia-minimal-search input { width:100%;height:38px!important;border-radius:8px!important;background:var(--muted)!important;border-color:transparent!important;box-shadow:none!important;font-size:13px; }
+.symphonia-flat-list,.symphonia-flat-empty,.symphonia-join-card,.symphonia-list-card { background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important; }
+.symphonia-flat-list { overflow:visible!important; }
+.symphonia-flat-table thead { display:none!important; }
+#root .symphonia-flat-table tbody tr { background:transparent!important; }
+#root .symphonia-flat-table tbody td { padding:18px 8px!important;border-bottom:1px solid color-mix(in srgb,var(--border) 65%,transparent)!important; }
+#root .symphonia-flat-table tbody tr:last-child td { border-bottom:0!important; }
+#root .symphonia-flat-table .inbox-original-actions a,
+#root .symphonia-flat-table .inbox-original-actions button { background:transparent!important;border:0!important;color:var(--muted-foreground)!important; }
+#root .symphonia-flat-table .inbox-original-actions a:hover,
+#root .symphonia-flat-table .inbox-original-actions button:hover { background:var(--muted)!important;color:var(--foreground)!important; }
+#root .symphonia-flat-table .inbox-more { min-width:36px;min-height:36px; }
+#root .symphonia-shell .demo-dashboard-link { font-size:11px; }
+#root .symphonia-shell #earlier-surveys-toggle { border:0!important;background:none!important;text-align:left;justify-content:flex-start;padding-left:8px!important;color:var(--muted-foreground); }
+.symphonia-expert-home .symphonia-join-card,.symphonia-expert-home .symphonia-list-card { padding:0!important; }
+.symphonia-expert-home .symphonia-join-card { margin-bottom:24px!important; }
+.symphonia-join-form { display:flex!important;gap:8px!important;align-items:flex-start!important; }
+.symphonia-join-form > div { flex:1;min-width:0; }
+.symphonia-join-form input { height:40px!important;border-radius:8px!important; }
+.symphonia-join-form button[type="submit"] { width:auto!important;min-width:56px!important;height:40px!important;padding-inline:12px!important; }
+.symphonia-list-card ul { gap:0!important; }
+.symphonia-list-card li.form-item { border:0!important;border-bottom:1px solid var(--border)!important;border-radius:0!important;background:transparent!important;padding:18px 0!important; }
+/* Leave an open reading surface; colour belongs to the evidence, not the frame. */
+#root .symphonia-shell .di-claims { border:0;border-radius:0; }
+#root .symphonia-shell .di-column-head { padding-inline:8px; }
+#root .symphonia-shell .product-summary #delphi-recorded-progress .di-claims .di-claim { padding:16px 8px!important; }
+#root .symphonia-shell .cw-primary { background:var(--muted)!important;color:var(--foreground)!important;border-color:transparent!important;border-radius:8px!important;min-height:36px;padding:8px 12px!important;font-weight:500; }
+#root .symphonia-shell a:focus-visible,#root .symphonia-shell button:focus-visible { outline:2px solid var(--ring);outline-offset:3px; }
+@media(max-width:800px) {
+  #root .symphonia-shell { padding-left:0; }
+  #root .symphonia-shell > .symphonia-shell-header { position:relative!important;inset:auto!important;width:100%;height:auto;background:var(--background)!important; }
+  #root .symphonia-shell > .symphonia-shell-header > div:first-child { flex-direction:row;align-items:center;justify-content:space-between;min-height:52px!important;padding:8px 16px!important; }
+  #root .symphonia-shell-header > div:first-child > nav,
+  #root .symphonia-shell-header > div:first-child > div:has(button[aria-haspopup="menu"]) { position:static;display:flex!important; }
+  #root .symphonia-shell-navigation { display:none; }
+  #root .symphonia-shell-header .symphonia-account-trigger::after { display:none; }
+  #root .symphonia-shell-header .symphonia-account > [role="menu"] { top:100%!important;bottom:auto;left:auto;right:0!important; }
+  #root .symphonia-shell > main.product-dashboard { padding:24px 20px 40px!important; }
+  #root .symphonia-shell > main.product-summary { padding-top:20px!important; }
+  #root .symphonia-admin-home .symphonia-create-action { display:inline-flex!important; }
+  .symphonia-admin-home > div > .mb-8 { align-items:flex-end!important;flex-direction:row!important;flex-wrap:wrap;gap:12px!important; }
+  .symphonia-admin-home > div > .mb-8 > div:first-child { flex-basis:100%; }
+  .symphonia-minimal-search { width:100%!important; }
+  #root .symphonia-minimal-search input { font-size:16px; }
+  .symphonia-admin-home > div > .mb-8 > div:last-child { margin-left:auto; }
+  #root .symphonia-shell .cw-primary { min-height:44px; }
+  #root .symphonia-shell .symphonia-admin-home > div > .mb-8 button { min-height:44px!important; }
 }
