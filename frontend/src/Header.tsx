@@ -38,7 +38,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40" style={{ backgroundColor: 'color-mix(in srgb, var(--background) 92%, transparent)', backdropFilter: 'blur(12px)' }}>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-11 flex items-center justify-between">
         <button
           onClick={() => navigate('/')}
           className="flex items-center justify-center"
