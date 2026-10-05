@@ -22,7 +22,9 @@ it('enhances the current main dashboard without replacing its action handler and
   window.history.replaceState({}, '', '/admin/form/32/summary');
   window.dispatchEvent(new PopStateEvent('popstate'));
   frames.splice(0).forEach(callback => callback(0));
-  expect(document.querySelector('header')?.classList.contains('symphonia-minimal-header')).toBe(false);
+  expect(document.querySelector('header')?.classList.contains('symphonia-shell-header')).toBe(true);
+  expect(document.querySelector('.symphonia-shell-navigation a[href="/"]')?.hasAttribute('aria-current')).toBe(false);
+  expect(document.querySelectorAll('.symphonia-shell-navigation')).toHaveLength(1);
   document.body.innerHTML = '';
   vi.unstubAllGlobals();
 });

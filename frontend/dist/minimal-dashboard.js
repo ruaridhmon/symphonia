@@ -14,7 +14,34 @@ function relabelButton(button, label) {
 function markHeader() {
   const header = Array.from(document.querySelectorAll("header")).find((candidate) => candidate.querySelector('img[src*="logo-mark.png"]'));
   if (!header) return;
-  header.classList.add("symphonia-minimal-header");
+  header.classList.add("symphonia-shell-header");
+  header.parentElement?.classList.add("symphonia-shell");
+  let navigation = header.querySelector(".symphonia-shell-navigation");
+  if (!navigation) {
+    navigation = document.createElement("nav");
+    navigation.className = "symphonia-shell-navigation";
+    navigation.setAttribute("aria-label", "Workspace");
+    const home2 = document.createElement("a");
+    home2.href = "/";
+    home2.textContent = "Consultations";
+    navigation.append(home2);
+    header.append(navigation);
+  }
+  const home = navigation.querySelector('a[href="/"]');
+  if (location.pathname === "/") home.setAttribute("aria-current", "page");
+  else home.removeAttribute("aria-current");
+  const canCreate = !!findButton(/^new(?: consultation)?$/i) || location.pathname.startsWith("/admin/");
+  const existing = navigation.querySelector('a[href="/admin/forms/new"]');
+  if (canCreate && !existing) {
+    const create = document.createElement("a");
+    create.href = "/admin/forms/new";
+    create.textContent = "New consultation";
+    navigation.append(create);
+  }
+  if (existing) {
+    if (location.pathname === "/admin/forms/new") existing.setAttribute("aria-current", "page");
+    else existing.removeAttribute("aria-current");
+  }
 }
 function nearestCard(node) {
   let current = node?.parentElement || null;
@@ -34,6 +61,7 @@ function markAdminDashboard() {
   const title = Array.from(section.querySelectorAll("h1")).find((heading) => /^consultations$/i.test(cleanText(heading.textContent)));
   title?.classList.add("symphonia-redundant-title");
   relabelButton(newButton, "New consultation");
+  newButton.classList.add("symphonia-create-action");
   if (joinButton) relabelButton(joinButton, "Join");
   const search = section.querySelector(
     'input[aria-label*="Search"], input[placeholder*="Search"]'
@@ -71,11 +99,8 @@ function markExpertDashboard() {
   }
 }
 function applyMinimalDashboard() {
-  if (window.location.pathname !== "/") {
-    document.querySelectorAll(".symphonia-minimal-header").forEach((header) => header.classList.remove("symphonia-minimal-header"));
-    return;
-  }
   markHeader();
+  if (window.location.pathname !== "/") return;
   if (!markAdminDashboard()) markExpertDashboard();
 }
 var scheduled = false;
