@@ -15,74 +15,40 @@ export default function Header() {
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Close mobile menu on Escape, manage focus
-  const handleMenuKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!menuOpen) return;
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setMenuOpen(false);
-        menuButtonRef.current?.focus();
-      }
-    },
-    [menuOpen],
-  );
+  const handleMenuKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!menuOpen) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    }
+  }, [menuOpen]);
 
   useEffect(() => {
-    if (menuOpen) {
-      document.addEventListener('keydown', handleMenuKeyDown);
-      // Focus first focusable item in menu
-      const timer = setTimeout(() => {
-        const focusable = menuRef.current?.querySelector<HTMLElement>(
-          'button, a, [tabindex]:not([tabindex="-1"])',
-        );
-        focusable?.focus();
-      }, 50);
-      return () => {
-        clearTimeout(timer);
-        document.removeEventListener('keydown', handleMenuKeyDown);
-      };
-    }
+    if (!menuOpen) return;
+    document.addEventListener('keydown', handleMenuKeyDown);
+    const timer = setTimeout(() => {
+      menuRef.current?.querySelector<HTMLElement>('button, a, [tabindex]:not([tabindex="-1"])')?.focus();
+    }, 50);
     return () => {
+      clearTimeout(timer);
       document.removeEventListener('keydown', handleMenuKeyDown);
     };
   }, [menuOpen, handleMenuKeyDown]);
 
   return (
-    <header
-      className="border-b sticky top-0 z-40"
-      style={{
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
-        boxShadow: '0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px -1px rgba(0,0,0,0.04)',
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex justify-between items-center">
-        {/* Left: branding — converging waves, clicks to home */}
+    <header className="sticky top-0 z-40" style={{ backgroundColor: 'color-mix(in srgb, var(--background) 92%, transparent)', backdropFilter: 'blur(12px)' }}>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2.5"
+          className="flex items-center justify-center"
           style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
           aria-label="Go to home"
         >
-          <img
-            src="/logo-mark.png"
-            alt="Symphonia"
-            className="h-7 w-auto flex-shrink-0"
-          />
-          <div>
-            <h1
-              className="text-lg font-semibold leading-tight"
-              style={{ color: 'var(--foreground)', letterSpacing: '-0.02em' }}
-            >
-              Symphonia
-            </h1>
-          </div>
+          <img src="/logo-mark.png" alt="Symphonia" className="h-6 w-auto" />
         </button>
 
-        {/* Right: desktop layout */}
-        <nav aria-label={t('header.primaryNavigation', 'Primary navigation')} className="hidden sm:flex items-center gap-2">
+        <nav aria-label={t('header.primaryNavigation', 'Primary navigation')} className="hidden sm:flex items-center">
           {user && (
             <AccountMenu
               email={user.email}
@@ -92,26 +58,19 @@ export default function Header() {
           )}
         </nav>
 
-        {/* Right: mobile hamburger button */}
         <button
           ref={menuButtonRef}
-          className="sm:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
-          style={{
-            color: 'var(--foreground)',
-            backgroundColor: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-          }}
+          className="sm:hidden flex items-center justify-center w-8 h-8 rounded-md"
+          style={{ color: 'var(--foreground)', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
           onClick={() => setMenuOpen(prev => !prev)}
           aria-label={menuOpen ? t('header.closeMenu') : t('header.openMenu')}
           aria-expanded={menuOpen}
           aria-controls="mobile-nav-menu"
         >
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          {menuOpen ? <X size={19} /> : <Menu size={19} />}
         </button>
       </div>
 
-      {/* Mobile dropdown menu */}
       <nav
         ref={menuRef}
         id="mobile-nav-menu"
@@ -119,32 +78,18 @@ export default function Header() {
         role="menu"
         aria-label={t('header.mobileNavigation', 'Mobile navigation')}
         style={{
-          maxHeight: menuOpen ? '200px' : '0',
+          maxHeight: menuOpen ? '190px' : '0',
           opacity: menuOpen ? 1 : 0,
-          borderTop: menuOpen ? '1px solid var(--border)' : 'none',
+          borderTop: menuOpen ? '1px solid color-mix(in srgb, var(--border) 55%, transparent)' : 'none',
         }}
       >
-        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-3">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-3">
           {user && (
-            <div
-              className="rounded-2xl px-3 py-3"
-              style={{
-                backgroundColor: 'color-mix(in srgb, var(--muted) 64%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--border) 58%, transparent)',
-              }}
-            >
-              <p className="text-xs truncate" style={{ color: 'var(--muted-foreground)' }} title={user.email}>
-                {user.email}
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <button
-                  onClick={() => { setMenuOpen(false); logout(); }}
-                  className="header-logout-btn text-sm text-left px-3 py-2 rounded-lg"
-                  aria-label={t('common.logOut')}
-                >
-                  {t('common.logOut')}
-                </button>
-              </div>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs truncate" style={{ color: 'var(--muted-foreground)' }} title={user.email}>{user.email}</p>
+              <button onClick={() => { setMenuOpen(false); logout(); }} className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                {t('common.logOut')}
+              </button>
             </div>
           )}
           <div className="flex items-center justify-between">
