@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Symphonia interface preview</title><style>
+*{box-sizing:border-box}body{margin:0;background:#ececea;color:#242424;font:13px system-ui}header{display:flex;gap:16px;align-items:center;flex-wrap:wrap;padding:14px 20px}strong{font-weight:550}label{display:flex;align-items:center;gap:8px}select,a{font:inherit;color:inherit}select{padding:6px;border:1px solid #d9d9d7;border-radius:6px;background:#fff}a{margin-left:auto}iframe{display:block;width:1060px;max-width:100%;height:calc(100dvh - 70px);margin:0 auto;background:white;border:0;box-shadow:0 1px 12px #0001}footer{padding:8px 20px;font-size:11px;color:#737373}
+</style></head><body>
+<header><strong>Interface preview</strong><label>Width <select id="width"><option value="1060">Desktop</option><option value="768">Tablet</option><option value="390">Mobile</option></select></label><label>Page <select id="page"><option value="/">Consultations</option><option value="/admin/form/32/summary">Example summary</option><option value="/admin/forms/new">Create consultation</option></select></label><a href="/">Open app</a></header>
+<iframe title="Live Symphonia app" src="/"></iframe><footer>This loads the actual app at the selected width. Use Open demo if prompted.</footer>
+<script>const frame=document.querySelector('iframe');document.getElementById('width').addEventListener('change',event=>{frame.style.width=event.target.value+'px'});document.getElementById('page').addEventListener('change',event=>{frame.src=event.target.value});</script>
+</body></html>
