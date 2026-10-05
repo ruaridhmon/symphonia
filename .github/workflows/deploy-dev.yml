@@ -43,14 +43,18 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Build current dev frontend
-        run: npm run build -- --mode development
+      - name: Validate source build outside committed dist
+        run: npm run build -- --mode development --outDir /tmp/symphonia-source-build
+        working-directory: frontend
+
+      - name: Rebuild selective legacy dashboard assets
+        run: node scripts/build-minimal-dashboard.cjs
         working-directory: frontend
 
       - name: Prepare Firebase dev config
         run: cp firebase.dev.json firebase.json
 
-      - name: Deploy current build to Firebase dev
+      - name: Deploy committed dev mirror
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
