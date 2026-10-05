@@ -174,239 +174,377 @@ export default function UserDashboard() {
   };
 
   return (
-    <section className="flex-1 py-4 sm:py-6">
+    <section className="flex-1 py-6 sm:py-8">
       <Container size="md">
+        {/* ── Error banner ── */}
         {error && (
           <div
-            className="mb-5 flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm"
-            role="alert"
+            className="rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
             style={{
-              backgroundColor: 'color-mix(in srgb, var(--destructive) 7%, transparent)',
+              backgroundColor: 'color-mix(in srgb, var(--destructive) 10%, transparent)',
+              border: '1px solid var(--destructive)',
               color: 'var(--destructive)',
             }}
           >
-            <span>{error}</span>
-            <button type="button" onClick={fetchMyForms} className="font-medium">Retry</button>
+            <span className="text-sm font-medium">{error}</span>
+            <LoadingButton
+              variant="destructive"
+              size="sm"
+              onClick={fetchMyForms}
+            >
+              Retry
+            </LoadingButton>
           </div>
         )}
 
-        <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onClick={() => {
-              setShowCreateForm(v => !v);
-              setCreateError(null);
-              setCreatedCode(null);
-              setCreatedFormId(null);
-            }}
-            className="inline-flex items-center gap-1.5 text-sm font-medium"
-            style={{ color: 'var(--foreground)' }}
-          >
-            <PlusCircle size={16} />
-            New
-          </button>
-
-          <form onSubmit={handleUnlock} className="flex w-full gap-2 sm:w-auto">
-            <label htmlFor="join-code-input" className="sr-only">Join code</label>
-            <input
-              id="join-code-input"
-              type="text"
-              placeholder="Join with code"
-              value={joinCode}
-              onChange={e => {
-                setJoinCode(e.target.value);
-                setJoinError('');
-              }}
-              className="min-w-0 flex-1 rounded-lg px-3 py-2 text-sm sm:w-44"
+        {/* ── My Consultations (owned forms) ── */}
+        <div
+          className="rounded-xl p-6 sm:p-8 mb-6 sm:mb-8"
+          style={{
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--card-shadow, none)',
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
+              My Consultations
+            </h2>
+            <button
+              onClick={() => { setShowCreateForm(v => !v); setCreateError(null); setCreatedCode(null); setCreatedFormId(null); }}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg font-medium"
               style={{
+                backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                color: 'var(--accent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+              }}
+            >
+              <PlusCircle size={14} />
+              New Consultation
+            </button>
+          </div>
+
+          {/* Inline create form */}
+          {showCreateForm && (
+            <div
+              className="rounded-lg p-4 mb-4 space-y-3"
+              style={{
+                backgroundColor: 'var(--muted)',
                 border: '1px solid var(--border)',
-                backgroundColor: 'transparent',
-                color: 'var(--foreground)',
               }}
-            />
-            <LoadingButton type="submit" variant="ghost" size="sm">Join</LoadingButton>
-          </form>
-        </div>
-
-        {joinError && (
-          <p className="-mt-4 mb-5 text-right text-xs" style={{ color: 'var(--destructive)' }}>
-            {joinError}
-          </p>
-        )}
-
-        {showCreateForm && (
-          <div
-            className="mb-7 rounded-xl p-4 sm:p-5"
-            style={{ backgroundColor: 'color-mix(in srgb, var(--muted) 55%, transparent)' }}
-          >
-            <input
-              type="text"
-              autoFocus
-              placeholder="Untitled consultation"
-              value={newFormTitle}
-              onChange={e => setNewFormTitle(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && newFormTitle.trim()) void handleCreateForm();
-              }}
-              className="w-full bg-transparent text-base font-medium outline-none"
-              style={{ color: 'var(--foreground)' }}
-            />
-            {createError && (
-              <p className="mt-2 text-sm" style={{ color: 'var(--destructive)' }}>{createError}</p>
-            )}
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <LoadingButton
-                variant="ghost"
-                size="sm"
-                onClick={() => { setShowCreateForm(false); setCreateError(null); }}
-              >
-                Cancel
-              </LoadingButton>
-              <LoadingButton
-                variant="accent"
-                size="sm"
-                loading={creating}
-                onClick={handleCreateForm}
-                disabled={!newFormTitle.trim()}
-              >
-                Create
-              </LoadingButton>
-            </div>
-          </div>
-        )}
-
-        {createdCode && (
-          <div className="mb-6 flex items-center justify-between gap-3 text-sm">
-            <span style={{ color: 'var(--muted-foreground)' }}>
-              Created · code <strong style={{ color: 'var(--foreground)' }}>{createdCode}</strong>
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => navigator.clipboard.writeText(createdCode)}
-                className="inline-flex items-center gap-1 text-sm"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                <ClipboardCopy size={14} /> Copy
-              </button>
-              {createdFormId && (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/form/${createdFormId}`)}
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  Open
-                </button>
+            >
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                  Consultation Title
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter title…"
+                  value={newFormTitle}
+                  onChange={e => setNewFormTitle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg text-sm"
+                  style={{
+                    border: '1px solid var(--input)',
+                    backgroundColor: 'var(--background)',
+                    color: 'var(--foreground)',
+                  }}
+                />
+              </div>
+              <label className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: 'var(--foreground)' }}>
+                <input
+                  type="checkbox"
+                  checked={newFormAllowJoin}
+                  onChange={e => setNewFormAllowJoin(e.target.checked)}
+                />
+                Allow participants to join via code
+              </label>
+              {createError && (
+                <p className="text-sm" style={{ color: 'var(--destructive)' }}>{createError}</p>
               )}
+              <div className="flex gap-2">
+                <LoadingButton
+                  variant="accent"
+                  size="sm"
+                  loading={creating}
+                  onClick={handleCreateForm}
+                >
+                  Create
+                </LoadingButton>
+                <LoadingButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setShowCreateForm(false); setCreateError(null); }}
+                >
+                  Cancel
+                </LoadingButton>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div>
-          {ownedForms.length === 0 && !showCreateForm && !loading && myForms.length === 0 ? (
-            <div className="py-20 text-center">
+          {/* Success banner with join code */}
+          {createdCode && (
+            <div
+              className="rounded-lg p-3 mb-4 flex items-center justify-between gap-3"
+              style={{
+                backgroundColor: 'color-mix(in srgb, var(--success) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--success) 40%, transparent)',
+              }}
+            >
+              <div>
+                <p className="text-xs font-medium mb-0.5" style={{ color: 'var(--success)' }}>
+                  Form created! Share this join code:
+                </p>
+                <p className="text-sm font-mono font-bold" style={{ color: 'var(--foreground)' }}>
+                  {createdCode}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {createdFormId && (
+                  <LoadingButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/form/${createdFormId}`)}
+                  >
+                    Preview
+                  </LoadingButton>
+                )}
+                <button
+                  onClick={() => { navigator.clipboard.writeText(createdCode); }}
+                  className="p-1.5 rounded"
+                  title="Copy join code"
+                  style={{ color: 'var(--success)' }}
+                >
+                  <ClipboardCopy size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* List of owned forms */}
+          {ownedForms.length === 0 && !showCreateForm ? (
+            <div className="text-center py-6">
               <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-                Nothing here yet.
+                No consultations created yet. Click <strong>New Consultation</strong> to start one.
               </p>
             </div>
           ) : (
-            <>
-              {ownedForms.length > 0 && (
-                <ul>
-                  {ownedForms.map(f => (
-                    <li
-                      key={f.id}
-                      className="group flex items-center justify-between gap-4 border-b py-4"
-                      style={{ borderColor: 'color-mix(in srgb, var(--border) 55%, transparent)' }}
-                    >
+            <ul className="space-y-2">
+              {ownedForms.map(f => (
+                <li
+                  key={f.id}
+                  className="rounded-lg p-3 flex items-center justify-between gap-3"
+                  style={{
+                    backgroundColor: 'var(--muted)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>{f.title}</p>
+                    <div className="flex items-center gap-3 mt-0.5 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                      <span>Round {f.round_count}</span>
+                      {f.participant_count !== undefined && <span>{f.participant_count} participants</span>}
                       <button
-                        type="button"
-                        onClick={() => navigate(`/form/${f.id}`)}
-                        className="min-w-0 flex-1 text-left"
+                        className="inline-flex items-center gap-1 hover:underline"
+                        title="Copy join code"
+                        onClick={() => navigator.clipboard.writeText(f.join_code)}
+                        style={{ color: 'var(--accent)' }}
                       >
-                        <p className="truncate text-[15px] font-medium" style={{ color: 'var(--foreground)' }}>{f.title}</p>
-                        <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                          Round {f.round_count}{f.participant_count !== undefined ? ` · ${f.participant_count} participants` : ''}
-                        </p>
+                        <ClipboardCopy size={11} />
+                        {f.join_code}
                       </button>
-                      <div className="flex items-center gap-2 opacity-70 transition-opacity group-hover:opacity-100">
-                        <button
-                          type="button"
-                          onClick={() => navigator.clipboard.writeText(f.join_code)}
-                          className="p-1.5"
-                          title={`Copy join code ${f.join_code}`}
-                          style={{ color: 'var(--muted-foreground)' }}
-                        >
-                          <ClipboardCopy size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRegenCode(f.id)}
-                          disabled={regenLoading[f.id]}
-                          className="p-1.5"
-                          title="Regenerate join code"
-                          style={{ color: 'var(--muted-foreground)' }}
-                        >
-                          <RefreshCw size={14} style={regenLoading[f.id] ? { animation: 'spin 1s linear infinite' } : {}} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteOwned(f.id)}
-                          className="p-1.5"
-                          title="Delete"
-                          style={{ color: 'var(--muted-foreground)' }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+                      <button
+                        className="inline-flex items-center gap-1 hover:opacity-70"
+                        title="Regenerate join code"
+                        onClick={() => handleRegenCode(f.id)}
+                        disabled={regenLoading[f.id]}
+                        style={{ color: 'var(--muted-foreground)' }}
+                      >
+                        <RefreshCw
+                          size={11}
+                          style={regenLoading[f.id] ? { animation: 'spin 1s linear infinite' } : {}}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <LoadingButton
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/form/${f.id}`)}
+                    >
+                      Preview
+                    </LoadingButton>
+                    <button
+                      onClick={() => handleDeleteOwned(f.id)}
+                      className="p-1.5 rounded hover:opacity-80"
+                      title="Delete form"
+                      style={{ color: 'var(--destructive)' }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
-              {myForms.length > 0 && (
-                <div className={ownedForms.length > 0 ? 'mt-8' : ''}>
-                  {ownedForms.length > 0 && (
-                    <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.14em]" style={{ color: 'var(--muted-foreground)' }}>
-                      Joined
-                    </p>
-                  )}
-                  <ul>
-                    {myForms.map(f => {
-                      const status = formStatuses[f.id];
-                      return (
-                        <li
-                          key={f.id}
-                          className="group flex items-center justify-between gap-4 border-b py-4"
-                          style={{ borderColor: 'color-mix(in srgb, var(--border) 55%, transparent)' }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/form/${f.id}`)}
-                            className="min-w-0 flex-1 text-left"
-                          >
-                            <p className="truncate text-[15px] font-medium" style={{ color: 'var(--foreground)' }}>{f.title}</p>
-                            <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                              {status?.roundNumber != null ? `Round ${status.roundNumber}` : 'Open'}
-                              {status ? ` · ${status.submitted ? 'Response sent' : 'Response needed'}` : ''}
-                            </p>
-                          </button>
-                          <span className="text-sm opacity-0 transition-opacity group-hover:opacity-60" aria-hidden="true">→</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+        {/* ── Join form card ── */}
+        <div
+          className="rounded-xl p-6 sm:p-8 mb-6 sm:mb-8"
+          style={{
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--card-shadow, none)',
+          }}
+        >
+          <h2
+            className="text-xl font-semibold mb-4 text-center"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Join a New Form
+          </h2>
+          <form onSubmit={handleUnlock} className="space-y-4">
+            <div>
+              <label htmlFor="join-code-input" className="sr-only">Join code</label>
+              <input
+                id="join-code-input"
+                type="text"
+                placeholder="Enter join code"
+                value={joinCode}
+                onChange={e => {
+                  setJoinCode(e.target.value);
+                  setJoinError('');
+                }}
+                className="w-full px-4 py-2 rounded-lg"
+                style={{
+                  border: '1px solid var(--input)',
+                  backgroundColor: 'var(--background)',
+                  color: 'var(--foreground)',
+                }}
+              />
+            </div>
+            {joinError && (
+              <p
+                className="text-sm text-center"
+                style={{ color: 'var(--destructive)' }}
+              >
+                {joinError}
+              </p>
+            )}
+            <LoadingButton
+              type="submit"
+              variant="accent"
+              size="md"
+              className="w-full"
+            >
+              Join Form
+            </LoadingButton>
+          </form>
+        </div>
+
+        {/* ── My forms list ── */}
+        <div
+          className="rounded-xl p-6 sm:p-8"
+          style={{
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--card-shadow, none)',
+          }}
+        >
+          <h2
+            className="text-xl font-semibold mb-4"
+            style={{ color: 'var(--foreground)' }}
+          >
+            My Forms
+          </h2>
+
+          {loading ? (
+            <div className="space-y-3">
+              <SkeletonCard />
+              <SkeletonCard />
+              <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '0.5rem' }}>
+                <Skeleton variant="text" width="40%" height="0.75rem" />
+              </div>
+            </div>
+          ) : (
+            <ul className="space-y-3 stagger-enter">
+              {myForms.length === 0 && (
+                <div className="text-center py-8">
+                  <div className="text-3xl mb-3 opacity-40">📭</div>
+                  <p className="text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+                    No consultations yet
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                    Enter a join code above to access your first consultation.
+                  </p>
                 </div>
               )}
-            </>
-          )}
-
-          {loading && (
-            <div className="space-y-3 py-4">
-              <SkeletonCard />
-              <SkeletonCard />
-            </div>
+              {myForms.map((f) => {
+                const status = formStatuses[f.id];
+                return (
+                  <li
+                    key={f.id}
+                    className="form-item rounded-lg p-4 relative overflow-hidden"
+                    style={{
+                      backgroundColor: 'var(--muted)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    <div className="flex flex-col gap-1.5 pr-16">
+                      <span style={{ color: 'var(--foreground)', fontWeight: 500 }}>{f.title}</span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {status?.roundNumber != null && (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                              color: 'var(--accent)',
+                            }}
+                          >
+                            <FileText size={11} />
+                            Round {status.roundNumber}
+                          </span>
+                        )}
+                        {status?.submitted ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: 'color-mix(in srgb, var(--success) 12%, transparent)',
+                              color: 'var(--success)',
+                            }}
+                          >
+                            <CheckCircle2 size={11} />
+                            Submitted
+                          </span>
+                        ) : status ? (
+                          <span
+                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                            style={{
+                              backgroundColor: 'color-mix(in srgb, var(--warning) 12%, transparent)',
+                              color: 'var(--warning-foreground)',
+                            }}
+                          >
+                            <Clock size={11} />
+                            Awaiting response
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    {/* Float-in action — slides in from right on hover */}
+                    <div className="form-item-action">
+                      <LoadingButton
+                        variant="success"
+                        size="sm"
+                        onClick={() => navigate(`/form/${f.id}`)}
+                      >
+                        {status?.submitted ? 'Review' : 'Enter'}
+                      </LoadingButton>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           )}
         </div>
       </Container>
