@@ -189,16 +189,22 @@ export default function AdminDashboard() {
               : action.accent
                 ? 'var(--accent)'
                 : 'var(--muted-foreground)';
-          const border = 'none';
+          const border = action.danger
+            ? '1px solid color-mix(in srgb, var(--destructive) 24%, var(--border))'
+            : action.accent
+              ? '1px solid color-mix(in srgb, var(--accent) 24%, var(--border))'
+              : '1px solid color-mix(in srgb, var(--border) 55%, transparent)';
           const commonProps = {
             title: action.label,
             'aria-label': `${action.label} ${form.title}`,
-            className: 'inline-flex h-8 items-center justify-center gap-1.5 px-1.5 text-xs font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
+            className: 'inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2',
             style: {
               color,
               border,
               opacity: action.disabled ? 0.65 : 1,
-              backgroundColor: 'transparent',
+              backgroundColor: action.accent
+                ? 'color-mix(in srgb, var(--accent) 7%, transparent)'
+                : 'transparent',
             },
             onMouseEnter: (event: MouseEvent<HTMLElement>) => {
               event.currentTarget.style.color = action.danger
@@ -210,7 +216,9 @@ export default function AdminDashboard() {
             },
             onMouseLeave: (event: MouseEvent<HTMLElement>) => {
               event.currentTarget.style.color = color;
-              event.currentTarget.style.backgroundColor = 'transparent';
+              event.currentTarget.style.backgroundColor = action.accent
+                ? 'color-mix(in srgb, var(--accent) 7%, transparent)'
+                : 'transparent';
             },
           };
 
@@ -548,140 +556,50 @@ export default function AdminDashboard() {
                   const participantCount = f.participant_count ?? 0;
                   const participantLabel = `${participantCount} participant${participantCount === 1 ? '' : 's'}`;
                   return (
-    <section className="flex-1 py-4 sm:py-6">
-      <Container size="lg">
-        <ConsultationShareSheet
-          open={!!sharingForm}
-          title={sharingForm?.title ?? ''}
-          joinCode={sharingForm?.joinCode ?? ''}
-          onClose={() => setSharingForm(null)}
-        />
-        <DownloadSheet
-          open={!!downloadingForm}
-          form={downloadingForm}
-          onClose={() => setDownloadingForm(null)}
-        />
-        <ConfirmDialog
-          open={!!pendingDeleteForm}
-          title="Delete this consultation?"
-          body={
-            pendingDeleteForm
-              ? `Delete "${pendingDeleteForm.title}" and all associated responses, rounds, and invite codes? This action cannot be undone.`
-              : ''
-          }
-          confirmLabel="Delete"
-          cancelLabel="Cancel"
-          loading={pendingDeleteForm ? deletingFormId === pendingDeleteForm.id : false}
-          onCancel={() => {
-            if (!deletingFormId) setPendingDeleteForm(null);
-          }}
-          onConfirm={() => {
-            if (pendingDeleteForm) void handleDeleteForm(pendingDeleteForm.id, pendingDeleteForm.title);
-          }}
-        />
-
-        {error && (
-          <div
-            className="mb-5 flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm"
-            role="alert"
-            style={{ backgroundColor: 'color-mix(in srgb, var(--destructive) 7%, transparent)', color: 'var(--destructive)' }}
-          >
-            <span>{error}</span>
-            <button type="button" onClick={fetchForms} className="font-medium">{t('common.retry')}</button>
-          </div>
-        )}
-
-        <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-5">
-            <button
-              type="button"
-              onClick={() => navigate('/admin/forms/new')}
-              className="inline-flex items-center gap-1.5 text-sm font-medium"
-              style={{ color: 'var(--foreground)' }}
-            >
-              <Plus size={16} aria-hidden="true" />
-              New
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/join')}
-              className="inline-flex items-center gap-1.5 text-sm font-medium"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              <Ticket size={15} aria-hidden="true" />
-              Join
-            </button>
-          </div>
-
-          {forms.length > 3 && (
-            <div className="relative w-full sm:w-56">
-              <Search
-                size={14}
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  left: 10,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--muted-foreground)',
-                  pointerEvents: 'none',
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Search"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full rounded-lg py-2 pl-8 pr-3 text-sm outline-none"
-                aria-label={t('adminDashboard.searchLabel')}
-                style={{
-                  border: '1px solid color-mix(in srgb, var(--border) 60%, transparent)',
-                  backgroundColor: 'transparent',
-                  color: 'var(--foreground)',
-                }}
-              />
-            </div>
-          )}
-        </div>
-
-        {forms.length === 0 ? (
-          <div className="py-20 text-center">
-            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>Nothing here yet.</p>
-          </div>
-        ) : visibleForms.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>No matches.</p>
-          </div>
-        ) : (
-          <div>
-            <ul>
-              {visibleForms.map((f: any) => {
-                const participantCount = f.participant_count ?? 0;
-                return (
-                  <li
-                    key={f.id}
-                    className="group flex flex-col gap-3 border-b py-4 sm:flex-row sm:items-center sm:justify-between"
-                    style={{ borderColor: 'color-mix(in srgb, var(--border) 55%, transparent)' }}
-                  >
-                    <Link to={`/admin/form/${f.id}`} className="min-w-0 flex-1">
-                      <p className="truncate text-[15px] font-medium" style={{ color: 'var(--foreground)' }}>
-                        {f.title}
-                      </p>
-                      <p className="mt-1 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                        {participantCount} participant{participantCount === 1 ? '' : 's'} · Round {f.current_round ?? 1}
-                      </p>
-                    </Link>
-                    <div className="sm:opacity-55 sm:transition-opacity sm:group-hover:opacity-100">
-                      {renderConsultationActions(f, 'start')}
+                    <div
+                      key={f.id}
+                      className="rounded-2xl px-4 py-4 transition-colors duration-150"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, var(--card) 96%, var(--background) 4%)',
+                        border: '1px solid color-mix(in srgb, var(--border) 55%, transparent)',
+                      }}
+                    >
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div
+                              className="font-semibold text-sm leading-snug"
+                              style={{ color: 'var(--foreground)' }}
+                            >
+                              {f.title}
+                            </div>
+                            <div
+                              className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm"
+                              style={{ color: 'var(--muted-foreground)' }}
+                            >
+                              <span>{participantLabel}</span>
+                              <span>Round {f.current_round ?? 1}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>{renderConsultationActions(f, 'start')}</div>
+                      </div>
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
-            {search && (
-              <p className="mt-3 text-xs" style={{ color: 'var(--muted-foreground)' }}>
+                  );
+                })}
+              </div>
+            )}
+
+            {search && visibleForms.length > 0 && (
+              <div
+                className="px-5 sm:px-6 py-3 text-xs"
+                style={{
+                  borderTop: '1px solid color-mix(in srgb, var(--border) 45%, transparent)',
+                  color: 'var(--muted-foreground)',
+                }}
+              >
                 {t('common.showingResults', { count: visibleForms.length, total: forms.length })}
-              </p>
+              </div>
             )}
           </div>
         )}
