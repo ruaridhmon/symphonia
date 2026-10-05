@@ -5,12 +5,14 @@ it('enhances the current main dashboard without replacing its action handler and
   window.history.replaceState({}, '', '/');
   const frames: FrameRequestCallback[] = [];
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { frames.push(callback); return frames.length; });
-  document.body.innerHTML = `<header><div><button><img src="/logo-mark.png" /></button></div></header><main><div><div class="mb-8"><h1>Consultations</h1><div><input aria-label="Search consultations" /></div><div><button id="join">Enter code</button><button id="new">New</button></div></div><div class="rounded-2xl"><table><tbody><tr><td>Example</td></tr></tbody></table></div></div></main>`;
+  document.body.innerHTML = `<header><div><button><img src="/logo-mark.png" /></button><nav><div><button id="account" aria-haspopup="menu"><span class="rounded-full">TE</span></button><div role="menu"><button id="theme" aria-haspopup="menu">Theme</button></div></div></nav></div></header><main><div><div class="mb-8"><h1>Consultations</h1><div><input aria-label="Search consultations" /></div><div><button id="join">Enter code</button><button id="new">New</button></div></div><div class="rounded-2xl"><table><tbody><tr><td>Example</td></tr></tbody></table></div></div></main>`;
   const action = vi.fn();
   document.querySelector('#new')!.addEventListener('click', action);
   await import('./minimalDashboard');
   expect(document.querySelector('main')?.classList.contains('symphonia-admin-home')).toBe(true);
   expect(document.querySelector('#new')?.textContent).toBe('New consultation');
+  expect(document.querySelector('#account')?.classList.contains('symphonia-account-trigger')).toBe(true);
+  expect(document.querySelector('#theme')?.classList.contains('symphonia-account-trigger')).toBe(false);
   (document.querySelector('#new') as HTMLButtonElement).click();
   expect(action).toHaveBeenCalledOnce();
   // A React rerender must still be detected after the button has been relabelled.

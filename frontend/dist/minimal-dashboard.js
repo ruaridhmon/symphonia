@@ -16,6 +16,9 @@ function markHeader() {
   if (!header) return;
   header.classList.add("symphonia-shell-header");
   header.parentElement?.classList.add("symphonia-shell");
+  const account = header.querySelector('button[aria-haspopup="menu"]');
+  account?.classList.add("symphonia-account-trigger");
+  account?.parentElement?.classList.add("symphonia-account");
   let navigation = header.querySelector(".symphonia-shell-navigation");
   if (!navigation) {
     navigation = document.createElement("nav");

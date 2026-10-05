@@ -28,11 +28,11 @@
 #root .symphonia-shell-header > div:first-child > div:has(button[aria-haspopup="menu"]) {
   display:flex!important;position:absolute;bottom:18px;left:16px;right:16px;
 }
-#root .symphonia-shell-header button[aria-haspopup="menu"] { border:0!important;background:transparent!important;border-radius:7px!important;min-height:44px;padding:6px!important;gap:9px!important; }
-#root .symphonia-shell-header button[aria-haspopup="menu"]::after { content:'Account';font-size:12px;color:var(--muted-foreground); }
-#root .symphonia-shell-header button[aria-haspopup="menu"] > svg { display:none; }
-#root .symphonia-shell-header button[aria-haspopup="menu"] > span { width:28px;height:28px;font-size:10px;letter-spacing:0; }
-#root .symphonia-shell-header [role="menu"] { top:auto!important;bottom:calc(100% + 8px);left:0;right:auto!important;width:260px;max-width:calc(100vw - 32px);border-radius:10px!important; }
+#root .symphonia-shell-header .symphonia-account-trigger { border:0!important;background:transparent!important;border-radius:7px!important;min-height:44px;padding:6px!important;gap:9px!important; }
+#root .symphonia-shell-header .symphonia-account-trigger::after { content:'Account';font-size:12px;color:var(--muted-foreground); }
+#root .symphonia-shell-header .symphonia-account-trigger > svg { display:none; }
+#root .symphonia-shell-header .symphonia-account-trigger > span { width:28px;height:28px;font-size:10px;letter-spacing:0; }
+#root .symphonia-shell-header .symphonia-account > [role="menu"] { top:auto!important;bottom:calc(100% + 8px);left:0;right:auto!important;width:260px;max-width:calc(100vw - 32px);border-radius:10px!important; }
 #root .symphonia-shell-header button[aria-controls="mobile-nav-menu"],
 #root .symphonia-shell-header #mobile-nav-menu { display:none!important; }
 #root .symphonia-shell > footer { border:0!important;background:none!important;padding:16px!important;font-size:10px!important;opacity:.5; }
@@ -83,8 +83,8 @@
   #root .symphonia-shell-header > div:first-child > nav,
   #root .symphonia-shell-header > div:first-child > div:has(button[aria-haspopup="menu"]) { position:static;display:flex!important; }
   #root .symphonia-shell-navigation { display:none; }
-  #root .symphonia-shell-header button[aria-haspopup="menu"]::after { display:none; }
-  #root .symphonia-shell-header [role="menu"] { top:100%!important;bottom:auto;left:auto;right:0!important; }
+  #root .symphonia-shell-header .symphonia-account-trigger::after { display:none; }
+  #root .symphonia-shell-header .symphonia-account > [role="menu"] { top:100%!important;bottom:auto;left:auto;right:0!important; }
   #root .symphonia-shell > main.product-dashboard { padding:24px 20px 40px!important; }
   #root .symphonia-shell > main.product-summary { padding-top:20px!important; }
   #root .symphonia-admin-home .symphonia-create-action { display:inline-flex!important; }
