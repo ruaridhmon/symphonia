@@ -22,9 +22,13 @@ jobs:
         if: env.TARGET_IS_PROD == 'true'
         run: npm run build -- --mode production
         working-directory: frontend
-      - name: Build frontend (development mode)
+      - name: Validate frontend source (development mode)
         if: env.TARGET_IS_DEV == 'true'
-        run: npm run build -- --mode development
+        run: npm run build -- --mode development --outDir /tmp/symphonia-source-build
+        working-directory: frontend
+      - name: Rebuild selective legacy dashboard assets
+        if: env.TARGET_IS_DEV == 'true'
+        run: node scripts/build-minimal-dashboard.cjs
         working-directory: frontend
       - name: Prepare Firebase config (prod)
         if: env.TARGET_IS_PROD == 'true'
