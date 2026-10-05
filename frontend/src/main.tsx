@@ -18,6 +18,8 @@ import './index.css'
 import './product.css'
 import './workspace.css'
 import './legacy/productUI'
+import './minimal-dashboard.css'
+import './legacy/minimalDashboard'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

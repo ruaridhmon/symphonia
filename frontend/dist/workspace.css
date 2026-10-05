@@ -449,9 +449,9 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 #root aside.summary-actions-panel>details.summary-disclosure[open]>.card { position:relative;top:auto;left:auto;right:auto;width:100%;max-width:none;margin:0; }
 #root .di-heading:has(.di-title:empty) { display:none; }
 #root .di-change-overview { font-size:12px;color:var(--muted-foreground);margin:0 0 14px; }
-#root .product-summary .di-claims { border-radius:8px;--rating-width:220px;--claim-gap:32px; }
+#root .product-summary .di-claims { border-radius:8px;--rating-width:200px;--claim-gap:24px; }
 #root .product-summary .di-column-head { background:transparent;padding:10px 20px; }
-#root .product-summary #delphi-recorded-progress .di-claims .di-claim { padding:20px!important; }
+#root .product-summary #delphi-recorded-progress .di-claims .di-claim { padding:14px 20px!important; }
 #root .product-summary .di-claim h3 { font-size:14px!important;line-height:1.55!important;font-weight:500!important; }
 #root .product-summary .di-legend { font-size:11px;gap:4px 10px; }
 #root .product-summary .di-trend { font-size:11px;margin-top:6px; }
@@ -501,7 +501,7 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 #root .rp-rating-change>.rp-rating { margin:0;font-size:11px; }
 #root .rp-history-toggle { margin-top:16px;padding:6px 0;color:var(--muted-foreground);font-size:12px; }
 #root .opening-claims[hidden] { display:none!important; }
-#root .opening-claims .di-claims .di-claim { padding:20px!important; }
+#root .opening-claims .di-claims .di-claim { padding:14px 20px!important; }
 #root .opening-status { font-size:12px;color:var(--muted-foreground); }
 #root .opening-claims { padding:0!important;margin:0!important;border:0!important;box-shadow:none;background:transparent; }
 #root button.rp-answer-heading { flex-wrap:nowrap;align-items:center; }

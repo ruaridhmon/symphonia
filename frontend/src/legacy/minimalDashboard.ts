@@ -1,3 +1,5 @@
+export {};
+
 /**
  * Legacy dev-dashboard compatibility layer.
  *
@@ -43,11 +45,11 @@ function nearestCard(node: Element | null): HTMLElement | null {
 }
 
 function markAdminDashboard(): boolean {
-  const newButton = findButton(/^new consultation$/i);
+  const newButton = findButton(/^new(?: consultation)?$/i);
   const joinButton = findButton(/^(join|enter).*code|^join consultation$/i);
-  if (!newButton || !newButton.closest('section')) return false;
+  if (!newButton) return false;
 
-  const section = newButton.closest<HTMLElement>('section');
+  const section = newButton.closest<HTMLElement>('section, main');
   if (!section) return false;
   section.classList.add('symphonia-minimal-dashboard', 'symphonia-admin-home');
 
@@ -55,7 +57,7 @@ function markAdminDashboard(): boolean {
     .find((heading) => /^consultations$/i.test(cleanText(heading.textContent)));
   title?.classList.add('symphonia-redundant-title');
 
-  relabelButton(newButton, 'New');
+  relabelButton(newButton, 'New consultation');
   if (joinButton) relabelButton(joinButton, 'Join');
 
   const search = section.querySelector<HTMLInputElement>(
@@ -83,7 +85,7 @@ function markExpertDashboard(): void {
     .find((heading) => /^my consultations$/i.test(cleanText(heading.textContent)));
   if (!joinHeading && !listHeading) return;
 
-  const section = (joinHeading || listHeading)?.closest<HTMLElement>('section');
+  const section = (joinHeading || listHeading)?.closest<HTMLElement>('section, main');
   section?.classList.add('symphonia-minimal-dashboard', 'symphonia-expert-home');
 
   if (joinHeading) {
@@ -104,8 +106,11 @@ function markExpertDashboard(): void {
 }
 
 function applyMinimalDashboard(): void {
+  if (window.location.pathname !== '/') {
+    document.querySelectorAll('.symphonia-minimal-header').forEach(header => header.classList.remove('symphonia-minimal-header'));
+    return;
+  }
   markHeader();
-  if (window.location.pathname !== '/') return;
   if (!markAdminDashboard()) markExpertDashboard();
 }
 
