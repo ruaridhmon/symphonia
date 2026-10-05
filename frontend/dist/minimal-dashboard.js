@@ -1,48 +1,42 @@
 /**
  * Legacy dev-dashboard compatibility layer.
- *
- * Dev hosting currently serves the committed frontend/dist mirror. Keep this
- * DOM-only enhancement deliberately conservative: it changes presentation and
- * labels on the authenticated home route without replacing React handlers,
- * auth state, API callbacks, or stored data.
+ * Presentation only: preserves React handlers, auth, API callbacks and data.
  */
-
-function cleanText(value: string |function findButton(pattern) | undefined): string {
+function cleanText(value) {
   return (value || '').replace(/\s+/g, ' ').trim();
 }
 
-function findButton(pattern: RegExp): HTMLButtonElement |function findButton(pattern) {
+function findButton(pattern) {
   return Array.from(document.querySelectorAll('button'))
-    .find((button) => pattern.test(cleanText(button.textContent))) ||function findButton(pattern);
+    .find((button) => pattern.test(cleanText(button.textContent))) || null;
 }
 
-function relabelButton(button: HTMLButtonElement |function findButton(pattern), label: string): void {
+function relabelButton(button, label) {
   if (!button || button.dataset.minimalLabel === label) return;
   button.dataset.minimalLabel = label;
   button.setAttribute('aria-label', label);
   button.textContent = label;
 }
 
-function markHeader(): void {
+function markHeader() {
   const header = Array.from(document.querySelectorAll('header'))
     .find((candidate) => candidate.querySelector('img[src*="logo-mark.png"]'));
   if (!header) return;
   header.classList.add('symphonia-minimal-header');
 }
 
-function nearestCard(node: Element |function findButton(pattern)): HTMLElement |function findButton(pattern) {
-  let current = node?.parentElement ||function findButton(pattern);
+function nearestCard(node) {
+  let current = node?.parentElement || null;
   while (current && current.id !== 'root') {
-    if (
-      current.classList.contains('rounded-xl') ||
-      current.classList.contains('rounded-2xl')
-    ) return current;
+    if (current.classList.contains('rounded-xl') || current.classList.contains('rounded-2xl')) {
+      return current;
+    }
     current = current.parentElement;
   }
-  returnfunction findButton(pattern);
+  return null;
 }
 
-function markAdminDashboard(): boolean {
+function markAdminDashboard() {
   const newButton = findButton(/^new consultation$/i);
   const joinButton = findButton(/^(join|enter).*code|^join consultation$/i);
   if (!newButton || !newButton.closest('section')) return false;
@@ -58,9 +52,7 @@ function markAdminDashboard(): boolean {
   relabelButton(newButton, 'New');
   if (joinButton) relabelButton(joinButton, 'Join');
 
-  const search = section.querySelector(
-    'input[aria-label*="Search"], input[placeholder*="Search"]',
-  );
+  const search = section.querySelector('input[aria-label*="Search"], input[placeholder*="Search"]');
   search?.closest('div')?.classList.add('symphonia-minimal-search');
 
   const table = section.querySelector('table');
@@ -76,7 +68,7 @@ function markAdminDashboard(): boolean {
   return true;
 }
 
-function markExpertDashboard(): void {
+function markExpertDashboard() {
   const joinHeading = Array.from(document.querySelectorAll('h2'))
     .find((heading) => /^join a consultation$/i.test(cleanText(heading.textContent)));
   const listHeading = Array.from(document.querySelectorAll('h2'))
@@ -94,7 +86,7 @@ function markExpertDashboard(): void {
     form?.classList.add('symphonia-join-form');
     const input = form?.querySelector('input');
     if (input) input.placeholder = 'Join with code';
-    relabelButton(form?.querySelector('button[type="submit"]') ||function findButton(pattern), 'Join');
+    relabelButton(form?.querySelector('button[type="submit"]') || null, 'Join');
   }
 
   if (listHeading) {
@@ -103,14 +95,14 @@ function markExpertDashboard(): void {
   }
 }
 
-function applyMinimalDashboard(): void {
+function applyMinimalDashboard() {
   markHeader();
   if (window.location.pathname !== '/') return;
   if (!markAdminDashboard()) markExpertDashboard();
 }
 
 let scheduled = false;
-function scheduleApply(): void {
+function scheduleApply() {
   if (scheduled) return;
   scheduled = true;
   window.requestAnimationFrame(() => {
