@@ -1,3 +1,4 @@
+import {focusClaim} from './focusClaim';
 import type { ReasoningGraph, ReasoningNode } from '../types/synthesis';
 const el=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.textContent=text;e.className=cls;return e;};
 const observers=new WeakMap<HTMLElement,ResizeObserver>();
@@ -45,7 +46,7 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
      const link=document.createElement('button');link.type='button';
      const relation={supports:'Supported by',qualifies:'Qualified by',challenges:'Challenged by',motivates:'Motivated by'}[edge.relation];
      link.textContent=`${relation} ${labels.get(source.id)}`;link.setAttribute('aria-label',`${n.text}: ${relation.toLowerCase()} claim ${labels.get(source.id)}. ${source.text}`);
-     link.onclick=()=>{select(source);diagram.querySelector<HTMLElement>(`[data-rf-node="${source.id}"]`)?.scrollIntoView?.({block:'nearest',behavior:'smooth'});};links.append(link);
+     link.onclick=()=>focusClaim([...diagram.querySelectorAll<HTMLElement>('[data-rf-node]')].find(b=>b.dataset.rfNode===source.id)||null);links.append(link);
     }row.append(links);
    }
    diagram.append(row);

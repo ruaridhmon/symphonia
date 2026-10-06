@@ -36,5 +36,5 @@ it('orders dependent claims after premises and links only to their upstream reas
  expect([...root.querySelectorAll('[data-rf-node]')].map(n=>(n as HTMLElement).dataset.rfNode)).toEqual(['a','b']);
  expect(root.querySelector('.rf-wires')).toBeNull();expect(root.querySelector('.rf-list-origin')?.textContent).toBe('Inferred assumption · unconfirmed');
  expect(root.querySelectorAll('.rf-dependencies button')).toHaveLength(1);expect(root.querySelector('.rf-dependencies')?.textContent).toContain('Supported by 1.1');
- (root.querySelector('.rf-dependencies button') as HTMLButtonElement).click();expect(root.querySelector('.rf-detail')?.textContent).toContain('Original words.');
+ document.body.replaceChildren(root);(root.querySelector('.rf-dependencies button') as HTMLButtonElement).click();expect(root.querySelector<HTMLDialogElement>('.rf-detail')?.open).toBe(false);expect(document.activeElement).toBe(root.querySelector('[data-rf-node="a"]'));expect(root.querySelector('.claim-reference-highlight')).not.toBeNull();
 });

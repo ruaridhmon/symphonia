@@ -149,6 +149,19 @@ function buildFixedDelphiRound(round, rounds, responses) {
   });
 }
 
+// src/utils/focusClaim.ts
+function focusClaim(target) {
+  if (!target) return;
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView?.({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+  target.focus({ preventScroll: true });
+  const row = target.closest(".rf-claim-row,.di-claim") || target;
+  row.classList.remove("claim-reference-highlight");
+  void row.offsetWidth;
+  row.classList.add("claim-reference-highlight");
+  row.addEventListener("animationend", () => row.classList.remove("claim-reference-highlight"), { once: true });
+}
+
 // src/utils/reasoningFlow.ts
 var el = (tag, text = "", cls = "") => {
   const e = document.createElement(tag);
@@ -283,10 +296,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
           const relation = { supports: "Supported by", qualifies: "Qualified by", challenges: "Challenged by", motivates: "Motivated by" }[edge.relation];
           link.textContent = `${relation} ${labels.get(source.id)}`;
           link.setAttribute("aria-label", `${n.text}: ${relation.toLowerCase()} claim ${labels.get(source.id)}. ${source.text}`);
-          link.onclick = () => {
-            select(source);
-            diagram.querySelector(`[data-rf-node="${source.id}"]`)?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
-          };
+          link.onclick = () => focusClaim([...diagram.querySelectorAll("[data-rf-node]")].find((b2) => b2.dataset.rfNode === source.id) || null);
           links.append(link);
         }
         row.append(links);
@@ -445,6 +455,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     const map = opening?.synthesis_json?.narrative === opening?.synthesis ? opening?.synthesis_json?.reasoning_graph : null;
     const claim = map?.claims?.find((c) => c.text.replace(/\s+/g, " ").trim() === row.label.replace(/^Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim());
     if (claim && map?.claims) {
+      article.dataset.claimId = claim.id;
       number.textContent = String(map.claims.indexOf(claim) + 1).padStart(2, "0");
       const links = node("div", "", "di-claim-links");
       for (const edge of map.claim_edges || []) {
@@ -453,8 +464,14 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
         if (!other) continue;
         const relation = { supports: "Supported by", qualifies: "Qualified by", challenges: "Challenged by", motivates: "Motivated by" }[edge.relation];
         const text = `${relation} ${String(map.claims.indexOf(other) + 1).padStart(2, "0")}`;
-        const b = button(text, () => document.dispatchEvent(new CustomEvent("symphonia:claim-map", { detail: { nodeId: other.id } })));
-        b.title = "Inspect the connected claim";
+        const b = button(text, () => {
+          const target = [...list.querySelectorAll("[data-claim-id]")].find((n) => n.dataset.claimId === other.id);
+          if (target) {
+            target.tabIndex = -1;
+            focusClaim(target);
+          }
+        });
+        b.title = "Go to the connected claim";
         links.append(b);
       }
       if (links.childElementCount) left.append(links);

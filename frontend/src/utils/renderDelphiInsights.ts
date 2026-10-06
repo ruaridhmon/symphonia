@@ -1,3 +1,4 @@
+import {focusClaim} from './focusClaim';
 import { renderReasoningFlow, clearReasoningFlow } from './reasoningFlow';
 import '../reasoning-flow.css';
 import { renderDelphiPlanner } from './renderDelphiPlanner';
@@ -56,8 +57,8 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     const left=node('div','','di-claim-copy');const number=node('span',String(rows.indexOf(row)+1).padStart(2,'0'),'di-claim-number');number.setAttribute('aria-label',`Claim ${rows.indexOf(row)+1}`);const claimTitle=node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,''));left.append(number,claimTitle);heading.append(left);
     const opening=rounds.find(r=>r.round_number===1);const map=opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null;
     const claim=map?.claims?.find(c=>c.text.replace(/\s+/g,' ').trim()===row.label.replace(/^Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim());
-    if(claim&&map?.claims){number.textContent=String(map.claims.indexOf(claim)+1).padStart(2,'0');
-      const links=node('div','','di-claim-links');for(const edge of map.claim_edges||[]){if(edge.to!==claim.id)continue;const other=map.claims.find(c=>c.id===edge.from);if(!other)continue;const relation={supports:'Supported by',qualifies:'Qualified by',challenges:'Challenged by',motivates:'Motivated by'}[edge.relation];const text=`${relation} ${String(map.claims.indexOf(other)+1).padStart(2,'0')}`;const b=button(text,()=>document.dispatchEvent(new CustomEvent('symphonia:claim-map',{detail:{nodeId:other.id}})));b.title='Inspect the connected claim';links.append(b);}if(links.childElementCount)left.append(links);
+    if(claim&&map?.claims){article.dataset.claimId=claim.id;number.textContent=String(map.claims.indexOf(claim)+1).padStart(2,'0');
+      const links=node('div','','di-claim-links');for(const edge of map.claim_edges||[]){if(edge.to!==claim.id)continue;const other=map.claims.find(c=>c.id===edge.from);if(!other)continue;const relation={supports:'Supported by',qualifies:'Qualified by',challenges:'Challenged by',motivates:'Motivated by'}[edge.relation];const text=`${relation} ${String(map.claims.indexOf(other)+1).padStart(2,'0')}`;const b=button(text,()=>{const target=[...list.querySelectorAll<HTMLElement>('[data-claim-id]')].find(n=>n.dataset.claimId===other.id);if(target){target.tabIndex=-1;focusClaim(target);}});b.title='Go to the connected claim';links.append(b);}if(links.childElementCount)left.append(links);
     }
     const rating=node('div','','di-rating');rating.setAttribute('aria-label',category(row));
     const score=node('div','','di-score');score.append(node('strong',row.percent===null?'—':`${Math.round(row.percent)}%`),node('span',row.percent===null?'No ratings':'agree'));rating.append(score);heading.append(rating);article.append(heading);

@@ -1004,3 +1004,8 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
  #root .cw-identity {flex:1;}
  #root .cw-identity h2 {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
 }
+
+@keyframes claim-reference-highlight {0%,35%{background:var(--muted);}100%{background:transparent;}}
+#root .claim-reference-highlight {animation:claim-reference-highlight 1.6s ease-out;}
+#root .di-claim:focus-visible {outline:2px solid var(--muted-foreground);outline-offset:3px;border-radius:4px;}
+@media(prefers-reduced-motion:reduce){#root .claim-reference-highlight {animation:none;}}

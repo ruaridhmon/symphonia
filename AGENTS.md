@@ -323,3 +323,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Final prose live refinement: verbatim claim sentences read consecutively as paragraphs, avoiding a comma-separated list of quoted claims and doubled sentence punctuation. Dist Summary v37, consultation v23, final v18, workflow-24, CSS v38.
 
 - Actual mobile-frame computed-style check exposed the older high-specificity 72px workspace exception; update that exception to 12px so the toggle and title align. CSS v39.
+
+- Claim connections navigate in place: upstream references scroll/focus and briefly highlight the existing claim in R1/R2/R3 rather than opening evidence or changing views. Claim words retain supporting-information dialogs; reduced motion respected. Summary v38, consultation v24, final v19, workflow-25, CSS v40.
