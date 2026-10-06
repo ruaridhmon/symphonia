@@ -618,21 +618,46 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
       h(
         "nav",
         { className: "cw-views", "aria-label": "Consultation views" },
-        [["synthesis", "Summary"], ["responses", "Responses"]].map(([view, label]) => button(label, () => {
-          if (canLeave()) {
-            setFinalView(false);
-            setMapView(false);
-            p.onView(view);
-          }
-        }, { key: view, "aria-pressed": !finalView && !mapView && p.view === view })),
-        button("Claim map", () => {
-          if (canLeave()) {
-            p.onView("synthesis");
-            setFinalView(false);
-            setMapNode(void 0);
-            setMapView(true);
-          }
-        }, { "aria-pressed": mapView, className: "cw-map-tab" }),
+        h(
+          "details",
+          { className: "cw-view-menu", onKeyDown: (e) => {
+            if (e.key === "Escape") {
+              e.currentTarget.open = false;
+              e.currentTarget.querySelector("summary")?.focus();
+            }
+          }, onBlur: (e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false;
+          } },
+          h("summary", { "aria-label": "Change consultation view" }, finalView ? "Final synthesis" : mapView ? "Claim map" : p.view === "responses" ? "Responses" : "Summary", h("span", { "aria-hidden": true }, "\u2304")),
+          h(
+            "div",
+            { className: "cw-view-popover", onClick: (e) => {
+              if (e.target.closest("button")) {
+                const menu = e.currentTarget.closest("details");
+                if (menu) {
+                  menu.open = false;
+                  requestAnimationFrame(() => menu.querySelector("summary")?.focus());
+                }
+              }
+            } },
+            [["synthesis", "Summary"], ["responses", "Responses"]].map(([view, label]) => button(label, () => {
+              if (canLeave()) {
+                setFinalView(false);
+                setMapView(false);
+                p.onView(view);
+              }
+            }, { key: view, "aria-pressed": !finalView && !mapView && p.view === view })),
+            button("Claim map", () => {
+              if (canLeave()) {
+                p.onView("synthesis");
+                setFinalView(false);
+                setMapNode(void 0);
+                setMapView(true);
+              }
+            }, { "aria-pressed": mapView, className: "cw-map-tab" }),
+            p.view === "synthesis" && !finalView && !mapView ? h("div", { className: "cw-summary-slot" }) : null
+          )
+        ),
         h(
           "div",
           { className: "cw-context cw-simple-context" },
@@ -652,7 +677,6 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
           }, { "aria-pressed": finalView, className: "cw-final-tab", title: "Round 4 \xB7 final synthesis" }) : null
         )
       ),
-      p.view === "synthesis" && !finalView && !mapView ? h("div", { className: "cw-summary-slot" }) : null,
       mapView ? h("section", { className: "cw-claim-map", "aria-label": "Shared claim map" }, graph ? h("div", { ref: mapRoot }) : h(R.Fragment, null, h("h2", null, "No shared claim map yet"), h("p", null, "Extract the Round 1 contributions to create source-linked explicit claims, inferred assumptions and their connections."))) : null,
       finalView && FinalSynthesis ? h(FinalSynthesis, { formId: p.form.id, onComplete: () => setCompleted(true) }) : null,
       saved ? h("p", { className: "cw-response-saved", role: "status" }, saved) : null,

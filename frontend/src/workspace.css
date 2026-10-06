@@ -954,3 +954,44 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .di-supporting-dialog .di-supporting-kicker {margin-bottom:5px;}
 #root .rf-canvas>.rf-flow-title {display:none;}
 @media(max-width:640px){#root .cw-summary-slot .rf-source-picker {max-width:100%;margin-left:auto;}#root .cw-summary-slot .summary-switch {gap:8px 12px;}#root .di-supporting-dialog {padding:18px;}}
+
+/* Quiet title bar and one navigation row. Secondary views open on demand. */
+#root .consultation-workspace {display:block;margin-bottom:28px;padding-bottom:0!important;border:0;}
+#root .cw-title-row {align-items:center;flex-direction:row;gap:16px;min-height:40px;margin-bottom:14px;}
+#root .cw-identity {display:flex;align-items:center;gap:8px;min-width:0;}
+#root .cw-identity h2 {font-size:18px!important;line-height:1.35!important;font-weight:550!important;letter-spacing:-.02em;}
+#root .cw-provenance {font-size:10px;padding:2px 5px;flex-shrink:0;margin:0;}
+#root .cw-title-actions {width:auto;margin:0;padding:0;gap:4px;}
+#root .cw-add-response {border:0;background:none;box-shadow:none;padding:8px 10px;min-height:36px;font-size:12px;border-radius:8px;}
+#root .cw-add-response:hover {background:var(--muted);}
+#root .cw-options>summary {display:flex;align-items:center;justify-content:center;width:36px;height:36px;min-height:36px;padding:0;border-radius:8px;}
+#root .cw-options>summary:hover,#root .cw-options[open]>summary {background:var(--muted);}
+#root .cw-views {display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:16px;border:0;margin:0;}
+#root .cw-views .cw-context {order:-1;width:auto;margin:0;gap:4px;justify-content:flex-start;min-width:0;}
+#root .cw-round-tabs {display:flex;gap:2px;min-width:0;}
+#root .cw-views .cw-round-tabs button,#root .cw-views .cw-final-tab {border:0;border-radius:8px;padding:8px 11px;min-height:34px;white-space:nowrap;font-size:12px;font-weight:400;background:none;}
+#root .cw-views .cw-round-tabs button[aria-pressed=true],#root .cw-views .cw-final-tab[aria-pressed=true] {background:var(--muted);color:var(--foreground);font-weight:550;}
+#root .cw-views .cw-round-tabs button:hover,#root .cw-views .cw-final-tab:hover {background:var(--muted);}
+#root .cw-view-menu {position:relative;flex-shrink:0;}
+#root .cw-view-menu>summary {display:flex;align-items:center;gap:7px;list-style:none;cursor:pointer;padding:8px 10px;min-height:34px;box-sizing:border-box;border-radius:8px;color:var(--muted-foreground);font-size:12px;}
+#root .cw-view-menu>summary::-webkit-details-marker {display:none;}
+#root .cw-view-menu>summary:hover,#root .cw-view-menu[open]>summary {background:var(--muted);color:var(--foreground);}
+#root .cw-view-popover {position:absolute;top:calc(100% + 6px);right:0;z-index:65;width:220px;padding:6px;background:var(--background);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 28px #00000014;}
+#root .cw-view-popover>button,#root .cw-summary-slot .summary-switch>button {display:block;width:100%;text-align:left;min-height:36px;padding:9px 10px;font-size:12px;border:0;border-radius:6px;color:var(--foreground);background:none;}
+#root .cw-view-popover button:hover {background:var(--muted);}
+#root .cw-view-popover>button[aria-pressed=true] {background:var(--muted);font-weight:550;}
+#root .cw-summary-slot .summary-switch {display:block;margin:6px 0 0;padding:6px 0 0;border-top:1px solid var(--border);}
+#root .cw-summary-slot .rf-source-picker {display:block;max-width:100%;width:100%;margin:6px 0 0;padding:9px 10px;border:0;border-top:1px solid var(--border);font-size:12px;}
+#root .cw-summary-slot .rf-source-picker[hidden] {display:none;}
+#root .cw-view-menu>summary:focus-visible,#root .cw-options>summary:focus-visible {outline:2px solid var(--foreground);outline-offset:2px;}
+@media(max-width:640px){
+ #root .cw-title-row {gap:8px;margin-bottom:12px;}
+ #root .cw-identity h2 {font-size:16px!important;}
+ #root .cw-add-response {width:36px;height:36px;padding:10px;}
+ #root .cw-add-response>span {display:none;}
+ #root .cw-views {gap:4px;align-items:flex-start;flex-wrap:wrap;}
+ #root .cw-views .cw-context {gap:2px;flex:1;}
+ #root .cw-views .cw-round-tabs button,#root .cw-views .cw-final-tab {padding:8px 7px;font-size:11px;}
+ #root .cw-view-menu>summary {padding:8px 6px;font-size:11px;}
+}
+@media(max-width:380px){#root .cw-view-menu {margin-left:auto;}}
