@@ -959,10 +959,10 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .consultation-workspace {display:block;margin-bottom:28px;padding-bottom:0!important;border:0;}
 #root .cw-title-row {align-items:center;flex-direction:row;gap:16px;min-height:40px;margin-bottom:14px;}
 #root .cw-identity {display:flex;align-items:center;gap:8px;min-width:0;}
-#root .cw-identity h2 {font-size:18px!important;line-height:1.35!important;font-weight:550!important;letter-spacing:-.02em;}
+#root .symphonia-shell .consultation-workspace .cw-identity h2 {font-size:18px!important;line-height:1.35!important;font-weight:550!important;letter-spacing:-.02em;}
 #root .cw-provenance {font-size:10px;padding:2px 5px;flex-shrink:0;margin:0;}
 #root .cw-title-actions {width:auto;margin:0;padding:0;gap:4px;}
-#root .cw-add-response {border:0;background:none;box-shadow:none;padding:8px 10px;min-height:36px;font-size:12px;border-radius:8px;}
+#root .cw-title-actions .cw-add-response {border:0;background:none;box-shadow:none;padding:8px 10px;min-height:36px;font-size:12px;border-radius:8px;}
 #root .cw-add-response:hover {background:var(--muted);}
 #root .cw-options>summary {display:flex;align-items:center;justify-content:center;width:36px;height:36px;min-height:36px;padding:0;border-radius:8px;}
 #root .cw-options>summary:hover,#root .cw-options[open]>summary {background:var(--muted);}
@@ -986,8 +986,8 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .cw-view-menu>summary:focus-visible,#root .cw-options>summary:focus-visible {outline:2px solid var(--foreground);outline-offset:2px;}
 @media(max-width:640px){
  #root .cw-title-row {gap:8px;margin-bottom:12px;}
- #root .cw-identity h2 {font-size:16px!important;}
- #root .cw-add-response {width:36px;height:36px;padding:10px;}
+ #root .symphonia-shell .consultation-workspace .cw-identity h2 {font-size:16px!important;}
+ #root .cw-title-actions .cw-add-response {width:36px;height:36px;padding:10px;}
  #root .cw-add-response>span {display:none;}
  #root .cw-views {gap:4px;align-items:flex-start;flex-wrap:wrap;}
  #root .cw-views .cw-context {gap:2px;flex:1;}
