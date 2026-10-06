@@ -2496,8 +2496,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
         row.classList.add("rf-inferred-row");
         b.append(el("span", "Inferred assumption", "rf-list-origin"));
       }
-      const sourceCount = n.sources?.filter((s) => s.quote.trim()).length || (n.quote?.trim() ? 1 : 0);
-      if (sourceCount) b.append(el("span", `Supporting information \xB7 ${sourceCount}`, "rf-list-supporting"));
+      b.title = n.kind === "assumption" ? "Inspect inferred assumption" : "Read supporting information";
       b.setAttribute("aria-haspopup", "dialog");
       b.onclick = () => select(n);
       row.append(b);
@@ -2984,13 +2983,21 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     if (row.origin === "inferred") left.append(node("p", "Inferred assumption \xB7 unconfirmed", "di-inferred-origin"));
     const supporting = row.evidence.filter((e) => e.comment.trim());
     const wrapper = node("div", "", "di-reasons");
-    const trigger = button(`Supporting information \xB7 ${supporting.length}`, () => {
+    const trigger = button("", () => {
       detail.showModal();
     });
     trigger.className = "di-supporting-trigger";
     trigger.setAttribute("aria-haspopup", "dialog");
-    trigger.title = supporting.length ? `${supporting.length} responses include supporting information` : "No supporting information provided";
-    wrapper.append(trigger);
+    trigger.setAttribute("aria-label", "Supporting information");
+    trigger.title = "Supporting information";
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("viewBox", "0 0 20 20");
+    icon.setAttribute("aria-hidden", "true");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M5 2.75h6l4 4v10.5H5z M11 2.75v4h4 M8 10h4 M8 13h4");
+    icon.append(path);
+    trigger.append(icon);
+    if (supporting.length) wrapper.append(trigger);
     const detail = document.createElement("dialog");
     detail.className = "di-supporting-dialog";
     detail.setAttribute("aria-label", `Supporting information: ${row.label.replace(/^Claim\s+\d+:\s*/i, "")}`);

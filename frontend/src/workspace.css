@@ -883,3 +883,10 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .di-supporting-distribution {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px;font-size:12px;margin:18px 0;}
 #root .di-supporting-distribution dt,#root .di-supporting-distribution dd {margin:0;}
 @media(max-width:640px){#root .di-supporting-certainty {margin-left:0;flex-basis:100%;}#root .di-supporting-entry {padding:15px 0;}}
+
+/* Supporting text is a quiet affordance, not repeated metadata. */
+#root .di-supporting-trigger {display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:5px;border-radius:6px;color:var(--muted-foreground);opacity:.65;}
+#root .di-supporting-trigger svg {width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+#root .di-supporting-trigger:hover,#root .di-supporting-trigger:focus-visible {opacity:1;background:var(--muted);}
+#root .di-reasons:has(>.di-supporting-dialog:only-child) {display:none;}
+#root .rf-list-node strong {flex:1;}
