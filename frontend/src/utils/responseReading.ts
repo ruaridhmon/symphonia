@@ -15,7 +15,7 @@ export function responseSections(questions:Question[],answers:Record<string,unkn
   const comment=/comment|clarification|justify|what led|explain your position/i.test(label);
   const confidence=/^Confidence in your rating$/i.test(label)||/^claim_.+_confidence$/.test(String(config.questionId||''));
   const previous=result[result.length-1];
-  const useGroup=Array.isArray(config.options)||comment||/^(Your response|Your position)$/i.test(label);
+  const useGroup=Array.isArray(config.options)||comment||confidence||/^(Your response|Your position)$/i.test(label);
   const title=((useGroup&&group)?group:label).replace(/^Claim\s+\d+:\s*/i,'');
   const section:ReadingSection=(comment||confidence)&&group&&previous?.title===title?previous:{title,blocks:[]};
   if(section!==previous)result.push(section);

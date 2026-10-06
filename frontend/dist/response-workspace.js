@@ -15,7 +15,7 @@ function responseSections(questions, answers) {
     const comment = /comment|clarification|justify|what led|explain your position/i.test(label);
     const confidence = /^Confidence in your rating$/i.test(label) || /^claim_.+_confidence$/.test(String(config.questionId || ""));
     const previous = result[result.length - 1];
-    const useGroup = Array.isArray(config.options) || comment || /^(Your response|Your position)$/i.test(label);
+    const useGroup = Array.isArray(config.options) || comment || confidence || /^(Your response|Your position)$/i.test(label);
     const title = (useGroup && group ? group : label).replace(/^Claim\s+\d+:\s*/i, "");
     const section = (comment || confidence) && group && previous?.title === title ? previous : { title, blocks: [] };
     if (section !== previous) result.push(section);
@@ -166,9 +166,9 @@ function createResponseWorkspace(R, Editor, remove) {
               const changed = !!previous?.rating && !!section.rating && previous.rating !== section.rating;
               return h(
                 "section",
-                { key: index, className: "rp-question-answer" },
-                h("div", { className: "rp-question-heading" }, h("h3", null, section.title), changed ? h("span", { className: "rp-rating-change", "aria-label": `${previous.rating} to ${section.rating}` }, badge(previous.rating), h("span", { "aria-hidden": true }, " \u2192 "), badge(section.rating)) : badge(section.rating)),
-                h("div", { className: "rp-answer" }, ...section.blocks.map((block, i) => h("div", { key: i }, block.label && block.label !== "Reasoning" ? h("span", { className: "rp-block-label" }, block.label) : null, h("p", null, block.text))))
+                { key: index, className: `rp-question-answer ${section.rating ? "rp-compact-rating" : ""}` },
+                h("div", { className: "rp-question-heading" }, h("h3", null, section.title), changed ? h("span", { className: "rp-rating-change", "aria-label": `${previous.rating} to ${section.rating}` }, badge(previous.rating), h("span", { "aria-hidden": true }, " \u2192 "), badge(section.rating)) : badge(section.rating), section.rating ? section.blocks.filter((block) => block.label === "Confidence").map((block, i) => h("span", { key: i, className: "rp-inline-confidence" }, `Confidence: ${block.text}`)) : null),
+                section.rating ? section.blocks.some((block) => block.label !== "Confidence") ? h("details", { className: "rp-response-details" }, h("summary", null, "Reasoning"), h("div", { className: "rp-answer" }, ...section.blocks.filter((block) => block.label !== "Confidence").map((block, i) => h("div", { key: i }, block.label && block.label !== "Reasoning" ? h("span", { className: "rp-block-label" }, block.label) : null, h("p", null, block.text))))) : null : h("div", { className: "rp-answer" }, ...section.blocks.map((block, i) => h("div", { key: i }, block.label && block.label !== "Reasoning" ? h("span", { className: "rp-block-label" }, block.label) : null, h("p", null, block.text))))
               );
             })),
             history.length ? button(isExpanded ? "Hide earlier answers" : "Earlier answers", () => setExpanded((previous) => {

@@ -756,3 +756,17 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .symphonia-shell.symphonia-sidebar-collapsed > main.product-dashboard {padding-top:76px!important;}
 @media(max-width:1000px){#root .symphonia-shell > main.product-summary,#root .symphonia-shell > main.product-dashboard {padding-top:76px!important;}}
 @media(max-width:650px){#root .rf-diagram {padding-bottom:0;gap:22px;}#root .rf-wires {display:none;}#root .rf-node {min-height:0;}#root .rf-stage {padding-top:10px;border-top:1px solid var(--border);}}
+
+/* Compact review responses retain exact ratings and separate confidence. */
+#root .rp-person-answers .rp-compact-rating{padding:10px 0;border-bottom:1px solid var(--border);margin:0}
+#root .rp-person-answers .rp-compact-rating:last-child{border-bottom:0}
+#root .rp-compact-rating .rp-question-heading{display:flex;align-items:baseline;gap:6px 10px;flex-wrap:wrap;margin:0}
+#root .rp-compact-rating .rp-question-heading h3{color:var(--foreground);font-size:13px;line-height:1.6;font-weight:500;max-width:none}
+#root .rp-compact-rating .rp-question-heading h3::after{content:':'}
+#root .rp-compact-rating .rp-question-heading .rp-rating,#root .rp-compact-rating .rp-question-heading .rp-rating-change{margin:0;font-size:12px}
+.rp-inline-confidence{font-size:12px;color:var(--muted-foreground);line-height:1.6}
+.rp-response-details{margin-top:4px}
+.rp-response-details>summary{cursor:pointer;font-size:11px;line-height:1.6;color:var(--muted-foreground);width:fit-content}
+#root .rp-response-details .rp-answer{padding:8px 0 2px}
+#root .rp-response-details .rp-answer p{font-size:13px;line-height:1.65}
+@media(max-width:640px){#root .rp-compact-rating .rp-question-heading h3{flex-basis:100%}.rp-response-details>summary{padding:4px 0;min-height:28px}}
