@@ -63,3 +63,8 @@ it('rates every normalized claim, including visibly inferred and minority claims
  expect(q[3]).toMatchObject({claimOrigin:'inferred',claimText:'This is an inferred necessary step.',inferenceQuestion:'Does this bridge follow?'});
  expect(q[3].groupPrompt).toContain('not directly stated');
 });
+
+it('preserves an inferred label when a saved claim list is used without graph metadata',()=>{
+ const q=buildDelphiRoundTwoQuestions('<div><p>Claim 1: <strong>An unstated bridge.</strong></p><p>Inferred · unconfirmed. Not directly stated by an expert.</p></div>') as Record<string,unknown>[];
+ expect(q[0].claimOrigin).toBe('inferred');expect(q[0].groupPrompt).toContain('not directly stated');
+});

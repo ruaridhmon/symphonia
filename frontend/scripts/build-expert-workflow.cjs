@@ -10,6 +10,6 @@ const shim={react:'import {r as React} from "/assets/vendor-react-D3EY6NCv.js";e
  code='import FinalSynthesisPanel from "/final-synthesis.js?v=2";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=4');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v11.js',code);
  fs.copyFileSync('src/legacy/delphiRoundSetup.js','dist/delphi-round-two-ui.js');fs.copyFileSync('src/workspace.css','dist/workspace.css');fs.copyFileSync('src/reasoning-flow.css','dist/reasoning-flow.css');
  let html=fs.readFileSync('dist/index.html','utf8').replace(/\/assets\/SummaryPage-workspace-v(?:9|10)\.js/,'/assets/SummaryPage-workspace-v11.js').replace(/\/workspace\.css\?v=[23]/,'/workspace.css?v=4');
- for(const name of ['delphi-progress','product-ui','delphi-demo','delphi-round-two-ui'])html=html.replace(new RegExp(`/${name}\\.js\\?v=[^"']+`,'g'),`/${name}.js?v=workflow-2`);
+ for(const name of ['delphi-progress','product-ui','delphi-demo','delphi-round-two-ui'])html=html.replace(new RegExp(`/${name}\\.js\\?v=[^"']+`,'g'),`/${name}.js?v=${name==='delphi-round-two-ui'?'workflow-3':'workflow-2'}`);
  fs.writeFileSync('dist/index.html',html);
 })().catch(e=>{console.error(e);process.exitCode=1;});
