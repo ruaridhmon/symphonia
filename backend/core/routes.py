@@ -27,11 +27,11 @@ import os
 import re
 import secrets
 import zipfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 import asyncio
-from typing import Any
+from typing import Annotated, Any
 from xml.etree import ElementTree as ET
 import textwrap
 from uuid import UUID
@@ -64,6 +64,7 @@ from .models import (
     InviteCode,
     PublicFormSession,
 )
+from .reasoning import REASONING_PROMPT, parse_reasoning_output
 from .audit import audit_log
 from .auth import (
     get_db,
@@ -3449,7 +3450,6 @@ class GenerateSynthesisVersionPayload(BaseModel):
     prompt: str | None = None
 
 
-from .reasoning import REASONING_PROMPT, parse_reasoning_output
 
 class ReasoningMapPayload(BaseModel):
     expected_synthesis: str
@@ -7984,17 +7984,17 @@ def _final_account_material(form_id, db, *, lock=False):
 
 
 @router.get('/forms/{form_id}/final_synthesis', tags=['Rounds'])
-def get_final_account(form_id: int, db: Session = Depends(get_db), user: User = Depends(require_platform_admin)):
+def get_final_account(form_id: int, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(require_platform_admin)]):
     account, final, saved = _final_account_material(form_id, db)
     return {'preview': account, 'saved': saved, 'stale': bool(saved and saved.get('revision') != account['revision']), 'collection_open': final.is_active}
 
 
 @router.post('/forms/{form_id}/final_synthesis', tags=['Rounds'])
-def save_final_account(form_id: int, payload: FinalAccountPayload, db: Session = Depends(get_db), user: User = Depends(require_platform_admin)):
+def save_final_account(form_id: int, payload: FinalAccountPayload, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(require_platform_admin)]):
     account, final, saved = _final_account_material(form_id, db, lock=True)
     if payload.expected_revision != account['revision']:
         raise HTTPException(status_code=409, detail='Responses or reasoning changed. Refresh the final synthesis before saving.')
-    account['saved_at'] = datetime.now(timezone.utc).isoformat()
+    account['saved_at'] = datetime.now(UTC).isoformat()
     account['completed'] = payload.complete or bool(saved and saved.get('completed'))
     final.context_settings = {**(final.context_settings or {}), 'final_synthesis': account}
     if payload.complete:
