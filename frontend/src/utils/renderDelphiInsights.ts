@@ -61,10 +61,10 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     }
     const rating=node('div','','di-rating');rating.setAttribute('aria-label',category(row));
     const score=node('div','','di-score');score.append(node('strong',row.percent===null?'—':`${Math.round(row.percent)}%`),node('span',row.percent===null?'No ratings':'agree'));rating.append(score);heading.append(rating);article.append(heading);
-    const bar=node('div','','di-bar');bar.setAttribute('aria-hidden','true');
+    const bar=node('div','','di-bar');bar.setAttribute('role','group');bar.setAttribute('aria-label','Expert positions and confidence');
     // Denominator matches the displayed percentage; omissions are reported separately.
     row.votes.slice(0,5).forEach((n,i)=>{if(n&&row.answered){for(const expert of row.evidence.filter(e=>e.group===i)){
-      const part=node('span');const level=confidenceLabels.indexOf(expert.confidence);part.style.width=`${100/row.answered}%`;part.style.height=`${level<0?2:2+level*2}px`;part.style.background=colors[i];part.dataset.confidence=level<0?'missing':String(level);part.title=`${expert.participant}: ${expert.position}; confidence: ${expert.confidence || 'not recorded'}`;bar.append(part);
+      const part=button('',()=>{});part.disabled=true;part.dataset.stance=String(i);const level=confidenceLabels.indexOf(expert.confidence);part.style.width=`${100/row.answered}%`;part.style.height=`${level<0?2:2+level*2}px`;part.style.background=colors[i];part.dataset.confidence=level<0?'missing':String(level);part.title=`${expert.participant}: ${expert.position}; confidence: ${expert.confidence || 'not recorded'}`;part.setAttribute('aria-label',part.title);bar.append(part);
     }}});bar.title='Length shows the share of positions. Each segment is one expert; thicker means higher confidence. Dashed segments have no confidence rating.';rating.append(bar);
     const legend=node('div','','di-legend');
     row.votes.forEach((n,i)=>{if(n||i<2){
@@ -78,20 +78,22 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
         const disclosure=node('details','','di-confidence') as HTMLDetailsElement;disclosure.dataset.key=`${row.key}:confidence:${i}`;disclosure.open=false;
         const trigger=node('summary',label+(values.length&&values.length<n?` (${values.length}/${n})`:''));trigger.setAttribute('aria-label',`${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);disclosure.append(trigger);
         const body=document.createElement('dialog');body.className='di-confidence-detail';body.setAttribute('aria-label',`Confidence among people who ${stanceLabels[i].toLowerCase()}`);
+        let anchorControl:HTMLElement=trigger;
         const position=()=>{
           if(!body.open)return;
           const viewport=window.visualViewport;
           const leftEdge=(viewport?.offsetLeft||0)+12,topEdge=(viewport?.offsetTop||0)+12;
           const rightEdge=leftEdge+(viewport?.width||window.innerWidth)-24,bottomEdge=topEdge+(viewport?.height||window.innerHeight)-24;
           body.style.maxWidth=`${rightEdge-leftEdge}px`;body.style.maxHeight=`${bottomEdge-topEdge}px`;
-          const anchor=trigger.getBoundingClientRect(),box=body.getBoundingClientRect();
+          const anchor=anchorControl.getBoundingClientRect(),box=body.getBoundingClientRect();
           const below=bottomEdge-anchor.bottom-8,above=anchor.top-topEdge-8;
           const top=below>=box.height||below>=above?anchor.bottom+8:anchor.top-box.height-8;
           body.style.left=`${Math.max(leftEdge,Math.min(anchor.left,rightEdge-box.width))}px`;
           body.style.top=`${Math.max(topEdge,Math.min(top,bottomEdge-box.height))}px`;
         };
-        const dismiss=()=>{body.close();disclosure.open=false;trigger.focus();};
+        const dismiss=()=>{body.close();disclosure.open=false;anchorControl.focus();};
         trigger.onclick=e=>{e.preventDefault();root.querySelectorAll<HTMLDialogElement>('.di-confidence dialog[open]').forEach(d=>d.close());disclosure.open=true;body.showModal();position();window.addEventListener('resize',position);window.addEventListener('scroll',position,true);window.visualViewport?.addEventListener('resize',position);};
+        for(const part of bar.querySelectorAll<HTMLButtonElement>(`button[data-stance="${i}"]`)){part.disabled=false;part.setAttribute('aria-haspopup','dialog');part.onclick=()=>{anchorControl=part;trigger.click();};}
         body.onclose=()=>{disclosure.open=false;window.removeEventListener('resize',position);window.removeEventListener('scroll',position,true);window.visualViewport?.removeEventListener('resize',position);};
         body.oncancel=e=>{e.preventDefault();dismiss();};
         body.onclick=e=>{if(e.target===body){const r=body.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dismiss();}};

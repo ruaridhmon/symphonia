@@ -12,7 +12,7 @@ it('keeps unsure votes in the bar denominator and reports missing answers separa
  const root=document.createElement('section');document.body.append(root);
  renderDelphiInsights(root,round,[round],responses(['Agree','Disagree','Unsure','']));
  expect(root.querySelector('.di-score')!.textContent).toBe('33%agree');
- const widths=Array.from(root.querySelectorAll<HTMLElement>('.di-bar>span')).map(s=>parseFloat(s.style.width));
+ const widths=Array.from(root.querySelectorAll<HTMLElement>('.di-bar>button')).map(s=>parseFloat(s.style.width));
  expect(widths).toHaveLength(3);expect(widths.reduce((a,b)=>a+b,0)).toBeCloseTo(100);
  expect(root.querySelector('.di-legend')!.textContent).toContain('1 not answered');
  renderDelphiInsights(root,round,[round],responses(['']));
@@ -93,6 +93,14 @@ it('counts supplied supporting information and opens it in a dismissible modal',
 it('keeps position lengths equal while individual confidence changes thickness',()=>{
  const root=document.createElement('section');const current={...round,questions:[...questions,{questionId:'confidence',sectionTitle:'Exact claim',label:'Confidence in your rating',inputType:'single_select',options:['Very confident']}]};
  const data=responses(['Agree','Agree','Disagree']);data[0].responses[0].answers.q2={position:'Slightly confident'};data[0].responses[1].answers.q2={position:'Extremely confident'};
- renderDelphiInsights(root,current,[current],data);const parts=[...root.querySelectorAll<HTMLElement>('.di-bar>span')];
+ renderDelphiInsights(root,current,[current],data);const parts=[...root.querySelectorAll<HTMLElement>('.di-bar>button')];
  expect(parts.map(p=>parseFloat(p.style.width))).toEqual([100/3,100/3,100/3]);expect(parts.map(p=>p.style.height)).toEqual(['4px','10px','2px']);expect(parts[2].dataset.confidence).toBe('missing');expect(root.querySelector('.di-score')?.textContent).toBe('67%agree');
+});
+
+it('opens exact confidence from a line segment and returns focus on close',()=>{
+ const root=document.createElement('section');document.body.append(root);const current={...round,questions:[...questions,{questionId:'confidence',sectionTitle:'Exact claim',label:'Confidence in your rating',inputType:'single_select',options:['Very confident']}]};
+ const data=responses(['Agree']);data[0].responses[0].answers.q2={position:'Very confident'};renderDelphiInsights(root,current,[current],data);
+ const part=root.querySelector<HTMLButtonElement>('.di-bar>button')!;expect(part.disabled).toBe(false);expect(part.getAttribute('aria-label')).toContain('Very confident');expect(part.getAttribute('aria-haspopup')).toBe('dialog');
+ const dialog=root.querySelector<HTMLDialogElement>('.di-confidence-detail')!;dialog.showModal=vi.fn(()=>dialog.open=true);dialog.close=vi.fn(()=>{dialog.open=false;dialog.dispatchEvent(new Event('close'));});
+ part.click();expect(dialog.open).toBe(true);expect(dialog.querySelector('[aria-label="Very confident: 1"]')).not.toBeNull();(dialog.querySelector('button') as HTMLButtonElement).click();expect(dialog.open).toBe(false);expect(document.activeElement).toBe(part);
 });
