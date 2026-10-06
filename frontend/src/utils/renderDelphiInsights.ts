@@ -118,8 +118,8 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     }
     if(row.origin==='inferred')left.append(node('p','Inferred assumption · unconfirmed','di-inferred-origin'));
     const supporting=row.evidence.filter(e=>e.comment.trim());
-    const wrapper=node('div','','di-reasons');const trigger=button(`Supporting information · ${supporting.length}`,()=>{detail.showModal();});
-    trigger.className='di-supporting-trigger';trigger.setAttribute('aria-haspopup','dialog');trigger.title=supporting.length?`${supporting.length} responses include supporting information`:'No supporting information provided';wrapper.append(trigger);
+    const wrapper=node('div','','di-reasons');const trigger=button('',()=>{detail.showModal();});
+    trigger.className='di-supporting-trigger';trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-label','Supporting information');trigger.title='Supporting information';const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 20 20');icon.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M5 2.75h6l4 4v10.5H5z M11 2.75v4h4 M8 10h4 M8 13h4');icon.append(path);trigger.append(icon);if(supporting.length)wrapper.append(trigger);
     const detail=document.createElement('dialog');detail.className='di-supporting-dialog';detail.setAttribute('aria-label',`Supporting information: ${row.label.replace(/^Claim\s+\d+:\s*/i,'')}`);
     const dismiss=()=>{detail.close();trigger.focus();};const close=button('×',dismiss);close.setAttribute('aria-label','Close supporting information');
     const header=node('div','','di-supporting-heading');const title=node('div');title.append(node('p','Supporting information','di-supporting-kicker'),node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,''),'di-supporting-claim'));header.append(title,close);detail.append(header);

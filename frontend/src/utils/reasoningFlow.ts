@@ -39,7 +39,7 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
    const b=document.createElement('button');b.type='button';b.className='rf-node rf-list-node';b.dataset.rfNode=n.id;b.setAttribute('aria-pressed','false');
    b.append(el('span',labels.get(n.id)!,'rf-number'),el('strong',n.text));
    if(n.kind==='assumption'){row.classList.add('rf-inferred-row');b.append(el('span','Inferred assumption','rf-list-origin'));}
-   const sourceCount=n.sources?.filter(s=>s.quote.trim()).length || (n.quote?.trim()?1:0);if(sourceCount)b.append(el('span',`Supporting information · ${sourceCount}`,'rf-list-supporting'));
+   b.title=n.kind==='assumption'?'Inspect inferred assumption':'Read supporting information';
    b.setAttribute('aria-haspopup','dialog');b.onclick=()=>select(n);row.append(b);
    const incoming=flow.edges.filter(e=>e.to===n.id);
    if(incoming.length){const links=el('div','','rf-dependencies');

@@ -431,8 +431,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
         row.classList.add("rf-inferred-row");
         b.append(el("span", "Inferred assumption", "rf-list-origin"));
       }
-      const sourceCount = n.sources?.filter((s) => s.quote.trim()).length || (n.quote?.trim() ? 1 : 0);
-      if (sourceCount) b.append(el("span", `Supporting information \xB7 ${sourceCount}`, "rf-list-supporting"));
+      b.title = n.kind === "assumption" ? "Inspect inferred assumption" : "Read supporting information";
       b.setAttribute("aria-haspopup", "dialog");
       b.onclick = () => select(n);
       row.append(b);
