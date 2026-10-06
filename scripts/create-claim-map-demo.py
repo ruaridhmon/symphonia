@@ -66,7 +66,7 @@ for round_number in [2,3]:
 for r in req('GET',f'forms/{fid}/rounds',auth=True):
     if r['round_number']>1:
         note='Three fictional experts rated all seven claims, with separate confidence and explanations.' if r['round_number']==2 else 'The fictional panel reconsidered the same seven claims. One expert strengthened support for lesson-only storage; disagreement and uncertainty remain.'
-        req('PUT',f'forms/{fid}/rounds/{r["id"]}/synthesis',{'summary':'<p>'+note+'</p>'},True)
+        req('PUT',f'forms/{fid}/rounds/{r["id"]}/synthesis',{'summary':'<p>'+note+'</p>'+r['synthesis']},True)
 account=req('GET',f'forms/{fid}/final_synthesis',auth=True)
 req('POST',f'forms/{fid}/final_synthesis',{'expected_revision':account['preview']['revision'],'complete':False},True)
 s['completed']=True;save();print(json.dumps({'form_id':fid,'claims':7,'inferred':2,'responses':9,'paid_calls':0}))
