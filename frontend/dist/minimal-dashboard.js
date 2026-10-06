@@ -1,3 +1,274 @@
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+
+// <define:import.meta.env>
+var define_import_meta_env_default;
+var init_define_import_meta_env = __esm({
+  "<define:import.meta.env>"() {
+    define_import_meta_env_default = {};
+  }
+});
+
+// src/api/client.ts
+var client_exports = {};
+__export(client_exports, {
+  ApiError: () => ApiError,
+  api: () => api,
+  clearAuthAndRedirect: () => clearAuthAndRedirect,
+  getApiErrorDetail: () => getApiErrorDetail,
+  isCfAccessRedirect: () => isCfAccessRedirect,
+  publicApi: () => publicApi
+});
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+function isCfAccessRedirect(response) {
+  if (response.type === "opaqueredirect") return true;
+  if (response.redirected) {
+    const url = response.url.toLowerCase();
+    if (url.includes("cloudflareaccess.com") || url.includes("cdn-cgi/access")) {
+      return true;
+    }
+  }
+  return false;
+}
+function clearAuthAndRedirect() {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("email");
+  localStorage.removeItem("is_admin");
+  document.cookie = "csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
+  document.cookie = `csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}; SameSite=Lax`;
+  if (!_redirecting) {
+    _redirecting = true;
+    window.location.href = "/login?expired=1";
+  }
+}
+async function apiClient(endpoint, options = {}) {
+  const csrfToken = getCookie("csrf_token");
+  const bearerToken = localStorage.getItem("access_token");
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      credentials: "include",
+      // Send httpOnly cookies automatically
+      headers: {
+        "Content-Type": "application/json",
+        ...csrfToken ? { "X-CSRF-Token": csrfToken } : {},
+        ...bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {},
+        ...options.headers
+      }
+    });
+  } catch (err) {
+    throw new ApiError(0, "Connection interrupted. Please try again when you are online.");
+  }
+  if (isCfAccessRedirect(response)) {
+    clearAuthAndRedirect();
+    throw new ApiError(401, "Session expired (CF Access). Please log in again.");
+  }
+  if (!response.ok) {
+    if (response.status === 401) {
+      if (endpoint !== "/login") {
+        clearAuthAndRedirect();
+        throw new ApiError(401, "Session expired. Please log in again.");
+      }
+    }
+    let errorBody;
+    try {
+      errorBody = await response.text();
+    } catch {
+      errorBody = `HTTP ${response.status}`;
+    }
+    throw new ApiError(response.status, errorBody, response.headers);
+  }
+  try {
+    return await response.json();
+  } catch {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("text/html")) {
+      throw new ApiError(502, "The server returned an unexpected page. Please try again.");
+    }
+    throw new ApiError(response.status, "Invalid JSON response from server");
+  }
+}
+async function publicApiClient(endpoint, options = {}) {
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      credentials: "omit"
+    });
+  } catch (err) {
+    throw new ApiError(0, err instanceof Error ? err.message : "Network request failed");
+  }
+  if (!response.ok) {
+    let errorBody;
+    try {
+      errorBody = await response.text();
+    } catch {
+      errorBody = `HTTP ${response.status}`;
+    }
+    throw new ApiError(response.status, errorBody, response.headers);
+  }
+  try {
+    return await response.json();
+  } catch {
+    throw new ApiError(response.status, "Invalid JSON response from server");
+  }
+}
+function getApiErrorDetail(error) {
+  if (!(error instanceof ApiError)) return null;
+  try {
+    const parsed = JSON.parse(error.message);
+    if (parsed && typeof parsed.detail === "string") return parsed.detail;
+  } catch {
+  }
+  return error.message || null;
+}
+var API_BASE_URL, _redirecting, ApiError, api, publicApi;
+var init_client = __esm({
+  "src/api/client.ts"() {
+    "use strict";
+    init_define_import_meta_env();
+    API_BASE_URL = (define_import_meta_env_default.VITE_API_BASE_URL || "/api").trim();
+    _redirecting = false;
+    ApiError = class extends Error {
+      constructor(status, message, headers) {
+        super(message);
+        this.status = status;
+        __publicField(this, "headers");
+        this.name = "ApiError";
+        this.headers = headers ?? new Headers();
+      }
+    };
+    api = {
+      get: (endpoint) => apiClient(endpoint),
+      post: (endpoint, data) => apiClient(endpoint, {
+        method: "POST",
+        body: data !== void 0 ? JSON.stringify(data) : void 0
+      }),
+      /** POST with URL-encoded form body (for endpoints that expect form data) */
+      postForm: (endpoint, params) => apiClient(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(params).toString()
+      }),
+      patch: (endpoint, data) => apiClient(endpoint, { method: "PATCH", body: JSON.stringify(data) }),
+      put: (endpoint, data) => apiClient(endpoint, {
+        method: "PUT",
+        body: JSON.stringify(data)
+      }),
+      delete: (endpoint) => apiClient(endpoint, { method: "DELETE" })
+    };
+    publicApi = {
+      get: (endpoint) => publicApiClient(endpoint),
+      post: (endpoint, data) => publicApiClient(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: data !== void 0 ? JSON.stringify(data) : void 0
+      }),
+      postMultipart: (endpoint, data) => publicApiClient(endpoint, {
+        method: "POST",
+        body: data
+      }),
+      put: (endpoint, data) => publicApiClient(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+    };
+  }
+});
+
+// src/legacy/minimalDashboard.ts
+init_define_import_meta_env();
+
+// src/utils/consultationNavigation.ts
+init_define_import_meta_env();
+async function loadNavigation(client) {
+  const me = await client.get("/me");
+  const admin = me.is_admin === true;
+  const canCreate = admin || me.role === "facilitator" || me.role === "platform_admin";
+  if (admin) return { forms: await client.get("/forms"), canCreate, admin };
+  const joined = await client.get("/my_forms");
+  const owned = canCreate ? await client.get("/forms/my-created") : [];
+  const forms = new Map(joined.map((form) => [form.id, form]));
+  owned.forEach((form) => forms.set(form.id, { ...form, owned: true }));
+  return { forms: [...forms.values()], canCreate, admin };
+}
+function consultationId(path) {
+  const match = path.match(/^\/(?:admin\/)?form\/(\d+)(?:\/|$)/);
+  return match ? Number(match[1]) : null;
+}
+function navigationHref(form, admin) {
+  return admin || form.owned ? `/admin/form/${form.id}/summary` : `/form/${form.id}`;
+}
+function renderConsultationNavigation(nav, data, path, error, query = "") {
+  const makeLink = (text, href) => {
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = text;
+    if (href === "/" ? path === "/" : consultationId(href) !== null && consultationId(href) === consultationId(path)) link.setAttribute("aria-current", "page");
+    return link;
+  };
+  const top = document.createElement("div");
+  top.className = "symphonia-navigation-actions";
+  top.append(makeLink("All consultations", "/"));
+  if (data?.canCreate) top.append(makeLink("+ New consultation", "/admin/forms/new"));
+  nav.replaceChildren(top);
+  const label = document.createElement("h2");
+  label.textContent = "Consultations";
+  nav.append(label);
+  if (!data) {
+    const status = document.createElement("p");
+    status.className = "symphonia-navigation-status";
+    status.textContent = error ? "Could not load consultations. Open All consultations to try again." : "Loading consultations\u2026";
+    status.setAttribute("role", "status");
+    nav.append(status);
+    return;
+  }
+  const forms = [...data.forms].sort((a, b) => b.id - a.id).filter((form) => form.title.toLowerCase().includes(query.toLowerCase()));
+  const dev = location.hostname === "symphonia-dev-488613.web.app" || /^symphonia-dev-488613--[a-z0-9-]+\.web\.app$/.test(location.hostname);
+  const earlierIds = /* @__PURE__ */ new Set([20, 23, 24, 25, 26, 27, 28]);
+  const earlier = document.createElement("details");
+  earlier.className = "symphonia-navigation-earlier";
+  const summary = document.createElement("summary");
+  summary.textContent = "Earlier examples";
+  earlier.append(summary);
+  for (const form of forms) {
+    const title = form.title.replace(/^(?:Simulated example\s*[·]|SIMULATED PANEL\s*[—–-])\s*/i, "");
+    const link = makeLink(title, navigationHref(form, data.admin));
+    link.title = form.title;
+    link.className = "symphonia-consultation-link";
+    if (/^(Simulated example|SIMULATED PANEL)/i.test(form.title)) {
+      link.setAttribute("aria-label", `${title} \xB7 Simulated example`);
+      const badge = document.createElement("span");
+      badge.className = "symphonia-navigation-demo";
+      badge.textContent = "Example";
+      link.append(badge);
+    }
+    if (dev && earlierIds.has(form.id) && !query && consultationId(path) !== form.id) earlier.append(link);
+    else nav.append(link);
+  }
+  if (earlier.children.length > 1) nav.append(earlier);
+  if (!forms.length) {
+    const empty = document.createElement("p");
+    empty.className = "symphonia-navigation-status";
+    empty.textContent = query ? "No matching consultations." : "Your consultations will appear here.";
+    nav.append(empty);
+  }
+}
+
 // src/legacy/minimalDashboard.ts
 function cleanText(value) {
   return (value || "").replace(/\s+/g, " ").trim();
@@ -11,39 +282,136 @@ function relabelButton(button, label) {
   button.setAttribute("aria-label", label);
   button.textContent = label;
 }
+var shells = /* @__PURE__ */ new WeakMap();
+var collapsed = false;
+async function navigationClient() {
+  if (document.querySelector('script[src*="index-HJquNmhn.js"]')) {
+    const deployed = "/assets/index-HJquNmhn.js";
+    const module = await import(
+      /* @vite-ignore */
+      deployed
+    );
+    return module.b;
+  }
+  return (await Promise.resolve().then(() => (init_client(), client_exports))).api;
+}
 function markHeader() {
-  const header = Array.from(document.querySelectorAll("header")).find((candidate) => candidate.querySelector('img[src*="logo-mark.png"]'));
+  const header = Array.from(document.querySelectorAll("header")).find((candidate) => candidate.querySelector('img[src*="logo-mark.png"]') && candidate.querySelector('button[aria-haspopup="menu"]'));
   if (!header) return;
   header.classList.add("symphonia-shell-header");
-  header.parentElement?.classList.add("symphonia-shell");
+  const shell = header.parentElement;
+  shell.classList.add("symphonia-shell");
+  shell.classList.toggle("symphonia-consultation-open", consultationId(location.pathname) !== null);
+  shell.classList.toggle("symphonia-sidebar-collapsed", collapsed);
   const account = header.querySelector('button[aria-haspopup="menu"]');
   account?.classList.add("symphonia-account-trigger");
   account?.parentElement?.classList.add("symphonia-account");
-  let navigation = header.querySelector(".symphonia-shell-navigation");
-  if (!navigation) {
-    navigation = document.createElement("nav");
-    navigation.className = "symphonia-shell-navigation";
-    navigation.setAttribute("aria-label", "Workspace");
-    const home2 = document.createElement("a");
-    home2.href = "/";
-    home2.textContent = "Consultations";
-    navigation.append(home2);
-    header.append(navigation);
+  let state = shells.get(header);
+  if (!state) {
+    const nav = document.createElement("nav");
+    nav.className = "symphonia-shell-navigation";
+    nav.setAttribute("aria-label", "Consultations");
+    const search = document.createElement("input");
+    search.type = "search";
+    search.placeholder = "Find a consultation";
+    search.setAttribute("aria-label", "Find a consultation");
+    search.className = "symphonia-navigation-search";
+    const list = document.createElement("div");
+    list.className = "symphonia-navigation-list";
+    nav.append(search, list);
+    header.append(nav);
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "symphonia-navigation-toggle";
+    toggle.textContent = "\u2630";
+    toggle.setAttribute("aria-label", "Open consultations");
+    header.querySelector("div")?.prepend(toggle);
+    const dialog = document.createElement("dialog");
+    dialog.className = "symphonia-navigation-drawer";
+    dialog.setAttribute("aria-label", "Consultations");
+    header.append(dialog);
+    state = { data: null, error: false, path: "", signature: "", nav, dialog, toggle, query: "", pending: false, loadedPath: "" };
+    shells.set(header, state);
+    const current = state;
+    const closeDrawer = () => dialog.close();
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        const r = dialog.getBoundingClientRect();
+        if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) closeDrawer();
+      }
+    });
+    dialog.addEventListener("close", () => {
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.focus();
+    });
+    toggle.addEventListener("click", () => {
+      if (innerWidth > 800 && consultationId(location.pathname) !== null) {
+        collapsed = !collapsed;
+        shell.classList.toggle("symphonia-sidebar-collapsed", collapsed);
+        toggle.setAttribute("aria-label", collapsed ? "Open consultations" : "Collapse consultations");
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        return;
+      }
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "symphonia-drawer-close";
+      close.textContent = "Close";
+      close.setAttribute("aria-label", "Close consultations");
+      close.onclick = closeDrawer;
+      const drawerNav = document.createElement("nav");
+      drawerNav.setAttribute("aria-label", "Switch consultation");
+      const drawerSearch = document.createElement("input");
+      drawerSearch.type = "search";
+      drawerSearch.placeholder = "Find a consultation";
+      drawerSearch.setAttribute("aria-label", "Find a consultation");
+      drawerSearch.className = "symphonia-navigation-search";
+      drawerSearch.addEventListener("input", () => renderConsultationNavigation(drawerNav, current.data, location.pathname, current.error, drawerSearch.value));
+      renderConsultationNavigation(drawerNav, current.data, location.pathname, current.error);
+      dialog.replaceChildren(close, drawerSearch, drawerNav);
+      dialog.showModal();
+      toggle.setAttribute("aria-expanded", "true");
+    });
+    search.addEventListener("input", () => {
+      current.query = search.value;
+      current.signature = "";
+      scheduleApply();
+    });
   }
-  const home = navigation.querySelector('a[href="/"]');
-  if (location.pathname === "/") home.setAttribute("aria-current", "page");
-  else home.removeAttribute("aria-current");
-  const canCreate = !!findButton(/^new(?: consultation)?$/i) || location.pathname.startsWith("/admin/");
-  const existing = navigation.querySelector('a[href="/admin/forms/new"]');
-  if (canCreate && !existing) {
-    const create = document.createElement("a");
-    create.href = "/admin/forms/new";
-    create.textContent = "New consultation";
-    navigation.append(create);
+  if (!state.pending && state.loadedPath !== location.pathname) {
+    state.pending = true;
+    state.loadedPath = location.pathname;
+    const current = state;
+    navigationClient().then(loadNavigation).then((data) => {
+      if (header.isConnected) {
+        current.data = data;
+        current.error = false;
+        current.signature = "";
+      }
+    }).catch(() => {
+      if (header.isConnected) {
+        current.error = true;
+        current.signature = "";
+      }
+    }).finally(() => {
+      current.pending = false;
+      if (header.isConnected) scheduleApply();
+    });
   }
-  if (existing) {
-    if (location.pathname === "/admin/forms/new") existing.setAttribute("aria-current", "page");
-    else existing.removeAttribute("aria-current");
+  if (state.path !== location.pathname) {
+    state.path = location.pathname;
+    if (state.dialog.open) state.dialog.close();
+  }
+  const signature = JSON.stringify([location.pathname, state.data, state.error, state.query]);
+  if (state.signature !== signature) {
+    state.signature = signature;
+    renderConsultationNavigation(state.nav.querySelector(".symphonia-navigation-list"), state.data, location.pathname, state.error, state.query);
+    const drawerNav = state.dialog.querySelector("nav");
+    if (state.dialog.open && drawerNav) renderConsultationNavigation(drawerNav, state.data, location.pathname, state.error, state.dialog.querySelector("input")?.value);
+  }
+  if (!state.dialog.open) {
+    const expanded = consultationId(location.pathname) !== null && !collapsed && innerWidth > 800;
+    state.toggle.setAttribute("aria-expanded", String(expanded));
+    state.toggle.setAttribute("aria-label", expanded ? "Collapse consultations" : "Open consultations");
   }
 }
 function nearestCard(node) {
@@ -56,7 +424,7 @@ function nearestCard(node) {
 }
 function markAdminDashboard() {
   const newButton = findButton(/^new(?: consultation)?$/i);
-  const joinButton = findButton(/^(join|enter).*code|^join consultation$/i);
+  const joinButton = findButton(/^(join|enter).*code|^join(?: consultation)?$/i);
   if (!newButton) return false;
   const section = newButton.closest("section, main");
   if (!section) return false;
@@ -65,7 +433,7 @@ function markAdminDashboard() {
   title?.classList.add("symphonia-redundant-title");
   relabelButton(newButton, "New consultation");
   newButton.classList.add("symphonia-create-action");
-  if (joinButton) relabelButton(joinButton, "Join");
+  if (joinButton) relabelButton(joinButton, "Join with code");
   const search = section.querySelector(
     'input[aria-label*="Search"], input[placeholder*="Search"]'
   );
@@ -94,7 +462,7 @@ function markExpertDashboard() {
     form?.classList.add("symphonia-join-form");
     const input = form?.querySelector("input");
     if (input) input.placeholder = "Join with code";
-    relabelButton(form?.querySelector('button[type="submit"]') || null, "Join");
+    relabelButton(form?.querySelector('button[type="submit"]') || null, "Join with code");
   }
   if (listHeading) {
     nearestCard(listHeading)?.classList.add("symphonia-list-card");
@@ -103,6 +471,16 @@ function markExpertDashboard() {
 }
 function applyMinimalDashboard() {
   markHeader();
+  if (location.pathname === "/join") {
+    const heading = document.querySelector("main h1, section h1");
+    const card = nearestCard(heading);
+    card?.classList.add("symphonia-code-entry");
+    const input = card?.querySelector("input");
+    if (input) {
+      input.setAttribute("aria-label", "Consultation code");
+      input.placeholder = "Consultation code";
+    }
+  }
   if (window.location.pathname !== "/") return;
   if (!markAdminDashboard()) markExpertDashboard();
 }
@@ -119,3 +497,4 @@ applyMinimalDashboard();
 var observer = new MutationObserver(scheduleApply);
 observer.observe(document.documentElement, { childList: true, subtree: true });
 window.addEventListener("popstate", scheduleApply);
+window.addEventListener("resize", scheduleApply);
