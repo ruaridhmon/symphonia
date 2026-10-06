@@ -245,6 +245,7 @@ function enhanceSynthesisControls(main) {
   if (nav && !nav.hidden) {
     toolbar.classList.add("summary-actions-panel");
     const generation = toolbar.querySelector("details.summary-disclosure");
+    if (progress?.querySelector(".di-claim,.rf-workspace")) nav.querySelector(".summary-generate-empty")?.remove();
     if (generation && !progress?.querySelector(".di-claim,.rf-workspace") && !nav.querySelector(".summary-generate-empty")) {
       const generate = document.createElement("button");
       generate.type = "button";
