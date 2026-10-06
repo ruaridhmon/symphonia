@@ -845,3 +845,7 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .rf-list-node strong {grid-column:2;}
 #root .rf-list-supporting,#root .rf-list-origin {grid-column:2;margin:0;text-align:left;}
 @media(max-width:640px){#root .rf-list-node{gap:3px 10px;}#root .rf-list-node strong{flex-basis:auto;}#root .rf-list-supporting,#root .rf-list-origin{margin:0;}}
+
+#root .product-summary .delphi-insights[data-review=true] .di-claim-copy>.di-reasons:not([open]) {grid-column:2;grid-row:auto;margin:0;}
+#root .product-summary .delphi-insights[data-review=true] .di-claim-copy>.di-inferred-origin {grid-column:2;grid-row:auto;color:#b0474e;margin:0;}
+@media(max-width:600px){#root .product-summary .delphi-insights[data-review=true] .di-claim-copy>.di-reasons:not([open]),#root .product-summary .delphi-insights[data-review=true] .di-claim-copy>.di-inferred-origin{margin-top:5px;}}

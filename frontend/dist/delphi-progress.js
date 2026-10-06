@@ -611,7 +611,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       }
       rating.append(trend);
     }
-    if (row.origin === "inferred") article.prepend(node("p", "Inferred \xB7 unconfirmed. Not directly stated by an expert.", "di-inferred-origin"));
+    if (row.origin === "inferred") left.append(node("p", "Inferred assumption \xB7 unconfirmed", "di-inferred-origin"));
     const supporting = row.evidence.filter((e) => e.comment.trim());
     const wrapper = node("div", "", "di-reasons");
     const trigger = button(`Supporting information \xB7 ${supporting.length}`, () => {
@@ -671,7 +671,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       detail.append(section);
     });
     wrapper.append(detail);
-    article.append(wrapper);
+    left.append(wrapper);
     list.append(article);
   });
   root.append(list);
