@@ -16,11 +16,11 @@ def is_rating(q):
         isinstance(q, dict)
         and str(q.get("questionId", "")).startswith("claim_")
         and any(
-            str(o).lower() in {"agree", "strongly agree"} for o in q.get("options", [])
+            str(o).lower() in {"agree", "strongly agree"} for o in (q.get("options") or [])
         )
         and any(
             str(o).lower() in {"disagree", "strongly disagree"}
-            for o in q.get("options", [])
+            for o in (q.get("options") or [])
         )
     )
 
