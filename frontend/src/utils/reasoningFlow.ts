@@ -41,7 +41,7 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph){
    const column=el('div','','rf-column');diagram.append(column);
    for(const n of flow.nodes.filter(n=>levels.get(n.id)===level)){
     const card=el('div','','rf-step');const b=document.createElement('button');b.type='button';b.className='rf-node rf-'+n.kind;b.dataset.rfNode=n.id;b.setAttribute('aria-pressed','false');
-    b.append(el('span',`${labels.get(n.id)} / ${n.kind==='assumption'?'INFERRED ASSUMPTION':n.kind==='premise'?'STATED PREMISE':'STATED RECOMMENDATION'}`,'rf-eyebrow'),el('strong',n.text));
+    b.append(el('span',`${labels.get(n.id)} / ${n.kind==='assumption'?'INFERRED ASSUMPTION':!flow.response_number?'EXPLICIT CLAIM':n.kind==='premise'?'STATED PREMISE':'STATED RECOMMENDATION'}`,'rf-eyebrow'),el('strong',n.text));
     if(n.condition)b.append(el('span',n.condition,'rf-condition'));
     b.append(el('span',n.kind==='assumption'?'Not stated · needs checking':'Inspect source ↗','rf-node-foot'));b.onclick=()=>select(n);card.append(b);
     const outgoing=flow.edges.filter(e=>e.from===n.id);if(outgoing.length){const links=el('div','','rf-arrows');for(const edge of outgoing){const link=document.createElement('button');link.type='button';link.textContent=`${edge.relation} → ${labels.get(edge.to)}`;link.setAttribute('aria-label',`${labels.get(n.id)} ${edge.relation} ${labels.get(edge.to)}. Inspect connected step`);link.onclick=()=>{const target=flow.nodes.find(t=>t.id===edge.to);if(target)select(target)};links.append(link);}card.append(links);}column.append(card);

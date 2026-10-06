@@ -107,7 +107,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
       const trend=node('div','','di-trend');
       if(row.delta!==null&&Math.round(row.delta)!==0){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since Round ${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}rating.append(trend);
     }
-    if(row.origin==='inferred')article.prepend(node('p','Inferred · unconfirmed. Not directly stated by an expert.','di-eyebrow'));
+    if(row.origin==='inferred')article.prepend(node('p','Inferred · unconfirmed. Not directly stated by an expert.','di-inferred-origin'));
     const detail=document.createElement('details');detail.className='di-reasons';detail.dataset.key=row.key;detail.open=priorOpen.has(row.key);
     const summary=node('summary','Distribution, responses and changes');detail.append(summary);
     detail.append(node('p',row.options.map(option=>`${row.evidence.filter(e=>e.position===option).length} ${option.toLowerCase()}`).join(' · '),'di-exact-distribution'));
