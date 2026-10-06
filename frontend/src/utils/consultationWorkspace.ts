@@ -1,4 +1,5 @@
 import type * as React from 'react';
+import {renderReasoningFlow,clearReasoningFlow} from './reasoningFlow';
 import type { Form, Round, RoundWithResponses } from '../types/summary';
 import type { FinalSynthesisProps } from '../components/summary/FinalSynthesisPanel';
 import type { ManualResponseProps } from '../components/summary/ManualResponseSheet';
@@ -39,6 +40,11 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
   return function ConsultationWorkspace(p: WorkspaceProps) {
     const [panel, setPanel] = R.useState<'invite' | 'questions' | null>(null);
     const [finalView,setFinalView] = R.useState(false);
+    const [mapView,setMapView] = R.useState(false);
+    const mapRoot=R.useRef<HTMLDivElement>(null);
+    const opening=p.rounds.find(r=>r.round_number===1);
+    const graph=opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null;
+    R.useEffect(()=>{const root=mapRoot.current;if(root&&graph&&mapView){root.replaceChildren();renderReasoningFlow(root,graph);}return()=>{if(root)clearReasoningFlow(root);};},[graph,mapView]);
     const [completed,setCompleted] = R.useState(false);
     const [copyState, setCopyState] = R.useState('');
     const [adding, setAdding] = R.useState<Round | null>(null);
@@ -63,30 +69,32 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       if (!panel && dialog.current?.open) dialog.current.close();
     }, [panel]);
     R.useEffect(()=>{const dismiss=(e:PointerEvent)=>{if(options.current?.open&&!options.current.contains(e.target as Node))options.current.open=false;};document.addEventListener('pointerdown',dismiss);return()=>document.removeEventListener('pointerdown',dismiss);},[]);
-    R.useEffect(() => { setPanel(null); setCopyState(''); setAdding(null); setSaved('');setFinalView(false);setCompleted(false); }, [p.form.id]);
+    R.useEffect(() => { setPanel(null); setCopyState(''); setAdding(null); setSaved('');setFinalView(false);setMapView(false);setCompleted(false); }, [p.form.id]);
     const canLeave = () => !document.querySelector('.response-workspace textarea') || window.confirm('Discard unsaved response edits?');
     const button = (text: string, onClick: () => void, props: Record<string, unknown> = {}) => h('button', { type: 'button', onClick, ...props }, (props.children as React.ReactNode) ?? text);
     const copy = async () => {
       try { await navigator.clipboard.writeText(joinUrl); setCopyState('Link copied'); }
       catch { setCopyState('Copy unavailable. Select the link below and copy it.'); }
     };
-    return h('section', { className: 'consultation-workspace', 'data-final-view':finalView?'true':undefined, 'data-final-round':ordered.some(r=>r.round_number===3) ? 'true' : undefined, 'aria-label': 'Consultation workspace' },
+    return h('section', { className: 'consultation-workspace', 'data-final-view':finalView||mapView?'true':undefined, 'data-final-round':ordered.some(r=>r.round_number===3) ? 'true' : undefined, 'aria-label': 'Consultation workspace' },
       h('div', { className: 'cw-title-row' },
         h('div', { className: 'cw-identity' }, h('h2', null, displayTitle), (simulated&&!p.isDemo)?h('span', { className: 'cw-provenance',title:'Simulated consultation with fictional experts','aria-label':'Demo with fictional experts' }, 'Demo'):null),
         p.isDemo ? h('span', {className:'cw-demo-badge'}, 'Synthetic example') : h('div', { className: 'cw-title-actions' },
+          !finalView && !mapView && ManualResponse && p.onResponseAdded ? button('Add response',()=>{if(round?.is_active&&!completed&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response','aria-label':'Add response',disabled:!round?.is_active||completed,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response',children:[h('svg',{key:'icon',width:16,height:16,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,'aria-hidden':true},h('path',{d:'M12 5v14M5 12h14'})),h('span',{key:'label'},'Add response')]}) : null,
           h('details', { ref:options,className: 'cw-options',onKeyDown:(e:React.KeyboardEvent<HTMLDetailsElement>)=>{if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}} }, h('summary', { 'aria-label': 'Consultation options' }, '•••'),
             h('div', null, button('Invite people',()=>openPanel('invite')),h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),button('View questions',()=>openPanel('questions'),{className:'cw-mobile-questions','aria-label':'Preview round questions',disabled:!round}),
               p.onDownload ? button('Download', p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? 'Updating…' : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null)))),
       h('nav', { className: 'cw-views', 'aria-label': 'Consultation views' },
         ([['synthesis', 'Summary'], ['responses', 'Responses']] as [View, string][]).map(([view, label]) =>
-          button(label, () => { if (canLeave()) {setFinalView(false);p.onView(view);} }, { key: view, 'aria-pressed': !finalView && p.view === view })),
+          button(label, () => { if (canLeave()) {setFinalView(false);setMapView(false);p.onView(view);} }, { key: view, 'aria-pressed': !finalView && !mapView && p.view === view })),
+      button('Claim map',()=>{if(canLeave()){p.onView('synthesis');setFinalView(false);setMapView(true);}}, {'aria-pressed':mapView,className:'cw-map-tab'}),
       h('div', { className: 'cw-context cw-simple-context' },
-        ordered.length<=5?h('div',{className:'cw-round-tabs','aria-label':'Rounds'},...ordered.map(r=>button(`Round ${r.round_number}`,()=>{if(canLeave()){setFinalView(false);p.onRound(r);}},{key:r.id,'aria-pressed':!finalView&&round?.id===r.id,title:r.is_active?'Current round':`View Round ${r.round_number}`}))):h('label',{className:'cw-round-picker'},h('span',{className:'cw-round-display','aria-hidden':true},`Round ${round?.round_number||'—'} ⌄`),h('select',{'aria-label':'Round',value:round?.id||'',onChange:(event:React.ChangeEvent<HTMLSelectElement>)=>{const selected=ordered.find(r=>r.id===Number(event.target.value));if(selected&&canLeave()){setFinalView(false);p.onRound(selected);}}},...ordered.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}${r.is_active?' · Current':''}`)))),
-        ordered.some(r=>r.round_number===3)&&FinalSynthesis?button('Final synthesis',()=>{if(canLeave()){p.onView('synthesis');setFinalView(true);}}, {'aria-pressed':finalView,className:'cw-final-tab',title:'Round 4 · final synthesis'}):null,
-        count!==undefined&&!finalView?h('span',null,`${count} response${count===1?'':'s'}`):null,
-        !finalView && !p.isDemo && ManualResponse && p.onResponseAdded ? button('+ Add response',()=>{if(round?.is_active&&!completed&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response',disabled:!round?.is_active||completed,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response'}) : null,
+        ordered.length<=5?h('div',{className:'cw-round-tabs','aria-label':'Rounds'},...ordered.map(r=>button(`Round ${r.round_number}`,()=>{if(canLeave()){setFinalView(false);setMapView(false);p.onRound(r);}},{key:r.id,'aria-pressed':!finalView&&!mapView&&round?.id===r.id,title:r.is_active?'Current round':`View Round ${r.round_number}`}))):h('label',{className:'cw-round-picker'},h('span',{className:'cw-round-display','aria-hidden':true},`Round ${round?.round_number||'—'} ⌄`),h('select',{'aria-label':'Round',value:round?.id||'',onChange:(event:React.ChangeEvent<HTMLSelectElement>)=>{const selected=ordered.find(r=>r.id===Number(event.target.value));if(selected&&canLeave()){setFinalView(false);setMapView(false);p.onRound(selected);}}},...ordered.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}${r.is_active?' · Current':''}`)))),
+        ordered.some(r=>r.round_number===3)&&FinalSynthesis?button('Final synthesis',()=>{if(canLeave()){p.onView('synthesis');setMapView(false);setFinalView(true);}}, {'aria-pressed':finalView,className:'cw-final-tab',title:'Round 4 · final synthesis'}):null,
+        count!==undefined&&!finalView&&!mapView?h('span',null,`${count} response${count===1?'':'s'}`):null,
         button('View questions', () => openPanel('questions'), { className: 'cw-text-button', disabled: !round }))),
+      mapView ? h('section',{className:'cw-claim-map','aria-label':'Shared claim map'},graph?h('div',{ref:mapRoot}):h(R.Fragment,null,h('h2',null,'No shared claim map yet'),h('p',null,'Extract the Round 1 contributions to create source-linked explicit claims, inferred assumptions and their connections.'))) : null,
       finalView && FinalSynthesis ? h(FinalSynthesis,{formId:p.form.id,onComplete:()=>setCompleted(true)}) : null,
       saved ? h('p',{className:'cw-response-saved',role:'status'},saved) : null,
       adding && ManualResponse ? h(ManualResponse,{form:p.form,round:adding,onClose:()=>{setAdding(null);requestAnimationFrame(()=>addTrigger.current?.focus());},onSaved:async()=>{await p.onResponseAdded?.();setSaved('Response saved');}}) : null,

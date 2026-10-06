@@ -441,13 +441,13 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   root.dataset.empty = String(actual === 0);
   const note = synthesisProvenanceNote(round, rounds);
   if (note) root.append(node("p", note, "di-warning"));
-  if (round.round_number === 1 && !rows.length) {
+  if (round.round_number === 1) {
     const graph = round.synthesis_json?.reasoning_graph;
     if (graph?.version === 1 && round.synthesis_json?.narrative === round.synthesis) {
       renderReasoningFlow(root, graph);
       return;
     }
-    if (actual && round.synthesis) {
+    if (!rows.length && actual && round.synthesis) {
       root.append(node("p", "This saved draft contains claims only. Generate a new draft with Simple or Custom instructions to include source-linked reasoning and inferred assumptions.", "di-empty"));
       return;
     }
