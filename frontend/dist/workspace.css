@@ -999,7 +999,7 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 /* The sidebar control shares the top line rather than claiming an empty row. */
 #root .symphonia-shell.symphonia-sidebar-collapsed>main.product-summary {padding-top:12px!important;}
 @media(max-width:1000px){
- #root .symphonia-shell>main.product-summary {padding-top:12px!important;}
+ #root .symphonia-shell>main.product-summary:has(.consultation-workspace) {padding-top:12px!important;}
  #root .cw-title-row {padding-left:48px;}
  #root .cw-identity {flex:1;}
  #root .cw-identity h2 {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
