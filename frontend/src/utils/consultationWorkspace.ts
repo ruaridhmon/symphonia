@@ -42,9 +42,11 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
     const [finalView,setFinalView] = R.useState(false);
     const [mapView,setMapView] = R.useState(false);
     const mapRoot=R.useRef<HTMLDivElement>(null);
+    const [mapNode,setMapNode]=R.useState<string|undefined>();
     const opening=p.rounds.find(r=>r.round_number===1);
     const graph=opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null;
-    R.useEffect(()=>{const root=mapRoot.current;if(root&&graph&&mapView){root.replaceChildren();renderReasoningFlow(root,graph);}return()=>{if(root)clearReasoningFlow(root);};},[graph,mapView]);
+    R.useEffect(()=>{const root=mapRoot.current;if(root&&graph&&mapView){root.replaceChildren();renderReasoningFlow(root,graph,mapNode);}return()=>{if(root)clearReasoningFlow(root);};},[graph,mapView,mapNode]);
+    R.useEffect(()=>{const open=(event:Event)=>{const id=(event as CustomEvent).detail?.nodeId;if(graph?.claims?.some(c=>c.id===id)){setMapNode(id);setMapView(true);setFinalView(false);p.onView('synthesis');}};document.addEventListener('symphonia:claim-map',open);return()=>document.removeEventListener('symphonia:claim-map',open);},[graph,p.form.id,p.onView]);
     const [completed,setCompleted] = R.useState(false);
     const [copyState, setCopyState] = R.useState('');
     const [adding, setAdding] = R.useState<Round | null>(null);
@@ -69,7 +71,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       if (!panel && dialog.current?.open) dialog.current.close();
     }, [panel]);
     R.useEffect(()=>{const dismiss=(e:PointerEvent)=>{if(options.current?.open&&!options.current.contains(e.target as Node))options.current.open=false;};document.addEventListener('pointerdown',dismiss);return()=>document.removeEventListener('pointerdown',dismiss);},[]);
-    R.useEffect(() => { setPanel(null); setCopyState(''); setAdding(null); setSaved('');setFinalView(false);setMapView(false);setCompleted(false); }, [p.form.id]);
+    R.useEffect(() => { setPanel(null); setCopyState(''); setAdding(null); setSaved('');setFinalView(false);setMapView(false);setMapNode(undefined);setCompleted(false); }, [p.form.id]);
     const canLeave = () => !document.querySelector('.response-workspace textarea') || window.confirm('Discard unsaved response edits?');
     const button = (text: string, onClick: () => void, props: Record<string, unknown> = {}) => h('button', { type: 'button', onClick, ...props }, (props.children as React.ReactNode) ?? text);
     const copy = async () => {
@@ -88,7 +90,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       h('nav', { className: 'cw-views', 'aria-label': 'Consultation views' },
         ([['synthesis', 'Summary'], ['responses', 'Responses']] as [View, string][]).map(([view, label]) =>
           button(label, () => { if (canLeave()) {setFinalView(false);setMapView(false);p.onView(view);} }, { key: view, 'aria-pressed': !finalView && !mapView && p.view === view })),
-      button('Claim map',()=>{if(canLeave()){p.onView('synthesis');setFinalView(false);setMapView(true);}}, {'aria-pressed':mapView,className:'cw-map-tab'}),
+      button('Claim map',()=>{if(canLeave()){p.onView('synthesis');setFinalView(false);setMapNode(undefined);setMapView(true);}}, {'aria-pressed':mapView,className:'cw-map-tab'}),
       h('div', { className: 'cw-context cw-simple-context' },
         ordered.length<=5?h('div',{className:'cw-round-tabs','aria-label':'Rounds'},...ordered.map(r=>button(`Round ${r.round_number}`,()=>{if(canLeave()){setFinalView(false);setMapView(false);p.onRound(r);}},{key:r.id,'aria-pressed':!finalView&&!mapView&&round?.id===r.id,title:r.is_active?'Current round':`View Round ${r.round_number}`}))):h('label',{className:'cw-round-picker'},h('span',{className:'cw-round-display','aria-hidden':true},`Round ${round?.round_number||'—'} ⌄`),h('select',{'aria-label':'Round',value:round?.id||'',onChange:(event:React.ChangeEvent<HTMLSelectElement>)=>{const selected=ordered.find(r=>r.id===Number(event.target.value));if(selected&&canLeave()){setFinalView(false);setMapView(false);p.onRound(selected);}}},...ordered.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}${r.is_active?' · Current':''}`)))),
         ordered.some(r=>r.round_number===3)&&FinalSynthesis?button('Final synthesis',()=>{if(canLeave()){p.onView('synthesis');setMapView(false);setFinalView(true);}}, {'aria-pressed':finalView,className:'cw-final-tab',title:'Round 4 · final synthesis'}):null,

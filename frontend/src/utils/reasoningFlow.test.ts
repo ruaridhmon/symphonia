@@ -6,7 +6,7 @@ const graph:ReasoningGraph={version:1,response_count:2,mapped_response_count:2,r
 it('switches contributions and exposes sources without attributing assumptions',()=>{
  const root=document.createElement('div');document.body.replaceChildren(root);renderReasoningFlow(root,graph);
  expect(root.querySelector('.rf-detail')?.textContent).toContain('Original words.');
- (root.querySelector('[data-rf-node="b"]') as HTMLElement).click();expect(root.querySelector('.rf-detail')?.textContent).toContain('INFERRED · UNCONFIRMED');expect(root.querySelector('.rf-detail')?.textContent).toContain('Is this what you mean?');expect(root.querySelector('.rf-detail')?.textContent).not.toContain('Original words.');
+ (root.querySelector('[data-rf-node="b"]') as HTMLElement).click();expect(root.querySelector('.rf-detail')?.textContent).toContain('Inferred · unconfirmed');expect(root.querySelector('.rf-detail')?.textContent).toContain('Is this what you mean?');expect(root.querySelector('.rf-detail')?.textContent).not.toContain('Original words.');
  (root.querySelectorAll('.rf-tabs button')[1] as HTMLElement).click();expect(root.querySelectorAll('.rf-node')).toHaveLength(1);expect(root.querySelector('.rf-detail')?.textContent).toContain('Another response.');
 });
 it('renders source content as text, not executable HTML',()=>{
@@ -22,4 +22,10 @@ it('shows reasoning only in round one and only for its matching saved synthesis'
 it('shows a saved first-round graph even when synthesis already has parsed claim rows',()=>{
  const root=document.createElement('div');const base={id:1,round_number:1,is_active:true,questions:['Views?'],synthesis:'<p>Claim 1: Phones interrupt lessons.</p>',synthesis_json:{narrative:'<p>Claim 1: Phones interrupt lessons.</p>',reasoning_graph:graph} as any};
  renderDelphiInsights(root,base,[base],[]);expect(root.querySelector('.rf-workspace')).not.toBeNull();
+});
+
+it('uses matching numbers and keeps evidence closed until selection',()=>{
+ const root=document.createElement('div');renderReasoningFlow(root,graph);
+ expect(root.querySelector('.rf-number')?.textContent).toBe('1.1');expect(root.querySelector<HTMLElement>('.rf-detail')?.hidden).toBe(true);
+ (root.querySelector('[data-rf-node="b"]') as HTMLButtonElement).click();expect(root.querySelector<HTMLElement>('.rf-detail')?.hidden).toBe(false);expect(root.textContent).not.toContain('EXPLICIT · SOURCE-LINKED CLAIM');expect(root.querySelector('.rf-header')).toBeNull();
 });

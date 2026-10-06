@@ -2363,20 +2363,14 @@ function clearReasoningFlow(root) {
   observers.get(root)?.disconnect();
   observers.delete(root);
 }
-function renderReasoningFlow(root, graph) {
+function renderReasoningFlow(root, graph, selectedNode) {
   clearReasoningFlow(root);
   const shared = graph.claims?.length ? [{ id: "shared-claims", title: "Shared claim map", response_number: 0, nodes: graph.claims.map((c) => ({ id: c.id, text: c.text, kind: c.origin === "inferred" ? "assumption" : "premise", question: c.question, sources: c.sources })), edges: graph.claim_edges || [] }] : [];
   const flows = [...shared, ...graph.flows];
   const remembered = root.dataset.reasoningFlow;
   const section = el("section", "", "rf-workspace");
   section.setAttribute("aria-label", "First-round reasoning");
-  const head = el("header", "", "rf-header");
-  head.append(el("h2", "Claims & reasoning"), el("p", "Review the shared claims and their logical connections, then inspect each original contribution. Dashed cards mark inferred steps."));
-  section.append(head);
-  const counts2 = el("div", `${graph.mapped_response_count} of ${graph.response_count} responses represented \xB7 ${graph.flows.length} source argument${graph.flows.length === 1 ? "" : "s"}${graph.claims?.length ? " \xB7 " + graph.claims.length + " shared claims" : ""}`, "rf-coverage");
-  section.append(counts2);
-  if (graph.rejected_flow_count) counts2.append(el("span", ` \xB7 ${graph.rejected_flow_count} map${graph.rejected_flow_count === 1 ? " was" : "s were"} withheld because source or structure checks failed.`));
-  section.append(el("p", (graph.status === "provided_interpretation" ? "Provided interpretation" : graph.status === "authored_example" ? "Illustrative interpretation" : "AI interpretation") + " \xB7 source quotes are matched to saved responses; meaning and connections still need review. Assumptions are unconfirmed.", "rf-provenance"));
+  if (graph.rejected_flow_count) section.append(el("p", `${graph.rejected_flow_count} source maps could not be validated.`, "rf-coverage"));
   if (!flows.length) {
     section.append(el("p", "No source-linked reasoning maps were saved for this draft. Open Claims & full summary to review the claim list."));
     root.append(section);
@@ -2385,15 +2379,10 @@ function renderReasoningFlow(root, graph) {
   const nav = el("nav", "", "rf-tabs");
   nav.setAttribute("aria-label", "Expert reasoning flows");
   section.append(nav);
-  const legend = el("div", "", "rf-legend");
-  for (const [cls, label] of [["premise", "Stated premise"], ["recommendation", "Stated recommendation"], ["assumption", "Inferred assumption"]]) legend.append(el("span", label, "rf-key rf-" + cls));
-  section.append(legend);
   const canvas = el("div", "", "rf-canvas");
   const detail = el("section", "", "rf-detail");
   detail.setAttribute("aria-live", "polite");
   section.append(canvas, detail);
-  const caption = el("p", "Arrows describe a proposed logical connection, not a sequence in time or proof of causation. Separate expert contributions remain separate. These are selected arguments, not a guarantee that every statement is represented.", "rf-caption");
-  section.append(caption);
   const show = (index) => {
     const flow = flows[index];
     root.dataset.reasoningFlow = flow.id;
@@ -2401,24 +2390,37 @@ function renderReasoningFlow(root, graph) {
     detail.replaceChildren();
     nav.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === index)));
     const title = el("div", "", "rf-flow-title");
-    title.append(el("h3", flow.title), el("span", flow.response_number ? `Response ${flow.response_number}` : "Explicit and inferred claims"));
-    canvas.append(title);
+    if (flow.response_number) {
+      title.append(el("h3", flow.title));
+      canvas.append(title);
+    }
     const diagram = el("div", "", "rf-diagram");
     canvas.append(diagram);
-    const labels = new Map(flow.nodes.map((n, i) => [n.id, String.fromCharCode(65 + i)]));
-    const select = (n) => {
+    const labels = new Map(flow.nodes.map((n, i) => [n.id, flow.response_number ? `${flow.response_number}.${i + 1}` : String(i + 1).padStart(2, "0")]));
+    const select = (n, open = true) => {
       root.dataset.reasoningNode = n.id;
       diagram.querySelectorAll("[data-rf-node]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rfNode === n.id)));
       detail.replaceChildren();
       detail.classList.toggle("rf-inferred-detail", n.kind === "assumption");
-      detail.append(el("div", n.kind === "assumption" ? "INFERRED \xB7 UNCONFIRMED" : flow.response_number ? `SOURCE \xB7 RESPONSE ${flow.response_number}` : "EXPLICIT \xB7 SOURCE-LINKED CLAIM", "rf-eyebrow"), el("h4", n.kind === "assumption" ? "A step to check with the expert" : "The expert\u2019s words"));
-      if (n.kind === "assumption") detail.append(el("p", n.text), el("blockquote", n.question || "Ask the expert to clarify this connection."), el("p", "This bridge is an interpretation, not a direct expert statement. It can be reviewed independently; ratings never change its inferred origin.", "rf-small"));
+      detail.hidden = !open;
+      const top = el("div", "", "rf-detail-heading");
+      top.append(el("h4", `Claim ${labels.get(n.id)}`));
+      const close = document.createElement("button");
+      close.type = "button";
+      close.textContent = "Close";
+      close.onclick = () => {
+        detail.hidden = true;
+        diagram.querySelector(`[data-rf-node="${n.id}"]`)?.focus();
+      };
+      top.append(close);
+      detail.append(top);
+      if (n.kind === "assumption") detail.append(el("p", n.text), el("blockquote", n.question || "Ask the expert to clarify this connection."), el("p", "Inferred \xB7 unconfirmed", "rf-small"));
       else if (n.sources) {
         for (const source of n.sources) {
           const block = el("section");
-          block.append(el("h4", `Response ${source.response_number} \xB7 ${source.stance} (interpreted)`), el("blockquote", source.quote));
+          block.append(el("h4", `Response ${source.response_number}`), el("blockquote", source.quote));
           const context = document.createElement("details");
-          context.append(el("summary", "Original reasoning, evidence and confidence"), el("p", source.source_text));
+          context.append(el("summary", "Full response"), el("p", source.source_text));
           if (source.source_answers) {
             const raw = el("pre", JSON.stringify(source.source_answers, null, 2), "rf-original-answer");
             context.append(raw);
@@ -2438,7 +2440,6 @@ function renderReasoningFlow(root, graph) {
       const links = flow.edges.filter((e) => e.from === n.id || e.to === n.id);
       if (links.length) {
         const list = el("div", "", "rf-connections");
-        list.append(el("span", "Connections \xB7 interpretation", "rf-small"));
         for (const edge of links) {
           const other = flow.nodes.find((t) => t.id === (edge.from === n.id ? edge.to : edge.from));
           if (!other) continue;
@@ -2458,8 +2459,10 @@ function renderReasoningFlow(root, graph) {
     }
     const max = Math.max(...levels.values());
     diagram.style.setProperty("--rf-columns", String(max + 1));
+    diagram.style.setProperty("--rf-bus-space", `${24 + 12 * flow.edges.filter((e) => (levels.get(e.to) || 0) - (levels.get(e.from) || 0) > 1).length}px`);
     for (let level = 0; level <= max; level++) {
       const column = el("div", "", "rf-column");
+      column.append(el("h4", level === 0 ? "Starting points" : `Step ${level + 1}`, "rf-stage"));
       diagram.append(column);
       for (const n of flow.nodes.filter((n2) => levels.get(n2.id) === level)) {
         const card = el("div", "", "rf-step");
@@ -2468,9 +2471,11 @@ function renderReasoningFlow(root, graph) {
         b.className = "rf-node rf-" + n.kind;
         b.dataset.rfNode = n.id;
         b.setAttribute("aria-pressed", "false");
-        b.append(el("span", `${labels.get(n.id)} / ${n.kind === "assumption" ? "INFERRED ASSUMPTION" : !flow.response_number ? "EXPLICIT CLAIM" : n.kind === "premise" ? "STATED PREMISE" : "STATED RECOMMENDATION"}`, "rf-eyebrow"), el("strong", n.text));
+        const identity = el("div", "", "rf-node-identity");
+        identity.append(el("span", labels.get(n.id), "rf-number"));
+        if (n.kind === "assumption") identity.append(el("span", "Inferred", "rf-origin"));
+        b.append(identity, el("strong", n.text));
         if (n.condition) b.append(el("span", n.condition, "rf-condition"));
-        b.append(el("span", n.kind === "assumption" ? "Not stated \xB7 needs checking" : "Inspect source \u2197", "rf-node-foot"));
         b.onclick = () => select(n);
         card.append(b);
         const outgoing = flow.edges.filter((e) => e.from === n.id);
@@ -2512,23 +2517,29 @@ function renderReasoningFlow(root, graph) {
       marker.setAttribute("markerHeight", "5");
       marker.setAttribute("orient", "auto");
       tip.setAttribute("d", "M 0 0 L 6 3 L 0 6");
-      tip.setAttribute("fill", "#baa9cb");
+      tip.setAttribute("fill", "#9ca3af");
       marker.append(tip);
       defs.append(marker);
       svg.append(defs);
       const vertical = getComputedStyle(diagram).gridTemplateColumns.split(" ").length === 1;
+      let skipped = 0;
       for (const edge of flow.edges) {
         const cards = Array.from(diagram.querySelectorAll("[data-rf-node]"));
         const from = cards.find((c) => c.dataset.rfNode === edge.from), to = cards.find((c) => c.dataset.rfNode === edge.to);
         if (!from || !to) continue;
         const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
-        const x1 = (vertical ? a.left + a.width / 2 : a.right) - box.left, y1 = (vertical ? a.bottom : a.top + a.height / 2) - box.top;
-        const x2 = (vertical ? b.left + b.width / 2 : b.left) - box.left, y2 = (vertical ? b.top : b.top + b.height / 2) - box.top;
+        const outgoing = flow.edges.filter((e) => e.from === edge.from), incoming = flow.edges.filter((e) => e.to === edge.to);
+        const x1 = (vertical ? a.left + a.width / 2 : a.right) - box.left, y1 = (vertical ? a.bottom : a.top + a.height * (outgoing.indexOf(edge) + 1) / (outgoing.length + 1)) - box.top;
+        const x2 = (vertical ? b.left + b.width / 2 : b.left) - box.left, y2 = (vertical ? b.top : b.top + b.height * (incoming.indexOf(edge) + 1) / (incoming.length + 1)) - box.top;
         const path = document.createElementNS(svg.namespaceURI, "path");
-        path.setAttribute("d", vertical ? `M ${x1} ${y1} C ${x1} ${(y1 + y2) / 2}, ${x2} ${(y1 + y2) / 2}, ${x2} ${y2}` : `M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}`);
+        const skip = (levels.get(edge.to) || 0) - (levels.get(edge.from) || 0) > 1;
+        if (skip && !vertical) {
+          const lane = diagram.scrollHeight - 14 - skipped++ * 12, exit = x1 + 12, entry = x2 - 12;
+          path.setAttribute("d", `M ${x1} ${y1} L ${exit} ${y1} L ${exit} ${lane} L ${entry} ${lane} L ${entry} ${y2} L ${x2} ${y2}`);
+        } else path.setAttribute("d", vertical ? `M ${x1} ${y1} C ${x1} ${(y1 + y2) / 2}, ${x2} ${(y1 + y2) / 2}, ${x2} ${y2}` : `M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}`);
         path.setAttribute("marker-end", `url(#${markerId})`);
         path.setAttribute("fill", "none");
-        path.setAttribute("stroke", edge.relation === "challenges" ? "#bd7883" : "#baa9cb");
+        path.setAttribute("stroke", edge.relation === "challenges" ? "#b56a72" : "#9ca3af");
         path.setAttribute("stroke-width", "1.4");
         if (flow.nodes.some((n) => (n.id === edge.from || n.id === edge.to) && n.kind === "assumption")) path.setAttribute("stroke-dasharray", "4 4");
         svg.append(path);
@@ -2541,20 +2552,21 @@ function renderReasoningFlow(root, graph) {
       observers.set(root, observer);
     }
     requestAnimationFrame(draw2);
-    select(flow.nodes.find((n) => n.id === root.dataset.reasoningNode) || flow.nodes[0]);
+    select(flow.nodes.find((n) => n.id === (selectedNode || root.dataset.reasoningNode)) || flow.nodes[0], !!selectedNode);
   };
   flows.forEach((flow, i) => {
     const b = document.createElement("button");
     b.type = "button";
     b.append(el("span", flow.response_number ? `Response ${flow.response_number}` : "All contributions"), el("strong", flow.title));
     b.onclick = () => {
+      selectedNode = void 0;
       delete root.dataset.reasoningNode;
       show(i);
     };
     nav.append(b);
   });
   root.append(section);
-  show(Math.max(0, flows.findIndex((f) => f.id === remembered)));
+  show(selectedNode ? 0 : Math.max(0, flows.findIndex((f) => f.id === remembered)));
 }
 
 // src/utils/answers.ts
@@ -2833,6 +2845,24 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     number.setAttribute("aria-label", `Claim ${rows.indexOf(row) + 1}`);
     left.append(number, node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, "")));
     heading.append(left);
+    const opening = rounds.find((r) => r.round_number === 1);
+    const map = opening?.synthesis_json?.narrative === opening?.synthesis ? opening?.synthesis_json?.reasoning_graph : null;
+    const claim = map?.claims?.find((c) => c.text.replace(/\s+/g, " ").trim() === row.label.replace(/^Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim());
+    if (claim && map?.claims) {
+      number.textContent = String(map.claims.indexOf(claim) + 1).padStart(2, "0");
+      const links = node("div", "", "di-claim-links");
+      for (const edge of map.claim_edges || []) {
+        if (edge.from !== claim.id && edge.to !== claim.id) continue;
+        const incoming = edge.to === claim.id;
+        const other = map.claims.find((c) => c.id === (incoming ? edge.from : edge.to));
+        if (!other) continue;
+        const text = incoming ? `${String(map.claims.indexOf(other) + 1).padStart(2, "0")} ${edge.relation} this` : `${edge.relation} ${String(map.claims.indexOf(other) + 1).padStart(2, "0")}`;
+        const b = button(text, () => document.dispatchEvent(new CustomEvent("symphonia:claim-map", { detail: { nodeId: other.id } })));
+        b.title = "Inspect the connected claim";
+        links.append(b);
+      }
+      if (links.childElementCount) left.append(links);
+    }
     const rating = node("div", "", "di-rating");
     rating.setAttribute("aria-label", category(row));
     const score = node("div", "", "di-score");

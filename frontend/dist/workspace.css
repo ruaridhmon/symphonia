@@ -731,3 +731,28 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root #delphi-recorded-progress .di-inferred-origin {display:block;margin:0 0 8px;color:#85602f;font-size:12px;line-height:1.5;}
 
 .manual-response-feedback {white-space:pre-line;font-size:13px;line-height:1.6;color:var(--muted-foreground);margin:8px 0 14px;}
+
+/* Numbered reading order; evidence stays closed until requested. */
+#root .rf-diagram {gap:28px;padding:0 3px var(--rf-bus-space,48px);}
+#root .rf-column {display:flex;flex-direction:column;gap:18px;}
+#root .rf-stage {font-size:12px;font-weight:500;color:var(--muted-foreground);margin:0 0 2px;line-height:22px;}
+#root .rf-node {min-height:112px;padding:14px;box-shadow:none;border-radius:10px;}
+#root .rf-node strong {font-size:14px;font-weight:500;line-height:1.5;margin:10px 0 0;}
+#root .rf-node-identity {display:flex;align-items:center;gap:8px;}
+#root .rf-number {display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:24px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:550;color:var(--foreground);font-variant-numeric:tabular-nums;background:var(--background);}
+#root .rf-origin {font-size:11px;color:#85602f;}
+#root .rf-node[aria-pressed=true] {border-color:#6b7280;box-shadow:0 0 0 1px #6b7280;}
+#root .rf-node.rf-assumption[aria-pressed=true] {border-color:#aa8348;box-shadow:0 0 0 1px #aa8348;}
+#root .rf-detail[hidden] {display:none!important;}
+#root .rf-detail {margin-top:14px;min-height:0;padding-top:16px;}
+#root .rf-detail-heading {display:flex;justify-content:space-between;align-items:center;}
+#root .rf-detail-heading h4 {margin:0;font-size:13px;}
+#root .rf-detail-heading button {padding:6px 8px;border:0;background:none;color:var(--muted-foreground);font-size:12px;}
+#root .rf-detail blockquote {font-family:inherit;font-size:14px;line-height:1.6;border-color:var(--border);}
+#root .di-claim-links {grid-column:2;display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:3px;}
+#root .di-claim-links button {padding:0;border:0;background:none;font-size:12px;color:var(--muted-foreground);text-align:left;cursor:pointer;}
+#root .di-claim-links button:hover {color:var(--foreground);text-decoration:underline;}
+#root .symphonia-shell.symphonia-sidebar-collapsed > main.product-summary,
+#root .symphonia-shell.symphonia-sidebar-collapsed > main.product-dashboard {padding-top:76px!important;}
+@media(max-width:1000px){#root .symphonia-shell > main.product-summary,#root .symphonia-shell > main.product-dashboard {padding-top:76px!important;}}
+@media(max-width:650px){#root .rf-diagram {padding-bottom:0;gap:22px;}#root .rf-wires {display:none;}#root .rf-node {min-height:0;}#root .rf-stage {padding-top:10px;border-top:1px solid var(--border);}}
