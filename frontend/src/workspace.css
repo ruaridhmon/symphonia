@@ -794,3 +794,8 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 
 #root .symphonia-shell .product-summary #delphi-recorded-progress[data-review=true] .di-claims .di-claim{padding:10px 0!important}
 #root .product-summary .delphi-insights[data-review=true] .di-score{margin:0}
+
+@media(min-width:761px){
+ #root .product-summary .delphi-insights[data-review=true] .di-claim-copy{padding-right:62px}
+ #root .product-summary .delphi-insights[data-review=true] .di-reasons:not([open]){grid-column:1;grid-row:1;align-self:end;justify-self:end;width:fit-content;margin:0}
+}

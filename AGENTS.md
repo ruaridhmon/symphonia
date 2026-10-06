@@ -269,3 +269,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Review-summary live check: override the shell-specific legacy row padding and remove score-bottom spacing. Workspace CSS v13.
 
 - Rename live compatibility: detect the deployed index-workspace entry as well as the original index before loading the host API singleton. Summary v20, consultation module v10, minimal navigation v13.
+
+- Desktop review Details now shares the connection line when collapsed, while expanded audit remains full-width. Reserve copy space to avoid overlaps. Workspace CSS v14.
