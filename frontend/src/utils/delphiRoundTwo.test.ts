@@ -47,7 +47,7 @@ describe('Delphi Round 2 builder', () => {
     });
     expect(questions[1]).toMatchObject({questionId:'claim_1_confidence',inputType:'single_select',optional:true,options:['Not at all confident','Slightly confident','Moderately confident','Very confident','Extremely confident']});
     expect(questions[1]).not.toHaveProperty('defaultValue');
-    expect(questions[0].options).toEqual(['Strongly agree', 'Agree', 'Neither agree nor disagree', 'Disagree', 'Strongly disagree', 'Unable to judge — need more information']);
+    expect(questions[0].options).toEqual(['Agree', 'Disagree', 'Unable to judge']);
     expect(questions.every(q => !q.conditionalOnQuestionId)).toBe(true);
   });
 

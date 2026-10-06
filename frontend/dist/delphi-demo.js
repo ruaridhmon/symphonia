@@ -2841,12 +2841,19 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     bar.setAttribute("aria-hidden", "true");
     row.votes.slice(0, 5).forEach((n, i) => {
       if (n && row.answered) {
-        const part = node("span");
-        part.style.width = `${n / row.answered * 100}%`;
-        part.style.background = colors[i];
-        bar.append(part);
+        for (const expert of row.evidence.filter((e) => e.group === i)) {
+          const part = node("span");
+          const level = confidenceLabels.indexOf(expert.confidence);
+          part.style.width = `${100 / row.answered}%`;
+          part.style.height = `${level < 0 ? 2 : 2 + level * 2}px`;
+          part.style.background = colors[i];
+          part.dataset.confidence = level < 0 ? "missing" : String(level);
+          part.title = `${expert.participant}: ${expert.position}; confidence: ${expert.confidence || "not recorded"}`;
+          bar.append(part);
+        }
       }
     });
+    bar.title = "Length shows the share of positions. Each segment is one expert; thicker means higher confidence. Dashed segments have no confidence rating.";
     rating.append(bar);
     const legend = node("div", "", "di-legend");
     row.votes.forEach((n, i) => {

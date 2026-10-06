@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'backend'))
 from core.reasoning import parse_reasoning_output,render_claim_map
 BASE='https://symphonia-dev-488613.web.app/api/'
-private=Path('/tmp/symphonia-claim-map-demo-private.json')
+private=Path('/tmp/symphonia-three-choice-demo-private.json')
 s=json.loads(private.read_text()) if private.exists() else {}
 def save():private.write_text(json.dumps(s));private.chmod(0o600)
 def req(method,path,data=None,auth=False,form=False):
@@ -20,7 +20,7 @@ def req(method,path,data=None,auth=False,form=False):
 s['token']=req('POST','dev/demo-login',{} )['access_token'];save()
 if s.get('completed'):print('Demo already created:',s['form_id']);sys.exit()
 if s.get('form_id'):raise SystemExit('Partial demo exists; inspect private checkpoint before retrying.')
-form=req('POST','forms/create',{'title':'SIMULATED PANEL — School phones: claims, assumptions and disagreement','questions':[{'questionId':'opening','label':'How should schools handle personal phones? Explain your reasoning, evidence and uncertainty.','inputType':'textarea','optional':False}],'allow_join':True,'allow_public_responses':True},True)
+form=req('POST','forms/create',{'title':'SIMULATED PANEL — School phone policy','questions':[{'questionId':'opening','label':'How should schools handle personal phones? Explain your reasoning, evidence and uncertainty.','inputType':'textarea','optional':False}],'allow_join':True,'allow_public_responses':True},True)
 s.update(form_id=form['id'],join_code=form['join_code'],sessions=[]);save();fid=form['id']
 texts=['Phones interrupt lessons. Store phones during lessons, with medical exceptions. I favour a small pilot; my evidence is classroom observation, not a controlled trial.','Phones help some pupils regulate anxiety. A whole-day ban could harm those pupils. Medical and accessibility access must remain. I oppose restrictions that remove these supports.','Evidence for a whole-day ban is weak. Pilot lesson-only storage before expanding it. I am uncertain that storage alone will improve learning; compare participation and disruption before and after.']
 for i,text in enumerate(texts):
@@ -43,7 +43,7 @@ _,graph=parse_reasoning_output(json.dumps({'claims_text':'Authored demo','normal
 html='<p>Authored demonstration with three fictional experts. These are illustrative interpretations, not AI extraction results or real expert evidence.</p>'+render_claim_map(graph)
 req('PUT',f'forms/{fid}/rounds/{r1["id"]}/synthesis',{'summary':html},True)
 req('POST',f'forms/{fid}/rounds/{r1["id"]}/reasoning',{'expected_synthesis':html,'reasoning_flows':flows,'normalized_claims':claims,'claim_edges':edges},True)
-opts=['Strongly agree','Agree','Neither agree nor disagree','Disagree','Strongly disagree','Unable to judge — need more information'];conf=['Not at all confident','Slightly confident','Moderately confident','Very confident','Extremely confident'];qs=[]
+opts=['Agree','Disagree','Unable to judge'];conf=['Not at all confident','Slightly confident','Moderately confident','Very confident','Extremely confident'];qs=[]
 for q in graph['claims']:
     meta={'claimId':q['id'],'claimText':q['text'],'claimOrigin':q['origin'],'sectionTitle':q['text'],'requireEvidence':False,'requireCounterarguments':False,'requireConfidence':False}
     if q['origin']=='inferred':meta['inferenceQuestion']=q['question']
@@ -58,15 +58,23 @@ for round_number in [2,3]:
     for i,old in enumerate(s['sessions']):
         token=req('POST',f'public/forms/session/{old}/continue')['session_token'];s['sessions'][i]=token;save();answers={}
         for j,q in enumerate(graph['claims']):
-            position= ['Agree','Disagree','Unable to judge — need more information'][i] if q['id'] in ['claim_4','claim_6'] else ['Agree','Strongly agree','Neither agree nor disagree'][i]
-            if round_number==3 and i==0 and q['id']=='claim_6':position='Strongly agree'
+            confidence_matrix=[[4,3,1],[1,4,2],[2,3,4],[1,4,2],[0,1,4],[3,2,1],[4,1,2]]
+            certainty=confidence_matrix[j][i]
+            if round_number==3 and i==2 and q['id']=='claim_6':certainty=3
+            position= ['Agree','Disagree','Unable to judge'][i] if q['id'] in ['claim_4','claim_6'] else ['Agree','Agree','Unable to judge'][i]
+            if round_number==3 and i==2 and q['id']=='claim_6':position='Agree'
             if round_number==2:positions.setdefault(q['id'],[]).append(position)
-            for k,value in enumerate([position,conf[[1,4,2][i]],['I favour a cautious pilot, with exceptions.','Do not remove anxiety support; preserve medical access.','The evidence remains weak. I am not ready to endorse the inferred mechanism.'][i]]):answers[f'q{j*3+k+1}']={'position':value}
+            for k,value in enumerate([position,conf[certainty],['I favour a cautious pilot, with exceptions.','Do not remove anxiety support; preserve medical access.','The evidence remains weak. I am not ready to endorse the inferred mechanism.'][i]]):answers[f'q{j*3+k+1}']={'position':value}
         req('POST',f'public/forms/session/{token}/submit',{'participant_name':f'Fictional expert {i+1}','answers':answers})
 for r in req('GET',f'forms/{fid}/rounds',auth=True):
     if r['round_number']==3 and r['is_active']:
-        note='The fictional panel reconsidered the same seven claims. One expert strengthened support for lesson-only storage; disagreement and uncertainty remain.'
+        note='The fictional panel reconsidered the same seven claims. One expert moved from unable to judge to agreement on lesson-only storage; disagreement and uncertainty remain.'
         req('PUT',f'forms/{fid}/rounds/{r["id"]}/synthesis',{'summary':'<p>'+note+'</p>'+r['synthesis']},True)
+rounds=req('GET',f'forms/{fid}/rounds',auth=True)
+for r in rounds:
+    if r['round_number']>1:req('PUT',f'forms/{fid}/rounds/{r["id"]}/synthesis',{'summary':f'<p>Round {r["round_number"]}: fictional expert judgments on the seven frozen claims. Agreement and confidence are recorded separately.</p>'},True)
+r3=next(r for r in rounds if r['round_number']==3)
+req('POST',f'forms/{fid}/rounds/{r3["id"]}/make_active',{},True)
 account=req('GET',f'forms/{fid}/final_synthesis',auth=True)
 req('POST',f'forms/{fid}/final_synthesis',{'expected_revision':account['preview']['revision'],'complete':False},True)
 s['completed']=True;save();print(json.dumps({'form_id':fid,'claims':7,'inferred':2,'responses':9,'paid_calls':0}))

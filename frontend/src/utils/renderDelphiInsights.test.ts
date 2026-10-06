@@ -89,3 +89,10 @@ it('counts supplied supporting information and opens it in a dismissible modal',
  (dialog.querySelector('button') as HTMLButtonElement).click();expect(dialog.open).toBe(false);expect(document.activeElement).toBe(trigger);
  renderDelphiInsights(root,current,[current],responses(['Agree']));expect(root.querySelector('.di-supporting-trigger')?.textContent).toBe('Supporting information · 0');
 });
+
+it('keeps position lengths equal while individual confidence changes thickness',()=>{
+ const root=document.createElement('section');const current={...round,questions:[...questions,{questionId:'confidence',sectionTitle:'Exact claim',label:'Confidence in your rating',inputType:'single_select',options:['Very confident']}]};
+ const data=responses(['Agree','Agree','Disagree']);data[0].responses[0].answers.q2={position:'Slightly confident'};data[0].responses[1].answers.q2={position:'Extremely confident'};
+ renderDelphiInsights(root,current,[current],data);const parts=[...root.querySelectorAll<HTMLElement>('.di-bar>span')];
+ expect(parts.map(p=>parseFloat(p.style.width))).toEqual([100/3,100/3,100/3]);expect(parts.map(p=>p.style.height)).toEqual(['4px','10px','2px']);expect(parts[2].dataset.confidence).toBe('missing');expect(root.querySelector('.di-score')?.textContent).toBe('67%agree');
+});

@@ -14,14 +14,7 @@ export interface DelphiClaim {
 
 export const CONFIDENCE_OPTIONS = ['Not at all confident', 'Slightly confident', 'Moderately confident', 'Very confident', 'Extremely confident'];
 
-const RATING_OPTIONS = [
-  'Strongly agree',
-  'Agree',
-  'Neither agree nor disagree',
-  'Disagree',
-  'Strongly disagree',
-  'Unable to judge — need more information',
-];
+const RATING_OPTIONS = ['Agree', 'Disagree', 'Unable to judge'];
 
 function detailCount(container: Element, label: string): number | null {
   const detail = Array.from(container.querySelectorAll('details')).find((item) =>
