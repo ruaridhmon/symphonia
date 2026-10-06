@@ -216,3 +216,7 @@ observer.observe(document.documentElement, { childList: true, subtree: true });
 window.addEventListener('popstate', scheduleApply);
 
 window.addEventListener('resize', scheduleApply);
+
+document.addEventListener('symphonia:consultations-changed',(event)=>{const detail=(event as CustomEvent).detail;document.querySelectorAll<HTMLElement>('.symphonia-shell-header').forEach(header=>{const state=shells.get(header);if(!state)return;if(detail?.id&&state.data){state.data.forms=state.data.forms.map(f=>f.id===detail.id?{...f,title:detail.title}:f);if(navigationCache)navigationCache.data=state.data;}state.signature='';});scheduleApply();});
+
+document.addEventListener('pointerdown',event=>{document.querySelectorAll<HTMLDetailsElement>('.symphonia-navigation-menu[open]').forEach(menu=>{if(!menu.contains(event.target as Node))menu.open=false;});});

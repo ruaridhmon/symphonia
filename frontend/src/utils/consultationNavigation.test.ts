@@ -24,3 +24,11 @@ it('loads admin collection, renders untrusted titles as text, and filters withou
  renderConsultationNavigation(nav,data,'/',false,'missing');expect(nav.textContent).toContain('No matching');expect(data.forms).toHaveLength(1);
  expect(consultationId('/admin/forms/new')).toBeNull();
 });
+
+it('pins per account and exposes rename only for owned consultations',()=>{
+ localStorage.setItem('email','first@example.test');localStorage.setItem('symphonia:pins:first@example.test','[7]');
+ const nav=document.createElement('nav');renderConsultationNavigation(nav,{admin:false,canCreate:true,forms:[{id:8,title:'Joined'},{id:7,title:'Owned',owned:true}]},'/admin/form/7/summary',false);
+ expect(nav.querySelector('.symphonia-navigation-row')?.textContent).toContain('Owned');expect(nav.textContent).toContain('Pinned');expect(nav.querySelectorAll('button')).toHaveLength(3);
+ const rows=nav.querySelectorAll('.symphonia-navigation-row');expect(rows[1].textContent).not.toContain('Rename');
+ localStorage.setItem('email','second@example.test');renderConsultationNavigation(nav,{admin:false,canCreate:false,forms:[{id:8,title:'Joined'},{id:7,title:'Owned'}]},'/',false);expect(nav.querySelector('.symphonia-navigation-row')?.textContent).toContain('Joined');localStorage.clear();
+});

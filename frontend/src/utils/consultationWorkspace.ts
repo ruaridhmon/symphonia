@@ -1,3 +1,4 @@
+import {pinnedConsultations,toggleConsultationPin,renameConsultation} from './consultationActions';
 import type * as React from 'react';
 import {renderReasoningFlow,clearReasoningFlow} from './reasoningFlow';
 import type { Form, Round, RoundWithResponses } from '../types/summary';
@@ -63,8 +64,12 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
     const count = responseGroup ? responseGroup.responses.length : round?.response_count;
     const joinUrl = new URL(`/share/${encodeURIComponent(p.form.join_code)}`, window.location.origin).href;
     const outline=questionOutline(round?.questions || p.form.questions);
-    const simulated=/^SIMULATED PANEL\s*[—–-]\s*/i.test(p.form.title);
-    const displayTitle=p.form.title.replace(/^SIMULATED PANEL\s*[—–-]\s*/i,'');
+    const [currentTitle,setCurrentTitle]=R.useState(p.form.title);
+    const [pinned,setPinned]=R.useState(()=>pinnedConsultations().includes(p.form.id));
+    R.useEffect(()=>{setCurrentTitle(p.form.title);setPinned(pinnedConsultations().includes(p.form.id));},[p.form.id,p.form.title]);
+    R.useEffect(()=>{const changed=(e:Event)=>{const d=(e as CustomEvent).detail;if(d?.id===p.form.id)setCurrentTitle(d.title);setPinned(pinnedConsultations().includes(p.form.id));};document.addEventListener('symphonia:consultations-changed',changed);return()=>document.removeEventListener('symphonia:consultations-changed',changed);},[p.form.id]);
+    const simulated=/^SIMULATED PANEL\s*[—–-]\s*/i.test(currentTitle);
+    const displayTitle=currentTitle.replace(/^SIMULATED PANEL\s*[—–-]\s*/i,'');
     const hint = round?.round_number === 1 ? 'Collect independent views, then draw out the claims.' : round?.round_number === 2 ? 'Review the claims and where the panel agrees or differs.' : 'Review final ratings alongside the reasons behind them.';
     R.useEffect(() => {
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
@@ -84,7 +89,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
         p.isDemo ? h('span', {className:'cw-demo-badge'}, 'Synthetic example') : h('div', { className: 'cw-title-actions' },
           !finalView && ManualResponse && p.onResponseAdded ? button('Add response',()=>{if(round?.is_active&&!completed&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response','aria-label':'Add response',disabled:!round?.is_active||completed,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response',children:[h('svg',{key:'icon',width:16,height:16,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,'aria-hidden':true},h('path',{d:'M12 5v14M5 12h14'})),h('span',{key:'label'},'Add response')]}) : null,
           h('details', { ref:options,className: 'cw-options',onKeyDown:(e:React.KeyboardEvent<HTMLDetailsElement>)=>{if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}} }, h('summary', { 'aria-label': 'Consultation options' }, '•••'),
-            h('div', null, button('Invite people',()=>openPanel('invite')),h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),button('View questions',()=>openPanel('questions'),{className:'cw-mobile-questions','aria-label':'Preview round questions',disabled:!round}),
+            h('div', null, button('Rename',()=>{if(options.current)options.current.open=false;renameConsultation(p.form.id,currentTitle,options.current?.querySelector('summary'));}),button(pinned?'Unpin':'Pin',()=>{toggleConsultationPin(p.form.id);if(options.current)options.current.open=false;}),button('Invite people',()=>openPanel('invite')),h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),button('View questions',()=>openPanel('questions'),{className:'cw-mobile-questions','aria-label':'Preview round questions',disabled:!round}),
               p.onDownload ? button('Download', p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? 'Updating…' : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null)))),
       h('nav', { className: 'cw-views', 'aria-label': 'Consultation views' },

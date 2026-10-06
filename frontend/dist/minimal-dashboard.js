@@ -218,13 +218,122 @@ function forwardConsultationClick(event) {
 
 // src/utils/consultationNavigation.ts
 init_define_import_meta_env();
-async function loadNavigation(client) {
-  const me = await client.get("/me");
+
+// src/utils/consultationActions.ts
+init_define_import_meta_env();
+var pinKey = () => `symphonia:pins:${localStorage.getItem("email") || "anonymous"}`;
+function pinnedConsultations() {
+  try {
+    const value = JSON.parse(localStorage.getItem(pinKey()) || "[]");
+    return Array.isArray(value) ? value.filter((v) => Number.isSafeInteger(v) && v > 0) : [];
+  } catch {
+    return [];
+  }
+}
+function toggleConsultationPin(id) {
+  const pins = pinnedConsultations();
+  const next = pins.includes(id) ? pins.filter((n) => n !== id) : [id, ...pins];
+  localStorage.setItem(pinKey(), JSON.stringify(next));
+  document.dispatchEvent(new CustomEvent("symphonia:consultations-changed", { detail: { pinned: true } }));
+  return next.includes(id);
+}
+async function client() {
+  if (document.querySelector('script[src*="index-HJquNmhn.js"]')) {
+    const path = "/assets/index-HJquNmhn.js";
+    return (await import(
+      /* @vite-ignore */
+      path
+    )).b;
+  }
+  return (await Promise.resolve().then(() => (init_client(), client_exports))).api;
+}
+function renameConsultation(id, title, trigger) {
+  const prefix = title.match(/^(?:SIMULATED PANEL\s*[—–-]|Simulated example\s*·)\s*/i)?.[0] || "";
+  const dialog = document.createElement("dialog");
+  dialog.className = "consultation-rename";
+  dialog.setAttribute("aria-labelledby", "rename-consultation-title");
+  const form = document.createElement("form");
+  const heading = document.createElement("h2");
+  heading.id = "rename-consultation-title";
+  heading.textContent = "Rename consultation";
+  const label = document.createElement("label");
+  label.textContent = "Name";
+  const input = document.createElement("input");
+  input.name = "title";
+  input.required = true;
+  input.maxLength = 240 - prefix.length;
+  input.value = title.slice(prefix.length);
+  label.append(input);
+  const error = document.createElement("p");
+  error.className = "rename-error";
+  error.setAttribute("role", "alert");
+  const actions = document.createElement("div");
+  actions.className = "rename-actions";
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.textContent = "Cancel";
+  const save = document.createElement("button");
+  save.type = "submit";
+  save.textContent = "Save";
+  actions.append(cancel, save);
+  form.append(heading, label, error, actions);
+  dialog.append(form);
+  document.body.append(dialog);
+  let busy = false;
+  const close = () => {
+    if (busy) return;
+    dialog.close();
+  };
+  cancel.onclick = close;
+  dialog.addEventListener("cancel", (e) => {
+    if (busy) e.preventDefault();
+  });
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    trigger?.focus();
+  });
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const next = input.value.trim();
+    if (!next) {
+      error.textContent = "Enter a name.";
+      input.focus();
+      return;
+    }
+    busy = true;
+    save.disabled = true;
+    cancel.disabled = true;
+    input.disabled = true;
+    save.textContent = "Saving\u2026";
+    error.textContent = "";
+    try {
+      await (await client()).patch(`/forms/${id}/title`, { title: prefix + next, expected_title: title });
+      document.dispatchEvent(new CustomEvent("symphonia:consultations-changed", { detail: { id, title: prefix + next } }));
+      busy = false;
+      dialog.close();
+    } catch (err) {
+      error.textContent = err instanceof Error ? err.message : "Could not rename. Please try again.";
+      busy = false;
+      save.disabled = false;
+      cancel.disabled = false;
+      input.disabled = false;
+      save.textContent = "Save";
+    }
+  };
+  dialog.showModal();
+  input.focus();
+  input.select();
+  return dialog;
+}
+
+// src/utils/consultationNavigation.ts
+async function loadNavigation(client2) {
+  const me = await client2.get("/me");
   const admin = me.is_admin === true;
   const canCreate = admin || me.role === "facilitator" || me.role === "platform_admin";
-  if (admin) return { forms: await client.get("/forms"), canCreate, admin };
-  const joined = await client.get("/my_forms");
-  const owned = canCreate ? await client.get("/forms/my-created") : [];
+  if (admin) return { forms: await client2.get("/forms"), canCreate, admin };
+  const joined = await client2.get("/my_forms");
+  const owned = canCreate ? await client2.get("/forms/my-created") : [];
   const forms = new Map(joined.map((form) => [form.id, form]));
   owned.forEach((form) => forms.set(form.id, { ...form, owned: true }));
   return { forms: [...forms.values()], canCreate, admin };
@@ -249,9 +358,6 @@ function renderConsultationNavigation(nav, data, path, error, query = "") {
   top.append(makeLink("All consultations", "/"));
   if (data?.canCreate) top.append(makeLink("+ New consultation", "/admin/forms/new"));
   nav.replaceChildren(top);
-  const label = document.createElement("h2");
-  label.textContent = "Consultations";
-  nav.append(label);
   if (!data) {
     const status = document.createElement("p");
     status.className = "symphonia-navigation-status";
@@ -260,7 +366,8 @@ function renderConsultationNavigation(nav, data, path, error, query = "") {
     nav.append(status);
     return;
   }
-  const forms = [...data.forms].sort((a, b) => b.id - a.id).filter((form) => form.title.toLowerCase().includes(query.toLowerCase()));
+  const pins = pinnedConsultations();
+  const forms = [...data.forms].sort((a, b) => Number(pins.includes(b.id)) - Number(pins.includes(a.id)) || b.id - a.id).filter((form) => form.title.toLowerCase().includes(query.toLowerCase()));
   const dev = location.hostname === "symphonia-dev-488613.web.app" || /^symphonia-dev-488613--[a-z0-9-]+\.web\.app$/.test(location.hostname);
   const earlierIds = /* @__PURE__ */ new Set([20, 23, 24, 25, 26, 27, 28]);
   const earlier = document.createElement("details");
@@ -268,7 +375,15 @@ function renderConsultationNavigation(nav, data, path, error, query = "") {
   const summary = document.createElement("summary");
   summary.textContent = "Earlier examples";
   earlier.append(summary);
+  let group = "";
   for (const form of forms) {
+    const nextGroup = pins.includes(form.id) ? "Pinned" : "Consultations";
+    if (group !== nextGroup) {
+      group = nextGroup;
+      const h = document.createElement("h2");
+      h.textContent = group;
+      nav.append(h);
+    }
     const title = form.title.replace(/^(?:Simulated example\s*[·]|SIMULATED PANEL\s*[—–-])\s*/i, "");
     const link = makeLink(title, navigationHref(form, data.admin));
     link.title = form.title;
@@ -280,8 +395,44 @@ function renderConsultationNavigation(nav, data, path, error, query = "") {
       badge.textContent = "Example";
       link.append(badge);
     }
-    if (dev && earlierIds.has(form.id) && !query && consultationId(path) !== form.id) earlier.append(link);
-    else nav.append(link);
+    const row = document.createElement("div");
+    row.className = "symphonia-navigation-row";
+    row.append(link);
+    const menu = document.createElement("details");
+    menu.className = "symphonia-navigation-menu";
+    const trigger = document.createElement("summary");
+    trigger.textContent = "\u2022\u2022\u2022";
+    trigger.setAttribute("aria-label", `Actions for ${title}`);
+    menu.append(trigger);
+    const controls = document.createElement("div");
+    const pin = document.createElement("button");
+    pin.type = "button";
+    pin.textContent = pins.includes(form.id) ? "Unpin" : "Pin";
+    pin.onclick = () => {
+      toggleConsultationPin(form.id);
+      menu.open = false;
+    };
+    controls.append(pin);
+    if (data.admin || form.owned) {
+      const rename = document.createElement("button");
+      rename.type = "button";
+      rename.textContent = "Rename";
+      rename.onclick = () => {
+        menu.open = false;
+        renameConsultation(form.id, form.title, trigger);
+      };
+      controls.append(rename);
+    }
+    menu.append(controls);
+    menu.onkeydown = (e) => {
+      if (e.key === "Escape") {
+        menu.open = false;
+        trigger.focus();
+      }
+    };
+    row.append(menu);
+    if (dev && earlierIds.has(form.id) && !query && consultationId(path) !== form.id) earlier.append(row);
+    else nav.append(row);
   }
   if (earlier.children.length > 1) nav.append(earlier);
   if (!forms.length) {
@@ -562,3 +713,21 @@ var observer = new MutationObserver(scheduleApply);
 observer.observe(document.documentElement, { childList: true, subtree: true });
 window.addEventListener("popstate", scheduleApply);
 window.addEventListener("resize", scheduleApply);
+document.addEventListener("symphonia:consultations-changed", (event) => {
+  const detail = event.detail;
+  document.querySelectorAll(".symphonia-shell-header").forEach((header) => {
+    const state = shells.get(header);
+    if (!state) return;
+    if (detail?.id && state.data) {
+      state.data.forms = state.data.forms.map((f) => f.id === detail.id ? { ...f, title: detail.title } : f);
+      if (navigationCache) navigationCache.data = state.data;
+    }
+    state.signature = "";
+  });
+  scheduleApply();
+});
+document.addEventListener("pointerdown", (event) => {
+  document.querySelectorAll(".symphonia-navigation-menu[open]").forEach((menu) => {
+    if (!menu.contains(event.target)) menu.open = false;
+  });
+});

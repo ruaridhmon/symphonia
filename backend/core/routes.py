@@ -6959,6 +6959,37 @@ def delete_owned_form(
     return {"deleted": form_id, "title": title}
 
 
+class FormTitleUpdate(BaseModel):
+    title: str
+    expected_title: str | None = None
+
+
+@router.patch("/forms/{form_id}/title", tags=["Forms"])
+@limiter.limit(CRUD_LIMIT)
+def rename_form(
+    form_id: int,
+    payload: FormTitleUpdate,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    form = db.query(FormModel).filter(FormModel.id == form_id).with_for_update().first()
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    assert_form_owner_or_facilitator(form, user)
+    title = payload.title.strip()
+    if not title or len(title) > 240:
+        raise HTTPException(status_code=422, detail="Enter a name of 1–240 characters")
+    if payload.expected_title is not None and form.title != payload.expected_title:
+        raise HTTPException(status_code=409, detail="The name changed. Refresh and try again.")
+    old_title = form.title
+    form.title = title
+    audit_log(db, user=user, action="rename_form", resource_type="form", resource_id=form_id,
+              detail={"old_title": old_title, "new_title": title}, request=request)
+    db.commit()
+    return {"id": form.id, "title": title}
+
+
 @router.put(
     "/forms/{form_id}",
     tags=["Forms"],

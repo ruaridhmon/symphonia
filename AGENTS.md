@@ -263,3 +263,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - **2026-10-06 compact review responses:** Review-round person disclosures show compact claim/position/separate-confidence rows with unchanged reasoning/evidence behind native disclosures. Prior-position changes remain visible; opening prose/editing/storage unchanged. Expert build includes response-workspace v5, Summary v18 and workspace CSS v10.
 
 - Compact response visual check: remove inherited 22px answer-grid gaps; desktop reasoning triggers share the claim row. Workspace CSS v11.
+
+- **2026-10-06 consultation organization:** Title-only PATCH /forms/{id}/title checks ownership and expected title without touching ballots/questions/access. Sidebar and workspace offer Rename and account/browser-scoped Pin/Unpin; pinned rows precede other consultations. Event bridge updates current title/sidebar without route reload. Review summaries use compact rows and horizontal counts with unchanged full audit/confidence dialogs. Mirror Summary v19, consultation v9, workspace CSS v12/results workflow-7; minimal navigation v12.

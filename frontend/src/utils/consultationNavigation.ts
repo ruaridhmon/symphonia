@@ -1,3 +1,4 @@
+import {pinnedConsultations,toggleConsultationPin,renameConsultation} from './consultationActions';
 export interface NavigationForm { id: number; title: string; owned?: boolean }
 export interface NavigationData { forms: NavigationForm[]; canCreate: boolean; admin: boolean }
 type Client = { get<T>(path: string): Promise<T> };
@@ -34,18 +35,21 @@ export function renderConsultationNavigation(nav: HTMLElement, data: NavigationD
   top.append(makeLink('All consultations', '/'));
   if (data?.canCreate) top.append(makeLink('+ New consultation', '/admin/forms/new'));
   nav.replaceChildren(top);
-  const label = document.createElement('h2'); label.textContent = 'Consultations'; nav.append(label);
+
   if (!data) {
     const status = document.createElement('p'); status.className = 'symphonia-navigation-status';
     status.textContent = error ? 'Could not load consultations. Open All consultations to try again.' : 'Loading consultations…';
     status.setAttribute('role', 'status'); nav.append(status); return;
   }
-  const forms = [...data.forms].sort((a,b) => b.id-a.id).filter(form => form.title.toLowerCase().includes(query.toLowerCase()));
+  const pins=pinnedConsultations();
+  const forms = [...data.forms].sort((a,b) => Number(pins.includes(b.id))-Number(pins.includes(a.id)) || b.id-a.id).filter(form => form.title.toLowerCase().includes(query.toLowerCase()));
   const dev = location.hostname === 'symphonia-dev-488613.web.app' || /^symphonia-dev-488613--[a-z0-9-]+\.web\.app$/.test(location.hostname);
   const earlierIds = new Set([20,23,24,25,26,27,28]);
   const earlier = document.createElement('details'); earlier.className = 'symphonia-navigation-earlier';
   const summary = document.createElement('summary'); summary.textContent = 'Earlier examples'; earlier.append(summary);
+  let group='';
   for (const form of forms) {
+    const nextGroup=pins.includes(form.id)?'Pinned':'Consultations';if(group!==nextGroup){group=nextGroup;const h=document.createElement('h2');h.textContent=group;nav.append(h);}
     const title = form.title.replace(/^(?:Simulated example\s*[·]|SIMULATED PANEL\s*[—–-])\s*/i, '');
     const link = makeLink(title, navigationHref(form, data.admin)); link.title = form.title;
     link.className = 'symphonia-consultation-link';
@@ -53,8 +57,13 @@ export function renderConsultationNavigation(nav: HTMLElement, data: NavigationD
       link.setAttribute('aria-label', `${title} · Simulated example`);
       const badge = document.createElement('span'); badge.className = 'symphonia-navigation-demo'; badge.textContent = 'Example'; link.append(badge);
     }
-    if (dev && earlierIds.has(form.id) && !query && consultationId(path) !== form.id) earlier.append(link);
-    else nav.append(link);
+    const row=document.createElement('div');row.className='symphonia-navigation-row';row.append(link);
+    const menu=document.createElement('details');menu.className='symphonia-navigation-menu';const trigger=document.createElement('summary');trigger.textContent='•••';trigger.setAttribute('aria-label',`Actions for ${title}`);menu.append(trigger);const controls=document.createElement('div');
+    const pin=document.createElement('button');pin.type='button';pin.textContent=pins.includes(form.id)?'Unpin':'Pin';pin.onclick=()=>{toggleConsultationPin(form.id);menu.open=false;};controls.append(pin);
+    if(data.admin||form.owned){const rename=document.createElement('button');rename.type='button';rename.textContent='Rename';rename.onclick=()=>{menu.open=false;renameConsultation(form.id,form.title,trigger);};controls.append(rename);}
+    menu.append(controls);menu.onkeydown=e=>{if(e.key==='Escape'){menu.open=false;trigger.focus();}};row.append(menu);
+    if (dev && earlierIds.has(form.id) && !query && consultationId(path) !== form.id) earlier.append(row);
+    else nav.append(row);
   }
   if (earlier.children.length > 1) nav.append(earlier);
   if (!forms.length) {

@@ -442,6 +442,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   root.dataset.plannerRound = String(round.id);
   root.replaceChildren();
   root.className = "card delphi-insights";
+  root.dataset.review = String(round.round_number > 1);
   root.dataset.claimLabels = JSON.stringify(rows.map((r) => r.label.replace(/^Claim\s+\d+:\s*/i, "").replace(/\s+/g, " ").trim()));
   const head = node("div", "", "di-heading");
   const title = node("div", "", "di-title");
@@ -642,7 +643,8 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     detail.className = "di-reasons";
     detail.dataset.key = row.key;
     detail.open = priorOpen.has(row.key);
-    const summary = node("summary", "Distribution, responses and changes");
+    const summary = node("summary", "Details");
+    summary.setAttribute("aria-label", "Distribution, responses and changes");
     detail.append(summary);
     detail.append(node("p", row.options.map((option) => `${row.evidence.filter((e) => e.position === option).length} ${option.toLowerCase()}`).join(" \xB7 "), "di-exact-distribution"));
     if (row.inferenceQuestion) detail.append(node("p", String(row.inferenceQuestion)));
