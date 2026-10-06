@@ -27,8 +27,10 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
     const addTrigger = R.useRef(null);
     const dialog = R.useRef(null);
     const titleId = R.useId();
+    const invoker = R.useRef(null);
     const options = R.useRef(null);
     const openPanel = (next) => {
+      invoker.current = options.current?.contains(document.activeElement) ? options.current.querySelector("summary") || null : document.activeElement;
       if (options.current) options.current.open = false;
       setCopyState("");
       setPanel(next);
@@ -46,6 +48,13 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
       if (!panel && dialog.current?.open) dialog.current.close();
     }, [panel]);
+    R.useEffect(() => {
+      const dismiss = (e) => {
+        if (options.current?.open && !options.current.contains(e.target)) options.current.open = false;
+      };
+      document.addEventListener("pointerdown", dismiss);
+      return () => document.removeEventListener("pointerdown", dismiss);
+    }, []);
     R.useEffect(() => {
       setPanel(null);
       setCopyState("");
@@ -132,7 +141,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
               setAdding(round);
             }
           }, { ref: addTrigger, className: "cw-add-response", disabled: !round?.is_active || completed, title: round?.is_active ? "Record a response received outside Symphonia" : "Select the current round to add a response" }) : null,
-          button("View questions", () => setPanel("questions"), { className: "cw-text-button", disabled: !round })
+          button("View questions", () => openPanel("questions"), { className: "cw-text-button", disabled: !round })
         )
       ),
       finalView && FinalSynthesis ? h(FinalSynthesis, { formId: p.form.id, onComplete: () => setCompleted(true) }) : null,
@@ -146,7 +155,10 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
       } }) : null,
       h(
         "dialog",
-        { ref: dialog, className: "cw-dialog", "aria-labelledby": titleId, onCancel: () => setPanel(null), onClose: () => setPanel(null), onClick: (event) => {
+        { ref: dialog, className: "cw-dialog", "aria-labelledby": titleId, onCancel: () => setPanel(null), onClose: () => {
+          setPanel(null);
+          requestAnimationFrame(() => invoker.current?.focus());
+        }, onClick: (event) => {
           if (event.target === event.currentTarget) setPanel(null);
         } },
         h(

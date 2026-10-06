@@ -7,9 +7,9 @@ const shim={react:'import {r as React} from "/assets/vendor-react-D3EY6NCv.js";e
  let code=fs.readFileSync('dist/assets/SummaryPage-workspace-v9.js','utf8');
  const host='const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet);';
  if(!code.includes(host))throw Error('Unsupported maintained summary shape');
- code='import FinalSynthesisPanel from "/final-synthesis.js?v=1";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=3');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v10.js',code);
+ code='import FinalSynthesisPanel from "/final-synthesis.js?v=2";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=4');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v11.js',code);
  fs.copyFileSync('src/legacy/delphiRoundSetup.js','dist/delphi-round-two-ui.js');fs.copyFileSync('src/workspace.css','dist/workspace.css');fs.copyFileSync('src/reasoning-flow.css','dist/reasoning-flow.css');
- let html=fs.readFileSync('dist/index.html','utf8').replace('/assets/SummaryPage-workspace-v9.js','/assets/SummaryPage-workspace-v10.js').replace('/workspace.css?v=2','/workspace.css?v=3');
+ let html=fs.readFileSync('dist/index.html','utf8').replace(/\/assets\/SummaryPage-workspace-v(?:9|10)\.js/,'/assets/SummaryPage-workspace-v11.js').replace('/workspace.css?v=2','/workspace.css?v=3');
  for(const name of ['delphi-progress','product-ui','delphi-demo','delphi-round-two-ui'])html=html.replace(new RegExp(`/${name}\\.js\\?v=[^"']+`,'g'),`/${name}.js?v=workflow-2`);
  fs.writeFileSync('dist/index.html',html);
 })().catch(e=>{console.error(e);process.exitCode=1;});

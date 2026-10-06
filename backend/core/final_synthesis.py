@@ -74,7 +74,10 @@ def build_final_account(form, rounds, responses):
             return [{'label': label, 'count': counts[label]} for label in dict.fromkeys([*options, *counts])]
         confidence_options = ['Not at all confident', 'Slightly confident', 'Moderately confident', 'Very confident', 'Extremely confident']
         text = q.get('claimText') or str(q.get('sectionTitle') or q.get('label') or '').split(': ', 1)[-1]
-        claims.append({'id': key, 'text': text, 'origin': q.get('claimOrigin', 'explicit'),
+        mapped = next((c for c in (graph or {}).get('claims', []) if c['id'] == q.get('claimId', key.removesuffix('_response'))), None)
+        if mapped and (mapped['text'] != text or mapped['origin'] != q.get('claimOrigin', 'explicit')):
+            raise ValueError('The opening map no longer matches the frozen claim wording or origin. Review its relationship to the rating questionnaire.')
+        claims.append({'claim_id':q.get('claimId', key.removesuffix('_response')), 'id': key, 'text': text, 'origin': q.get('claimOrigin', 'explicit'),
                        'inference_question': q.get('inferenceQuestion'), 'options': q['options'],
                        'positions': distribution(current_records, 'position', q['options']),
                        'confidence': distribution(current_records, 'confidence', confidence_options),
@@ -82,8 +85,11 @@ def build_final_account(form, rounds, responses):
                        'round_two_positions': distribution(old_records, 'position', q['options']),
                        'changes': sum(r['position_changed'] is True for r in current_records),
                        'matched': sum(r['before'] is not None for r in current_records)})
+    if not claims:
+        raise ValueError('No fixed claims are present in the final questionnaire.')
     if not by_round[final.id]:
         raise ValueError('No Round 3 responses have been recorded yet.')
+    unrated = [c for c in (graph or {}).get('claims', []) if not any(c['id']==r['claim_id'] and c['text']==r['text'] for r in claims)]
     lines = [f'# {form.title}', '## Round 4 · Final synthesis',
              'This account preserves the frozen claim wording and recorded expert judgments. Disagreement is a valid outcome. Confidence is separate from agreement.',
              f'{len(by_round[baseline.id])} submissions in Round 2; {len(by_round[final.id])} in Round 3. Missing ratings are not agreement or disagreement.']
@@ -97,6 +103,8 @@ def build_final_account(form, rounds, responses):
         for r in c['final_responses']:
             if r['justification']:
                 lines += [f"{r['expert']} — {r['position']}; confidence: {r['confidence'] or 'not recorded'}", r['justification']]
+    if unrated:
+        lines += ['## Opening claims not reviewed by the panel', *[c['text'] + ' — not rated; no final position can be inferred.' for c in unrated]]
     if graph:
         lines += ['## Reasoning connections · interpretation']
         claim_text = {c['id']: c['text'] for c in graph.get('claims', [])}
@@ -105,7 +113,7 @@ def build_final_account(form, rounds, responses):
     else:
         lines += ['No source-linked opening reasoning graph was saved. No graph has been invented for this account.']
     return {'revision': revision, 'form_id': form.id, 'title': form.title, 'stage': 4,
-            'method': 'recorded_data_organizer', 'claims': claims, 'reasoning_graph': graph,
+            'method': 'recorded_data_organizer', 'unrated_claims':unrated, 'claims': claims, 'reasoning_graph': graph,
             'round_two_count': len(by_round[baseline.id]), 'round_three_count': len(by_round[final.id]),
             'rounds':[{'round_number':r.round_number,'questions':r.questions,'responses':[{'response_id':s.id,'expert':labels[s.user_id],'answers':s.answers,'version':s.version} for s in by_round[r.id]]} for r in rounds],
             'markdown': '\n\n'.join(lines)}

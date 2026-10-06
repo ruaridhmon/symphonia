@@ -46,8 +46,9 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
     const addTrigger = R.useRef<HTMLButtonElement>(null);
     const dialog = R.useRef<HTMLDialogElement>(null);
     const titleId = R.useId();
+    const invoker = R.useRef<HTMLElement|null>(null);
     const options = R.useRef<HTMLDetailsElement>(null);
-    const openPanel = (next:'invite'|'questions') => {if(options.current)options.current.open=false;setCopyState('');setPanel(next);};
+    const openPanel = (next:'invite'|'questions') => {invoker.current=options.current?.contains(document.activeElement)?options.current.querySelector('summary') || null:document.activeElement as HTMLElement;if(options.current)options.current.open=false;setCopyState('');setPanel(next);};
     const ordered = [...p.rounds].sort((a, b) => a.round_number - b.round_number);
     const round = ordered.find(r => r.id === p.selectedRoundId) || ordered.find(r => r.is_active) || ordered[0];
     const responseGroup = p.responses?.find(r => r.id === round?.id);
@@ -61,6 +62,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
       if (!panel && dialog.current?.open) dialog.current.close();
     }, [panel]);
+    R.useEffect(()=>{const dismiss=(e:PointerEvent)=>{if(options.current?.open&&!options.current.contains(e.target as Node))options.current.open=false;};document.addEventListener('pointerdown',dismiss);return()=>document.removeEventListener('pointerdown',dismiss);},[]);
     R.useEffect(() => { setPanel(null); setCopyState(''); setAdding(null); setSaved('');setFinalView(false);setCompleted(false); }, [p.form.id]);
     const canLeave = () => !document.querySelector('.response-workspace textarea') || window.confirm('Discard unsaved response edits?');
     const button = (text: string, onClick: () => void, props: Record<string, unknown> = {}) => h('button', { type: 'button', onClick, ...props }, (props.children as React.ReactNode) ?? text);
@@ -84,11 +86,11 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
         ordered.some(r=>r.round_number===3)&&FinalSynthesis?button('Final synthesis',()=>{if(canLeave()){p.onView('synthesis');setFinalView(true);}}, {'aria-pressed':finalView,className:'cw-final-tab',title:'Round 4 · final synthesis'}):null,
         count!==undefined&&!finalView?h('span',null,`${count} response${count===1?'':'s'}`):null,
         !finalView && !p.isDemo && ManualResponse && p.onResponseAdded ? button('+ Add response',()=>{if(round?.is_active&&!completed&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response',disabled:!round?.is_active||completed,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response'}) : null,
-        button('View questions', () => setPanel('questions'), { className: 'cw-text-button', disabled: !round }))),
+        button('View questions', () => openPanel('questions'), { className: 'cw-text-button', disabled: !round }))),
       finalView && FinalSynthesis ? h(FinalSynthesis,{formId:p.form.id,onComplete:()=>setCompleted(true)}) : null,
       saved ? h('p',{className:'cw-response-saved',role:'status'},saved) : null,
       adding && ManualResponse ? h(ManualResponse,{form:p.form,round:adding,onClose:()=>{setAdding(null);requestAnimationFrame(()=>addTrigger.current?.focus());},onSaved:async()=>{await p.onResponseAdded?.();setSaved('Response saved');}}) : null,
-      h('dialog', { ref: dialog, className: 'cw-dialog', 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => setPanel(null), onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
+      h('dialog', { ref: dialog, className: 'cw-dialog', 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => {setPanel(null);requestAnimationFrame(()=>invoker.current?.focus());}, onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
         h('div', { className: 'cw-dialog-body' },
           h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Invite people' : `Round ${round?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
           panel === 'invite' ? h(R.Fragment, null,
