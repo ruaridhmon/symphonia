@@ -285,6 +285,19 @@ function renameConsultation(id, title, trigger) {
   return dialog;
 }
 
+// src/utils/focusClaim.ts
+function focusClaim(target) {
+  if (!target) return;
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView?.({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+  target.focus({ preventScroll: true });
+  const row = target.closest(".rf-claim-row,.di-claim") || target;
+  row.classList.remove("claim-reference-highlight");
+  void row.offsetWidth;
+  row.classList.add("claim-reference-highlight");
+  row.addEventListener("animationend", () => row.classList.remove("claim-reference-highlight"), { once: true });
+}
+
 // src/utils/reasoningFlow.ts
 var el = (tag, text = "", cls = "") => {
   const e = document.createElement(tag);
@@ -419,10 +432,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
           const relation = { supports: "Supported by", qualifies: "Qualified by", challenges: "Challenged by", motivates: "Motivated by" }[edge.relation];
           link.textContent = `${relation} ${labels.get(source.id)}`;
           link.setAttribute("aria-label", `${n.text}: ${relation.toLowerCase()} claim ${labels.get(source.id)}. ${source.text}`);
-          link.onclick = () => {
-            select(source);
-            diagram.querySelector(`[data-rf-node="${source.id}"]`)?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
-          };
+          link.onclick = () => focusClaim([...diagram.querySelectorAll("[data-rf-node]")].find((b2) => b2.dataset.rfNode === source.id) || null);
           links.append(link);
         }
         row.append(links);
