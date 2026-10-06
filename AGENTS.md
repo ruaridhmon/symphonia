@@ -295,3 +295,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Quiet supporting access: opening claims themselves open source popups, without repeated Supporting information/count text. Review claims use a small labelled document icon beneath the claim, only when supporting text exists. Inferred labels remain visible. Summary v28, consultation v14, final v9, results workflow-14, CSS v25.
 
 - Quiet top navigation: Study stage combines round selection and final synthesis, question preview remains in consultation options, contribution cards become a labelled native source selector. Summary generation moves into Summary actions once claims exist. Existing handlers/data retained. Summary v29, consultation v15, final v10, results workflow-15, CSS v26.
+
+- Header live check: remove any direct generation action created while results were loading once claims arrive. Results workflow-16.

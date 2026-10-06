@@ -27,6 +27,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
  if(nav&&!nav.hidden){
   toolbar.classList.add('summary-actions-panel');
   const generation=toolbar.querySelector<HTMLDetailsElement>('details.summary-disclosure');
+  if(progress?.querySelector('.di-claim,.rf-workspace'))nav.querySelector('.summary-generate-empty')?.remove();
   if(generation&&!progress?.querySelector('.di-claim,.rf-workspace')&&!nav.querySelector('.summary-generate-empty')){
    const generate=document.createElement('button');generate.type='button';generate.className='summary-generate-empty';generate.textContent='Generate summary';
    const sync=()=>generate.setAttribute('aria-expanded',String(generation.open));
