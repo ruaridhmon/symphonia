@@ -265,3 +265,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Compact response visual check: remove inherited 22px answer-grid gaps; desktop reasoning triggers share the claim row. Workspace CSS v11.
 
 - **2026-10-06 consultation organization:** Title-only PATCH /forms/{id}/title checks ownership and expected title without touching ballots/questions/access. Sidebar and workspace offer Rename and account/browser-scoped Pin/Unpin; pinned rows precede other consultations. Event bridge updates current title/sidebar without route reload. Review summaries use compact rows and horizontal counts with unchanged full audit/confidence dialogs. Mirror Summary v19, consultation v9, workspace CSS v12/results workflow-7; minimal navigation v12.
+
+- Review-summary live check: override the shell-specific legacy row padding and remove score-bottom spacing. Workspace CSS v13.
