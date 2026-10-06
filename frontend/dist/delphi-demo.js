@@ -2838,17 +2838,22 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     heading.append(rating);
     article.append(heading);
     const bar = node("div", "", "di-bar");
-    bar.setAttribute("aria-hidden", "true");
+    bar.setAttribute("role", "group");
+    bar.setAttribute("aria-label", "Expert positions and confidence");
     row.votes.slice(0, 5).forEach((n, i) => {
       if (n && row.answered) {
         for (const expert of row.evidence.filter((e) => e.group === i)) {
-          const part = node("span");
+          const part = button("", () => {
+          });
+          part.disabled = true;
+          part.dataset.stance = String(i);
           const level = confidenceLabels.indexOf(expert.confidence);
           part.style.width = `${100 / row.answered}%`;
           part.style.height = `${level < 0 ? 2 : 2 + level * 2}px`;
           part.style.background = colors[i];
           part.dataset.confidence = level < 0 ? "missing" : String(level);
           part.title = `${expert.participant}: ${expert.position}; confidence: ${expert.confidence || "not recorded"}`;
+          part.setAttribute("aria-label", part.title);
           bar.append(part);
         }
       }
@@ -2878,6 +2883,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           const body = document.createElement("dialog");
           body.className = "di-confidence-detail";
           body.setAttribute("aria-label", `Confidence among people who ${stanceLabels[i].toLowerCase()}`);
+          let anchorControl = trigger2;
           const position = () => {
             if (!body.open) return;
             const viewport = window.visualViewport;
@@ -2885,7 +2891,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
             const rightEdge = leftEdge + (viewport?.width || window.innerWidth) - 24, bottomEdge = topEdge + (viewport?.height || window.innerHeight) - 24;
             body.style.maxWidth = `${rightEdge - leftEdge}px`;
             body.style.maxHeight = `${bottomEdge - topEdge}px`;
-            const anchor = trigger2.getBoundingClientRect(), box = body.getBoundingClientRect();
+            const anchor = anchorControl.getBoundingClientRect(), box = body.getBoundingClientRect();
             const below = bottomEdge - anchor.bottom - 8, above = anchor.top - topEdge - 8;
             const top = below >= box.height || below >= above ? anchor.bottom + 8 : anchor.top - box.height - 8;
             body.style.left = `${Math.max(leftEdge, Math.min(anchor.left, rightEdge - box.width))}px`;
@@ -2894,7 +2900,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           const dismiss2 = () => {
             body.close();
             disclosure.open = false;
-            trigger2.focus();
+            anchorControl.focus();
           };
           trigger2.onclick = (e) => {
             e.preventDefault();
@@ -2906,6 +2912,14 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
             window.addEventListener("scroll", position, true);
             window.visualViewport?.addEventListener("resize", position);
           };
+          for (const part of bar.querySelectorAll(`button[data-stance="${i}"]`)) {
+            part.disabled = false;
+            part.setAttribute("aria-haspopup", "dialog");
+            part.onclick = () => {
+              anchorControl = part;
+              trigger2.click();
+            };
+          }
           body.onclose = () => {
             disclosure.open = false;
             window.removeEventListener("resize", position);

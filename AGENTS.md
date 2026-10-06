@@ -285,3 +285,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Confidence-line refinement: supporting information uses its own line beneath each claim, with no reserved claim-column width; per-expert line segments have softened ends. Seed switches active round explicitly before editing round notes. Workspace CSS v20.
 
 - Live compactness check: supporting control belongs inside claim-copy below its text/connections, avoiding an empty full-row gap. Inferred marker stays in the claim column. Summary v25, results workflow-11, workspace CSS v21. Sole replacement example form 36 has 3 rounds/9 authored submissions and a saved final snapshot; R3 remains active.
+
+- **2026-10-06 quiet confidence line:** Removed repeated position counts and confidence-label legend from visible review rows. Native line-segment buttons open the unchanged stance confidence distribution, anchored to the clicked segment with keyboard access/focus return. Single coloured variable-thickness line retained; no second competing encoding. Summary v26, results workflow-12, workspace CSS v22.

@@ -834,13 +834,13 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .di-supporting-dialog:not([open]) {display:none!important;}
 
 #root .product-summary .delphi-insights[data-review=true] .di-bar {height:10px;display:flex;align-items:center;overflow:visible;background:transparent;border-radius:0;gap:0;}
-#root .product-summary .delphi-insights[data-review=true] .di-bar>span {flex-shrink:0;display:block;border-radius:0;}
-#root .product-summary .delphi-insights[data-review=true] .di-bar>span[data-confidence=missing] {background:none!important;border-top:2px dashed var(--muted-foreground);}
+#root .product-summary .delphi-insights[data-review=true] .di-bar>button {flex-shrink:0;display:block;border-radius:0;}
+#root .product-summary .delphi-insights[data-review=true] .di-bar>button[data-confidence=missing] {background:none!important;border-top:2px dashed var(--muted-foreground);}
 
 /* Give claim text the full column; supporting information sits beneath it. */
 #root .product-summary .delphi-insights[data-review=true] .di-claim-copy {padding-right:0;}
 #root .product-summary .delphi-insights[data-review=true] .di-reasons:not([open]) {grid-column:1;grid-row:2;justify-self:start;align-self:start;margin:0 0 0 34px;}
-#root .product-summary .delphi-insights[data-review=true] .di-bar>span {border-radius:2px;}
+#root .product-summary .delphi-insights[data-review=true] .di-bar>button {border-radius:2px;}
 #root .rf-list-node {display:grid;grid-template-columns:24px minmax(0,1fr);gap:3px 14px;}
 #root .rf-list-node strong {grid-column:2;}
 #root .rf-list-supporting,#root .rf-list-origin {grid-column:2;margin:0;text-align:left;}
@@ -849,3 +849,11 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .product-summary .delphi-insights[data-review=true] .di-claim-copy>.di-reasons:not([open]) {grid-column:2;grid-row:auto;margin:0;}
 #root .product-summary .delphi-insights[data-review=true] .di-claim-copy>.di-inferred-origin {grid-column:2;grid-row:auto;color:#b0474e;margin:0;}
 @media(max-width:600px){#root .product-summary .delphi-insights[data-review=true] .di-claim-copy>.di-reasons:not([open]),#root .product-summary .delphi-insights[data-review=true] .di-claim-copy>.di-inferred-origin{margin-top:5px;}}
+
+/* The line carries the overview; exact confidence opens from its segments. */
+#root .product-summary .delphi-insights[data-review=true] .di-legend,#root .product-summary .delphi-insights[data-review=true] .di-stance-group,#root .product-summary .delphi-insights[data-review=true] .di-confidence[open] {display:contents;}
+#root .product-summary .delphi-insights[data-review=true] .di-stance-group>span,#root .product-summary .delphi-insights[data-review=true] .di-confidence>summary,#root .product-summary .delphi-insights[data-review=true] .di-confidence:not([open]) {display:none;}
+#root .product-summary .delphi-insights[data-review=true] .di-bar>button {position:relative;margin:0;padding:0;border:0;min-width:0;min-height:0;font-size:0;line-height:0;box-shadow:none;cursor:pointer;}
+#root .product-summary .delphi-insights[data-review=true] .di-bar>button:disabled {opacity:1;cursor:default;}
+#root .product-summary .delphi-insights[data-review=true] .di-bar>button::after {content:'';position:absolute;inset:-18px 0;}
+#root .product-summary .delphi-insights[data-review=true] .di-bar>button:focus-visible {outline:2px solid var(--foreground);outline-offset:4px;}
