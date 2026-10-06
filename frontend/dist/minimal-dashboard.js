@@ -238,7 +238,7 @@ function toggleConsultationPin(id) {
   return next.includes(id);
 }
 async function client() {
-  if (document.querySelector('script[src*="index-HJquNmhn.js"]')) {
+  if (document.querySelector('script[src*="index-HJquNmhn.js"],script[src*="index-workspace-v1.js"]')) {
     const path = "/assets/index-HJquNmhn.js";
     return (await import(
       /* @vite-ignore */
@@ -485,7 +485,7 @@ function panelIcon() {
   return svg;
 }
 async function navigationClient() {
-  if (document.querySelector('script[src*="index-HJquNmhn.js"]')) {
+  if (document.querySelector('script[src*="index-HJquNmhn.js"],script[src*="index-workspace-v1.js"]')) {
     const deployed = "/assets/index-HJquNmhn.js";
     const module = await import(
       /* @vite-ignore */
