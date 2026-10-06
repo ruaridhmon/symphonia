@@ -99,6 +99,6 @@ it('opens the final stage without creating a fourth expert round',()=>{
 it('keeps the shared map accessible from a later round',()=>{
  const p=props();p.rounds[0].synthesis='saved';p.rounds[0].synthesis_json={narrative:'saved',reasoning_graph:{version:1,flows:[],response_count:1,mapped_response_count:0,rejected_flow_count:0,status:'provided_interpretation',claims:[{id:'claim_a',text:'An inferred bridge',origin:'inferred',sources:[],question:'Does this follow?'}],claim_edges:[]}} as any;
  render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Claim map'}));
- expect(screen.getByRole('option',{name:'Shared claims'})).toBeInTheDocument();expect(screen.getByText('Inferred assumption',{exact:true})).toBeInTheDocument();
+ expect(screen.getByRole('option',{name:'Shared claims'})).toBeInTheDocument();expect(screen.getByText('Inferred assumption · unconfirmed',{exact:true})).toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Responses'}));expect(screen.queryByRole('combobox',{name:'Claim sources'})).not.toBeInTheDocument();
 });

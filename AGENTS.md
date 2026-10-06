@@ -297,3 +297,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Quiet top navigation: Study stage combines round selection and final synthesis, question preview remains in consultation options, contribution cards become a labelled native source selector. Summary generation moves into Summary actions once claims exist. Existing handlers/data retained. Summary v29, consultation v15, final v10, results workflow-15, CSS v26.
 
 - Header live check: remove any direct generation action created while results were loading once claims arrive. Results workflow-16.
+
+- Opening/review style parity: Round 1 uses plain numbers, matching 14px claim typography and 10px row spacing; no boxed selected state or inference side rails. Same supporting icon below the claim, visible inferred/unconfirmed label and upstream links retained. Summary v30, consultation v16, final v11, results workflow-17, CSS v27.

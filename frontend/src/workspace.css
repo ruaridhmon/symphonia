@@ -903,3 +903,17 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .rf-source-picker {font:inherit;font-size:12px;max-width:100%;padding:7px 28px 7px 0;border:0;background-color:transparent;color:var(--muted-foreground);cursor:pointer;}
 #root .rf-source-picker:focus-visible {outline:2px solid var(--foreground);outline-offset:3px;}
 @media(max-width:640px){#root .cw-views {gap:17px;}#root .cw-views .cw-context {width:auto;margin:0 0 0 auto;}#root .cw-views>button {font-size:12px;}#root .cw-round-display {font-size:11px;}}
+
+/* Opening and review rounds share the same compact reading rows. */
+#root .rf-canvas {padding:0;overflow:visible;}
+#root .rf-claim-list {border-top:0;}
+#root .rf-claim-row {padding:10px 0;border-bottom:1px solid var(--border);}
+#root .rf-list-node {grid-template-columns:22px minmax(0,1fr);gap:4px 10px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;}
+#root .rf-list-node:hover,#root .rf-list-node[aria-pressed=true] {background:none;box-shadow:none;}
+#root .rf-list-node strong {font-size:14px;line-height:1.55;font-weight:550;color:var(--foreground);}
+#root .rf-list-node .rf-number {display:block;min-width:0;height:auto;border:0;border-radius:0;background:none;font-size:11px;line-height:23px;font-weight:400;color:var(--muted-foreground);text-align:left;}
+#root .rf-inferred-row {border-left:0;padding-left:0;}
+#root .rf-list-origin {font-size:10px;font-weight:400;}
+#root .rf-dependencies {margin:3px 0 0 32px;gap:6px 12px;}
+#root .rf-source-trigger {margin:2px 0 0 32px;}
+#root .rf-list-node:focus-visible {outline:2px solid var(--foreground);outline-offset:4px;border-radius:3px;}
