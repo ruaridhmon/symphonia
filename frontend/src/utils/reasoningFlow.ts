@@ -11,7 +11,7 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
  if(graph.rejected_flow_count)section.append(el('p',`${graph.rejected_flow_count} source maps could not be validated.`, 'rf-coverage'));
  if(!flows.length){section.append(el('p','No source-linked reasoning maps were saved for this draft. Open Claims & full summary to review the claim list.'));root.append(section);return;}
  const nav=el('nav','','rf-tabs');nav.setAttribute('aria-label','Expert reasoning flows');section.append(nav);
- const canvas=el('div','','rf-canvas');const detail=el('section','','rf-detail');detail.setAttribute('aria-live','polite');section.append(canvas,detail);
+ const canvas=el('div','','rf-canvas');const detail=document.createElement('dialog');detail.className='rf-detail di-supporting-dialog';detail.setAttribute('aria-label','Supporting information');detail.setAttribute('aria-live','polite');section.append(canvas,detail);
  const show=(index:number)=>{
   const flow=flows[index];root.dataset.reasoningFlow=flow.id;canvas.replaceChildren();detail.replaceChildren();
   nav.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
@@ -20,12 +20,14 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
   const labels=new Map(flow.nodes.map((n,i)=>[n.id,flow.response_number?`${flow.response_number}.${i+1}`:String(i+1).padStart(2,'0')]));
   const select=(n:ReasoningNode,open=true)=>{
    root.dataset.reasoningNode=n.id;diagram.querySelectorAll<HTMLButtonElement>('[data-rf-node]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rfNode===n.id)));detail.replaceChildren();detail.classList.toggle('rf-inferred-detail',n.kind==='assumption');detail.hidden=!open;
-   const top=el('div','','rf-detail-heading');top.append(el('h4',`Claim ${labels.get(n.id)}`));const close=document.createElement('button');close.type='button';close.textContent='Close';close.onclick=()=>{detail.hidden=true;diagram.querySelector<HTMLButtonElement>(`[data-rf-node="${n.id}"]`)?.focus();};top.append(close);detail.append(top);
+   const top=el('div','','rf-detail-heading');top.append(el('h4',`Supporting information · Claim ${labels.get(n.id)}`));const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close supporting information');close.onclick=()=>{detail.close();detail.hidden=true;diagram.querySelector<HTMLButtonElement>(`[data-rf-node="${n.id}"]`)?.focus();};top.append(close);detail.append(top);
    if(n.kind==='assumption')detail.append(el('p',n.text),el('blockquote',n.question||'Ask the expert to clarify this connection.'),el('p','Inferred · unconfirmed','rf-small'));
    else if(n.sources){for(const source of n.sources){const block=el('section');block.append(el('h4',`Response ${source.response_number}`),el('blockquote',source.quote));const context=document.createElement('details');context.append(el('summary','Full response'),el('p',source.source_text));if(source.source_answers){const raw=el('pre',JSON.stringify(source.source_answers,null,2),'rf-original-answer');context.append(raw);}block.append(context);detail.append(block);}}
    else{detail.append(el('blockquote',n.quote||''));if(n.condition)detail.append(el('p','Qualification: '+n.condition,'rf-qualification'));if(n.source_text&&n.source_text!==n.quote){const context=document.createElement('details');context.append(el('summary','Read the source in context'),el('p',n.source_text));detail.append(context);}}
+   detail.oncancel=e=>{e.preventDefault();close.click();};detail.onclick=e=>{if(e.target===detail){const r=detail.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close.click();}};
    const links=flow.edges.filter(e=>e.from===n.id||e.to===n.id);
    if(links.length){const list=el('div','','rf-connections');for(const edge of links){const other=flow.nodes.find(t=>t.id===(edge.from===n.id?edge.to:edge.from));if(!other)continue;const b=document.createElement('button');b.type='button';b.textContent=`${labels.get(edge.from)} ${edge.relation} ${labels.get(edge.to)} · ${other.text}`;b.onclick=()=>select(other);list.append(b);}detail.append(list);}
+   if(open&&!detail.open)detail.showModal();
   };
   // Stable logical order: every dependency appears before the claim it informs.
   const ordered:ReasoningNode[]=[];const pending=[...flow.nodes];
@@ -37,7 +39,8 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
    const b=document.createElement('button');b.type='button';b.className='rf-node rf-list-node';b.dataset.rfNode=n.id;b.setAttribute('aria-pressed','false');
    b.append(el('span',labels.get(n.id)!,'rf-number'),el('strong',n.text));
    if(n.kind==='assumption'){row.classList.add('rf-inferred-row');b.append(el('span','Inferred assumption','rf-list-origin'));}
-   b.onclick=()=>select(n);row.append(b);
+   const sourceCount=n.sources?.filter(s=>s.quote.trim()).length || (n.quote?.trim()?1:0);if(sourceCount)b.append(el('span',`Supporting information · ${sourceCount}`,'rf-list-supporting'));
+   b.setAttribute('aria-haspopup','dialog');b.onclick=()=>select(n);row.append(b);
    const incoming=flow.edges.filter(e=>e.to===n.id);
    if(incoming.length){const links=el('div','','rf-dependencies');
     for(const edge of incoming){const source=flow.nodes.find(t=>t.id===edge.from);if(!source)continue;

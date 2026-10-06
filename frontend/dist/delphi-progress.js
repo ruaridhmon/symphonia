@@ -178,7 +178,9 @@ function renderReasoningFlow(root, graph, selectedNode) {
   nav.setAttribute("aria-label", "Expert reasoning flows");
   section.append(nav);
   const canvas = el("div", "", "rf-canvas");
-  const detail = el("section", "", "rf-detail");
+  const detail = document.createElement("dialog");
+  detail.className = "rf-detail di-supporting-dialog";
+  detail.setAttribute("aria-label", "Supporting information");
   detail.setAttribute("aria-live", "polite");
   section.append(canvas, detail);
   const show = (index) => {
@@ -202,11 +204,13 @@ function renderReasoningFlow(root, graph, selectedNode) {
       detail.classList.toggle("rf-inferred-detail", n.kind === "assumption");
       detail.hidden = !open;
       const top = el("div", "", "rf-detail-heading");
-      top.append(el("h4", `Claim ${labels.get(n.id)}`));
+      top.append(el("h4", `Supporting information \xB7 Claim ${labels.get(n.id)}`));
       const close = document.createElement("button");
       close.type = "button";
-      close.textContent = "Close";
+      close.textContent = "\xD7";
+      close.setAttribute("aria-label", "Close supporting information");
       close.onclick = () => {
+        detail.close();
         detail.hidden = true;
         diagram.querySelector(`[data-rf-node="${n.id}"]`)?.focus();
       };
@@ -235,6 +239,16 @@ function renderReasoningFlow(root, graph, selectedNode) {
           detail.append(context);
         }
       }
+      detail.oncancel = (e) => {
+        e.preventDefault();
+        close.click();
+      };
+      detail.onclick = (e) => {
+        if (e.target === detail) {
+          const r = detail.getBoundingClientRect();
+          if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) close.click();
+        }
+      };
       const links = flow.edges.filter((e) => e.from === n.id || e.to === n.id);
       if (links.length) {
         const list = el("div", "", "rf-connections");
@@ -249,6 +263,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
         }
         detail.append(list);
       }
+      if (open && !detail.open) detail.showModal();
     };
     const ordered = [];
     const pending2 = [...flow.nodes];
@@ -276,6 +291,9 @@ function renderReasoningFlow(root, graph, selectedNode) {
         row.classList.add("rf-inferred-row");
         b.append(el("span", "Inferred assumption", "rf-list-origin"));
       }
+      const sourceCount = n.sources?.filter((s) => s.quote.trim()).length || (n.quote?.trim() ? 1 : 0);
+      if (sourceCount) b.append(el("span", `Supporting information \xB7 ${sourceCount}`, "rf-list-supporting"));
+      b.setAttribute("aria-haspopup", "dialog");
       b.onclick = () => select(n);
       row.append(b);
       const incoming = flow.edges.filter((e) => e.to === n.id);
@@ -495,9 +513,9 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           const disclosure = node("details", "", "di-confidence");
           disclosure.dataset.key = `${row.key}:confidence:${i}`;
           disclosure.open = false;
-          const trigger = node("summary", label + (values.length && values.length < n ? ` (${values.length}/${n})` : ""));
-          trigger.setAttribute("aria-label", `${stanceLabels[i]}: ${trigger.textContent}. Show confidence responses`);
-          disclosure.append(trigger);
+          const trigger2 = node("summary", label + (values.length && values.length < n ? ` (${values.length}/${n})` : ""));
+          trigger2.setAttribute("aria-label", `${stanceLabels[i]}: ${trigger2.textContent}. Show confidence responses`);
+          disclosure.append(trigger2);
           const body = document.createElement("dialog");
           body.className = "di-confidence-detail";
           body.setAttribute("aria-label", `Confidence among people who ${stanceLabels[i].toLowerCase()}`);
@@ -508,18 +526,18 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
             const rightEdge = leftEdge + (viewport?.width || window.innerWidth) - 24, bottomEdge = topEdge + (viewport?.height || window.innerHeight) - 24;
             body.style.maxWidth = `${rightEdge - leftEdge}px`;
             body.style.maxHeight = `${bottomEdge - topEdge}px`;
-            const anchor = trigger.getBoundingClientRect(), box = body.getBoundingClientRect();
+            const anchor = trigger2.getBoundingClientRect(), box = body.getBoundingClientRect();
             const below = bottomEdge - anchor.bottom - 8, above = anchor.top - topEdge - 8;
             const top = below >= box.height || below >= above ? anchor.bottom + 8 : anchor.top - box.height - 8;
             body.style.left = `${Math.max(leftEdge, Math.min(anchor.left, rightEdge - box.width))}px`;
             body.style.top = `${Math.max(topEdge, Math.min(top, bottomEdge - box.height))}px`;
           };
-          const dismiss = () => {
+          const dismiss2 = () => {
             body.close();
             disclosure.open = false;
-            trigger.focus();
+            trigger2.focus();
           };
-          trigger.onclick = (e) => {
+          trigger2.onclick = (e) => {
             e.preventDefault();
             root.querySelectorAll(".di-confidence dialog[open]").forEach((d) => d.close());
             disclosure.open = true;
@@ -537,20 +555,20 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           };
           body.oncancel = (e) => {
             e.preventDefault();
-            dismiss();
+            dismiss2();
           };
           body.onclick = (e) => {
             if (e.target === body) {
               const r = body.getBoundingClientRect();
-              if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dismiss();
+              if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dismiss2();
             }
           };
-          const header = node("div", "", "di-confidence-header");
-          const close = button("\xD7", dismiss);
-          close.className = "di-confidence-close";
-          close.setAttribute("aria-label", "Close confidence");
-          header.append(node("strong", `Confidence \xB7 ${stanceLabels[i].toLowerCase()}`), close);
-          body.append(header, node("p", `${values.length} of ${n} answered`, "di-confidence-subtitle"));
+          const header2 = node("div", "", "di-confidence-header");
+          const close2 = button("\xD7", dismiss2);
+          close2.className = "di-confidence-close";
+          close2.setAttribute("aria-label", "Close confidence");
+          header2.append(node("strong", `Confidence \xB7 ${stanceLabels[i].toLowerCase()}`), close2);
+          body.append(header2, node("p", `${values.length} of ${n} answered`, "di-confidence-subtitle"));
           const distribution = node("div", "", "di-confidence-distribution");
           confidenceLabels.forEach((label2, j) => {
             const total = values.filter((v) => v === j).length;
@@ -587,13 +605,37 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       rating.append(trend);
     }
     if (row.origin === "inferred") article.prepend(node("p", "Inferred \xB7 unconfirmed. Not directly stated by an expert.", "di-inferred-origin"));
-    const detail = document.createElement("details");
-    detail.className = "di-reasons";
-    detail.dataset.key = row.key;
-    detail.open = priorOpen.has(row.key);
-    const summary = node("summary", "Details");
-    summary.setAttribute("aria-label", "Distribution, responses and changes");
-    detail.append(summary);
+    const supporting = row.evidence.filter((e) => e.comment.trim());
+    const wrapper = node("div", "", "di-reasons");
+    const trigger = button(`Supporting information \xB7 ${supporting.length}`, () => {
+      detail.showModal();
+    });
+    trigger.className = "di-supporting-trigger";
+    trigger.setAttribute("aria-haspopup", "dialog");
+    trigger.title = supporting.length ? `${supporting.length} responses include supporting information` : "No supporting information provided";
+    wrapper.append(trigger);
+    const detail = document.createElement("dialog");
+    detail.className = "di-supporting-dialog";
+    detail.setAttribute("aria-label", `Supporting information: ${row.label.replace(/^Claim\s+\d+:\s*/i, "")}`);
+    const dismiss = () => {
+      detail.close();
+      trigger.focus();
+    };
+    const close = button("\xD7", dismiss);
+    close.setAttribute("aria-label", "Close supporting information");
+    const header = node("div", "", "di-supporting-heading");
+    header.append(node("h3", "Supporting information"), close);
+    detail.append(header, node("p", row.label.replace(/^Claim\s+\d+:\s*/i, ""), "di-supporting-claim"));
+    detail.oncancel = (e) => {
+      e.preventDefault();
+      dismiss();
+    };
+    detail.onclick = (e) => {
+      if (e.target === detail) {
+        const r = detail.getBoundingClientRect();
+        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dismiss();
+      }
+    };
     detail.append(node("p", row.options.map((option) => `${row.evidence.filter((e) => e.position === option).length} ${option.toLowerCase()}`).join(" \xB7 "), "di-exact-distribution"));
     if (row.inferenceQuestion) detail.append(node("p", String(row.inferenceQuestion)));
     if (row.hasConfidence) detail.append(node("p", "Confidence: " + confidenceLabels.map((level) => `${row.evidence.filter((e) => e.confidence === level).length} ${level.toLowerCase()}`).join(" \xB7 ") + ` \xB7 ${row.evidence.filter((e) => !e.confidence).length} not recorded.`));
@@ -604,8 +646,8 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       article.prepend(node("p", `Related proposal \xB7 introduced in Round ${question.introducedRound || round.round_number}`, "di-eyebrow"));
       detail.append(node("p", `Original claim: ${question.parentClaimText || question.parentClaimId}`), node("p", `Reason for this proposal: ${question.claimRationale || "Not recorded"}`));
     }
-    const evidence = row.evidence;
-    if (!evidence.length) detail.append(node("p", "No separate comments were recorded for this claim. Original responses remain available in the Responses view."));
+    const evidence = supporting;
+    if (!evidence.length) detail.append(node("p", "No supporting information was provided for this claim. Original responses remain available in Responses."));
     [0, 1, 2, 3, 4, 5].forEach((group) => {
       const subset = evidence.filter((e) => e.group === group);
       if (!subset.length) return;
@@ -621,7 +663,8 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       });
       detail.append(section);
     });
-    article.append(detail);
+    wrapper.append(detail);
+    article.append(wrapper);
     list.append(article);
   });
   root.append(list);

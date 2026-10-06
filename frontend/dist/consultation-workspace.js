@@ -314,7 +314,9 @@ function renderReasoningFlow(root, graph, selectedNode) {
   nav.setAttribute("aria-label", "Expert reasoning flows");
   section.append(nav);
   const canvas = el("div", "", "rf-canvas");
-  const detail = el("section", "", "rf-detail");
+  const detail = document.createElement("dialog");
+  detail.className = "rf-detail di-supporting-dialog";
+  detail.setAttribute("aria-label", "Supporting information");
   detail.setAttribute("aria-live", "polite");
   section.append(canvas, detail);
   const show = (index) => {
@@ -338,11 +340,13 @@ function renderReasoningFlow(root, graph, selectedNode) {
       detail.classList.toggle("rf-inferred-detail", n.kind === "assumption");
       detail.hidden = !open;
       const top = el("div", "", "rf-detail-heading");
-      top.append(el("h4", `Claim ${labels.get(n.id)}`));
+      top.append(el("h4", `Supporting information \xB7 Claim ${labels.get(n.id)}`));
       const close = document.createElement("button");
       close.type = "button";
-      close.textContent = "Close";
+      close.textContent = "\xD7";
+      close.setAttribute("aria-label", "Close supporting information");
       close.onclick = () => {
+        detail.close();
         detail.hidden = true;
         diagram.querySelector(`[data-rf-node="${n.id}"]`)?.focus();
       };
@@ -371,6 +375,16 @@ function renderReasoningFlow(root, graph, selectedNode) {
           detail.append(context);
         }
       }
+      detail.oncancel = (e) => {
+        e.preventDefault();
+        close.click();
+      };
+      detail.onclick = (e) => {
+        if (e.target === detail) {
+          const r = detail.getBoundingClientRect();
+          if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) close.click();
+        }
+      };
       const links = flow.edges.filter((e) => e.from === n.id || e.to === n.id);
       if (links.length) {
         const list = el("div", "", "rf-connections");
@@ -385,6 +399,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
         }
         detail.append(list);
       }
+      if (open && !detail.open) detail.showModal();
     };
     const ordered = [];
     const pending = [...flow.nodes];
@@ -412,6 +427,9 @@ function renderReasoningFlow(root, graph, selectedNode) {
         row.classList.add("rf-inferred-row");
         b.append(el("span", "Inferred assumption", "rf-list-origin"));
       }
+      const sourceCount = n.sources?.filter((s) => s.quote.trim()).length || (n.quote?.trim() ? 1 : 0);
+      if (sourceCount) b.append(el("span", `Supporting information \xB7 ${sourceCount}`, "rf-list-supporting"));
+      b.setAttribute("aria-haspopup", "dialog");
       b.onclick = () => select(n);
       row.append(b);
       const incoming = flow.edges.filter((e) => e.to === n.id);

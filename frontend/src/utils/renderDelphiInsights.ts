@@ -113,8 +113,14 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
       if(row.delta!==null&&Math.round(row.delta)!==0){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since Round ${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}rating.append(trend);
     }
     if(row.origin==='inferred')article.prepend(node('p','Inferred · unconfirmed. Not directly stated by an expert.','di-inferred-origin'));
-    const detail=document.createElement('details');detail.className='di-reasons';detail.dataset.key=row.key;detail.open=priorOpen.has(row.key);
-    const summary=node('summary','Details');summary.setAttribute('aria-label','Distribution, responses and changes');detail.append(summary);
+    const supporting=row.evidence.filter(e=>e.comment.trim());
+    const wrapper=node('div','','di-reasons');const trigger=button(`Supporting information · ${supporting.length}`,()=>{detail.showModal();});
+    trigger.className='di-supporting-trigger';trigger.setAttribute('aria-haspopup','dialog');trigger.title=supporting.length?`${supporting.length} responses include supporting information`:'No supporting information provided';wrapper.append(trigger);
+    const detail=document.createElement('dialog');detail.className='di-supporting-dialog';detail.setAttribute('aria-label',`Supporting information: ${row.label.replace(/^Claim\s+\d+:\s*/i,'')}`);
+    const dismiss=()=>{detail.close();trigger.focus();};const close=button('×',dismiss);close.setAttribute('aria-label','Close supporting information');
+    const header=node('div','','di-supporting-heading');header.append(node('h3','Supporting information'),close);detail.append(header,node('p',row.label.replace(/^Claim\s+\d+:\s*/i,''),'di-supporting-claim'));
+    detail.oncancel=e=>{e.preventDefault();dismiss();};detail.onclick=e=>{if(e.target===detail){const r=detail.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dismiss();}};
+
     detail.append(node('p',row.options.map(option=>`${row.evidence.filter(e=>e.position===option).length} ${option.toLowerCase()}`).join(' · '),'di-exact-distribution'));
     if(row.inferenceQuestion)detail.append(node('p',String(row.inferenceQuestion)));
     if(row.hasConfidence)detail.append(node('p','Confidence: '+confidenceLabels.map(level=>`${row.evidence.filter(e=>e.confidence===level).length} ${level.toLowerCase()}`).join(' · ')+` · ${row.evidence.filter(e=>!e.confidence).length} not recorded.`));
@@ -122,13 +128,13 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     if(row.matched)detail.append(node('p',`${row.changed} of ${row.matched} returning respondents changed their exact position since Round ${row.previousRound}.`,'di-movement'));
     const question=round.questions.find(q=>typeof q==='object'&&String(q.questionId)===row.key) as Record<string,unknown>|undefined;
     if(question?.parentClaimId) { article.prepend(node('p',`Related proposal · introduced in Round ${question.introducedRound || round.round_number}`,'di-eyebrow'));detail.append(node('p',`Original claim: ${question.parentClaimText || question.parentClaimId}`),node('p',`Reason for this proposal: ${question.claimRationale || 'Not recorded'}`)); }
-    const evidence=row.evidence;
-    if(!evidence.length)detail.append(node('p','No separate comments were recorded for this claim. Original responses remain available in the Responses view.'));
+    const evidence=supporting;
+    if(!evidence.length)detail.append(node('p','No supporting information was provided for this claim. Original responses remain available in Responses.'));
     [0,1,2,3,4,5].forEach(group=>{
       const subset=evidence.filter(e=>e.group===group);if(!subset.length)return;
       const section=node('section');section.append(node('h4',`${stanceLabels[group]} · ${subset.length}`));
       subset.forEach(e=>{const block=node('blockquote');block.append(node('div',`${e.participant} · ${e.position || 'Not answered'}`,'di-attribution'));if(e.before!==null)block.append(node('p',`${e.before} → ${e.position}${e.changed?'':' · Position retained'}`,'di-shift'));if(row.hasConfidence)block.append(node('p',`Confidence: ${e.confidence || 'Not recorded'}${e.beforeConfidence!==null?` · Previously: ${e.beforeConfidence || 'Not recorded'}`:''}`));block.append(node('p',e.comment||'No reason supplied.'));section.append(block);});detail.append(section);
-    });article.append(detail);list.append(article);
+    });wrapper.append(detail);article.append(wrapper);list.append(article);
   });root.append(list);
   const archived=node('details','','di-method');archived.append(node('summary','Earlier claims not rated in this round'));
   const seen=new Set(rows.map(r=>r.key));
