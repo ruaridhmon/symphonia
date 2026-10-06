@@ -99,6 +99,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       h('div', { className: 'cw-context cw-simple-context' },
         h('div',{className:'cw-round-tabs','aria-label':'Rounds'},...ordered.map(r=>button(`Round ${r.round_number}`,()=>{if(canLeave()){setFinalView(false);setMapView(false);p.onRound(r);}},{key:r.id,'aria-pressed':!finalView&&!mapView&&round?.id===r.id,title:r.is_active?'Current round':`View Round ${r.round_number}`}))),
         ordered.some(r=>r.round_number===3)&&FinalSynthesis?button('Final synthesis',()=>{if(canLeave()){p.onView('synthesis');setMapView(false);setFinalView(true);}}, {'aria-pressed':finalView,className:'cw-final-tab',title:'Round 4 · final synthesis'}):null)),
+      p.view==='synthesis'&&!finalView&&!mapView?h('div',{className:'cw-summary-slot'}):null,
       mapView ? h('section',{className:'cw-claim-map','aria-label':'Shared claim map'},graph?h('div',{ref:mapRoot}):h(R.Fragment,null,h('h2',null,'No shared claim map yet'),h('p',null,'Extract the Round 1 contributions to create source-linked explicit claims, inferred assumptions and their connections.'))) : null,
       finalView && FinalSynthesis ? h(FinalSynthesis,{formId:p.form.id,onComplete:()=>setCompleted(true)}) : null,
       saved ? h('p',{className:'cw-response-saved',role:'status'},saved) : null,

@@ -45,3 +45,9 @@ it('retargets controls when a claim-only draft gains a reasoning map',()=>{
  main.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();expect(progress.hidden).toBe(true);
  main.querySelector<HTMLButtonElement>('.summary-switch button')!.click();expect(progress.hidden).toBe(false);
 });
+
+it('puts summary and source controls in the header without replacing handlers',()=>{
+ const main=fixture();const slot=document.createElement('div');slot.className='cw-summary-slot';main.prepend(slot);const progress=main.querySelector('#delphi-recorded-progress')!;progress.innerHTML='<section class="rf-workspace"><nav class="rf-tabs"><select class="rf-source-picker"><option>Shared claims</option></select></nav></section>';
+ const picker=progress.querySelector<HTMLSelectElement>('select')!,changed=vi.fn();picker.onchange=changed;quietSummary(main);quietSummary(main);expect(slot.querySelector('select')).toBe(picker);expect(progress.querySelector('select')).toBeNull();picker.dispatchEvent(new Event('change'));expect(changed).toHaveBeenCalledOnce();
+ slot.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();expect(picker.hidden).toBe(true);slot.querySelector<HTMLButtonElement>('button')!.click();expect(picker.hidden).toBe(false);
+});

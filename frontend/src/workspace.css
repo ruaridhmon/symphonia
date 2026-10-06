@@ -941,3 +941,16 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-number {grid-column:1;grid-row:1;}
 #root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-copy>.di-claim-links,#root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-copy>.di-inferred-origin {grid-column:2;}
 #root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-trigger {display:block!important;width:100%!important;max-width:100%;}
+
+/* The top banner holds navigation, actions and source selection. */
+#root .consultation-workspace {margin-bottom:20px;padding-bottom:10px!important;border-bottom:1px solid var(--border);}
+#root .cw-views {border-bottom:0;}
+#root .cw-summary-slot .summary-switch {margin:0;min-height:36px;gap:16px;align-items:center;flex-wrap:wrap;}
+#root .cw-summary-slot .rf-source-picker {margin-left:auto;padding:6px 24px 6px 0;font-size:12px;width:auto;max-width:45%;}
+#root .rf-tabs:empty {display:none;}
+#root .di-supporting-dialog .di-supporting-heading h3.di-supporting-claim,#root .di-supporting-dialog .rf-detail-heading h4.di-supporting-claim {font-size:15px!important;line-height:1.5!important;margin-bottom:14px!important;}
+#root .di-supporting-dialog .di-supporting-entry {padding:12px 0;}
+#root .di-supporting-dialog .di-supporting-entry:last-child {padding-bottom:0;}
+#root .di-supporting-dialog .di-supporting-kicker {margin-bottom:5px;}
+#root .rf-canvas>.rf-flow-title {display:none;}
+@media(max-width:640px){#root .cw-summary-slot .rf-source-picker {max-width:100%;margin-left:auto;}#root .cw-summary-slot .summary-switch {gap:8px 12px;}#root .di-supporting-dialog {padding:18px;}}
