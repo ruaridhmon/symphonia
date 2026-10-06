@@ -54,6 +54,11 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     article.dataset.openExcerpts=JSON.stringify([...priorOpen].filter(k=>k?.startsWith(`${row.key}:excerpt:`)));
     const heading=node('div','','di-claim-top');
     const left=node('div','','di-claim-copy');const number=node('span',String(rows.indexOf(row)+1).padStart(2,'0'),'di-claim-number');number.setAttribute('aria-label',`Claim ${rows.indexOf(row)+1}`);left.append(number,node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,'')));heading.append(left);
+    const opening=rounds.find(r=>r.round_number===1);const map=opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null;
+    const claim=map?.claims?.find(c=>c.text.replace(/\s+/g,' ').trim()===row.label.replace(/^Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim());
+    if(claim&&map?.claims){number.textContent=String(map.claims.indexOf(claim)+1).padStart(2,'0');
+      const links=node('div','','di-claim-links');for(const edge of map.claim_edges||[]){if(edge.from!==claim.id&&edge.to!==claim.id)continue;const incoming=edge.to===claim.id;const other=map.claims.find(c=>c.id===(incoming?edge.from:edge.to));if(!other)continue;const text=incoming?`${String(map.claims.indexOf(other)+1).padStart(2,'0')} ${edge.relation} this`:`${edge.relation} ${String(map.claims.indexOf(other)+1).padStart(2,'0')}`;const b=button(text,()=>document.dispatchEvent(new CustomEvent('symphonia:claim-map',{detail:{nodeId:other.id}})));b.title='Inspect the connected claim';links.append(b);}if(links.childElementCount)left.append(links);
+    }
     const rating=node('div','','di-rating');rating.setAttribute('aria-label',category(row));
     const score=node('div','','di-score');score.append(node('strong',row.percent===null?'—':`${Math.round(row.percent)}%`),node('span',row.percent===null?'No ratings':'agree'));rating.append(score);heading.append(rating);article.append(heading);
     const bar=node('div','','di-bar');bar.setAttribute('aria-hidden','true');

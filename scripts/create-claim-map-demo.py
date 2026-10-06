@@ -64,8 +64,8 @@ for round_number in [2,3]:
             for k,value in enumerate([position,conf[[1,4,2][i]],['I favour a cautious pilot, with exceptions.','Do not remove anxiety support; preserve medical access.','The evidence remains weak. I am not ready to endorse the inferred mechanism.'][i]]):answers[f'q{j*3+k+1}']={'position':value}
         req('POST',f'public/forms/session/{token}/submit',{'participant_name':f'Fictional expert {i+1}','answers':answers})
 for r in req('GET',f'forms/{fid}/rounds',auth=True):
-    if r['round_number']>1:
-        note='Three fictional experts rated all seven claims, with separate confidence and explanations.' if r['round_number']==2 else 'The fictional panel reconsidered the same seven claims. One expert strengthened support for lesson-only storage; disagreement and uncertainty remain.'
+    if r['round_number']==3 and r['is_active']:
+        note='The fictional panel reconsidered the same seven claims. One expert strengthened support for lesson-only storage; disagreement and uncertainty remain.'
         req('PUT',f'forms/{fid}/rounds/{r["id"]}/synthesis',{'summary':'<p>'+note+'</p>'+r['synthesis']},True)
 account=req('GET',f'forms/{fid}/final_synthesis',auth=True)
 req('POST',f'forms/{fid}/final_synthesis',{'expected_revision':account['preview']['revision'],'complete':False},True)

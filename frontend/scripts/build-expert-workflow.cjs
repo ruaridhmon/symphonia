@@ -21,9 +21,9 @@ await build({entryPoints:['src/components/summary/ManualResponseSheet.tsx'],outf
  let code=fs.readFileSync('dist/assets/SummaryPage-workspace-v9.js','utf8');
  const host='const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet);';
  if(!code.includes(host))throw Error('Unsupported maintained summary shape');
- code='import FinalSynthesisPanel from "/final-synthesis.js?v=4";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/manual-response-sheet.js?v=2','/manual-response-sheet.js?v=3').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=7');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v16.js',code);
+ code='import FinalSynthesisPanel from "/final-synthesis.js?v=5";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/manual-response-sheet.js?v=2','/manual-response-sheet.js?v=3').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=8');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v17.js',code);
  fs.copyFileSync('src/legacy/delphiRoundSetup.js','dist/delphi-round-two-ui.js');fs.copyFileSync('src/workspace.css','dist/workspace.css');fs.copyFileSync('src/reasoning-flow.css','dist/reasoning-flow.css');
- let html=fs.readFileSync('dist/index.html','utf8').replace(/\/assets\/SummaryPage-workspace-v(?:9|10|11|12|13|14|15)\.js/,'/assets/SummaryPage-workspace-v16.js').replace(/\/workspace\.css\?v=[234567]/,'/workspace.css?v=8');
- for(const name of ['delphi-progress','product-ui','delphi-demo','delphi-round-two-ui'])html=html.replace(new RegExp(`/${name}\\.js\\?v=[^"']+`,'g'),`/${name}.js?v=${name==='delphi-round-two-ui'?'workflow-3':'workflow-5'}`);
+ let html=fs.readFileSync('dist/index.html','utf8').replace(/\/assets\/SummaryPage-workspace-v(?:9|10|11|12|13|14|15|16)\.js/,'/assets/SummaryPage-workspace-v17.js').replace(/\/workspace\.css\?v=[2345678]/,'/workspace.css?v=9');
+ for(const name of ['delphi-progress','product-ui','delphi-demo','delphi-round-two-ui'])html=html.replace(new RegExp(`/${name}\\.js\\?v=[^"']+`,'g'),`/${name}.js?v=${name==='delphi-round-two-ui'?'workflow-3':'workflow-6'}`);
  fs.writeFileSync('dist/index.html',html);
 })().catch(e=>{console.error(e);process.exitCode=1;});
