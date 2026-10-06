@@ -54,7 +54,7 @@ def build_final_account(form, rounds, responses):
             return {'response_id': s.id, 'expert': labels[s.user_id],
                     'position': answer(s, rating_index, r.questions),
                     'confidence': answer(s, paired_index(r.questions, '_confidence'), r.questions),
-                    'justification': answer(s, paired_index(r.questions, '_comment'), r.questions), 'original_answers':s.answers}
+                    'justification': answer(s, paired_index(r.questions, '_comment'), r.questions), 'original_answers':{f'q{i+1}':(s.answers or {}).get(f'q{i+1}', (s.answers or {}).get(r.questions[i].get('questionId'))) for i in [rating_index, paired_index(r.questions, '_confidence'), paired_index(r.questions, '_comment')] if i is not None}}
         previous = by_round[baseline.id]
         prior_counts = Counter(s.user_id for s in previous)
         final_counts = Counter(s.user_id for s in by_round[final.id])

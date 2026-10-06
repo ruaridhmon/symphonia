@@ -57,3 +57,14 @@ def test_final_account_keeps_strength_confidence_minority_and_raw_history(client
 def test_final_synthesis_is_not_available_before_reconsideration(client,admin_headers):
     form=create_form(client,admin_headers)
     assert client.get(f"/forms/{form['id']}/final_synthesis",headers=admin_headers).status_code==409
+
+
+def test_context_edits_do_not_discard_saved_final_snapshot(client,admin_headers):
+    fid=fixture(client,admin_headers);url=f'/forms/{fid}/final_synthesis'
+    revision=client.get(url,headers=admin_headers).json()['preview']['revision']
+    client.post(url,headers=admin_headers,json={'expected_revision':revision})
+    rounds=client.get(f'/forms/{fid}/rounds',headers=admin_headers).json()
+    rid=next(r['id'] for r in rounds if r['round_number']==3)
+    edited=client.patch(f'/forms/{fid}/rounds/{rid}',headers=admin_headers,json={'context_settings':{'intro_body':'Updated introduction'}})
+    assert edited.status_code==200,edited.text
+    assert client.get(url,headers=admin_headers).json()['saved']['revision']==revision

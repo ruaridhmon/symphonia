@@ -3571,6 +3571,10 @@ def _stringify_custom_synthesis_answer(value: Any) -> str:
             if text:
                 parts.append(f"{label}: {text}")
         if parts:
+            known = {"position", "value", "answer", "selected", "selectedScore", "score", "evidence", "confidence", "confidenceJustification", "counterarguments"}
+            for key, extra in value.items():
+                if key not in known and extra not in (None, "", [], {}):
+                    parts.append(f"{key}: {_stringify_custom_synthesis_answer(extra)}")
             return "\n".join(parts)
         try:
             return json.dumps(value, ensure_ascii=False, indent=2)
@@ -3615,8 +3619,10 @@ def _format_custom_synthesis_material(
         if not isinstance(answers, dict):
             answers = {}
         for question_index, label in enumerate(labels, start=1):
+            question = questions[question_index - 1]
+            question_id = question.get('questionId') if isinstance(question, dict) else None
             answer = _stringify_custom_synthesis_answer(
-                answers.get(f"q{question_index}")
+                answers.get(f"q{question_index}", answers.get(question_id))
             ).strip()
             lines.append(f"Q{question_index}. {label}")
             lines.append(f"A: {answer or 'No answer'}")
@@ -8275,7 +8281,10 @@ def update_round_setup(
             raise HTTPException(status_code=409, detail="The Delphi claim set is fixed after round 1.")
         round_obj.questions = payload.questions
     if payload.context_settings is not None:
-        round_obj.context_settings = payload.context_settings
+        preserved_final = (round_obj.context_settings or {}).get("final_synthesis")
+        round_obj.context_settings = {k:v for k,v in payload.context_settings.items() if k != "final_synthesis"}
+        if preserved_final:
+            round_obj.context_settings = {**round_obj.context_settings, "final_synthesis": preserved_final}
     db.commit()
     db.refresh(round_obj)
     return {
