@@ -40,7 +40,7 @@ function panelIcon(): SVGSVGElement {
 
 async function navigationClient() {
   // Preserve the deployed React/auth singleton; source builds use their own client.
-  if (document.querySelector('script[src*="index-HJquNmhn.js"]')) {
+  if (document.querySelector('script[src*="index-HJquNmhn.js"],script[src*="index-workspace-v1.js"]')) {
     const deployed = '/assets/index-HJquNmhn.js';
     const module = await import(/* @vite-ignore */ deployed);
     return module.b;

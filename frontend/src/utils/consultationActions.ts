@@ -2,7 +2,7 @@
 const pinKey=()=>`symphonia:pins:${localStorage.getItem('email')||'anonymous'}`;
 export function pinnedConsultations():number[]{try {const value=JSON.parse(localStorage.getItem(pinKey())||'[]');return Array.isArray(value)?value.filter(v=>Number.isSafeInteger(v)&&v>0):[];}catch{return [];}}
 export function toggleConsultationPin(id:number){const pins=pinnedConsultations();const next=pins.includes(id)?pins.filter(n=>n!==id):[id,...pins];localStorage.setItem(pinKey(),JSON.stringify(next));document.dispatchEvent(new CustomEvent('symphonia:consultations-changed',{detail:{pinned:true}}));return next.includes(id);}
-async function client(){if(document.querySelector('script[src*="index-HJquNmhn.js"]')){const path='/assets/index-HJquNmhn.js';return (await import(/* @vite-ignore */ path)).b;}return (await import('../api/client')).api;}
+async function client(){if(document.querySelector('script[src*="index-HJquNmhn.js"],script[src*="index-workspace-v1.js"]')){const path='/assets/index-HJquNmhn.js';return (await import(/* @vite-ignore */ path)).b;}return (await import('../api/client')).api;}
 export function renameConsultation(id:number,title:string,trigger?:HTMLElement|null){
  const prefix=title.match(/^(?:SIMULATED PANEL\s*[—–-]|Simulated example\s*·)\s*/i)?.[0]||'';
  const dialog=document.createElement('dialog');dialog.className='consultation-rename';dialog.setAttribute('aria-labelledby','rename-consultation-title');

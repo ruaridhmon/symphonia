@@ -197,7 +197,7 @@ function toggleConsultationPin(id) {
   return next.includes(id);
 }
 async function client() {
-  if (document.querySelector('script[src*="index-HJquNmhn.js"]')) {
+  if (document.querySelector('script[src*="index-HJquNmhn.js"],script[src*="index-workspace-v1.js"]')) {
     const path = "/assets/index-HJquNmhn.js";
     return (await import(
       /* @vite-ignore */
