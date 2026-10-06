@@ -37,6 +37,7 @@ def fixture(client, headers):
             "sectionTitle": "Claim 1: Retain medical exceptions.",
             "label": "Explain your position",
             "inputType": "textarea",
+            "options": None,
         },
     ]
     with TestingSessionLocal() as db:
