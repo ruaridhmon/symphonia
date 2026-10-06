@@ -791,3 +791,6 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .product-summary .delphi-insights[data-review=true] .di-inferred-origin{font-size:10px;margin:0 0 2px;padding:0;background:none}
 @media(max-width:760px){#root .product-summary .delphi-insights[data-review=true] .di-claims{--rating-width:240px;--claim-gap:12px}}
 @media(max-width:600px){#root .product-summary .delphi-insights[data-review=true] .di-rating{margin:8px 0 4px}#root .product-summary .delphi-insights[data-review=true] .di-claims .di-claim{padding:12px 0!important}}
+
+#root .symphonia-shell .product-summary #delphi-recorded-progress[data-review=true] .di-claims .di-claim{padding:10px 0!important}
+#root .product-summary .delphi-insights[data-review=true] .di-score{margin:0}
