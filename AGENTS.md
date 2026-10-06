@@ -311,3 +311,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Compact banner and source popup: React owns an empty utility slot in the consultation header; maintained summary nav/source selector move into it while their original handlers remain. Opening source popup contains exact expert text without raw field or repeated connection disclosures; those remain accessible through Responses/upstream claim links. Smaller modal heading/spacing. Summary v33, consultation v19, final v14, results workflow-20, CSS v32.
 
 - Quiet consultation header: small title/action bar and direct pill-style round tabs; Summary/Responses/Claim map and source/full-summary controls share a keyboard-accessible view popover instead of three competing rows. Mobile Add response remains labelled with a compact icon. Summary v34, consultation v20, final v15, results workflow-21, CSS v33.
+
+- Header narrow-width refinement: title and sidebar toggle share the top line with an explicit 48px toggle gutter; long titles truncate with their full text in the native title. Summary v35, consultation v21, final v16, results workflow-22, CSS v34.
