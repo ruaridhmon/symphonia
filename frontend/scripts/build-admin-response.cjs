@@ -24,6 +24,6 @@ code='import ManualResponseSheet from "/manual-response-sheet.js?v=2";'+code.rep
 parse(code,{sourceType:'module'});
 fs.writeFileSync('dist/assets/SummaryPage-workspace-v9.js',code);
 fs.copyFileSync('src/workspace.css','dist/workspace.css');
-let html=fs.readFileSync('dist/index.html','utf8').replace(/"\/assets\/SummaryPage-workspace-v[789]\.js"/,'"/assets/SummaryPage-workspace-v9.js"').replace('/workspace.css?v=1','/workspace.css?v=2').replace(/\/minimal-dashboard.js\?v=\d+/,'/minimal-dashboard.js?v=10').replace(/\/minimal-dashboard.css\?v=\d+/,'/minimal-dashboard.css?v=10');
+let html=fs.readFileSync('dist/index.html','utf8').replace(/"\/assets\/SummaryPage-workspace-v[789]\.js"/,'"/assets/SummaryPage-workspace-v9.js"').replace('/workspace.css?v=1','/workspace.css?v=2').replace(/\/minimal-dashboard.js\?v=\d+/,'/minimal-dashboard.js?v=11').replace(/\/minimal-dashboard.css\?v=\d+/,'/minimal-dashboard.css?v=11');
 fs.writeFileSync('dist/index.html',html);
 })().catch(error=>{console.error(error);process.exitCode=1;});

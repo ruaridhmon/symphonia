@@ -101,10 +101,13 @@
  #root .symphonia-shell.symphonia-consultation-open {padding-left:0;}
  #root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) > .symphonia-shell-header::before {display:none;}
  #root .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-shell-header button[aria-label="Go to dashboard"] {display:none!important;}
+ #root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header button[aria-label="Go to dashboard"] {display:none!important;}
  #root .symphonia-shell-header .symphonia-account {left:auto!important;right:18px!important;width:auto!important;bottom:16px!important;}
+ #root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header .symphonia-account {left:auto!important;right:18px!important;width:auto!important;}
  #root .symphonia-shell-header .symphonia-account-trigger {background:var(--background)!important;min-height:44px!important;}
  #root .symphonia-account-trigger::after {display:none;}
  #root .symphonia-shell-header .symphonia-account > [role="menu"] {left:auto!important;right:0!important;}
+ #root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-account > [role="menu"] {left:auto!important;right:0!important;}
  #root .symphonia-navigation-toggle {top:8px;}
  .symphonia-drawer-header {padding:8px 20px;height:60px;}
  #root .symphonia-shell .cw-identity h2 {font-size:20px!important;}
