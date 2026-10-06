@@ -729,3 +729,5 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .rf-detail blockquote {font:15px/1.65 inherit;color:var(--foreground);}
 
 #root #delphi-recorded-progress .di-inferred-origin {display:block;margin:0 0 8px;color:#85602f;font-size:12px;line-height:1.5;}
+
+.manual-response-feedback {white-space:pre-line;font-size:13px;line-height:1.6;color:var(--muted-foreground);margin:8px 0 14px;}

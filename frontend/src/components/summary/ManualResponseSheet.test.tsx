@@ -27,3 +27,9 @@ it('keeps failed entries and retries the same request without using participant 
  expect(mocks.post.mock.calls[1][1].request_id).toBe(mocks.post.mock.calls[0][1].request_id);
  expect(mocks.post.mock.calls[1][1].expected_questions).toEqual([question]);
 });
+
+it('retains inferred provenance and round feedback during offline entry',async()=>{
+ const q={...question,sectionTitle:'An inferred claim',groupPrompt:'Inferred · unconfirmed. Round 2: 1 disagree; confidence: extremely confident.'};mocks.get.mockResolvedValue({...props.form,consent_required:false});
+ render(<ManualResponseSheet {...props} round={{...props.round,questions:[q,{...q,label:'Reason'}]}}/>);
+ expect(await screen.findByText(q.groupPrompt)).toBeInTheDocument();expect(screen.getAllByText(q.groupPrompt)).toHaveLength(1);
+});
