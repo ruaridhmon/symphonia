@@ -321,3 +321,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Narrow header padding is scoped to a consultation workspace to override later-loaded mobile shell padding. CSS v37.
 
 - Final prose live refinement: verbatim claim sentences read consecutively as paragraphs, avoiding a comma-separated list of quoted claims and doubled sentence punctuation. Dist Summary v37, consultation v23, final v18, workflow-24, CSS v38.
+
+- Actual mobile-frame computed-style check exposed the older high-specificity 72px workspace exception; update that exception to 12px so the toggle and title align. CSS v39.
