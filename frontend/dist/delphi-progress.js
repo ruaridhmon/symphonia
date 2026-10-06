@@ -224,23 +224,11 @@ function renderReasoningFlow(root, graph, selectedNode) {
         for (const source of n.sources) {
           const block = el("section", "", "di-supporting-entry");
           block.append(el("div", `Response ${source.response_number}`, "di-supporting-person"), el("blockquote", source.source_text || source.quote, "di-supporting-text"));
-          if (source.source_answers || source.source_text !== source.quote) {
-            const context = document.createElement("details");
-            context.className = "di-supporting-audit";
-            context.append(el("summary", "Original fields"), el("p", source.quote));
-            if (source.source_answers) context.append(el("pre", JSON.stringify(source.source_answers, null, 2), "rf-original-answer"));
-            block.append(context);
-          }
           detail.append(block);
         }
       } else {
-        detail.append(el("blockquote", n.quote || ""));
+        detail.append(el("blockquote", n.source_text || n.quote || "", "di-supporting-text"));
         if (n.condition) detail.append(el("p", "Qualification: " + n.condition, "rf-qualification"));
-        if (n.source_text && n.source_text !== n.quote) {
-          const context = document.createElement("details");
-          context.append(el("summary", "Read the source in context"), el("p", n.source_text));
-          detail.append(context);
-        }
       }
       detail.oncancel = (e) => {
         e.preventDefault();
@@ -252,22 +240,6 @@ function renderReasoningFlow(root, graph, selectedNode) {
           if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) close.click();
         }
       };
-      const links = flow.edges.filter((e) => e.from === n.id || e.to === n.id);
-      if (links.length) {
-        const list = el("div", "", "rf-connections");
-        for (const edge of links) {
-          const other = flow.nodes.find((t) => t.id === (edge.from === n.id ? edge.to : edge.from));
-          if (!other) continue;
-          const b = document.createElement("button");
-          b.type = "button";
-          b.textContent = `${labels.get(edge.from)} ${edge.relation} ${labels.get(edge.to)} \xB7 ${other.text}`;
-          b.onclick = () => select(other);
-          list.append(b);
-        }
-        const connections = el("details", "", "di-supporting-audit");
-        connections.append(el("summary", "Claim connections"), list);
-        detail.append(connections);
-      }
       if (open && !detail.open) detail.showModal();
     };
     const ordered = [];

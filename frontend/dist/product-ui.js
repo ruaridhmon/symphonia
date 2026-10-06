@@ -122,6 +122,14 @@ function quietSummary(main) {
   const label = hasReasoning ? "Reasoning" : hasResults ? "Claims" : "Overview";
   if (state.claims.textContent !== label) state.claims.textContent = label;
   const current = state;
+  const slot = main.querySelector(".cw-summary-slot");
+  if (slot && current.nav.parentElement !== slot) slot.replaceChildren(current.nav);
+  const picker = progress?.querySelector(".rf-source-picker");
+  const previous2 = current.nav.querySelector(".rf-source-picker");
+  if (picker && picker !== previous2) {
+    previous2?.remove();
+    current.nav.append(picker);
+  } else if (!hasReasoning) previous2?.remove();
   function sync() {
     const text = hasReasoning ? "Claims & full summary" : empty ? "Write a summary" : "Full summary";
     if (current.button.textContent !== text) current.button.textContent = text;
@@ -133,6 +141,8 @@ function quietSummary(main) {
     current.claims.setAttribute("aria-pressed", String(!current.open));
     current.button.setAttribute("aria-pressed", String(current.open));
     if (progress) progress.hidden = current.open;
+    const source = current.nav.querySelector(".rf-source-picker");
+    if (source) source.hidden = current.open;
   }
   current.claims.onclick = () => {
     current.open = false;

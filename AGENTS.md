@@ -307,3 +307,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Claim-text mobile check: neutralize inherited full-width inline-block button styling so long claim buttons wrap inside the title line. CSS v30.
 
 - Narrow text-button geometry: explicitly keep claim copy in the two-column number/title grid, rather than inherited block layout with inline h3. Title buttons fit the flexible title column; CSS v31.
+
+- Compact banner and source popup: React owns an empty utility slot in the consultation header; maintained summary nav/source selector move into it while their original handlers remain. Opening source popup contains exact expert text without raw field or repeated connection disclosures; those remain accessible through Responses/upstream claim links. Smaller modal heading/spacing. Summary v33, consultation v19, final v14, results workflow-20, CSS v32.
