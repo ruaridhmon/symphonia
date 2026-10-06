@@ -305,7 +305,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
         p.isDemo ? h("span", { className: "cw-demo-badge" }, "Synthetic example") : h(
           "div",
           { className: "cw-title-actions" },
-          !finalView && !mapView && ManualResponse && p.onResponseAdded ? button("Add response", () => {
+          !finalView && ManualResponse && p.onResponseAdded ? button("Add response", () => {
             if (round?.is_active && !completed && canLeave()) {
               setSaved("");
               setAdding(round);
