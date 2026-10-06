@@ -74,6 +74,7 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
           const key = `q${index + 1}`; if (!visible(index)) return null;
           return <section key={key} className={`manual-response-question ${missing === key ? 'manual-response-missing' : ''}`}>
             {question.sectionTitle && question.sectionTitle !== configs[index - 1]?.sectionTitle ? <h3>{question.sectionTitle}</h3> : null}
+            {question.groupPrompt && question.groupPrompt !== configs[index - 1]?.groupPrompt ? <p className="manual-response-feedback">{question.groupPrompt}</p> : null}
             <h4>{question.label}<span>{question.optional ? ' · Optional' : ''}</span></h4>
             {isTypedSurveyQuestion(question) ? <SurveyQuestionInput question={question} value={answers[key] || emptyStructuredResponse()} onChange={value => update(key, value)} readOnly={saving} /> : <StructuredInput questionIndex={index} formId={form.id} value={answers[key] || emptyStructuredResponse()} onChange={value => update(key, value)} showEvidence={question.requireEvidence} showConfidence={question.requireConfidence} showCounterarguments={question.requireCounterarguments} persistDraft={false} readOnly={saving} />}
           </section>;
