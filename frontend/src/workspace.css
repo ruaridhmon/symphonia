@@ -857,3 +857,9 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .product-summary .delphi-insights[data-review=true] .di-bar>button:disabled {opacity:1;cursor:default;}
 #root .product-summary .delphi-insights[data-review=true] .di-bar>button::after {content:'';position:absolute;inset:-18px 0;}
 #root .product-summary .delphi-insights[data-review=true] .di-bar>button:focus-visible {outline:2px solid var(--foreground);outline-offset:4px;}
+
+#root .product-summary .delphi-insights[data-review=true] .di-rating {grid-template-columns:auto minmax(0,1fr);}
+#root .product-summary .delphi-insights[data-review=true] .di-score {grid-column:1;grid-row:1;}
+#root .product-summary .delphi-insights[data-review=true] .di-bar {grid-column:2;grid-row:1;min-width:0;width:100%;}
+#root .product-summary .delphi-insights[data-review=true] .di-trend {grid-column:1/-1;}
+#root .product-summary .delphi-insights[data-review=true] .di-confidence>summary::before {content:none;}
