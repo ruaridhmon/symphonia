@@ -4,7 +4,7 @@ export function enhanceConsultationInbox(main:HTMLElement){
  for(const button of main.querySelectorAll('button')) {
   for(const child of button.childNodes)if(child.nodeType===Node.TEXT_NODE){
    if(child.textContent?.trim()==='Create Form')child.textContent='New consultation';
-   if(child.textContent?.trim()==='Enter code')child.textContent='Join';
+   if(child.textContent?.trim()==='Enter code')child.textContent='Join with code';
   }
  }
  for(const link of main.querySelectorAll<HTMLAnchorElement>('a[href$="/summary"]')){

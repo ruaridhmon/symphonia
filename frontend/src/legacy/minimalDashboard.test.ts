@@ -8,6 +8,7 @@ it('enhances the current main dashboard without replacing its action handler and
   document.body.innerHTML = `<header><div><button><img src="/logo-mark.png" /></button><nav><div><button id="account" aria-haspopup="menu"><span class="rounded-full">TE</span></button><div role="menu"><button id="theme" aria-haspopup="menu">Theme</button></div></div></nav></div></header><main><div><div class="mb-8"><h1>Consultations</h1><div><input aria-label="Search consultations" /></div><div><button id="join">Enter code</button><button id="new">New</button></div></div><div class="rounded-2xl"><table><tbody><tr><td>Example</td></tr></tbody></table></div></div></main>`;
   const action = vi.fn();
   document.querySelector('#new')!.addEventListener('click', action);
+  vi.mock('../api/client', () => ({api:{get:vi.fn().mockResolvedValue({role:'expert'})}}));
   await import('./minimalDashboard');
   expect(document.querySelector('main')?.classList.contains('symphonia-admin-home')).toBe(true);
   expect(document.querySelector('#new')?.textContent).toBe('New consultation');
@@ -27,6 +28,9 @@ it('enhances the current main dashboard without replacing its action handler and
   expect(document.querySelector('header')?.classList.contains('symphonia-shell-header')).toBe(true);
   expect(document.querySelector('.symphonia-shell-navigation a[href="/"]')?.hasAttribute('aria-current')).toBe(false);
   expect(document.querySelectorAll('.symphonia-shell-navigation')).toHaveLength(1);
+  expect(document.querySelector('.symphonia-navigation-toggle')?.getAttribute('aria-expanded')).toBe('true');
+  (document.querySelector('.symphonia-navigation-toggle') as HTMLButtonElement).click();
+  expect(document.querySelector('.symphonia-shell')?.classList.contains('symphonia-sidebar-collapsed')).toBe(true);
   document.body.innerHTML = '';
   vi.unstubAllGlobals();
 });
