@@ -922,3 +922,14 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .di-claim-trigger {display:inline;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;border-radius:0;cursor:pointer;}
 #root .di-claim-trigger:hover,#root .rf-list-node:hover strong {text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:4px;}
 #root .di-claim-trigger:focus-visible {outline:2px solid var(--foreground);outline-offset:4px;border-radius:3px;}
+
+/* Study stages are direct tabs; all consultation actions share one menu. */
+#root .cw-views .cw-context {gap:12px;}
+#root .cw-round-tabs {background:none;padding:0;gap:12px;}
+#root .cw-round-tabs button {border:0;border-bottom:2px solid transparent;border-radius:0;padding:10px 0;min-height:36px;font-size:12px;background:none;box-shadow:none;}
+#root .cw-round-tabs button[aria-pressed=true] {border-bottom-color:var(--foreground);background:none;box-shadow:none;font-weight:550;}
+#root .cw-final-tab {font-size:12px;padding:10px 0;min-height:36px;border-radius:0;}
+#root .cw-final-tab[aria-pressed=true] {background:none;border-bottom:2px solid var(--foreground);}
+#root .summary-actions-menu[hidden],#root .summary-generate-empty[hidden] {display:none!important;}
+#root .cw-summary-actions {border-top:1px solid var(--border);padding-top:6px;margin-top:6px;}
+@media(max-width:800px){#root .cw-views .cw-context {width:100%;margin:0;justify-content:flex-start;gap:20px;}#root .cw-round-tabs {gap:20px;}}

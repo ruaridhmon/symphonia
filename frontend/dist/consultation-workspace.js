@@ -664,21 +664,20 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
         h(
           "div",
           { className: "cw-context cw-simple-context" },
-          h("label", { className: "cw-round-picker" }, h("span", { className: "cw-round-display", "aria-hidden": true }, finalView ? "Final synthesis \u2304" : `Round ${round?.round_number || "\u2014"} \u2304`), h("select", { "aria-label": "Study stage", value: finalView ? "final" : round?.id || "", onChange: (event) => {
-            if (!canLeave()) return;
-            if (event.target.value === "final") {
+          h("div", { className: "cw-round-tabs", "aria-label": "Rounds" }, ...ordered.map((r) => button(`Round ${r.round_number}`, () => {
+            if (canLeave()) {
+              setFinalView(false);
+              setMapView(false);
+              p.onRound(r);
+            }
+          }, { key: r.id, "aria-pressed": !finalView && !mapView && round?.id === r.id, title: r.is_active ? "Current round" : `View Round ${r.round_number}` }))),
+          ordered.some((r) => r.round_number === 3) && FinalSynthesis ? button("Final synthesis", () => {
+            if (canLeave()) {
               p.onView("synthesis");
               setMapView(false);
               setFinalView(true);
-              return;
             }
-            const selected = ordered.find((r) => r.id === Number(event.target.value));
-            if (selected) {
-              setFinalView(false);
-              setMapView(false);
-              p.onRound(selected);
-            }
-          } }, ...ordered.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}${r.is_active ? " \xB7 Current" : ""}`)), ordered.some((r) => r.round_number === 3) && FinalSynthesis ? h("option", { value: "final" }, "Final synthesis") : null))
+          }, { "aria-pressed": finalView, className: "cw-final-tab", title: "Round 4 \xB7 final synthesis" }) : null
         )
       ),
       mapView ? h("section", { className: "cw-claim-map", "aria-label": "Shared claim map" }, graph ? h("div", { ref: mapRoot }) : h(R.Fragment, null, h("h2", null, "No shared claim map yet"), h("p", null, "Extract the Round 1 contributions to create source-linked explicit claims, inferred assumptions and their connections."))) : null,
