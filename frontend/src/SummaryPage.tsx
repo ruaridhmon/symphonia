@@ -1,4 +1,5 @@
 import * as WorkspaceReact from 'react';
+import { createSummaryRoute } from './utils/summaryRoute';
 import { createConsultationWorkspace } from './utils/consultationWorkspace';
 const ConsultationWorkspace = createConsultationWorkspace(WorkspaceReact);
 import './components/summary/summary-refinement.css';
@@ -569,7 +570,7 @@ function normalizeSynthesisForEditor(raw: string): string {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function SummaryPage() {
+function SummaryPageContent() {
 	const { t } = useTranslation();
 	useDocumentTitle(t('summary.pageTitle'));
 	const navigate = useNavigate();
@@ -1113,7 +1114,6 @@ export default function SummaryPage() {
 		try {
 			const f = await apiFetchForm(formId);
 			if (!f) throw new Error('Form not found');
-			setForm(f as Form);
 
 			let list: ApiRound[];
 			try {
@@ -1134,6 +1134,7 @@ export default function SummaryPage() {
 				response_count: x.response_count ?? 0,
 				draft_count: x.draft_count ?? 0,
 			}));
+			setForm(f as Form);
 			setRounds(mapped);
 
 			const active = mapped.find(x => x.is_active) || null;
@@ -2577,3 +2578,5 @@ export default function SummaryPage() {
 			</div>
 		);
 	}
+
+export default createSummaryRoute(WorkspaceReact, useNavigate, useParams, SummaryPageContent);

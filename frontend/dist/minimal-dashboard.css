@@ -6,9 +6,9 @@
 #root .symphonia-shell.symphonia-consultation-open > .symphonia-shell-header {margin-left:calc(-1 * var(--shell-width));}
 #root .symphonia-shell.symphonia-sidebar-collapsed > .symphonia-shell-header {margin-left:0;}
 #root .symphonia-shell > .symphonia-shell-header.symphonia-shell-header > div:first-child {display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;max-width:none!important;min-height:58px!important;margin:0!important;padding:10px 20px!important;}
-#root .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-shell-header button[aria-label="Go to dashboard"] {min-height:36px;justify-content:flex-start;gap:0!important;padding:0 6px!important;}
-#root .symphonia-shell-header button[aria-label="Go to home"] img,#root .symphonia-shell-header button[aria-label="Go to dashboard"] img {display:none!important;}
-#root .symphonia-shell-header button[aria-label="Go to home"] h1,#root .symphonia-shell-header button[aria-label="Go to dashboard"] span {display:block!important;font-size:15px!important;font-weight:550!important;letter-spacing:-.025em;}
+#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to dashboard"] {min-height:36px;justify-content:flex-start;gap:0!important;padding:0 6px!important;}
+#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to home"] img,#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to dashboard"] img {display:none!important;}
+#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to home"] h1,#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to dashboard"] span {display:block!important;font-size:15px!important;font-weight:550!important;letter-spacing:-.025em;}
 #root .symphonia-shell-header > div:first-child > nav,#root .symphonia-shell-header > div:first-child > div:has(button[aria-haspopup="menu"]) {display:flex!important;position:relative;bottom:auto;left:auto;right:auto;margin-left:auto;}
 #root .symphonia-shell-header .symphonia-account-trigger {border:0!important;background:transparent!important;border-radius:7px!important;min-height:36px;padding:4px!important;gap:4px!important;}
 #root .symphonia-shell-header .symphonia-account-trigger > svg {display:none;}
@@ -29,9 +29,21 @@
 .symphonia-navigation-status {padding:10px;font-size:12px;color:var(--muted-foreground);line-height:1.5;}
 .symphonia-navigation-earlier {margin-top:14px;}
 .symphonia-navigation-earlier > summary {padding:10px;font-size:12px;color:var(--muted-foreground);cursor:pointer;}
-#root .symphonia-navigation-drawer {position:fixed;inset:0 auto 0 0;margin:0;border:0;border-right:1px solid var(--border);width:304px;max-width:calc(100vw - 40px);height:100dvh;max-height:100dvh;padding:20px 14px;background:var(--background);color:var(--foreground);overflow:auto;}
+#root .symphonia-navigation-drawer {position:fixed;inset:0 auto 0 0;margin:0;border:0;border-right:1px solid var(--border);width:304px;max-width:calc(100vw - 40px);height:100dvh;max-height:100dvh;padding:0 14px 24px;background:var(--background);color:var(--foreground);overflow:auto;}
 #root .symphonia-navigation-drawer::backdrop {background:rgb(0 0 0 / .28);}
-.symphonia-drawer-close {display:block;margin-left:auto;min-height:36px;border:0;background:none;color:var(--muted-foreground);padding:8px 10px;font-size:12px;cursor:pointer;}
+.symphonia-drawer-header {display:flex;align-items:center;gap:8px;height:58px;margin:0 -14px 18px;padding:10px 20px;}
+.symphonia-drawer-header > span {padding-left:6px;font-size:15px;font-weight:550;letter-spacing:-.025em;}
+.symphonia-drawer-close {display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:36px;height:36px;border:0;border-radius:7px;background:none;color:var(--muted-foreground);padding:0;cursor:pointer;}
+.symphonia-drawer-close:hover {background:var(--muted);color:var(--foreground);}
+.symphonia-drawer-close:focus-visible {outline:2px solid var(--ring);outline-offset:3px;}
+#root .symphonia-shell > main.symphonia-summary-loading {width:100%;max-width:1000px;margin:0 auto;padding:28px 32px;min-height:70vh;}
+.symphonia-opening-status {font-size:13px;color:var(--muted-foreground);margin-bottom:24px;}
+.symphonia-reading-scaffold {opacity:.65;}
+.symphonia-placeholder-title {height:22px;max-width:480px;background:var(--muted);border-radius:5px;margin-bottom:24px;}
+.symphonia-placeholder-tabs {height:12px;width:220px;background:var(--muted);border-radius:4px;margin-bottom:28px;}
+.symphonia-placeholder-row {display:flex;justify-content:space-between;gap:32px;padding:26px 0 54px;border-top:1px solid var(--border);}
+.symphonia-placeholder-row > span:first-child {width:60%;height:12px;background:var(--muted);border-radius:4px;}
+.symphonia-placeholder-row > span:last-child {width:18%;height:12px;background:var(--muted);border-radius:4px;}
 #root .symphonia-shell > footer {border:0!important;background:none!important;padding:16px!important;font-size:10px!important;opacity:.5;}
 #root .symphonia-shell > main.product-dashboard {max-width:1040px!important;padding:40px 32px!important;}
 #root .symphonia-shell > main.product-summary {padding-top:28px!important;}
@@ -78,8 +90,11 @@
 #root .symphonia-shell a:focus-visible,#root .symphonia-shell button:focus-visible { outline:2px solid var(--ring);outline-offset:3px; }
 #root .symphonia-shell .cw-identity h2 {font-size:24px!important;line-height:1.35!important;letter-spacing:-.025em;}
 @media(max-width:800px) {
+ #root .symphonia-shell > .symphonia-shell-header.symphonia-shell-header > div:first-child {padding:7px 20px!important;}
+ .symphonia-drawer-header {padding:7px 20px;}
  #root .symphonia-shell .cw-identity h2 {font-size:20px!important;}
- #root .symphonia-navigation-toggle {width:44px;height:44px;}
+ #root .symphonia-navigation-toggle,.symphonia-drawer-close {width:44px;height:44px;}
+ #root .symphonia-shell > main.symphonia-summary-loading {padding:24px 20px;}
  #root .symphonia-navigation-drawer .symphonia-navigation-search {font-size:16px!important;height:44px;}
  #root .symphonia-navigation-drawer nav a,.symphonia-drawer-close {min-height:44px;}
  #root .symphonia-shell.symphonia-consultation-open {padding-left:0;}
