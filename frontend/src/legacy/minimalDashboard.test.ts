@@ -43,6 +43,9 @@ it('enhances the current main dashboard without replacing its action handler and
   (drawer.querySelector('button') as HTMLButtonElement).click();
   expect(drawer.open).toBe(false);
   expect(document.activeElement).toBe(toggle);
+  document.body.innerHTML='<header><a href="/"><img src="/logo-mark.png" /></a></header><p>Loading</p>';
+  await Promise.resolve(); frames.splice(0).forEach(callback=>callback(0));
+  expect(document.querySelector('.symphonia-shell-navigation')).toBeNull();
   document.body.innerHTML = '';
   vi.unstubAllGlobals();
 });

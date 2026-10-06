@@ -296,7 +296,7 @@ async function navigationClient() {
   return (await Promise.resolve().then(() => (init_client(), client_exports))).api;
 }
 function markHeader() {
-  const header = Array.from(document.querySelectorAll("header")).find((candidate) => candidate.querySelector('img[src*="logo-mark.png"]'));
+  const header = Array.from(document.querySelectorAll("header")).find((candidate) => candidate.querySelector('img[src*="logo-mark.png"]') && candidate.querySelector('button[aria-haspopup="menu"]'));
   if (!header) return;
   header.classList.add("symphonia-shell-header");
   const shell = header.parentElement;

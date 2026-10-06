@@ -41,7 +41,7 @@ async function navigationClient() {
 
 function markHeader(): void {
   const header = Array.from(document.querySelectorAll<HTMLElement>('header'))
-    .find(candidate => candidate.querySelector('img[src*="logo-mark.png"]'));
+    .find(candidate => candidate.querySelector('img[src*="logo-mark.png"]') && candidate.querySelector('button[aria-haspopup="menu"]'));
   if (!header) return;
   header.classList.add('symphonia-shell-header');
   const shell = header.parentElement!;
