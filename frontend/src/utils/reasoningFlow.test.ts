@@ -1,4 +1,5 @@
-import {expect,it} from 'vitest';
+import {beforeAll,expect,it} from 'vitest';
+beforeAll(()=>{HTMLDialogElement.prototype.showModal=function(){this.open=true;};HTMLDialogElement.prototype.close=function(){this.open=false;};});
 import {renderReasoningFlow} from './reasoningFlow';
 import {renderDelphiInsights} from './renderDelphiInsights';
 import type {ReasoningGraph} from '../types/synthesis';
