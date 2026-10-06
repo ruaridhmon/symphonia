@@ -72,7 +72,9 @@ for r in req('GET',f'forms/{fid}/rounds',auth=True):
         req('PUT',f'forms/{fid}/rounds/{r["id"]}/synthesis',{'summary':'<p>'+note+'</p>'+r['synthesis']},True)
 rounds=req('GET',f'forms/{fid}/rounds',auth=True)
 for r in rounds:
-    if r['round_number']>1:req('PUT',f'forms/{fid}/rounds/{r["id"]}/synthesis',{'summary':f'<p>Round {r["round_number"]}: fictional expert judgments on the seven frozen claims. Agreement and confidence are recorded separately.</p>'},True)
+    if r['round_number']>1:
+        req('POST',f'forms/{fid}/rounds/{r["id"]}/make_active',{},True)
+        req('PUT',f'forms/{fid}/rounds/{r["id"]}/synthesis',{'summary':f'<p>Round {r["round_number"]}: fictional expert judgments on the seven frozen claims. Agreement and confidence are recorded separately.</p>'},True)
 r3=next(r for r in rounds if r['round_number']==3)
 req('POST',f'forms/{fid}/rounds/{r3["id"]}/make_active',{},True)
 account=req('GET',f'forms/{fid}/final_synthesis',auth=True)
