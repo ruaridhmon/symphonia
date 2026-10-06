@@ -271,3 +271,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Rename live compatibility: detect the deployed index-workspace entry as well as the original index before loading the host API singleton. Summary v20, consultation module v10, minimal navigation v13.
 
 - Desktop review Details now shares the connection line when collapsed, while expanded audit remains full-width. Reserve copy space to avoid overlaps. Workspace CSS v14.
+
+- **2026-10-06 question-first recorded entry:** Single-question Add response sheets lead with the exact saved question, shown once, plus quiet round/provenance context. Multiple-question sheets retain the round introduction and individual prompts. Removed generic entry instructions and consultation-title repetition; save/validation/consent/provenance unchanged. Expert mirror Summary v21, manual sheet v4, workspace CSS v15.
