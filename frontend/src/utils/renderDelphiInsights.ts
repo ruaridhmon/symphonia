@@ -114,7 +114,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
       const trend=node('div','','di-trend');
       if(row.delta!==null&&Math.round(row.delta)!==0){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since Round ${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}rating.append(trend);
     }
-    if(row.origin==='inferred')article.prepend(node('p','Inferred · unconfirmed. Not directly stated by an expert.','di-inferred-origin'));
+    if(row.origin==='inferred')left.append(node('p','Inferred assumption · unconfirmed','di-inferred-origin'));
     const supporting=row.evidence.filter(e=>e.comment.trim());
     const wrapper=node('div','','di-reasons');const trigger=button(`Supporting information · ${supporting.length}`,()=>{detail.showModal();});
     trigger.className='di-supporting-trigger';trigger.setAttribute('aria-haspopup','dialog');trigger.title=supporting.length?`${supporting.length} responses include supporting information`:'No supporting information provided';wrapper.append(trigger);
@@ -136,7 +136,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
       const subset=evidence.filter(e=>e.group===group);if(!subset.length)return;
       const section=node('section');section.append(node('h4',`${stanceLabels[group]} · ${subset.length}`));
       subset.forEach(e=>{const block=node('blockquote');block.append(node('div',`${e.participant} · ${e.position || 'Not answered'}`,'di-attribution'));if(e.before!==null)block.append(node('p',`${e.before} → ${e.position}${e.changed?'':' · Position retained'}`,'di-shift'));if(row.hasConfidence)block.append(node('p',`Confidence: ${e.confidence || 'Not recorded'}${e.beforeConfidence!==null?` · Previously: ${e.beforeConfidence || 'Not recorded'}`:''}`));block.append(node('p',e.comment||'No reason supplied.'));section.append(block);});detail.append(section);
-    });wrapper.append(detail);article.append(wrapper);list.append(article);
+    });wrapper.append(detail);left.append(wrapper);list.append(article);
   });root.append(list);
   const archived=node('details','','di-method');archived.append(node('summary','Earlier claims not rated in this round'));
   const seen=new Set(rows.map(r=>r.key));
