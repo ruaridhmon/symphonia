@@ -320,6 +320,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
   detail.setAttribute("aria-live", "polite");
   section.append(canvas, detail);
   const show = (index) => {
+    picker.value = String(index);
     const flow = flows[index];
     root.dataset.reasoningFlow = flow.id;
     canvas.replaceChildren();
@@ -458,17 +459,21 @@ function renderReasoningFlow(root, graph, selectedNode) {
     }
     select(flow.nodes.find((n) => n.id === (selectedNode || root.dataset.reasoningNode)) || flow.nodes[0], !!selectedNode);
   };
+  const picker = document.createElement("select");
+  picker.className = "rf-source-picker";
+  picker.setAttribute("aria-label", "Claim sources");
   flows.forEach((flow, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.append(el("span", flow.response_number ? `Response ${flow.response_number}` : "All contributions"), el("strong", flow.title));
-    b.onclick = () => {
-      selectedNode = void 0;
-      delete root.dataset.reasoningNode;
-      show(i);
-    };
-    nav.append(b);
+    const option = document.createElement("option");
+    option.value = String(i);
+    option.textContent = flow.response_number ? `Response ${flow.response_number} \xB7 ${flow.title}` : "Shared claims";
+    picker.append(option);
   });
+  picker.onchange = () => {
+    selectedNode = void 0;
+    delete root.dataset.reasoningNode;
+    show(Number(picker.value));
+  };
+  nav.append(picker);
   root.append(section);
   show(selectedNode ? 0 : Math.max(0, flows.findIndex((f) => f.id === remembered)));
 }
@@ -631,7 +636,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
               }),
               button("Invite people", () => openPanel("invite")),
               h("a", { href: `/admin/form/${p.form.id}` }, "Edit consultation"),
-              button("View questions", () => openPanel("questions"), { className: "cw-mobile-questions", "aria-label": "Preview round questions", disabled: !round }),
+              button("View questions", () => openPanel("questions"), { "aria-label": "View questions", disabled: !round }),
               p.onDownload ? button("Download", p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? "Updating\u2026" : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null
             )
@@ -659,29 +664,21 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
         h(
           "div",
           { className: "cw-context cw-simple-context" },
-          ordered.length <= 5 ? h("div", { className: "cw-round-tabs", "aria-label": "Rounds" }, ...ordered.map((r) => button(`Round ${r.round_number}`, () => {
-            if (canLeave()) {
-              setFinalView(false);
+          h("label", { className: "cw-round-picker" }, h("span", { className: "cw-round-display", "aria-hidden": true }, finalView ? "Final synthesis \u2304" : `Round ${round?.round_number || "\u2014"} \u2304`), h("select", { "aria-label": "Study stage", value: finalView ? "final" : round?.id || "", onChange: (event) => {
+            if (!canLeave()) return;
+            if (event.target.value === "final") {
+              p.onView("synthesis");
               setMapView(false);
-              p.onRound(r);
+              setFinalView(true);
+              return;
             }
-          }, { key: r.id, "aria-pressed": !finalView && !mapView && round?.id === r.id, title: r.is_active ? "Current round" : `View Round ${r.round_number}` }))) : h("label", { className: "cw-round-picker" }, h("span", { className: "cw-round-display", "aria-hidden": true }, `Round ${round?.round_number || "\u2014"} \u2304`), h("select", { "aria-label": "Round", value: round?.id || "", onChange: (event) => {
             const selected = ordered.find((r) => r.id === Number(event.target.value));
-            if (selected && canLeave()) {
+            if (selected) {
               setFinalView(false);
               setMapView(false);
               p.onRound(selected);
             }
-          } }, ...ordered.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}${r.is_active ? " \xB7 Current" : ""}`)))),
-          ordered.some((r) => r.round_number === 3) && FinalSynthesis ? button("Final synthesis", () => {
-            if (canLeave()) {
-              p.onView("synthesis");
-              setMapView(false);
-              setFinalView(true);
-            }
-          }, { "aria-pressed": finalView, className: "cw-final-tab", title: "Round 4 \xB7 final synthesis" }) : null,
-          count !== void 0 && !finalView && !mapView ? h("span", null, `${count} response${count === 1 ? "" : "s"}`) : null,
-          button("View questions", () => openPanel("questions"), { className: "cw-text-button", disabled: !round })
+          } }, ...ordered.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}${r.is_active ? " \xB7 Current" : ""}`)), ordered.some((r) => r.round_number === 3) && FinalSynthesis ? h("option", { value: "final" }, "Final synthesis") : null))
         )
       ),
       mapView ? h("section", { className: "cw-claim-map", "aria-label": "Shared claim map" }, graph ? h("div", { ref: mapRoot }) : h(R.Fragment, null, h("h2", null, "No shared claim map yet"), h("p", null, "Extract the Round 1 contributions to create source-linked explicit claims, inferred assumptions and their connections."))) : null,

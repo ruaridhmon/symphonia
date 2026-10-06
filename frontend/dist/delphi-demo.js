@@ -2385,6 +2385,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
   detail.setAttribute("aria-live", "polite");
   section.append(canvas, detail);
   const show = (index) => {
+    picker.value = String(index);
     const flow = flows[index];
     root.dataset.reasoningFlow = flow.id;
     canvas.replaceChildren();
@@ -2523,17 +2524,21 @@ function renderReasoningFlow(root, graph, selectedNode) {
     }
     select(flow.nodes.find((n) => n.id === (selectedNode || root.dataset.reasoningNode)) || flow.nodes[0], !!selectedNode);
   };
+  const picker = document.createElement("select");
+  picker.className = "rf-source-picker";
+  picker.setAttribute("aria-label", "Claim sources");
   flows.forEach((flow, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.append(el("span", flow.response_number ? `Response ${flow.response_number}` : "All contributions"), el("strong", flow.title));
-    b.onclick = () => {
-      selectedNode = void 0;
-      delete root.dataset.reasoningNode;
-      show(i);
-    };
-    nav.append(b);
+    const option = document.createElement("option");
+    option.value = String(i);
+    option.textContent = flow.response_number ? `Response ${flow.response_number} \xB7 ${flow.title}` : "Shared claims";
+    picker.append(option);
   });
+  picker.onchange = () => {
+    selectedNode = void 0;
+    delete root.dataset.reasoningNode;
+    show(Number(picker.value));
+  };
+  nav.append(picker);
   root.append(section);
   show(selectedNode ? 0 : Math.max(0, flows.findIndex((f) => f.id === remembered)));
 }

@@ -13,7 +13,7 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
  const nav=el('nav','','rf-tabs');nav.setAttribute('aria-label','Expert reasoning flows');section.append(nav);
  const canvas=el('div','','rf-canvas');const detail=document.createElement('dialog');detail.className='rf-detail di-supporting-dialog';detail.setAttribute('aria-label','Supporting information');detail.setAttribute('aria-live','polite');section.append(canvas,detail);
  const show=(index:number)=>{
-  const flow=flows[index];root.dataset.reasoningFlow=flow.id;canvas.replaceChildren();detail.replaceChildren();
+  picker.value=String(index);const flow=flows[index];root.dataset.reasoningFlow=flow.id;canvas.replaceChildren();detail.replaceChildren();
   nav.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
   const title=el('div','','rf-flow-title');if(flow.response_number){title.append(el('h3',flow.title));canvas.append(title);}
   const diagram=el('div','','rf-diagram');canvas.append(diagram);
@@ -53,6 +53,8 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
   }
   select(flow.nodes.find(n=>n.id===(selectedNode||root.dataset.reasoningNode))||flow.nodes[0],!!selectedNode);
  };
- flows.forEach((flow,i)=>{const b=document.createElement('button');b.type='button';b.append(el('span',flow.response_number?`Response ${flow.response_number}`:'All contributions'),el('strong',flow.title));b.onclick=()=>{selectedNode=undefined;delete root.dataset.reasoningNode;show(i)};nav.append(b);});
+ const picker=document.createElement('select');picker.className='rf-source-picker';picker.setAttribute('aria-label','Claim sources');
+ flows.forEach((flow,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=flow.response_number?`Response ${flow.response_number} · ${flow.title}`:'Shared claims';picker.append(option);});
+ picker.onchange=()=>{selectedNode=undefined;delete root.dataset.reasoningNode;show(Number(picker.value));};nav.append(picker);
  root.append(section);show(selectedNode?0:Math.max(0,flows.findIndex(f=>f.id===remembered)));
 }
