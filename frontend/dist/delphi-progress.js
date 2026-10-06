@@ -204,7 +204,9 @@ function renderReasoningFlow(root, graph, selectedNode) {
       detail.classList.toggle("rf-inferred-detail", n.kind === "assumption");
       detail.hidden = !open;
       const top = el("div", "", "rf-detail-heading");
-      top.append(el("h4", `Supporting information \xB7 Claim ${labels.get(n.id)}`));
+      const title2 = el("div");
+      title2.append(el("p", "Supporting information", "di-supporting-kicker"), el("h4", n.text, "di-supporting-claim"));
+      top.append(title2);
       const close = document.createElement("button");
       close.type = "button";
       close.textContent = "\xD7";
@@ -216,18 +218,18 @@ function renderReasoningFlow(root, graph, selectedNode) {
       };
       top.append(close);
       detail.append(top);
-      if (n.kind === "assumption") detail.append(el("p", n.text), el("blockquote", n.question || "Ask the expert to clarify this connection."), el("p", "Inferred \xB7 unconfirmed", "rf-small"));
+      if (n.kind === "assumption") detail.append(el("p", "Inferred \xB7 unconfirmed", "di-supporting-origin"), el("p", n.question || "Ask the expert to clarify this connection.", "di-supporting-text"));
       else if (n.sources) {
         for (const source of n.sources) {
-          const block = el("section");
-          block.append(el("h4", `Response ${source.response_number}`), el("blockquote", source.quote));
-          const context = document.createElement("details");
-          context.append(el("summary", "Full response"), el("p", source.source_text));
-          if (source.source_answers) {
-            const raw = el("pre", JSON.stringify(source.source_answers, null, 2), "rf-original-answer");
-            context.append(raw);
+          const block = el("section", "", "di-supporting-entry");
+          block.append(el("div", `Response ${source.response_number}`, "di-supporting-person"), el("blockquote", source.source_text || source.quote, "di-supporting-text"));
+          if (source.source_answers || source.source_text !== source.quote) {
+            const context = document.createElement("details");
+            context.className = "di-supporting-audit";
+            context.append(el("summary", "Original fields"), el("p", source.quote));
+            if (source.source_answers) context.append(el("pre", JSON.stringify(source.source_answers, null, 2), "rf-original-answer"));
+            block.append(context);
           }
-          block.append(context);
           detail.append(block);
         }
       } else {
@@ -261,7 +263,9 @@ function renderReasoningFlow(root, graph, selectedNode) {
           b.onclick = () => select(other);
           list.append(b);
         }
-        detail.append(list);
+        const connections = el("details", "", "di-supporting-audit");
+        connections.append(el("summary", "Claim connections"), list);
+        detail.append(connections);
       }
       if (open && !detail.open) detail.showModal();
     };
@@ -590,7 +594,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
           close2.setAttribute("aria-label", "Close confidence");
           header2.append(node("strong", `Confidence \xB7 ${stanceLabels[i].toLowerCase()}`), close2);
           body.append(header2, node("p", `${values.length} of ${n} answered`, "di-confidence-subtitle"));
-          const distribution = node("div", "", "di-confidence-distribution");
+          const distribution2 = node("div", "", "di-confidence-distribution");
           confidenceLabels.forEach((label2, j) => {
             const total = values.filter((v) => v === j).length;
             const line = node("div", "", "di-confidence-level");
@@ -601,9 +605,9 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
             fill.style.width = `${values.length ? 100 * total / values.length : 0}%`;
             track.append(fill);
             line.append(node("span", label2.replace(" confident", "")), track, node("span", String(total), "di-confidence-count"));
-            distribution.append(line);
+            distribution2.append(line);
           });
-          body.append(distribution);
+          body.append(distribution2);
           const method = node("details", "", "di-confidence-method");
           method.addEventListener("toggle", position);
           method.append(node("summary", "How this is summarised"), node("p", "High: very or extremely. Moderate: moderately. Low: slightly or not at all. The label describes more than half of recorded answers; otherwise mixed. Missing answers are excluded. This is self-reported certainty, not correctness."));
@@ -645,8 +649,11 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     const close = button("\xD7", dismiss);
     close.setAttribute("aria-label", "Close supporting information");
     const header = node("div", "", "di-supporting-heading");
-    header.append(node("h3", "Supporting information"), close);
-    detail.append(header, node("p", row.label.replace(/^Claim\s+\d+:\s*/i, ""), "di-supporting-claim"));
+    const title2 = node("div");
+    title2.append(node("p", "Supporting information", "di-supporting-kicker"), node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, ""), "di-supporting-claim"));
+    header.append(title2, close);
+    detail.append(header);
+    if (row.origin === "inferred") detail.append(node("p", "Inferred assumption \xB7 unconfirmed", "di-supporting-origin"));
     detail.oncancel = (e) => {
       e.preventDefault();
       dismiss();
@@ -657,33 +664,46 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
         if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dismiss();
       }
     };
-    detail.append(node("p", row.options.map((option) => `${row.evidence.filter((e) => e.position === option).length} ${option.toLowerCase()}`).join(" \xB7 "), "di-exact-distribution"));
-    if (row.inferenceQuestion) detail.append(node("p", String(row.inferenceQuestion)));
-    if (row.hasConfidence) detail.append(node("p", "Confidence: " + confidenceLabels.map((level) => `${row.evidence.filter((e) => e.confidence === level).length} ${level.toLowerCase()}`).join(" \xB7 ") + ` \xB7 ${row.evidence.filter((e) => !e.confidence).length} not recorded.`));
-    detail.append(node("p", row.history.map((h) => `Round ${h.round}: ${h.n ? Math.round(h.percent) + "% agree" : "No ratings"} (${h.n} answered)`).join(" \xB7 ")));
-    if (row.matched) detail.append(node("p", `${row.changed} of ${row.matched} returning respondents changed their exact position since Round ${row.previousRound}.`, "di-movement"));
+    const audit = node("details", "", "di-supporting-audit");
+    audit.append(node("summary", "Ratings and changes"));
+    const distribution = node("dl", "", "di-supporting-distribution");
+    for (const option of row.options) {
+      distribution.append(node("dt", option), node("dd", String(row.evidence.filter((e) => e.position === option).length)));
+    }
+    audit.append(distribution);
+    if (row.inferenceQuestion) audit.append(node("p", String(row.inferenceQuestion)));
+    if (row.hasConfidence) {
+      const certainty = node("dl", "", "di-supporting-distribution");
+      certainty.append(node("dt", "Confidence"), node("dd", "Responses"));
+      for (const level of confidenceLabels) {
+        certainty.append(node("dt", level), node("dd", String(row.evidence.filter((e) => e.confidence === level).length)));
+      }
+      certainty.append(node("dt", "Not recorded"), node("dd", String(row.evidence.filter((e) => !e.confidence).length)));
+      audit.append(certainty);
+    }
+    audit.append(node("p", row.history.map((h) => `Round ${h.round}: ${h.n ? Math.round(h.percent) + "% agree" : "No ratings"} (${h.n} answered)`).join(" \xB7 ")));
+    if (row.matched) audit.append(node("p", `${row.changed} of ${row.matched} returning respondents changed their exact position since Round ${row.previousRound}.`, "di-movement"));
     const question = round.questions.find((q) => typeof q === "object" && String(q.questionId) === row.key);
     if (question?.parentClaimId) {
       article.prepend(node("p", `Related proposal \xB7 introduced in Round ${question.introducedRound || round.round_number}`, "di-eyebrow"));
-      detail.append(node("p", `Original claim: ${question.parentClaimText || question.parentClaimId}`), node("p", `Reason for this proposal: ${question.claimRationale || "Not recorded"}`));
+      audit.append(node("p", `Original claim: ${question.parentClaimText || question.parentClaimId}`), node("p", `Reason for this proposal: ${question.claimRationale || "Not recorded"}`));
     }
     const evidence = supporting;
     if (!evidence.length) detail.append(node("p", "No supporting information was provided for this claim. Original responses remain available in Responses."));
-    [0, 1, 2, 3, 4, 5].forEach((group) => {
-      const subset = evidence.filter((e) => e.group === group);
-      if (!subset.length) return;
-      const section = node("section");
-      section.append(node("h4", `${stanceLabels[group]} \xB7 ${subset.length}`));
-      subset.forEach((e) => {
-        const block = node("blockquote");
-        block.append(node("div", `${e.participant} \xB7 ${e.position || "Not answered"}`, "di-attribution"));
-        if (e.before !== null) block.append(node("p", `${e.before} \u2192 ${e.position}${e.changed ? "" : " \xB7 Position retained"}`, "di-shift"));
-        if (row.hasConfidence) block.append(node("p", `Confidence: ${e.confidence || "Not recorded"}${e.beforeConfidence !== null ? ` \xB7 Previously: ${e.beforeConfidence || "Not recorded"}` : ""}`));
-        block.append(node("p", e.comment || "No reason supplied."));
-        section.append(block);
-      });
-      detail.append(section);
-    });
+    const entries = node("div", "", "di-supporting-entries");
+    for (const e of evidence) {
+      const entry = node("section", "", "di-supporting-entry"), identity = node("div", "", "di-supporting-entry-heading");
+      identity.append(node("span", e.participant, "di-supporting-person"));
+      const position = node("span", e.position || "Not answered", "di-supporting-position");
+      position.dataset.group = String(e.group);
+      identity.append(position);
+      if (row.hasConfidence) identity.append(node("span", `Confidence: ${e.confidence || "Not recorded"}`, "di-supporting-certainty"));
+      entry.append(identity, node("blockquote", e.comment, "di-supporting-text"));
+      if (e.changed && e.before !== null) entry.append(node("p", `Position changed: ${e.before} \u2192 ${e.position}`, "di-supporting-change"));
+      if (e.confidenceChanged) entry.append(node("p", `Confidence changed: ${e.beforeConfidence || "Not recorded"} \u2192 ${e.confidence || "Not recorded"}`, "di-supporting-change"));
+      entries.append(entry);
+    }
+    detail.append(entries, audit);
     wrapper.append(detail);
     left.append(wrapper);
     list.append(article);

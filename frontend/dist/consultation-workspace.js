@@ -340,7 +340,9 @@ function renderReasoningFlow(root, graph, selectedNode) {
       detail.classList.toggle("rf-inferred-detail", n.kind === "assumption");
       detail.hidden = !open;
       const top = el("div", "", "rf-detail-heading");
-      top.append(el("h4", `Supporting information \xB7 Claim ${labels.get(n.id)}`));
+      const title2 = el("div");
+      title2.append(el("p", "Supporting information", "di-supporting-kicker"), el("h4", n.text, "di-supporting-claim"));
+      top.append(title2);
       const close = document.createElement("button");
       close.type = "button";
       close.textContent = "\xD7";
@@ -352,18 +354,18 @@ function renderReasoningFlow(root, graph, selectedNode) {
       };
       top.append(close);
       detail.append(top);
-      if (n.kind === "assumption") detail.append(el("p", n.text), el("blockquote", n.question || "Ask the expert to clarify this connection."), el("p", "Inferred \xB7 unconfirmed", "rf-small"));
+      if (n.kind === "assumption") detail.append(el("p", "Inferred \xB7 unconfirmed", "di-supporting-origin"), el("p", n.question || "Ask the expert to clarify this connection.", "di-supporting-text"));
       else if (n.sources) {
         for (const source of n.sources) {
-          const block = el("section");
-          block.append(el("h4", `Response ${source.response_number}`), el("blockquote", source.quote));
-          const context = document.createElement("details");
-          context.append(el("summary", "Full response"), el("p", source.source_text));
-          if (source.source_answers) {
-            const raw = el("pre", JSON.stringify(source.source_answers, null, 2), "rf-original-answer");
-            context.append(raw);
+          const block = el("section", "", "di-supporting-entry");
+          block.append(el("div", `Response ${source.response_number}`, "di-supporting-person"), el("blockquote", source.source_text || source.quote, "di-supporting-text"));
+          if (source.source_answers || source.source_text !== source.quote) {
+            const context = document.createElement("details");
+            context.className = "di-supporting-audit";
+            context.append(el("summary", "Original fields"), el("p", source.quote));
+            if (source.source_answers) context.append(el("pre", JSON.stringify(source.source_answers, null, 2), "rf-original-answer"));
+            block.append(context);
           }
-          block.append(context);
           detail.append(block);
         }
       } else {
@@ -397,7 +399,9 @@ function renderReasoningFlow(root, graph, selectedNode) {
           b.onclick = () => select(other);
           list.append(b);
         }
-        detail.append(list);
+        const connections = el("details", "", "di-supporting-audit");
+        connections.append(el("summary", "Claim connections"), list);
+        detail.append(connections);
       }
       if (open && !detail.open) detail.showModal();
     };

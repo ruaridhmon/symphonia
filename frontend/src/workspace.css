@@ -863,3 +863,23 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .product-summary .delphi-insights[data-review=true] .di-bar {grid-column:2;grid-row:1;min-width:0;width:100%;}
 #root .product-summary .delphi-insights[data-review=true] .di-trend {grid-column:1/-1;}
 #root .product-summary .delphi-insights[data-review=true] .di-confidence>summary::before {content:none;}
+
+/* Read supporting contributions like compact response rows. */
+#root .di-supporting-dialog .di-supporting-kicker {font-size:11px;line-height:1.4;color:var(--muted-foreground);margin:0 0 8px;}
+#root .di-supporting-heading h3.di-supporting-claim,#root .rf-detail-heading h4.di-supporting-claim {font-size:18px!important;line-height:1.5!important;font-weight:500!important;margin:0 0 20px!important;}
+#root .di-supporting-origin {font-size:11px!important;color:#b0474e;margin:0 0 18px;}
+#root .di-supporting-entry {padding:17px 0;border-top:1px solid var(--border);}
+#root .di-supporting-entry-heading {display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 10px;}
+#root .di-supporting-person {font-size:12px;font-weight:500;color:var(--foreground);}
+#root .di-supporting-position {font-size:11px;font-weight:500;border-radius:5px;padding:2px 7px;background:var(--muted);color:var(--muted-foreground);}
+#root .di-supporting-position[data-group='0'] {color:#137c70;background:#137c7010;}
+#root .di-supporting-position[data-group='1'] {color:#b34d60;background:#b34d6010;}
+#root .di-supporting-position[data-group='3'] {color:#93631c;background:#c28a2a10;}
+#root .di-supporting-certainty {font-size:11px;color:var(--muted-foreground);margin-left:auto;}
+#root .di-supporting-dialog blockquote.di-supporting-text {font-family:inherit;font-size:14px;line-height:1.75;white-space:pre-wrap;color:var(--foreground);background:none;border:0;padding:0;margin:10px 0 0;}
+#root .di-supporting-dialog .di-supporting-change {font-size:11px;color:var(--muted-foreground);margin:8px 0 0;}
+#root .di-supporting-audit {border-top:1px solid var(--border);padding-top:12px;margin-top:4px;}
+#root .di-supporting-audit>summary {font-size:11px;color:var(--muted-foreground);cursor:pointer;}
+#root .di-supporting-distribution {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px;font-size:12px;margin:18px 0;}
+#root .di-supporting-distribution dt,#root .di-supporting-distribution dd {margin:0;}
+@media(max-width:640px){#root .di-supporting-certainty {margin-left:0;flex-basis:100%;}#root .di-supporting-entry {padding:15px 0;}}
