@@ -95,7 +95,7 @@
         claims = frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId === q.questionId.replace(/_response$/, '_confidence');}) || {}).options};});
       } else {
         var opening=rounds.find(function(r){return r.round_number===1;});
-        var claimBuilder=await import('/claim-review.js?v=1');
+        var claimBuilder=await import('/claim-review.js?v=2');
         frozenQuestions=claimBuilder.buildDelphiRoundTwoQuestions(opening?.synthesis || '',opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null);
         claims=frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,origin:q.claimOrigin,feedback:q.groupPrompt,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId===q.questionId.replace(/_response$/,'_confidence');}) || {}).options};});
       }

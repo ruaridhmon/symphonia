@@ -58,6 +58,7 @@ export function extractDelphiClaims(synthesisHtml: string): DelphiClaim[] {
       : null;
 
     claims.push({
+      ...(Array.from(container.children).some(child=>/^Inferred\s*·\s*unconfirmed/i.test(child.textContent || "")) ? {origin:"inferred" as const,inferenceQuestion:"Review this inferred claim independently; it was not directly stated by an expert."} : {}),
       number: Number(match[1]),
       text,
       support,
