@@ -701,3 +701,5 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 .fs-inferred {border-left:2px dashed #aa92ba;padding-left:10px;color:var(--muted-foreground);}
 .rf-original-answer {font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;}
 @media(max-width:640px){.final-synthesis button,.fs-actions summary {min-height:44px;}.fs-heading{display:block;}.fs-heading>button{margin-top:10px;}#root .cw-final-tab{min-height:40px;}.fs-records{padding:8px 12px;}}
+@media(max-width:800px){#root:not(:has(main.product-dashboard)) .symphonia-shell > main.product-summary:has(.consultation-workspace){padding-top:72px!important;}}
+@media(max-width:640px){#root .cw-title-row{flex-direction:row;align-items:flex-start;gap:12px;}#root .cw-title-row .cw-identity{flex:1;min-width:0;}#root .cw-title-actions{width:auto;flex-shrink:0;justify-content:flex-end;}}
