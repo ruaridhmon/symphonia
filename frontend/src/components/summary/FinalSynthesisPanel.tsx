@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {finalNarrative} from '../../utils/finalNarrative';
 import {api, getApiErrorDetail} from '../../api/client';
 import type {ReasoningGraph} from '../../types/synthesis';
 import {renderReasoningFlow,clearReasoningFlow} from '../../utils/reasoningFlow';
@@ -20,10 +21,10 @@ export default function FinalSynthesisPanel({formId,onComplete}:FinalSynthesisPr
  }
  function download(kind:'json'|'md'){
   if(!account)return;
-  const blob=new Blob([kind==='json'?JSON.stringify(account,null,2):account.markdown],{type:kind==='json'?'application/json':'text/markdown'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`symphonia-final-${formId}.${kind}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const blob=new Blob([kind==='json'?JSON.stringify(account,null,2):`# ${account.title}\n\n${finalNarrative(account.claims).join('\n\n')}`],{type:kind==='json'?'application/json':'text/markdown'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`symphonia-final-${formId}.${kind}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  }
  return <section className="final-synthesis" aria-label="Final synthesis">
-  <header className="fs-heading"><div><h2>Round 4 · Final synthesis</h2><p>Three expert rounds, followed by one faithful account of the panel’s reasoning.</p></div><button type="button" onClick={()=>void refresh()} disabled={busy}>Refresh</button></header>
+  <header className="fs-heading"><div><h2>Final synthesis</h2></div><button type="button" onClick={()=>void refresh()} disabled={busy}>Refresh</button></header>
   {error&&<p role="alert" className="cw-notice">{error}</p>}
   {!account&&!error&&<p role="status">Loading the recorded judgments…</p>}
   {account&&<>
@@ -31,7 +32,7 @@ export default function FinalSynthesisPanel({formId,onComplete}:FinalSynthesisPr
    {result?.collection_open&&<p className="fs-note">Round 3 is still open. Save a snapshot or finish the study when the panel has responded.</p>}
    {result?.stale&&<p role="status" className="cw-notice">Recorded data has changed since this snapshot. <button type="button" onClick={()=>setShowCurrent(v=>!v)}>{showCurrent?'View saved snapshot':'Review current data'}</button></p>}
    <div className="fs-actions"><button type="button" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save()}>Save snapshot</button>{result?.collection_open&&<button type="button" className="cw-primary" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save(true)}>Finish study</button>}<details><summary>Download</summary><button type="button" onClick={()=>download('md')}>Readable account (.md)</button><button type="button" onClick={()=>download('json')}>Full audit data (.json)</button></details></div>
-   <div className="fs-prose">{account.claims.map(c=><p key={c.id}>{c.origin==='inferred'&&<span className="fs-assumption-label">Inferred assumption · unconfirmed. </span>}On “{c.text}”, final positions were {c.positions.filter(d=>d.count).map(d=>`${d.count} ${d.label.toLowerCase()}`).join(', ') || 'not recorded'}. Confidence was rated separately: {c.confidence.filter(d=>d.count).map(d=>`${d.count} ${d.label.toLowerCase()}`).join(', ') || 'not recorded'}.{c.matched>0&&` ${c.changes ? `${c.changes} of ${c.matched} returning experts revised their position` : `All ${c.matched} returning experts retained their position`}.`}</p>)}</div>
+   <div className="fs-prose">{finalNarrative(account.claims).map((text,i)=><p key={i}>{text}</p>)}</div>
    <details className="fs-audit"><summary>Claims, expert reasoning and changes</summary>
    <div className="fs-claims">{account.claims.map(c=><article key={c.id}>
     <h3>{c.text}</h3>{c.origin==='inferred'&&<p className="fs-inferred">Inferred · unconfirmed. Not directly stated by an expert. {c.inference_question}</p>}

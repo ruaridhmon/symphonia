@@ -315,3 +315,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Header narrow-width refinement: title and sidebar toggle share the top line with an explicit 48px toggle gutter; long titles truncate with their full text in the native title. Summary v35, consultation v21, final v16, results workflow-22, CSS v34.
 
 - Live header CSS check: outrank the later shell heading rules and earlier add-response pill selectors so the intended 18px/16px title and borderless action are actually served. CSS v35.
+
+- Policy-readable final synthesis: deterministic grouped prose leads with shared positions, opposition, unresolved disagreement and clearly labelled inferred assumptions, preserving every frozen claim verbatim. Individual counts/confidence/history stay in the supporting record. Readable Markdown exports the same prose; full JSON audit retained. No model/provider call. Summary v36, consultation v22, final v17, workflow-23, CSS v36.
