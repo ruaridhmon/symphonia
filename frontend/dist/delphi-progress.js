@@ -267,7 +267,7 @@ function renderReasoningFlow(root, graph) {
         b.className = "rf-node rf-" + n.kind;
         b.dataset.rfNode = n.id;
         b.setAttribute("aria-pressed", "false");
-        b.append(el("span", `${labels.get(n.id)} / ${n.kind === "assumption" ? "INFERRED ASSUMPTION" : n.kind === "premise" ? "STATED PREMISE" : "STATED RECOMMENDATION"}`, "rf-eyebrow"), el("strong", n.text));
+        b.append(el("span", `${labels.get(n.id)} / ${n.kind === "assumption" ? "INFERRED ASSUMPTION" : !flow.response_number ? "EXPLICIT CLAIM" : n.kind === "premise" ? "STATED PREMISE" : "STATED RECOMMENDATION"}`, "rf-eyebrow"), el("strong", n.text));
         if (n.condition) b.append(el("span", n.condition, "rf-condition"));
         b.append(el("span", n.kind === "assumption" ? "Not stated \xB7 needs checking" : "Inspect source \u2197", "rf-node-foot"));
         b.onclick = () => select(n);
@@ -607,7 +607,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       }
       rating.append(trend);
     }
-    if (row.origin === "inferred") article.prepend(node("p", "Inferred \xB7 unconfirmed. Not directly stated by an expert.", "di-eyebrow"));
+    if (row.origin === "inferred") article.prepend(node("p", "Inferred \xB7 unconfirmed. Not directly stated by an expert.", "di-inferred-origin"));
     const detail = document.createElement("details");
     detail.className = "di-reasons";
     detail.dataset.key = row.key;

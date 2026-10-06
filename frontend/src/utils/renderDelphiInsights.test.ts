@@ -71,3 +71,9 @@ it('reveals confidence distribution by stance and exposes partial response count
  (dialog.querySelector('button') as HTMLButtonElement).click();expect(dialog.close).toHaveBeenCalled();expect(details.open).toBe(false);
  expect(root.querySelector('.di-score')!.textContent).toBe('67%agree');
 });
+
+it('keeps inferred origin outside legacy hidden metadata',()=>{
+ const root=document.createElement('section');const inferred={...round,questions:[{...questions[0],claimOrigin:'inferred'}]};
+ renderDelphiInsights(root,inferred,[inferred],responses(['Agree']));
+ const badge=root.querySelector('.di-inferred-origin');expect(badge?.textContent).toContain('Inferred · unconfirmed');expect(badge?.classList.contains('di-eyebrow')).toBe(false);
+});
