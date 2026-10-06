@@ -317,3 +317,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Live header CSS check: outrank the later shell heading rules and earlier add-response pill selectors so the intended 18px/16px title and borderless action are actually served. CSS v35.
 
 - Policy-readable final synthesis: deterministic grouped prose leads with shared positions, opposition, unresolved disagreement and clearly labelled inferred assumptions, preserving every frozen claim verbatim. Individual counts/confidence/history stay in the supporting record. Readable Markdown exports the same prose; full JSON audit retained. No model/provider call. Summary v36, consultation v22, final v17, workflow-23, CSS v36.
+
+- Narrow header padding is scoped to a consultation workspace to override later-loaded mobile shell padding. CSS v37.
