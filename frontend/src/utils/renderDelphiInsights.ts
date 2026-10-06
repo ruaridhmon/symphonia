@@ -23,7 +23,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   delete root.dataset.filter;
   const existingPlanner=root.dataset.plannerRound===String(round.id)?root.querySelector('.di-planner'):null;
   root.dataset.plannerRound=String(round.id);
-  root.replaceChildren();root.className='card delphi-insights';
+  root.replaceChildren();root.className='card delphi-insights';root.dataset.review=String(round.round_number>1);
   root.dataset.claimLabels=JSON.stringify(rows.map(r=>r.label.replace(/^Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim()));
   const head=node('div','','di-heading');
   const title=node('div','','di-title');if(refresh)title.append(button('Refresh',refresh));head.append(title);root.append(head);
@@ -114,7 +114,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     }
     if(row.origin==='inferred')article.prepend(node('p','Inferred · unconfirmed. Not directly stated by an expert.','di-inferred-origin'));
     const detail=document.createElement('details');detail.className='di-reasons';detail.dataset.key=row.key;detail.open=priorOpen.has(row.key);
-    const summary=node('summary','Distribution, responses and changes');detail.append(summary);
+    const summary=node('summary','Details');summary.setAttribute('aria-label','Distribution, responses and changes');detail.append(summary);
     detail.append(node('p',row.options.map(option=>`${row.evidence.filter(e=>e.position===option).length} ${option.toLowerCase()}`).join(' · '),'di-exact-distribution'));
     if(row.inferenceQuestion)detail.append(node('p',String(row.inferenceQuestion)));
     if(row.hasConfidence)detail.append(node('p','Confidence: '+confidenceLabels.map(level=>`${row.evidence.filter(e=>e.confidence===level).length} ${level.toLowerCase()}`).join(' · ')+` · ${row.evidence.filter(e=>!e.confidence).length} not recorded.`));

@@ -1,3 +1,290 @@
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
+// src/api/client.ts
+var client_exports = {};
+__export(client_exports, {
+  ApiError: () => ApiError,
+  api: () => api,
+  clearAuthAndRedirect: () => clearAuthAndRedirect,
+  getApiErrorDetail: () => getApiErrorDetail,
+  isCfAccessRedirect: () => isCfAccessRedirect,
+  publicApi: () => publicApi
+});
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+function isCfAccessRedirect(response) {
+  if (response.type === "opaqueredirect") return true;
+  if (response.redirected) {
+    const url = response.url.toLowerCase();
+    if (url.includes("cloudflareaccess.com") || url.includes("cdn-cgi/access")) {
+      return true;
+    }
+  }
+  return false;
+}
+function clearAuthAndRedirect() {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("email");
+  localStorage.removeItem("is_admin");
+  document.cookie = "csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax";
+  document.cookie = `csrf_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}; SameSite=Lax`;
+  if (!_redirecting) {
+    _redirecting = true;
+    window.location.href = "/login?expired=1";
+  }
+}
+async function apiClient(endpoint, options = {}) {
+  const csrfToken = getCookie("csrf_token");
+  const bearerToken = localStorage.getItem("access_token");
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      credentials: "include",
+      // Send httpOnly cookies automatically
+      headers: {
+        "Content-Type": "application/json",
+        ...csrfToken ? { "X-CSRF-Token": csrfToken } : {},
+        ...bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {},
+        ...options.headers
+      }
+    });
+  } catch (err) {
+    throw new ApiError(0, "Connection interrupted. Please try again when you are online.");
+  }
+  if (isCfAccessRedirect(response)) {
+    clearAuthAndRedirect();
+    throw new ApiError(401, "Session expired (CF Access). Please log in again.");
+  }
+  if (!response.ok) {
+    if (response.status === 401) {
+      if (endpoint !== "/login") {
+        clearAuthAndRedirect();
+        throw new ApiError(401, "Session expired. Please log in again.");
+      }
+    }
+    let errorBody;
+    try {
+      errorBody = await response.text();
+    } catch {
+      errorBody = `HTTP ${response.status}`;
+    }
+    throw new ApiError(response.status, errorBody, response.headers);
+  }
+  try {
+    return await response.json();
+  } catch {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("text/html")) {
+      throw new ApiError(502, "The server returned an unexpected page. Please try again.");
+    }
+    throw new ApiError(response.status, "Invalid JSON response from server");
+  }
+}
+async function publicApiClient(endpoint, options = {}) {
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      credentials: "omit"
+    });
+  } catch (err) {
+    throw new ApiError(0, err instanceof Error ? err.message : "Network request failed");
+  }
+  if (!response.ok) {
+    let errorBody;
+    try {
+      errorBody = await response.text();
+    } catch {
+      errorBody = `HTTP ${response.status}`;
+    }
+    throw new ApiError(response.status, errorBody, response.headers);
+  }
+  try {
+    return await response.json();
+  } catch {
+    throw new ApiError(response.status, "Invalid JSON response from server");
+  }
+}
+function getApiErrorDetail(error) {
+  if (!(error instanceof ApiError)) return null;
+  try {
+    const parsed = JSON.parse(error.message);
+    if (parsed && typeof parsed.detail === "string") return parsed.detail;
+  } catch {
+  }
+  return error.message || null;
+}
+var API_BASE_URL, _redirecting, ApiError, api, publicApi;
+var init_client = __esm({
+  "src/api/client.ts"() {
+    "use strict";
+    API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "/api").trim();
+    _redirecting = false;
+    ApiError = class extends Error {
+      constructor(status, message, headers) {
+        super(message);
+        this.status = status;
+        this.name = "ApiError";
+        this.headers = headers ?? new Headers();
+      }
+      headers;
+    };
+    api = {
+      get: (endpoint) => apiClient(endpoint),
+      post: (endpoint, data) => apiClient(endpoint, {
+        method: "POST",
+        body: data !== void 0 ? JSON.stringify(data) : void 0
+      }),
+      /** POST with URL-encoded form body (for endpoints that expect form data) */
+      postForm: (endpoint, params) => apiClient(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(params).toString()
+      }),
+      patch: (endpoint, data) => apiClient(endpoint, { method: "PATCH", body: JSON.stringify(data) }),
+      put: (endpoint, data) => apiClient(endpoint, {
+        method: "PUT",
+        body: JSON.stringify(data)
+      }),
+      delete: (endpoint) => apiClient(endpoint, { method: "DELETE" })
+    };
+    publicApi = {
+      get: (endpoint) => publicApiClient(endpoint),
+      post: (endpoint, data) => publicApiClient(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: data !== void 0 ? JSON.stringify(data) : void 0
+      }),
+      postMultipart: (endpoint, data) => publicApiClient(endpoint, {
+        method: "POST",
+        body: data
+      }),
+      put: (endpoint, data) => publicApiClient(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+    };
+  }
+});
+
+// src/utils/consultationActions.ts
+var pinKey = () => `symphonia:pins:${localStorage.getItem("email") || "anonymous"}`;
+function pinnedConsultations() {
+  try {
+    const value = JSON.parse(localStorage.getItem(pinKey()) || "[]");
+    return Array.isArray(value) ? value.filter((v) => Number.isSafeInteger(v) && v > 0) : [];
+  } catch {
+    return [];
+  }
+}
+function toggleConsultationPin(id) {
+  const pins = pinnedConsultations();
+  const next = pins.includes(id) ? pins.filter((n) => n !== id) : [id, ...pins];
+  localStorage.setItem(pinKey(), JSON.stringify(next));
+  document.dispatchEvent(new CustomEvent("symphonia:consultations-changed", { detail: { pinned: true } }));
+  return next.includes(id);
+}
+async function client() {
+  if (document.querySelector('script[src*="index-HJquNmhn.js"]')) {
+    const path = "/assets/index-HJquNmhn.js";
+    return (await import(
+      /* @vite-ignore */
+      path
+    )).b;
+  }
+  return (await Promise.resolve().then(() => (init_client(), client_exports))).api;
+}
+function renameConsultation(id, title, trigger) {
+  const prefix = title.match(/^(?:SIMULATED PANEL\s*[—–-]|Simulated example\s*·)\s*/i)?.[0] || "";
+  const dialog = document.createElement("dialog");
+  dialog.className = "consultation-rename";
+  dialog.setAttribute("aria-labelledby", "rename-consultation-title");
+  const form = document.createElement("form");
+  const heading = document.createElement("h2");
+  heading.id = "rename-consultation-title";
+  heading.textContent = "Rename consultation";
+  const label = document.createElement("label");
+  label.textContent = "Name";
+  const input = document.createElement("input");
+  input.name = "title";
+  input.required = true;
+  input.maxLength = 240 - prefix.length;
+  input.value = title.slice(prefix.length);
+  label.append(input);
+  const error = document.createElement("p");
+  error.className = "rename-error";
+  error.setAttribute("role", "alert");
+  const actions = document.createElement("div");
+  actions.className = "rename-actions";
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.textContent = "Cancel";
+  const save = document.createElement("button");
+  save.type = "submit";
+  save.textContent = "Save";
+  actions.append(cancel, save);
+  form.append(heading, label, error, actions);
+  dialog.append(form);
+  document.body.append(dialog);
+  let busy = false;
+  const close = () => {
+    if (busy) return;
+    dialog.close();
+  };
+  cancel.onclick = close;
+  dialog.addEventListener("cancel", (e) => {
+    if (busy) e.preventDefault();
+  });
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    trigger?.focus();
+  });
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    const next = input.value.trim();
+    if (!next) {
+      error.textContent = "Enter a name.";
+      input.focus();
+      return;
+    }
+    busy = true;
+    save.disabled = true;
+    cancel.disabled = true;
+    input.disabled = true;
+    save.textContent = "Saving\u2026";
+    error.textContent = "";
+    try {
+      await (await client()).patch(`/forms/${id}/title`, { title: prefix + next, expected_title: title });
+      document.dispatchEvent(new CustomEvent("symphonia:consultations-changed", { detail: { id, title: prefix + next } }));
+      busy = false;
+      dialog.close();
+    } catch (err) {
+      error.textContent = err instanceof Error ? err.message : "Could not rename. Please try again.";
+      busy = false;
+      save.disabled = false;
+      cancel.disabled = false;
+      input.disabled = false;
+      save.textContent = "Save";
+    }
+  };
+  dialog.showModal();
+  input.focus();
+  input.select();
+  return dialog;
+}
+
 // src/utils/reasoningFlow.ts
 var el = (tag, text = "", cls = "") => {
   const e = document.createElement(tag);
@@ -288,8 +575,23 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
     const count = responseGroup ? responseGroup.responses.length : round?.response_count;
     const joinUrl = new URL(`/share/${encodeURIComponent(p.form.join_code)}`, window.location.origin).href;
     const outline = questionOutline(round?.questions || p.form.questions);
-    const simulated = /^SIMULATED PANEL\s*[—–-]\s*/i.test(p.form.title);
-    const displayTitle = p.form.title.replace(/^SIMULATED PANEL\s*[—–-]\s*/i, "");
+    const [currentTitle, setCurrentTitle] = R.useState(p.form.title);
+    const [pinned, setPinned] = R.useState(() => pinnedConsultations().includes(p.form.id));
+    R.useEffect(() => {
+      setCurrentTitle(p.form.title);
+      setPinned(pinnedConsultations().includes(p.form.id));
+    }, [p.form.id, p.form.title]);
+    R.useEffect(() => {
+      const changed = (e) => {
+        const d = e.detail;
+        if (d?.id === p.form.id) setCurrentTitle(d.title);
+        setPinned(pinnedConsultations().includes(p.form.id));
+      };
+      document.addEventListener("symphonia:consultations-changed", changed);
+      return () => document.removeEventListener("symphonia:consultations-changed", changed);
+    }, [p.form.id]);
+    const simulated = /^SIMULATED PANEL\s*[—–-]\s*/i.test(currentTitle);
+    const displayTitle = currentTitle.replace(/^SIMULATED PANEL\s*[—–-]\s*/i, "");
     const hint = round?.round_number === 1 ? "Collect independent views, then draw out the claims." : round?.round_number === 2 ? "Review the claims and where the panel agrees or differs." : "Review final ratings alongside the reasons behind them.";
     R.useEffect(() => {
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
@@ -350,6 +652,14 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
             h(
               "div",
               null,
+              button("Rename", () => {
+                if (options.current) options.current.open = false;
+                renameConsultation(p.form.id, currentTitle, options.current?.querySelector("summary"));
+              }),
+              button(pinned ? "Unpin" : "Pin", () => {
+                toggleConsultationPin(p.form.id);
+                if (options.current) options.current.open = false;
+              }),
               button("Invite people", () => openPanel("invite")),
               h("a", { href: `/admin/form/${p.form.id}` }, "Edit consultation"),
               button("View questions", () => openPanel("questions"), { className: "cw-mobile-questions", "aria-label": "Preview round questions", disabled: !round }),

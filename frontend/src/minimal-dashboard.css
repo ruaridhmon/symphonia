@@ -127,3 +127,23 @@
  .symphonia-admin-home > div > .mb-8 > div:last-child {margin-left:auto;}
  #root .symphonia-shell .cw-primary,#root .symphonia-shell .symphonia-admin-home > div > .mb-8 button {min-height:44px!important;}
 }
+
+.symphonia-navigation-row{position:relative;display:flex;align-items:center;min-width:0}
+.symphonia-navigation-row>.symphonia-consultation-link{flex:1;min-width:0;padding-right:30px!important}
+.symphonia-navigation-menu{position:absolute;right:3px;top:8px;z-index:3}
+.symphonia-navigation-menu>summary{cursor:pointer;list-style:none;border-radius:6px;padding:4px;font-size:12px;color:var(--muted-foreground);opacity:0}
+.symphonia-navigation-menu>summary::-webkit-details-marker{display:none}
+.symphonia-navigation-row:hover .symphonia-navigation-menu>summary,.symphonia-navigation-menu:focus-within>summary,.symphonia-navigation-menu[open]>summary{opacity:1}
+.symphonia-navigation-menu>div{position:absolute;right:0;top:30px;min-width:140px;padding:5px;background:var(--background);border:1px solid var(--border);border-radius:10px;box-shadow:0 6px 24px #0001}
+.symphonia-navigation-menu button{display:block;width:100%;padding:9px 12px;border:0;background:none;color:var(--foreground);text-align:left;font:inherit;font-size:13px;border-radius:6px;cursor:pointer}
+.symphonia-navigation-menu button:hover{background:var(--muted)}
+.consultation-rename{width:min(420px,calc(100vw - 40px));border:1px solid var(--border);border-radius:16px;padding:24px;background:var(--background);color:var(--foreground);box-shadow:0 20px 80px #0002}
+.consultation-rename::backdrop{background:#0003}
+.consultation-rename h2{font:600 18px/1.4 system-ui;margin:0 0 20px}
+.consultation-rename label{display:grid;gap:8px;font:13px system-ui;color:var(--muted-foreground)}
+.consultation-rename input{width:100%;box-sizing:border-box;font:14px system-ui;padding:11px 12px;border:1px solid var(--border);border-radius:8px;background:var(--background);color:var(--foreground)}
+.rename-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.rename-actions button{font:13px system-ui;padding:9px 16px;border:1px solid var(--border);border-radius:8px;background:var(--background);color:var(--foreground);cursor:pointer}
+.rename-actions button[type=submit]{background:var(--foreground);color:var(--background)}
+.rename-error{font:12px system-ui;color:var(--destructive,#b42318)}
+@media(hover:none){.symphonia-navigation-menu>summary{opacity:1}}

@@ -76,7 +76,8 @@ it('keeps claim, exact stance and separate confidence together with reasoning co
  const review=[questions[0],{questionId:'claim_1_confidence',sectionTitle:questions[0].sectionTitle,label:'Confidence in your rating',inputType:'single_select'},{questionId:'why',sectionTitle:questions[0].sectionTitle,label:'Explain your position',inputType:'textarea'}];
  const response={...answer(2,'Alice',3),answers:{q1:{position:'Strongly agree'},q2:{position:'Slightly confident'},q3:{position:'Evidence remains weak.'}}};
  const Workspace=createResponseWorkspace(React,Editor);
- const view=render(<Workspace {...base} rounds={[{...rounds[1],questions:review}]} structuredRounds={[{...rounds[1],questions:review,responses:[response]}]}/>);
+ const reviewed={...rounds[1],questions:review,responses:[response]};
+ const view=render(<Workspace {...base} rounds={[reviewed]} structuredRounds={[reviewed]}/>);
  const heading=view.container.querySelector('.rp-compact-rating .rp-question-heading')!;
  expect(heading).toHaveTextContent('Preserve the exact claim');expect(heading).toHaveTextContent('Strongly agree');expect(heading).toHaveTextContent('Confidence: Slightly confident');
  const disclosure=view.container.querySelector('.rp-response-details') as HTMLDetailsElement;

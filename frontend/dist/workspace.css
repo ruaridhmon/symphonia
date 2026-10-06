@@ -777,3 +777,17 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .rp-compact-rating .rp-response-details{margin:0}
 #root .rp-compact-rating .rp-response-details>summary{position:absolute;right:0;top:15px}
 @media(max-width:640px){#root .rp-compact-rating .rp-question-heading{padding-right:0}#root .rp-compact-rating .rp-response-details{margin-top:4px}#root .rp-compact-rating .rp-response-details>summary{position:static}}
+
+/* Compact review summary, with the full audit behind Details. */
+#root .product-summary .delphi-insights[data-review=true] .di-claims{--rating-width:300px;--claim-gap:20px;border:0;border-radius:0}
+#root .product-summary #delphi-recorded-progress[data-review=true] .di-claims .di-claim{padding:13px 0!important;row-gap:5px}
+#root .product-summary .delphi-insights[data-review=true] .di-claim-copy{gap:4px 10px}
+#root .product-summary .delphi-insights[data-review=true] .di-rating{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center}
+#root .product-summary .delphi-insights[data-review=true] .di-bar{width:100%;margin:0;height:3px}
+#root .product-summary .delphi-insights[data-review=true] .di-legend{grid-column:1/-1;display:flex;flex-direction:row;flex-wrap:wrap;gap:3px 10px;margin:0}
+#root .product-summary .delphi-insights[data-review=true] .di-legend .di-stance-group{flex-basis:auto;font-size:11px;gap:3px}
+#root .product-summary .delphi-insights[data-review=true] .di-reasons{margin-top:2px}
+#root .product-summary .delphi-insights[data-review=true] .di-reasons>summary{font-size:11px;padding:0;min-height:22px}
+#root .product-summary .delphi-insights[data-review=true] .di-inferred-origin{font-size:10px;margin:0 0 2px;padding:0;background:none}
+@media(max-width:760px){#root .product-summary .delphi-insights[data-review=true] .di-claims{--rating-width:240px;--claim-gap:12px}}
+@media(max-width:600px){#root .product-summary .delphi-insights[data-review=true] .di-rating{margin:8px 0 4px}#root .product-summary .delphi-insights[data-review=true] .di-claims .di-claim{padding:12px 0!important}}
