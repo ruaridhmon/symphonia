@@ -271,6 +271,7 @@ export default function SurveyQuestionInput({
         <div className="relative">
           <input
             type="text"
+            aria-label={question.label}
             className="w-full rounded-[1.4rem] px-4 py-3 pr-24 text-sm leading-6"
             style={composerFieldStyle}
             placeholder={readOnly ? 'No response provided' : question.placeholder ?? 'Write a short response'}
@@ -510,6 +511,7 @@ export default function SurveyQuestionInput({
       {renderHelpText(question.helpText)}
       <div className="relative">
         <textarea
+          aria-label={question.label}
           rows={question.rows ?? 4}
           className="w-full rounded-[1.6rem] px-4 py-3.5 pr-24 text-sm leading-6"
           style={{

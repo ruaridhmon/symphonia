@@ -15,11 +15,14 @@ function questionOutline(questions) {
   const scales = [...new Set(groups.flatMap((group) => group.fields.filter((field) => field.options.length).map((field) => JSON.stringify(field.options))))];
   return { groups, sharedScale: scales.length === 1 ? JSON.parse(scales[0]) : null };
 }
-function createConsultationWorkspace(R) {
+function createConsultationWorkspace(R, ManualResponse) {
   const h = R.createElement;
   return function ConsultationWorkspace(p) {
     const [panel, setPanel] = R.useState(null);
     const [copyState, setCopyState] = R.useState("");
+    const [adding, setAdding] = R.useState(null);
+    const [saved, setSaved] = R.useState("");
+    const addTrigger = R.useRef(null);
     const dialog = R.useRef(null);
     const titleId = R.useId();
     const ordered = [...p.rounds].sort((a, b) => a.round_number - b.round_number);
@@ -38,6 +41,8 @@ function createConsultationWorkspace(R) {
     R.useEffect(() => {
       setPanel(null);
       setCopyState("");
+      setAdding(null);
+      setSaved("");
     }, [p.form.id]);
     const canLeave = () => !document.querySelector(".response-workspace textarea") || window.confirm("Discard unsaved response edits?");
     const button = (text, onClick, props = {}) => h("button", { type: "button", onClick, ...props }, props.children ?? text);
@@ -94,9 +99,23 @@ function createConsultationWorkspace(R) {
             if (selected && canLeave()) p.onRound(selected);
           } }, ...ordered.map((r) => h("option", { key: r.id, value: r.id }, `Round ${r.round_number}${r.is_active ? " \xB7 Current" : ""}`)))),
           count !== void 0 ? h("span", null, `${count} response${count === 1 ? "" : "s"}`) : null,
+          p.view === "responses" && !p.isDemo && ManualResponse && p.onResponseAdded ? button("+ Add response", () => {
+            if (round?.is_active && canLeave()) {
+              setSaved("");
+              setAdding(round);
+            }
+          }, { ref: addTrigger, className: "cw-add-response", disabled: !round?.is_active, title: round?.is_active ? "Record a response received outside Symphonia" : "Select the current round to add a response" }) : null,
           button("View questions", () => setPanel("questions"), { className: "cw-text-button", disabled: !round })
         )
       ),
+      saved ? h("p", { className: "cw-response-saved", role: "status" }, saved) : null,
+      adding && ManualResponse ? h(ManualResponse, { form: p.form, round: adding, onClose: () => {
+        setAdding(null);
+        requestAnimationFrame(() => addTrigger.current?.focus());
+      }, onSaved: async () => {
+        await p.onResponseAdded?.();
+        setSaved("Response saved");
+      } }) : null,
       h(
         "dialog",
         { ref: dialog, className: "cw-dialog", "aria-labelledby": titleId, onCancel: () => setPanel(null), onClose: () => setPanel(null), onClick: (event) => {

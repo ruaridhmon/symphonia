@@ -37,7 +37,8 @@ export function forwardConsultationClick(event: MouseEvent): void {
   if (url.origin !== location.origin || !/^\/admin\/form\/\d+\/summary\/?$/.test(location.pathname) || !/^\/admin\/form\/\d+\/summary\/?$/.test(url.pathname)) return;
   if (url.pathname === location.pathname) { event.preventDefault(); return; }
   const dirty = document.querySelector('.synthesis-draft-state')?.textContent?.includes('Unsaved changes')
-    || document.querySelector('.response-workspace textarea:not(:disabled)');
+    || document.querySelector('.response-workspace textarea:not(:disabled)')
+    || document.querySelector('.manual-response-sheet[data-dirty="true"]');
   if (dirty && !window.confirm('Leave this consultation and discard unsaved edits?')) { event.preventDefault(); return; }
   const request = new CustomEvent(CONSULTATION_NAVIGATION, { cancelable: true, detail: { href: url.pathname + url.search } });
   window.dispatchEvent(request);

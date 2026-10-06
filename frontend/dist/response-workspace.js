@@ -39,7 +39,7 @@ function responseSections(questions, answers) {
 // src/utils/responseWorkspace.ts
 function createResponseWorkspace(R, Editor, remove) {
   const h = R.createElement;
-  const label = (response, index) => (response.email || `Anonymous response ${index + 1}`).replace(/^Guest:\s*/, "").replace(/\s*\[[A-Za-z0-9_-]{8}\]$/, "");
+  const label = (response, index) => (response.email || `Anonymous response ${index + 1}`).replace(/^(?:Guest|Admin entry):\s*/, "").replace(/\s*\[[A-Za-z0-9_-]{8,32}\]$/, "");
   const timestamp = (value) => {
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? "" : date.toLocaleString(void 0, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -145,7 +145,7 @@ function createResponseWorkspace(R, Editor, remove) {
         const history = earlier.filter((previous) => previous.sections.some((section) => row.sections.some((current) => current.title === section.title)) || previous.round.round_number === 1);
         const isExpanded = expanded.has(row.response.id);
         const personOpen = people.has(row.response.id);
-        const heading = h(R.Fragment, null, h("strong", null, row.name), roundId === "all" ? h("span", { className: "rp-round-label" }, `Round ${row.round.round_number}`) : null, h("span", { className: "rp-person-chevron", "aria-hidden": true }, personOpen ? "\u2212" : "+"));
+        const heading = h(R.Fragment, null, h("strong", null, row.name), row.response.email?.startsWith("Admin entry:") ? h("span", { className: "rp-round-label" }, "Recorded by admin") : null, roundId === "all" ? h("span", { className: "rp-round-label" }, `Round ${row.round.round_number}`) : null, h("span", { className: "rp-person-chevron", "aria-hidden": true }, personOpen ? "\u2212" : "+"));
         return h(
           "article",
           { key: row.response.id, className: "rp-person-answer rp-unified-answer" },

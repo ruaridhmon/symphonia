@@ -1,5 +1,6 @@
 import type * as React from 'react';
 import type { Form, Round, RoundWithResponses } from '../types/summary';
+import type { ManualResponseProps } from '../components/summary/ManualResponseSheet';
 
 type View = 'synthesis' | 'responses' | 'analysis';
 export interface WorkspaceProps {
@@ -14,6 +15,7 @@ export interface WorkspaceProps {
   onMakeLive?: (round: Round) => void;
   makingLiveId?: number | null;
   onDownload?: () => void;
+  onResponseAdded?: () => void | Promise<void>;
 }
 
 export function questionOutline(questions: Round['questions']) {
@@ -31,11 +33,14 @@ export function questionOutline(questions: Round['questions']) {
 }
 
 /** Shared by source and the deployed compatibility build. Uses the existing state and callbacks. */
-export function createConsultationWorkspace(R: typeof React) {
+export function createConsultationWorkspace(R: typeof React, ManualResponse?: React.ComponentType<ManualResponseProps>) {
   const h = R.createElement;
   return function ConsultationWorkspace(p: WorkspaceProps) {
     const [panel, setPanel] = R.useState<'invite' | 'questions' | null>(null);
     const [copyState, setCopyState] = R.useState('');
+    const [adding, setAdding] = R.useState<Round | null>(null);
+    const [saved, setSaved] = R.useState('');
+    const addTrigger = R.useRef<HTMLButtonElement>(null);
     const dialog = R.useRef<HTMLDialogElement>(null);
     const titleId = R.useId();
     const ordered = [...p.rounds].sort((a, b) => a.round_number - b.round_number);
@@ -51,7 +56,7 @@ export function createConsultationWorkspace(R: typeof React) {
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
       if (!panel && dialog.current?.open) dialog.current.close();
     }, [panel]);
-    R.useEffect(() => { setPanel(null); setCopyState(''); }, [p.form.id]);
+    R.useEffect(() => { setPanel(null); setCopyState(''); setAdding(null); setSaved(''); }, [p.form.id]);
     const canLeave = () => !document.querySelector('.response-workspace textarea') || window.confirm('Discard unsaved response edits?');
     const button = (text: string, onClick: () => void, props: Record<string, unknown> = {}) => h('button', { type: 'button', onClick, ...props }, (props.children as React.ReactNode) ?? text);
     const copy = async () => {
@@ -73,7 +78,10 @@ export function createConsultationWorkspace(R: typeof React) {
       h('div', { className: 'cw-context cw-simple-context' },
         ordered.length<=5?h('div',{className:'cw-round-tabs','aria-label':'Rounds'},...ordered.map(r=>button(`Round ${r.round_number}`,()=>{if(canLeave())p.onRound(r);},{key:r.id,'aria-pressed':round?.id===r.id,title:r.is_active?'Current round':`View Round ${r.round_number}`}))):h('label',{className:'cw-round-picker'},h('span',{className:'cw-round-display','aria-hidden':true},`Round ${round?.round_number||'—'} ⌄`),h('select',{'aria-label':'Round',value:round?.id||'',onChange:(event:React.ChangeEvent<HTMLSelectElement>)=>{const selected=ordered.find(r=>r.id===Number(event.target.value));if(selected&&canLeave())p.onRound(selected);}},...ordered.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}${r.is_active?' · Current':''}`)))),
         count!==undefined?h('span',null,`${count} response${count===1?'':'s'}`):null,
+        p.view==='responses' && !p.isDemo && ManualResponse && p.onResponseAdded ? button('+ Add response',()=>{if(round?.is_active&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response',disabled:!round?.is_active,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response'}) : null,
         button('View questions', () => setPanel('questions'), { className: 'cw-text-button', disabled: !round }))),
+      saved ? h('p',{className:'cw-response-saved',role:'status'},saved) : null,
+      adding && ManualResponse ? h(ManualResponse,{form:p.form,round:adding,onClose:()=>{setAdding(null);requestAnimationFrame(()=>addTrigger.current?.focus());},onSaved:async()=>{await p.onResponseAdded?.();setSaved('Response saved');}}) : null,
       h('dialog', { ref: dialog, className: 'cw-dialog', 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => setPanel(null), onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
         h('div', { className: 'cw-dialog-body' },
           h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Bring your panel together' : `Round ${round?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),

@@ -34,6 +34,7 @@ import asyncio
 from typing import Any
 from xml.etree import ElementTree as ET
 import textwrap
+from uuid import UUID
 
 from .rate_limiter import (
     limiter,
@@ -2281,7 +2282,7 @@ def save_round_synthesis(
     """Save the round-specific editor used by the deployed participant workflow."""
     round_obj = db.query(RoundModel).filter(
         RoundModel.id == round_id, RoundModel.form_id == form_id
-    ).first()
+    ).with_for_update().first()
     if round_obj is None:
         raise HTTPException(status_code=404, detail="Round not found")
     if not round_obj.is_active:
@@ -8546,6 +8547,71 @@ def rounds_with_responses(
 
 
 # ---------------------------------------------------------
+class AdminResponsePayload(BaseModel):
+    participant_name: str
+    answers: dict[str, Any]
+    expected_questions: list[Any]
+    request_id: UUID
+    consent_confirmed: bool = False
+
+
+@router.post("/forms/{form_id}/rounds/{round_id}/responses", tags=["Responses"])
+@limiter.limit(CRUD_LIMIT)
+def add_admin_response(
+    request: Request,
+    form_id: int,
+    round_id: int,
+    payload: AdminResponsePayload,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_platform_admin),
+):
+    """Record a separate offline respondent, never replace an existing answer."""
+    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    round_obj = db.query(RoundModel).filter(
+        RoundModel.id == round_id, RoundModel.form_id == form_id
+    ).first()
+    if not form or not round_obj:
+        raise HTTPException(status_code=404, detail="Consultation round not found")
+    name = re.sub(r"\s+", " ", payload.participant_name).strip()
+    if not name or len(name) > 160:
+        raise HTTPException(status_code=400, detail="Enter a respondent name (up to 160 characters).")
+
+    # A lost success response can be retried without creating another respondent.
+    suffix = f" [{payload.request_id.hex}]"
+    email = f"Admin entry: {name}{suffix}"
+    guest = db.query(User).filter(User.email.endswith(suffix)).first()
+    if guest:
+        previous = db.query(Response).filter(Response.user_id == guest.id).first()
+        if (previous and previous.form_id == form_id and previous.round_id == round_id
+                and guest.email == email and previous.answers == payload.answers):
+            return {"id": previous.id, "ok": True}
+        raise HTTPException(status_code=409, detail="This entry was already saved. Close the sheet and start a new response.")
+
+    if not round_obj.is_active:
+        raise HTTPException(status_code=409, detail="The current round changed. Reopen Add response for the current round.")
+    if payload.expected_questions != (round_obj.questions or []):
+        raise HTTPException(status_code=409, detail="The questions changed. Reopen Add response before saving.")
+    if _consent_required(form) and not payload.consent_confirmed:
+        raise HTTPException(status_code=400, detail="Confirm the respondent's consent before saving.")
+    validation_error = _validate_required_answers(round_obj.questions, payload.answers)
+    if validation_error:
+        raise HTTPException(status_code=400, detail=validation_error)
+    if not any(_extract_answer_position(answer) for answer in payload.answers.values()):
+        raise HTTPException(status_code=400, detail="Enter at least one answer before saving.")
+
+    guest = User(email=email, hashed_password=get_password_hash(secrets.token_urlsafe(32)),
+                 role=UserRole.EXPERT.value, is_public_guest=True)
+    db.add(guest)
+    db.flush()
+    response = Response(form_id=form_id, user_id=guest.id, round_id=round_id, answers=payload.answers)
+    db.add(response)
+    db.add(ArchivedResponse(form_id=form_id, user_id=guest.id, email=email,
+                            round_id=round_id, answers=payload.answers))
+    db.commit()
+    logger.info("Admin %s recorded response %s for form %s round %s", user.id, response.id, form_id, round_id)
+    return {"id": response.id, "ok": True}
+
+
 # GENERIC SYNTHESIS
 # ---------------------------------------------------------
 

@@ -9,6 +9,19 @@ beforeAll(() => {
   HTMLDialogElement.prototype.close = function () { this.open = false; };
 });
 afterEach(cleanup);
+it('adds entries only to the current round from Responses and refreshes after saving',async()=>{
+ const Sheet=({round,onSaved,onClose}:any)=><div role="dialog" aria-label="Add response"><span>Adding to {round.id}</span><button onClick={async()=>{await onSaved();onClose();}}>Save entry</button></div>;
+ const AdminWorkspace=createConsultationWorkspace(React,Sheet);
+ const p={...props(),view:'responses' as const,onResponseAdded:vi.fn()};
+ const mounted=render(<AdminWorkspace {...p}/>);
+ fireEvent.click(screen.getByRole('button',{name:'+ Add response'}));
+ expect(screen.getByText('Adding to 12')).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Save entry'}));
+ await waitFor(()=>expect(screen.getByRole('status')).toHaveTextContent('Response saved'));
+ expect(p.onResponseAdded).toHaveBeenCalledOnce();
+ mounted.rerender(<AdminWorkspace {...p} selectedRoundId={11}/>);
+ expect(screen.getByRole('button',{name:'+ Add response'})).toBeDisabled();
+});
 function props(): WorkspaceProps {
   return {form:{id:7,title:'A panel on research',join_code:'ABC 123',allow_join:true,questions:['Opening question']},rounds:[{id:11,round_number:1,is_active:false,questions:['What matters?'],synthesis:''},{id:12,round_number:2,is_active:true,questions:[{label:'Your response',sectionTitle:'Claim 1: Keep independent review',options:['Agree','Disagree']}],synthesis:''}],selectedRoundId:12,view:'synthesis',onView:vi.fn(),onRound:vi.fn(),onMakeLive:vi.fn(),responses:[{id:12,round_number:2,synthesis:'',is_active:true,responses:[]}]} ;
 }

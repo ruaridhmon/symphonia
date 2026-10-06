@@ -5,7 +5,7 @@ type Props={structuredRounds:RoundWithResponses[];rounds:Round[];formQuestions:(
 /** Uses the host's React/editor/API so source and the deployed mirror share one reader. */
 export function createResponseWorkspace(R:typeof React,Editor:React.ComponentType<any>,remove?:(id:number)=>Promise<unknown>){
  const h=R.createElement;
- const label=(response:StructuredResponse,index:number)=>(response.email||`Anonymous response ${index+1}`).replace(/^Guest:\s*/,'').replace(/\s*\[[A-Za-z0-9_-]{8}\]$/,'');
+ const label=(response:StructuredResponse,index:number)=>(response.email||`Anonymous response ${index+1}`).replace(/^(?:Guest|Admin entry):\s*/,'').replace(/\s*\[[A-Za-z0-9_-]{8,32}\]$/,'');
  const timestamp=(value:string)=>{const date=new Date(value);return Number.isNaN(date.getTime())?'':date.toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});};
  return function ResponseWorkspace(p:Props){
   const [roundId,setRoundId]=R.useState<number|'all'>(()=>p.initialRoundId??p.rounds.find(r=>r.is_active)?.id??p.structuredRounds.at(-1)?.id??'all');
@@ -50,7 +50,7 @@ export function createResponseWorkspace(R:typeof React,Editor:React.ComponentTyp
       const history=earlier.filter(previous=>previous.sections.some(section=>row.sections.some(current=>current.title===section.title))||previous.round.round_number===1);
       const isExpanded=expanded.has(row.response.id);
       const personOpen=people.has(row.response.id);
-      const heading=h(R.Fragment,null,h('strong',null,row.name),roundId==='all'?h('span',{className:'rp-round-label'},`Round ${row.round.round_number}`):null,h('span',{className:'rp-person-chevron','aria-hidden':true},personOpen?'−':'+'));
+      const heading=h(R.Fragment,null,h('strong',null,row.name),row.response.email?.startsWith('Admin entry:')?h('span',{className:'rp-round-label'},'Recorded by admin'):null,roundId==='all'?h('span',{className:'rp-round-label'},`Round ${row.round.round_number}`):null,h('span',{className:'rp-person-chevron','aria-hidden':true},personOpen?'−':'+'));
       return h('article',{key:row.response.id,className:'rp-person-answer rp-unified-answer'},
         button('',()=>{if(active===row.response.id&&!allowLeave())return;setActive(null);setPeople(previous=>{const next=new Set(previous);personOpen?next.delete(row.response.id):next.add(row.response.id);return next;});},{className:'rp-answer-heading','aria-label':`Responses from ${row.name}`,'aria-expanded':personOpen,'aria-controls':`person-answers-${row.response.id}`,children:heading}),
         personOpen?h('div',{id:`person-answers-${row.response.id}`,className:'rp-person-content'},

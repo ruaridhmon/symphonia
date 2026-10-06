@@ -29,7 +29,7 @@ function forwardConsultationClick(event) {
     event.preventDefault();
     return;
   }
-  const dirty = document.querySelector(".synthesis-draft-state")?.textContent?.includes("Unsaved changes") || document.querySelector(".response-workspace textarea:not(:disabled)");
+  const dirty = document.querySelector(".synthesis-draft-state")?.textContent?.includes("Unsaved changes") || document.querySelector(".response-workspace textarea:not(:disabled)") || document.querySelector('.manual-response-sheet[data-dirty="true"]');
   if (dirty && !window.confirm("Leave this consultation and discard unsaved edits?")) {
     event.preventDefault();
     return;
