@@ -12,7 +12,7 @@ export default function FinalSynthesisPanel({formId,onComplete}:FinalSynthesisPr
  const account=showCurrent?result?.preview:result?.saved || result?.preview;
  const refresh=React.useCallback(async()=>{setBusy(true);setError('');try{setResult(await api.get<Result>(`/forms/${formId}/final_synthesis`));}catch(e){setError(getApiErrorDetail(e) || 'Could not load final synthesis.');}finally{setBusy(false);}},[formId]);
  React.useEffect(()=>{let active=true;setResult(null);setError('');api.get<Result>(`/forms/${formId}/final_synthesis`).then(r=>{if(active)setResult(r);}).catch(e=>{if(active)setError(getApiErrorDetail(e) || 'Could not load final synthesis.');});return()=>{active=false;};},[formId]);
- React.useEffect(()=>{const root=graph.current;if(root&&account?.reasoning_graph)renderReasoningFlow(root,account.reasoning_graph);return()=>{if(root)clearReasoningFlow(root);};},[account]);
+ React.useEffect(()=>{const root=graph.current;if(root&&account?.reasoning_graph){root.replaceChildren();renderReasoningFlow(root,account.reasoning_graph);}return()=>{if(root)clearReasoningFlow(root);};},[account]);
  async function save(complete=false){
   if(!result)return;
   if(complete&&!window.confirm(`Finish this study with ${result.preview.round_three_count} Round 3 responses? This closes Round 3 submissions and saves the final synthesis.`))return;
