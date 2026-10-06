@@ -1,6 +1,5 @@
 import type { ReasoningGraph, ReasoningNode } from '../types/synthesis';
 const el=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.textContent=text;e.className=cls;return e;};
-let wireId=0;
 const observers=new WeakMap<HTMLElement,ResizeObserver>();
 export function clearReasoningFlow(root:HTMLElement){observers.get(root)?.disconnect();observers.delete(root);}
 /** Read-only source maps. Inferred claims remain visibly unconfirmed even when rated. */
@@ -28,46 +27,27 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
    const links=flow.edges.filter(e=>e.from===n.id||e.to===n.id);
    if(links.length){const list=el('div','','rf-connections');for(const edge of links){const other=flow.nodes.find(t=>t.id===(edge.from===n.id?edge.to:edge.from));if(!other)continue;const b=document.createElement('button');b.type='button';b.textContent=`${labels.get(edge.from)} ${edge.relation} ${labels.get(edge.to)} · ${other.text}`;b.onclick=()=>select(other);list.append(b);}detail.append(list);}
   };
-  // The API returns a DAG. Level columns retain branching without crossing card content.
-  const levels=new Map<string,number>();for(const n of flow.nodes){const incoming=flow.edges.filter(e=>e.to===n.id);levels.set(n.id,incoming.length?Math.max(...incoming.map(e=>(levels.get(e.from)??0)+1)):0);}
-  const max=Math.max(...levels.values());diagram.style.setProperty('--rf-columns',String(max+1));diagram.style.setProperty('--rf-bus-space',`${24+12*flow.edges.filter(e=>(levels.get(e.to)||0)-(levels.get(e.from)||0)>1).length}px`);
-  for(let level=0;level<=max;level++){
-   const column=el('div','','rf-column');column.append(el('h4',level===0?'Starting points':`Step ${level+1}`,'rf-stage'));diagram.append(column);
-   for(const n of flow.nodes.filter(n=>levels.get(n.id)===level)){
-    const card=el('div','','rf-step');const b=document.createElement('button');b.type='button';b.className='rf-node rf-'+n.kind;b.dataset.rfNode=n.id;b.setAttribute('aria-pressed','false');
-    const identity=el('div','','rf-node-identity');identity.append(el('span',labels.get(n.id)!,'rf-number'));if(n.kind==='assumption')identity.append(el('span','Inferred','rf-origin'));b.append(identity,el('strong',n.text));
-    if(n.condition)b.append(el('span',n.condition,'rf-condition'));
-    b.onclick=()=>select(n);card.append(b);
-    const outgoing=flow.edges.filter(e=>e.from===n.id);if(outgoing.length){const links=el('div','','rf-arrows');for(const edge of outgoing){const link=document.createElement('button');link.type='button';link.textContent=`${edge.relation} → ${labels.get(edge.to)}`;link.setAttribute('aria-label',`${labels.get(n.id)} ${edge.relation} ${labels.get(edge.to)}. Inspect connected step`);link.onclick=()=>{const target=flow.nodes.find(t=>t.id===edge.to);if(target)select(target)};links.append(link);}card.append(links);}column.append(card);
-   }
+  // Stable logical order: every dependency appears before the claim it informs.
+  const ordered:ReasoningNode[]=[];const pending=[...flow.nodes];
+  while(pending.length){const ready=pending.findIndex(n=>flow.edges.filter(e=>e.to===n.id).every(e=>ordered.some(p=>p.id===e.from)||!flow.nodes.some(p=>p.id===e.from)));if(ready<0){ordered.push(...pending);break;}ordered.push(pending.splice(ready,1)[0]);}
+  ordered.forEach((n,i)=>labels.set(n.id,flow.response_number?`${flow.response_number}.${i+1}`:String(i+1).padStart(2,'0')));
+  diagram.className='rf-claim-list';diagram.setAttribute('role','list');
+  for(const n of ordered){
+   const row=el('div','','rf-claim-row');row.setAttribute('role','listitem');
+   const b=document.createElement('button');b.type='button';b.className='rf-node rf-list-node';b.dataset.rfNode=n.id;b.setAttribute('aria-pressed','false');
+   b.append(el('span',labels.get(n.id)!,'rf-number'),el('strong',n.text));
+   if(n.kind==='assumption'){row.classList.add('rf-inferred-row');b.append(el('span','Inferred assumption','rf-list-origin'));}
+   b.onclick=()=>select(n);row.append(b);
+   const incoming=flow.edges.filter(e=>e.to===n.id);
+   if(incoming.length){const links=el('div','','rf-dependencies');
+    for(const edge of incoming){const source=flow.nodes.find(t=>t.id===edge.from);if(!source)continue;
+     const link=document.createElement('button');link.type='button';
+     const relation={supports:'Supported by',qualifies:'Qualified by',challenges:'Challenged by',motivates:'Motivated by'}[edge.relation];
+     link.textContent=`${relation} ${labels.get(source.id)}`;link.setAttribute('aria-label',`${n.text}: ${relation.toLowerCase()} claim ${labels.get(source.id)}. ${source.text}`);
+     link.onclick=()=>{select(source);diagram.querySelector<HTMLElement>(`[data-rf-node="${source.id}"]`)?.scrollIntoView?.({block:'nearest',behavior:'smooth'});};links.append(link);
+    }row.append(links);
+   }diagram.append(row);
   }
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.classList.add('rf-wires');svg.setAttribute('aria-hidden','true');diagram.prepend(svg);
-  const markerId='rf-arrow-'+(++wireId);
-  const draw=()=>{
-    const box=diagram.getBoundingClientRect();if(!box.width)return;
-    svg.setAttribute('width',String(diagram.scrollWidth));svg.setAttribute('height',String(diagram.scrollHeight));svg.replaceChildren();
-    const defs=document.createElementNS(svg.namespaceURI,'defs'),marker=document.createElementNS(svg.namespaceURI,'marker'),tip=document.createElementNS(svg.namespaceURI,'path');
-    marker.setAttribute('id',markerId);marker.setAttribute('viewBox','0 0 6 6');marker.setAttribute('refX','6');marker.setAttribute('refY','3');marker.setAttribute('markerWidth','5');marker.setAttribute('markerHeight','5');marker.setAttribute('orient','auto');tip.setAttribute('d','M 0 0 L 6 3 L 0 6');tip.setAttribute('fill','#9ca3af');marker.append(tip);defs.append(marker);svg.append(defs);
-    const vertical=getComputedStyle(diagram).gridTemplateColumns.split(' ').length===1;
-    let skipped=0;for(const edge of flow.edges){
-      const cards=Array.from(diagram.querySelectorAll<HTMLElement>('[data-rf-node]'));
-      const from=cards.find(c=>c.dataset.rfNode===edge.from),to=cards.find(c=>c.dataset.rfNode===edge.to);if(!from||!to)continue;
-      const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
-      const outgoing=flow.edges.filter(e=>e.from===edge.from),incoming=flow.edges.filter(e=>e.to===edge.to);
-      const x1=(vertical?a.left+a.width/2:a.right)-box.left,y1=(vertical?a.bottom:a.top+a.height*(outgoing.indexOf(edge)+1)/(outgoing.length+1))-box.top;
-      const x2=(vertical?b.left+b.width/2:b.left)-box.left,y2=(vertical?b.top:b.top+b.height*(incoming.indexOf(edge)+1)/(incoming.length+1))-box.top;
-      const path=document.createElementNS(svg.namespaceURI,'path');
-      const skip=(levels.get(edge.to)||0)-(levels.get(edge.from)||0)>1;
-      if(skip&&!vertical){const lane=diagram.scrollHeight-14-(skipped++*12),exit=x1+12,entry=x2-12;path.setAttribute('d',`M ${x1} ${y1} L ${exit} ${y1} L ${exit} ${lane} L ${entry} ${lane} L ${entry} ${y2} L ${x2} ${y2}`);}
-      else path.setAttribute('d',vertical?`M ${x1} ${y1} C ${x1} ${(y1+y2)/2}, ${x2} ${(y1+y2)/2}, ${x2} ${y2}`:`M ${x1} ${y1} C ${(x1+x2)/2} ${y1}, ${(x1+x2)/2} ${y2}, ${x2} ${y2}`);
-      path.setAttribute('marker-end',`url(#${markerId})`);path.setAttribute('fill','none');path.setAttribute('stroke',edge.relation==='challenges'?'#b56a72':'#9ca3af');path.setAttribute('stroke-width','1.4');
-      if(flow.nodes.some(n=>(n.id===edge.from||n.id===edge.to)&&n.kind==='assumption'))path.setAttribute('stroke-dasharray','4 4');
-      svg.append(path);
-    }
-  };
-  observers.get(root)?.disconnect();
-  if(typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(draw);observer.observe(diagram);observers.set(root,observer);}
-  requestAnimationFrame(draw);
   select(flow.nodes.find(n=>n.id===(selectedNode||root.dataset.reasoningNode))||flow.nodes[0],!!selectedNode);
  };
  flows.forEach((flow,i)=>{const b=document.createElement('button');b.type='button';b.append(el('span',flow.response_number?`Response ${flow.response_number}`:'All contributions'),el('strong',flow.title));b.onclick=()=>{selectedNode=undefined;delete root.dataset.reasoningNode;show(i)};nav.append(b);});

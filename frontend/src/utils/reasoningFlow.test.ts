@@ -29,3 +29,11 @@ it('uses matching numbers and keeps evidence closed until selection',()=>{
  expect(root.querySelector('.rf-number')?.textContent).toBe('1.1');expect(root.querySelector<HTMLElement>('.rf-detail')?.hidden).toBe(true);
  (root.querySelector('[data-rf-node="b"]') as HTMLButtonElement).click();expect(root.querySelector<HTMLElement>('.rf-detail')?.hidden).toBe(false);expect(root.textContent).not.toContain('EXPLICIT · SOURCE-LINKED CLAIM');expect(root.querySelector('.rf-header')).toBeNull();
 });
+
+it('orders dependent claims after premises and links only to their upstream reasoning',()=>{
+ const root=document.createElement('div');const copy=structuredClone(graph);copy.flows[0].nodes.reverse();renderReasoningFlow(root,copy);
+ expect([...root.querySelectorAll('[data-rf-node]')].map(n=>(n as HTMLElement).dataset.rfNode)).toEqual(['a','b']);
+ expect(root.querySelector('.rf-wires')).toBeNull();expect(root.querySelector('.rf-list-origin')?.textContent).toBe('Inferred assumption');
+ expect(root.querySelectorAll('.rf-dependencies button')).toHaveLength(1);expect(root.querySelector('.rf-dependencies')?.textContent).toContain('Supported by 1.1');
+ (root.querySelector('.rf-dependencies button') as HTMLButtonElement).click();expect(root.querySelector('.rf-detail')?.textContent).toContain('Original words.');
+});
