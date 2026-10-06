@@ -34,7 +34,7 @@ it('uses matching numbers and keeps evidence closed until selection',()=>{
 it('orders dependent claims after premises and links only to their upstream reasoning',()=>{
  const root=document.createElement('div');const copy=structuredClone(graph);copy.flows[0].nodes.reverse();renderReasoningFlow(root,copy);
  expect([...root.querySelectorAll('[data-rf-node]')].map(n=>(n as HTMLElement).dataset.rfNode)).toEqual(['a','b']);
- expect(root.querySelector('.rf-wires')).toBeNull();expect(root.querySelector('.rf-list-origin')?.textContent).toBe('Inferred assumption');
+ expect(root.querySelector('.rf-wires')).toBeNull();expect(root.querySelector('.rf-list-origin')?.textContent).toBe('Inferred assumption · unconfirmed');
  expect(root.querySelectorAll('.rf-dependencies button')).toHaveLength(1);expect(root.querySelector('.rf-dependencies')?.textContent).toContain('Supported by 1.1');
  (root.querySelector('.rf-dependencies button') as HTMLButtonElement).click();expect(root.querySelector('.rf-detail')?.textContent).toContain('Original words.');
 });

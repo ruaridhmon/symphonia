@@ -18,9 +18,9 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
   const title=el('div','','rf-flow-title');if(flow.response_number){title.append(el('h3',flow.title));canvas.append(title);}
   const diagram=el('div','','rf-diagram');canvas.append(diagram);
   const labels=new Map(flow.nodes.map((n,i)=>[n.id,flow.response_number?`${flow.response_number}.${i+1}`:String(i+1).padStart(2,'0')]));
-  const select=(n:ReasoningNode,open=true)=>{
+  const select=(n:ReasoningNode,open=true,invoker?:HTMLButtonElement)=>{
    root.dataset.reasoningNode=n.id;diagram.querySelectorAll<HTMLButtonElement>('[data-rf-node]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rfNode===n.id)));detail.replaceChildren();detail.classList.toggle('rf-inferred-detail',n.kind==='assumption');detail.hidden=!open;
-   const top=el('div','','rf-detail-heading');const title=el('div');title.append(el('p','Supporting information','di-supporting-kicker'),el('h4',n.text,'di-supporting-claim'));top.append(title);const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close supporting information');close.onclick=()=>{detail.close();detail.hidden=true;diagram.querySelector<HTMLButtonElement>(`[data-rf-node="${n.id}"]`)?.focus();};top.append(close);detail.append(top);
+   const top=el('div','','rf-detail-heading');const title=el('div');title.append(el('p','Supporting information','di-supporting-kicker'),el('h4',n.text,'di-supporting-claim'));top.append(title);const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close supporting information');close.onclick=()=>{detail.close();detail.hidden=true;(invoker||diagram.querySelector<HTMLButtonElement>(`[data-rf-node="${n.id}"]`))?.focus();};top.append(close);detail.append(top);
    if(n.kind==='assumption')detail.append(el('p','Inferred · unconfirmed','di-supporting-origin'),el('p',n.question||'Ask the expert to clarify this connection.','di-supporting-text'));
    else if(n.sources){for(const source of n.sources){const block=el('section','','di-supporting-entry');block.append(el('div',`Response ${source.response_number}`,'di-supporting-person'),el('blockquote',source.source_text||source.quote,'di-supporting-text'));if(source.source_answers||source.source_text!==source.quote){const context=document.createElement('details');context.className='di-supporting-audit';context.append(el('summary','Original fields'),el('p',source.quote));if(source.source_answers)context.append(el('pre',JSON.stringify(source.source_answers,null,2),'rf-original-answer'));block.append(context);}detail.append(block);}}
    else{detail.append(el('blockquote',n.quote||''));if(n.condition)detail.append(el('p','Qualification: '+n.condition,'rf-qualification'));if(n.source_text&&n.source_text!==n.quote){const context=document.createElement('details');context.append(el('summary','Read the source in context'),el('p',n.source_text));detail.append(context);}}
@@ -38,7 +38,7 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
    const row=el('div','','rf-claim-row');row.setAttribute('role','listitem');
    const b=document.createElement('button');b.type='button';b.className='rf-node rf-list-node';b.dataset.rfNode=n.id;b.setAttribute('aria-pressed','false');
    b.append(el('span',labels.get(n.id)!,'rf-number'),el('strong',n.text));
-   if(n.kind==='assumption'){row.classList.add('rf-inferred-row');b.append(el('span','Inferred assumption','rf-list-origin'));}
+   if(n.kind==='assumption'){row.classList.add('rf-inferred-row');b.append(el('span','Inferred assumption · unconfirmed','rf-list-origin'));}
    b.title=n.kind==='assumption'?'Inspect inferred assumption':'Read supporting information';
    b.setAttribute('aria-haspopup','dialog');b.onclick=()=>select(n);row.append(b);
    const incoming=flow.edges.filter(e=>e.to===n.id);
@@ -49,6 +49,10 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph, sele
      link.textContent=`${relation} ${labels.get(source.id)}`;link.setAttribute('aria-label',`${n.text}: ${relation.toLowerCase()} claim ${labels.get(source.id)}. ${source.text}`);
      link.onclick=()=>{select(source);diagram.querySelector<HTMLElement>(`[data-rf-node="${source.id}"]`)?.scrollIntoView?.({block:'nearest',behavior:'smooth'});};links.append(link);
     }row.append(links);
+   }
+   if(n.sources?.some(s=>s.quote.trim())||n.quote?.trim()){
+    const source=document.createElement('button');source.type='button';source.className='di-supporting-trigger rf-source-trigger';source.setAttribute('aria-label','Supporting information');source.setAttribute('aria-haspopup','dialog');source.title='Supporting information';
+    const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 20 20');icon.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M5 2.75h6l4 4v10.5H5z M11 2.75v4h4 M8 10h4 M8 13h4');icon.append(path);source.append(icon);source.onclick=()=>select(n,true,source);row.append(source);
    }diagram.append(row);
   }
   select(flow.nodes.find(n=>n.id===(selectedNode||root.dataset.reasoningNode))||flow.nodes[0],!!selectedNode);

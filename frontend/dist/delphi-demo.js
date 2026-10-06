@@ -2399,7 +2399,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
     const diagram = el("div", "", "rf-diagram");
     canvas.append(diagram);
     const labels = new Map(flow.nodes.map((n, i) => [n.id, flow.response_number ? `${flow.response_number}.${i + 1}` : String(i + 1).padStart(2, "0")]));
-    const select = (n, open = true) => {
+    const select = (n, open = true, invoker) => {
       root.dataset.reasoningNode = n.id;
       diagram.querySelectorAll("[data-rf-node]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rfNode === n.id)));
       detail.replaceChildren();
@@ -2416,7 +2416,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
       close.onclick = () => {
         detail.close();
         detail.hidden = true;
-        diagram.querySelector(`[data-rf-node="${n.id}"]`)?.focus();
+        (invoker || diagram.querySelector(`[data-rf-node="${n.id}"]`))?.focus();
       };
       top.append(close);
       detail.append(top);
@@ -2495,7 +2495,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
       b.append(el("span", labels.get(n.id), "rf-number"), el("strong", n.text));
       if (n.kind === "assumption") {
         row.classList.add("rf-inferred-row");
-        b.append(el("span", "Inferred assumption", "rf-list-origin"));
+        b.append(el("span", "Inferred assumption \xB7 unconfirmed", "rf-list-origin"));
       }
       b.title = n.kind === "assumption" ? "Inspect inferred assumption" : "Read supporting information";
       b.setAttribute("aria-haspopup", "dialog");
@@ -2519,6 +2519,23 @@ function renderReasoningFlow(root, graph, selectedNode) {
           links.append(link);
         }
         row.append(links);
+      }
+      if (n.sources?.some((s) => s.quote.trim()) || n.quote?.trim()) {
+        const source = document.createElement("button");
+        source.type = "button";
+        source.className = "di-supporting-trigger rf-source-trigger";
+        source.setAttribute("aria-label", "Supporting information");
+        source.setAttribute("aria-haspopup", "dialog");
+        source.title = "Supporting information";
+        const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        icon.setAttribute("viewBox", "0 0 20 20");
+        icon.setAttribute("aria-hidden", "true");
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M5 2.75h6l4 4v10.5H5z M11 2.75v4h4 M8 10h4 M8 13h4");
+        icon.append(path);
+        source.append(icon);
+        source.onclick = () => select(n, true, source);
+        row.append(source);
       }
       diagram.append(row);
     }
