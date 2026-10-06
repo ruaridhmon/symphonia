@@ -643,7 +643,8 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 .manual-response-sheet::backdrop {background:rgb(0 0 0 / .22);}
 .manual-response-sheet[open] {display:flex;flex-direction:column;}
 .manual-response-heading {display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 24px 16px;border-bottom:1px solid var(--border);}
-.manual-response-heading h2 {font-size:20px;font-weight:550;margin:0 0 5px;letter-spacing:-.025em;}
+.manual-response-heading > div {min-width:0;}
+.manual-response-heading h2 {font-size:20px;line-height:1.4;font-weight:550;margin:0 0 8px;letter-spacing:-.025em;overflow-wrap:anywhere;}
 .manual-response-heading p {font-size:12px;line-height:1.5;color:var(--muted-foreground);margin:0;}
 .manual-response-heading button {border:0;background:none;color:var(--muted-foreground);width:36px;height:36px;font-size:24px;flex-shrink:0;}
 .manual-response-sheet form {display:flex;flex-direction:column;min-height:0;flex:1;}
