@@ -319,3 +319,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Policy-readable final synthesis: deterministic grouped prose leads with shared positions, opposition, unresolved disagreement and clearly labelled inferred assumptions, preserving every frozen claim verbatim. Individual counts/confidence/history stay in the supporting record. Readable Markdown exports the same prose; full JSON audit retained. No model/provider call. Summary v36, consultation v22, final v17, workflow-23, CSS v36.
 
 - Narrow header padding is scoped to a consultation workspace to override later-loaded mobile shell padding. CSS v37.
+
+- Final prose live refinement: verbatim claim sentences read consecutively as paragraphs, avoiding a comma-separated list of quoted claims and doubled sentence punctuation. Dist Summary v37, consultation v23, final v18, workflow-24, CSS v38.
