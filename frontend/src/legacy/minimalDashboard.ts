@@ -5,7 +5,7 @@ import { consultationId, loadNavigation, renderConsultationNavigation, type Navi
  *
  * Dev hosting currently serves the committed frontend/dist mirror. Keep this
  * DOM-only enhancement deliberately conservative: it changes presentation and
- * labels on the authenticated home route without replacing React handlers,
+ * navigation and labels on authenticated routes without replacing React handlers,
  * auth state, API callbacks, or stored data.
  */
 
@@ -72,8 +72,10 @@ function markHeader(): void {
       }
       const close = document.createElement('button'); close.type='button'; close.className='symphonia-drawer-close'; close.textContent='Close'; close.setAttribute('aria-label','Close consultations'); close.onclick=closeDrawer;
       const drawerNav = document.createElement('nav'); drawerNav.setAttribute('aria-label','Switch consultation');
+      const drawerSearch = document.createElement('input'); drawerSearch.type='search'; drawerSearch.placeholder='Find a consultation'; drawerSearch.setAttribute('aria-label','Find a consultation'); drawerSearch.className='symphonia-navigation-search';
+      drawerSearch.addEventListener('input', () => renderConsultationNavigation(drawerNav,current.data,location.pathname,current.error,drawerSearch.value));
       renderConsultationNavigation(drawerNav, current.data, location.pathname, current.error);
-      dialog.replaceChildren(close, drawerNav); dialog.showModal(); toggle.setAttribute('aria-expanded','true');
+      dialog.replaceChildren(close, drawerSearch, drawerNav); dialog.showModal(); toggle.setAttribute('aria-expanded','true');
     });
     search.addEventListener('input', () => { current.query = search.value; current.signature=''; scheduleApply(); });
 
@@ -89,7 +91,7 @@ function markHeader(): void {
     state.signature=signature;
     renderConsultationNavigation(state.nav.querySelector('.symphonia-navigation-list')!, state.data, location.pathname, state.error, state.query);
     const drawerNav=state.dialog.querySelector('nav');
-    if (state.dialog.open && drawerNav) renderConsultationNavigation(drawerNav,state.data,location.pathname,state.error);
+    if (state.dialog.open && drawerNav) renderConsultationNavigation(drawerNav,state.data,location.pathname,state.error,state.dialog.querySelector<HTMLInputElement>('input')?.value);
   }
   if (!state.dialog.open) {
     const expanded = consultationId(location.pathname) !== null && !collapsed && innerWidth > 800;

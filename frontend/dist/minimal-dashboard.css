@@ -5,7 +5,7 @@
 #root .symphonia-shell > .symphonia-shell-header {position:sticky!important;top:0;inset:auto!important;height:58px;width:auto;z-index:40;border:0!important;box-shadow:none!important;backdrop-filter:none!important;background:var(--background)!important;}
 #root .symphonia-shell.symphonia-consultation-open > .symphonia-shell-header {margin-left:calc(-1 * var(--shell-width));}
 #root .symphonia-shell.symphonia-sidebar-collapsed > .symphonia-shell-header {margin-left:0;}
-#root .symphonia-shell > .symphonia-shell-header > div:first-child {display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;max-width:none!important;min-height:58px!important;margin:0!important;padding:10px 20px!important;}
+#root .symphonia-shell > .symphonia-shell-header.symphonia-shell-header > div:first-child {display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;max-width:none!important;min-height:58px!important;margin:0!important;padding:10px 20px!important;}
 #root .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-shell-header button[aria-label="Go to dashboard"] {min-height:36px;justify-content:flex-start;gap:0!important;padding:0 6px!important;}
 #root .symphonia-shell-header button[aria-label="Go to home"] img,#root .symphonia-shell-header button[aria-label="Go to dashboard"] img {display:none!important;}
 #root .symphonia-shell-header button[aria-label="Go to home"] h1,#root .symphonia-shell-header button[aria-label="Go to dashboard"] span {display:block!important;font-size:15px!important;font-weight:550!important;letter-spacing:-.025em;}
@@ -55,10 +55,10 @@
 #root .symphonia-flat-table tbody tr { background:transparent!important; }
 #root .symphonia-flat-table tbody td { padding:18px 8px!important;border-bottom:1px solid color-mix(in srgb,var(--border) 65%,transparent)!important; }
 #root .symphonia-flat-table tbody tr:last-child td { border-bottom:0!important; }
-#root .symphonia-flat-table .inbox-original-actions a,
-#root .symphonia-flat-table .inbox-original-actions button { background:transparent!important;border:0!important;color:var(--muted-foreground)!important; }
-#root .symphonia-flat-table .inbox-original-actions a:hover,
-#root .symphonia-flat-table .inbox-original-actions button:hover { background:var(--muted)!important;color:var(--foreground)!important; }
+#root .symphonia-shell .symphonia-flat-table .inbox-original-actions a,
+#root .symphonia-shell .symphonia-flat-table .inbox-original-actions button { background:transparent!important;border:0!important;color:var(--muted-foreground)!important; }
+#root .symphonia-shell .symphonia-flat-table .inbox-original-actions a:hover,
+#root .symphonia-shell .symphonia-flat-table .inbox-original-actions button:hover { background:var(--muted)!important;color:var(--foreground)!important; }
 #root .symphonia-flat-table .inbox-more { min-width:36px;min-height:36px; }
 #root .symphonia-shell .demo-dashboard-link { font-size:11px; }
 #root .symphonia-shell #earlier-surveys-toggle { border:0!important;background:none!important;text-align:left;justify-content:flex-start;padding-left:8px!important;color:var(--muted-foreground); }
@@ -76,7 +76,12 @@
 #root .symphonia-shell .product-summary #delphi-recorded-progress .di-claims .di-claim { padding:16px 8px!important; }
 #root .symphonia-shell .cw-primary { background:var(--muted)!important;color:var(--foreground)!important;border-color:transparent!important;border-radius:8px!important;min-height:36px;padding:8px 12px!important;font-weight:500; }
 #root .symphonia-shell a:focus-visible,#root .symphonia-shell button:focus-visible { outline:2px solid var(--ring);outline-offset:3px; }
+#root .symphonia-shell .cw-identity h2 {font-size:24px!important;line-height:1.35!important;letter-spacing:-.025em;}
 @media(max-width:800px) {
+ #root .symphonia-shell .cw-identity h2 {font-size:20px!important;}
+ #root .symphonia-navigation-toggle {width:44px;height:44px;}
+ #root .symphonia-navigation-drawer .symphonia-navigation-search {font-size:16px!important;height:44px;}
+ #root .symphonia-navigation-drawer nav a,.symphonia-drawer-close {min-height:44px;}
  #root .symphonia-shell.symphonia-consultation-open {padding-left:0;}
  #root .symphonia-shell.symphonia-consultation-open > .symphonia-shell-header {margin-left:0;}
  #root .symphonia-shell-header > .symphonia-shell-navigation {display:none!important;}
