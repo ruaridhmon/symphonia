@@ -8,7 +8,7 @@ it('switches contributions and exposes sources without attributing assumptions',
  const root=document.createElement('div');document.body.replaceChildren(root);renderReasoningFlow(root,graph);
  expect(root.querySelector('.rf-detail')?.textContent).toContain('Original words.');
  (root.querySelector('[data-rf-node="b"]') as HTMLElement).click();expect(root.querySelector('.rf-detail')?.textContent).toContain('Inferred · unconfirmed');expect(root.querySelector('.rf-detail')?.textContent).toContain('Is this what you mean?');expect(root.querySelector('.rf-detail')?.textContent).not.toContain('Original words.');
- (root.querySelectorAll('.rf-tabs button')[1] as HTMLElement).click();expect(root.querySelectorAll('.rf-node')).toHaveLength(1);expect(root.querySelector('.rf-detail')?.textContent).toContain('Another response.');
+ const picker=root.querySelector<HTMLSelectElement>('.rf-source-picker')!;picker.value='1';picker.dispatchEvent(new Event('change'));expect(root.querySelectorAll('.rf-node')).toHaveLength(1);expect(root.querySelector('.rf-detail')?.textContent).toContain('Another response.');
 });
 it('renders source content as text, not executable HTML',()=>{
  const root=document.createElement('div');const copy=structuredClone(graph);copy.flows[0].nodes[0].quote='<img src=x onerror=alert(1)>';renderReasoningFlow(root,copy);expect(root.querySelector('img')).toBeNull();expect(root.textContent).toContain('<img src=x');

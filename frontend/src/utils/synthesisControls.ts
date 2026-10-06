@@ -15,7 +15,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
   if(bound.has(detail))continue;bound.add(detail);
   const trigger=detail.querySelector<HTMLElement>(':scope > summary');const panel=detail.querySelector<HTMLElement>(':scope > .card');if(!trigger||!panel)continue;
   panel.id ||= `synthesis-panel-${++panelId}`;trigger.setAttribute('aria-controls',panel.id);panel.setAttribute('role','region');panel.setAttribute('aria-label',trigger.querySelector('span')?.textContent||'Synthesis settings');
-  const close=document.createElement('button');close.type='button';close.className='summary-panel-close';close.textContent='Close';close.setAttribute('aria-label',`Close ${panel.getAttribute('aria-label')?.toLowerCase()}`);close.onclick=()=>{detail.open=false;(main.querySelector<HTMLElement>('.summary-generate-empty')||trigger).focus();};panel.prepend(close);
+  const close=document.createElement('button');close.type='button';close.className='summary-panel-close';close.textContent='Close';close.setAttribute('aria-label',`Close ${panel.getAttribute('aria-label')?.toLowerCase()}`);close.onclick=()=>{detail.open=false;(main.querySelector<HTMLElement>('.summary-generate-empty')||main.querySelector<HTMLElement>('.summary-actions-menu>summary')||trigger).focus();};panel.prepend(close);
   const sync=()=>{trigger.setAttribute('aria-expanded',String(detail.open));if(detail.open)toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure').forEach(other=>{if(other!==detail)other.open=false;});};
   detail.addEventListener('toggle',sync);sync();
  }
@@ -27,7 +27,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
  if(nav&&!nav.hidden){
   toolbar.classList.add('summary-actions-panel');
   const generation=toolbar.querySelector<HTMLDetailsElement>('details.summary-disclosure');
-  if(generation&&!nav.querySelector('.summary-generate-empty')){
+  if(generation&&!progress?.querySelector('.di-claim,.rf-workspace')&&!nav.querySelector('.summary-generate-empty')){
    const generate=document.createElement('button');generate.type='button';generate.className='summary-generate-empty';generate.textContent='Generate summary';
    const sync=()=>generate.setAttribute('aria-expanded',String(generation.open));
    generate.setAttribute('aria-controls',generation.querySelector('.card')?.id||'');sync();
@@ -40,7 +40,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
    const items=document.createElement('div');items.className='summary-actions-items';menu.append(items);nav.append(menu);
 
    for(const detail of toolbar.querySelectorAll<HTMLDetailsElement>(':scope > details.summary-disclosure')){
-    if(detail===generation)continue;
+
     const action=document.createElement('button');action.type='button';action.textContent=detail.querySelector('summary span')?.textContent||'Summary settings';
     action.onclick=()=>{menu!.open=false;toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure').forEach(other=>other.open=other===detail?!detail.open:false);detail.querySelector<HTMLElement>('.card input,.card select,.summary-panel-close')?.focus();};items.append(action);
    }
@@ -50,7 +50,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
   }
  }else toolbar.classList.remove('summary-actions-panel');
  if(bound.has(toolbar))return;bound.add(toolbar);
- toolbar.addEventListener('keydown',event=>{if(event.key!=='Escape')return;const open=toolbar.querySelector<HTMLDetailsElement>('details.summary-disclosure[open]');if(open){event.preventDefault();open.open=false;(main.querySelector<HTMLElement>('.summary-generate-empty')||open.querySelector<HTMLElement>('summary'))?.focus();}});
+ toolbar.addEventListener('keydown',event=>{if(event.key!=='Escape')return;const open=toolbar.querySelector<HTMLDetailsElement>('details.summary-disclosure[open]');if(open){event.preventDefault();open.open=false;(main.querySelector<HTMLElement>('.summary-generate-empty')||main.querySelector<HTMLElement>('.summary-actions-menu>summary')||open.querySelector<HTMLElement>('summary'))?.focus();}});
  // Pointer dismissal is scoped to this toolbar and removed when the view unmounts.
  const outside=(event:PointerEvent)=>{if(!toolbar.isConnected){document.removeEventListener('pointerdown',outside);return;}if(toolbar.contains(event.target as Node)||(event.target as Element).closest('.summary-switch,.summary-tools-only'))return;toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure[open]').forEach(d=>d.open=false);};
  document.addEventListener('pointerdown',outside);

@@ -220,7 +220,7 @@ function enhanceSynthesisControls(main) {
     close.setAttribute("aria-label", `Close ${panel.getAttribute("aria-label")?.toLowerCase()}`);
     close.onclick = () => {
       detail.open = false;
-      (main.querySelector(".summary-generate-empty") || trigger).focus();
+      (main.querySelector(".summary-generate-empty") || main.querySelector(".summary-actions-menu>summary") || trigger).focus();
     };
     panel.prepend(close);
     const sync = () => {
@@ -245,7 +245,7 @@ function enhanceSynthesisControls(main) {
   if (nav && !nav.hidden) {
     toolbar.classList.add("summary-actions-panel");
     const generation = toolbar.querySelector("details.summary-disclosure");
-    if (generation && !nav.querySelector(".summary-generate-empty")) {
+    if (generation && !progress?.querySelector(".di-claim,.rf-workspace") && !nav.querySelector(".summary-generate-empty")) {
       const generate = document.createElement("button");
       generate.type = "button";
       generate.className = "summary-generate-empty";
@@ -273,7 +273,6 @@ function enhanceSynthesisControls(main) {
       menu.append(items);
       nav.append(menu);
       for (const detail of toolbar.querySelectorAll(":scope > details.summary-disclosure")) {
-        if (detail === generation) continue;
         const action = document.createElement("button");
         action.type = "button";
         action.textContent = detail.querySelector("summary span")?.textContent || "Summary settings";
@@ -319,7 +318,7 @@ function enhanceSynthesisControls(main) {
     if (open) {
       event.preventDefault();
       open.open = false;
-      (main.querySelector(".summary-generate-empty") || open.querySelector("summary"))?.focus();
+      (main.querySelector(".summary-generate-empty") || main.querySelector(".summary-actions-menu>summary") || open.querySelector("summary"))?.focus();
     }
   });
   const outside = (event) => {

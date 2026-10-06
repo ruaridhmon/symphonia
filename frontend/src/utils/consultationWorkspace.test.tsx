@@ -28,12 +28,12 @@ function props(): WorkspaceProps {
 describe('consultation workspace', () => {
   it('views a previous round without changing the live round', () => {
     const p=props();render(<Workspace {...p}/>);
-    fireEvent.click(screen.getByRole('button',{name:'Round 1'}));
+    fireEvent.change(screen.getByRole('combobox',{name:'Study stage'}),{target:{value:'11'}});
     expect(p.onRound).toHaveBeenCalledWith(p.rounds[0]);expect(p.onMakeLive).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button',{name:'Responses'}));expect(p.onView).toHaveBeenCalledWith('responses');
   });
   it('previews the actual questions and options', async () => {
-    render(<Workspace {...props()}/>);fireEvent.click(screen.getByRole('button',{name:'View questions'}));
+    render(<Workspace {...props()}/>);fireEvent.click(screen.getByRole('button',{name:'View questions',hidden:true}));
     expect(await screen.findByRole('dialog',{name:'Round 2 questions'})).toBeTruthy();
     expect(screen.getByText('Claim 1: Keep independent review')).toBeTruthy();expect(screen.getByText('Agree · Disagree')).toBeTruthy();
   });
@@ -61,7 +61,7 @@ it('groups rating and explanation under one claim without repeating the scale',(
  const questions=[{sectionTitle:claim,label:'Your response',inputType:'single_select',options:['Agree','Disagree']},{sectionTitle:claim,label:'Explain your position',inputType:'textarea'}];
  const round={id:22,round_number:2,is_active:true,synthesis:'',questions};
  render(<Workspace form={{id:1,title:'Panel',questions,allow_join:true,join_code:'abc'}} rounds={[round]} selectedRoundId={22} view="synthesis" onView={()=>{}} onRound={()=>{}}/>);
- fireEvent.click(screen.getByRole('button',{name:'View questions'}));
+ fireEvent.click(screen.getByRole('button',{name:'View questions',hidden:true}));
  expect(screen.getAllByRole('heading',{name:claim})).toHaveLength(1);
  expect(screen.getAllByText('Rating',{exact:true}).length).toBeGreaterThan(0);
  expect(screen.getByText('Written explanation',{exact:false})).toBeInTheDocument();
@@ -71,7 +71,7 @@ it('offers only Summary and Responses with directly selectable rounds',()=>{
  expect(screen.getByRole('button',{name:'Summary'})).toBeInTheDocument();
  expect(screen.queryByRole('button',{name:'Analysis'})).not.toBeInTheDocument();
  expect(screen.queryByText('Reflection')).not.toBeInTheDocument();
- expect(screen.getByRole('button',{name:'Round 2'})).toHaveAttribute('aria-pressed','true');
+ expect(screen.getByRole('combobox',{name:'Study stage'})).toHaveValue('12');
 });
 
 it('makes Add response available from Summary and places invitations inside the options menu',()=>{
@@ -89,16 +89,16 @@ it('opens the final stage without creating a fourth expert round',()=>{
  const Final=({formId}:any)=><div>Final account for {formId}</div>;
  const AdminWorkspace=createConsultationWorkspace(React,undefined,Final);
  const p=props();p.rounds.push({...p.rounds[1],id:13,round_number:3});
- render(<AdminWorkspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Final synthesis'}));
+ render(<AdminWorkspace {...p}/>);fireEvent.change(screen.getByRole('combobox',{name:'Study stage'}),{target:{value:'final'}});
  expect(screen.getByText('Final account for 7')).toBeInTheDocument();
  expect(p.onView).toHaveBeenCalledWith('synthesis');expect(p.onMakeLive).not.toHaveBeenCalled();
  expect(screen.queryByRole('button',{name:'Round 4'})).not.toBeInTheDocument();
- fireEvent.click(screen.getByRole('button',{name:'Round 1'}));expect(screen.queryByText('Final account for 7')).not.toBeInTheDocument();
+ fireEvent.change(screen.getByRole('combobox',{name:'Study stage'}),{target:{value:'11'}});expect(screen.queryByText('Final account for 7')).not.toBeInTheDocument();
 });
 
 it('keeps the shared map accessible from a later round',()=>{
  const p=props();p.rounds[0].synthesis='saved';p.rounds[0].synthesis_json={narrative:'saved',reasoning_graph:{version:1,flows:[],response_count:1,mapped_response_count:0,rejected_flow_count:0,status:'provided_interpretation',claims:[{id:'claim_a',text:'An inferred bridge',origin:'inferred',sources:[],question:'Does this follow?'}],claim_edges:[]}} as any;
  render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Claim map'}));
- expect(screen.getByText('Shared claim map')).toBeInTheDocument();expect(screen.getByText('Inferred',{exact:true})).toBeInTheDocument();
- fireEvent.click(screen.getByRole('button',{name:'Responses'}));expect(screen.queryByText('Shared claim map')).not.toBeInTheDocument();
+ expect(screen.getByRole('option',{name:'Shared claims'})).toBeInTheDocument();expect(screen.getByText('Inferred assumption',{exact:true})).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Responses'}));expect(screen.queryByRole('combobox',{name:'Claim sources'})).not.toBeInTheDocument();
 });
