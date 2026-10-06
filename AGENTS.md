@@ -313,3 +313,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Quiet consultation header: small title/action bar and direct pill-style round tabs; Summary/Responses/Claim map and source/full-summary controls share a keyboard-accessible view popover instead of three competing rows. Mobile Add response remains labelled with a compact icon. Summary v34, consultation v20, final v15, results workflow-21, CSS v33.
 
 - Header narrow-width refinement: title and sidebar toggle share the top line with an explicit 48px toggle gutter; long titles truncate with their full text in the native title. Summary v35, consultation v21, final v16, results workflow-22, CSS v34.
+
+- Live header CSS check: outrank the later shell heading rules and earlier add-response pill selectors so the intended 18px/16px title and borderless action are actually served. CSS v35.
