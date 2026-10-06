@@ -1,8 +1,9 @@
+import FinalSynthesisPanel from "./components/summary/FinalSynthesisPanel";
 import * as WorkspaceReact from 'react';
 import { createSummaryRoute } from './utils/summaryRoute';
 import { createConsultationWorkspace } from './utils/consultationWorkspace';
 import ManualResponseSheet from './components/summary/ManualResponseSheet';
-const ConsultationWorkspace = createConsultationWorkspace(WorkspaceReact, ManualResponseSheet);
+const ConsultationWorkspace = createConsultationWorkspace(WorkspaceReact, ManualResponseSheet, FinalSynthesisPanel);
 import './components/summary/summary-refinement.css';
 import { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
@@ -1604,7 +1605,7 @@ function SummaryPageContent() {
 
 	function prepareDelphiRoundTwo() {
 		if (!displayRound || displayRound.round_number >= 3) { toastWarning('This Delphi ends after round 3.'); return; }
-		const questions = displayRound.round_number === 2 ? buildFixedDelphiRound(displayRound, rounds, structuredRounds) : buildDelphiRoundTwoQuestions(displayRound.synthesis || '');
+		const questions = displayRound.round_number === 2 ? buildFixedDelphiRound(displayRound, rounds, structuredRounds) : buildDelphiRoundTwoQuestions(displayRound.synthesis || '', displayRound.synthesis_json?.narrative === displayRound.synthesis ? displayRound.synthesis_json?.reasoning_graph : null);
 		if (!questions.length) {
 			toastWarning('No structured claims were found in this synthesis.');
 			return;

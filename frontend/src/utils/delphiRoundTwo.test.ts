@@ -55,3 +55,11 @@ describe('Delphi Round 2 builder', () => {
     expect(buildDelphiRoundTwoQuestions('<h2>Summary</h2><p>No claims.</p>')).toEqual([]);
   });
 });
+
+it('rates every normalized claim, including visibly inferred and minority claims, with unchanged wording',()=>{
+ const graph={version:1 as const,response_count:2,mapped_response_count:0,rejected_flow_count:0,flows:[],claims:[{id:'claim_minority',text:'Retain this unique exception.',origin:'explicit' as const,sources:[]},{id:'claim_bridge',text:'This is an inferred necessary step.',origin:'inferred' as const,sources:[],question:'Does this bridge follow?',based_on_responses:[1]}]};
+ const q=buildDelphiRoundTwoQuestions(SYNTHESIS,graph) as Record<string,unknown>[];
+ expect(q).toHaveLength(6);expect(q[0]).toMatchObject({questionId:'claim_minority_response',claimText:'Retain this unique exception.',claimOrigin:'explicit'});
+ expect(q[3]).toMatchObject({claimOrigin:'inferred',claimText:'This is an inferred necessary step.',inferenceQuestion:'Does this bridge follow?'});
+ expect(q[3].groupPrompt).toContain('not directly stated');
+});

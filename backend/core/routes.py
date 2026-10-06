@@ -27,11 +27,11 @@ import os
 import re
 import secrets
 import zipfile
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 import asyncio
-from typing import Any
+from typing import Annotated, Any
 from xml.etree import ElementTree as ET
 import textwrap
 from uuid import UUID
@@ -64,6 +64,7 @@ from .models import (
     InviteCode,
     PublicFormSession,
 )
+from .reasoning import REASONING_PROMPT, parse_reasoning_output
 from .audit import audit_log
 from .auth import (
     get_db,
@@ -3449,7 +3450,6 @@ class GenerateSynthesisVersionPayload(BaseModel):
     prompt: str | None = None
 
 
-from .reasoning import REASONING_PROMPT, parse_reasoning_output
 
 class ReasoningMapPayload(BaseModel):
     expected_synthesis: str
@@ -3531,8 +3531,8 @@ Rules:
 - Use Clear disagreement when there are opposing response positions.
 - Opposing views must be a short contrast, never just an option label.
 - Put a blank line between every claim.
-- Maximum 12 claims total. Each claim may appear once only.
-- Keep each claim under 22 words.
+- Include every distinct substantive claim, including unique and minority claims. Each claim may appear once only.
+- Keep wording concise without dropping qualifications, scope, negation or uncertainty.
 - Do not invent claims, evidence, consensus, expert positions, or quotations.
 """
 
@@ -3571,6 +3571,10 @@ def _stringify_custom_synthesis_answer(value: Any) -> str:
             if text:
                 parts.append(f"{label}: {text}")
         if parts:
+            known = {"position", "value", "answer", "selected", "selectedScore", "score", "evidence", "confidence", "confidenceJustification", "counterarguments"}
+            for key, extra in value.items():
+                if key not in known and extra not in (None, "", [], {}):
+                    parts.append(f"{key}: {_stringify_custom_synthesis_answer(extra)}")
             return "\n".join(parts)
         try:
             return json.dumps(value, ensure_ascii=False, indent=2)
@@ -3615,8 +3619,10 @@ def _format_custom_synthesis_material(
         if not isinstance(answers, dict):
             answers = {}
         for question_index, label in enumerate(labels, start=1):
+            question = questions[question_index - 1]
+            question_id = question.get('questionId') if isinstance(question, dict) else None
             answer = _stringify_custom_synthesis_answer(
-                answers.get(f"q{question_index}")
+                answers.get(f"q{question_index}", answers.get(question_id))
             ).strip()
             lines.append(f"Q{question_index}. {label}")
             lines.append(f"A: {answer or 'No answer'}")
@@ -3939,7 +3945,7 @@ def _format_custom_claim_list(
                 continue
             seen_structured.add(claim_key)
             deduped_structured.append(item)
-        return render_structured_claims(deduped_structured[:12])
+        return render_structured_claims(deduped_structured)
 
     section_order = [
         "### Agreement claims",
@@ -4119,7 +4125,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             asyncio.to_thread(
                 client.chat.completions.create,
                 model=resolved_model,
-                max_tokens=6500 if round_number == 1 else 2500,
+                max_tokens=12000 if round_number == 1 else 2500,
                 temperature=0.2,
                 messages=[
                     {
@@ -4151,13 +4157,18 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     if round_number == 1:
         try:
             output, reasoning_graph = parse_reasoning_output(output, response_dicts)
-        except (ValueError, TypeError) as exc:
+            if not reasoning_graph.get("claims"):
+                raise ValueError("Missing normalized claim map")
+        except (ValueError, TypeError, KeyError) as exc:
             raise HTTPException(status_code=502, detail="The model returned an incomplete reasoning draft. The previous synthesis has been kept. Try generating again.") from exc
     synthesis_text = _format_custom_claim_list(
         output,
         questions=questions,
         response_dicts=response_dicts,
     )
+    if reasoning_graph is not None:
+        from .reasoning import render_claim_map
+        synthesis_text = render_claim_map(reasoning_graph)
     synthesis_json_data = _merge_summary_display_preferences(
         {
             "narrative": synthesis_text,
@@ -4188,6 +4199,13 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     round_obj = db.query(RoundModel).filter(RoundModel.id == round_id).first()
     if not round_obj:
         raise HTTPException(status_code=404, detail="Round not found")
+
+    if reasoning_graph is not None:
+        from .reasoning import response_revision
+        db.expire_all()
+        latest = db.query(Response).filter_by(form_id=form_id, round_id=round_id).all()
+        if response_revision([{'response_id':r.id,'answers':r.answers} for r in latest]) != reasoning_graph['source_revision']:
+            raise HTTPException(status_code=409, detail='Responses changed while the reasoning draft was generated. The previous draft has been kept.')
 
     synthesis_json_data = _merge_summary_display_preferences(
         synthesis_json_data,
@@ -7943,9 +7961,50 @@ def put_expert_labels(
 # ROUNDS (Delphi)
 # ---------------------------------------------------------
 
+class FinalAccountPayload(BaseModel):
+    expected_revision: str
+    complete: bool = False
+
+
+def _final_account_material(form_id, db, *, lock=False):
+    from .final_synthesis import build_final_account
+    form = db.get(FormModel, form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    query = db.query(RoundModel).filter_by(form_id=form_id).order_by(RoundModel.round_number)
+    rounds = (query.with_for_update() if lock else query).all()
+    responses = db.query(Response).filter_by(form_id=form_id).order_by(Response.id).all()
+    try:
+        account = build_final_account(form, rounds, responses)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    final = next(r for r in rounds if r.round_number == 3)
+    saved = (final.context_settings or {}).get('final_synthesis')
+    return account, final, saved
+
+
+@router.get('/forms/{form_id}/final_synthesis', tags=['Rounds'])
+def get_final_account(form_id: int, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(require_platform_admin)]):
+    account, final, saved = _final_account_material(form_id, db)
+    return {'preview': account, 'saved': saved, 'stale': bool(saved and saved.get('revision') != account['revision']), 'collection_open': final.is_active}
+
+
+@router.post('/forms/{form_id}/final_synthesis', tags=['Rounds'])
+def save_final_account(form_id: int, payload: FinalAccountPayload, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(require_platform_admin)]):
+    account, final, saved = _final_account_material(form_id, db, lock=True)
+    if payload.expected_revision != account['revision']:
+        raise HTTPException(status_code=409, detail='Responses or reasoning changed. Refresh the final synthesis before saving.')
+    account['saved_at'] = datetime.now(UTC).isoformat()
+    account['completed'] = payload.complete or bool(saved and saved.get('completed'))
+    final.context_settings = {**(final.context_settings or {}), 'final_synthesis': account}
+    if payload.complete:
+        final.is_active = False
+    db.commit()
+    return {'preview': account, 'saved': account, 'stale': False, 'collection_open': final.is_active}
+
 
 def _delphi_claim_signature(questions):
-    return [(q.get("questionId"), q.get("sectionTitle"), q.get("label"), q.get("inputType"), q.get("options"))
+    return [(q.get("questionId"), q.get("sectionTitle"), q.get("label"), q.get("inputType"), q.get("options"), q.get("claimOrigin"), q.get("claimText"), q.get("inferenceQuestion"))
             for q in (questions or []) if isinstance(q, dict)
             and str(q.get("questionId", "")).startswith("claim_") and isinstance(q.get("options"), list)]
 
@@ -8222,7 +8281,10 @@ def update_round_setup(
             raise HTTPException(status_code=409, detail="The Delphi claim set is fixed after round 1.")
         round_obj.questions = payload.questions
     if payload.context_settings is not None:
-        round_obj.context_settings = payload.context_settings
+        preserved_final = (round_obj.context_settings or {}).get("final_synthesis")
+        round_obj.context_settings = {k:v for k,v in payload.context_settings.items() if k != "final_synthesis"}
+        if preserved_final:
+            round_obj.context_settings = {**round_obj.context_settings, "final_synthesis": preserved_final}
     db.commit()
     db.refresh(round_obj)
     return {

@@ -88,7 +88,13 @@ export interface SynthesisData {
   synthesis_background?: 'default' | 'paper' | 'soft' | string;
 }
 
+export interface NormalizedClaim {
+  id:string; text:string; origin:"explicit"|"inferred"; sources:{response_number:number;response_id?:number;quote:string;stance:string;source_text:string;source_answers?:Record<string,unknown>}[];
+  based_on_responses?:number[]; question?:string; confirmed?:false;
+}
+
 export interface ReasoningNode {
+  sources?: NormalizedClaim["sources"];
   id: string;
   kind: 'premise' | 'recommendation' | 'assumption';
   text: string;
@@ -99,6 +105,8 @@ export interface ReasoningNode {
   confirmed?: false;
 }
 export interface ReasoningGraph {
+  claims?:NormalizedClaim[];
+  claim_edges?:{from:string;to:string;relation:"supports"|"qualifies"|"challenges"|"motivates"}[];
   status?: "model_interpretation" | "provided_interpretation" | "authored_example";
   version: 1;
   response_count: number;

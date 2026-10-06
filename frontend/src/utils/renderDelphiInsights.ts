@@ -107,18 +107,22 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
       const trend=node('div','','di-trend');
       if(row.delta!==null&&Math.round(row.delta)!==0){const change=Math.round(row.delta);trend.append(node('span',change===0?'No change':`${change>0?'+':'−'}${Math.abs(change)} pp`,'di-change'),node('span',`since Round ${previous.round}`));trend.title=`Agreement: Round ${previous.round} ${Math.round(previous.percent!)}% → Round ${round.round_number} ${Math.round(row.percent!)}%. Change in percentage points.`;}rating.append(trend);
     }
+    if(row.origin==='inferred')article.prepend(node('p','Inferred · unconfirmed. Not directly stated by an expert.','di-eyebrow'));
     const detail=document.createElement('details');detail.className='di-reasons';detail.dataset.key=row.key;detail.open=priorOpen.has(row.key);
-    const summary=node('summary','Responses and changes');detail.append(summary);
+    const summary=node('summary','Distribution, responses and changes');detail.append(summary);
+    detail.append(node('p',row.options.map(option=>`${row.evidence.filter(e=>e.position===option).length} ${option.toLowerCase()}`).join(' · '),'di-exact-distribution'));
+    if(row.inferenceQuestion)detail.append(node('p',String(row.inferenceQuestion)));
+    if(row.hasConfidence)detail.append(node('p','Confidence: '+confidenceLabels.map(level=>`${row.evidence.filter(e=>e.confidence===level).length} ${level.toLowerCase()}`).join(' · ')+` · ${row.evidence.filter(e=>!e.confidence).length} not recorded.`));
     detail.append(node('p',row.history.map(h=>`Round ${h.round}: ${h.n ? Math.round(h.percent!)+'% agree' : 'No ratings'} (${h.n} answered)`).join(' · ')));
-    if(row.matched)detail.append(node('p',`${row.changed} of ${row.matched} returning respondents changed position group since Round ${row.previousRound}.`,'di-movement'));
+    if(row.matched)detail.append(node('p',`${row.changed} of ${row.matched} returning respondents changed their exact position since Round ${row.previousRound}.`,'di-movement'));
     const question=round.questions.find(q=>typeof q==='object'&&String(q.questionId)===row.key) as Record<string,unknown>|undefined;
     if(question?.parentClaimId) { article.prepend(node('p',`Related proposal · introduced in Round ${question.introducedRound || round.round_number}`,'di-eyebrow'));detail.append(node('p',`Original claim: ${question.parentClaimText || question.parentClaimId}`),node('p',`Reason for this proposal: ${question.claimRationale || 'Not recorded'}`)); }
-    const evidence=row.evidence.filter(e=>e.comment||e.changed);
+    const evidence=row.evidence;
     if(!evidence.length)detail.append(node('p','No separate comments were recorded for this claim. Original responses remain available in the Responses view.'));
     [0,1,2,3,4,5].forEach(group=>{
       const subset=evidence.filter(e=>e.group===group);if(!subset.length)return;
       const section=node('section');section.append(node('h4',`${stanceLabels[group]} · ${subset.length}`));
-      subset.forEach(e=>{const block=node('blockquote');block.append(node('div',`${e.participant} · ${e.position || 'Not answered'}`,'di-attribution'));if(e.changed)block.append(node('p',`${e.before} → ${e.position}`,'di-shift'));block.append(node('p',e.comment||'No reason supplied.'));section.append(block);});detail.append(section);
+      subset.forEach(e=>{const block=node('blockquote');block.append(node('div',`${e.participant} · ${e.position || 'Not answered'}`,'di-attribution'));if(e.before!==null)block.append(node('p',`${e.before} → ${e.position}${e.changed?'':' · Position retained'}`,'di-shift'));if(row.hasConfidence)block.append(node('p',`Confidence: ${e.confidence || 'Not recorded'}${e.beforeConfidence!==null?` · Previously: ${e.beforeConfidence || 'Not recorded'}`:''}`));block.append(node('p',e.comment||'No reason supplied.'));section.append(block);});detail.append(section);
     });article.append(detail);list.append(article);
   });root.append(list);
   const archived=node('details','','di-method');archived.append(node('summary','Earlier claims not rated in this round'));

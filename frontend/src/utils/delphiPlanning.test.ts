@@ -23,3 +23,15 @@ it('carries agreement and separate confidence unchanged into round three',()=>{
  expect(result[0]).toMatchObject(fixed);
  expect(result[1]).toEqual(generated[1]);
 });
+
+it('shows full strength, independent confidence, and anonymised reasons before reconsideration',()=>{
+ const q=buildDelphiRoundTwoQuestions('<p>Claim 1: <strong>Keep this claim.</strong></p>');
+ const round={...r,questions:q} as Round;
+ const answers=[{q1:{position:'Strongly agree'},q2:{position:'Slightly confident'},q3:{position:'Weak evidence supports a cautious approach.'}},{q1:{position:'Disagree'},q2:{position:'Very confident'},q3:{position:'A minority objection.'}}];
+ const data={id:2,round_number:2,is_active:true,synthesis:'',responses:answers.map((a,i)=>({id:i,round_id:2,email:'private-'+i,timestamp:'',version:1,answers:a}))};
+ const result=buildFixedDelphiRound(round,[round],[data]) as Record<string,unknown>[];
+ expect(result[0].groupPrompt).toContain('1 strongly agree');
+ expect(result[0].groupPrompt).toContain('1 slightly confident');
+ expect(result[0].groupPrompt).toContain('A minority objection.');
+ expect(result[0].groupPrompt).not.toContain('private-');
+});

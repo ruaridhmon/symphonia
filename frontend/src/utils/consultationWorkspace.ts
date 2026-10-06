@@ -1,5 +1,6 @@
 import type * as React from 'react';
 import type { Form, Round, RoundWithResponses } from '../types/summary';
+import type { FinalSynthesisProps } from '../components/summary/FinalSynthesisPanel';
 import type { ManualResponseProps } from '../components/summary/ManualResponseSheet';
 
 type View = 'synthesis' | 'responses' | 'analysis';
@@ -33,16 +34,21 @@ export function questionOutline(questions: Round['questions']) {
 }
 
 /** Shared by source and the deployed compatibility build. Uses the existing state and callbacks. */
-export function createConsultationWorkspace(R: typeof React, ManualResponse?: React.ComponentType<ManualResponseProps>) {
+export function createConsultationWorkspace(R: typeof React, ManualResponse?: React.ComponentType<ManualResponseProps>, FinalSynthesis?:React.ComponentType<FinalSynthesisProps>) {
   const h = R.createElement;
   return function ConsultationWorkspace(p: WorkspaceProps) {
     const [panel, setPanel] = R.useState<'invite' | 'questions' | null>(null);
+    const [finalView,setFinalView] = R.useState(false);
+    const [completed,setCompleted] = R.useState(false);
     const [copyState, setCopyState] = R.useState('');
     const [adding, setAdding] = R.useState<Round | null>(null);
     const [saved, setSaved] = R.useState('');
     const addTrigger = R.useRef<HTMLButtonElement>(null);
     const dialog = R.useRef<HTMLDialogElement>(null);
     const titleId = R.useId();
+    const invoker = R.useRef<HTMLElement|null>(null);
+    const options = R.useRef<HTMLDetailsElement>(null);
+    const openPanel = (next:'invite'|'questions') => {invoker.current=options.current?.contains(document.activeElement)?options.current.querySelector('summary') || null:document.activeElement as HTMLElement;if(options.current)options.current.open=false;setCopyState('');setPanel(next);};
     const ordered = [...p.rounds].sort((a, b) => a.round_number - b.round_number);
     const round = ordered.find(r => r.id === p.selectedRoundId) || ordered.find(r => r.is_active) || ordered[0];
     const responseGroup = p.responses?.find(r => r.id === round?.id);
@@ -56,35 +62,37 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
       if (!panel && dialog.current?.open) dialog.current.close();
     }, [panel]);
-    R.useEffect(() => { setPanel(null); setCopyState(''); setAdding(null); setSaved(''); }, [p.form.id]);
+    R.useEffect(()=>{const dismiss=(e:PointerEvent)=>{if(options.current?.open&&!options.current.contains(e.target as Node))options.current.open=false;};document.addEventListener('pointerdown',dismiss);return()=>document.removeEventListener('pointerdown',dismiss);},[]);
+    R.useEffect(() => { setPanel(null); setCopyState(''); setAdding(null); setSaved('');setFinalView(false);setCompleted(false); }, [p.form.id]);
     const canLeave = () => !document.querySelector('.response-workspace textarea') || window.confirm('Discard unsaved response edits?');
     const button = (text: string, onClick: () => void, props: Record<string, unknown> = {}) => h('button', { type: 'button', onClick, ...props }, (props.children as React.ReactNode) ?? text);
     const copy = async () => {
       try { await navigator.clipboard.writeText(joinUrl); setCopyState('Link copied'); }
       catch { setCopyState('Copy unavailable. Select the link below and copy it.'); }
     };
-    return h('section', { className: 'consultation-workspace', 'data-final-round':ordered.length === 3 ? 'true' : undefined, 'aria-label': 'Consultation workspace' },
+    return h('section', { className: 'consultation-workspace', 'data-final-view':finalView?'true':undefined, 'data-final-round':ordered.some(r=>r.round_number===3) ? 'true' : undefined, 'aria-label': 'Consultation workspace' },
       h('div', { className: 'cw-title-row' },
         h('div', { className: 'cw-identity' }, h('h2', null, displayTitle), (simulated&&!p.isDemo)?h('span', { className: 'cw-provenance',title:'Simulated consultation with fictional experts','aria-label':'Demo with fictional experts' }, 'Demo'):null),
         p.isDemo ? h('span', {className:'cw-demo-badge'}, 'Synthetic example') : h('div', { className: 'cw-title-actions' },
-          button('Invite people', () => { setCopyState(''); setPanel('invite'); }, { className: 'cw-primary' }),
-          h('details', { className: 'cw-options' }, h('summary', { 'aria-label': 'Consultation options' }, '•••'),
-            h('div', null, h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),button('View questions',()=>setPanel('questions'),{className:'cw-mobile-questions','aria-label':'Preview round questions',disabled:!round}),
+          h('details', { ref:options,className: 'cw-options',onKeyDown:(e:React.KeyboardEvent<HTMLDetailsElement>)=>{if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}} }, h('summary', { 'aria-label': 'Consultation options' }, '•••'),
+            h('div', null, button('Invite people',()=>openPanel('invite')),h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),button('View questions',()=>openPanel('questions'),{className:'cw-mobile-questions','aria-label':'Preview round questions',disabled:!round}),
               p.onDownload ? button('Download', p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? 'Updating…' : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null)))),
       h('nav', { className: 'cw-views', 'aria-label': 'Consultation views' },
         ([['synthesis', 'Summary'], ['responses', 'Responses']] as [View, string][]).map(([view, label]) =>
-          button(label, () => { if (canLeave()) p.onView(view); }, { key: view, 'aria-pressed': p.view === view })),
+          button(label, () => { if (canLeave()) {setFinalView(false);p.onView(view);} }, { key: view, 'aria-pressed': !finalView && p.view === view })),
       h('div', { className: 'cw-context cw-simple-context' },
-        ordered.length<=5?h('div',{className:'cw-round-tabs','aria-label':'Rounds'},...ordered.map(r=>button(`Round ${r.round_number}`,()=>{if(canLeave())p.onRound(r);},{key:r.id,'aria-pressed':round?.id===r.id,title:r.is_active?'Current round':`View Round ${r.round_number}`}))):h('label',{className:'cw-round-picker'},h('span',{className:'cw-round-display','aria-hidden':true},`Round ${round?.round_number||'—'} ⌄`),h('select',{'aria-label':'Round',value:round?.id||'',onChange:(event:React.ChangeEvent<HTMLSelectElement>)=>{const selected=ordered.find(r=>r.id===Number(event.target.value));if(selected&&canLeave())p.onRound(selected);}},...ordered.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}${r.is_active?' · Current':''}`)))),
-        count!==undefined?h('span',null,`${count} response${count===1?'':'s'}`):null,
-        p.view==='responses' && !p.isDemo && ManualResponse && p.onResponseAdded ? button('+ Add response',()=>{if(round?.is_active&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response',disabled:!round?.is_active,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response'}) : null,
-        button('View questions', () => setPanel('questions'), { className: 'cw-text-button', disabled: !round }))),
+        ordered.length<=5?h('div',{className:'cw-round-tabs','aria-label':'Rounds'},...ordered.map(r=>button(`Round ${r.round_number}`,()=>{if(canLeave()){setFinalView(false);p.onRound(r);}},{key:r.id,'aria-pressed':!finalView&&round?.id===r.id,title:r.is_active?'Current round':`View Round ${r.round_number}`}))):h('label',{className:'cw-round-picker'},h('span',{className:'cw-round-display','aria-hidden':true},`Round ${round?.round_number||'—'} ⌄`),h('select',{'aria-label':'Round',value:round?.id||'',onChange:(event:React.ChangeEvent<HTMLSelectElement>)=>{const selected=ordered.find(r=>r.id===Number(event.target.value));if(selected&&canLeave()){setFinalView(false);p.onRound(selected);}}},...ordered.map(r=>h('option',{key:r.id,value:r.id},`Round ${r.round_number}${r.is_active?' · Current':''}`)))),
+        ordered.some(r=>r.round_number===3)&&FinalSynthesis?button('Final synthesis',()=>{if(canLeave()){p.onView('synthesis');setFinalView(true);}}, {'aria-pressed':finalView,className:'cw-final-tab',title:'Round 4 · final synthesis'}):null,
+        count!==undefined&&!finalView?h('span',null,`${count} response${count===1?'':'s'}`):null,
+        !finalView && !p.isDemo && ManualResponse && p.onResponseAdded ? button('+ Add response',()=>{if(round?.is_active&&!completed&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response',disabled:!round?.is_active||completed,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response'}) : null,
+        button('View questions', () => openPanel('questions'), { className: 'cw-text-button', disabled: !round }))),
+      finalView && FinalSynthesis ? h(FinalSynthesis,{formId:p.form.id,onComplete:()=>setCompleted(true)}) : null,
       saved ? h('p',{className:'cw-response-saved',role:'status'},saved) : null,
       adding && ManualResponse ? h(ManualResponse,{form:p.form,round:adding,onClose:()=>{setAdding(null);requestAnimationFrame(()=>addTrigger.current?.focus());},onSaved:async()=>{await p.onResponseAdded?.();setSaved('Response saved');}}) : null,
-      h('dialog', { ref: dialog, className: 'cw-dialog', 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => setPanel(null), onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
+      h('dialog', { ref: dialog, className: 'cw-dialog', 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => {setPanel(null);requestAnimationFrame(()=>invoker.current?.focus());}, onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
         h('div', { className: 'cw-dialog-body' },
-          h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Bring your panel together' : `Round ${round?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
+          h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Invite people' : `Round ${round?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
           panel === 'invite' ? h(R.Fragment, null,
             h('p', { className: 'cw-dialog-intro' }, 'Share one link. Each person joins the consultation and responds in their own space.'),
             !p.form.allow_join ? h('p', { role: 'status', className: 'cw-notice' }, 'Joining is currently closed. Review access settings before inviting new participants.') : null,

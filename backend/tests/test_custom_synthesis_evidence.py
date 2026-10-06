@@ -101,3 +101,9 @@ Opposing statements:
 
     assert "Show opposing experts" in rendered
     assert "Show opposing statements" not in rendered
+
+
+def test_custom_material_preserves_stable_id_answers_references_and_qualifications():
+    from core.routes import _format_custom_synthesis_material
+    material=_format_custom_synthesis_material([{'label':'Your view','questionId':'original'}],[{'answers':{'original':{'position':'A cautious view.','references':['DOI: source-reference'],'qualification':'Only under these conditions.'}}}])
+    assert 'A cautious view.' in material and 'source-reference' in material and 'Only under these conditions.' in material

@@ -6,7 +6,7 @@ from core.reasoning import parse_reasoning_output
 
 RESPONSES=[{'response_id':15,'answers':{'q1':{'position':'Phones interrupt lessons. Put them away during lessons, with medical exceptions.'}}},{'response_id':16,'answers':{'q1':{'position':'A whole-day ban would make travel less safe.'}}}]
 def payload():
-    return {'claims_text':'Claims\nClaim 1\nText: Put phones away during lessons.', 'reasoning_flows':[{'title':'Lesson disruption','response_number':1,'nodes':[{'id':'a','kind':'premise','text':'Phones interrupt lessons.','quote':'Phones interrupt lessons.'},{'id':'b','kind':'assumption','text':'Putting phones away reduces disruption.','question':'Would storage reduce interruptions?','quote':'invented attribution'},{'id':'c','kind':'recommendation','text':'Put phones away during lessons.','quote':'Put them away during lessons, with medical exceptions.','condition':'Medical exceptions'}],'edges':[{'from':'a','to':'b','relation':'supports'},{'from':'b','to':'c','relation':'supports'}]}]}
+    return {'normalized_claims':[{'id':'claim_1','text':'Put phones away during lessons, with medical exceptions.','origin':'explicit','sources':[{'response_number':1,'quote':'Put them away during lessons, with medical exceptions.','stance':'support'}]}],'claim_edges':[],'claims_text':'Claims\nClaim 1\nText: Put phones away during lessons.', 'reasoning_flows':[{'title':'Lesson disruption','response_number':1,'nodes':[{'id':'a','kind':'premise','text':'Phones interrupt lessons.','quote':'Phones interrupt lessons.'},{'id':'b','kind':'assumption','text':'Putting phones away reduces disruption.','question':'Would storage reduce interruptions?','quote':'invented attribution'},{'id':'c','kind':'recommendation','text':'Put phones away during lessons.','quote':'Put them away during lessons, with medical exceptions.','condition':'Medical exceptions'}],'edges':[{'from':'a','to':'b','relation':'supports'},{'from':'b','to':'c','relation':'supports'}]}]}
 def parse(p):return parse_reasoning_output(json.dumps(p),RESPONSES)[1]
 def test_source_grounding_and_assumption_separation():
     graph=parse(payload());assert graph['mapped_response_count']==1
@@ -77,3 +77,18 @@ def test_unanchored_inferences_are_not_a_response_map():
     p=payload();f=p['reasoning_flows'][0]
     f['nodes']=[f['nodes'][1]];f['edges']=[]
     assert parse(p)['flows']==[]
+
+
+def test_shared_claim_map_retains_minorities_inferences_and_branches():
+    p=payload()
+    p['normalized_claims']=[{'id':'claim_1','text':'Phones interrupt lessons.','origin':'explicit','sources':[{'response_number':1,'quote':'Phones interrupt lessons.','stance':'support'}]},{'id':'claim_2','text':'Storage reduces disruption.','origin':'inferred','sources':[], 'based_on_responses':[1],'question':'Would storage reduce interruptions?'},{'id':'claim_3','text':'A whole-day ban would make travel less safe.','origin':'explicit','sources':[{'response_number':2,'quote':'A whole-day ban would make travel less safe.','stance':'oppose'}]}]
+    p['claim_edges']=[{'from':'claim_1','to':'claim_2','relation':'supports'},{'from':'claim_3','to':'claim_2','relation':'challenges'}]
+    g=parse(p)
+    assert len(g['claims'])==3 and len(g['claim_edges'])==2
+    assert g['claims'][-1]['origin']=='inferred' and g['claims'][-1]['sources']==[]
+    assert g['claims'][1]['sources'][0]['response_id']==16
+    assert g['claims'][1]['sources'][0]['source_answers']==RESPONSES[1]['answers']
+    p['claim_edges'].append({'from':'claim_2','to':'claim_1','relation':'supports'})
+    with pytest.raises(ValueError):parse(p)
+    p['claim_edges']=[];p['normalized_claims'][0]['sources'][0]['response_number']=2
+    with pytest.raises(ValueError):parse(p)

@@ -3,14 +3,15 @@ const el=(tag:string,text='',cls='')=>{const e=document.createElement(tag);e.tex
 let wireId=0;
 const observers=new WeakMap<HTMLElement,ResizeObserver>();
 export function clearReasoningFlow(root:HTMLElement){observers.get(root)?.disconnect();observers.delete(root);}
-/** Read-only view: assumptions never become rating questions or recorded votes. */
+/** Read-only source maps. Inferred claims remain visibly unconfirmed even when rated. */
 export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph){
  clearReasoningFlow(root);
- const flows=graph.flows;const remembered=root.dataset.reasoningFlow;
+ const shared: ReasoningGraph["flows"] = graph.claims?.length ? [{id:"shared-claims",title:"Shared claim map",response_number:0,nodes:graph.claims.map(c=>({id:c.id,text:c.text,kind:c.origin==="inferred"?"assumption":"premise",question:c.question,sources:c.sources})),edges:graph.claim_edges || []}] : [];
+ const flows=[...shared,...graph.flows];const remembered=root.dataset.reasoningFlow;
  const section=el('section','','rf-workspace');section.setAttribute('aria-label','First-round reasoning');
- const head=el('header','','rf-header');head.append(el('h2','Claims & reasoning'),el('p','Follow each contribution from its premises to its conclusion. Dashed cards make the unstated steps visible.'));
+ const head=el('header','','rf-header');head.append(el('h2','Claims & reasoning'),el('p','Review the shared claims and their logical connections, then inspect each original contribution. Dashed cards mark inferred steps.'));
  section.append(head);
- const counts=el('div',`${graph.mapped_response_count} of ${graph.response_count} responses represented · ${flows.length} argument${flows.length===1?'':'s'}`,'rf-coverage');section.append(counts);
+ const counts=el('div',`${graph.mapped_response_count} of ${graph.response_count} responses represented · ${graph.flows.length} source argument${graph.flows.length===1?'':'s'}${graph.claims?.length?' · '+graph.claims.length+' shared claims':''}`,'rf-coverage');section.append(counts);
  if(graph.rejected_flow_count)counts.append(el('span',` · ${graph.rejected_flow_count} map${graph.rejected_flow_count===1?' was':'s were'} withheld because source or structure checks failed.`));
  section.append(el('p',(graph.status==='provided_interpretation'?'Provided interpretation':graph.status==='authored_example'?'Illustrative interpretation':'AI interpretation')+' · source quotes are matched to saved responses; meaning and connections still need review. Assumptions are unconfirmed.','rf-provenance'));
  if(!flows.length){section.append(el('p','No source-linked reasoning maps were saved for this draft. Open Claims & full summary to review the claim list.'));root.append(section);return;}
@@ -21,13 +22,14 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph){
  const show=(index:number)=>{
   const flow=flows[index];root.dataset.reasoningFlow=flow.id;canvas.replaceChildren();detail.replaceChildren();
   nav.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
-  const title=el('div','','rf-flow-title');title.append(el('h3',flow.title),el('span',`Response ${flow.response_number}`));canvas.append(title);
+  const title=el('div','','rf-flow-title');title.append(el('h3',flow.title),el('span',flow.response_number?`Response ${flow.response_number}`:"Explicit and inferred claims"));canvas.append(title);
   const diagram=el('div','','rf-diagram');canvas.append(diagram);
   const labels=new Map(flow.nodes.map((n,i)=>[n.id,String.fromCharCode(65+i)]));
   const select=(n:ReasoningNode)=>{
    root.dataset.reasoningNode=n.id;diagram.querySelectorAll<HTMLButtonElement>('[data-rf-node]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rfNode===n.id)));detail.replaceChildren();detail.classList.toggle('rf-inferred-detail',n.kind==='assumption');
-   detail.append(el('div',n.kind==='assumption'?'INFERRED · UNCONFIRMED':`SOURCE · RESPONSE ${flow.response_number}`,'rf-eyebrow'),el('h4',n.kind==='assumption'?'A step to check with the expert':'The expert’s words'));
-   if(n.kind==='assumption')detail.append(el('p',n.text),el('blockquote',n.question||'Ask the expert to clarify this connection.'),el('p','This bridge is an interpretation. It is not attributed to the expert and is not part of the rating questionnaire.','rf-small'));
+   detail.append(el('div',n.kind==='assumption'?'INFERRED · UNCONFIRMED':flow.response_number?`SOURCE · RESPONSE ${flow.response_number}`:'EXPLICIT · SOURCE-LINKED CLAIM','rf-eyebrow'),el('h4',n.kind==='assumption'?'A step to check with the expert':'The expert’s words'));
+   if(n.kind==='assumption')detail.append(el('p',n.text),el('blockquote',n.question||'Ask the expert to clarify this connection.'),el('p','This bridge is an interpretation, not a direct expert statement. It can be reviewed independently; ratings never change its inferred origin.','rf-small'));
+   else if(n.sources){for(const source of n.sources){const block=el('section');block.append(el('h4',`Response ${source.response_number} · ${source.stance} (interpreted)`),el('blockquote',source.quote));const context=document.createElement('details');context.append(el('summary','Original reasoning, evidence and confidence'),el('p',source.source_text));if(source.source_answers){const raw=el('pre',JSON.stringify(source.source_answers,null,2),'rf-original-answer');context.append(raw);}block.append(context);detail.append(block);}}
    else{detail.append(el('blockquote',n.quote||''));if(n.condition)detail.append(el('p','Qualification: '+n.condition,'rf-qualification'));if(n.source_text&&n.source_text!==n.quote){const context=document.createElement('details');context.append(el('summary','Read the source in context'),el('p',n.source_text));detail.append(context);}}
    const links=flow.edges.filter(e=>e.from===n.id||e.to===n.id);
    if(links.length){const list=el('div','','rf-connections');list.append(el('span','Connections · interpretation','rf-small'));for(const edge of links){const other=flow.nodes.find(t=>t.id===(edge.from===n.id?edge.to:edge.from));if(!other)continue;const b=document.createElement('button');b.type='button';b.textContent=`${labels.get(edge.from)} ${edge.relation} ${labels.get(edge.to)} · ${other.text}`;b.onclick=()=>select(other);list.append(b);}detail.append(list);}
@@ -71,6 +73,6 @@ export function renderReasoningFlow(root:HTMLElement, graph:ReasoningGraph){
   requestAnimationFrame(draw);
   select(flow.nodes.find(n=>n.id===root.dataset.reasoningNode)||flow.nodes[0]);
  };
- flows.forEach((flow,i)=>{const b=document.createElement('button');b.type='button';b.append(el('span',`Response ${flow.response_number}`),el('strong',flow.title));b.onclick=()=>{delete root.dataset.reasoningNode;show(i)};nav.append(b);});
+ flows.forEach((flow,i)=>{const b=document.createElement('button');b.type='button';b.append(el('span',flow.response_number?`Response ${flow.response_number}`:'All contributions'),el('strong',flow.title));b.onclick=()=>{delete root.dataset.reasoningNode;show(i)};nav.append(b);});
  root.append(section);show(Math.max(0,flows.findIndex(f=>f.id===remembered)));
 }
