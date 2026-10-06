@@ -762,7 +762,7 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .rp-person-answers .rp-compact-rating:last-child{border-bottom:0}
 #root .rp-compact-rating .rp-question-heading{display:flex;align-items:baseline;gap:6px 10px;flex-wrap:wrap;margin:0}
 #root .rp-compact-rating .rp-question-heading h3{color:var(--foreground);font-size:13px;line-height:1.6;font-weight:500;max-width:none}
-#root .rp-compact-rating .rp-question-heading h3::after{content:':'}
+#root .rp-compact-rating .rp-question-heading h3::after{content:none}
 #root .rp-compact-rating .rp-question-heading .rp-rating,#root .rp-compact-rating .rp-question-heading .rp-rating-change{margin:0;font-size:12px}
 .rp-inline-confidence{font-size:12px;color:var(--muted-foreground);line-height:1.6}
 .rp-response-details{margin-top:4px}
@@ -770,3 +770,10 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .rp-response-details .rp-answer{padding:8px 0 2px}
 #root .rp-response-details .rp-answer p{font-size:13px;line-height:1.65}
 @media(max-width:640px){#root .rp-compact-rating .rp-question-heading h3{flex-basis:100%}.rp-response-details>summary{padding:4px 0;min-height:28px}}
+
+#root .rp-person-answers:has(.rp-compact-rating){gap:0}
+#root .rp-compact-rating{position:relative}
+#root .rp-compact-rating .rp-question-heading{padding-right:72px}
+#root .rp-compact-rating .rp-response-details{margin:0}
+#root .rp-compact-rating .rp-response-details>summary{position:absolute;right:0;top:15px}
+@media(max-width:640px){#root .rp-compact-rating .rp-question-heading{padding-right:0}#root .rp-compact-rating .rp-response-details{margin-top:4px}#root .rp-compact-rating .rp-response-details>summary{position:static}}
