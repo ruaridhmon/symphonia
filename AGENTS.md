@@ -273,3 +273,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Desktop review Details now shares the connection line when collapsed, while expanded audit remains full-width. Reserve copy space to avoid overlaps. Workspace CSS v14.
 
 - **2026-10-06 question-first recorded entry:** Single-question Add response sheets lead with the exact saved question, shown once, plus quiet round/provenance context. Multiple-question sheets retain the round introduction and individual prompts. Removed generic entry instructions and consultation-title repetition; save/validation/consent/provenance unchanged. Expert mirror Summary v21, manual sheet v4, workspace CSS v15.
+
+- Recorded-entry live heading check: scope 20px prompt typography against inherited product heading rules, including mobile. Workspace CSS v16.
