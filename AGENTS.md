@@ -305,3 +305,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Direct study tabs and one actions menu: round buttons and final synthesis are directly selectable, with a separate stage row at narrow widths. Existing synthesis actions are proxied into consultation options, preserving settings handlers; secondary ellipsis/direct generation hidden when top menu is available. Summary v32, consultation v18, final v13, results workflow-19, CSS v29.
 
 - Claim-text mobile check: neutralize inherited full-width inline-block button styling so long claim buttons wrap inside the title line. CSS v30.
+
+- Narrow text-button geometry: explicitly keep claim copy in the two-column number/title grid, rather than inherited block layout with inline h3. Title buttons fit the flexible title column; CSS v31.

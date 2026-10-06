@@ -935,3 +935,9 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 @media(max-width:800px){#root .cw-views .cw-context {width:100%;margin:0;justify-content:flex-start;gap:20px;}#root .cw-round-tabs {gap:20px;}}
 
 #root .product-summary .di-claim-copy h3 .di-claim-trigger {display:inline!important;width:auto!important;max-width:100%;white-space:normal;overflow-wrap:anywhere;font:inherit;}
+
+#root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-copy {display:grid!important;grid-template-columns:22px minmax(0,1fr);gap:4px 10px;}
+#root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-copy h3 {display:block!important;grid-column:2;grid-row:1;min-width:0;margin:0;}
+#root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-number {grid-column:1;grid-row:1;}
+#root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-copy>.di-claim-links,#root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-copy>.di-inferred-origin {grid-column:2;}
+#root .product-summary #delphi-recorded-progress[data-review=true] .di-claim-trigger {display:block!important;width:100%!important;max-width:100%;}
