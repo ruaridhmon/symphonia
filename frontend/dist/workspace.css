@@ -800,3 +800,19 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
  #root .product-summary .delphi-insights[data-review=true] .di-claim-copy{padding-right:62px}
  #root .product-summary .delphi-insights[data-review=true] .di-reasons:not([open]){grid-column:1;grid-row:1;align-self:end;justify-self:end;width:fit-content;margin:0}
 }
+
+/* Read the opening argument from premises to conclusions, with dependencies above. */
+#root .rf-claim-list {display:block;padding:0;border-top:1px solid var(--border);}
+#root .rf-claim-row {padding:15px 0;border-bottom:1px solid var(--border);}
+#root .rf-list-node {display:flex;flex-direction:row;align-items:baseline;gap:14px;min-height:0;padding:4px 6px;border:0;border-radius:6px;background:transparent;color:var(--foreground);box-shadow:none;}
+#root .rf-list-node strong {flex:1;margin:0;font-size:14px;font-weight:500;line-height:1.6;}
+#root .rf-list-node .rf-number {flex-shrink:0;font-size:12px;color:var(--muted-foreground);font-variant-numeric:tabular-nums;}
+#root .rf-list-node:hover,#root .rf-list-node[aria-pressed=true] {background:var(--muted);}
+#root .rf-list-origin,.fs-assumption-label {color:#b0474e;font-size:11px;font-weight:500;}
+#root .rf-inferred-row {border-left:2px solid #c46a70;padding-left:10px;}
+#root .rf-dependencies {display:flex;flex-wrap:wrap;gap:6px 12px;margin:3px 0 0 36px;}
+#root .rf-dependencies button {font:inherit;font-size:11px;color:var(--muted-foreground);border:0;background:none;padding:2px 0;cursor:pointer;text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:3px;}
+#root .fs-prose {max-width:780px;margin:26px 0;}
+#root .fs-prose p {font-size:14px;line-height:1.85;margin:0 0 20px;color:var(--foreground);}
+#root .fs-audit>summary {font-size:12px;padding:12px 0;color:var(--muted-foreground);cursor:pointer;border-top:1px solid var(--border);}
+@media(max-width:640px){#root .rf-list-node{flex-wrap:wrap;gap:6px 10px;}#root .rf-list-node strong{flex-basis:calc(100% - 36px);}#root .rf-list-origin{margin-left:30px;}#root .rf-dependencies{margin-left:30px;}}
