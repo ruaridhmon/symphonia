@@ -179,10 +179,12 @@ function enhanceParticipantPresentation(main) {
 // src/utils/synthesisControls.ts
 var bound = /* @__PURE__ */ new WeakSet();
 var panelId = 0;
+var proxiedMenus = /* @__PURE__ */ new WeakMap();
 function enhanceSynthesisControls(main) {
   const toolbar = main.querySelector('aside[aria-label="Synthesis controls"]');
   if (!toolbar) {
     main.querySelector(".summary-tools-only")?.remove();
+    main.querySelector(".cw-summary-actions")?.remove();
     return;
   }
   const progress = main.querySelector("#delphi-recorded-progress");
@@ -220,7 +222,7 @@ function enhanceSynthesisControls(main) {
     close.setAttribute("aria-label", `Close ${panel.getAttribute("aria-label")?.toLowerCase()}`);
     close.onclick = () => {
       detail.open = false;
-      (main.querySelector(".summary-generate-empty") || main.querySelector(".summary-actions-menu>summary") || trigger).focus();
+      (main.querySelector(".summary-generate-empty") || main.querySelector(".cw-options>summary") || main.querySelector(".summary-actions-menu>summary") || trigger).focus();
     };
     panel.prepend(close);
     const sync = () => {
@@ -310,6 +312,35 @@ function enhanceSynthesisControls(main) {
       };
       document.addEventListener("pointerdown", dismiss);
     }
+    const top = main.querySelector(".cw-options>div");
+    if (top) {
+      let group = top.querySelector(".cw-summary-actions");
+      if (!group) {
+        group = document.createElement("div");
+        group.className = "cw-summary-actions";
+        top.append(group);
+      }
+      const actions = [...menu.querySelectorAll(".summary-actions-items>button")];
+      const signature = actions.map((a) => a.textContent).join("|");
+      if (group.dataset.signature !== signature || proxiedMenus.get(group) !== menu) {
+        proxiedMenus.set(group, menu);
+        group.dataset.signature = signature;
+        group.replaceChildren();
+        for (const action of actions) {
+          const proxy = document.createElement("button");
+          proxy.type = "button";
+          proxy.textContent = action.textContent;
+          proxy.onclick = () => {
+            const options = top.closest("details");
+            if (options) options.open = false;
+            action.click();
+          };
+          group.append(proxy);
+        }
+      }
+      menu.hidden = true;
+      nav.querySelector(".summary-generate-empty")?.setAttribute("hidden", "");
+    }
   } else toolbar.classList.remove("summary-actions-panel");
   if (bound.has(toolbar)) return;
   bound.add(toolbar);
@@ -319,7 +350,7 @@ function enhanceSynthesisControls(main) {
     if (open) {
       event.preventDefault();
       open.open = false;
-      (main.querySelector(".summary-generate-empty") || main.querySelector(".summary-actions-menu>summary") || open.querySelector("summary"))?.focus();
+      (main.querySelector(".summary-generate-empty") || main.querySelector(".cw-options>summary") || main.querySelector(".summary-actions-menu>summary") || open.querySelector("summary"))?.focus();
     }
   });
   const outside = (event) => {

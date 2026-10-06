@@ -29,3 +29,10 @@ it('removes generated summary actions when switching to responses',()=>{
  document.body.innerHTML='<main><section class="consultation-workspace"></section><aside aria-label="Synthesis controls"><details class="summary-disclosure"><summary><span>Generate synthesis</span></summary><div class="card">Settings</div></details></aside></main>';
  const main=document.querySelector('main')!;enhanceSynthesisControls(main);expect(main.querySelector('.summary-tools-only')).not.toBeNull();main.querySelector('aside')!.remove();enhanceSynthesisControls(main);expect(main.querySelector('.summary-tools-only')).toBeNull();
 });
+
+it('shares summary actions with the consultation menu and removes stale proxies',()=>{
+ document.body.innerHTML='<main><section class="consultation-workspace"><details class="cw-options" open><summary>Options</summary><div></div></details></section><nav class="summary-switch"><button>Claims</button></nav><section id="delphi-recorded-progress"><article class="di-claim"></article></section><aside aria-label="Synthesis controls"><details class="summary-disclosure"><summary><span>Generate synthesis</span></summary><div class="card"><input value="Exact prompt"></div></details></aside></main>';
+ const main=document.querySelector('main')!;enhanceSynthesisControls(main);enhanceSynthesisControls(main);expect(main.querySelectorAll('.cw-summary-actions button')).toHaveLength(1);expect(main.querySelector<HTMLElement>('.summary-actions-menu')?.hidden).toBe(true);
+ main.querySelector<HTMLButtonElement>('.cw-summary-actions button')!.click();expect(main.querySelector<HTMLDetailsElement>('.cw-options')?.open).toBe(false);expect(main.querySelector<HTMLDetailsElement>('.summary-disclosure')?.open).toBe(true);expect(main.querySelector('input')?.value).toBe('Exact prompt');
+ main.querySelector('aside')!.remove();enhanceSynthesisControls(main);expect(main.querySelector('.cw-summary-actions')).toBeNull();
+});
