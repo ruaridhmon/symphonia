@@ -4,6 +4,7 @@
 #root .symphonia-shell.symphonia-sidebar-collapsed {padding-left:0;}
 #root .symphonia-shell > .symphonia-shell-header {position:static!important;inset:auto!important;height:0!important;min-height:0!important;width:0!important;margin:0!important;padding:0!important;z-index:auto;border:0!important;box-shadow:none!important;backdrop-filter:none!important;background:transparent!important;}
 #root .symphonia-shell-header > div:first-child {height:0!important;min-height:0!important;margin:0!important;padding:0!important;}
+#root .symphonia-shell-header > div:first-child > nav {display:block!important;}
 #root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) > .symphonia-shell-header::before {content:"";position:fixed;inset:0 auto 0 0;width:var(--shell-width);background:color-mix(in srgb,var(--muted) 65%,var(--background));z-index:35;}
 #root .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-shell-header button[aria-label="Go to dashboard"] {display:none!important;position:fixed;left:70px;top:17px;min-height:28px!important;padding:0!important;background:none!important;border:0!important;z-index:42;}
 #root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header button[aria-label="Go to dashboard"] {display:flex!important;}
