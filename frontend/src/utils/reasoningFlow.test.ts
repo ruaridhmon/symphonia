@@ -18,3 +18,8 @@ it('shows reasoning only in round one and only for its matching saved synthesis'
  renderDelphiInsights(root,{...base,round_number:2},[base],[]);expect(root.querySelector('.rf-workspace')).toBeNull();
  renderDelphiInsights(root,{...base,synthesis:'edited'},[base],[]);expect(root.querySelector('.rf-workspace')).toBeNull();
 });
+
+it('shows a saved first-round graph even when synthesis already has parsed claim rows',()=>{
+ const root=document.createElement('div');const base={id:1,round_number:1,is_active:true,questions:['Views?'],synthesis:'<p>Claim 1: Phones interrupt lessons.</p>',synthesis_json:{narrative:'<p>Claim 1: Phones interrupt lessons.</p>',reasoning_graph:graph} as any};
+ renderDelphiInsights(root,base,[base],[]);expect(root.querySelector('.rf-workspace')).not.toBeNull();
+});

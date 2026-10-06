@@ -3454,6 +3454,8 @@ class GenerateSynthesisVersionPayload(BaseModel):
 class ReasoningMapPayload(BaseModel):
     expected_synthesis: str
     reasoning_flows: list[dict[str, Any]]
+    normalized_claims: list[dict[str, Any]] | None = None
+    claim_edges: list[dict[str, Any]] = []
 
 
 @router.post("/forms/{form_id}/rounds/{round_id}/reasoning", tags=["Synthesis"])
@@ -3471,8 +3473,15 @@ def save_reasoning_map(request: Request, form_id: int, round_id: int,
         raise HTTPException(status_code=409, detail="The synthesis has changed. Reload before saving the map.")
     responses = db.query(Response).filter(Response.round_id == round_id).order_by(Response.created_at.asc()).all()
     material = [{"answers": r.answers, "response_id": r.id} for r in responses]
-    _, graph = parse_reasoning_output(json.dumps({"claims_text": row.synthesis,
-        "reasoning_flows": payload.reasoning_flows}), material)
+    provided = {"claims_text": row.synthesis, "reasoning_flows": payload.reasoning_flows}
+    if payload.normalized_claims is not None:
+        if db.query(RoundModel).filter(RoundModel.form_id == form_id, RoundModel.round_number > 1).first():
+            raise HTTPException(status_code=409, detail="Shared claims are frozen after review rounds exist.")
+        provided.update(normalized_claims=payload.normalized_claims, claim_edges=payload.claim_edges)
+    try:
+        _, graph = parse_reasoning_output(json.dumps(provided), material)
+    except (ValueError, TypeError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail="Shared claims need valid source quotations, inferred labels and acyclic connections.") from exc
     if not graph["flows"] or graph["rejected_flow_count"]:
         raise HTTPException(status_code=422, detail="Every map must have valid connections and exact quotes from its specified response.")
     graph["status"] = "provided_interpretation"

@@ -92,3 +92,20 @@ def test_shared_claim_map_retains_minorities_inferences_and_branches():
     with pytest.raises(ValueError):parse(p)
     p['claim_edges']=[];p['normalized_claims'][0]['sources'][0]['response_number']=2
     with pytest.raises(ValueError):parse(p)
+
+def test_provided_shared_map_validates_sources_and_freezes_after_review(client,admin_headers,participant_headers):
+    from tests.conftest import create_form, submit_response
+    form=create_form(client,admin_headers,questions=['Your view?'])
+    submit_response(client,participant_headers,form['id'],RESPONSES[0]['answers'])
+    rid=client.get(f"/forms/{form['id']}/rounds",headers=admin_headers).json()[0]['id']
+    url=f"/forms/{form['id']}/rounds/{rid}"
+    original='<p>Claim 1: Put phones away during lessons.</p>'
+    client.put(url+'/synthesis',headers=admin_headers,json={'summary':original})
+    body={'expected_synthesis':original,**payload()}
+    saved=client.post(url+'/reasoning',headers=admin_headers,json=body)
+    assert saved.status_code==200,saved.text
+    assert len(saved.json()['synthesis_json']['reasoning_graph']['claims'])==1
+    bad={**body,'normalized_claims':[{**body['normalized_claims'][0],'sources':[{'response_number':1,'quote':'An invented source quotation.','stance':'support'}]}]}
+    assert client.post(url+'/reasoning',headers=admin_headers,json=bad).status_code==422
+    client.post(f"/forms/{form['id']}/next_round",headers=admin_headers,json={'expected_round_number':1,'questions':['Your rating?']})
+    assert client.post(url+'/reasoning',headers=admin_headers,json=body).status_code==409

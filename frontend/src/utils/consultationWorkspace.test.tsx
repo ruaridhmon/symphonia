@@ -14,13 +14,13 @@ it('adds entries only to the current round from Responses and refreshes after sa
  const AdminWorkspace=createConsultationWorkspace(React,Sheet);
  const p={...props(),view:'responses' as const,onResponseAdded:vi.fn()};
  const mounted=render(<AdminWorkspace {...p}/>);
- fireEvent.click(screen.getByRole('button',{name:'+ Add response'}));
+ fireEvent.click(screen.getByRole('button',{name:'Add response'}));
  expect(screen.getByText('Adding to 12')).toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Save entry'}));
  await waitFor(()=>expect(screen.getByRole('status')).toHaveTextContent('Response saved'));
  expect(p.onResponseAdded).toHaveBeenCalledOnce();
  mounted.rerender(<AdminWorkspace {...p} selectedRoundId={11}/>);
- expect(screen.getByRole('button',{name:'+ Add response'})).toBeDisabled();
+ expect(screen.getByRole('button',{name:'Add response'})).toBeDisabled();
 });
 function props(): WorkspaceProps {
   return {form:{id:7,title:'A panel on research',join_code:'ABC 123',allow_join:true,questions:['Opening question']},rounds:[{id:11,round_number:1,is_active:false,questions:['What matters?'],synthesis:''},{id:12,round_number:2,is_active:true,questions:[{label:'Your response',sectionTitle:'Claim 1: Keep independent review',options:['Agree','Disagree']}],synthesis:''}],selectedRoundId:12,view:'synthesis',onView:vi.fn(),onRound:vi.fn(),onMakeLive:vi.fn(),responses:[{id:12,round_number:2,synthesis:'',is_active:true,responses:[]}]} ;
@@ -77,7 +77,7 @@ it('offers only Summary and Responses with directly selectable rounds',()=>{
 it('makes Add response available from Summary and places invitations inside the options menu',()=>{
  const AdminWorkspace=createConsultationWorkspace(React,()=>null);
  render(<AdminWorkspace {...props()} onResponseAdded={()=>{}}/>);
- expect(screen.getByRole('button',{name:'+ Add response'})).toBeEnabled();
+ expect(screen.getByRole('button',{name:'Add response'})).toBeEnabled();
  const invite=screen.getByRole('button',{name:'Invite people',hidden:true});
  expect(invite.closest('details')).toHaveClass('cw-options');
  fireEvent.click(invite);
@@ -94,4 +94,11 @@ it('opens the final stage without creating a fourth expert round',()=>{
  expect(p.onView).toHaveBeenCalledWith('synthesis');expect(p.onMakeLive).not.toHaveBeenCalled();
  expect(screen.queryByRole('button',{name:'Round 4'})).not.toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Round 1'}));expect(screen.queryByText('Final account for 7')).not.toBeInTheDocument();
+});
+
+it('keeps the shared map accessible from a later round',()=>{
+ const p=props();p.rounds[0].synthesis='saved';p.rounds[0].synthesis_json={narrative:'saved',reasoning_graph:{version:1,flows:[],response_count:1,mapped_response_count:0,rejected_flow_count:0,status:'provided_interpretation',claims:[{id:'claim_a',text:'An inferred bridge',origin:'inferred',sources:[],question:'Does this follow?'}],claim_edges:[]}} as any;
+ render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Claim map'}));
+ expect(screen.getByRole('heading',{name:'Shared claim map'})).toBeInTheDocument();expect(screen.getByText('INFERRED · UNCONFIRMED')).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Responses'}));expect(screen.queryByRole('heading',{name:'Shared claim map'})).not.toBeInTheDocument();
 });

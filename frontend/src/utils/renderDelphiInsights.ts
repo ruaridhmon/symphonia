@@ -31,10 +31,10 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   const actual=responses.find(r=>r.id===round.id)?.responses.length;
   root.dataset.empty=String(actual===0);
   const note=synthesisProvenanceNote(round,rounds);if(note)root.append(node('p',note,'di-warning'));
-  if(round.round_number===1 && !rows.length){
+  if(round.round_number===1){
     const graph=round.synthesis_json?.reasoning_graph;
     if(graph?.version===1 && round.synthesis_json?.narrative===round.synthesis){renderReasoningFlow(root,graph);return;}
-    if(actual && round.synthesis){root.append(node('p','This saved draft contains claims only. Generate a new draft with Simple or Custom instructions to include source-linked reasoning and inferred assumptions.','di-empty'));return;}
+    if(!rows.length && actual && round.synthesis){root.append(node('p','This saved draft contains claims only. Generate a new draft with Simple or Custom instructions to include source-linked reasoning and inferred assumptions.','di-empty'));return;}
   }
   if(!rows.length) {root.append(node('p',actual===0?'No responses yet for this round. Responses will appear here as participants submit them.':round.round_number===1?'This round gathers independent views. Extract claims from the responses before setting up the rating round.':'There are no comparable claim ratings in this round. Review the written responses or synthesis below.','di-empty'));return;}
   const comparable=rows.filter(row=>row.delta!==null);
