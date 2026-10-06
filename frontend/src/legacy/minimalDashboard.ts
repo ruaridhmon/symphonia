@@ -1,3 +1,4 @@
+import { forwardConsultationClick } from '../utils/summaryRoute';
 import { consultationId, loadNavigation, renderConsultationNavigation, type NavigationData } from '../utils/consultationNavigation';
 
 /**
@@ -28,6 +29,14 @@ function relabelButton(button: HTMLButtonElement | null, label: string): void {
 type ShellState = { data: NavigationData | null; error: boolean; path: string; signature: string; nav: HTMLElement; dialog: HTMLDialogElement; toggle: HTMLButtonElement; query: string; pending: boolean; loadedPath: string };
 const shells = new WeakMap<HTMLElement, ShellState>();
 let collapsed = false;
+let navigationCache: { identity: string; data: NavigationData; at: number } | null = null;
+function accountIdentity(): string { const email=localStorage.getItem('email'); return email ? [email, localStorage.getItem('role') || ''].join('|') : ''; }
+function panelIcon(): SVGSVGElement {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 24 24'); svg.setAttribute('width','20'); svg.setAttribute('height','20'); svg.setAttribute('fill','none'); svg.setAttribute('stroke','currentColor'); svg.setAttribute('stroke-width','1.6'); svg.setAttribute('aria-hidden','true');
+  const rect = document.createElementNS(svg.namespaceURI,'rect'); rect.setAttribute('x','3'); rect.setAttribute('y','4'); rect.setAttribute('width','18'); rect.setAttribute('height','16'); rect.setAttribute('rx','3');
+  const path = document.createElementNS(svg.namespaceURI,'path'); path.setAttribute('d','M9 4v16M5.5 8h1M5.5 12h1M5.5 16h1'); path.setAttribute('stroke-linecap','round'); svg.append(rect,path); return svg;
+}
 
 async function navigationClient() {
   // Preserve the deployed React/auth singleton; source builds use their own client.
@@ -42,7 +51,7 @@ async function navigationClient() {
 function markHeader(): void {
   const header = Array.from(document.querySelectorAll<HTMLElement>('header'))
     .find(candidate => candidate.querySelector('img[src*="logo-mark.png"]') && candidate.querySelector('button[aria-haspopup="menu"]'));
-  if (!header) return;
+  if (!header) { if (/^\/(?:login|register|forgot-password|reset-password)/.test(location.pathname)) navigationCache=null; return; }
   header.classList.add('symphonia-shell-header');
   const shell = header.parentElement!;
   shell.classList.add('symphonia-shell');
@@ -55,11 +64,12 @@ function markHeader(): void {
   if (!state) {
     const nav = document.createElement('nav'); nav.className = 'symphonia-shell-navigation'; nav.setAttribute('aria-label', 'Consultations');
     const search = document.createElement('input'); search.type = 'search'; search.placeholder = 'Find a consultation'; search.setAttribute('aria-label', 'Find a consultation'); search.className = 'symphonia-navigation-search';
-    const list = document.createElement('div'); list.className = 'symphonia-navigation-list'; nav.append(search, list); header.append(nav);
-    const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'symphonia-navigation-toggle'; toggle.textContent = '☰'; toggle.setAttribute('aria-label', 'Open consultations');
+    const list = document.createElement('div'); list.className = 'symphonia-navigation-list'; nav.append(search, list); nav.addEventListener('click',forwardConsultationClick); header.append(nav);
+    const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'symphonia-navigation-toggle'; toggle.append(panelIcon()); toggle.setAttribute('aria-label', 'Open consultations'); toggle.setAttribute('title','Open consultations');
     header.querySelector('div')?.prepend(toggle);
-    const dialog = document.createElement('dialog'); dialog.className = 'symphonia-navigation-drawer'; dialog.setAttribute('aria-label', 'Consultations'); header.append(dialog);
-    state = { data: null, error: false, path: '', signature: '', nav, dialog, toggle, query: '', pending: false, loadedPath: '' }; shells.set(header, state);
+    const dialog = document.createElement('dialog'); dialog.className = 'symphonia-navigation-drawer'; dialog.setAttribute('aria-label', 'Consultations'); dialog.addEventListener('click',forwardConsultationClick); header.append(dialog);
+    const cached=accountIdentity() && navigationCache?.identity === accountIdentity() && Date.now()-navigationCache.at<30000 ? navigationCache.data : null;
+    state = { data: cached, error: false, path: '', signature: '', nav, dialog, toggle, query: '', pending: false, loadedPath: cached ? location.pathname : '' }; shells.set(header, state);
     const current = state;
     const closeDrawer = () => dialog.close();
     dialog.addEventListener('click', event => { if (event.target === dialog) { const r=dialog.getBoundingClientRect(); if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom) closeDrawer(); } });
@@ -70,12 +80,14 @@ function markHeader(): void {
         toggle.setAttribute('aria-label', collapsed ? 'Open consultations' : 'Collapse consultations'); toggle.setAttribute('aria-expanded', String(!collapsed));
         return;
       }
-      const close = document.createElement('button'); close.type='button'; close.className='symphonia-drawer-close'; close.textContent='Close'; close.setAttribute('aria-label','Close consultations'); close.onclick=closeDrawer;
+      const close = document.createElement('button'); close.type='button'; close.className='symphonia-drawer-close'; close.append(panelIcon()); close.setAttribute('aria-label','Close consultations'); close.setAttribute('title','Close consultations'); close.onclick=closeDrawer;
+      const drawerHeader=document.createElement('div'); drawerHeader.className='symphonia-drawer-header';
+      const wordmark=document.createElement('span'); wordmark.textContent='Symphonia'; drawerHeader.append(close,wordmark);
       const drawerNav = document.createElement('nav'); drawerNav.setAttribute('aria-label','Switch consultation');
       const drawerSearch = document.createElement('input'); drawerSearch.type='search'; drawerSearch.placeholder='Find a consultation'; drawerSearch.setAttribute('aria-label','Find a consultation'); drawerSearch.className='symphonia-navigation-search';
       drawerSearch.addEventListener('input', () => renderConsultationNavigation(drawerNav,current.data,location.pathname,current.error,drawerSearch.value));
       renderConsultationNavigation(drawerNav, current.data, location.pathname, current.error);
-      dialog.replaceChildren(close, drawerSearch, drawerNav); dialog.showModal(); toggle.setAttribute('aria-expanded','true');
+      dialog.replaceChildren(drawerHeader, drawerSearch, drawerNav); dialog.showModal(); toggle.setAttribute('aria-expanded','true');
     });
     search.addEventListener('input', () => { current.query = search.value; current.signature=''; scheduleApply(); });
 
@@ -83,7 +95,7 @@ function markHeader(): void {
   if (!state.pending && state.loadedPath !== location.pathname) {
     state.pending=true; state.loadedPath=location.pathname;
     const current=state;
-    navigationClient().then(loadNavigation).then(data => { if(header.isConnected) { current.data=data; current.error=false; current.signature=''; } }).catch(() => { if(header.isConnected) { current.error=true; current.signature=''; } }).finally(() => { current.pending=false; if(header.isConnected) scheduleApply(); });
+    navigationClient().then(loadNavigation).then(data => { if(header.isConnected) { current.data=data; current.error=false; current.signature=''; navigationCache={identity:accountIdentity(),data,at:Date.now()}; } }).catch(() => { if(header.isConnected) { current.error=true; current.signature=''; } }).finally(() => { current.pending=false; if(header.isConnected) scheduleApply(); });
   }
   if (state.path !== location.pathname) { state.path=location.pathname; if(state.dialog.open)state.dialog.close(); }
   const signature = JSON.stringify([location.pathname, state.data, state.error, state.query]);
@@ -97,6 +109,7 @@ function markHeader(): void {
     const expanded = consultationId(location.pathname) !== null && !collapsed && innerWidth > 800;
     state.toggle.setAttribute('aria-expanded', String(expanded));
     state.toggle.setAttribute('aria-label', expanded ? 'Collapse consultations' : 'Open consultations');
+    state.toggle.setAttribute('title', expanded ? 'Collapse consultations' : 'Open consultations');
   }
 }
 

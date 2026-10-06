@@ -1,0 +1,22 @@
+// Version only the maintained summary chunk; retain the shared app/auth singleton.
+const fs=require('node:fs');
+const {parse}=require('@babel/parser');
+const {buildSync}=require('esbuild');
+const input='dist/assets/SummaryPage-workspace-v6.js';
+let code=fs.readFileSync(input,'utf8');
+const ast=parse(code,{sourceType:'module'});
+const loading=ast.program.body.find(n=>n.type==='FunctionDeclaration'&&n.id.name==='En');
+if (!loading || code.slice(loading.start,loading.end)!=='function En(){return renderWorkspaceLoading(o.createElement);}') throw Error('Unexpected summary loading component');
+code=code.slice(0,loading.start)+'function En(){const{user,logout,role}=Kt();return renderConsultationLoading(o.createElement,o.createElement(wn,{email:user?.email||"",viewers:[],onLogout:logout,showAdminLinks:role==="platform_admin"}));}'+code.slice(loading.end);
+const exportText='export{oo as default};';
+if (!code.endsWith(exportText)) throw Error('Unexpected summary export');
+code=code.slice(0,-exportText.length)+'const SmoothSummaryRoute=createSummaryRoute(o,gt,Lt,oo);export{SmoothSummaryRoute as default};';
+const first='if(!r)throw new Error("Form not found");F(r);';
+if (!code.includes(first)||!code.includes('Q(p);')) throw Error('Unexpected summary form/round loading');
+code=code.replace(first,'if(!r)throw new Error("Form not found");').replace('Q(p);','F(r);Q(p);');
+code='import{createSummaryRoute}from"/summary-route.js?v=1";import{renderConsultationLoading}from"/consultation-loading.js?v=1";'+code;
+parse(code,{sourceType:'module'});
+fs.writeFileSync('dist/assets/SummaryPage-workspace-v7.js',code);
+for(const [entry,name] of [['src/utils/summaryRoute.ts','summary-route'],['src/utils/consultationLoading.ts','consultation-loading']])buildSync({entryPoints:[entry],outfile:`dist/${name}.js`,bundle:true,format:'esm',target:'es2020'});
+const html=fs.readFileSync('dist/index.html','utf8').replace('"/assets/SummaryPage-workspace-v6.js"','"/assets/SummaryPage-workspace-v7.js"');
+fs.writeFileSync('dist/index.html',html);
