@@ -303,3 +303,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Supporting access is integrated into claim words: review h3 contains a native text button when supporting comments exist; opening claim text already opens its source. No page icons or reserved supporting row. Dialog close returns to the claim trigger, with hover/focus cues. Summary v31, consultation v17, final v12, results workflow-18, CSS v28.
 
 - Direct study tabs and one actions menu: round buttons and final synthesis are directly selectable, with a separate stage row at narrow widths. Existing synthesis actions are proxied into consultation options, preserving settings handlers; secondary ellipsis/direct generation hidden when top menu is available. Summary v32, consultation v18, final v13, results workflow-19, CSS v29.
+
+- Claim-text mobile check: neutralize inherited full-width inline-block button styling so long claim buttons wrap inside the title line. CSS v30.

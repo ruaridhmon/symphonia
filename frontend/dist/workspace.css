@@ -933,3 +933,5 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .summary-actions-menu[hidden],#root .summary-generate-empty[hidden] {display:none!important;}
 #root .cw-summary-actions {border-top:1px solid var(--border);padding-top:6px;margin-top:6px;}
 @media(max-width:800px){#root .cw-views .cw-context {width:100%;margin:0;justify-content:flex-start;gap:20px;}#root .cw-round-tabs {gap:20px;}}
+
+#root .product-summary .di-claim-copy h3 .di-claim-trigger {display:inline!important;width:auto!important;max-width:100%;white-space:normal;overflow-wrap:anywhere;font:inherit;}
