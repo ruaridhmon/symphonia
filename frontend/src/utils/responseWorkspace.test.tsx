@@ -71,3 +71,15 @@ it('shows a change from the nearest earlier exact claim and hides history initia
 it('does not match anonymous identities or differently worded questions',()=>{const Workspace=createResponseWorkspace(React,Editor);render(<Workspace {...base} structuredRounds={[{...{...rounds[0],questions:[{...questions[0],sectionTitle:'Different claim'}]},responses:[answer(1,'Alice',2),answer(7,'',2)]},{...rounds[1],responses:[answer(2,'Alice',3),answer(8,'',3)]}]}/>);expect(screen.queryByRole('button',{name:/Anonymous.*Earlier answers/})).not.toBeInTheDocument();expect(screen.queryByText(/→/)).not.toBeInTheDocument();});
 
 it('starts with names only and expands or collapses all answers for one person',()=>{const Workspace=createResponseWorkspace(React,Editor);rawRender(<Workspace {...base}/>);expect(screen.queryByText('Original evidence 2')).not.toBeInTheDocument();const person=screen.getByRole('button',{name:'Responses from Alice'});fireEvent.click(person);expect(screen.getByText('Original evidence 2')).toBeInTheDocument();expect(screen.queryByText('Original evidence 3')).not.toBeInTheDocument();expect(person).toHaveAttribute('aria-expanded','true');fireEvent.click(person);expect(screen.queryByText('Original evidence 2')).not.toBeInTheDocument();});
+
+it('keeps claim, exact stance and separate confidence together with reasoning collapsed',()=>{
+ const review=[questions[0],{questionId:'claim_1_confidence',sectionTitle:questions[0].sectionTitle,label:'Confidence in your rating',inputType:'single_select'},{questionId:'why',sectionTitle:questions[0].sectionTitle,label:'Explain your position',inputType:'textarea'}];
+ const response={...answer(2,'Alice',3),answers:{q1:{position:'Strongly agree'},q2:{position:'Slightly confident'},q3:{position:'Evidence remains weak.'}}};
+ const Workspace=createResponseWorkspace(React,Editor);
+ const view=render(<Workspace {...base} rounds={[{...rounds[1],questions:review}]} structuredRounds={[{...rounds[1],questions:review,responses:[response]}]}/>);
+ const heading=view.container.querySelector('.rp-compact-rating .rp-question-heading')!;
+ expect(heading).toHaveTextContent('Preserve the exact claim');expect(heading).toHaveTextContent('Strongly agree');expect(heading).toHaveTextContent('Confidence: Slightly confident');
+ const disclosure=view.container.querySelector('.rp-response-details') as HTMLDetailsElement;
+ expect(disclosure.open).toBe(false);fireEvent.click(disclosure.querySelector('summary')!);expect(disclosure.open).toBe(true);expect(disclosure).toHaveTextContent('Evidence remains weak.');
+ expect(view.container.querySelectorAll('.rp-question-answer')).toHaveLength(1);
+});
