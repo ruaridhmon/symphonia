@@ -1,7 +1,8 @@
 import * as WorkspaceReact from 'react';
 import { createSummaryRoute } from './utils/summaryRoute';
 import { createConsultationWorkspace } from './utils/consultationWorkspace';
-const ConsultationWorkspace = createConsultationWorkspace(WorkspaceReact);
+import ManualResponseSheet from './components/summary/ManualResponseSheet';
+const ConsultationWorkspace = createConsultationWorkspace(WorkspaceReact, ManualResponseSheet);
 import './components/summary/summary-refinement.css';
 import { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
@@ -2221,6 +2222,7 @@ function SummaryPageContent() {
                         onMakeLive={() => { void makeSelectedRoundLive(); }}
                         makingLiveId={isActivatingRound ? displayRound?.id : null}
                         onDownload={() => setDownloadSheetOpen(true)}
+                        onResponseAdded={loadResponses}
                     />
 
                     {/* Synthesis progress bar */}

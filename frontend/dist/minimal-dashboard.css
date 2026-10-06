@@ -1,23 +1,29 @@
-/* Home stays focused; consultation navigation is visible inside a consultation. */
+/* Navigation controls belong to the sidebar, not a full-width branded header. */
 #root .symphonia-shell {--shell-width:252px;min-width:0;padding-left:0;}
 #root .symphonia-shell.symphonia-consultation-open {padding-left:var(--shell-width);}
 #root .symphonia-shell.symphonia-sidebar-collapsed {padding-left:0;}
-#root .symphonia-shell > .symphonia-shell-header {position:sticky!important;top:0;inset:auto!important;height:58px;width:auto;z-index:40;border:0!important;box-shadow:none!important;backdrop-filter:none!important;background:var(--background)!important;}
-#root .symphonia-shell.symphonia-consultation-open > .symphonia-shell-header {margin-left:calc(-1 * var(--shell-width));}
-#root .symphonia-shell.symphonia-sidebar-collapsed > .symphonia-shell-header {margin-left:0;}
-#root .symphonia-shell > .symphonia-shell-header.symphonia-shell-header > div:first-child {display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;max-width:none!important;min-height:58px!important;margin:0!important;padding:10px 20px!important;}
-#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to dashboard"] {min-height:36px;justify-content:flex-start;gap:0!important;padding:0 6px!important;}
-#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to home"] img,#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to dashboard"] img {display:none!important;}
-#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to home"] h1,#root .symphonia-shell-header.symphonia-shell-header button[aria-label="Go to dashboard"] span {display:block!important;font-size:15px!important;font-weight:550!important;letter-spacing:-.025em;}
-#root .symphonia-shell-header > div:first-child > nav,#root .symphonia-shell-header > div:first-child > div:has(button[aria-haspopup="menu"]) {display:flex!important;position:relative;bottom:auto;left:auto;right:auto;margin-left:auto;}
-#root .symphonia-shell-header .symphonia-account-trigger {border:0!important;background:transparent!important;border-radius:7px!important;min-height:36px;padding:4px!important;gap:4px!important;}
+#root .symphonia-shell > .symphonia-shell-header {position:static!important;inset:auto!important;height:0!important;min-height:0!important;width:0!important;margin:0!important;padding:0!important;z-index:auto;border:0!important;box-shadow:none!important;backdrop-filter:none!important;background:transparent!important;}
+#root .symphonia-shell-header > div:first-child {height:0!important;min-height:0!important;margin:0!important;padding:0!important;}
+#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) > .symphonia-shell-header::before {content:"";position:fixed;inset:0 auto 0 0;width:var(--shell-width);background:color-mix(in srgb,var(--muted) 65%,var(--background));z-index:35;}
+#root .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-shell-header button[aria-label="Go to dashboard"] {display:none!important;position:fixed;left:70px;top:17px;min-height:28px!important;padding:0!important;background:none!important;border:0!important;z-index:42;}
+#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header button[aria-label="Go to dashboard"] {display:flex!important;}
+#root .symphonia-shell-header button[aria-label="Go to home"] img,#root .symphonia-shell-header button[aria-label="Go to dashboard"] img {display:none!important;}
+#root .symphonia-shell-header button[aria-label="Go to home"] h1,#root .symphonia-shell-header button[aria-label="Go to dashboard"] span {display:block!important;font-size:15px!important;font-weight:550!important;letter-spacing:-.025em;}
+#root .symphonia-shell-header .symphonia-account {position:fixed!important;left:auto!important;right:18px!important;top:auto!important;bottom:16px!important;z-index:50;}
+#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header .symphonia-account {left:14px!important;right:auto!important;width:224px;}
+#root .symphonia-shell-header .symphonia-account-trigger {border:0!important;background:var(--background)!important;border-radius:8px!important;min-height:40px;padding:6px!important;gap:10px!important;box-shadow:none;}
+#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header .symphonia-account-trigger {width:100%;justify-content:flex-start;background:transparent!important;}
 #root .symphonia-shell-header .symphonia-account-trigger > svg {display:none;}
 #root .symphonia-shell-header .symphonia-account-trigger > span {width:28px;height:28px;font-size:10px;letter-spacing:0;}
-#root .symphonia-shell-header .symphonia-account > [role="menu"] {top:calc(100% + 8px)!important;bottom:auto;left:auto;right:0!important;width:260px;max-width:calc(100vw - 32px);border-radius:10px!important;}
+#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-account-trigger::after {content:"Account";font-size:13px;color:var(--muted-foreground);}
+#root .symphonia-shell-header .symphonia-account > [role="menu"] {top:auto!important;bottom:calc(100% + 8px)!important;left:auto!important;right:0!important;width:260px;max-width:calc(100vw - 32px);border-radius:10px!important;}
+#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-account > [role="menu"] {left:0!important;right:auto!important;}
 #root .symphonia-shell-header button[aria-controls="mobile-nav-menu"],#root .symphonia-shell-header #mobile-nav-menu {display:none!important;}
-#root .symphonia-navigation-toggle {display:inline-flex!important;align-items:center;justify-content:center;width:36px;height:36px;border:0;border-radius:7px;background:none;color:var(--muted-foreground);font-size:18px;cursor:pointer;}
+#root .symphonia-shell-header [role="status"][aria-label*="on this page"] {position:fixed;right:20px;top:12px;z-index:40;padding:4px 8px;border-radius:7px;background:var(--background);}
+#root .symphonia-navigation-toggle {position:fixed;left:20px;top:12px;z-index:45;display:inline-flex!important;align-items:center;justify-content:center;width:36px;height:36px;border:0;border-radius:7px;background:var(--background);color:var(--muted-foreground);cursor:pointer;}
+#root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-navigation-toggle {background:transparent;}
 #root .symphonia-navigation-toggle:hover {background:var(--muted);color:var(--foreground);}
-#root .symphonia-shell-header > .symphonia-shell-navigation {display:none;position:fixed;top:58px;left:0;bottom:0;width:var(--shell-width);overflow-y:auto;background:color-mix(in srgb,var(--muted) 65%,var(--background));padding:18px 14px 24px;}
+#root .symphonia-shell-header > .symphonia-shell-navigation {display:none;position:fixed;top:64px;left:0;bottom:76px;width:var(--shell-width);overflow-y:auto;padding:10px 14px 24px;z-index:40;}
 #root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) .symphonia-shell-header > .symphonia-shell-navigation {display:block;}
 .symphonia-navigation-search {width:100%;height:36px;border:1px solid transparent!important;border-radius:7px!important;background:var(--background)!important;font-size:12px!important;padding:8px 10px!important;margin-bottom:10px;}
 .symphonia-navigation-list h2,.symphonia-navigation-drawer nav h2 {margin:22px 10px 8px;font-size:11px;font-weight:500;color:var(--muted-foreground);}
@@ -31,7 +37,7 @@
 .symphonia-navigation-earlier > summary {padding:10px;font-size:12px;color:var(--muted-foreground);cursor:pointer;}
 #root .symphonia-navigation-drawer {position:fixed;inset:0 auto 0 0;margin:0;border:0;border-right:1px solid var(--border);width:304px;max-width:calc(100vw - 40px);height:100dvh;max-height:100dvh;padding:0 14px 24px;background:var(--background);color:var(--foreground);overflow:auto;}
 #root .symphonia-navigation-drawer::backdrop {background:rgb(0 0 0 / .28);}
-.symphonia-drawer-header {display:flex;align-items:center;gap:8px;height:58px;margin:0 -14px 18px;padding:10px 20px;}
+.symphonia-drawer-header {display:flex;align-items:center;gap:8px;height:60px;margin:0 -14px 14px;padding:12px 20px;}
 .symphonia-drawer-header > span {padding-left:6px;font-size:15px;font-weight:550;letter-spacing:-.025em;}
 .symphonia-drawer-close {display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:36px;height:36px;border:0;border-radius:7px;background:none;color:var(--muted-foreground);padding:0;cursor:pointer;}
 .symphonia-drawer-close:hover {background:var(--muted);color:var(--foreground);}
@@ -45,8 +51,9 @@
 .symphonia-placeholder-row > span:first-child {width:60%;height:12px;background:var(--muted);border-radius:4px;}
 .symphonia-placeholder-row > span:last-child {width:18%;height:12px;background:var(--muted);border-radius:4px;}
 #root .symphonia-shell > footer {border:0!important;background:none!important;padding:16px!important;font-size:10px!important;opacity:.5;}
-#root .symphonia-shell > main.product-dashboard {max-width:1040px!important;padding:40px 32px!important;}
-#root .symphonia-shell > main.product-summary {padding-top:28px!important;}
+#root .symphonia-shell > main.product-dashboard {max-width:1040px!important;padding:32px 32px 76px!important;}
+#root .symphonia-shell > main.product-summary {padding-top:32px!important;padding-bottom:76px!important;}
+#root .symphonia-shell > main:not(.product-summary):not(.product-dashboard) {padding-top:72px!important;padding-bottom:76px!important;}
 #root .symphonia-shell > main.product-summary > div > a:first-child {display:none;}
 #root .symphonia-code-entry {background:transparent!important;border:0!important;box-shadow:none!important;max-width:420px;margin:auto;padding:32px 12px!important;}
 #root .symphonia-code-entry h1 {font-size:24px;letter-spacing:-.025em;}
@@ -90,8 +97,15 @@
 #root .symphonia-shell a:focus-visible,#root .symphonia-shell button:focus-visible { outline:2px solid var(--ring);outline-offset:3px; }
 #root .symphonia-shell .cw-identity h2 {font-size:24px!important;line-height:1.35!important;letter-spacing:-.025em;}
 @media(max-width:800px) {
- #root .symphonia-shell > .symphonia-shell-header.symphonia-shell-header > div:first-child {padding:7px 20px!important;}
- .symphonia-drawer-header {padding:7px 20px;}
+ #root .symphonia-shell.symphonia-consultation-open {padding-left:0;}
+ #root .symphonia-consultation-open:not(.symphonia-sidebar-collapsed) > .symphonia-shell-header::before {display:none;}
+ #root .symphonia-shell-header button[aria-label="Go to home"],#root .symphonia-shell-header button[aria-label="Go to dashboard"] {display:none!important;}
+ #root .symphonia-shell-header .symphonia-account {left:auto!important;right:18px!important;width:auto!important;bottom:16px!important;}
+ #root .symphonia-shell-header .symphonia-account-trigger {background:var(--background)!important;min-height:44px!important;}
+ #root .symphonia-account-trigger::after {display:none;}
+ #root .symphonia-shell-header .symphonia-account > [role="menu"] {left:auto!important;right:0!important;}
+ #root .symphonia-navigation-toggle {top:8px;}
+ .symphonia-drawer-header {padding:8px 20px;height:60px;}
  #root .symphonia-shell .cw-identity h2 {font-size:20px!important;}
  #root .symphonia-navigation-toggle,.symphonia-drawer-close {width:44px;height:44px;}
  #root .symphonia-shell > main.symphonia-summary-loading {padding:24px 20px;}
@@ -100,8 +114,8 @@
  #root .symphonia-shell.symphonia-consultation-open {padding-left:0;}
  #root .symphonia-shell.symphonia-consultation-open > .symphonia-shell-header {margin-left:0;}
  #root .symphonia-shell-header > .symphonia-shell-navigation {display:none!important;}
- #root .symphonia-shell > main.product-dashboard {padding:24px 20px 40px!important;}
- #root .symphonia-shell > main.product-summary {padding-top:20px!important;}
+ #root .symphonia-shell > main.product-dashboard {padding:72px 20px 76px!important;}
+ #root .symphonia-shell > main.product-summary {padding-top:72px!important;}
  .symphonia-admin-home > div > .mb-8 {align-items:flex-end!important;flex-direction:row!important;flex-wrap:wrap;gap:12px!important;}
  .symphonia-admin-home > div > .mb-8 > div:first-child {flex-basis:100%;}
  .symphonia-minimal-search {width:100%!important;}
