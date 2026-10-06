@@ -53,7 +53,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     const article=node('article','','di-claim');article.dataset.key=row.key;
     article.dataset.openExcerpts=JSON.stringify([...priorOpen].filter(k=>k?.startsWith(`${row.key}:excerpt:`)));
     const heading=node('div','','di-claim-top');
-    const left=node('div','','di-claim-copy');const number=node('span',String(rows.indexOf(row)+1).padStart(2,'0'),'di-claim-number');number.setAttribute('aria-label',`Claim ${rows.indexOf(row)+1}`);left.append(number,node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,'')));heading.append(left);
+    const left=node('div','','di-claim-copy');const number=node('span',String(rows.indexOf(row)+1).padStart(2,'0'),'di-claim-number');number.setAttribute('aria-label',`Claim ${rows.indexOf(row)+1}`);const claimTitle=node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,''));left.append(number,claimTitle);heading.append(left);
     const opening=rounds.find(r=>r.round_number===1);const map=opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null;
     const claim=map?.claims?.find(c=>c.text.replace(/\s+/g,' ').trim()===row.label.replace(/^Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim());
     if(claim&&map?.claims){number.textContent=String(map.claims.indexOf(claim)+1).padStart(2,'0');
@@ -118,8 +118,8 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     }
     if(row.origin==='inferred')left.append(node('p','Inferred assumption · unconfirmed','di-inferred-origin'));
     const supporting=row.evidence.filter(e=>e.comment.trim());
-    const wrapper=node('div','','di-reasons');const trigger=button('',()=>{detail.showModal();});
-    trigger.className='di-supporting-trigger';trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-label','Supporting information');trigger.title='Supporting information';const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 20 20');icon.setAttribute('aria-hidden','true');const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d','M5 2.75h6l4 4v10.5H5z M11 2.75v4h4 M8 10h4 M8 13h4');icon.append(path);trigger.append(icon);if(supporting.length)wrapper.append(trigger);
+    const trigger=button(claimTitle.textContent||'',()=>{detail.showModal();});
+    trigger.className='di-claim-trigger';trigger.setAttribute('aria-haspopup','dialog');trigger.title='Read supporting information';if(supporting.length)claimTitle.replaceChildren(trigger);
     const detail=document.createElement('dialog');detail.className='di-supporting-dialog';detail.setAttribute('aria-label',`Supporting information: ${row.label.replace(/^Claim\s+\d+:\s*/i,'')}`);
     const dismiss=()=>{detail.close();trigger.focus();};const close=button('×',dismiss);close.setAttribute('aria-label','Close supporting information');
     const header=node('div','','di-supporting-heading');const title=node('div');title.append(node('p','Supporting information','di-supporting-kicker'),node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,''),'di-supporting-claim'));header.append(title,close);detail.append(header);
@@ -145,7 +145,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
       if(e.changed&&e.before!==null)entry.append(node('p',`Position changed: ${e.before} → ${e.position}`,'di-supporting-change'));
       if(e.confidenceChanged)entry.append(node('p',`Confidence changed: ${e.beforeConfidence || 'Not recorded'} → ${e.confidence || 'Not recorded'}`,'di-supporting-change'));
       entries.append(entry);
-    }detail.append(entries,audit);wrapper.append(detail);left.append(wrapper);list.append(article);
+    }detail.append(entries,audit);article.append(detail);list.append(article);
   });root.append(list);
   const archived=node('details','','di-method');archived.append(node('summary','Earlier claims not rated in this round'));
   const seen=new Set(rows.map(r=>r.key));

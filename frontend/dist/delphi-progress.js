@@ -319,23 +319,6 @@ function renderReasoningFlow(root, graph, selectedNode) {
         }
         row.append(links);
       }
-      if (n.sources?.some((s) => s.quote.trim()) || n.quote?.trim()) {
-        const source = document.createElement("button");
-        source.type = "button";
-        source.className = "di-supporting-trigger rf-source-trigger";
-        source.setAttribute("aria-label", "Supporting information");
-        source.setAttribute("aria-haspopup", "dialog");
-        source.title = "Supporting information";
-        const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        icon.setAttribute("viewBox", "0 0 20 20");
-        icon.setAttribute("aria-hidden", "true");
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", "M5 2.75h6l4 4v10.5H5z M11 2.75v4h4 M8 10h4 M8 13h4");
-        icon.append(path);
-        source.append(icon);
-        source.onclick = () => select(n, true, source);
-        row.append(source);
-      }
       diagram.append(row);
     }
     select(flow.nodes.find((n) => n.id === (selectedNode || root.dataset.reasoningNode)) || flow.nodes[0], !!selectedNode);
@@ -483,7 +466,8 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     const left = node("div", "", "di-claim-copy");
     const number = node("span", String(rows.indexOf(row) + 1).padStart(2, "0"), "di-claim-number");
     number.setAttribute("aria-label", `Claim ${rows.indexOf(row) + 1}`);
-    left.append(number, node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, "")));
+    const claimTitle = node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, ""));
+    left.append(number, claimTitle);
     heading.append(left);
     const opening = rounds.find((r) => r.round_number === 1);
     const map = opening?.synthesis_json?.narrative === opening?.synthesis ? opening?.synthesis_json?.reasoning_graph : null;
@@ -652,22 +636,13 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     }
     if (row.origin === "inferred") left.append(node("p", "Inferred assumption \xB7 unconfirmed", "di-inferred-origin"));
     const supporting = row.evidence.filter((e) => e.comment.trim());
-    const wrapper = node("div", "", "di-reasons");
-    const trigger = button("", () => {
+    const trigger = button(claimTitle.textContent || "", () => {
       detail.showModal();
     });
-    trigger.className = "di-supporting-trigger";
+    trigger.className = "di-claim-trigger";
     trigger.setAttribute("aria-haspopup", "dialog");
-    trigger.setAttribute("aria-label", "Supporting information");
-    trigger.title = "Supporting information";
-    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    icon.setAttribute("viewBox", "0 0 20 20");
-    icon.setAttribute("aria-hidden", "true");
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", "M5 2.75h6l4 4v10.5H5z M11 2.75v4h4 M8 10h4 M8 13h4");
-    icon.append(path);
-    trigger.append(icon);
-    if (supporting.length) wrapper.append(trigger);
+    trigger.title = "Read supporting information";
+    if (supporting.length) claimTitle.replaceChildren(trigger);
     const detail = document.createElement("dialog");
     detail.className = "di-supporting-dialog";
     detail.setAttribute("aria-label", `Supporting information: ${row.label.replace(/^Claim\s+\d+:\s*/i, "")}`);
@@ -733,8 +708,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       entries.append(entry);
     }
     detail.append(entries, audit);
-    wrapper.append(detail);
-    left.append(wrapper);
+    article.append(detail);
     list.append(article);
   });
   root.append(list);
