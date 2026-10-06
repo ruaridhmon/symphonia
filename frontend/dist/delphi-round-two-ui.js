@@ -34,7 +34,7 @@
   var confidenceOptions = ['Not at all confident', 'Slightly confident', 'Moderately confident', 'Very confident', 'Extremely confident'];
 
   function questionsFor(claims) {
-    var responseOptions = ['Strongly agree', 'Agree', 'Neither agree nor disagree', 'Disagree', 'Strongly disagree', 'Unable to judge — need more information'];
+    var responseOptions = ['Agree', 'Disagree', 'Unable to judge'];
     return claims.reduce(function (questions, claim) {
       var prefix = 'claim_' + claim.number;
       var sectionTitle = 'Claim ' + claim.number + ': ' + claim.title;

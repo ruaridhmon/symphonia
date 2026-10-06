@@ -63,7 +63,9 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     const score=node('div','','di-score');score.append(node('strong',row.percent===null?'—':`${Math.round(row.percent)}%`),node('span',row.percent===null?'No ratings':'agree'));rating.append(score);heading.append(rating);article.append(heading);
     const bar=node('div','','di-bar');bar.setAttribute('aria-hidden','true');
     // Denominator matches the displayed percentage; omissions are reported separately.
-    row.votes.slice(0,5).forEach((n,i)=>{if(n&&row.answered){const part=node('span');part.style.width=`${n/row.answered*100}%`;part.style.background=colors[i];bar.append(part);}});rating.append(bar);
+    row.votes.slice(0,5).forEach((n,i)=>{if(n&&row.answered){for(const expert of row.evidence.filter(e=>e.group===i)){
+      const part=node('span');const level=confidenceLabels.indexOf(expert.confidence);part.style.width=`${100/row.answered}%`;part.style.height=`${level<0?2:2+level*2}px`;part.style.background=colors[i];part.dataset.confidence=level<0?'missing':String(level);part.title=`${expert.participant}: ${expert.position}; confidence: ${expert.confidence || 'not recorded'}`;bar.append(part);
+    }}});bar.title='Length shows the share of positions. Each segment is one expert; thicker means higher confidence. Dashed segments have no confidence rating.';rating.append(bar);
     const legend=node('div','','di-legend');
     row.votes.forEach((n,i)=>{if(n||i<2){
       const item=node('span','','di-stance-group');
