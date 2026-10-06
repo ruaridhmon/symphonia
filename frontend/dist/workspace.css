@@ -836,3 +836,12 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .product-summary .delphi-insights[data-review=true] .di-bar {height:10px;display:flex;align-items:center;overflow:visible;background:transparent;border-radius:0;gap:0;}
 #root .product-summary .delphi-insights[data-review=true] .di-bar>span {flex-shrink:0;display:block;border-radius:0;}
 #root .product-summary .delphi-insights[data-review=true] .di-bar>span[data-confidence=missing] {background:none!important;border-top:2px dashed var(--muted-foreground);}
+
+/* Give claim text the full column; supporting information sits beneath it. */
+#root .product-summary .delphi-insights[data-review=true] .di-claim-copy {padding-right:0;}
+#root .product-summary .delphi-insights[data-review=true] .di-reasons:not([open]) {grid-column:1;grid-row:2;justify-self:start;align-self:start;margin:0 0 0 34px;}
+#root .product-summary .delphi-insights[data-review=true] .di-bar>span {border-radius:2px;}
+#root .rf-list-node {display:grid;grid-template-columns:24px minmax(0,1fr);gap:3px 14px;}
+#root .rf-list-node strong {grid-column:2;}
+#root .rf-list-supporting,#root .rf-list-origin {grid-column:2;margin:0;text-align:left;}
+@media(max-width:640px){#root .rf-list-node{gap:3px 10px;}#root .rf-list-node strong{flex-basis:auto;}#root .rf-list-supporting,#root .rf-list-origin{margin:0;}}
