@@ -29,7 +29,7 @@ it('preserves open excerpts across result refreshes without counting them as rat
  expect(root.querySelector('.di-score')!.textContent).toBe('50%agree');
  expect(root.querySelector('.di-legend')!.textContent).toBe('1 agree1 disagree');
  expect(root.querySelector('.unified-excerpts blockquote')!.textContent).toBe('Exact original words.');
- expect(root.querySelectorAll('h3')).toHaveLength(1);
+ expect(root.querySelectorAll('.di-claim-copy h3')).toHaveLength(1);
  expect(root.querySelector('.di-reasons')).toBeNull();
  expect(root.querySelector('.unified-excerpts summary')!.textContent).toBe('Supporting excerpts17');
  const control=root.querySelector<HTMLButtonElement>('.unified-excerpt-button')!;
@@ -83,11 +83,11 @@ it('counts supplied supporting information and opens it in a dismissible modal',
  const current={...round,questions:[...questions,{questionId:'reason',sectionTitle:'Exact claim',label:'Explain your position',inputType:'textarea'}]};
  const data=responses(['Agree','Disagree','Agree']);data[0].responses[0].answers.q2={position:'Evidence from my research.'};data[0].responses[1].answers.q2={position:'  '};
  renderDelphiInsights(root,current,[current],data);
- const trigger=root.querySelector<HTMLButtonElement>('.di-supporting-trigger')!;expect(trigger.textContent).toBe('');expect(trigger.getAttribute('aria-label')).toBe('Supporting information');expect(root.querySelector('details.di-reasons')).toBeNull();
+ const trigger=root.querySelector<HTMLButtonElement>('.di-claim-trigger')!;expect(trigger.textContent).toBe('Exact claim');expect(trigger.closest('h3')).not.toBeNull();expect(root.querySelector('details.di-reasons')).toBeNull();
  const dialog=root.querySelector<HTMLDialogElement>('.di-supporting-dialog')!;dialog.showModal=vi.fn(()=>dialog.open=true);dialog.close=vi.fn(()=>dialog.open=false);
  trigger.click();expect(dialog.open).toBe(true);expect(dialog.textContent).toContain('Evidence from my research.');expect(dialog.querySelectorAll('blockquote')).toHaveLength(1);
  (dialog.querySelector('button') as HTMLButtonElement).click();expect(dialog.open).toBe(false);expect(document.activeElement).toBe(trigger);
- renderDelphiInsights(root,current,[current],responses(['Agree']));expect(root.querySelector('.di-supporting-trigger')).toBeNull();
+ renderDelphiInsights(root,current,[current],responses(['Agree']));expect(root.querySelector('.di-claim-trigger')).toBeNull();
 });
 
 it('keeps position lengths equal while individual confidence changes thickness',()=>{

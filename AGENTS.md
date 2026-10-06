@@ -299,3 +299,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Header live check: remove any direct generation action created while results were loading once claims arrive. Results workflow-16.
 
 - Opening/review style parity: Round 1 uses plain numbers, matching 14px claim typography and 10px row spacing; no boxed selected state or inference side rails. Same supporting icon below the claim, visible inferred/unconfirmed label and upstream links retained. Summary v30, consultation v16, final v11, results workflow-17, CSS v27.
+
+- Supporting access is integrated into claim words: review h3 contains a native text button when supporting comments exist; opening claim text already opens its source. No page icons or reserved supporting row. Dialog close returns to the claim trigger, with hover/focus cues. Summary v31, consultation v17, final v12, results workflow-18, CSS v28.

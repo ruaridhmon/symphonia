@@ -917,3 +917,8 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .rf-dependencies {margin:3px 0 0 32px;gap:6px 12px;}
 #root .rf-source-trigger {margin:2px 0 0 32px;}
 #root .rf-list-node:focus-visible {outline:2px solid var(--foreground);outline-offset:4px;border-radius:3px;}
+
+/* Claim words are the supporting-information control; no extra row. */
+#root .di-claim-trigger {display:inline;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;border-radius:0;cursor:pointer;}
+#root .di-claim-trigger:hover,#root .rf-list-node:hover strong {text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:4px;}
+#root .di-claim-trigger:focus-visible {outline:2px solid var(--foreground);outline-offset:4px;border-radius:3px;}
