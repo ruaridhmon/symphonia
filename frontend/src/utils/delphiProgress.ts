@@ -71,13 +71,16 @@ export function ratingProgress(round: Round, rounds: Round[], responses: RoundWi
       const old = priorIndex >= 0 && r.email && newByIdentity.has(r.email) ? oldByIdentity.get(r.email) : undefined;
       const before = old ? coerceAnswerPosition(old.answers[`q${priorIndex+1}`] ?? old.answers[String(q.questionId)]) : '';
       const comparable = !!old && stance(before)<4 && stance(position)<4;
-      if(comparable) { matched++; if(stance(before)!==stance(position)) changed++; }
+      if(comparable) { matched++; if(before!==position) changed++; }
       const commentQuestion = round.questions[commentIndex];
       const comment = commentIndex >= 0 ? coerceAnswerPosition(r.answers[`q${commentIndex+1}`] ?? r.answers[String(typeof commentQuestion === 'object' ? commentQuestion.questionId : '')]) : '';
       const confidence = confidenceIndex >= 0 ? coerceAnswerPosition(r.answers[`q${confidenceIndex+1}`] ?? r.answers[String(typeof confidenceQuestion === 'object' ? confidenceQuestion.questionId : '')]) : '';
-      return {confidence,participant:`Response ${i+1}`,position,group:stance(position),comment,before:comparable ? before : null,changed:comparable && stance(before)!==stance(position)};
+      const priorConfidenceIndex = previous?.questions.findIndex(p=>typeof p==='object' && p!==null && p.sectionTitle===q.sectionTitle && /^Confidence in your rating$/i.test(String(p.label))) ?? -1;
+      const priorConfidenceQuestion = previous?.questions[priorConfidenceIndex];
+      const beforeConfidence = old && priorConfidenceIndex>=0 ? coerceAnswerPosition(old.answers[`q${priorConfidenceIndex+1}`] ?? old.answers[String(typeof priorConfidenceQuestion==='object' ? priorConfidenceQuestion.questionId : '')]) : null;
+      return {beforeConfidence,confidenceChanged:beforeConfidence!==null && beforeConfidence!==confidence,confidence,participant:`Response ${i+1}`,position,group:stance(position),comment,before:comparable ? before : null,changed:comparable && before!==position};
     });
-    return [{ hasConfidence:confidenceIndex>=0, history, evidence, matched, changed, key: String(q.questionId || index), label: String(q.sectionTitle || q.label), votes, answered, percent,
+    return [{ origin:q.claimOrigin, inferenceQuestion:q.inferenceQuestion, options:(q.options as unknown[]).map(String), hasConfidence:confidenceIndex>=0, history, evidence, matched, changed, key: String(q.questionId || index), label: String(q.sectionTitle || q.label), votes, answered, percent,
       previousRound: previous?.round_number,
       delta: percent !== null && prior && priorAnswered ? percent - 100 * prior[0] / priorAnswered : null,
       previousAnswered: priorAnswered }];

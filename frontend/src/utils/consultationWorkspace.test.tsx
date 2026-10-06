@@ -73,3 +73,25 @@ it('offers only Summary and Responses with directly selectable rounds',()=>{
  expect(screen.queryByText('Reflection')).not.toBeInTheDocument();
  expect(screen.getByRole('button',{name:'Round 2'})).toHaveAttribute('aria-pressed','true');
 });
+
+it('makes Add response available from Summary and places invitations inside the options menu',()=>{
+ const AdminWorkspace=createConsultationWorkspace(React,()=>null);
+ render(<AdminWorkspace {...props()} onResponseAdded={()=>{}}/>);
+ expect(screen.getByRole('button',{name:'+ Add response'})).toBeEnabled();
+ const invite=screen.getByRole('button',{name:'Invite people',hidden:true});
+ expect(invite.closest('details')).toHaveClass('cw-options');
+ fireEvent.click(invite);
+ expect(invite.closest('details')).not.toHaveAttribute('open');
+ expect(screen.getByRole('dialog',{name:'Invite people'})).toBeInTheDocument();
+});
+
+it('opens the final stage without creating a fourth expert round',()=>{
+ const Final=({formId}:any)=><div>Final account for {formId}</div>;
+ const AdminWorkspace=createConsultationWorkspace(React,undefined,Final);
+ const p=props();p.rounds.push({...p.rounds[1],id:13,round_number:3});
+ render(<AdminWorkspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Final synthesis'}));
+ expect(screen.getByText('Final account for 7')).toBeInTheDocument();
+ expect(p.onView).toHaveBeenCalledWith('synthesis');expect(p.onMakeLive).not.toHaveBeenCalled();
+ expect(screen.queryByRole('button',{name:'Round 4'})).not.toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Round 1'}));expect(screen.queryByText('Final account for 7')).not.toBeInTheDocument();
+});

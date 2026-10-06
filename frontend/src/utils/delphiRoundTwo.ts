@@ -1,7 +1,9 @@
+import type { ReasoningGraph } from "../types/synthesis";
 import type { QuestionInput } from './questions';
 
 export interface DelphiClaim {
   number: number;
+  id?:string; origin?:"explicit"|"inferred"; inferenceQuestion?:string;
   text: string;
   support: number | null;
   oppose: number | null;
@@ -96,21 +98,25 @@ function baseQuestion(overrides: Record<string, unknown>): Record<string, unknow
   };
 }
 
-export function buildDelphiRoundTwoQuestions(synthesisHtml: string): QuestionInput[] {
-  return extractDelphiClaims(synthesisHtml).flatMap((claim) => {
-    const prefix = `claim_${claim.number}`;
+export function buildDelphiRoundTwoQuestions(synthesisHtml: string, graph?: ReasoningGraph | null): QuestionInput[] {
+  const claims: DelphiClaim[] = graph?.claims?.length ? graph.claims.map((c,i)=>({number:i+1,id:c.id,text:c.text,origin:c.origin,inferenceQuestion:c.question,support:null,oppose:null,uncertain:null,notClassified:null,total:null})) : extractDelphiClaims(synthesisHtml);
+  return claims.flatMap((claim) => {
+    const prefix = claim.id || `claim_${claim.number}`;
+    const metadata = {claimId:prefix, claimText:claim.text, claimOrigin:claim.origin || "explicit", ...(claim.inferenceQuestion?{inferenceQuestion:claim.inferenceQuestion}:{})};
     const sectionTitle = `Claim ${claim.number}: ${claim.text}`;
     return [
       baseQuestion({
+        ...metadata,
         label: 'Your view',
         questionId: `${prefix}_response`,
         sectionTitle,
-        groupPrompt: groupFeedback(claim),
+        groupPrompt: claim.origin === "inferred" ? `Inferred · unconfirmed. This claim was not directly stated by an expert. ${claim.inferenceQuestion || "Check this interpretation independently."} Agreement does not establish that the original expert stated it.` : groupFeedback(claim),
         inputType: 'single_select',
         options: RATING_OPTIONS,
         optional: false,
       }),
       baseQuestion({
+        ...metadata,
         label: 'Confidence in your rating',
         questionId: `${prefix}_confidence`,
         sectionTitle,
@@ -119,6 +125,7 @@ export function buildDelphiRoundTwoQuestions(synthesisHtml: string): QuestionInp
         optional: true,
       }),
       baseQuestion({
+        ...metadata,
         label: 'Explain your position',
         questionId: `${prefix}_comment`,
         sectionTitle,

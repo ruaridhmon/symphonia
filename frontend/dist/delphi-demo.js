@@ -2365,14 +2365,15 @@ function clearReasoningFlow(root) {
 }
 function renderReasoningFlow(root, graph) {
   clearReasoningFlow(root);
-  const flows = graph.flows;
+  const shared = graph.claims?.length ? [{ id: "shared-claims", title: "Shared claim map", response_number: 0, nodes: graph.claims.map((c) => ({ id: c.id, text: c.text, kind: c.origin === "inferred" ? "assumption" : "premise", question: c.question, sources: c.sources })), edges: graph.claim_edges || [] }] : [];
+  const flows = [...shared, ...graph.flows];
   const remembered = root.dataset.reasoningFlow;
   const section = el("section", "", "rf-workspace");
   section.setAttribute("aria-label", "First-round reasoning");
   const head = el("header", "", "rf-header");
-  head.append(el("h2", "Claims & reasoning"), el("p", "Follow each contribution from its premises to its conclusion. Dashed cards make the unstated steps visible."));
+  head.append(el("h2", "Claims & reasoning"), el("p", "Review the shared claims and their logical connections, then inspect each original contribution. Dashed cards mark inferred steps."));
   section.append(head);
-  const counts2 = el("div", `${graph.mapped_response_count} of ${graph.response_count} responses represented \xB7 ${flows.length} argument${flows.length === 1 ? "" : "s"}`, "rf-coverage");
+  const counts2 = el("div", `${graph.mapped_response_count} of ${graph.response_count} responses represented \xB7 ${graph.flows.length} source argument${graph.flows.length === 1 ? "" : "s"}${graph.claims?.length ? " \xB7 " + graph.claims.length + " shared claims" : ""}`, "rf-coverage");
   section.append(counts2);
   if (graph.rejected_flow_count) counts2.append(el("span", ` \xB7 ${graph.rejected_flow_count} map${graph.rejected_flow_count === 1 ? " was" : "s were"} withheld because source or structure checks failed.`));
   section.append(el("p", (graph.status === "provided_interpretation" ? "Provided interpretation" : graph.status === "authored_example" ? "Illustrative interpretation" : "AI interpretation") + " \xB7 source quotes are matched to saved responses; meaning and connections still need review. Assumptions are unconfirmed.", "rf-provenance"));
@@ -2400,7 +2401,7 @@ function renderReasoningFlow(root, graph) {
     detail.replaceChildren();
     nav.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === index)));
     const title = el("div", "", "rf-flow-title");
-    title.append(el("h3", flow.title), el("span", `Response ${flow.response_number}`));
+    title.append(el("h3", flow.title), el("span", flow.response_number ? `Response ${flow.response_number}` : "Explicit and inferred claims"));
     canvas.append(title);
     const diagram = el("div", "", "rf-diagram");
     canvas.append(diagram);
@@ -2410,9 +2411,22 @@ function renderReasoningFlow(root, graph) {
       diagram.querySelectorAll("[data-rf-node]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.rfNode === n.id)));
       detail.replaceChildren();
       detail.classList.toggle("rf-inferred-detail", n.kind === "assumption");
-      detail.append(el("div", n.kind === "assumption" ? "INFERRED \xB7 UNCONFIRMED" : `SOURCE \xB7 RESPONSE ${flow.response_number}`, "rf-eyebrow"), el("h4", n.kind === "assumption" ? "A step to check with the expert" : "The expert\u2019s words"));
-      if (n.kind === "assumption") detail.append(el("p", n.text), el("blockquote", n.question || "Ask the expert to clarify this connection."), el("p", "This bridge is an interpretation. It is not attributed to the expert and is not part of the rating questionnaire.", "rf-small"));
-      else {
+      detail.append(el("div", n.kind === "assumption" ? "INFERRED \xB7 UNCONFIRMED" : flow.response_number ? `SOURCE \xB7 RESPONSE ${flow.response_number}` : "EXPLICIT \xB7 SOURCE-LINKED CLAIM", "rf-eyebrow"), el("h4", n.kind === "assumption" ? "A step to check with the expert" : "The expert\u2019s words"));
+      if (n.kind === "assumption") detail.append(el("p", n.text), el("blockquote", n.question || "Ask the expert to clarify this connection."), el("p", "This bridge is an interpretation, not a direct expert statement. It can be reviewed independently; ratings never change its inferred origin.", "rf-small"));
+      else if (n.sources) {
+        for (const source of n.sources) {
+          const block = el("section");
+          block.append(el("h4", `Response ${source.response_number} \xB7 ${source.stance} (interpreted)`), el("blockquote", source.quote));
+          const context = document.createElement("details");
+          context.append(el("summary", "Original reasoning, evidence and confidence"), el("p", source.source_text));
+          if (source.source_answers) {
+            const raw = el("pre", JSON.stringify(source.source_answers, null, 2), "rf-original-answer");
+            context.append(raw);
+          }
+          block.append(context);
+          detail.append(block);
+        }
+      } else {
         detail.append(el("blockquote", n.quote || ""));
         if (n.condition) detail.append(el("p", "Qualification: " + n.condition, "rf-qualification"));
         if (n.source_text && n.source_text !== n.quote) {
@@ -2532,7 +2546,7 @@ function renderReasoningFlow(root, graph) {
   flows.forEach((flow, i) => {
     const b = document.createElement("button");
     b.type = "button";
-    b.append(el("span", `Response ${flow.response_number}`), el("strong", flow.title));
+    b.append(el("span", flow.response_number ? `Response ${flow.response_number}` : "All contributions"), el("strong", flow.title));
     b.onclick = () => {
       delete root.dataset.reasoningNode;
       show(i);
@@ -2637,14 +2651,20 @@ function ratingProgress(round, rounds, responses) {
       const comparable = !!old && stance(before) < 4 && stance(position) < 4;
       if (comparable) {
         matched++;
-        if (stance(before) !== stance(position)) changed++;
+        if (before !== position) changed++;
       }
       const commentQuestion = round.questions[commentIndex];
       const comment = commentIndex >= 0 ? coerceAnswerPosition(r.answers[`q${commentIndex + 1}`] ?? r.answers[String(typeof commentQuestion === "object" ? commentQuestion.questionId : "")]) : "";
       const confidence = confidenceIndex >= 0 ? coerceAnswerPosition(r.answers[`q${confidenceIndex + 1}`] ?? r.answers[String(typeof confidenceQuestion === "object" ? confidenceQuestion.questionId : "")]) : "";
-      return { confidence, participant: `Response ${i + 1}`, position, group: stance(position), comment, before: comparable ? before : null, changed: comparable && stance(before) !== stance(position) };
+      const priorConfidenceIndex = previous?.questions.findIndex((p) => typeof p === "object" && p !== null && p.sectionTitle === q.sectionTitle && /^Confidence in your rating$/i.test(String(p.label))) ?? -1;
+      const priorConfidenceQuestion = previous?.questions[priorConfidenceIndex];
+      const beforeConfidence = old && priorConfidenceIndex >= 0 ? coerceAnswerPosition(old.answers[`q${priorConfidenceIndex + 1}`] ?? old.answers[String(typeof priorConfidenceQuestion === "object" ? priorConfidenceQuestion.questionId : "")]) : null;
+      return { beforeConfidence, confidenceChanged: beforeConfidence !== null && beforeConfidence !== confidence, confidence, participant: `Response ${i + 1}`, position, group: stance(position), comment, before: comparable ? before : null, changed: comparable && before !== position };
     });
     return [{
+      origin: q.claimOrigin,
+      inferenceQuestion: q.inferenceQuestion,
+      options: q.options.map(String),
       hasConfidence: confidenceIndex >= 0,
       history,
       evidence,
@@ -2678,7 +2698,11 @@ function buildFixedDelphiRound(round, rounds, responses) {
   return baseline.questions.map((q) => {
     if (typeof q === "string") return q;
     const row = rows.find((r) => r.key === String(q.questionId));
-    if (row) return { ...q, groupPrompt: [`Round 2: ${row.votes[0]} agree, ${row.votes[1]} disagree, ${row.votes[2]} neutral, ${row.votes[3]} unable to judge; ${row.answered} answered.`, "Review the other participants\u2019 reasoning, then rate this same claim again. You do not need to change your mind.", ...row.evidence.filter((e) => e.comment).map((e) => `${e.position}: ${e.comment}`)].join("\n") };
+    if (row) {
+      const distribution = row.options.map((option) => `${row.evidence.filter((e) => e.position === option).length} ${option.toLowerCase()}`).join(" \xB7 ");
+      const confidence = ["Not at all confident", "Slightly confident", "Moderately confident", "Very confident", "Extremely confident"].map((level) => `${row.evidence.filter((e) => e.confidence === level).length} ${level.toLowerCase()}`).join(" \xB7 ");
+      return { ...q, groupPrompt: [q.claimOrigin === "inferred" ? `Inferred \xB7 unconfirmed. Not directly stated by an expert. ${q.inferenceQuestion || ""}` : "", `Round 2 positions: ${distribution}. ${row.votes[5]} not answered; ${row.votes[4]} unrecognised.`, row.hasConfidence ? `Separate confidence: ${confidence}. ${row.evidence.filter((e) => !e.confidence).length} not recorded.` : "Separate confidence was not collected in this questionnaire.", "Keep or revise your position and confidence after considering the panel. Persistent disagreement is valid.", ...row.evidence.map((e) => `${e.participant}: ${e.position || "Not answered"}; confidence: ${e.confidence || "not recorded"}. ${e.comment || "No justification supplied."}`)].filter(Boolean).join("\n") };
+    }
     if (/comment|clarification|justify|what led|explain your position/i.test(String(q.label))) return { ...q, label: "Explain your position", placeholder: "Why do you agree or disagree? Share the reasoning or evidence behind your answer." };
     return { ...q };
   });
@@ -2935,20 +2959,24 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       }
       rating.append(trend);
     }
+    if (row.origin === "inferred") article.prepend(node("p", "Inferred \xB7 unconfirmed. Not directly stated by an expert.", "di-eyebrow"));
     const detail = document.createElement("details");
     detail.className = "di-reasons";
     detail.dataset.key = row.key;
     detail.open = priorOpen.has(row.key);
-    const summary = node("summary", "Responses and changes");
+    const summary = node("summary", "Distribution, responses and changes");
     detail.append(summary);
+    detail.append(node("p", row.options.map((option) => `${row.evidence.filter((e) => e.position === option).length} ${option.toLowerCase()}`).join(" \xB7 "), "di-exact-distribution"));
+    if (row.inferenceQuestion) detail.append(node("p", String(row.inferenceQuestion)));
+    if (row.hasConfidence) detail.append(node("p", "Confidence: " + confidenceLabels.map((level) => `${row.evidence.filter((e) => e.confidence === level).length} ${level.toLowerCase()}`).join(" \xB7 ") + ` \xB7 ${row.evidence.filter((e) => !e.confidence).length} not recorded.`));
     detail.append(node("p", row.history.map((h) => `Round ${h.round}: ${h.n ? Math.round(h.percent) + "% agree" : "No ratings"} (${h.n} answered)`).join(" \xB7 ")));
-    if (row.matched) detail.append(node("p", `${row.changed} of ${row.matched} returning respondents changed position group since Round ${row.previousRound}.`, "di-movement"));
+    if (row.matched) detail.append(node("p", `${row.changed} of ${row.matched} returning respondents changed their exact position since Round ${row.previousRound}.`, "di-movement"));
     const question = round.questions.find((q) => typeof q === "object" && String(q.questionId) === row.key);
     if (question?.parentClaimId) {
       article.prepend(node("p", `Related proposal \xB7 introduced in Round ${question.introducedRound || round.round_number}`, "di-eyebrow"));
       detail.append(node("p", `Original claim: ${question.parentClaimText || question.parentClaimId}`), node("p", `Reason for this proposal: ${question.claimRationale || "Not recorded"}`));
     }
-    const evidence = row.evidence.filter((e) => e.comment || e.changed);
+    const evidence = row.evidence;
     if (!evidence.length) detail.append(node("p", "No separate comments were recorded for this claim. Original responses remain available in the Responses view."));
     [0, 1, 2, 3, 4, 5].forEach((group) => {
       const subset = evidence.filter((e) => e.group === group);
@@ -2958,7 +2986,8 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
       subset.forEach((e) => {
         const block = node("blockquote");
         block.append(node("div", `${e.participant} \xB7 ${e.position || "Not answered"}`, "di-attribution"));
-        if (e.changed) block.append(node("p", `${e.before} \u2192 ${e.position}`, "di-shift"));
+        if (e.before !== null) block.append(node("p", `${e.before} \u2192 ${e.position}${e.changed ? "" : " \xB7 Position retained"}`, "di-shift"));
+        if (row.hasConfidence) block.append(node("p", `Confidence: ${e.confidence || "Not recorded"}${e.beforeConfidence !== null ? ` \xB7 Previously: ${e.beforeConfidence || "Not recorded"}` : ""}`));
         block.append(node("p", e.comment || "No reason supplied."));
         section.append(block);
       });

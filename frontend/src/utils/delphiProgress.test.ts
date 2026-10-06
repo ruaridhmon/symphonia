@@ -58,3 +58,8 @@ it('pairs confidence with the same respondent and claim without changing agreeme
  const data=votes(2,['Agree','Disagree','Agree']);data.responses[0].answers.q2={position:'Very confident'};data.responses[1].answers.claim_1_confidence={position:'Slightly confident'};
  const [row]=ratingProgress(round,[round],[data]);expect(row.votes).toEqual([2,1,0,0,0,0]);expect(row.evidence.map(e=>[e.group,e.confidence])).toEqual([[0,'Very confident'],[1,'Slightly confident'],[0,'']]);
 });
+
+it('detects a change in agreement strength even within the same broad group',()=>{
+ const rounds=[makeRound(1),makeRound(2)];const old=votes(1,['Agree']),now=votes(2,['Strongly agree']);old.responses[0].email=now.responses[0].email='stable';
+ const [row]=ratingProgress(rounds[1],rounds,[old,now]);expect(row.changed).toBe(1);expect(row.evidence[0].before).toBe('Agree');expect(row.evidence[0].changed).toBe(true);
+});
