@@ -61,6 +61,15 @@ def _normalise(s: str) -> str:
     return re.sub(r'\s+', ' ', s).strip()
 
 
+def _quote_matches(quote, source):
+    if not isinstance(quote, str) or not quote.strip():
+        return False
+    excerpt, original = _normalise(quote), _normalise(source)
+    # Short answers can still carry a substantive position; require the entire answer,
+    # rather than accepting a tiny arbitrary fragment of a longer contribution.
+    return excerpt in original and (len(excerpt) >= 12 or excerpt == original)
+
+
 def parse_reasoning_output(content: str, responses: list[dict]) -> tuple[str, dict]:
     text = re.sub(r'^```(?:json)?\s*|\s*```$', '', content.strip())
     data = json.loads(text)
@@ -100,7 +109,7 @@ def parse_reasoning_output(content: str, responses: list[dict]) -> tuple[str, di
                     n.update(question=q.strip(), confirmed=False)
                 else:
                     quote = item.get('quote', '')
-                    if not isinstance(quote, str) or len(quote.strip()) < 12 or not any(_normalise(quote) in _normalise(s) for s in source):
+                    if not any(_quote_matches(quote, s) for s in source):
                         raise ValueError('Source quote does not match this response')
                     n['quote'] = quote.strip()
                     # Source is retained so the UI can expose context, not an isolated quotation.
@@ -175,7 +184,7 @@ def validate_claim_map(data: dict, responses: list[dict]) -> dict:
                 answers = response.get('answers') or {}
                 if isinstance(answers, str):
                     answers = json.loads(answers)
-                matches = [s for s in _strings(answers) if isinstance(quote, str) and len(quote.strip()) >= 12 and _normalise(quote) in _normalise(s)]
+                matches = [s for s in _strings(answers) if _quote_matches(quote, s)]
                 if not matches:
                     raise ValueError('Shared claim quote does not match its source')
                 claim['sources'].append({'response_number': number, 'response_id': response.get('response_id'),

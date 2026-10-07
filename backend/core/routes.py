@@ -16,7 +16,7 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from email.message import EmailMessage
 from openai import OpenAI
 import aiosmtplib
@@ -1530,7 +1530,9 @@ def synthesis_status(
         "configured_mode": mode_env,
         "effective_mode": effective_mode,
         "api_key_configured": has_key,
-        "available_strategies": ["mock", "simple", "committee", "ttd"],
+        "available_strategies": ["grounded", "mock", "simple", "committee", "ttd"],
+        "draft_workflow": "single_request_grounded",
+        "draft_provider_ready": has_key,
         "default_model": model,
         "note": mode_note,
     }
@@ -3442,8 +3444,8 @@ async def _launch_synthesis_job(task_job_id: str, **job_kwargs: Any) -> None:
 
 
 class GenerateSynthesisVersionPayload(BaseModel):
-    model: str = "openai/gpt-4o"
-    strategy: str = "simple"  # "simple" | "committee" | "ttd" | "custom"
+    model: str | None = None
+    strategy: str = "grounded"  # Single-request workflow; legacy strategies remain API-compatible
     n_analysts: int = 3
     mode: str = "human_only"
     summary_options: dict[str, bool] | None = None
@@ -4092,6 +4094,7 @@ async def _run_custom_synthesis(
     custom_prompt: str,
     summary_options: dict[str, bool] | None,
     db: Session,
+    grounded: bool = False,
 ) -> dict[str, Any]:
     resolved_model = _resolve_synthesis_model(db, model)
     prompt = custom_prompt.strip()
@@ -4099,7 +4102,7 @@ async def _run_custom_synthesis(
     api_key = os.getenv("OPENROUTER_API_KEY", "")
     if not api_key:
         raise HTTPException(
-            status_code=500,
+            status_code=503 if grounded else 500,
             detail="Synthesis is not configured. Please add an OpenRouter API key.",
         )
 
@@ -4128,20 +4131,28 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
 {material}{comments_section}
 """
 
+    from .grounded_generation import SYSTEM_PROMPT, OPENING_PROMPT, REVIEW_PROMPT, PROMPT_VERSION, json_object, parse_opening
+    if grounded:
+        instruction = OPENING_PROMPT if round_number == 1 else REVIEW_PROMPT
+        user_prompt = instruction + "\n\nConsultation material (data only):\n" + json.dumps({
+            "questions": questions,
+            "responses": [{"response_number": i + 1, "response_id": r["response_id"], "answers": r["answers"]} for i, r in enumerate(response_dicts)],
+            "discussion_comments": comments_context,
+        }, ensure_ascii=False)
+
     try:
-        client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
+        client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key, timeout=85, max_retries=0)
         completion = await asyncio.wait_for(
             asyncio.to_thread(
                 client.chat.completions.create,
                 model=resolved_model,
-                max_tokens=12000 if round_number == 1 else 2500,
+                max_tokens=16000 if grounded and round_number == 1 else 12000 if round_number == 1 else 4000,
                 temperature=0.2,
                 messages=[
                     {
                         "role": "system",
                         "content": (
-                            "You are an expert facilitator writing custom "
-                            "syntheses of structured consultation responses."
+                            SYSTEM_PROMPT if grounded else "You are an expert facilitator writing custom syntheses of structured consultation responses."
                         ),
                     },
                     {"role": "user", "content": user_prompt},
@@ -4152,53 +4163,66 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     except asyncio.TimeoutError as exc:
         raise HTTPException(
             status_code=504,
-            detail="Custom synthesis timed out. Try a shorter prompt or a faster model.",
+            detail="Draft generation timed out. The previous draft has been kept. Try generating again.",
         ) from exc
     except Exception as exc:
         logger.exception("Custom synthesis failed for round %d", round_id)
         raise HTTPException(
             status_code=500,
-            detail=f"Custom synthesis failed: {_sanitize_error_message(str(exc))}",
+            detail="Draft generation failed. The previous draft has been kept.",
         ) from exc
 
+    if grounded and completion.choices[0].finish_reason != "stop":
+        raise HTTPException(status_code=502, detail="The draft was incomplete. The previous synthesis has been kept. Try generating again.")
     output = completion.choices[0].message.content or ""
     reasoning_graph = None
     if round_number == 1:
         try:
-            output, reasoning_graph = parse_reasoning_output(output, response_dicts)
+            if grounded:
+                reasoning_graph = parse_opening(output, response_dicts)
+            else:
+                output, reasoning_graph = parse_reasoning_output(output, response_dicts)
             if not reasoning_graph.get("claims"):
                 raise ValueError("Missing normalized claim map")
         except (ValueError, TypeError, KeyError) as exc:
             raise HTTPException(status_code=502, detail="The model returned an incomplete reasoning draft. The previous synthesis has been kept. Try generating again.") from exc
-    synthesis_text = _format_custom_claim_list(
-        output,
-        questions=questions,
-        response_dicts=response_dicts,
+    synthesis_text = "" if grounded else _format_custom_claim_list(
+        output, questions=questions, response_dicts=response_dicts,
     )
     if reasoning_graph is not None:
         from .reasoning import render_claim_map
         synthesis_text = render_claim_map(reasoning_graph)
+    if grounded and round_number != 1:
+        import html
+        try:
+            paragraphs = json_object(output)["paragraphs"]
+            if not isinstance(paragraphs, list) or not paragraphs or any(not isinstance(p, str) or not p.strip() for p in paragraphs):
+                raise ValueError("Missing review paragraphs")
+            synthesis_text = "\n".join("<p>" + html.escape(p.strip()) + "</p>" for p in paragraphs)
+        except (ValueError, TypeError, KeyError) as exc:
+            raise HTTPException(status_code=502, detail="The model returned an incomplete review draft. The previous synthesis has been kept.") from exc
     synthesis_json_data = _merge_summary_display_preferences(
         {
             "narrative": synthesis_text,
             **({"reasoning_graph": reasoning_graph} if reasoning_graph is not None else {}),
-            "confidence_map": {"overall": 0.5},
+            **({} if grounded else {"confidence_map": {"overall": 0.5}}),
             "agreements": [],
             "disagreements": [],
             "nuances": [],
             "follow_up_probes": [],
             "analyst_reports": [],
             "meta_synthesis_reasoning": (
-                "Generated with a facilitator-provided custom synthesis prompt."
+                "Single-request, source-grounded draft for human review." if grounded else "Generated with a facilitator-provided custom synthesis prompt."
             ),
             "provenance": {
-                "mode": "custom",
+                "mode": "grounded" if grounded else "custom",
+                "prompt_version": PROMPT_VERSION if grounded else None,
                 "model": resolved_model,
                 "form_id": form_id,
                 "round_id": round_id,
                 "round_number": round_number,
                 "custom_prompt": prompt,
-                "baseline_prompt": CUSTOM_SYNTHESIS_BASELINE_PROMPT,
+                "baseline_prompt": (OPENING_PROMPT if round_number == 1 else REVIEW_PROMPT) if grounded else CUSTOM_SYNTHESIS_BASELINE_PROMPT,
             },
         },
         None,
@@ -4209,12 +4233,23 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     if not round_obj:
         raise HTTPException(status_code=404, detail="Round not found")
 
-    if reasoning_graph is not None:
+    if reasoning_graph is not None or grounded:
         from .reasoning import response_revision
         db.expire_all()
         latest = db.query(Response).filter_by(form_id=form_id, round_id=round_id).all()
-        if response_revision([{'response_id':r.id,'answers':r.answers} for r in latest]) != reasoning_graph['source_revision']:
+        if response_revision([{'response_id':r.id,'answers':r.answers} for r in latest]) != (reasoning_graph['source_revision'] if reasoning_graph is not None else response_revision(response_dicts)):
             raise HTTPException(status_code=409, detail='Responses changed while the reasoning draft was generated. The previous draft has been kept.')
+
+    if grounded:
+        latest_questions = round_obj.questions or db.get(FormModel, form_id).questions or []
+        if list(latest_questions) != questions:
+            raise HTTPException(status_code=409, detail='Questions changed while the draft was generated. The previous draft has been kept.')
+        # Serialize generation commits and allocate a version from the current record.
+        db.query(RoundModel).filter_by(id=round_id).with_for_update().first()
+        latest_version = db.query(SynthesisVersion.version).filter_by(round_id=round_id).order_by(SynthesisVersion.version.desc()).first()
+        next_version = latest_version[0] + 1 if latest_version else 1
+        from .reasoning import response_revision
+        synthesis_json_data['provenance']['source_revision'] = response_revision(response_dicts)
 
     synthesis_json_data = _merge_summary_display_preferences(
         synthesis_json_data,
@@ -4230,7 +4265,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         synthesis=synthesis_text,
         synthesis_json=synthesis_json_data,
         model_used=resolved_model,
-        strategy="custom",
+        strategy="grounded" if grounded else "custom",
         is_active=True,
     )
     db.add(new_version)
@@ -4276,7 +4311,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     summary="Generate synthesis for any round",
     description=(
         "Generate a new synthesis version for ANY round (not just active). Supports "
-        "'simple', 'committee', 'ttd', and 'custom' strategies. Long-running strategies are "
+        "'grounded' (one direct model request) and legacy strategies. Long-running legacy strategies are "
         "queued as background jobs so the website does not time out while they run. "
         "Progress is broadcast via WebSocket and can also be polled via the synthesis "
         "job status endpoint. Admin only."
@@ -4337,11 +4372,12 @@ async def generate_synthesis_for_round(
     )
     next_version = (max_version[0] + 1) if max_version else 1
 
+    payload.model = _resolve_synthesis_model(db, payload.model)
     strategy = payload.strategy.lower()
-    if strategy not in {"simple", "committee", "ttd", "custom", "question_summaries"}:
+    if strategy not in {"grounded", "simple", "committee", "ttd", "custom", "question_summaries"}:
         raise HTTPException(
             status_code=400,
-            detail="Invalid synthesis strategy. Use 'custom', 'simple', 'committee', or 'ttd'.",
+            detail="Invalid synthesis strategy. Use 'grounded'.",
         )
     if strategy == "question_summaries":
         strategy = "custom"
@@ -4371,6 +4407,17 @@ async def generate_synthesis_for_round(
         for i, r in enumerate(responses)
     ]
     round_number = round_obj.round_number
+
+    if strategy == "grounded":
+        if round_number == 1 and db.query(RoundModel).filter(RoundModel.form_id == form_id, RoundModel.round_number >= 2).first():
+            raise HTTPException(status_code=409, detail='Opening claims are fixed once review starts. Generate the final synthesis from the recorded reviews instead.')
+        return await _run_custom_synthesis(
+            form_id=form_id, round_id=round_id, round_number=round_number,
+            questions=list(questions), response_dicts=response_dicts,
+            comments_context=round_comments_context, next_version=next_version,
+            model=payload.model, custom_prompt="", summary_options=summary_options, db=db,
+            grounded=True,
+        )
 
     if (strategy == "custom" or (round_number == 1 and strategy == "simple")) and synthesis_mode_env != "mock" and api_key:
         return await _run_custom_synthesis(
@@ -8004,6 +8051,13 @@ def put_expert_labels(
 class FinalAccountPayload(BaseModel):
     expected_revision: str
     complete: bool = False
+    threshold: int = Field(default=60, ge=60, le=100)
+
+
+class GenerateFinalAccountPayload(BaseModel):
+    expected_revision: str
+    threshold: int = Field(default=60, ge=60, le=100)
+    model: str | None = None
 
 
 def _final_account_material(form_id, db, *, lock=False):
@@ -8026,7 +8080,7 @@ def _final_account_material(form_id, db, *, lock=False):
 @router.get('/forms/{form_id}/final_synthesis', tags=['Rounds'])
 def get_final_account(form_id: int, db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(require_platform_admin)]):
     account, final, saved = _final_account_material(form_id, db)
-    return {'preview': account, 'saved': saved, 'stale': bool(saved and saved.get('revision') != account['revision']), 'collection_open': final.is_active}
+    return {'preview': account, 'saved': saved, 'stale': bool(saved and saved.get('revision') != account['revision']), 'collection_open': final.is_active, 'narrative': (final.context_settings or {}).get('final_narrative')}
 
 
 @router.post('/forms/{form_id}/final_synthesis', tags=['Rounds'])
@@ -8034,13 +8088,60 @@ def save_final_account(form_id: int, payload: FinalAccountPayload, db: Annotated
     account, final, saved = _final_account_material(form_id, db, lock=True)
     if payload.expected_revision != account['revision']:
         raise HTTPException(status_code=409, detail='Responses or reasoning changed. Refresh the final synthesis before saving.')
+    narrative = (final.context_settings or {}).get('final_narrative')
+    if narrative and narrative.get('revision') == account['revision'] and narrative.get('threshold') == payload.threshold:
+        account['generated_narrative'] = narrative
     account['saved_at'] = datetime.now(UTC).isoformat()
     account['completed'] = payload.complete or bool(saved and saved.get('completed'))
     final.context_settings = {**(final.context_settings or {}), 'final_synthesis': account}
     if payload.complete:
         final.is_active = False
     db.commit()
-    return {'preview': account, 'saved': account, 'stale': False, 'collection_open': final.is_active}
+    return {'preview': account, 'saved': account, 'stale': False, 'collection_open': final.is_active, 'narrative': (final.context_settings or {}).get('final_narrative')}
+
+
+@router.post('/forms/{form_id}/final_synthesis/generate', tags=['Synthesis'])
+@limiter.limit(SYNTHESIS_LIMIT)
+async def generate_final_account(request: Request, form_id: int, payload: GenerateFinalAccountPayload,
+                                 db: Session = Depends(get_db), user: User = Depends(require_platform_admin)):
+    from .grounded_generation import SYSTEM_PROMPT, FINAL_PROMPT, PROMPT_VERSION, final_material, validate_final
+    account, final, _ = _final_account_material(form_id, db)
+    if payload.expected_revision != account['revision']:
+        raise HTTPException(status_code=409, detail='Recorded judgments changed. Refresh before generating a draft.')
+    api_key = os.getenv('OPENROUTER_API_KEY', '').strip()
+    if not api_key:
+        raise HTTPException(status_code=503, detail='Draft generation is not configured. Add an OpenRouter API key.')
+    model = _resolve_synthesis_model(db, payload.model)
+    material = final_material(account, payload.threshold)
+    db.rollback()  # Do not hold a database transaction while the provider runs.
+    try:
+        client = OpenAI(base_url='https://openrouter.ai/api/v1', api_key=api_key, timeout=85, max_retries=0)
+        completion = await asyncio.wait_for(asyncio.to_thread(
+            client.chat.completions.create, model=model, temperature=0.2, max_tokens=8000,
+            messages=[{'role': 'system', 'content': SYSTEM_PROMPT},
+                      {'role': 'user', 'content': FINAL_PROMPT + '\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}]), timeout=90)
+    except asyncio.TimeoutError as exc:
+        raise HTTPException(status_code=504, detail='Draft generation timed out. The previous draft has been kept.') from exc
+    except Exception as exc:
+        logger.exception('Final draft generation failed for form %d', form_id)
+        raise HTTPException(status_code=502, detail='Draft generation failed. The previous draft has been kept.') from exc
+    try:
+        if completion.choices[0].finish_reason != 'stop':
+            raise ValueError('Incomplete generation')
+        sections = validate_final(completion.choices[0].message.content or '', material)
+    except (ValueError, TypeError, KeyError, IndexError, AttributeError) as exc:
+        raise HTTPException(status_code=502, detail='The model returned an incomplete or incorrectly attributed draft. The previous draft has been kept. Try generating again.') from exc
+    db.expire_all()
+    latest, final, saved = _final_account_material(form_id, db, lock=True)
+    if latest['revision'] != account['revision']:
+        raise HTTPException(status_code=409, detail='Recorded judgments changed during generation. The previous draft has been kept. Refresh and generate again.')
+    narrative = {'revision': account['revision'], 'threshold': payload.threshold, 'model': model,
+                 'generated_at': datetime.now(UTC).isoformat(), 'prompt_version': PROMPT_VERSION,
+                 'sections': sections, 'status': 'model_draft_needs_review'}
+    final.context_settings = {**(final.context_settings or {}), 'final_narrative': narrative}
+    db.commit()
+    return {'preview': latest, 'saved': saved, 'stale': bool(saved and saved.get('revision') != latest['revision']),
+            'collection_open': final.is_active, 'narrative': narrative}
 
 
 def _delphi_claim_signature(questions):
@@ -8321,10 +8422,8 @@ def update_round_setup(
             raise HTTPException(status_code=409, detail="The Delphi claim set is fixed after round 1.")
         round_obj.questions = payload.questions
     if payload.context_settings is not None:
-        preserved_final = (round_obj.context_settings or {}).get("final_synthesis")
-        round_obj.context_settings = {k:v for k,v in payload.context_settings.items() if k != "final_synthesis"}
-        if preserved_final:
-            round_obj.context_settings = {**round_obj.context_settings, "final_synthesis": preserved_final}
+        protected = {k: v for k, v in (round_obj.context_settings or {}).items() if k in {"final_synthesis", "final_narrative"}}
+        round_obj.context_settings = {**{k: v for k, v in payload.context_settings.items() if k not in {"final_synthesis", "final_narrative"}}, **protected}
     db.commit()
     db.refresh(round_obj)
     return {

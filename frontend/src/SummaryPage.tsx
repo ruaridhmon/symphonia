@@ -1716,8 +1716,8 @@ function SummaryPageContent() {
 		}
 
 		setIsGenerating(true);
-		setSynthesisStage(synthesisMode === 'custom' ? 'generating' : 'preparing');
-		setSynthesisStep(synthesisMode === 'custom' ? 2 : 0);
+		setSynthesisStage('generating');
+		setSynthesisStep(1);
 		setSynthesisTotalSteps(4);
 		setSynthesisStartedAtMs(Date.now());
 		setSynthesisElapsedSeconds(0);
@@ -1725,11 +1725,10 @@ function SummaryPageContent() {
 		try {
 			const data = await apiGenerateSynthesis(formId, targetRound.id, {
 				model: modelToUse,
-				strategy: synthesisMode,
+				strategy: 'grounded',
 				n_analysts: SYNTHESIS_ANALYSTS,
 				mode: 'human_only',
 				summary_options: summaryComposition,
-				prompt: synthesisMode === 'custom' ? customSynthesisPrompt.trim() : undefined,
 			});
 
 			// ── Async path: synthesis running in the background ──

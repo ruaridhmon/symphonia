@@ -21,3 +21,9 @@ it('keeps recorded neutral positions distinct from missing ratings',()=>{
  expect(groupFinalClaims([c],60)[0].claims).toHaveLength(0);
  const exported=groupedFinalMarkdown('Panel',[c],60,'table');expect(exported).toContain('Other positions');expect(exported).toContain('| 40% | 0% | 0% | 20% | 40% |');
 });
+
+it('exports model paragraphs without reverting to template prose',()=>{
+ const modelText='Experts favoured access exceptions because pupils may need urgent support, while retaining safeguards.';
+ const text=groupedFinalMarkdown('Panel',[claim('Retain access exceptions.',4,1)],60,'text',[],[{id:'consensus',paragraphs:[{text:modelText,claim_ids:['a']}]},{id:'disagreement',paragraphs:[]}]);
+ expect(text).toContain(modelText);expect(text).not.toContain('Retain access exceptions.');expect(text).not.toContain('support was not unanimous');
+});
