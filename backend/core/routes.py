@@ -8176,7 +8176,7 @@ async def generate_final_account(request: Request, form_id: int, payload: Genera
         completion = await _complete_grounded_draft(api_key, {
             'model': model, 'temperature': 0.2, 'max_tokens': 8000,
             'messages': [{'role': 'system', 'content': SYSTEM_PROMPT},
-                         {'role': 'user', 'content': FINAL_PROMPT + '\nUse the supplied response schema: consensus and disagreement are arrays of paragraphs.\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}],
+                         {'role': 'user', 'content': FINAL_PROMPT + '\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}],
             **_grounded_provider_options(model),
             'response_format': final_response_format(material),
         })

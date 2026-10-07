@@ -368,3 +368,6 @@ Any build pulses for this repo should read this file first. Key rules:
 
 
 - **2026-10-07 immediate display and final output:** Saved opening drafts update the maintained claim canvas immediately and invalidate older in-flight cache refreshes (five maintained checks). Final generation uses section-keyed native JSON with frozen claim-ID enums; server checks still enforce coverage, provenance and percentages. All 49 focused backend checks pass. Verify live final saving and repeat opening saving before claiming completion.
+
+
+- **2026-10-07 live generation follow-up:** Opening generation saved twice on isolated development consultation 78 in 5.44s and 4.17s, refreshed immediately and survived reload with original source links. Consultation 77 opening is locked because review Round 2 exists; a persistent alert now exposes that 409. Native final output requires every frozen claim key. Its inferred/unconfirmed provenance label is supplied from the frozen origin when absent from model prose; legacy provenance rejection, empty/generic prose, percentage and attribution checks remain. All 50 focused backend tests and five maintained generation checks pass. Final live persistence still needs rollout verification.
