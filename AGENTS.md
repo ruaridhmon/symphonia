@@ -353,3 +353,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Model selection correction: generation honors an explicitly selected model on dev instead of silently replacing it with the initial fast default. Initial dev settings still prefer the fast model. Maintained Summary v48; regression check exercises both default initialization and explicit selection.
 
 - Live fast-provider outputs exposed cross-response source IDs and unsupported relationship labels. Grounded Flash Lite opening drafts now send a strict JSON Schema with per-response flow variants, source ID enums, and relationship enums; routing requires parameter support. Server attribution/coverage/acyclic validation remains mandatory. Prompt grounded-draft-v3.
+
+- Structured opening drafts reserve at least 8,192 output tokens (ceiling only, not a requested output length), providing more room after a live structured completion returned a non-stop finish reason. Live diagnostics must verify whether truncation or provider failure caused that result. Diagnostics record finish reason and output token count only, never generated content.

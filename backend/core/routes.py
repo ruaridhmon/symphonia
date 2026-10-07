@@ -4166,7 +4166,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                 request_options["extra_body"]["provider"]["require_parameters"] = True
     completion_options = {
         "model": resolved_model,
-        "max_tokens": min(16000, max(4096, len(user_prompt) // 2)) if grounded and round_number == 1 else 12000 if round_number == 1 else 4000,
+        "max_tokens": min(16000, max(8192, len(user_prompt) // 2)) if grounded and round_number == 1 else 12000 if round_number == 1 else 4000,
         "temperature": 0.2,
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT if grounded else "You are an expert facilitator writing custom syntheses of structured consultation responses."},
@@ -4202,6 +4202,12 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             detail="Draft generation failed. The previous draft has been kept.",
         ) from exc
 
+    if grounded:
+        logger.warning(
+            "Grounded draft completion round=%d model=%s finish=%s output_tokens=%s",
+            round_id, resolved_model, completion.choices[0].finish_reason,
+            getattr(getattr(completion, "usage", None), "completion_tokens", None),
+        )
     if grounded and completion.choices[0].finish_reason != "stop":
         raise HTTPException(status_code=502, detail="The draft was incomplete. The previous synthesis has been kept. Try generating again.")
     output = completion.choices[0].message.content or ""
