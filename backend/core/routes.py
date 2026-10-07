@@ -4204,9 +4204,11 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
 
     if grounded:
         logger.warning(
-            "Grounded draft completion round=%d model=%s finish=%s output_tokens=%s",
+            "Grounded draft completion round=%d model=%s finish=%s output_tokens=%s output_chars=%d reasoning_tokens=%s",
             round_id, resolved_model, completion.choices[0].finish_reason,
             getattr(getattr(completion, "usage", None), "completion_tokens", None),
+            len(completion.choices[0].message.content or ""),
+            getattr(getattr(getattr(completion, "usage", None), "completion_tokens_details", None), "reasoning_tokens", None),
         )
     if grounded and completion.choices[0].finish_reason != "stop":
         raise HTTPException(status_code=502, detail="The draft was incomplete. The previous synthesis has been kept. Try generating again.")
@@ -4502,7 +4504,7 @@ async def generate_synthesis_for_round(
         new_version = SynthesisVersion(
             round_id=round_id,
             version=next_version,
-            synthesis=synthesis_text,
+          ynthesis=synthesis_text,
             synthesis_json=synthesis_json_data,
             model_used=payload.model,
             strategy=strategy,
@@ -11505,8 +11507,7 @@ def remove_participant(
         db,
         user=user,
         action="remove_participant",
-        resource_type="form",
-        resource_id=form_id,
+        resource_type="form        resource_id=form_id,
         detail={"removed_user_id": target_user_id},
         request=request,
     )

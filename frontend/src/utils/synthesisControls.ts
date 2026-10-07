@@ -42,8 +42,13 @@ export function enhanceSynthesisControls(main:HTMLElement){
    const items=document.createElement('div');items.className='summary-actions-items';menu.append(items);nav.append(menu);
 
    for(const detail of toolbar.querySelectorAll<HTMLDetailsElement>(':scope > details.summary-disclosure')){
-
+    const draft=detail.querySelector<HTMLButtonElement>('.synthesis-generate-footer button');
+    if(draft){
+     const generate=document.createElement('button');generate.type='button';generate.textContent='Generate draft';generate.dataset.draftAction='true';
+     generate.onclick=()=>{menu!.open=false;detail.open=false;if(!draft.disabled)draft.click();};items.append(generate);
+    }
     const action=document.createElement('button');action.type='button';action.textContent=detail.querySelector('summary span')?.textContent||'Summary settings';
+    if(draft)action.textContent='Draft settings';
     action.onclick=()=>{menu!.open=false;toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure').forEach(other=>other.open=other===detail?!detail.open:false);detail.querySelector<HTMLElement>('.card input,.card select,.summary-panel-close')?.focus();};items.append(action);
    }
    const refresh=toolbar.querySelector<HTMLButtonElement>('.summary-refresh');if(refresh){const action=document.createElement('button');action.type='button';action.textContent='Refresh';action.onclick=()=>{menu!.open=false;refresh.click();};items.append(action);}
@@ -59,6 +64,11 @@ export function enhanceSynthesisControls(main:HTMLElement){
    const signature=actions.map(a=>a.textContent).join('|');
    if(group.dataset.signature!==signature||proxiedMenus.get(group)!==menu){proxiedMenus.set(group,menu);group.dataset.signature=signature;group.replaceChildren();for(const action of actions){const proxy=document.createElement('button');proxy.type='button';proxy.textContent=action.textContent;proxy.onclick=()=>{const options=top.closest<HTMLDetailsElement>('details');if(options)options.open=false;action.click();};group.append(proxy);}}
    menu.hidden=true;nav.querySelector<HTMLElement>('.summary-generate-empty')?.setAttribute('hidden','');
+   const draft=toolbar.querySelector<HTMLButtonElement>('.synthesis-generate-footer button');
+   for(const action of group.querySelectorAll<HTMLButtonElement>('button'))if(action.textContent==='Generate draft'||action.textContent==='Writing draft…'){
+    const disabled=!!draft?.disabled,label=draft?.textContent==='Generating…'?'Writing draft…':'Generate draft';
+    if(action.disabled!==disabled)action.disabled=disabled;if(action.textContent!==label)action.textContent=label;
+   }
   }
  }else toolbar.classList.remove('summary-actions-panel');
  if(bound.has(toolbar))return;bound.add(toolbar);

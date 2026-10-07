@@ -541,3 +541,15 @@ def test_compact_inference_and_blank_response_keep_provenance():
     assert graph["claims"][1]["confirmed"] is False
     assert graph["flows"][0]["nodes"][1]["confirmed"] is False
     assert graph["response_coverage"][1]["status"] == "no_substantive_claim"
+def test_quoted_response_ids_keep_attribution_and_inference_context():
+    output = opening_output()
+    output["reasoning_flows"][0]["response_number"] = "1"
+    output["response_coverage"][0]["response_number"] = "1"
+    output["normalized_claims"].append({
+        "id": "claim_2", "text": "Exceptions may require review.", "origin": "inferred",
+        "sources": [], "based_on_responses": ["1"], "question": "Is review needed?",
+    })
+    graph = parse_opening(json.dumps(output), [{"response_id": 91, "answers": {"q1": SOURCE}}])
+    assert graph["flows"][0]["response_number"] == 1
+    assert graph["claims"][1]["based_on_responses"] == [1]
+    assert graph["response_coverage"][0]["response_number"] == 1
