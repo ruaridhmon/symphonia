@@ -18,7 +18,7 @@ jobs:
       - name: Read service settings and error diagnostics without source data
         run: |
           gcloud run services describe symphonia-dev --project=symphonia-dev-488613 --region=europe-west2 --format=json > /tmp/service.json
-          gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="symphonia-dev" AND (httpRequest.requestUrl:"generate_synthesis" OR textPayload:"Grounded" OR textPayload:"Custom synthesis" OR textPayload:"Error" OR textPayload:"Timeout")' --project=symphonia-dev-488613 --freshness=30m --limit=60 --format=json > /tmp/errors.json
+          gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="symphonia-dev" AND (httpRequest.requestUrl:"generate_synthesis" OR httpRequest.requestUrl:"final_synthesis/generate" OR textPayload:"Grounded" OR textPayload:"Custom synthesis" OR textPayload:"Error" OR textPayload:"Timeout")' --project=symphonia-dev-488613 --freshness=30m --limit=60 --format=json > /tmp/errors.json
           python3 - <<'PY'
           import json,re
           service=json.load(open('/tmp/service.json'))

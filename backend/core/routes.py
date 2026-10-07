@@ -4082,6 +4082,27 @@ def _format_custom_claim_list(
     return formatted if any(sections.get(heading) for heading in section_order) else markdown.strip()
 
 
+def _grounded_provider_options(model: str) -> dict[str, Any]:
+    options = {
+        "response_format": {"type": "json_object"},
+        "extra_body": {"provider": {"sort": "throughput", "preferred_max_latency": {"p90": 3}}},
+    }
+    if model == "google/gemini-2.5-flash-lite":
+        options["extra_body"]["reasoning"] = {"effort": "none"}
+    return options
+
+
+async def _complete_grounded_draft(api_key: str, options: dict[str, Any]):
+    # Shared cancellation and connection cleanup for opening, review and final drafts.
+    async with AsyncOpenAI(
+        base_url="https://openrouter.ai/api/v1", api_key=api_key,
+        timeout=Timeout(40, connect=5, write=10, pool=5), max_retries=0,
+    ) as client:
+        return await asyncio.wait_for(
+            client.chat.completions.create(**options), timeout=DRAFT_REQUEST_TIMEOUT_SECONDS,
+        )
+
+
 async def _run_custom_synthesis(
     *,
     form_id: int,
@@ -4157,10 +4178,8 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         db.rollback()
     request_options = {}
     if grounded:
-        request_options["response_format"] = {"type": "json_object"}
-        request_options["extra_body"] = {"provider": {"sort": "throughput", "preferred_max_latency": {"p90": 3}}}
+        request_options = _grounded_provider_options(resolved_model)
         if resolved_model == "google/gemini-2.5-flash-lite":
-            request_options["extra_body"]["reasoning"] = {"effort": "none"}
             if round_number == 1:
                 request_options["response_format"] = opening_response_format(response_dicts)
                 request_options["extra_body"]["provider"]["require_parameters"] = True
@@ -4176,14 +4195,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     }
     try:
         if grounded:
-            # Native async I/O can be cancelled; no provider thread survives a timeout.
-            async with AsyncOpenAI(
-                base_url="https://openrouter.ai/api/v1", api_key=api_key,
-                timeout=Timeout(40, connect=5, write=10, pool=5), max_retries=0,
-            ) as client:
-                completion = await asyncio.wait_for(
-                    client.chat.completions.create(**completion_options), timeout=DRAFT_REQUEST_TIMEOUT_SECONDS,
-                )
+            completion = await _complete_grounded_draft(api_key, completion_options)
         else:
             client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key, timeout=85, max_retries=0)
             completion = await asyncio.wait_for(
@@ -8160,16 +8172,23 @@ async def generate_final_account(request: Request, form_id: int, payload: Genera
     material = final_material(account, payload.threshold)
     db.rollback()  # Do not hold a database transaction while the provider runs.
     try:
-        client = OpenAI(base_url='https://openrouter.ai/api/v1', api_key=api_key, timeout=85, max_retries=0)
-        completion = await asyncio.wait_for(asyncio.to_thread(
-            client.chat.completions.create, model=model, temperature=0.2, max_tokens=8000,
-            messages=[{'role': 'system', 'content': SYSTEM_PROMPT},
-                      {'role': 'user', 'content': FINAL_PROMPT + '\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}]), timeout=90)
+        completion = await _complete_grounded_draft(api_key, {
+            'model': model, 'temperature': 0.2, 'max_tokens': 8000,
+            'messages': [{'role': 'system', 'content': SYSTEM_PROMPT},
+                         {'role': 'user', 'content': FINAL_PROMPT + '\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}],
+            **_grounded_provider_options(model),
+        })
     except TimeoutError as exc:
         raise HTTPException(status_code=504, detail='Draft generation timed out. The previous draft has been kept.') from exc
     except Exception as exc:
         logger.exception('Final draft generation failed for form %d', form_id)
         raise HTTPException(status_code=502, detail='Draft generation failed. The previous draft has been kept.') from exc
+    logger.warning(
+        "Grounded final draft completion form=%d model=%s finish=%s output_tokens=%s output_chars=%d",
+        form_id, model, completion.choices[0].finish_reason,
+        getattr(getattr(completion, "usage", None), "completion_tokens", None),
+        len(completion.choices[0].message.content or ""),
+    )
     try:
         if completion.choices[0].finish_reason != 'stop':
             raise ValueError('Incomplete generation')
