@@ -235,6 +235,13 @@ def test_final_one_call_snapshot_and_context_preservation(
     assert draft["revision"] == account["revision"] and draft["model"] == "chosen-model"
     assert got.json()["preview"]["claims"] == account["claims"]
     call.assert_called_once()
+    response_format = call.call_args.kwargs['response_format']
+    assert response_format['type'] == 'json_schema'
+    from jsonschema import validate
+    native = {section['id']: section['paragraphs'] for section in final_output(account)['sections']}
+    validate(native, response_format['json_schema']['schema'])
+    from core.grounded_generation import validate_final
+    assert validate_final(json.dumps(native), final_material(account, 60)) == draft['sections']
     saved = client.post(
         url,
         headers=admin_headers,
