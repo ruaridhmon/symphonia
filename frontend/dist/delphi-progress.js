@@ -721,6 +721,7 @@ var pending = false;
 var lastFetch = 0;
 var failed = false;
 var revision = 0;
+var savedRevision = 0;
 function el3(tag, text, className) {
   const node2 = document.createElement(tag);
   if (text) node2.textContent = text;
@@ -751,13 +752,14 @@ function render() {
     pending = true;
     lastFetch = Date.now();
     const requested = key;
+    const requestedSavedRevision = savedRevision;
     const deployedApi = "/assets/rounds-CU08geHs.js";
     import(
       /* @vite-ignore */
       deployedApi
     ).then(async (api) => {
       const [rounds, responses] = await Promise.all([api.g(Number(requested)), api.a(Number(requested))]);
-      if (key === requested) {
+      if (key === requested && savedRevision === requestedSavedRevision) {
         cache = { rounds, responses };
         revision += 1;
         failed = false;
@@ -808,6 +810,18 @@ new MutationObserver(() => {
 }).observe(document.body, { childList: true, subtree: true, characterData: true });
 window.addEventListener("focus", () => {
   lastFetch = 0;
+  render();
+});
+window.addEventListener("symphonia:draft-saved", (event) => {
+  const detail = event.detail;
+  if (!detail || String(detail.formId) !== key || typeof detail.synthesis !== "string") return;
+  savedRevision += 1;
+  const round = cache?.rounds.find((r) => r.id === detail.roundId);
+  if (round) {
+    round.synthesis = detail.synthesis;
+    round.synthesis_json = detail.synthesis_json;
+    revision += 1;
+  } else lastFetch = 0;
   render();
 });
 render();

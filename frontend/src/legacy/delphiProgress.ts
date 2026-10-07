@@ -9,6 +9,7 @@ let pending = false;
 let lastFetch = 0;
 let failed = false;
 let revision = 0;
+let savedRevision = 0;
 function el(tag: string, text?: string, className?: string) {
   const node = document.createElement(tag);
   if (text) node.textContent = text;
@@ -26,11 +27,12 @@ function render() {
     pending = true;
     lastFetch = Date.now();
     const requested = key;
+    const requestedSavedRevision = savedRevision;
     // Reuse the deployed application's authenticated API client, without copying credentials.
     const deployedApi = '/assets/rounds-CU08geHs.js';
     import(/* @vite-ignore */ deployedApi).then(async api => {
       const [rounds, responses] = await Promise.all([api.g(Number(requested)), api.a(Number(requested))]);
-      if (key === requested) { cache = { rounds, responses }; revision += 1; failed = false; }
+      if (key === requested && savedRevision === requestedSavedRevision) { cache = { rounds, responses }; revision += 1; failed = false; }
     }).catch(() => { if (key === requested) failed = true; }).finally(() => { pending = false; render(); });
   }
   const card = heading.closest('.card');
@@ -56,6 +58,18 @@ function render() {
 let timer: ReturnType<typeof setTimeout>;
 new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(render, 0); }).observe(document.body, { childList:true, subtree:true, characterData:true });
 window.addEventListener('focus', () => { lastFetch = 0; render(); });
+window.addEventListener('symphonia:draft-saved', event => {
+  const detail = (event as CustomEvent).detail;
+  if (!detail || String(detail.formId) !== key || typeof detail.synthesis !== 'string') return;
+  savedRevision += 1;
+  const round = cache?.rounds.find(r => r.id === detail.roundId);
+  if (round) {
+    round.synthesis = detail.synthesis;
+    round.synthesis_json = detail.synthesis_json;
+    revision += 1;
+  } else lastFetch = 0;
+  render();
+});
 render();
 
 setInterval(() => { if (document.visibilityState === 'visible') render(); }, 30000);
