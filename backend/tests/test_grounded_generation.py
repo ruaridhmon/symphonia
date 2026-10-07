@@ -595,3 +595,84 @@ def test_native_final_provenance_comes_from_frozen_claim_origin():
         output["consensus"]["inferred_claim"] = bad_text
         with pytest.raises(ValueError):
             validate_final(json.dumps(output), material)
+
+
+REVIEW_QUESTIONS = [{"questionId": "claim_old_response", "sectionTitle": "Old claim", "label": "Your response", "inputType": "single_select", "options": ["Agree", "Disagree"]}]
+
+
+def empty_review(rid):
+    with TestingSessionLocal() as db:
+        opening = db.get(RoundModel, rid)
+        opening.synthesis = "Previous opening"
+        review = RoundModel(form_id=opening.form_id, round_number=2, is_active=False,
+                            questions=REVIEW_QUESTIONS, synthesis=opening.synthesis)
+        db.add(review)
+        db.commit()
+        return review.id
+
+
+def test_opening_refreshes_empty_review_atomically(client, admin_headers, participant_headers, monkeypatch):
+    url, rid = opening_fixture(client, admin_headers, participant_headers)
+    review_id = empty_review(rid)
+    call, _ = provider(monkeypatch, opening_output())
+    got = client.post(url, headers=admin_headers, json={})
+    assert got.status_code == 200, got.text
+    call.assert_called_once()
+    with TestingSessionLocal() as db:
+        review = db.get(RoundModel, review_id)
+        question = review.questions[0]
+        assert question['questionId'] == 'claim_1_response'
+        assert question['claimText'] == 'Retain medical exceptions.'
+        assert question['options'] == ['Agree', 'Disagree']
+        assert review.is_active is False
+        assert review.synthesis == db.get(RoundModel, rid).synthesis
+        assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 1
+
+
+@pytest.mark.parametrize('during', [False, True])
+def test_review_draft_blocks_opening_rewrite(client, admin_headers, participant_headers, monkeypatch, during):
+    from core.models import Draft
+    url, rid = opening_fixture(client, admin_headers, participant_headers)
+    review_id = empty_review(rid)
+    def save_review():
+        with TestingSessionLocal() as db:
+            original = db.query(Response).filter_by(round_id=rid).one()
+            db.add(Draft(form_id=original.form_id, round_id=review_id, user_id=original.user_id, answers={'q1': 'Agree'}))
+            db.commit()
+    if not during:
+        save_review()
+    call, _ = provider(monkeypatch, opening_output(), callback=save_review if during else None)
+    got = client.post(url, headers=admin_headers, json={})
+    assert got.status_code == 409, got.text
+    assert call.call_count == int(during)
+    with TestingSessionLocal() as db:
+        assert db.get(RoundModel, rid).synthesis == 'Previous opening'
+        assert db.get(RoundModel, review_id).questions == REVIEW_QUESTIONS
+        assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 0
+
+
+def test_changed_review_setup_keeps_previous_draft(client, admin_headers, participant_headers, monkeypatch):
+    url, rid = opening_fixture(client, admin_headers, participant_headers)
+    review_id = empty_review(rid)
+    def change_review():
+        with TestingSessionLocal() as db:
+            db.get(RoundModel, review_id).questions = [{**REVIEW_QUESTIONS[0], 'options': ['Yes', 'No']}]
+            db.commit()
+    provider(monkeypatch, opening_output(), callback=change_review)
+    got = client.post(url, headers=admin_headers, json={})
+    assert got.status_code == 409, got.text
+    with TestingSessionLocal() as db:
+        assert db.get(RoundModel, rid).synthesis == 'Previous opening'
+        assert db.get(RoundModel, review_id).questions[0]['options'] == ['Yes', 'No']
+
+
+def test_review_refresh_preserves_inference_metadata():
+    from core.review_setup import refresh_review_questions
+    questions = refresh_review_questions(REVIEW_QUESTIONS, [{'id': 'claim_2', 'text': 'An inference', 'origin': 'inferred', 'question': 'Is this justified?'}])
+    assert questions[0]['inferenceQuestion'] == 'Is this justified?'
+    assert 'unconfirmed' in questions[0]['groupPrompt']
+    explicit = refresh_review_questions(questions, [{'id': 'claim_3', 'text': 'Explicit claim', 'origin': 'explicit'}])
+    assert 'inferenceQuestion' not in explicit[0]
+    assert 'unconfirmed' not in explicit[0]['groupPrompt']
+    with pytest.raises(ValueError):
+        refresh_review_questions([{'questionId': 'custom'}], [])
