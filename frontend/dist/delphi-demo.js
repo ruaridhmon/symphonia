@@ -2420,7 +2420,7 @@ function renderReasoningFlow(root, graph, selectedNode) {
       detail.hidden = !open;
       const top = el("div", "", "rf-detail-heading");
       const title2 = el("div");
-      title2.append(el("p", "Supporting information", "di-supporting-kicker"), el("h4", n.text, "di-supporting-claim"));
+      title2.append(el("h4", "Supporting information", "di-supporting-title"));
       top.append(title2);
       const close = document.createElement("button");
       close.type = "button";
@@ -2995,7 +2995,7 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     close.setAttribute("aria-label", "Close supporting information");
     const header = node("div", "", "di-supporting-heading");
     const title2 = node("div");
-    title2.append(node("p", "Supporting information", "di-supporting-kicker"), node("h3", row.label.replace(/^Claim\s+\d+:\s*/i, ""), "di-supporting-claim"));
+    title2.append(node("h3", "Supporting information", "di-supporting-title"));
     header.append(title2, close);
     detail.append(header);
     if (row.origin === "inferred") detail.append(node("p", "Inferred assumption \xB7 unconfirmed", "di-supporting-origin"));
