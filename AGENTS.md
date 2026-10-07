@@ -325,3 +325,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Actual mobile-frame computed-style check exposed the older high-specificity 72px workspace exception; update that exception to 12px so the toggle and title align. CSS v39.
 
 - Claim connections navigate in place: upstream references scroll/focus and briefly highlight the existing claim in R1/R2/R3 rather than opening evidence or changing views. Claim words retain supporting-information dialogs; reduced motion respected. Summary v38, consultation v24, final v19, workflow-25, CSS v40.
+
+- Quiet final synthesis: remove the redundant heading and on-page admin toolbar/status. Refresh, save, finish, downloads and snapshot metadata render through a React portal into the existing consultation options menu, with stale/open-round notices retained. Standalone fallback preserves reuse; host ReactDOM singleton retained in mirror. Summary v39, consultation v25, final v20, workflow-26, CSS v41.

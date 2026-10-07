@@ -1009,3 +1009,8 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .claim-reference-highlight {animation:claim-reference-highlight 1.6s ease-out;}
 #root .di-claim:focus-visible {outline:2px solid var(--muted-foreground);outline-offset:3px;border-radius:4px;}
 @media(prefers-reduced-motion:reduce){#root .claim-reference-highlight {animation:none;}}
+
+/* Final synthesis leads with the account; administration lives in the top menu. */
+#root .fs-menu-actions {border-top:1px solid var(--border);margin-top:6px;padding-top:6px;}
+#root .fs-menu-meta {display:grid;gap:4px;padding:8px 12px;color:var(--muted-foreground);font-size:11px;line-height:1.5;}
+#root .final-synthesis .fs-prose {margin:22px 0;}

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {createPortal} from 'react-dom';
 import {finalNarrative} from '../../utils/finalNarrative';
 import {api, getApiErrorDetail} from '../../api/client';
 import type {ReasoningGraph} from '../../types/synthesis';
@@ -10,6 +11,9 @@ export interface FinalSynthesisProps{formId:number;onComplete?:()=>void;}
 export default function FinalSynthesisPanel({formId,onComplete}:FinalSynthesisProps){
  const [result,setResult]=React.useState<Result|null>(null),[error,setError]=React.useState(''),[busy,setBusy]=React.useState(false),[showCurrent,setShowCurrent]=React.useState(false);
  const graph=React.useRef<HTMLDivElement>(null);
+ const surface=React.useRef<HTMLElement>(null);
+ const [actionsHost,setActionsHost]=React.useState<HTMLElement|null>(null);
+ React.useEffect(()=>{setActionsHost(surface.current?.closest('.consultation-workspace')?.querySelector<HTMLElement>('.cw-options > div')||null);},[formId]);
  const account=showCurrent?result?.preview:result?.saved || result?.preview;
  const refresh=React.useCallback(async()=>{setBusy(true);setError('');try{setResult(await api.get<Result>(`/forms/${formId}/final_synthesis`));}catch(e){setError(getApiErrorDetail(e) || 'Could not load final synthesis.');}finally{setBusy(false);}},[formId]);
  React.useEffect(()=>{let active=true;setResult(null);setError('');api.get<Result>(`/forms/${formId}/final_synthesis`).then(r=>{if(active)setResult(r);}).catch(e=>{if(active)setError(getApiErrorDetail(e) || 'Could not load final synthesis.');});return()=>{active=false;};},[formId]);
@@ -23,15 +27,20 @@ export default function FinalSynthesisPanel({formId,onComplete}:FinalSynthesisPr
   if(!account)return;
   const blob=new Blob([kind==='json'?JSON.stringify(account,null,2):`# ${account.title}\n\n${finalNarrative(account.claims).join('\n\n')}`],{type:kind==='json'?'application/json':'text/markdown'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`symphonia-final-${formId}.${kind}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  }
- return <section className="final-synthesis" aria-label="Final synthesis">
-  <header className="fs-heading"><div><h2>Final synthesis</h2></div><button type="button" onClick={()=>void refresh()} disabled={busy}>Refresh</button></header>
+ const actions=<div className="fs-menu-actions" onClick={event=>{if((event.target as HTMLElement).closest('button')&&actionsHost){const menu=actionsHost.closest<HTMLDetailsElement>('details');if(menu){menu.open=false;menu.querySelector<HTMLElement>('summary')?.focus();}}}}>
+  {account&&<div className="fs-menu-meta"><span>{account.completed?'Completed':result?.saved&&!showCurrent?'Saved snapshot':'Preview · not yet saved'}{account.saved_at?` · ${new Date(account.saved_at).toLocaleString()}`:''}</span><span>{account.round_two_count} Round 2 responses · {account.round_three_count} Round 3 responses</span></div>}
+  <button type="button" onClick={()=>void refresh()} disabled={busy}>Refresh synthesis</button>
+  {account&&<><button type="button" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save()}>Save snapshot</button>
+   {result?.collection_open&&<button type="button" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save(true)}>Finish study</button>}
+   <button type="button" onClick={()=>download('md')}>Download synthesis (.md)</button><button type="button" onClick={()=>download('json')}>Download audit (.json)</button></>}
+ </div>;
+ return <section ref={surface} className="final-synthesis" aria-label="Final synthesis">
+  {actionsHost?createPortal(actions,actionsHost):actions}
   {error&&<p role="alert" className="cw-notice">{error}</p>}
   {!account&&!error&&<p role="status">Loading the recorded judgments…</p>}
   {account&&<>
-   <div className="fs-status"><span>{account.completed?'Completed':result?.saved&&!showCurrent?'Saved snapshot':'Preview · not yet saved'}{account.saved_at?` · ${new Date(account.saved_at).toLocaleString()}`:''}</span><span>{account.round_two_count} Round 2 responses · {account.round_three_count} Round 3 responses</span></div>
-   {result?.collection_open&&<p className="fs-note">Round 3 is still open. Save a snapshot or finish the study when the panel has responded.</p>}
+   {result?.collection_open&&<p className="fs-note">Round 3 is still open. This synthesis may change as responses arrive.</p>}
    {result?.stale&&<p role="status" className="cw-notice">Recorded data has changed since this snapshot. <button type="button" onClick={()=>setShowCurrent(v=>!v)}>{showCurrent?'View saved snapshot':'Review current data'}</button></p>}
-   <div className="fs-actions"><button type="button" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save()}>Save snapshot</button>{result?.collection_open&&<button type="button" className="cw-primary" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save(true)}>Finish study</button>}<details><summary>Download</summary><button type="button" onClick={()=>download('md')}>Readable account (.md)</button><button type="button" onClick={()=>download('json')}>Full audit data (.json)</button></details></div>
    <div className="fs-prose">{finalNarrative(account.claims).map((text,i)=><p key={i}>{text}</p>)}</div>
    <details className="fs-audit"><summary>Claims, expert reasoning and changes</summary>
    <div className="fs-claims">{account.claims.map(c=><article key={c.id}>
