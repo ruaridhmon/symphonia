@@ -8160,6 +8160,7 @@ async def generate_final_account(request: Request, form_id: int, payload: Genera
         PROMPT_VERSION,
         SYSTEM_PROMPT,
         final_material,
+        final_response_format,
         validate_final,
     )
     account, final, _ = _final_account_material(form_id, db)
@@ -8175,8 +8176,9 @@ async def generate_final_account(request: Request, form_id: int, payload: Genera
         completion = await _complete_grounded_draft(api_key, {
             'model': model, 'temperature': 0.2, 'max_tokens': 8000,
             'messages': [{'role': 'system', 'content': SYSTEM_PROMPT},
-                         {'role': 'user', 'content': FINAL_PROMPT + '\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}],
+                         {'role': 'user', 'content': FINAL_PROMPT + '\nUse the supplied response schema: consensus and disagreement are arrays of paragraphs.\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}],
             **_grounded_provider_options(model),
+            'response_format': final_response_format(material),
         })
     except TimeoutError as exc:
         raise HTTPException(status_code=504, detail='Draft generation timed out. The previous draft has been kept.') from exc
@@ -8194,6 +8196,8 @@ async def generate_final_account(request: Request, form_id: int, payload: Genera
             raise ValueError('Incomplete generation')
         sections = validate_final(completion.choices[0].message.content or '', material)
     except (ValueError, TypeError, KeyError, IndexError, AttributeError) as exc:
+        logger.warning('Grounded final draft validation failed for form %d: %s', form_id,
+                       type(exc).__name__ if isinstance(exc, json.JSONDecodeError) or not isinstance(exc, ValueError) else str(exc))
         raise HTTPException(status_code=502, detail='The model returned an incomplete or incorrectly attributed draft. The previous draft has been kept. Try generating again.') from exc
     db.expire_all()
     latest, final, saved = _final_account_material(form_id, db, lock=True)
