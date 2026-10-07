@@ -252,9 +252,9 @@ function isDevelopmentHost(): boolean {
 		|| window.location.hostname === '127.0.0.1';
 }
 
-function sanitizeModel(model: string | null | undefined): string {
+function sanitizeModel(model: string | null | undefined, explicit = false): string {
 	// Keep the development site fast even when the shared admin setting is slower.
-	if (isDevelopmentHost()) return DEV_FAST_MODEL;
+	if (isDevelopmentHost() && !explicit) return DEV_FAST_MODEL;
 	if (!model || isBlockedModel(model)) return MODELS[0];
 	return model;
 }
@@ -1704,7 +1704,7 @@ function SummaryPageContent() {
 
 	async function generateSummary() {
 		const targetRound = targetRoundForGeneration;
-		const modelToUse = sanitizeModel(selectedModel);
+		const modelToUse = sanitizeModel(selectedModel, true);
 		if (isGenerating) return;
 		if (!formId || !modelToUse || !targetRound) {
 			toastError('The consultation is still loading. Please try again.');
