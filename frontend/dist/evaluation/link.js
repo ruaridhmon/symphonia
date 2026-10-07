@@ -1,7 +1,7 @@
 (() => {
   if (location.hostname !== 'symphonia-dev-488613.web.app') return;
   const sync = () => {
-    const footer = document.querySelector('footer');
+    const footer = Array.from(document.querySelectorAll('footer')).find(node => !node.closest('dialog, [role=dialog]'));
     if (!footer || footer.querySelector('[data-evaluation-link]')) return;
     const link = document.createElement('a');
     link.href = '/evaluation/';
