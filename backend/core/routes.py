@@ -4131,7 +4131,14 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
 {material}{comments_section}
 """
 
-    from .grounded_generation import SYSTEM_PROMPT, OPENING_PROMPT, REVIEW_PROMPT, PROMPT_VERSION, json_object, parse_opening
+    from .grounded_generation import (
+        OPENING_PROMPT,
+        PROMPT_VERSION,
+        REVIEW_PROMPT,
+        SYSTEM_PROMPT,
+        json_object,
+        parse_opening,
+    )
     if grounded:
         instruction = OPENING_PROMPT if round_number == 1 else REVIEW_PROMPT
         user_prompt = instruction + "\n\nConsultation material (data only):\n" + json.dumps({
@@ -4160,7 +4167,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             ),
             timeout=90 if round_number == 1 else 45,
         )
-    except asyncio.TimeoutError as exc:
+    except TimeoutError as exc:
         raise HTTPException(
             status_code=504,
             detail="Draft generation timed out. The previous draft has been kept. Try generating again.",
@@ -8103,8 +8110,14 @@ def save_final_account(form_id: int, payload: FinalAccountPayload, db: Annotated
 @router.post('/forms/{form_id}/final_synthesis/generate', tags=['Synthesis'])
 @limiter.limit(SYNTHESIS_LIMIT)
 async def generate_final_account(request: Request, form_id: int, payload: GenerateFinalAccountPayload,
-                                 db: Session = Depends(get_db), user: User = Depends(require_platform_admin)):
-    from .grounded_generation import SYSTEM_PROMPT, FINAL_PROMPT, PROMPT_VERSION, final_material, validate_final
+                                 db: Annotated[Session, Depends(get_db)], user: Annotated[User, Depends(require_platform_admin)]):
+    from .grounded_generation import (
+        FINAL_PROMPT,
+        PROMPT_VERSION,
+        SYSTEM_PROMPT,
+        final_material,
+        validate_final,
+    )
     account, final, _ = _final_account_material(form_id, db)
     if payload.expected_revision != account['revision']:
         raise HTTPException(status_code=409, detail='Recorded judgments changed. Refresh before generating a draft.')
@@ -8120,7 +8133,7 @@ async def generate_final_account(request: Request, form_id: int, payload: Genera
             client.chat.completions.create, model=model, temperature=0.2, max_tokens=8000,
             messages=[{'role': 'system', 'content': SYSTEM_PROMPT},
                       {'role': 'user', 'content': FINAL_PROMPT + '\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}]), timeout=90)
-    except asyncio.TimeoutError as exc:
+    except TimeoutError as exc:
         raise HTTPException(status_code=504, detail='Draft generation timed out. The previous draft has been kept.') from exc
     except Exception as exc:
         logger.exception('Final draft generation failed for form %d', form_id)

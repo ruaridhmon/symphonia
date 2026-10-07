@@ -3,6 +3,7 @@
 Models interpret sources; code validates attribution and computes ballot groupings.
 Neither JSON validation nor source matching proves semantic correctness: drafts need review.
 """
+
 import json
 import re
 
@@ -83,7 +84,7 @@ every reviewed claim exactly once. The IDs are audit links; they are not display
 def json_object(content):
     data = json.loads(re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip()))
     if not isinstance(data, dict):
-        raise ValueError("Expected a JSON object")
+        raise TypeError("Expected a JSON object")
     return data
 
 
@@ -102,26 +103,41 @@ def parse_opening(content, responses):
     seen = set()
     for entry in coverage:
         number, status = entry["response_number"], entry["status"]
-        if type(number) is not int or not 1 <= number <= len(responses) or number in seen:
+        if (
+            type(number) is not int
+            or not 1 <= number <= len(responses)
+            or number in seen
+        ):
             raise ValueError("Invalid coverage attribution")
         if status == "mapped":
             if number not in sourced or number not in mapped:
                 raise ValueError("Coverage claims an unmapped source")
         elif status == "no_substantive_claim":
-            if number in sourced or number in mapped or not isinstance(entry.get("reason"), str) or not entry["reason"].strip():
+            if (
+                number in sourced
+                or number in mapped
+                or not isinstance(entry.get("reason"), str)
+                or not entry["reason"].strip()
+            ):
                 raise ValueError("Invalid excluded response")
         else:
             raise ValueError("Unknown coverage status")
         seen.add(number)
     limitations = data.get("limitations")
-    if not isinstance(limitations, list) or any(not isinstance(x, str) for x in limitations):
+    if not isinstance(limitations, list) or any(
+        not isinstance(x, str) for x in limitations
+    ):
         raise ValueError("Invalid limitations")
-    graph.update(response_coverage=coverage, limitations=limitations, prompt_version=PROMPT_VERSION)
+    graph.update(
+        response_coverage=coverage,
+        limitations=limitations,
+        prompt_version=PROMPT_VERSION,
+    )
     return graph
 
 
 def position_counts(claim):
-    counts = dict(agree=0, disagree=0, unsure=0, missing=0, other=0)
+    counts = {"agree": 0, "disagree": 0, "unsure": 0, "missing": 0, "other": 0}
     for position in claim["positions"]:
         label = position["label"].strip().lower()
         if re.fullmatch(r"(strongly )?agree", label):
@@ -130,7 +146,12 @@ def position_counts(claim):
             key = "disagree"
         elif re.search(r"unable|unsure|don't know|cannot judge", label):
             key = "unsure"
-        elif not label or label in {"not recorded", "not answered", "unanswered", "missing"}:
+        elif not label or label in {
+            "not recorded",
+            "not answered",
+            "unanswered",
+            "missing",
+        }:
             key = "missing"
         else:
             key = "other"
@@ -143,31 +164,55 @@ def final_material(account, threshold):
     groups = {"consensus": [], "disagreement": []}
     for claim in account["claims"]:
         counts = position_counts(claim)
-        group = "consensus" if counts["total"] and max(counts["agree"], counts["disagree"]) * 100 >= threshold * counts["total"] else "disagreement"
+        group = (
+            "consensus"
+            if counts["total"]
+            and max(counts["agree"], counts["disagree"]) * 100
+            >= threshold * counts["total"]
+            else "disagreement"
+        )
         groups[group].append({**claim, "recorded_counts": counts})
-    return {"title": account["title"], "threshold": threshold, "groups": groups,
-            "opening_context": account.get("reasoning_graph"), "unrated_claims": account.get("unrated_claims", [])}
+    return {
+        "title": account["title"],
+        "threshold": threshold,
+        "groups": groups,
+        "opening_context": account.get("reasoning_graph"),
+        "unrated_claims": account.get("unrated_claims", []),
+    }
 
 
 def validate_final(content, material):
     sections = json_object(content)["sections"]
-    if not isinstance(sections, list) or [s["id"] for s in sections] != ["consensus", "disagreement"]:
+    if not isinstance(sections, list) or [s["id"] for s in sections] != [
+        "consensus",
+        "disagreement",
+    ]:
         raise ValueError("Invalid final sections")
     clean = []
     for section in sections:
         claims = {c["id"]: c for c in material["groups"][section["id"]]}
         seen, paragraphs = set(), []
         if not isinstance(section["paragraphs"], list):
-            raise ValueError("Invalid paragraphs")
+            raise TypeError("Invalid paragraphs")
         for paragraph in section["paragraphs"]:
             text, ids = paragraph["text"], paragraph["claim_ids"]
             if not isinstance(text, str) or not text.strip() or len(text) > 12000:
                 raise ValueError("Empty or excessive paragraph")
-            if not isinstance(ids, list) or not ids or any(not isinstance(i, str) or i not in claims or i in seen for i in ids) or len(set(ids)) != len(ids):
+            if (
+                not isinstance(ids, list)
+                or not ids
+                or any(
+                    not isinstance(i, str) or i not in claims or i in seen for i in ids
+                )
+                or len(set(ids)) != len(ids)
+            ):
                 raise ValueError("Wrong or duplicate claim attribution")
-            if any(claims[i]["origin"] == "inferred" for i in ids) and not (re.search(r"\binferred\b", text, re.I) and re.search(r"\bunconfirmed\b", text, re.I)):
+            if any(claims[i]["origin"] == "inferred" for i in ids) and not (
+                re.search(r"\binferred\b", text, re.IGNORECASE)
+                and re.search(r"\bunconfirmed\b", text, re.IGNORECASE)
+            ):
                 raise ValueError("Inference presented without provenance")
-            if re.search(r"\d\s*%|\bpercent(?:age)?\b", text, re.I):
+            if re.search(r"\d\s*%|\bpercent(?:age)?\b", text, re.IGNORECASE):
                 raise ValueError("Model-generated percentage in prose")
             if text.strip().lower() == "the panel broadly supported this account.":
                 raise ValueError("Generic filler")
