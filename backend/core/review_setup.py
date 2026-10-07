@@ -5,6 +5,12 @@ from copy import deepcopy
 
 def refresh_review_questions(questions, claims):
     """Keep the review's configured fields and scales while updating its claim set."""
+    # A later free-text round has no frozen claim identities to synchronize.
+    if not any(
+        isinstance(q, dict) and str(q.get("questionId", "")).startswith("claim_")
+        for q in questions
+    ):
+        return deepcopy(questions)
     suffixes = ("_response", "_confidence", "_comment")
     templates = {}
     for question in questions:
