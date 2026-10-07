@@ -1043,3 +1043,39 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 @keyframes dictation-active {to{transform:scaleY(.4);}}
 @media(prefers-reduced-motion:reduce){#root .manual-response-sheet .dictation-activity i {animation:none;}}
 @media(max-width:640px){#root .manual-response-sheet .dictation-controls button{width:40px;height:40px;}}
+/* Focused authoring; participant answer controls live in Preview. */
+#root .fc-composer .fc-toolbar { position:sticky;top:0;z-index:15;padding:18px 0;background:var(--background);gap:10px; }
+#root .fc-composer .fc-toolbar .cw-primary { background:var(--foreground);color:var(--background);border-radius:10px;padding:10px 16px;font-weight:500; }
+#root .fc-composer .fc-paper { max-width:720px;margin:48px auto; }
+#root .fc-composer .fc-introduction { padding-bottom:28px;margin-bottom:8px; }
+#root .fc-composer .fc-title { font-size:30px;letter-spacing:-.035em; }
+#root .fc-composer textarea.fc-title,#root .fc-composer textarea.fc-description,#root .fc-composer textarea.fc-question-label { resize:none;overflow:hidden; }
+#root .fc-composer .fc-question { padding:18px 0 24px; }
+#root .fc-composer .fc-question-top { margin:0 0 12px;gap:12px; }
+#root .fc-composer .fc-question-label { margin:0;line-height:1.7; }
+#root .fc-composer .fc-question-actions { display:flex;align-items:center;flex-wrap:wrap;gap:2px; }
+#root .fc-composer .fc-question-actions select { background:transparent;color:var(--muted-foreground); }
+#root .fc-composer .fc-question:focus-within .fc-question-top>span { color:var(--foreground); }
+#root .fc-composer .fc-delete,.fc-sheet .fc-delete { display:inline-flex;align-items:center;gap:6px;color:var(--muted-foreground); }
+#root .fc-composer .fc-delete:hover,.fc-sheet .fc-delete:hover { color:var(--destructive);background:color-mix(in srgb,var(--destructive) 7%,transparent); }
+#root .fc-composer .fc-add { border:0;text-align:left;padding:12px 0;width:auto;margin-top:16px; }
+#root .fc-composer .fc-add:hover { background:transparent;text-decoration:underline;text-underline-offset:4px; }
+#root .fc-composer .fc-answer[hidden] { display:none; }
+#root .fc-composer .fc-question[data-preview=true] h2 { margin-bottom:14px; }
+#root .fc-composer .fc-canvas-hint { text-align:left;margin-top:24px; }
+#root .fc-composer .fc-undo { display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--muted);font-size:13px;margin-top:16px; }
+#root .fc-composer .fc-undo button { font-size:13px;padding:4px 8px; }
+#root .fc-composer .fc-undo button:last-child { margin-left:auto; }
+.fc-empty-state { color:var(--muted-foreground);font-size:14px;padding:20px 0 0; }
+@media(max-width:640px){
+ #root .fc-composer .fc-toolbar { position:relative;padding-top:56px; }
+ #root .fc-composer .fc-save-state { font-size:10px; }
+ #root .fc-composer .fc-toolbar>div { width:100%;gap:4px; }
+ #root .fc-composer .fc-toolbar .cw-primary { padding:10px;font-size:12px; }
+ #root .fc-composer .fc-paper { margin:28px auto; }
+ #root .fc-composer .fc-title { font-size:26px; }
+ #root .fc-composer .fc-question-label { font-size:18px!important; }
+ #root .fc-composer .fc-question-actions button { min-height:40px; }
+ #root .fc-composer .fc-question-actions select { max-width:125px;min-height:40px; }
+ #root .fc-composer .fc-delete span { display:none; }
+}

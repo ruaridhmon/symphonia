@@ -69,3 +69,21 @@ it('saves the introduction as round context and retries without creating a dupli
  expect(JSON.parse(localStorage.getItem('symphonia:canvas-draft:v1:current')!).pendingFormId).toBe(99);
  fireEvent.click(screen.getByRole('button',{name:'Create consultation'}));await waitFor(()=>expect(api.patch).toHaveBeenCalledTimes(2));expect(api.post).toHaveBeenCalledTimes(1);expect(api.patch).toHaveBeenLastCalledWith('/forms/99/rounds/100',{context_settings:{show_previous_response:true,intro_body:'Please share a concrete example.'}});
 });
+
+it('deletes directly and restores exact question while keeping subsequent edits',()=>{
+ show();fireEvent.change(screen.getByLabelText('Question 1'),{target:{value:'First question'}});
+ fireEvent.click(screen.getByRole('button',{name:'+ Add question'}));fireEvent.change(screen.getByLabelText('Question 2'),{target:{value:'Second question'}});
+ fireEvent.click(screen.getByRole('button',{name:'Delete question 1'}));expect(screen.getByLabelText('Question 1')).toHaveValue('Second question');
+ fireEvent.change(screen.getByLabelText('Question 1'),{target:{value:'Edited survivor'}});fireEvent.click(screen.getByRole('button',{name:'Undo'}));
+ expect(screen.getByLabelText('Question 1')).toHaveValue('First question');expect(screen.getByLabelText('Question 2')).toHaveValue('Edited survivor');
+});
+it('persists an empty draft after deleting the last question and prevents creation',()=>{
+ const view=show();fireEvent.change(screen.getByLabelText('Consultation title'),{target:{value:'Empty draft'}});fireEvent.click(screen.getByRole('button',{name:'Delete question 1'}));
+ view.unmount();show();expect(screen.queryByLabelText('Question 1')).not.toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Create consultation'}));expect(api.post).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole('button',{name:'+ Add question'}));expect(screen.getByLabelText('Question 1')).toHaveValue('');
+});
+it('protects conditional follow-ups from becoming orphaned',()=>{
+ localStorage.setItem('symphonia:canvas-draft:v1:current',JSON.stringify({title:'Routing',description:'',questions:[{label:'Parent',questionId:'parent',inputType:'textarea'},{label:'Child',conditionalOnQuestionId:'parent',conditionalOnOption:'Yes',inputType:'textarea'}]}));
+ show();fireEvent.click(screen.getByRole('button',{name:'Delete question 1'}));expect(screen.getByRole('alert')).toHaveTextContent('dependent questions');expect(screen.getByLabelText('Question 2')).toHaveValue('Child');
+});

@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {api, getApiErrorDetail} from './api/client';
 import DocumentTemplateEditor from './components/DocumentTemplateEditor';
@@ -18,7 +18,7 @@ const blank = ():ConfigurableQuestion => ({label:'',inputType:'textarea',rows:4,
 export type Draft={pendingFormId?:number;format?:'questions'|'document';documentTemplate?:string;title:string;description:string;questions:ConfigurableQuestion[];allowJoin:boolean;allowPublicResponses:boolean;requireConsent:boolean;consentText:string;consentDocument:string};
 const fresh = ():Draft=>({title:'',description:'',questions:[blank()],allowJoin:true,allowPublicResponses:false,requireConsent:false,consentText:'I understand the purpose of this consultation and consent to my response being used within it.',consentDocument:''});
 function draftKey(){try{return `symphonia:canvas-draft:v1:${localStorage.getItem('email')||'current'}`;}catch{return 'symphonia:canvas-draft:v1';}}
-function readDraft():Draft{try{const value=JSON.parse(localStorage.getItem(draftKey())||'null');if(value&&typeof value.title==='string'&&typeof value.description==='string'&&Array.isArray(value.questions)&&value.questions.length&&value.questions.every((q:any)=>q&&typeof q.label==='string'))return {...fresh(),...value};}catch{}return fresh();}
+function readDraft():Draft{try{const value=JSON.parse(localStorage.getItem(draftKey())||'null');if(value&&typeof value.title==='string'&&typeof value.description==='string'&&Array.isArray(value.questions)&&value.questions.every((q:any)=>q&&typeof q.label==='string'))return {...fresh(),...value};}catch{}return fresh();}
 
 /** One canvas and the same answer components in author and participant-view modes. */
 export type CanvasEdit = {id:string; initial:Draft; roundNumber:number; locked:boolean; save:(draft:Draft)=>Promise<void>};
@@ -36,6 +36,7 @@ export function FormCanvas({edit}:{edit?:CanvasEdit}){
  const [saved,setSaved]=useState('');
  const [error,setError]=useState('');
  const [importNotice,setImportNotice]=useState('');
+ const [removed,setRemoved]=useState<{question:ConfigurableQuestion;index:number}|null>(null);
  const created=useRef(false);
  const pendingFormId=useRef<number|undefined>(draft.pendingFormId);
  const canvas=useRef<HTMLDivElement>(null);
@@ -44,6 +45,15 @@ export function FormCanvas({edit}:{edit?:CanvasEdit}){
  useEffect(()=>{document.title=`${edit?'Edit':'Create'} a consultation — Symphonia`;},[!!edit]);
  useEffect(()=>{if(!edit||!dirty)return;const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[!!edit,dirty]);
  useEffect(()=>{if(created.current||edit)return;try{localStorage.setItem(draftKey(),JSON.stringify(draft));setSaved('Draft saved on this device');}catch{setSaved('Draft could not be saved on this device');}},[draft]);
+ useLayoutEffect(()=>{canvas.current?.querySelectorAll<HTMLTextAreaElement>('.fc-title,.fc-description,.fc-question-label').forEach(field=>{field.style.height='auto';field.style.height=`${field.scrollHeight}px`;});},[draft,preview]);
+ const focusQuestion=(index:number)=>requestAnimationFrame(()=>{const field=canvas.current?.querySelector<HTMLTextAreaElement>(`[aria-label="Question ${index+1}"]`);(field??canvas.current?.querySelector<HTMLButtonElement>('.fc-add'))?.focus();});
+ const remove=(index:number)=>{
+  if(edit?.locked)return;
+  const question=draft.questions[index];
+  if(question.questionId&&draft.questions.some(q=>q.conditionalOnQuestionId===question.questionId)){setError('This question controls a follow-up. Remove its dependent questions first.');return;}
+  setRemoved({question,index});change({questions:draft.questions.filter((_,i)=>i!==index)});setAnswers({});setSelected(null);setError('');focusQuestion(Math.min(index,draft.questions.length-2));
+ };
+ const undoRemove=()=>{if(!removed)return;const questions=[...draft.questions];const index=Math.min(removed.index,questions.length);questions.splice(index,0,removed.question);change({questions});setAnswers({});setRemoved(null);focusQuestion(index);};
  const change=(patch:Partial<Draft>)=>setDraft(previous=>({...previous,...patch}));
  const updateQuestion=(index:number,question:ConfigurableQuestion)=>setDraft(previous=>({...previous,questions:previous.questions.map((q,i)=>i===index?question:q)}));
  const reorder=(from:number,to:number)=>{if(to<0||to>=draft.questions.length)return;const questions=[...draft.questions];[questions[from],questions[to]]=[questions[to],questions[from]];change({questions});setAnswers({});setSelected(to);};
@@ -73,26 +83,29 @@ export function FormCanvas({edit}:{edit?:CanvasEdit}){
    {!edit?<label><input type="checkbox" checked={draft.allowJoin} onChange={e=>change({allowJoin:e.target.checked})}/> Allow participants to join with the invitation code</label>:null}
    <PublicShareSettings enabled={draft.allowPublicResponses} onEnabledChange={allowPublicResponses=>change({allowPublicResponses})}/>
    <ConsentSettings enabled={draft.requireConsent} onEnabledChange={requireConsent=>change({requireConsent})} consentText={draft.consentText} onConsentTextChange={consentText=>change({consentText})} consentDocument={draft.consentDocument} onConsentDocumentChange={consentDocument=>change({consentDocument})}/>
-   {!edit?.locked&&!documentMode?<details><summary>Import questions</summary><QuestionnaireImporter onQuestionsImported={questions=>{change({questions});setAnswers({});setSelected(null);}} onImported={result=>setImportNotice(`Imported ${result.questions.length} questions. ${result.warnings.join(' ')}`)}/>{importNotice?<p role="status">{importNotice}</p>:null}</details>:null}
+   {!edit?.locked&&!documentMode?<details><summary>Import questions</summary><QuestionnaireImporter onQuestionsImported={questions=>{change({questions});setAnswers({});setSelected(null);setRemoved(null);}} onImported={result=>setImportNotice(`Imported ${result.questions.length} questions. ${result.warnings.join(' ')}`)}/>{importNotice?<p role="status">{importNotice}</p>:null}</details>:null}
    {!edit?.locked?<fieldset className="fc-format"><legend>Response format</legend>{(['questions','document'] as const).map(format=><label key={format}><input type="radio" name="response-format" checked={(draft.format||'questions')===format} onChange={()=>{change({format,documentTemplate:draft.documentTemplate||'{{long:Your response}}'});setAnswers({});}}/>{format==='questions'?'Questions':'Document'}</label>)}</fieldset>:null}
   </div></CanvasSheet>:null}
-  {!preview&&!settings&&!edit?.locked&&selected!==null&&draft.questions[selected]?<CanvasQuestionSettings key={`${selected}:${draft.questions[selected].inputType}`} question={draft.questions[selected]} index={selected} onChange={value=>updateQuestion(selected,value)} onClose={()=>setSelected(null)} first={selected===0} last={selected===draft.questions.length-1} only={draft.questions.length===1} onMove={direction=>reorder(selected,selected+direction)} onRemove={()=>{change({questions:draft.questions.filter((_,i)=>i!==selected)});setAnswers({});setSelected(null);}}/>:null}
+  {!preview&&!settings&&!edit?.locked&&selected!==null&&draft.questions[selected]?<CanvasQuestionSettings key={`${selected}:${draft.questions[selected].inputType}`} question={draft.questions[selected]} index={selected} onChange={value=>updateQuestion(selected,value)} onClose={()=>setSelected(null)} first={selected===0} last={selected===draft.questions.length-1} only={draft.questions.length===1} onMove={direction=>reorder(selected,selected+direction)} onRemove={()=>remove(selected)}/>:null}
   <div className="fc-paper" data-preview={preview}>
    <p className="fc-eyebrow">{edit?`Round ${edit.roundNumber}`:'New consultation'}<span>{documentMode?'Document':`${draft.questions.length} question${draft.questions.length===1?'':'s'}`}</span></p>
 
    <div className="fc-introduction">{preview?<><h1>{draft.title||'Untitled consultation'}</h1><p className={!draft.description?'fc-empty-intro':undefined}>{draft.description||'Add a short introduction for your participants…'}</p></>:<><label className="sr-only" htmlFor="canvas-title">Consultation title</label><textarea id="canvas-title" aria-label="Consultation title" className="fc-title" rows={1} placeholder="Name your consultation" value={draft.title} onChange={e=>change({title:e.target.value})}/>{<textarea aria-label="Introduction" className="fc-description" rows={1} placeholder="Add an introduction (optional)" value={draft.description} onChange={e=>change({description:e.target.value})}/>}</>}</div>
    {edit?.locked&&!preview?<p className="fc-preview-note">This round has responses. Questions are preserved so answers keep their meaning. Use a new round to revise them.</p>:null}
    {documentMode?<div className="fc-document">{preview||edit?.locked?<DocumentTemplateResponse template={template} answers={answers} onChange={(key,value)=>setAnswers(previous=>({...previous,[key]:value}))}/>:<DocumentTemplateEditor value={template} onChange={documentTemplate=>{change({documentTemplate});setAnswers(buildInitialDocumentTemplateResponses(documentTemplate));}} previewAnswers={answers} onPreviewChange={(key,value)=>setAnswers(previous=>({...previous,[key]:value}))}/>}</div>:draft.questions.map((q,i)=>isVisible(q)?<section key={i} data-preview={preview} className={`fc-question ${selected===i?'fc-selected':''}`}>
+    <div className="fc-question-top"><span>Question {i+1}{q.optional?' · Optional':''}</span>{!edit?.locked?<div className="fc-question-actions" style={preview?{visibility:'hidden'}:undefined} aria-hidden={preview||undefined}>{isSurveyQuestion(q)?<select aria-label={`Answer type for question ${i+1}`} value={q.inputType||'textarea'} onChange={e=>{updateQuestion(i,ensureTypeTransition(q,e.target.value as SurveyInputType));setAnswers({});if(['single_select','multi_select','slider','likert'].includes(e.target.value))setSelected(i);}}><option value="textarea">Long answer</option><option value="text">Short answer</option><option value="single_select">Single choice</option><option value="multi_select">Multiple choice</option><option value="slider">Number scale</option><option value="likert">Rating scale</option></select>:null}<button type="button" aria-label={`Options for question ${i+1}`} aria-expanded={selected===i} onClick={()=>setSelected(selected===i?null:i)}>Options</button><button type="button" className="fc-delete" aria-label={`Delete question ${i+1}`} title="Delete question" onClick={()=>remove(i)}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6m4-6v6"/></svg><span>Delete</span></button></div>:null}</div>
     {q.sectionTitle&&q.sectionTitle!==draft.questions[i-1]?.sectionTitle?<p className="fc-section-title">{q.sectionTitle}</p>:null}
     {preview||edit?.locked?<h2>{q.label||'Write your question'}</h2>:<textarea aria-label={`Question ${i+1}`} className="fc-question-label" rows={1} placeholder={i===0?"What would you like to ask your panel?":"Write your next question…"} value={q.label} onChange={e=>updateQuestion(i,{...q,label:e.target.value})}/>}
 
-    <div className="fc-answer" aria-label={`Answer to question ${i+1}`}>
+    <div className="fc-answer" hidden={!preview&&!edit?.locked} aria-label={`Answer to question ${i+1}`}>
     {isSurveyQuestion(q)?<SurveyQuestionInput question={q} authoring={true} value={answers[`q${i+1}`]||emptyStructuredResponse()} onChange={value=>setAnswers(previous=>({...previous,[`q${i+1}`]:value}))} previewOnly={false}/>:<StructuredInput formId="canvas-preview" questionIndex={i} value={answers[`q${i+1}`]||emptyStructuredResponse()} onChange={value=>setAnswers(previous=>({...previous,[`q${i+1}`]:value}))} persistDraft={false} showEvidence={q.requireEvidence} showCounterarguments={q.requireCounterarguments} showConfidence={q.requireConfidence}/>}
     </div>
-    <div className="fc-question-top"><span>Question {i+1}{q.optional?' · Optional':''}</span>{!edit?.locked?<div className="fc-question-actions" style={preview?{visibility:'hidden'}:undefined} aria-hidden={preview||undefined}>{isSurveyQuestion(q)?<select aria-label={`Answer type for question ${i+1}`} value={q.inputType||'textarea'} onChange={e=>{updateQuestion(i,ensureTypeTransition(q,e.target.value as SurveyInputType));setAnswers({});if(['single_select','multi_select','slider','likert'].includes(e.target.value))setSelected(i);}}><option value="textarea">Long answer</option><option value="text">Short answer</option><option value="single_select">Single choice</option><option value="multi_select">Multiple choice</option><option value="slider">Number scale</option><option value="likert">Rating scale</option></select>:null}<button type="button" aria-label={`Options for question ${i+1}`} aria-expanded={selected===i} onClick={()=>setSelected(selected===i?null:i)}>Options</button></div>:null}</div>
+
    </section>:null)}
+   {removed&&!preview?<div className="fc-undo" role="status"><span>Question deleted</span><button type="button" onClick={undoRemove}>Undo</button><button type="button" aria-label="Dismiss undo" onClick={()=>setRemoved(null)}>×</button></div>:null}
+   {!draft.questions.length&&!documentMode?<p className="fc-empty-state">Add a question to begin.</p>:null}
    {!preview&&!edit?.locked&&!documentMode?<button type="button" className="fc-add" onClick={add}>+ Add question</button>:null}
-   <p className="fc-canvas-hint">{preview?'Try the form as a participant. These answers are not submitted.':'Write directly on the page. Use Options to fine-tune each question.'}</p>
+   <p className="fc-canvas-hint">{preview?'Try the form as a participant. These answers are not submitted.':edit?'Preview to see what participants will see. Save changes when you’re ready.':'Your draft saves automatically. Preview to see what participants will see.'}</p>
   </div>
  </main>;
 }
