@@ -1,3 +1,4 @@
+import {DictationProvider} from '../DictationField';
 import { useEffect, useRef, useState } from 'react';
 import { api, getApiErrorDetail } from '../../api/client';
 import { getForm, type FormDetail } from '../../api/forms';
@@ -25,6 +26,7 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
   const [answers, setAnswers] = useState<Record<string, StructuredResponse>>({});
   const [consent, setConsent] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [dictating,setDictating]=useState(false);
   const [error, setError] = useState('');
   const [missing, setMissing] = useState<string | null>(null);
   const questions = round.questions;
@@ -40,7 +42,7 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
   }, [form.id]);
 
   async function save() {
-    if (saving || !details) return;
+    if (saving || dictating || !details) return;
     if (!name.trim()) { setError('Enter the respondent’s name.'); nameInput.current?.focus(); return; }
     const validation = template && !isRichFillableDocumentTemplate(template)
       ? validateDocumentTemplateResponses(template, answers) : validateQuestionResponses(questions, answers);
@@ -68,7 +70,7 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
   };
   return <dialog ref={dialog} className="manual-response-sheet" aria-labelledby="manual-response-title" data-dirty={dirty ? 'true' : 'false'} onCancel={event => { event.preventDefault(); close(); }}>
     <div className="manual-response-heading"><div><h2 id="manual-response-title">{heading}</h2><p>Round {round.round_number} · Recorded response</p></div><button type="button" aria-label="Close add response" onClick={close} disabled={saving}>×</button></div>
-    <form onSubmit={event => { event.preventDefault(); void save(); }}>
+    <DictationProvider onActiveChange={setDictating}><form onSubmit={event => { event.preventDefault(); void save(); }}>
       <div className="manual-response-content">
         <label className="manual-response-name">Respondent name<input ref={nameInput} value={name} onChange={e => setName(e.target.value)} maxLength={160} autoComplete="off" disabled={saving} /></label>
         {loadError ? <p role="alert">{loadError}</p> : !details ? <p role="status">Loading form…</p> : template ? <DocumentTemplateResponse template={template} questions={questions} answers={answers} onChange={update} readOnly={saving} highlightedQuestionKey={missing} /> : configs.map((question, index) => {
@@ -77,13 +79,13 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
             {question.sectionTitle && question.sectionTitle !== configs[index - 1]?.sectionTitle ? <h3>{question.sectionTitle}</h3> : null}
             {question.groupPrompt && question.groupPrompt !== configs[index - 1]?.groupPrompt ? <p className="manual-response-feedback">{question.groupPrompt}</p> : null}
             {!singleQuestion ? <h4>{question.label}<span>{question.optional ? ' · Optional' : ''}</span></h4> : question.optional ? <p className="manual-response-note">Optional</p> : null}
-            {isTypedSurveyQuestion(question) ? <SurveyQuestionInput question={question} value={answers[key] || emptyStructuredResponse()} onChange={value => update(key, value)} readOnly={saving} /> : <StructuredInput questionIndex={index} formId={form.id} value={answers[key] || emptyStructuredResponse()} onChange={value => update(key, value)} showEvidence={question.requireEvidence} showConfidence={question.requireConfidence} showCounterarguments={question.requireCounterarguments} persistDraft={false} readOnly={saving} />}
+            {isTypedSurveyQuestion(question) ? <SurveyQuestionInput dictation={true} question={question} value={answers[key] || emptyStructuredResponse()} onChange={value => update(key, value)} readOnly={saving} /> : <StructuredInput questionIndex={index} formId={form.id} value={answers[key] || emptyStructuredResponse()} onChange={value => update(key, value)} showEvidence={question.requireEvidence} showConfidence={question.requireConfidence} showCounterarguments={question.requireCounterarguments} persistDraft={false} readOnly={saving} dictation={true} />}
           </section>;
         })}
         {details?.consent_required ? <label className="manual-response-consent"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} disabled={saving} />I confirm the respondent gave the consent required for this consultation.</label> : null}
         {error ? <p role="alert" className="manual-response-error">{error}</p> : null}
       </div>
-      <div className="manual-response-footer"><button type="button" onClick={close} disabled={saving}>Cancel</button><button type="submit" disabled={saving || !details} className="cw-primary">{saving ? 'Saving…' : 'Save response'}</button></div>
-    </form>
+      <div className="manual-response-footer"><button type="button" onClick={close} disabled={saving}>Cancel</button><button type="submit" disabled={saving || dictating || !details} className="cw-primary">{saving ? 'Saving…' : 'Save response'}</button></div>
+    </form></DictationProvider>
   </dialog>;
 }

@@ -1,5 +1,6 @@
+import DictationField from './DictationField';
 import { Mic, MicOff } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import type { StructuredResponse } from '../types/structured-input';
 import { DEFAULT_LIKERT_OPTIONS, type ConfigurableQuestion } from '../utils/questions';
 
@@ -10,6 +11,7 @@ interface SurveyQuestionInputProps {
   readOnly?: boolean;
   previewOnly?: boolean;
   authoring?: boolean;
+  dictation?: boolean;
 }
 
 type SpeechRecognitionLike = {
@@ -238,6 +240,7 @@ export default function SurveyQuestionInput({
   readOnly = false,
   previewOnly = false,
   authoring = false,
+  dictation = false,
 }: SurveyQuestionInputProps) {
   const inputType = question.inputType ?? 'textarea';
   const options = question.options ?? [];
@@ -250,10 +253,12 @@ export default function SurveyQuestionInput({
   const sliderStartLabel = question.minLabel || formatSliderBoundary(sliderMin);
   const sliderEndLabel = question.maxLabel || formatSliderBoundary(sliderMax);
   const voiceInput = useVoiceInput(
-    !readOnly && !authoring && (inputType === 'text' || inputType === 'textarea'),
+    !readOnly && !authoring && !dictation && (inputType === 'text' || inputType === 'textarea'),
     value.position,
     (nextValue) => onChange(updatePosition(value, nextValue)),
   );
+
+  const spokenField=(field:ReactElement)=>dictation?<DictationField disabled={readOnly} onTranscript={text=>onChange(updatePosition(value,text))}>{field}</DictationField>:field;
 
   function commitSliderValue(nextValue: number) {
     onChange(updatePosition(value, String(clampNumber(nextValue, sliderMin, sliderMax))));
@@ -269,7 +274,7 @@ export default function SurveyQuestionInput({
       <div>
         {renderHelpText(question.helpText)}
         <div className="relative">
-          <input
+          {spokenField(<input
             type="text"
             aria-label={question.label}
             className="w-full rounded-[1.4rem] px-4 py-3 pr-24 text-sm leading-6"
@@ -278,8 +283,8 @@ export default function SurveyQuestionInput({
             value={value.position}
             readOnly={readOnly}
             onChange={(event) => onChange(updatePosition(value, event.target.value))}
-          />
-          {!readOnly && !authoring ? (
+          />)}
+          {!readOnly && !authoring && !dictation ? (
             <div className="absolute inset-y-0 right-2 flex items-center">
               <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
             </div>
@@ -510,7 +515,7 @@ export default function SurveyQuestionInput({
     <div>
       {renderHelpText(question.helpText)}
       <div className="relative">
-        <textarea
+        {spokenField(<textarea
           aria-label={question.label}
           rows={question.rows ?? 4}
           className="w-full rounded-[1.6rem] px-4 py-3.5 pr-24 text-sm leading-6"
@@ -523,8 +528,8 @@ export default function SurveyQuestionInput({
           value={value.position}
           readOnly={readOnly}
           onChange={(event) => onChange(updatePosition(value, event.target.value))}
-        />
-        {!readOnly && !authoring ? (
+        />)}
+        {!readOnly && !authoring && !dictation ? (
           <div className="absolute bottom-2 right-2">
             <VoiceButton {...voiceInput} onToggle={voiceInput.toggleListening} />
           </div>

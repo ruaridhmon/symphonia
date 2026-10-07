@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeAll, expect, it, vi } from 'vitest';
 import ManualResponseSheet from './ManualResponseSheet';
 const mocks=vi.hoisted(()=>({get:vi.fn(),post:vi.fn()}));
@@ -32,4 +32,18 @@ it('retains inferred provenance and round feedback during offline entry',async()
  const q={...question,sectionTitle:'An inferred claim',groupPrompt:'Inferred · unconfirmed. Round 2: 1 disagree; confidence: extremely confident.'};mocks.get.mockResolvedValue({...props.form,consent_required:false});
  render(<ManualResponseSheet {...props} round={{...props.round,questions:[q,{...q,label:'Reason'}]}}/>);
  expect(await screen.findByText(q.groupPrompt)).toBeInTheDocument();expect(screen.getAllByText(q.groupPrompt)).toHaveLength(1);
+});
+
+it('waits for the final dictation result before saving the editable transcript',async()=>{
+ let speech:any;
+ (window as any).webkitSpeechRecognition=class {onstart:any;onresult:any;onend:any;onerror:any;constructor(){speech=this;}start(){this.onstart?.();}stop(){}abort(){}};
+ mocks.get.mockResolvedValue({...props.form,consent_required:false});mocks.post.mockResolvedValue({ok:true});
+ const {unmount}=render(<ManualResponseSheet {...props}/>);await screen.findByRole('textbox',{name:'What matters?'});
+ fireEvent.change(screen.getByRole('textbox',{name:'Respondent name'}),{target:{value:'Alex'}});
+ fireEvent.click(screen.getByRole('button',{name:'Dictate response'}));expect(screen.getByRole('button',{name:'Save response'})).toBeDisabled();
+ fireEvent.click(screen.getByRole('button',{name:'Finish dictation'}));expect(screen.getByRole('button',{name:'Save response'})).toBeDisabled();
+ act(()=>{speech.onresult({results:[{isFinal:true,0:{transcript:'Independent review.'}}]});speech.onend();});
+ expect(screen.getByRole('textbox',{name:'What matters?'})).toHaveValue('Independent review.');expect(screen.getByRole('button',{name:'Save response'})).toBeEnabled();
+ fireEvent.click(screen.getByRole('button',{name:'Save response'}));await waitFor(()=>expect(mocks.post).toHaveBeenCalledOnce());
+ expect(mocks.post.mock.calls[0][1].answers.q1.position).toBe('Independent review.');unmount();delete (window as any).webkitSpeechRecognition;
 });

@@ -1022,3 +1022,24 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .di-supporting-dialog .di-supporting-heading h3.di-supporting-title,#root .di-supporting-dialog .rf-detail-heading h4.di-supporting-title {font-size:14px!important;font-weight:500!important;line-height:1.5!important;margin:4px 0 18px!important;}
 #root .symphonia-navigation-actions a.symphonia-new-consultation {display:flex;align-items:center;gap:10px;}
 #root .symphonia-new-consultation svg {flex:none;}
+
+/* A quiet microphone lives inside each recorded-answer composer. */
+#root .manual-response-sheet .dictation-composer {position:relative;}
+#root .manual-response-sheet .dictation-composer textarea {padding:14px 16px 52px!important;min-height:140px;border-radius:16px;display:block;}
+#root .manual-response-sheet .dictation-composer input {padding-right:52px!important;}
+#root .manual-response-sheet .dictation-controls {position:absolute;right:9px;bottom:9px;display:flex;align-items:center;gap:8px;max-width:calc(100% - 18px);}
+#root .manual-response-sheet .dictation-controls button {display:inline-flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted-foreground);cursor:pointer;transition:background .15s,color .15s;}
+#root .manual-response-sheet .dictation-controls button:hover {background:var(--muted);color:var(--foreground);}
+#root .manual-response-sheet .dictation-controls .dictation-stop {background:var(--foreground);color:var(--background);}
+#root .manual-response-sheet .dictation-controls button:focus-visible {outline:2px solid var(--ring);outline-offset:3px;}
+#root .manual-response-sheet .dictation-state {font-size:12px;color:var(--muted-foreground);}
+#root .manual-response-sheet .dictation-status {font-size:12px;line-height:1.5;color:var(--muted-foreground);margin:7px 3px 0;overflow-wrap:anywhere;}
+#root .manual-response-sheet .dictation-error {color:var(--destructive);}
+#root .manual-response-sheet .dictation-activity {display:flex;align-items:center;gap:2px;height:18px;}
+#root .manual-response-sheet .dictation-activity i {display:block;width:2px;height:5px;border-radius:2px;background:var(--foreground);animation:dictation-active 1s ease-in-out infinite alternate;}
+#root .manual-response-sheet .dictation-activity i:nth-child(2) {animation-delay:.2s;height:12px;}
+#root .manual-response-sheet .dictation-activity i:nth-child(3) {animation-delay:.4s;height:16px;}
+#root .manual-response-sheet .dictation-activity i:nth-child(4) {animation-delay:.6s;height:8px;}
+@keyframes dictation-active {to{transform:scaleY(.4);}}
+@media(prefers-reduced-motion:reduce){#root .manual-response-sheet .dictation-activity i {animation:none;}}
+@media(max-width:640px){#root .manual-response-sheet .dictation-controls button{width:40px;height:40px;}}
