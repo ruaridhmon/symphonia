@@ -83,7 +83,7 @@ def provider(monkeypatch, output, callback=None, finish="stop"):
     monkeypatch.setattr(routes, "OpenAI", constructor)
     monkeypatch.setattr(routes, "AsyncOpenAI", async_constructor)
 
-    # Final prose retains its compatible synchronous provider path.
+    # Legacy custom prose retains its synchronous provider path.
     def effective_constructor():
         return async_constructor if async_constructor.called else constructor
 
@@ -431,14 +431,27 @@ def test_source_catalog_retains_question_field_context():
     assert len(sources) == 2
 
 
+@pytest.mark.parametrize("kind", ["opening", "final"])
 def test_timeout_cancels_native_request_and_closes_connection(
-    client, admin_headers, participant_headers, monkeypatch
+    client, admin_headers, participant_headers, monkeypatch, kind
 ):
     import asyncio
 
-    url, rid = opening_fixture(client, admin_headers, participant_headers)
+    if kind == "opening":
+        url, rid = opening_fixture(client, admin_headers, participant_headers)
+        payload = {}
+    else:
+        fid = final_fixture(client, admin_headers)
+        url = f"/forms/{fid}/final_synthesis"
+        account = client.get(url, headers=admin_headers).json()["preview"]
+        payload = {"expected_revision": account["revision"], "threshold": 60}
+        url += "/generate"
+        with TestingSessionLocal() as db:
+            rid = db.query(RoundModel).filter_by(form_id=fid, round_number=3).one().id
     with TestingSessionLocal() as db:
-        db.get(RoundModel, rid).synthesis = "Previous draft"
+        row = db.get(RoundModel, rid)
+        row.synthesis = "Previous draft"
+        row.context_settings = {**(row.context_settings or {}), "final_narrative": {"model": "previous"}}
         db.commit()
     state = {"calls": 0, "cancelled": False, "closed": False}
 
@@ -461,11 +474,12 @@ def test_timeout_cancels_native_request_and_closes_connection(
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-only")
     monkeypatch.setattr(routes, "AsyncOpenAI", Mock(return_value=Client()))
     monkeypatch.setattr(routes, "DRAFT_REQUEST_TIMEOUT_SECONDS", 0.01)
-    response = client.post(url, headers=admin_headers, json={})
+    response = client.post(url, headers=admin_headers, json=payload)
     assert response.status_code == 504
     assert state == {"calls": 1, "cancelled": True, "closed": True}
     with TestingSessionLocal() as db:
         assert db.get(RoundModel, rid).synthesis == "Previous draft"
+        assert db.get(RoundModel, rid).context_settings["final_narrative"] == {"model": "previous"}
         assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 0
 
 
