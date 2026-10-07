@@ -77,6 +77,7 @@ def parse_reasoning_output(content: str, responses: list[dict]) -> tuple[str, di
         raise ValueError('Missing claim list')
     flows = []
     rejected = 0
+    rejection_reasons = []
     candidates = data.get('reasoning_flows', [])
     if not isinstance(candidates, list):
         candidates = []
@@ -146,12 +147,15 @@ def parse_reasoning_output(content: str, responses: list[dict]) -> tuple[str, di
             flows.append({'id': f'flow-{len(flows)+1}', 'title': title[:160],
                           'response_number': number, 'response_id': response.get('response_id'),
                           'nodes': sorted(nodes, key=lambda n: order.index(n['id'])), 'edges': edges})
-        except (ValueError, TypeError, KeyError, StopIteration):
+        except (ValueError, TypeError, KeyError, StopIteration) as exc:
             rejected += 1
+            # ValueErrors here are fixed validation labels, never source content.
+            rejection_reasons.append(str(exc) if isinstance(exc, ValueError) else type(exc).__name__)
     shared = validate_claim_map(data, responses) if 'normalized_claims' in data else {}
     return data['claims_text'], {'version': 1, 'flows': flows, **shared,
         'response_count': len(responses), 'mapped_response_count': len({f['response_number'] for f in flows}),
         'rejected_flow_count': rejected,
+        'rejected_flow_reasons': rejection_reasons,
         'status': 'model_interpretation', 'assumptions_confirmed': False,
         'source_revision': response_revision(responses)}
 
