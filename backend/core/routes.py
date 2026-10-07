@@ -4506,7 +4506,7 @@ async def generate_synthesis_for_round(
         synthesis_json_data = _merge_summary_display_preferences(
             {},
             round_obj.synthesis_json,
-            summary_optio
+            summary_options,
         )
 
         db.query(SynthesisVersion).filter(
@@ -11506,7 +11506,7 @@ def remove_participant(
 ):
     form = db.query(FormModel).filter(FormModel.id == form_id).first()
     if not form:
-        raise HTTPException(status_code=404, detailorm not found")
+        raise HTTPException(status_code=404, detail="Form not found")
     assert_form_owner_or_facilitator(form, user)
 
     unlock = (
