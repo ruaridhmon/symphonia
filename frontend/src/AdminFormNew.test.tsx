@@ -12,6 +12,7 @@ afterEach(()=>{cleanup();localStorage.clear();vi.clearAllMocks();});
 const show=()=>render(<MemoryRouter><AdminFormNew/></MemoryRouter>);
 it('edits on the same canvas, preserves test answers and restores the authoring draft',()=>{
  const view=show();
+ expect(screen.getByPlaceholderText('Write your response here')).toBeVisible();
  fireEvent.change(screen.getByLabelText('Consultation title'),{target:{value:'An important question'}});
  fireEvent.change(screen.getByLabelText('Question 1'),{target:{value:'What should we test?'}});
  fireEvent.click(screen.getByRole('button',{name:'Preview'}));
@@ -21,6 +22,7 @@ it('edits on the same canvas, preserves test answers and restores the authoring 
  fireEvent.change(screen.getByPlaceholderText('Write your response here'),{target:{value:'Try a small pilot'}});
  fireEvent.click(screen.getByRole('button',{name:'Edit'}));
  expect(screen.getByLabelText('Question 1')).toHaveValue('What should we test?');
+ expect(screen.getByPlaceholderText('Write your response here')).toBeVisible();
  expect(screen.getByPlaceholderText('Write your response here')).toHaveValue('Try a small pilot');
  view.unmount();show();expect(screen.getByLabelText('Consultation title')).toHaveValue('An important question');
 });

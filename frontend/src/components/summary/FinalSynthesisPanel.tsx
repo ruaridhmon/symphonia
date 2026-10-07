@@ -1,5 +1,7 @@
 import * as React from 'react';
 import {createPortal} from 'react-dom';
+import {groupFinalClaims,groupedFinalMarkdown,finalPercent,normalizeConsensusThreshold} from '../../utils/finalGrouping';
+import {finalPositionCounts} from '../../utils/finalNarrative';
 import {finalNarrative} from '../../utils/finalNarrative';
 import {api, getApiErrorDetail} from '../../api/client';
 import type {ReasoningGraph} from '../../types/synthesis';
@@ -10,6 +12,14 @@ type Result={preview:Account;saved:Account|null;stale:boolean;collection_open:bo
 export interface FinalSynthesisProps{formId:number;questions?:string[];onComplete?:()=>void;}
 export default function FinalSynthesisPanel({formId,questions=[],onComplete}:FinalSynthesisProps){
  const [result,setResult]=React.useState<Result|null>(null),[error,setError]=React.useState(''),[busy,setBusy]=React.useState(false),[showCurrent,setShowCurrent]=React.useState(false);
+ const preferenceKey=`symphonia:final-view:v1:${formId}`;
+ const readPreferences=()=>{try{const value=JSON.parse(localStorage.getItem(preferenceKey)||'null');return {threshold:normalizeConsensusThreshold(value?.threshold??60),view:value?.view==='table'?'table' as const:'text' as const};}catch{return {threshold:60,view:'text' as const};}};
+ const [preferences,setPreferences]=React.useState(readPreferences);
+ React.useEffect(()=>{setPreferences(readPreferences());},[formId]);
+ const changePreferences=(patch:Partial<typeof preferences>)=>{const value={...preferences,...patch};setPreferences(value);try{localStorage.setItem(preferenceKey,JSON.stringify(value));}catch{}};
+ const {threshold,view}=preferences;
+ const thresholdMenu=React.useRef<HTMLDetailsElement>(null);
+ React.useEffect(()=>{const outside=(event:PointerEvent)=>{const menu=thresholdMenu.current;if(menu?.open&&!menu.contains(event.target as Node))menu.open=false;};const escape=(event:KeyboardEvent)=>{const menu=thresholdMenu.current;if(event.key==='Escape'&&menu?.open){menu.open=false;menu.querySelector('summary')?.focus();}};document.addEventListener('pointerdown',outside);document.addEventListener('keydown',escape);return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',escape);};},[]);
  const graph=React.useRef<HTMLDivElement>(null);
  const surface=React.useRef<HTMLElement>(null);
  const [actionsHost,setActionsHost]=React.useState<HTMLElement|null>(null);
@@ -25,7 +35,7 @@ export default function FinalSynthesisPanel({formId,questions=[],onComplete}:Fin
  }
  function download(kind:'json'|'md'){
   if(!account)return;
-  const blob=new Blob([kind==='json'?JSON.stringify(account,null,2):`# ${account.title}\n\n${finalNarrative(account.claims).join('\n\n')}`],{type:kind==='json'?'application/json':'text/markdown'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`symphonia-final-${formId}.${kind}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const blob=new Blob([kind==='json'?JSON.stringify(account,null,2):groupedFinalMarkdown(account.title,account.claims,threshold,view,questions)],{type:kind==='json'?'application/json':'text/markdown'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`symphonia-final-${formId}.${kind}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  }
  const actions=<div className="fs-menu-actions" onClick={event=>{if((event.target as HTMLElement).closest('button')&&actionsHost){const menu=actionsHost.closest<HTMLDetailsElement>('details');if(menu){menu.open=false;menu.querySelector<HTMLElement>('summary')?.focus();}}}}>
   {account&&<div className="fs-menu-meta"><span>{account.completed?'Completed':result?.saved&&!showCurrent?'Saved snapshot':'Preview · not yet saved'}{account.saved_at?` · ${new Date(account.saved_at).toLocaleString()}`:''}</span><span>{account.round_two_count} Round 2 responses · {account.round_three_count} Round 3 responses</span></div>}
@@ -42,7 +52,15 @@ export default function FinalSynthesisPanel({formId,questions=[],onComplete}:Fin
    {result?.collection_open&&<p className="fs-note">Round 3 is still open. This synthesis may change as responses arrive.</p>}
    {result?.stale&&<p role="status" className="cw-notice">Recorded data has changed since this snapshot. <button type="button" onClick={()=>setShowCurrent(v=>!v)}>{showCurrent?'View saved snapshot':'Review current data'}</button></p>}
    {!!questions.length&&<div className="fs-question"><p className="fs-question-label">{questions.length===1?'Question':'Questions'}</p>{questions.map((question,i)=><p key={i} className="fs-question-text">{question}</p>)}</div>}
-   <div className="fs-prose">{finalNarrative(account.claims).map((text,i)=><p key={i}>{text}</p>)}</div>
+   <div className="fs-display-controls">
+    <div className="fs-view-switch" role="group" aria-label="Synthesis format"><button type="button" aria-pressed={view==='text'} onClick={()=>changePreferences({view:'text'})}>Text</button><button type="button" aria-pressed={view==='table'} onClick={()=>changePreferences({view:'table'})}>Table</button></div>
+    <details ref={thresholdMenu} className="fs-threshold"><summary>Consensus ≥ {threshold}%</summary><div><label htmlFor={`consensus-threshold-${formId}`}>Consensus threshold <span aria-hidden="true">{threshold}%</span></label><input id={`consensus-threshold-${formId}`} type="range" min={60} max={100} step={1} value={threshold} onChange={event=>changePreferences({threshold:normalizeConsensusThreshold(Number(event.target.value))})}/><p>At least this share of all final positions must agree or disagree. Unable to judge and missing ratings stay in the denominator. This changes the grouping only; inferred claims remain unconfirmed.</p></div></details>
+   </div>
+   <div className={`fs-grouped fs-${view}`}>{groupFinalClaims(account.claims,threshold).map(group=><section className="fs-group" key={group.id} aria-label={group.label}>
+    <h2>{group.label}{' '}<span>{group.claims.length}</span></h2>
+    {group.id==='disagreement'&&<p className="fs-group-caption">Below the {threshold}% threshold, including mixed or uncertain judgments.</p>}
+    {!group.claims.length?<p className="fs-empty">{group.id==='consensus'?'No claims meet this threshold.':'All reviewed claims meet this threshold.'}</p>:view==='text'?<div className="fs-prose">{finalNarrative(group.claims,threshold).map((text,i)=><p key={i}>{text}</p>)}</div>:<div className="fs-table-scroll"><table className="fs-table" aria-label={`${group.label} claims`}><thead><tr><th scope="col">Claim</th><th scope="col">Agree</th><th scope="col">Disagree</th><th scope="col">Unable to judge</th><th scope="col">Not recorded</th>{group.claims.some(c=>finalPositionCounts(c).other>0)&&<th scope="col">Other positions</th>}</tr></thead><tbody>{group.claims.map(claim=>{const counts=finalPositionCounts(claim);return <tr key={claim.id}><th scope="row">{claim.text}{claim.origin==='inferred'&&<span className="fs-table-inferred">Inferred · unconfirmed</span>}</th>{([...(['agree','disagree','unsure','missing'] as const),...(group.claims.some(c=>finalPositionCounts(c).other>0)?['other' as const]:[])]).map(position=><td key={position} title={`${counts[position]} of ${counts.total} final positions`}>{finalPercent(counts[position],counts.total)}</td>)}</tr>;})}</tbody></table></div>}
+   </section>)}</div>
    <details className="fs-audit"><summary>Claims, expert reasoning and changes</summary>
    <div className="fs-claims">{account.claims.map(c=><article key={c.id}>
     <h3>{c.text}</h3>{c.origin==='inferred'&&<p className="fs-inferred">Inferred · unconfirmed. Not directly stated by an expert. {c.inference_question}</p>}
