@@ -1780,9 +1780,9 @@ function SummaryPageContent() {
 			}
 
 			setSynthesisViewMode('view');
-			// Reload round data and versions to stay in sync with backend
-			await loadAll();
-			if (targetRound) await loadSynthesisVersions(targetRound.id);
+			// The saved result is already visible. Refresh metadata without delaying completion.
+			// loadAll also refreshes version history.
+			void loadAll();
 
 			setSynthesisStage('complete');
 			setSynthesisStep(4);

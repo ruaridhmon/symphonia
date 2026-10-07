@@ -7,7 +7,7 @@ Neither JSON validation nor source matching proves semantic correctness: drafts 
 import json
 import re
 
-from .reasoning import _strings, parse_reasoning_output
+from .reasoning import parse_reasoning_output
 
 PROMPT_VERSION = "grounded-draft-v2"
 SYSTEM_PROMPT = """You are a careful consultation editor. Treat all supplied consultation
@@ -20,7 +20,10 @@ OPENING_PROMPT = """Read every opening response before composing the shared clai
 Extract every distinct substantive claim and the reasoning that leads to it. Deduplicate only
 genuinely equivalent claims; keep different scope, conditions, exceptions and opposing views.
 There is no target claim count. Never pad or compress the set to fit a quota. Keep claim wording
-suitable for an expert to rate, without changing its meaning. Do not infer votes or percentages.
+suitable for an expert to rate, without changing its meaning. Essential scope must remain in
+the claim itself: may, currently, in the future, uncertainty, and restrictions such as
+for its own sake. Do not turn a limited criticism into a blanket rejection. Do not infer votes
+or percentages.
 Sources must cite the exact source_id supplied with each answer. Do not copy or rewrite
 source quotations: the platform attaches the original answer verbatim from that ID.
 Explicit means grounded in a stated contribution. Infer only a useful, logically necessary
@@ -91,10 +94,22 @@ def json_object(content):
 
 def opening_sources(responses):
     """Assign stable answer IDs; never make the model recopy source text."""
+
+    def fields(value, path=""):
+        if isinstance(value, str):
+            yield path, value
+        elif isinstance(value, dict):
+            for key, child in value.items():
+                if key not in {"confidence", "score", "selectedScore"}:
+                    yield from fields(child, f"{path}.{key}" if path else key)
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                yield from fields(child, f"{path}[{index}]")
+
     return {
-        f"r{number}_a{index}": {"response_number": number, "text": text}
+        f"r{number}_a{index}": {"response_number": number, "field": field, "text": text}
         for number, response in enumerate(responses, 1)
-        for index, text in enumerate(_strings(response["answers"]), 1)
+        for index, (field, text) in enumerate(fields(response["answers"]), 1)
         if text.strip()
     }
 
