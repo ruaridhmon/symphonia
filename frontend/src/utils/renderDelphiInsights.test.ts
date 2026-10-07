@@ -109,7 +109,7 @@ it('makes supporting explanations primary and keeps statistics collapsed',()=>{
  const root=document.createElement('section');const current={...round,questions:[...questions,{questionId:'confidence',sectionTitle:'Exact claim',label:'Confidence in your rating',inputType:'single_select',options:['Very confident']},{questionId:'reason',sectionTitle:'Exact claim',label:'Explain your position',inputType:'textarea'}]};
  const data=responses(['Disagree','Agree']);data[0].responses[0].answers.q2={position:'Very confident'};data[0].responses[0].answers.q3={position:'First exact explanation.'};data[0].responses[1].answers.q3={position:'Second exact explanation.'};
  renderDelphiInsights(root,current,[current],data);const dialog=root.querySelector('.di-supporting-dialog')!;
- expect(dialog.querySelector('h3')?.textContent).toBe('Exact claim');expect([...dialog.querySelectorAll('.di-supporting-text')].map(e=>e.textContent)).toEqual(['First exact explanation.','Second exact explanation.']);
+ expect(dialog.querySelector('h3')?.textContent).toBe('Supporting information');expect(dialog.querySelector('.di-supporting-claim')).toBeNull();expect([...dialog.querySelectorAll('.di-supporting-text')].map(e=>e.textContent)).toEqual(['First exact explanation.','Second exact explanation.']);
  expect([...dialog.querySelectorAll('.di-supporting-person')].map(e=>e.textContent)).toEqual(['Response 1','Response 2']);expect(dialog.querySelector('.di-supporting-certainty')?.textContent).toContain('Very confident');
  expect(dialog.querySelector<HTMLDetailsElement>('.di-supporting-audit')?.open).toBe(false);expect(dialog.querySelector('.di-supporting-audit .di-supporting-distribution')).not.toBeNull();expect(dialog.querySelector('.di-supporting-change')).toBeNull();
 });

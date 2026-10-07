@@ -7,8 +7,8 @@ import {renderReasoningFlow,clearReasoningFlow} from '../../utils/reasoningFlow'
 type Recorded={expert:string;response_id:number;position:string;confidence:string;justification:string;original_answers?:Record<string,unknown>;before?:Recorded|null;position_changed?:boolean|null;confidence_changed?:boolean|null};
 type Account={revision:string;title:string;stage:number;markdown:string;saved_at?:string;completed?:boolean;reasoning_graph?:ReasoningGraph|null;round_two_count:number;round_three_count:number;unrated_claims?:{id:string;text:string;origin:string}[];claims:{id:string;text:string;origin:string;inference_question?:string;positions:{label:string;count:number}[];confidence:{label:string;count:number}[];changes:number;matched:number;final_responses:Recorded[];round_two:Recorded[]}[]};
 type Result={preview:Account;saved:Account|null;stale:boolean;collection_open:boolean};
-export interface FinalSynthesisProps{formId:number;onComplete?:()=>void;}
-export default function FinalSynthesisPanel({formId,onComplete}:FinalSynthesisProps){
+export interface FinalSynthesisProps{formId:number;questions?:string[];onComplete?:()=>void;}
+export default function FinalSynthesisPanel({formId,questions=[],onComplete}:FinalSynthesisProps){
  const [result,setResult]=React.useState<Result|null>(null),[error,setError]=React.useState(''),[busy,setBusy]=React.useState(false),[showCurrent,setShowCurrent]=React.useState(false);
  const graph=React.useRef<HTMLDivElement>(null);
  const surface=React.useRef<HTMLElement>(null);
@@ -41,6 +41,7 @@ export default function FinalSynthesisPanel({formId,onComplete}:FinalSynthesisPr
   {account&&<>
    {result?.collection_open&&<p className="fs-note">Round 3 is still open. This synthesis may change as responses arrive.</p>}
    {result?.stale&&<p role="status" className="cw-notice">Recorded data has changed since this snapshot. <button type="button" onClick={()=>setShowCurrent(v=>!v)}>{showCurrent?'View saved snapshot':'Review current data'}</button></p>}
+   {!!questions.length&&<div className="fs-question"><p className="fs-question-label">{questions.length===1?'Question':'Questions'}</p>{questions.map((question,i)=><p key={i} className="fs-question-text">{question}</p>)}</div>}
    <div className="fs-prose">{finalNarrative(account.claims).map((text,i)=><p key={i}>{text}</p>)}</div>
    <details className="fs-audit"><summary>Claims, expert reasoning and changes</summary>
    <div className="fs-claims">{account.claims.map(c=><article key={c.id}>

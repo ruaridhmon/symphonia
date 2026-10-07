@@ -1014,3 +1014,11 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .fs-menu-actions {border-top:1px solid var(--border);margin-top:6px;padding-top:6px;}
 #root .fs-menu-meta {display:grid;gap:4px;padding:8px 12px;color:var(--muted-foreground);font-size:11px;line-height:1.5;}
 #root .final-synthesis .fs-prose {margin:22px 0;}
+
+/* Question leads the final account; supporting dialogs avoid repeating the claim. */
+#root .final-synthesis .fs-question {margin:24px 0 22px;max-width:800px;}
+#root .final-synthesis .fs-question-label {color:var(--muted-foreground);font-size:12px;margin:0 0 6px;line-height:1.5;}
+#root .final-synthesis .fs-question-text {font-size:17px;line-height:1.6;font-weight:500;margin:0 0 8px;}
+#root .di-supporting-dialog .di-supporting-heading h3.di-supporting-title,#root .di-supporting-dialog .rf-detail-heading h4.di-supporting-title {font-size:14px!important;font-weight:500!important;line-height:1.5!important;margin:4px 0 18px!important;}
+#root .symphonia-navigation-actions a.symphonia-new-consultation {display:flex;align-items:center;gap:10px;}
+#root .symphonia-new-consultation svg {flex:none;}

@@ -33,7 +33,11 @@ export function renderConsultationNavigation(nav: HTMLElement, data: NavigationD
   };
   const top = document.createElement('div'); top.className = 'symphonia-navigation-actions';
   top.append(makeLink('All consultations', '/'));
-  if (data?.canCreate) top.append(makeLink('+ New consultation', '/admin/forms/new'));
+  if (data?.canCreate) {
+    const create=makeLink('New consultation','/admin/forms/new');create.className='symphonia-new-consultation';
+    const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');icon.setAttribute('viewBox','0 0 24 24');icon.setAttribute('width','16');icon.setAttribute('height','16');icon.setAttribute('fill','none');icon.setAttribute('stroke','currentColor');icon.setAttribute('stroke-width','1.6');icon.setAttribute('aria-hidden','true');
+    const outline=document.createElementNS('http://www.w3.org/2000/svg','path');outline.setAttribute('d','M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M16 3a2.12 2.12 0 0 1 3 3l-9 9-4 1 1-4Z M15 4l3 3');icon.append(outline);create.prepend(icon);top.append(create);
+  }
   nav.replaceChildren(top);
 
   if (!data) {

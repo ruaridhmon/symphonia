@@ -123,7 +123,7 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
     trigger.className='di-claim-trigger';trigger.setAttribute('aria-haspopup','dialog');trigger.title='Read supporting information';if(supporting.length)claimTitle.replaceChildren(trigger);
     const detail=document.createElement('dialog');detail.className='di-supporting-dialog';detail.setAttribute('aria-label',`Supporting information: ${row.label.replace(/^Claim\s+\d+:\s*/i,'')}`);
     const dismiss=()=>{detail.close();trigger.focus();};const close=button('×',dismiss);close.setAttribute('aria-label','Close supporting information');
-    const header=node('div','','di-supporting-heading');const title=node('div');title.append(node('p','Supporting information','di-supporting-kicker'),node('h3',row.label.replace(/^Claim\s+\d+:\s*/i,''),'di-supporting-claim'));header.append(title,close);detail.append(header);
+    const header=node('div','','di-supporting-heading');const title=node('div');title.append(node('h3','Supporting information','di-supporting-title'));header.append(title,close);detail.append(header);
     if(row.origin==='inferred')detail.append(node('p','Inferred assumption · unconfirmed','di-supporting-origin'));
     detail.oncancel=e=>{e.preventDefault();dismiss();};detail.onclick=e=>{if(e.target===detail){const r=detail.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dismiss();}};
 

@@ -21,10 +21,12 @@ it('replaces the reasoning view after saving instead of appending duplicate grap
 it('keeps snapshot controls in consultation options and removes them when leaving synthesis',async()=>{
  const account={revision:'revision',title:'Panel',stage:4,markdown:'Account',round_two_count:3,round_three_count:3,claims:[],saved_at:'2026-10-06T00:00:00Z'};
  client.get.mockResolvedValue({preview:account,saved:account,stale:false,collection_open:false});
- const {unmount}=render(<section className="consultation-workspace"><details className="cw-options"><summary>Consultation options</summary><div/></details><FinalSynthesisPanel formId={1}/></section>);
+ const {unmount}=render(<section className="consultation-workspace"><details className="cw-options"><summary>Consultation options</summary><div/></details><FinalSynthesisPanel formId={1} questions={['What should schools do about phones?']}/></section>);
  await waitFor(()=>expect(document.querySelector('.cw-options .fs-menu-actions')).not.toBeNull());
  expect(document.querySelector('.final-synthesis .fs-menu-actions')).toBeNull();
  expect(document.querySelector('.final-synthesis h2')).toBeNull();
+ expect(document.querySelector('.fs-question')).toHaveTextContent('What should schools do about phones?');
+ expect(document.querySelector('.fs-question')?.nextElementSibling).toHaveClass('fs-prose');
  expect(document.querySelector('.cw-options')).toHaveTextContent('Save snapshot');
  expect(document.querySelector('.cw-options')).toHaveTextContent('Download synthesis');
  expect(client.post).not.toHaveBeenCalled();
