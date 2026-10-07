@@ -1704,17 +1704,14 @@ function SummaryPageContent() {
 	async function generateSummary() {
 		const targetRound = targetRoundForGeneration;
 		const modelToUse = sanitizeModel(selectedModel);
-		if (!formId || !modelToUse || !targetRound) return;
+		if (isGenerating) return;
+		if (!formId || !modelToUse || !targetRound) {
+			toastError('The consultation is still loading. Please try again.');
+			return;
+		}
 		if (modelToUse !== selectedModel) setSelectedModel(modelToUse);
 		let backgroundStarted = false;
-		let baselineVersionCount = 0;
-		try {
-			const before = await apiGetSynthesisVersions(formId, targetRound.id);
-			baselineVersionCount = before.length;
-		} catch {
-			// Non-fatal: polling can still check for synthesis text changes.
-		}
-
+		const baselineVersionCount = synthesisVersions.length;
 		setIsGenerating(true);
 		setSynthesisStage('generating');
 		setSynthesisStep(1);
@@ -2261,6 +2258,7 @@ function SummaryPageContent() {
 										onSetViewMode={handleSetSynthesisViewMode}
 										canGenerate={Boolean(displayRound?.is_active && responseCountForDisplay > 0)}
 										onGenerate={generateSummary}
+                                        isGenerating={isGenerating}
 										editor={editor}
 										isDirty={isSynthesisDirty}
 										isSaving={isSavingSynthesis}
