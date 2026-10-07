@@ -10,6 +10,7 @@ type Props = {
   synthesisViewMode: 'view' | 'edit';
   onSetViewMode: (mode: 'view' | 'edit') => void | Promise<void>;
   canGenerate?: boolean;
+  isGenerating?: boolean;
   onGenerate?: () => void;
   editor: Editor | null;
   isDirty: boolean;
@@ -87,6 +88,7 @@ export default function SynthesisEditorCard({
   synthesisViewMode,
   onSetViewMode,
   canGenerate = false,
+  isGenerating = false,
   onGenerate,
   editor,
   isDirty,
@@ -281,6 +283,7 @@ export default function SynthesisEditorCard({
               {canGenerate && onGenerate && (
                 <button
                   type="button"
+                  disabled={isGenerating}
                   onClick={onGenerate}
                   className="mt-4 inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-sm font-semibold"
                   style={{
@@ -289,7 +292,7 @@ export default function SynthesisEditorCard({
                     border: '1px solid var(--accent)',
                   }}
                 >
-                  Generate draft
+                  {isGenerating ? 'Generating…' : 'Generate draft'}
                 </button>
               )}
             </div>
