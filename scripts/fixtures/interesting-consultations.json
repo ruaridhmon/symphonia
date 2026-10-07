@@ -1,0 +1,502 @@
+[
+  {
+    "key": "interesting-01",
+    "title": "Would you trust an AI scientist?",
+    "question": "How much scientific decision-making should an autonomous AI researcher be allowed to control?",
+    "explicit": [
+      "Research questions should remain accountable to human scientific judgment.",
+      "Independent replication should precede reliance on autonomous discoveries.",
+      "Permit autonomous hypothesis generation within a bounded research programme.",
+      "Require a human decision before an AI changes the research programme.",
+      "Fund human-led exploratory science even when automated projects appear more efficient."
+    ],
+    "inferred": [
+      "Bounded delegation would preserve meaningful human scientific control.",
+      "Efficiency-based funding would otherwise crowd out valuable human-led exploration."
+    ],
+    "roles": [
+      "Computational biologist",
+      "Experimental scientist",
+      "Research ethicist"
+    ],
+    "scenario": "an AI proposes an unexpected biological mechanism and asks to redirect the laboratory",
+    "test": "compare independently reproduced results, missed alternatives and the effort required to challenge a proposal",
+    "experts": 3,
+    "word_budget": 100
+  },
+  {
+    "key": "interesting-02",
+    "title": "Could robots run the laboratory?",
+    "question": "Should laboratories allow robots to plan and execute experiments with minimal human supervision?",
+    "explicit": [
+      "Laboratory automation should have explicit intervention and shutdown responsibilities.",
+      "An experiment can be technically successful while answering the wrong research question.",
+      "Start with task-limited autonomous laboratories and independent review.",
+      "Allow broader autonomy only after the laboratory can explain failed experiments.",
+      "Preserve hands-on training even when robots can execute the work."
+    ],
+    "inferred": [
+      "Task boundaries would keep laboratory failures containable.",
+      "Removing hands-on practice would weaken future researchers’ experimental judgment."
+    ],
+    "roles": [
+      "Robotics researcher",
+      "Laboratory scientist",
+      "Training director"
+    ],
+    "scenario": "a robotic laboratory keeps optimizing a measurable output while ignoring an anomalous result",
+    "test": "test error recovery, operator intervention and whether trainees can diagnose a failure",
+    "experts": 5,
+    "word_budget": 500
+  },
+  {
+    "key": "interesting-03",
+    "title": "Longevity: longer life or healthier life?",
+    "question": "Should public research funding prioritise healthier ageing or attempts to extend maximum lifespan?",
+    "explicit": [
+      "Public longevity research should report functional outcomes alongside survival.",
+      "Access and affordability should shape priorities for publicly funded interventions.",
+      "Prioritise additional healthy years over record-breaking lifespan extension.",
+      "Keep a smaller programme for high-risk research on maximum lifespan.",
+      "Allocate a protected share of funding to social conditions that affect ageing."
+    ],
+    "inferred": [
+      "Funding healthy years would favour interventions that preserve everyday functioning.",
+      "A technology-led programme could otherwise displace investment in social conditions."
+    ],
+    "roles": [
+      "Ageing researcher",
+      "Health economist",
+      "Disability advocate"
+    ],
+    "scenario": "a proposed intervention promises longer survival but leaves its effects on independence unresolved",
+    "test": "compare functioning, burden on carers, accessibility and the distribution of benefits",
+    "experts": 8,
+    "word_budget": 200
+  },
+  {
+    "key": "interesting-04",
+    "title": "Fusion dreams or a better grid?",
+    "question": "How should an energy research budget balance fusion ambitions against improvements to existing grids?",
+    "explicit": [
+      "Energy funding should distinguish research potential from deployable reliability.",
+      "A portfolio should make the cost of delayed delivery visible.",
+      "Protect long-term fusion research while expanding near-term grid work.",
+      "Concentrate marginal funding on grids until fusion milestones are independently met.",
+      "Reserve funding for energy access rather than only national technology leadership."
+    ],
+    "inferred": [
+      "Portfolio funding would retain future options without delaying essential grid work.",
+      "A leadership-focused budget could otherwise neglect communities with unreliable supply."
+    ],
+    "roles": [
+      "Fusion researcher",
+      "Grid engineer",
+      "Energy-access specialist"
+    ],
+    "scenario": "a budget committee must choose between another experimental facility and neglected transmission upgrades",
+    "test": "compare delivery milestones, reliability improvements and communities reached by each allocation",
+    "experts": 12,
+    "word_budget": 350
+  },
+  {
+    "key": "interesting-05",
+    "title": "Who gets to touch the thermostat of Earth?",
+    "question": "Who should be allowed to authorise research or deployment of solar climate intervention?",
+    "explicit": [
+      "Climate-intervention decisions should include countries exposed to possible cross-border effects.",
+      "Research governance should distinguish observation from deployment.",
+      "Allow independently overseen research without treating it as permission to deploy.",
+      "Require a separate international decision before any sustained deployment.",
+      "Give disproportionately exposed communities a meaningful power to refuse participation."
+    ],
+    "inferred": [
+      "A research boundary could remain enforceable despite pressure to deploy.",
+      "Ordinary representation alone might fail to protect disproportionately exposed communities."
+    ],
+    "roles": [
+      "Climate-governance researcher",
+      "Atmospheric scientist",
+      "Community-rights specialist"
+    ],
+    "scenario": "an emergency creates pressure to turn a limited research programme into an operational intervention",
+    "test": "test governance boundaries, accountability for unexpected outcomes and whose objections can change the decision",
+    "experts": 20,
+    "word_budget": 100
+  },
+  {
+    "key": "interesting-06",
+    "title": "Carbon removal: public service or offset machine?",
+    "question": "Should publicly supported carbon removal be used to compensate for continued emissions?",
+    "explicit": [
+      "Carbon-removal claims should keep storage durability and measurement uncertainty visible.",
+      "A removal purchase should not erase the obligation to reduce avoidable emissions.",
+      "Prioritise removal for residual emissions with independently verified storage.",
+      "Keep reduction targets separate from any purchased removal credits.",
+      "Exclude public subsidies for removals that mainly prolong an avoidable high-emissions activity."
+    ],
+    "inferred": [
+      "Separate accounting would prevent removal purchases from weakening reduction obligations.",
+      "Some subsidy designs could extend avoidable emissions rather than address residual emissions."
+    ],
+    "roles": [
+      "Carbon-accounting researcher",
+      "Industrial-policy economist",
+      "Environmental-justice specialist"
+    ],
+    "scenario": "a firm requests a subsidy for removals while postponing an available emissions reduction",
+    "test": "compare additionality, durability, uncertainty and what the buyer would do without the credit",
+    "experts": 4,
+    "word_budget": 500
+  },
+  {
+    "key": "interesting-07",
+    "title": "Could a city retreat from the coast?",
+    "question": "When should a coastal city invest in protection, adaptation or voluntary relocation?",
+    "explicit": [
+      "Coastal planning should disclose who bears the costs of each option.",
+      "Residents should receive credible alternatives before a relocation decision.",
+      "Combine protection with funded voluntary relocation in the most exposed areas.",
+      "Prioritise protection where relocation would destroy irreplaceable community ties.",
+      "Guarantee renters a relocation offer rather than compensating property owners alone."
+    ],
+    "inferred": [
+      "A credible relocation offer would permit a genuinely voluntary choice.",
+      "Owner-only compensation would leave some residents unable to move safely."
+    ],
+    "roles": [
+      "Coastal planner",
+      "Housing researcher",
+      "Community organiser"
+    ],
+    "scenario": "a neighbourhood must decide whether to rebuild after repeated disruption or accept a relocation offer",
+    "test": "compare security, affordability, community continuity and the choices available to renters",
+    "experts": 6,
+    "word_budget": 200
+  },
+  {
+    "key": "interesting-08",
+    "title": "Bring back the wild: who decides?",
+    "question": "How should a region decide whether to reintroduce a large predator?",
+    "explicit": [
+      "Reintroduction plans should define responsibility for losses and conflict resolution.",
+      "Local participation should affect the plan rather than merely approve it.",
+      "Begin a monitored reintroduction with explicit compensation and review rules.",
+      "Delay release until affected communities can challenge the proposed safeguards.",
+      "Protect the option of coexistence without requiring every resident to welcome reintroduction."
+    ],
+    "inferred": [
+      "Compensation and review would make coexistence practically tolerable.",
+      "A demand for universal enthusiasm would prevent feasible coexistence arrangements."
+    ],
+    "roles": [
+      "Conservation ecologist",
+      "Rural-economy researcher",
+      "Wildlife-governance specialist"
+    ],
+    "scenario": "a reintroduction proposal promises regional benefits while concentrating immediate concerns in a few farms",
+    "test": "compare conflict resolution, compensation delays, monitoring and the distribution of local benefits",
+    "experts": 10,
+    "word_budget": 350
+  },
+  {
+    "key": "interesting-09",
+    "title": "Meat without animals: a public bet?",
+    "question": "Should governments subsidise cultivated meat, plant-based food or neither?",
+    "explicit": [
+      "Food innovation should be assessed on the system it would replace.",
+      "Public support should disclose production uncertainty and distributional effects.",
+      "Fund competing low-impact protein approaches against common evaluation criteria.",
+      "Prioritise established alternatives while cultivated-meat production remains uncertain.",
+      "Protect small producers from being locked out of a subsidised food transition."
+    ],
+    "inferred": [
+      "Common evaluation criteria would permit a fair comparison between protein approaches.",
+      "A subsidy programme could otherwise concentrate the transition in a few firms."
+    ],
+    "roles": [
+      "Food-systems researcher",
+      "Bioprocess engineer",
+      "Agricultural economist"
+    ],
+    "scenario": "a public fund must choose between a demonstration facility and scaling familiar lower-impact meals",
+    "test": "compare credible production pathways, affordability, access and effects on existing producers",
+    "experts": 15,
+    "word_budget": 500
+  },
+  {
+    "key": "interesting-10",
+    "title": "If AI could translate animals, should we listen?",
+    "question": "What should change if AI appears able to interpret meaningful animal communication?",
+    "explicit": [
+      "A claimed animal translation should be tested against alternative explanations.",
+      "An interpretation should not be treated as animal consent.",
+      "Use independently tested interpretations to improve animal-welfare decisions.",
+      "Keep welfare protections even when a model appears to report a positive response.",
+      "Prohibit entertainment uses that deliberately provoke distress to obtain interpretable signals."
+    ],
+    "inferred": [
+      "Validated interpretations would track animal welfare rather than only human expectations.",
+      "Commercial incentives could reward deliberately distressing communication displays."
+    ],
+    "roles": [
+      "Animal-behaviour researcher",
+      "Machine-learning scientist",
+      "Animal-welfare ethicist"
+    ],
+    "scenario": "a model produces convincing human-language descriptions of animal sounds but the evaluation is disputed",
+    "test": "compare predictions against independently designed behaviour tests and document ambiguous cases",
+    "experts": 7,
+    "word_budget": 100
+  },
+  {
+    "key": "interesting-11",
+    "title": "Digital afterlives: comfort or exploitation?",
+    "question": "Should people be able to create an AI replica of a deceased person?",
+    "explicit": [
+      "A digital replica should remain visibly distinct from the person it represents.",
+      "Consent should cover posthumous use rather than assume permission from available messages.",
+      "Permit limited replicas when prior consent and revocable access are documented.",
+      "Prohibit replicas when the represented person did not provide meaningful consent.",
+      "Prevent replicas from soliciting money or manipulating an emotionally dependent user."
+    ],
+    "inferred": [
+      "Visible disclosure would prevent users from mistaking a replica for the represented person.",
+      "Emotional dependence could otherwise become a route to commercial manipulation."
+    ],
+    "roles": [
+      "Bereavement researcher",
+      "Privacy lawyer",
+      "Human-computer-interaction researcher"
+    ],
+    "scenario": "a family wants a comforting replica while relatives disagree about consent and commercial access",
+    "test": "compare consent records, boundaries of use, withdrawal options and responses to emotional dependence",
+    "experts": 3,
+    "word_budget": 350
+  },
+  {
+    "key": "interesting-12",
+    "title": "Brain data: the last private space?",
+    "question": "What rules should govern devices that infer information from brain activity?",
+    "explicit": [
+      "Brain-data use should be limited to purposes that a person can meaningfully understand.",
+      "Refusing a brain-sensing device should not itself count as evidence against a person.",
+      "Permit voluntary narrowly specified uses with strict secondary-use controls.",
+      "Exclude brain-based inference from employment selection and routine policing.",
+      "Give people a practical right to delete derived profiles as well as raw recordings."
+    ],
+    "inferred": [
+      "Purpose limits would remain enforceable when new inferences become possible.",
+      "Keeping derived profiles would undermine meaningful deletion of brain data."
+    ],
+    "roles": [
+      "Neurotechnology researcher",
+      "Civil-rights lawyer",
+      "Privacy engineer"
+    ],
+    "scenario": "a voluntary device collected for one purpose later supports a new inference requested by an employer",
+    "test": "compare enforceable purpose controls, refusal consequences and deletion of derived information",
+    "experts": 9,
+    "word_budget": 200
+  },
+  {
+    "key": "interesting-13",
+    "title": "Editing future generations",
+    "question": "What would justify permitting heritable genome editing?",
+    "explicit": [
+      "Heritable-editing decisions should separate demonstrated capability from moral permission.",
+      "A decision should account for people who cannot participate in the original consent.",
+      "Require a separate publicly accountable authorisation process before any permitted use.",
+      "Keep a prohibition while essential uncertainties and governance questions remain unresolved.",
+      "Do not make access to support contingent on whether a family accepted an editing option."
+    ],
+    "inferred": [
+      "Public authorisation would represent the interests of affected future people.",
+      "An editing option could otherwise reduce support for people living with the targeted trait."
+    ],
+    "roles": [
+      "Genetics researcher",
+      "Bioethicist",
+      "Disability-rights scholar"
+    ],
+    "scenario": "a technically persuasive proposal reaches a regulator while families disagree about the social meaning of the intervention",
+    "test": "compare consent limits, alternatives, public accountability and protection for existing communities",
+    "experts": 12,
+    "word_budget": 500
+  },
+  {
+    "key": "interesting-14",
+    "title": "An AI tutor for every child?",
+    "question": "How should schools use highly capable AI tutors without losing the human parts of education?",
+    "explicit": [
+      "Educational evaluation should include relationships and agency as well as test performance.",
+      "A student should be able to challenge an AI tutor’s interpretation of their needs.",
+      "Use AI tutors as teacher-supervised support rather than a default replacement.",
+      "Allow broader tutor autonomy only after independent evaluation in the relevant setting.",
+      "Preserve a non-AI route for students who do not benefit from the system."
+    ],
+    "inferred": [
+      "Teacher supervision would remain meaningful when tutoring is highly personalised.",
+      "A default digital route could exclude students who need another form of support."
+    ],
+    "roles": [
+      "Learning scientist",
+      "Teacher educator",
+      "Child-rights specialist"
+    ],
+    "scenario": "a tutoring system improves a chosen metric while teachers worry that students stop asking independent questions",
+    "test": "compare learning transfer, agency, relationships and the experience of students who opt out",
+    "experts": 5,
+    "word_budget": 100
+  },
+  {
+    "key": "interesting-15",
+    "title": "Four days of work: who wins?",
+    "question": "When should an organisation adopt a four-day working week?",
+    "explicit": [
+      "A working-time trial should measure workload intensity as well as output.",
+      "Benefits should not depend only on whether a role is easy to reschedule.",
+      "Run a protected trial without using unpaid extra hours to preserve output.",
+      "Offer role-specific shorter-hour options where a common four-day schedule does not fit.",
+      "Include contract and shift workers in any sharing of the gains."
+    ],
+    "inferred": [
+      "A protected trial would prevent nominal time reductions from hiding unpaid work.",
+      "A standard schedule could otherwise allocate the gains mainly to office workers."
+    ],
+    "roles": [
+      "Labour economist",
+      "Occupational-health researcher",
+      "Operations manager"
+    ],
+    "scenario": "office teams want a shorter week while service coverage depends on shifts and contractors",
+    "test": "compare total hours, intensity, coverage, retention and who receives the time benefit",
+    "experts": 20,
+    "word_budget": 350
+  },
+  {
+    "key": "interesting-16",
+    "title": "Your genome as a forecast",
+    "question": "Should consumer genetic-risk forecasts be used outside clinical care?",
+    "explicit": [
+      "A genetic forecast should display uncertainty and the population limits of its interpretation.",
+      "A person should control whether a consumer result reaches another institution.",
+      "Restrict institutional use until the specific decision has independent validation.",
+      "Keep consumer exploration available without permitting automatic institutional decisions.",
+      "Prohibit insurers and employers from requiring consumer genetic-risk disclosure."
+    ],
+    "inferred": [
+      "Decision-specific validation would identify when a genetic forecast is useful for that decision.",
+      "Nominally voluntary disclosure could become effectively compulsory in unequal relationships."
+    ],
+    "roles": [
+      "Statistical geneticist",
+      "Consumer-protection specialist",
+      "Insurance-policy researcher"
+    ],
+    "scenario": "a consumer receives a persuasive risk score and an institution requests access before making an unrelated decision",
+    "test": "compare population transfer, uncertainty communication and the real freedom to refuse disclosure",
+    "experts": 8,
+    "word_budget": 500
+  },
+  {
+    "key": "interesting-17",
+    "title": "A city on Mars: whose rules?",
+    "question": "How should a permanent Mars settlement govern itself while preserving scientific and ethical responsibilities?",
+    "explicit": [
+      "Settlement rules should distinguish scientific stewardship from a claim to exclusive ownership.",
+      "Residents should have a meaningful way to contest life-support decisions.",
+      "Give residents democratic control within independently reviewed stewardship obligations.",
+      "Retain shared oversight for decisions with irreversible consequences beyond the settlement.",
+      "Preserve protected areas even when expansion would be more convenient without them."
+    ],
+    "inferred": [
+      "Local democratic control would remain workable under dependence on essential infrastructure.",
+      "Convenience-driven expansion could foreclose future scientific investigation."
+    ],
+    "roles": [
+      "Space-governance scholar",
+      "Life-support engineer",
+      "Planetary-science researcher"
+    ],
+    "scenario": "residents want to expand while scientists dispute whether the proposed area should remain undisturbed",
+    "test": "compare infrastructure accountability, contested decisions and preservation of future research options",
+    "experts": 6,
+    "word_budget": 200
+  },
+  {
+    "key": "interesting-18",
+    "title": "Robotaxis: convenience for whom?",
+    "question": "What should a city require before allowing large-scale autonomous taxi services?",
+    "explicit": [
+      "Transport evaluation should consider street use and accessibility rather than trips alone.",
+      "Public authorities should retain enforceable oversight of service changes.",
+      "Permit staged deployment tied to independently evaluated public-interest outcomes.",
+      "Limit expansion until underserved areas and disabled riders have credible service access.",
+      "Protect public-transport funding rather than assuming private fleets will replace it."
+    ],
+    "inferred": [
+      "Deployment conditions would remain enforceable when the fleet operator becomes indispensable.",
+      "Private fleet growth could otherwise weaken the political support for public transport."
+    ],
+    "roles": [
+      "Transport planner",
+      "Accessibility researcher",
+      "Autonomous-systems engineer"
+    ],
+    "scenario": "a fleet offers convenient journeys in profitable areas while requesting broad access to public road space",
+    "test": "compare accessibility, street use, underserved areas and dependency on one operator",
+    "experts": 15,
+    "word_budget": 100
+  },
+  {
+    "key": "interesting-19",
+    "title": "Could citizens govern with an AI adviser?",
+    "question": "Should citizens’ assemblies use AI to organise evidence and propose policy options?",
+    "explicit": [
+      "Assembly members should be able to inspect which arguments the system excluded.",
+      "An AI-generated option should remain a proposal rather than a decision.",
+      "Use AI for evidence organisation while reserving deliberation and judgment to citizens.",
+      "Require an independently prepared account alongside the AI’s presentation.",
+      "Preserve minority reports rather than reducing assembly output to a single recommendation."
+    ],
+    "inferred": [
+      "Inspectability would let citizens detect consequential omissions in the evidence account.",
+      "A single recommendation could otherwise erase unresolved minority reasoning."
+    ],
+    "roles": [
+      "Deliberative-democracy scholar",
+      "AI-governance researcher",
+      "Public-evidence curator"
+    ],
+    "scenario": "an assembly receives a beautifully concise AI briefing that participants suspect has omitted a difficult alternative",
+    "test": "compare traceability, omissions, time for challenge and the survival of minority reports",
+    "experts": 10,
+    "word_budget": 350
+  },
+  {
+    "key": "interesting-20",
+    "title": "Open science at the edge of danger",
+    "question": "How should institutions decide when to restrict a powerful biological research tool?",
+    "explicit": [
+      "Restrictions should identify the capability of concern rather than rely on a field’s reputation.",
+      "A governance decision should consider both scientific access and misuse uncertainty.",
+      "Use independently reviewed access tiers with proportionate monitoring and appeals.",
+      "Keep selected capabilities restricted when credible safeguards cannot be demonstrated.",
+      "Protect legitimate researchers in low-resource settings from blanket exclusion."
+    ],
+    "inferred": [
+      "Access tiers would reduce the identified risk without simply moving it elsewhere.",
+      "Blanket restrictions could otherwise exclude legitimate work without addressing the risk."
+    ],
+    "roles": [
+      "Biosafety-governance researcher",
+      "Open-science scholar",
+      "Research-access specialist"
+    ],
+    "scenario": "a useful tool raises contested governance concerns and an access restriction would exclude a small research group",
+    "test": "compare proportionality, meaningful appeals and whether the restriction addresses the identified capability",
+    "experts": 4,
+    "word_budget": 500
+  }
+]
