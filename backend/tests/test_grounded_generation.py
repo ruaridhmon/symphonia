@@ -145,10 +145,10 @@ def test_fast_model_requests_constrained_sources_and_relationships(
     properties = response_format["json_schema"]["schema"]["properties"]
     relations = properties["claim_edges"]["items"]["properties"]["relation"]["enum"]
     assert relations == ["supports", "qualifies", "challenges", "motivates"]
-    flow = properties["reasoning_flows"]["items"]["anyOf"][0]["properties"]
-    assert flow["response_number"]["enum"] == [1]
-    stated = flow["nodes"]["items"]["anyOf"][0]["properties"]
-    assert stated["source_id"]["enum"] == ["r1_a1"]
+    flow = properties["reasoning_by_response"]["properties"]["r1"]["properties"]
+    stated = flow["nodes"]["items"]["properties"]
+    assert stated["source_id"]["enum"] == ["r1_a1", ""]
+    assert "anyOf" not in json.dumps(properties)
 
 
 @pytest.mark.parametrize("failure", ["quote", "coverage", "flow", "truncated"])
@@ -467,3 +467,77 @@ def test_timeout_cancels_native_request_and_closes_connection(
     with TestingSessionLocal() as db:
         assert db.get(RoundModel, rid).synthesis == "Previous draft"
         assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 0
+
+
+def compact_opening_output():
+    return {
+        "normalized_claims": [{
+            "id": "claim_1", "text": "Retain medical exceptions.", "origin": "explicit",
+            "sources": [{"source_id": "r1_a1", "stance": "support"}],
+            "based_on_responses": [], "question": "",
+        }],
+        "claim_edges": [],
+        "reasoning_by_response": {"r1": {
+            "title": "Access exceptions", "nodes": [{
+                "id": "a", "kind": "recommendation", "text": "Retain medical exceptions.",
+                "source_id": "r1_a1", "question": "", "condition": "",
+            }], "edges": [], "exclusion_reason": "",
+        }},
+        "limitations": [],
+    }
+
+
+def test_compact_draft_saves_in_one_call(client, admin_headers, participant_headers, monkeypatch):
+    url, rid = opening_fixture(client, admin_headers, participant_headers)
+    call, _ = provider(monkeypatch, compact_opening_output())
+    got = client.post(url, headers=admin_headers, json={"model": "google/gemini-2.5-flash-lite"})
+    assert got.status_code == 200, got.text
+    call.assert_called_once()
+    graph = got.json()["synthesis_json"]["reasoning_graph"]
+    assert graph["flows"][0]["response_number"] == 1
+    assert graph["flows"][0]["nodes"][0]["quote"] == SOURCE
+    assert graph["response_coverage"] == [{"response_number": 1, "status": "mapped", "reason": ""}]
+    with TestingSessionLocal() as db:
+        assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 1
+
+
+@pytest.mark.parametrize("failure", ["missing", "unknown", "source", "excluded", "cycle", "empty"])
+def test_compact_draft_preserves_existing_validation(failure):
+    output = compact_opening_output()
+    responses = [{"response_id": 91, "answers": {"q1": SOURCE}}]
+    entry = output["reasoning_by_response"]["r1"]
+    if failure == "missing":
+        del output["reasoning_by_response"]["r1"]
+    elif failure == "unknown":
+        output["reasoning_by_response"]["r2"] = entry
+    elif failure == "source":
+        entry["nodes"][0]["source_id"] = "r2_a1"
+    elif failure == "excluded":
+        entry["exclusion_reason"] = "Off topic"
+    elif failure == "cycle":
+        entry["edges"] = [{"from": "a", "to": "a", "relation": "supports"}]
+    else:
+        entry["nodes"] = []
+    with pytest.raises((KeyError, ValueError)):
+        parse_opening(json.dumps(output), responses)
+
+
+def test_compact_inference_and_blank_response_keep_provenance():
+    output = compact_opening_output()
+    output["normalized_claims"].append({
+        "id": "claim_2", "text": "Access may affect medical needs.", "origin": "inferred",
+        "sources": [], "based_on_responses": [1], "question": "Does access affect medical needs?",
+    })
+    output["reasoning_by_response"]["r1"]["nodes"].append({
+        "id": "b", "kind": "assumption", "text": "Access may affect medical needs.",
+        "source_id": "", "question": "Does access affect medical needs?", "condition": "",
+    })
+    output["reasoning_by_response"]["r2"] = {
+        "title": "Blank answer", "nodes": [], "edges": [], "exclusion_reason": "The answer is blank.",
+    }
+    graph = parse_opening(json.dumps(output), [
+        {"response_id": 91, "answers": {"q1": SOURCE}}, {"response_id": 92, "answers": {"q1": ""}},
+    ])
+    assert graph["claims"][1]["confirmed"] is False
+    assert graph["flows"][0]["nodes"][1]["confirmed"] is False
+    assert graph["response_coverage"][1]["status"] == "no_substantive_claim"
