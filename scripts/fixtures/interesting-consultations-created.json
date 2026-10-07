@@ -1,0 +1,182 @@
+[
+  {
+    "id": 58,
+    "title": "Would you trust an AI scientist?",
+    "experts": 3,
+    "word_budget": 100,
+    "claim_count": 4,
+    "inferred_count": 1,
+    "verified": true
+  },
+  {
+    "id": 57,
+    "title": "Could robots run the laboratory?",
+    "experts": 5,
+    "word_budget": 500,
+    "claim_count": 12,
+    "inferred_count": 2,
+    "verified": true
+  },
+  {
+    "id": 59,
+    "title": "Longevity: longer life or healthier life?",
+    "experts": 8,
+    "word_budget": 200,
+    "claim_count": 9,
+    "inferred_count": 1,
+    "verified": true
+  },
+  {
+    "id": 60,
+    "title": "Fusion dreams or a better grid?",
+    "experts": 12,
+    "word_budget": 350,
+    "claim_count": 7,
+    "inferred_count": 0,
+    "verified": true
+  },
+  {
+    "id": 62,
+    "title": "Who gets to touch the thermostat of Earth?",
+    "experts": 20,
+    "word_budget": 100,
+    "claim_count": 11,
+    "inferred_count": 2,
+    "verified": true
+  },
+  {
+    "id": 61,
+    "title": "Carbon removal: public service or offset machine?",
+    "experts": 4,
+    "word_budget": 500,
+    "claim_count": 8,
+    "inferred_count": 1,
+    "verified": true
+  },
+  {
+    "id": 63,
+    "title": "Could a city retreat from the coast?",
+    "experts": 6,
+    "word_budget": 200,
+    "claim_count": 10,
+    "inferred_count": 2,
+    "verified": true
+  },
+  {
+    "id": 64,
+    "title": "Bring back the wild: who decides?",
+    "experts": 10,
+    "word_budget": 350,
+    "claim_count": 6,
+    "inferred_count": 0,
+    "verified": true
+  },
+  {
+    "id": 65,
+    "title": "Meat without animals: a public bet?",
+    "experts": 15,
+    "word_budget": 500,
+    "claim_count": 18,
+    "inferred_count": 2,
+    "verified": true
+  },
+  {
+    "id": 66,
+    "title": "If AI could translate animals, should we listen?",
+    "experts": 7,
+    "word_budget": 100,
+    "claim_count": 8,
+    "inferred_count": 1,
+    "verified": true
+  },
+  {
+    "id": 67,
+    "title": "Digital afterlives: comfort or exploitation?",
+    "experts": 3,
+    "word_budget": 350,
+    "claim_count": 10,
+    "inferred_count": 1,
+    "verified": true
+  },
+  {
+    "id": 68,
+    "title": "Brain data: the last private space?",
+    "experts": 9,
+    "word_budget": 200,
+    "claim_count": 14,
+    "inferred_count": 2,
+    "verified": true
+  },
+  {
+    "id": 69,
+    "title": "Editing future generations",
+    "experts": 12,
+    "word_budget": 500,
+    "claim_count": 20,
+    "inferred_count": 3,
+    "verified": true
+  },
+  {
+    "id": 70,
+    "title": "An AI tutor for every child?",
+    "experts": 5,
+    "word_budget": 100,
+    "claim_count": 5,
+    "inferred_count": 0,
+    "verified": true
+  },
+  {
+    "id": 71,
+    "title": "Four days of work: who wins?",
+    "experts": 20,
+    "word_budget": 350,
+    "claim_count": 9,
+    "inferred_count": 1,
+    "verified": true
+  },
+  {
+    "id": 72,
+    "title": "Your genome as a forecast",
+    "experts": 8,
+    "word_budget": 500,
+    "claim_count": 13,
+    "inferred_count": 2,
+    "verified": true
+  },
+  {
+    "id": 73,
+    "title": "A city on Mars: whose rules?",
+    "experts": 6,
+    "word_budget": 200,
+    "claim_count": 6,
+    "inferred_count": 0,
+    "verified": true
+  },
+  {
+    "id": 74,
+    "title": "Robotaxis: convenience for whom?",
+    "experts": 15,
+    "word_budget": 100,
+    "claim_count": 8,
+    "inferred_count": 1,
+    "verified": true
+  },
+  {
+    "id": 75,
+    "title": "Could citizens govern with an AI adviser?",
+    "experts": 10,
+    "word_budget": 350,
+    "claim_count": 15,
+    "inferred_count": 2,
+    "verified": true
+  },
+  {
+    "id": 76,
+    "title": "Open science at the edge of danger",
+    "experts": 4,
+    "word_budget": 500,
+    "claim_count": 12,
+    "inferred_count": 1,
+    "verified": true
+  }
+]

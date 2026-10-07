@@ -1,0 +1,342 @@
+[
+  {
+    "id": 58,
+    "title": "Would you trust an AI scientist?",
+    "experts": 3,
+    "word_budget": 100,
+    "actual_words": [
+      70,
+      74
+    ],
+    "rounds": 3,
+    "submissions": 9,
+    "same_experts_across_rounds": true,
+    "shared_claims": 4,
+    "inferred_assumptions": 1,
+    "position_changes": 1,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 57,
+    "title": "Could robots run the laboratory?",
+    "experts": 5,
+    "word_budget": 500,
+    "actual_words": [
+      389,
+      439
+    ],
+    "rounds": 3,
+    "submissions": 15,
+    "same_experts_across_rounds": true,
+    "shared_claims": 12,
+    "inferred_assumptions": 2,
+    "position_changes": 2,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 59,
+    "title": "Longevity: longer life or healthier life?",
+    "experts": 8,
+    "word_budget": 200,
+    "actual_words": [
+      155,
+      177
+    ],
+    "rounds": 3,
+    "submissions": 24,
+    "same_experts_across_rounds": true,
+    "shared_claims": 9,
+    "inferred_assumptions": 1,
+    "position_changes": 4,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 60,
+    "title": "Fusion dreams or a better grid?",
+    "experts": 12,
+    "word_budget": 350,
+    "actual_words": [
+      274,
+      324
+    ],
+    "rounds": 3,
+    "submissions": 36,
+    "same_experts_across_rounds": true,
+    "shared_claims": 7,
+    "inferred_assumptions": 0,
+    "position_changes": 6,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 62,
+    "title": "Who gets to touch the thermostat of Earth?",
+    "experts": 20,
+    "word_budget": 100,
+    "actual_words": [
+      63,
+      96
+    ],
+    "rounds": 3,
+    "submissions": 60,
+    "same_experts_across_rounds": true,
+    "shared_claims": 11,
+    "inferred_assumptions": 2,
+    "position_changes": 10,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 61,
+    "title": "Carbon removal: public service or offset machine?",
+    "experts": 4,
+    "word_budget": 500,
+    "actual_words": [
+      390,
+      433
+    ],
+    "rounds": 3,
+    "submissions": 12,
+    "same_experts_across_rounds": true,
+    "shared_claims": 8,
+    "inferred_assumptions": 1,
+    "position_changes": 2,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 63,
+    "title": "Could a city retreat from the coast?",
+    "experts": 6,
+    "word_budget": 200,
+    "actual_words": [
+      155,
+      191
+    ],
+    "rounds": 3,
+    "submissions": 18,
+    "same_experts_across_rounds": true,
+    "shared_claims": 10,
+    "inferred_assumptions": 2,
+    "position_changes": 4,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 64,
+    "title": "Bring back the wild: who decides?",
+    "experts": 10,
+    "word_budget": 350,
+    "actual_words": [
+      265,
+      327
+    ],
+    "rounds": 3,
+    "submissions": 30,
+    "same_experts_across_rounds": true,
+    "shared_claims": 6,
+    "inferred_assumptions": 0,
+    "position_changes": 6,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 65,
+    "title": "Meat without animals: a public bet?",
+    "experts": 15,
+    "word_budget": 500,
+    "actual_words": [
+      385,
+      479
+    ],
+    "rounds": 3,
+    "submissions": 45,
+    "same_experts_across_rounds": true,
+    "shared_claims": 18,
+    "inferred_assumptions": 2,
+    "position_changes": 8,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 66,
+    "title": "If AI could translate animals, should we listen?",
+    "experts": 7,
+    "word_budget": 100,
+    "actual_words": [
+      69,
+      94
+    ],
+    "rounds": 3,
+    "submissions": 21,
+    "same_experts_across_rounds": true,
+    "shared_claims": 8,
+    "inferred_assumptions": 1,
+    "position_changes": 4,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 67,
+    "title": "Digital afterlives: comfort or exploitation?",
+    "experts": 3,
+    "word_budget": 350,
+    "actual_words": [
+      265,
+      304
+    ],
+    "rounds": 3,
+    "submissions": 9,
+    "same_experts_across_rounds": true,
+    "shared_claims": 10,
+    "inferred_assumptions": 1,
+    "position_changes": 2,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 68,
+    "title": "Brain data: the last private space?",
+    "experts": 9,
+    "word_budget": 200,
+    "actual_words": [
+      141,
+      183
+    ],
+    "rounds": 3,
+    "submissions": 27,
+    "same_experts_across_rounds": true,
+    "shared_claims": 14,
+    "inferred_assumptions": 2,
+    "position_changes": 4,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 69,
+    "title": "Editing future generations",
+    "experts": 12,
+    "word_budget": 500,
+    "actual_words": [
+      395,
+      448
+    ],
+    "rounds": 3,
+    "submissions": 36,
+    "same_experts_across_rounds": true,
+    "shared_claims": 20,
+    "inferred_assumptions": 3,
+    "position_changes": 6,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 70,
+    "title": "An AI tutor for every child?",
+    "experts": 5,
+    "word_budget": 100,
+    "actual_words": [
+      72,
+      95
+    ],
+    "rounds": 3,
+    "submissions": 15,
+    "same_experts_across_rounds": true,
+    "shared_claims": 5,
+    "inferred_assumptions": 0,
+    "position_changes": 2,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 71,
+    "title": "Four days of work: who wins?",
+    "experts": 20,
+    "word_budget": 350,
+    "actual_words": [
+      262,
+      334
+    ],
+    "rounds": 3,
+    "submissions": 60,
+    "same_experts_across_rounds": true,
+    "shared_claims": 9,
+    "inferred_assumptions": 1,
+    "position_changes": 10,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 72,
+    "title": "Your genome as a forecast",
+    "experts": 8,
+    "word_budget": 500,
+    "actual_words": [
+      386,
+      446
+    ],
+    "rounds": 3,
+    "submissions": 24,
+    "same_experts_across_rounds": true,
+    "shared_claims": 13,
+    "inferred_assumptions": 2,
+    "position_changes": 4,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 73,
+    "title": "A city on Mars: whose rules?",
+    "experts": 6,
+    "word_budget": 200,
+    "actual_words": [
+      141,
+      179
+    ],
+    "rounds": 3,
+    "submissions": 18,
+    "same_experts_across_rounds": true,
+    "shared_claims": 6,
+    "inferred_assumptions": 0,
+    "position_changes": 4,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 74,
+    "title": "Robotaxis: convenience for whom?",
+    "experts": 15,
+    "word_budget": 100,
+    "actual_words": [
+      70,
+      96
+    ],
+    "rounds": 3,
+    "submissions": 45,
+    "same_experts_across_rounds": true,
+    "shared_claims": 8,
+    "inferred_assumptions": 1,
+    "position_changes": 8,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 75,
+    "title": "Could citizens govern with an AI adviser?",
+    "experts": 10,
+    "word_budget": 350,
+    "actual_words": [
+      268,
+      330
+    ],
+    "rounds": 3,
+    "submissions": 30,
+    "same_experts_across_rounds": true,
+    "shared_claims": 15,
+    "inferred_assumptions": 2,
+    "position_changes": 6,
+    "saved_synthesis_fresh": true
+  },
+  {
+    "id": 76,
+    "title": "Open science at the edge of danger",
+    "experts": 4,
+    "word_budget": 500,
+    "actual_words": [
+      391,
+      436
+    ],
+    "rounds": 3,
+    "submissions": 12,
+    "same_experts_across_rounds": true,
+    "shared_claims": 12,
+    "inferred_assumptions": 1,
+    "position_changes": 2,
+    "saved_synthesis_fresh": true
+  }
+]
