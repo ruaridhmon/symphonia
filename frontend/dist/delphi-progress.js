@@ -812,7 +812,20 @@ window.addEventListener("focus", () => {
   lastFetch = 0;
   render();
 });
+window.addEventListener("symphonia:draft-start", () => document.getElementById("draft-generation-error")?.remove());
+window.addEventListener("symphonia:draft-error", (event) => {
+  const detail = event.detail;
+  if (!detail || String(detail.formId) !== key || typeof detail.message !== "string") return;
+  document.getElementById("draft-generation-error")?.remove();
+  const panel = document.getElementById("delphi-recorded-progress");
+  if (!panel) return;
+  const alert = el3("p", detail.message, "card");
+  alert.id = "draft-generation-error";
+  alert.setAttribute("role", "alert");
+  panel.before(alert);
+});
 window.addEventListener("symphonia:draft-saved", (event) => {
+  document.getElementById("draft-generation-error")?.remove();
   const detail = event.detail;
   if (!detail || String(detail.formId) !== key || typeof detail.synthesis !== "string") return;
   savedRevision += 1;

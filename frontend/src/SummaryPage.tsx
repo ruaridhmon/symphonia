@@ -1713,6 +1713,7 @@ function SummaryPageContent() {
 		if (modelToUse !== selectedModel) setSelectedModel(modelToUse);
 		let backgroundStarted = false;
 		const baselineVersionCount = synthesisVersions.length;
+		window.dispatchEvent(new CustomEvent('symphonia:draft-start'));
 		setIsGenerating(true);
 		setSynthesisStage('generating');
 		setSynthesisStep(1);
@@ -1793,6 +1794,7 @@ function SummaryPageContent() {
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
 			} catch (error) {
 				const message = draftError(error);
+				window.dispatchEvent(new CustomEvent('symphonia:draft-error', { detail: { formId, message } }));
 				toastError(`Model "${modelToUse}" failed: ${message}`);
 				clearSynthesisRunState();
 				setSynthesisStage('preparing');
