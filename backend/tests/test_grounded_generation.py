@@ -675,4 +675,21 @@ def test_review_refresh_preserves_inference_metadata():
     assert 'inferenceQuestion' not in explicit[0]
     assert 'unconfirmed' not in explicit[0]['groupPrompt']
     with pytest.raises(ValueError):
-        refresh_review_questions([{'questionId': 'custom'}], [])
+        refresh_review_questions(REVIEW_QUESTIONS + [{'questionId': 'custom'}], [])
+
+
+
+def test_opening_preserves_unanswered_free_text_review(client, admin_headers, participant_headers, monkeypatch):
+    url, rid = opening_fixture(client, admin_headers, participant_headers)
+    review_id = empty_review(rid)
+    questions = ["What is the role of humans in future research?"]
+    with TestingSessionLocal() as db:
+        db.get(RoundModel, review_id).questions = questions
+        db.commit()
+    call, _ = provider(monkeypatch, opening_output())
+    got = client.post(url, headers=admin_headers, json={})
+    assert got.status_code == 200, got.text
+    call.assert_called_once()
+    with TestingSessionLocal() as db:
+        assert db.get(RoundModel, review_id).questions == questions
+        assert db.get(RoundModel, review_id).is_active is False

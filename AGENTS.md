@@ -374,3 +374,5 @@ Any build pulses for this repo should read this file first. Key rules:
 
 
 - **2026-10-07 empty review regeneration:** Opening generation may refresh canonical claim-review questionnaires only while every later round has no responses, archived responses, drafts, public participant sessions, comments, follow-ups or synthesis versions. Preserve configured scales and active round state; update unanswered question claims atomically with the opening version. Recheck review setup/progress after the single model request. Participant draft/submission and setup writes share a short form-row lock with the save. The maintained canvas refreshes review metadata immediately after saving (delphi-progress workflow-30). Focused generation/reasoning/final/continuity tests: 59 pass. Verify consultation 77 live after deployment.
+
+- Empty later free-text rounds (including consultation 77 Round 2) have no frozen claim IDs; retain their questions exactly and allow opening regeneration. Mixed claim-review/custom questionnaires remain protected. The same progress checks apply to all review formats.
