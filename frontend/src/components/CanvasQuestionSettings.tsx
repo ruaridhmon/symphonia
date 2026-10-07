@@ -25,7 +25,8 @@ export default function CanvasQuestionSettings({question:q,index,onChange,onClos
    <label className="fc-setting-field">Section heading<input value={q.sectionTitle??''} placeholder="Group related questions" onChange={e=>patch({sectionTitle:e.target.value||null})}/></label>
    {(type==='text'||type==='textarea')&&isSurveyQuestion(q)?<label className="fc-setting-field">Answer placeholder<input value={q.placeholder??''} placeholder="Write your response here" onChange={e=>patch({placeholder:e.target.value||null})}/></label>:null}
    <label className="fc-setting-toggle"><span>Ask for evidence, reservations and confidence</span><input type="checkbox" checked={!isSurveyQuestion(q)} onChange={e=>patch({requireEvidence:e.target.checked,requireCounterarguments:e.target.checked,requireConfidence:e.target.checked})}/></label>
-   <div className="fc-sheet-order"><button type="button" disabled={first} onClick={()=>onMove(-1)}>Move up</button><button type="button" disabled={last} onClick={()=>onMove(1)}>Move down</button><button type="button" disabled={only} onClick={onRemove}>Remove question</button></div>
+   <div className="fc-sheet-order"><button type="button" disabled={first} onClick={()=>onMove(-1)}>Move up</button><button type="button" disabled={last} onClick={()=>onMove(1)}>Move down</button></div>
   </details>
+  <button type="button" className="fc-delete" onClick={onRemove}>Delete question</button>
  </CanvasSheet>;
 }
