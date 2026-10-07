@@ -12,14 +12,14 @@ export function groupFinalClaims<T extends NarrativeClaim>(claims:T[],threshold=
  }
  return [{id:'consensus',label:'Consensus',claims:consensus},{id:'disagreement',label:'Disagreement',claims:disagreement}] as const;
 }
-export function groupedFinalMarkdown(title:string,claims:NarrativeClaim[],threshold:number,view:'text'|'table',questions:string[]=[]){
+export function groupedFinalMarkdown(title:string,claims:NarrativeClaim[],threshold:number,view:'text'|'table',questions:string[]=[],sections?:{id:string;paragraphs:{text:string;claim_ids:string[]}[]}[]){
  const limit=normalizeConsensusThreshold(threshold);
  const lines=[`# ${title}`,...questions.map(q=>`\n${q}`),`\nConsensus threshold: ${limit}% agreeing or disagreeing, out of all recorded final positions. Unable to judge and missing ratings count in the denominator. This is a display grouping, not a study finding. Inferred claims remain unconfirmed.\n`];
  const escapeCell=(value:string)=>value.replace(/\|/g,'\\|').replace(/\r?\n/g,' ');
  for(const group of groupFinalClaims(claims,limit)){
   lines.push(`## ${group.label}\n`);
   if(!group.claims.length){lines.push(group.id==='consensus'?'No claims meet this threshold.':'All reviewed claims meet this threshold.');continue;}
-  if(view==='text')lines.push(...finalNarrative(group.claims,limit));
+  if(view==='text')lines.push(...(sections?sections.find(s=>s.id===group.id)?.paragraphs.map(p=>p.text)||[]:finalNarrative(group.claims,limit)));
   else{
    lines.push('| Claim | Agree | Disagree | Unable to judge | Not recorded | Other positions |','| --- | --- | --- | --- | --- | --- |');
    for(const claim of group.claims){const counts=finalPositionCounts(claim);lines.push(`| ${escapeCell(claim.text)}${claim.origin==='inferred'?' (Inferred · unconfirmed)':''} | ${finalPercent(counts.agree,counts.total)} | ${finalPercent(counts.disagree,counts.total)} | ${finalPercent(counts.unsure,counts.total)} | ${finalPercent(counts.missing,counts.total)} | ${finalPercent(counts.other,counts.total)} |`);}

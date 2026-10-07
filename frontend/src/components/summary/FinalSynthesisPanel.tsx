@@ -2,13 +2,14 @@ import * as React from 'react';
 import {createPortal} from 'react-dom';
 import {groupFinalClaims,groupedFinalMarkdown,finalPercent,normalizeConsensusThreshold} from '../../utils/finalGrouping';
 import {finalPositionCounts} from '../../utils/finalNarrative';
-import {finalNarrative} from '../../utils/finalNarrative';
+
 import {api, getApiErrorDetail} from '../../api/client';
 import type {ReasoningGraph} from '../../types/synthesis';
 import {renderReasoningFlow,clearReasoningFlow} from '../../utils/reasoningFlow';
 type Recorded={expert:string;response_id:number;position:string;confidence:string;justification:string;original_answers?:Record<string,unknown>;before?:Recorded|null;position_changed?:boolean|null;confidence_changed?:boolean|null};
-type Account={revision:string;title:string;stage:number;markdown:string;saved_at?:string;completed?:boolean;reasoning_graph?:ReasoningGraph|null;round_two_count:number;round_three_count:number;unrated_claims?:{id:string;text:string;origin:string}[];claims:{id:string;text:string;origin:string;inference_question?:string;positions:{label:string;count:number}[];confidence:{label:string;count:number}[];changes:number;matched:number;final_responses:Recorded[];round_two:Recorded[]}[]};
-type Result={preview:Account;saved:Account|null;stale:boolean;collection_open:boolean};
+type ModelNarrative={revision:string;threshold:number;model:string;generated_at:string;prompt_version:string;sections:{id:string;paragraphs:{text:string;claim_ids:string[]}[]}[]};
+type Account={generated_narrative?:ModelNarrative;revision:string;title:string;stage:number;markdown:string;saved_at?:string;completed?:boolean;reasoning_graph?:ReasoningGraph|null;round_two_count:number;round_three_count:number;unrated_claims?:{id:string;text:string;origin:string}[];claims:{id:string;text:string;origin:string;inference_question?:string;positions:{label:string;count:number}[];confidence:{label:string;count:number}[];changes:number;matched:number;final_responses:Recorded[];round_two:Recorded[]}[]};
+type Result={narrative?:ModelNarrative|null;preview:Account;saved:Account|null;stale:boolean;collection_open:boolean};
 export interface FinalSynthesisProps{formId:number;questions?:string[];onComplete?:()=>void;}
 export default function FinalSynthesisPanel({formId,questions=[],onComplete}:FinalSynthesisProps){
  const [result,setResult]=React.useState<Result|null>(null),[error,setError]=React.useState(''),[busy,setBusy]=React.useState(false),[showCurrent,setShowCurrent]=React.useState(false);
@@ -25,24 +26,32 @@ export default function FinalSynthesisPanel({formId,questions=[],onComplete}:Fin
  const [actionsHost,setActionsHost]=React.useState<HTMLElement|null>(null);
  React.useEffect(()=>{setActionsHost(surface.current?.closest('.consultation-workspace')?.querySelector<HTMLElement>('.cw-options > div')||null);},[formId]);
  const account=showCurrent?result?.preview:result?.saved || result?.preview;
+ const narrative=[result?.narrative,account?.generated_narrative].find(n=>n?.revision===account?.revision&&n?.threshold===threshold);
  const refresh=React.useCallback(async()=>{setBusy(true);setError('');try{setResult(await api.get<Result>(`/forms/${formId}/final_synthesis`));}catch(e){setError(getApiErrorDetail(e) || 'Could not load final synthesis.');}finally{setBusy(false);}},[formId]);
  React.useEffect(()=>{let active=true;setResult(null);setError('');api.get<Result>(`/forms/${formId}/final_synthesis`).then(r=>{if(active)setResult(r);}).catch(e=>{if(active)setError(getApiErrorDetail(e) || 'Could not load final synthesis.');});return()=>{active=false;};},[formId]);
  React.useEffect(()=>{const root=graph.current;if(root&&account?.reasoning_graph){root.replaceChildren();renderReasoningFlow(root,account.reasoning_graph);}return()=>{if(root)clearReasoningFlow(root);};},[account]);
  async function save(complete=false){
   if(!result)return;
   if(complete&&!window.confirm(`Finish this study with ${result.preview.round_three_count} Round 3 responses? This closes Round 3 submissions and saves the final synthesis.`))return;
-  setBusy(true);setError('');try{const saved=await api.post<Result>(`/forms/${formId}/final_synthesis`,{expected_revision:result.preview.revision,complete});setResult(saved);setShowCurrent(false);if(complete)onComplete?.();}catch(e){setError(getApiErrorDetail(e) || 'Could not save final synthesis.');}finally{setBusy(false);}
+  setBusy(true);setError('');try{const saved=await api.post<Result>(`/forms/${formId}/final_synthesis`,{expected_revision:result.preview.revision,complete,threshold});setResult(saved);setShowCurrent(false);if(complete)onComplete?.();}catch(e){setError(getApiErrorDetail(e) || 'Could not save final synthesis.');}finally{setBusy(false);}
+ }
+ async function generate(){
+  if(!result)return;
+  setBusy(true);setError('');
+  try{setResult(await api.post<Result>(`/forms/${formId}/final_synthesis/generate`,{expected_revision:result.preview.revision,threshold}));setShowCurrent(true);}
+  catch(e){setError(getApiErrorDetail(e)||'Could not generate the draft. The previous draft has been kept.');}
+  finally{setBusy(false);}
  }
  function download(kind:'json'|'md'){
   if(!account)return;
-  const blob=new Blob([kind==='json'?JSON.stringify(account,null,2):groupedFinalMarkdown(account.title,account.claims,threshold,view,questions)],{type:kind==='json'?'application/json':'text/markdown'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`symphonia-final-${formId}.${kind}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const blob=new Blob([kind==='json'?JSON.stringify({...account,generated_narrative:narrative},null,2):groupedFinalMarkdown(account.title,account.claims,threshold,view,questions,narrative?.sections)],{type:kind==='json'?'application/json':'text/markdown'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`symphonia-final-${formId}.${kind}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  }
  const actions=<div className="fs-menu-actions" onClick={event=>{if((event.target as HTMLElement).closest('button')&&actionsHost){const menu=actionsHost.closest<HTMLDetailsElement>('details');if(menu){menu.open=false;menu.querySelector<HTMLElement>('summary')?.focus();}}}}>
   {account&&<div className="fs-menu-meta"><span>{account.completed?'Completed':result?.saved&&!showCurrent?'Saved snapshot':'Preview · not yet saved'}{account.saved_at?` · ${new Date(account.saved_at).toLocaleString()}`:''}</span><span>{account.round_two_count} Round 2 responses · {account.round_three_count} Round 3 responses</span></div>}
   <button type="button" onClick={()=>void refresh()} disabled={busy}>Refresh synthesis</button>
   {account&&<><button type="button" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save()}>Save snapshot</button>
    {result?.collection_open&&<button type="button" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save(true)}>Finish study</button>}
-   <button type="button" onClick={()=>download('md')}>Download synthesis (.md)</button><button type="button" onClick={()=>download('json')}>Download audit (.json)</button></>}
+   <button type="button" disabled={view==='text'&&!narrative} onClick={()=>download('md')}>Download synthesis (.md)</button><button type="button" onClick={()=>download('json')}>Download audit (.json)</button></>}
  </div>;
  return <section ref={surface} className="final-synthesis" aria-label="Final synthesis">
   {actionsHost?createPortal(actions,actionsHost):actions}
@@ -53,14 +62,17 @@ export default function FinalSynthesisPanel({formId,questions=[],onComplete}:Fin
    {result?.stale&&<p role="status" className="cw-notice">Recorded data has changed since this snapshot. <button type="button" onClick={()=>setShowCurrent(v=>!v)}>{showCurrent?'View saved snapshot':'Review current data'}</button></p>}
    {!!questions.length&&<div className="fs-question"><p className="fs-question-label">{questions.length===1?'Question':'Questions'}</p>{questions.map((question,i)=><p key={i} className="fs-question-text">{question}</p>)}</div>}
    <div className="fs-display-controls">
+    <button type="button" className="fs-generate" disabled={busy} onClick={()=>void generate()}>{busy?'Working…':narrative?'Regenerate draft':'Generate draft'}</button>
     <div className="fs-view-switch" role="group" aria-label="Synthesis format"><button type="button" aria-pressed={view==='text'} onClick={()=>changePreferences({view:'text'})}>Text</button><button type="button" aria-pressed={view==='table'} onClick={()=>changePreferences({view:'table'})}>Table</button></div>
     <details ref={thresholdMenu} className="fs-threshold"><summary>Consensus ≥ {threshold}%</summary><div><label htmlFor={`consensus-threshold-${formId}`}>Consensus threshold <span aria-hidden="true">{threshold}%</span></label><input id={`consensus-threshold-${formId}`} type="range" min={60} max={100} step={1} value={threshold} onChange={event=>changePreferences({threshold:normalizeConsensusThreshold(Number(event.target.value))})}/><p>At least this share of all final positions must agree or disagree. Unable to judge and missing ratings stay in the denominator. This changes the grouping only; inferred claims remain unconfirmed.</p></div></details>
    </div>
-   <div className={`fs-grouped fs-${view}`}>{groupFinalClaims(account.claims,threshold).map(group=><section className="fs-group" key={group.id} aria-label={group.label}>
+   {view==='text'&&!narrative&&<p className="fs-note" role="status">{result?.narrative||account.generated_narrative?'Generate a new draft for these judgments and this threshold. The table is ready to read.':'Generate a draft to turn the recorded judgments and expert reasoning into an account.'}</p>}
+   {narrative&&view==='text'&&<p className="fs-note">Draft · review before saving</p>}
+   {(view==='table'||narrative)&&<div className={`fs-grouped fs-${view}`}>{groupFinalClaims(account.claims,threshold).map(group=><section className="fs-group" key={group.id} aria-label={group.label}>
     <h2>{group.label}{' '}<span>{group.claims.length}</span></h2>
     {group.id==='disagreement'&&<p className="fs-group-caption">Below the {threshold}% threshold, including mixed or uncertain judgments.</p>}
-    {!group.claims.length?<p className="fs-empty">{group.id==='consensus'?'No claims meet this threshold.':'All reviewed claims meet this threshold.'}</p>:view==='text'?<div className="fs-prose">{finalNarrative(group.claims,threshold).map((text,i)=><p key={i}>{text}</p>)}</div>:<div className="fs-table-scroll"><table className="fs-table" aria-label={`${group.label} claims`}><thead><tr><th scope="col">Claim</th><th scope="col">Agree</th><th scope="col">Disagree</th><th scope="col">Unable to judge</th><th scope="col">Not recorded</th>{group.claims.some(c=>finalPositionCounts(c).other>0)&&<th scope="col">Other positions</th>}</tr></thead><tbody>{group.claims.map(claim=>{const counts=finalPositionCounts(claim);return <tr key={claim.id}><th scope="row">{claim.text}{claim.origin==='inferred'&&<span className="fs-table-inferred">Inferred · unconfirmed</span>}</th>{([...(['agree','disagree','unsure','missing'] as const),...(group.claims.some(c=>finalPositionCounts(c).other>0)?['other' as const]:[])]).map(position=><td key={position} title={`${counts[position]} of ${counts.total} final positions`}>{finalPercent(counts[position],counts.total)}</td>)}</tr>;})}</tbody></table></div>}
-   </section>)}</div>
+    {!group.claims.length?<p className="fs-empty">{group.id==='consensus'?'No claims meet this threshold.':'All reviewed claims meet this threshold.'}</p>:view==='text'?<div className="fs-prose">{narrative?.sections.find(s=>s.id===group.id)?.paragraphs.map((paragraph,i)=><p key={i}>{paragraph.text}</p>)}</div>:<div className="fs-table-scroll"><table className="fs-table" aria-label={`${group.label} claims`}><thead><tr><th scope="col">Claim</th><th scope="col">Agree</th><th scope="col">Disagree</th><th scope="col">Unable to judge</th><th scope="col">Not recorded</th>{group.claims.some(c=>finalPositionCounts(c).other>0)&&<th scope="col">Other positions</th>}</tr></thead><tbody>{group.claims.map(claim=>{const counts=finalPositionCounts(claim);return <tr key={claim.id}><th scope="row">{claim.text}{claim.origin==='inferred'&&<span className="fs-table-inferred">Inferred · unconfirmed</span>}</th>{([...(['agree','disagree','unsure','missing'] as const),...(group.claims.some(c=>finalPositionCounts(c).other>0)?['other' as const]:[])]).map(position=><td key={position} title={`${counts[position]} of ${counts.total} final positions`}>{finalPercent(counts[position],counts.total)}</td>)}</tr>;})}</tbody></table></div>}
+   </section>)}</div>}
    <details className="fs-audit"><summary>Claims, expert reasoning and changes</summary>
    <div className="fs-claims">{account.claims.map(c=><article key={c.id}>
     <h3>{c.text}</h3>{c.origin==='inferred'&&<p className="fs-inferred">Inferred · unconfirmed. Not directly stated by an expert. {c.inference_question}</p>}

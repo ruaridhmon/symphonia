@@ -1171,3 +1171,11 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
  #root .fc-composer .fc-question-footer button,#root .fc-composer .fc-question-footer select { min-height:40px; }
  #root .fc-sheet .fc-setting-field input,#root .fc-sheet .fc-setting-field textarea { font-size:16px; }
 }
+
+/* A single draft action, with measured views alongside it. */
+#root .fs-display-controls {flex-wrap:wrap;}
+#root .fs-display-controls .fs-generate {border:1px solid var(--border);background:var(--foreground);color:var(--background);border-radius:8px;padding:8px 13px;font-size:12px;white-space:nowrap;}
+#root .fs-display-controls .fs-generate:disabled {opacity:.55;cursor:wait;}
+#root .fs-display-controls .fs-view-switch {margin-left:auto;}
+#root .synthesis-generator .btn-accent {border:0;border-radius:8px;padding:9px 15px;background:var(--foreground);color:var(--background);font-size:13px;white-space:nowrap;}
+#root .synthesis-generator .btn-accent:disabled {opacity:.5;cursor:default;}
