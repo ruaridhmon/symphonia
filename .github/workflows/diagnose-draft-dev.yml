@@ -36,7 +36,7 @@ jobs:
               print('Error at',entry.get('timestamp'),'request status',entry.get('httpRequest',{}).get('status'),'latency',entry.get('httpRequest',{}).get('latency'))
               message=entry.get('textPayload','') or str(entry.get('jsonPayload',{}).get('message',''))
               for line in message.splitlines():
-                  if re.search(r'(Error|Exception|Timeout|Custom synthesis failed|Draft generation)',line):
+                  if re.search(r'(Error|Exception|Timeout|Custom synthesis failed|Draft generation|Grounded draft validation failed)',line):
                       line=re.sub(r'sk-[A-Za-z0-9_-]+','[redacted]',line)
                       print(line[:500])
           PY
