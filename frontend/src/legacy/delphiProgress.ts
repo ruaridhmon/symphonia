@@ -58,7 +58,20 @@ function render() {
 let timer: ReturnType<typeof setTimeout>;
 new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(render, 0); }).observe(document.body, { childList:true, subtree:true, characterData:true });
 window.addEventListener('focus', () => { lastFetch = 0; render(); });
+window.addEventListener('symphonia:draft-start', () => document.getElementById('draft-generation-error')?.remove());
+window.addEventListener('symphonia:draft-error', event => {
+  const detail = (event as CustomEvent).detail;
+  if (!detail || String(detail.formId) !== key || typeof detail.message !== 'string') return;
+  document.getElementById('draft-generation-error')?.remove();
+  const panel = document.getElementById('delphi-recorded-progress');
+  if (!panel) return;
+  const alert = el('p', detail.message, 'card');
+  alert.id = 'draft-generation-error';
+  alert.setAttribute('role', 'alert');
+  panel.before(alert);
+});
 window.addEventListener('symphonia:draft-saved', event => {
+  document.getElementById('draft-generation-error')?.remove();
   const detail = (event as CustomEvent).detail;
   if (!detail || String(detail.formId) !== key || typeof detail.synthesis !== 'string') return;
   savedRevision += 1;
