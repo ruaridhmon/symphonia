@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import pytest
 
 from core import routes
-from core.grounded_generation import final_material, parse_opening
+from core.grounded_generation import final_material, opening_sources, parse_opening
 from core.models import Response, RoundModel, SynthesisVersion
 from tests.conftest import TestingSessionLocal, create_form, submit_response
 from tests.test_final_synthesis import fixture as final_fixture
@@ -368,3 +368,19 @@ def test_flow_source_ids_cannot_cross_responses(source_id):
                 },
             ],
         )
+
+
+def test_source_catalog_retains_question_field_context():
+    sources = opening_sources(
+        [
+            {
+                "answers": {
+                    "q1": "Keep verification.",
+                    "q2": {"text": "Change incentives.", "confidence": "High"},
+                }
+            }
+        ]
+    )
+    assert sources["r1_a1"]["field"] == "q1"
+    assert sources["r1_a2"]["field"] == "q2.text"
+    assert len(sources) == 2
