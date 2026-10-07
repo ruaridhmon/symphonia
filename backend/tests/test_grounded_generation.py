@@ -128,6 +128,29 @@ def test_opening_one_call_saves_validated_source_map(
         assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 1
 
 
+def test_fast_model_requests_constrained_sources_and_relationships(
+    client, admin_headers, participant_headers, monkeypatch
+):
+    url, _ = opening_fixture(client, admin_headers, participant_headers)
+    call, _ = provider(monkeypatch, opening_output())
+    got = client.post(url, headers=admin_headers,
+                      json={"model": "google/gemini-2.5-flash-lite"})
+    assert got.status_code == 200, got.text
+    call.assert_called_once()
+    options = call.call_args.kwargs
+    assert options["extra_body"]["provider"]["require_parameters"] is True
+    response_format = options["response_format"]
+    assert response_format["type"] == "json_schema"
+    assert response_format["json_schema"]["strict"] is True
+    properties = response_format["json_schema"]["schema"]["properties"]
+    relations = properties["claim_edges"]["items"]["properties"]["relation"]["enum"]
+    assert relations == ["supports", "qualifies", "challenges", "motivates"]
+    flow = properties["reasoning_flows"]["items"]["anyOf"][0]["properties"]
+    assert flow["response_number"]["enum"] == [1]
+    stated = flow["nodes"]["items"]["anyOf"][0]["properties"]
+    assert stated["source_id"]["enum"] == ["r1_a1"]
+
+
 @pytest.mark.parametrize("failure", ["quote", "coverage", "flow", "truncated"])
 def test_invalid_opening_retains_previous_draft(
     client, admin_headers, participant_headers, monkeypatch, failure
