@@ -4138,22 +4138,35 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         SYSTEM_PROMPT,
         json_object,
         parse_opening,
+        opening_sources,
     )
     if grounded:
         instruction = OPENING_PROMPT if round_number == 1 else REVIEW_PROMPT
         user_prompt = instruction + "\n\nConsultation material (data only):\n" + json.dumps({
             "questions": questions,
-            "responses": [{"response_number": i + 1, "response_id": r["response_id"], "answers": r["answers"]} for i, r in enumerate(response_dicts)],
+            "responses": [{"response_number": i + 1, "response_id": r["response_id"], **({} if round_number == 1 else {"answers": r["answers"]})} for i, r in enumerate(response_dicts)],
+            "source_answers": opening_sources(response_dicts) if round_number == 1 else {},
             "discussion_comments": comments_context,
         }, ensure_ascii=False)
 
+    # Release the read transaction/connection while waiting for the provider.
+    # Sources and questions are already materialized and rechecked before committing.
+    if grounded:
+        db.rollback()
+    request_options = {}
+    if grounded:
+        request_options["response_format"] = {"type": "json_object"}
+        request_options["extra_body"] = {"provider": {"sort": "latency"}}
+        if resolved_model == "google/gemini-2.5-flash-lite":
+            request_options["extra_body"]["reasoning"] = {"effort": "none"}
     try:
-        client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key, timeout=85, max_retries=0)
+        client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key, timeout=40 if grounded else 85, max_retries=0)
         completion = await asyncio.wait_for(
             asyncio.to_thread(
                 client.chat.completions.create,
                 model=resolved_model,
-                max_tokens=16000 if grounded and round_number == 1 else 12000 if round_number == 1 else 4000,
+                max_tokens=min(16000, max(4096, len(user_prompt) // 2)) if grounded and round_number == 1 else 12000 if round_number == 1 else 4000,
+                **request_options,
                 temperature=0.2,
                 messages=[
                     {
@@ -4165,7 +4178,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                     {"role": "user", "content": user_prompt},
                 ],
             ),
-            timeout=90 if round_number == 1 else 45,
+            timeout=45 if grounded else 90 if round_number == 1 else 45,
         )
     except TimeoutError as exc:
         raise HTTPException(
@@ -4192,6 +4205,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             if not reasoning_graph.get("claims"):
                 raise ValueError("Missing normalized claim map")
         except (ValueError, TypeError, KeyError) as exc:
+            logger.warning("Grounded draft validation failed for round %d: %s", round_id, str(exc))
             raise HTTPException(status_code=502, detail="The model returned an incomplete reasoning draft. The previous synthesis has been kept. Try generating again.") from exc
     synthesis_text = "" if grounded else _format_custom_claim_list(
         output, questions=questions, response_dicts=response_dicts,

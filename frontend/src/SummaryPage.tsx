@@ -1,3 +1,4 @@
+import { draftError } from "./utils/draftError";
 import FinalSynthesisPanel from "./components/summary/FinalSynthesisPanel";
 import * as WorkspaceReact from 'react';
 import { createSummaryRoute } from './utils/summaryRoute';
@@ -1788,7 +1789,7 @@ function SummaryPageContent() {
 			clearSynthesisRunState();
 			setTimeout(() => { setSynthesisStage('preparing'); setSynthesisStep(0); }, 2000);
 			} catch (error) {
-				const message = (error as Error).message || 'Failed to generate synthesis';
+				const message = draftError(error);
 				toastError(`Model "${modelToUse}" failed: ${message}`);
 				clearSynthesisRunState();
 				setSynthesisStage('preparing');
@@ -2222,17 +2223,7 @@ function SummaryPageContent() {
                         onResponseAdded={loadResponses}
                     />
 
-                    {/* Synthesis progress bar */}
-				<div aria-live="polite">
-				<SynthesisProgress
-					stage={synthesisStage}
-					step={synthesisStep}
-					totalSteps={synthesisTotalSteps}
-					visible={isGenerating || synthesisStage === 'complete'}
-					elapsedSeconds={synthesisElapsedSeconds}
-					estimateSeconds={synthesisEstimateSeconds}
-				/>
-				</div>
+                    {isGenerating && <p role="status" aria-live="polite">Writing draft…</p>}
 
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_21rem]">
 					<div className="space-y-4 sm:space-y-6 min-w-0">
