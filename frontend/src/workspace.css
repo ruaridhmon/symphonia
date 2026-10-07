@@ -1150,3 +1150,24 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
  #root .fc-composer .fc-created h1 { font-size:26px; }
 }
 @media(prefers-reduced-motion:reduce){#root .fc-composer .fc-question-actions { transition:none; }}
+
+/* Focused consultation writing: prompts lead, settings stay in a popup. */
+#root .fc-composer .fc-paper { margin:40px auto; }
+#root .fc-composer .fc-question { padding:22px 0 18px; }
+#root .fc-composer .fc-question-footer { display:flex;justify-content:flex-end;min-height:34px;margin:10px 0 0; }
+#root .fc-composer .fc-question-footer .fc-question-actions { gap:6px; }
+#root .fc-composer .fc-question-footer button,#root .fc-composer .fc-question-footer select { font-size:13px;min-height:34px;padding:6px 9px;color:var(--muted-foreground); }
+#root .fc-composer .fc-optional-label { font-size:13px;color:var(--muted-foreground);margin:0 0 8px; }
+#root .fc-composer .fc-add-row { display:flex;align-items:center;gap:20px;margin-top:12px; }
+#root .fc-composer .fc-add-row .fc-add { margin:0; }
+#root .fc-composer .fc-import { font-size:13px;color:var(--muted-foreground);padding:12px 0; }
+#root .fc-composer .fc-import:hover { background:transparent;text-decoration:underline;text-underline-offset:4px; }
+#root .fc-sheet .fc-sheet-context { font-size:14px;line-height:1.6; }
+#root .fc-sheet .fc-setting-field,#root .fc-sheet .fc-setting-toggle { font-size:14px; }
+#root .fc-sheet .fc-setting-field input,#root .fc-sheet .fc-setting-field textarea { font-size:14px; }
+#root .fc-sheet .fc-optional,#root .fc-sheet .fc-setting-field small { font-size:12px; }
+@media(max-width:640px){
+ #root .fc-composer .fc-paper { margin:28px auto; }
+ #root .fc-composer .fc-question-footer button,#root .fc-composer .fc-question-footer select { min-height:40px; }
+ #root .fc-sheet .fc-setting-field input,#root .fc-sheet .fc-setting-field textarea { font-size:16px; }
+}

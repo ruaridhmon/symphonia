@@ -9,3 +9,5 @@ it('preserves exact claims and minority disagreement without turning ratings int
 it('does not manufacture agreement from absent or unsure positions',()=>{
  const prose=finalNarrative([{text:'A claim.',origin:'explicit',positions:[{label:'Agree',count:1},{label:'Not recorded',count:2}]}]).join('');expect(prose).toContain('No clear shared position');expect(prose).not.toContain('broad support');
 });
+
+it('leads supported prose with the substantive claims rather than a generic endorsement',()=>{const claim={text:'Trials should measure workload intensity.',origin:'explicit',positions:[{label:'Agree',count:4},{label:'Disagree',count:1}]};const text=finalNarrative([claim],60)[0];expect(text).toMatch(/^Trials should measure workload intensity\./);expect(text).not.toContain('supported this account');expect(text).toContain('not unanimous');});

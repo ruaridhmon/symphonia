@@ -14,8 +14,7 @@ export function finalNarrative(claims:NarrativeClaim[],thresholdPercent=50):stri
  const explicit=claims.filter(c=>c.origin!=='inferred');
  const shared=explicit.filter(c=>['agreed','supported'].includes(stance(c).kind));
  if(shared.length){
-  const unanimous=shared.every(c=>stance(c).kind==='agreed');
-  let text=`${unanimous?'All recorded final positions supported this account.':'The panel broadly supported this account.'} ${sentences(shared)}`;
+  let text=sentences(shared);
   if(shared.some(c=>stance(c).disagree))text+=' This support was not unanimous; dissent remains in the panel’s final responses.';
   if(shared.some(c=>stance(c).unsure))text+=' Some experts remained unable to judge these claims.';
   if(shared.some(c=>stance(c).missing))text+=' Some final positions were not recorded.';

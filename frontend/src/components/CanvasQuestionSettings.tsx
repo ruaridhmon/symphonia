@@ -9,29 +9,26 @@ export function CanvasSheet({title,onClose,children}:{title:string;onClose:()=>v
  </dialog>;
 }
 
-export function InlineQuestionSettings({question:q,index,onChange,onClose,onMove,first,last}:{question:ConfigurableQuestion;index:number;onChange:(q:ConfigurableQuestion)=>void;onClose:()=>void;onMove:(direction:number)=>void;onRemove:()=>void;first:boolean;last:boolean;only:boolean}){
- const [advanced,setAdvanced]=useState(false);
+export default function CanvasQuestionSettings({question:q,error,errorControl,onChange,onClose,onMove,onRemove,first,last}:{question:ConfigurableQuestion;index:number;error?:string;errorControl?:string;onChange:(q:ConfigurableQuestion)=>void;onClose:()=>void;onMove:(direction:number)=>void;onRemove:()=>void;first:boolean;last:boolean;only:boolean}){
  const [options,setOptions]=useState((q.options??(q.inputType==='likert'?DEFAULT_LIKERT_OPTIONS:[])).join('\n'));
  const patch=(update:Partial<ConfigurableQuestion>)=>onChange({...q,...update});
  const type=q.inputType||'textarea';
- return <div className="fc-inline-settings" aria-label={`Question ${index+1} settings`}>
-
+ const fieldProps=(name:string)=>({'aria-invalid':!!error&&errorControl===name,'aria-describedby':error&&errorControl===name?'fc-options-error':undefined});
+ return <CanvasSheet title="Question options" onClose={onClose}>
+  {error?<p id="fc-options-error" role="alert" className="fc-error">{error}</p>:null}
+  {q.label?<p className="fc-sheet-context">{q.label}</p>:null}
   <label className="fc-setting-toggle"><span>Required answer</span><input type="checkbox" role="switch" checked={!q.optional} onChange={e=>patch({optional:!e.target.checked})}/></label>
-  {(type==='single_select'||type==='multi_select'||type==='likert')&&isSurveyQuestion(q)?<label className="fc-setting-field">{type==='likert'?'Scale labels':'Options'}<textarea aria-label={type==='likert'?'Scale labels':'Options'} rows={5} value={options} placeholder="One choice per line" onChange={e=>{setOptions(e.target.value);patch({options:e.target.value.split('\n').map(s=>s.trim()).filter(Boolean)});}}/><small>One choice per line</small></label>:null}
-  {type==='multi_select'&&isSurveyQuestion(q)?<label className="fc-setting-field">Maximum selections<input aria-label="Maximum selections" type="number" min={1} value={q.maxSelections??''} onChange={e=>patch({maxSelections:e.target.value?Number(e.target.value):null})}/></label>:null}
+  {(type==='single_select'||type==='multi_select'||type==='likert')&&isSurveyQuestion(q)?<label className="fc-setting-field">{type==='likert'?'Scale labels':'Options'}<textarea {...fieldProps(type==='likert'?'Scale labels':'Options')} aria-label={type==='likert'?'Scale labels':'Options'} rows={5} value={options} placeholder="One choice per line" onChange={e=>{setOptions(e.target.value);patch({options:e.target.value.split('\n').map(s=>s.trim()).filter(Boolean)});}}/><small>One choice per line</small></label>:null}
+  {type==='multi_select'&&isSurveyQuestion(q)?<label className="fc-setting-field">Maximum selections<input {...fieldProps('Maximum selections')} aria-label="Maximum selections" type="number" min={1} value={q.maxSelections??''} onChange={e=>patch({maxSelections:e.target.value?Number(e.target.value):null})}/></label>:null}
   {type==='likert'&&isSurveyQuestion(q)?<label className="fc-setting-toggle"><span>Include “Don’t know / unsure”</span><input type="checkbox" role="switch" checked={q.allowUnsure??true} onChange={e=>patch({allowUnsure:e.target.checked})}/></label>:null}
-  {type==='slider'&&isSurveyQuestion(q)?<div className="fc-scale-settings"><label className="fc-setting-field">Minimum<input aria-label="Minimum" type="number" value={q.minValue??0} onChange={e=>patch({minValue:Number(e.target.value)})}/></label><label className="fc-setting-field">Maximum<input aria-label="Maximum" type="number" value={q.maxValue??10} onChange={e=>patch({maxValue:Number(e.target.value)})}/></label><label className="fc-setting-field">Start label<input value={q.minLabel??''} placeholder="Optional" onChange={e=>patch({minLabel:e.target.value||null})}/></label><label className="fc-setting-field">End label<input value={q.maxLabel??''} placeholder="Optional" onChange={e=>patch({maxLabel:e.target.value||null})}/></label></div>:null}
+  {type==='slider'&&isSurveyQuestion(q)?<div className="fc-scale-settings"><label className="fc-setting-field">Minimum<input aria-label="Minimum" type="number" value={q.minValue??0} onChange={e=>patch({minValue:Number(e.target.value)})}/></label><label className="fc-setting-field">Maximum<input {...fieldProps('Maximum')} aria-label="Maximum" type="number" value={q.maxValue??10} onChange={e=>patch({maxValue:Number(e.target.value)})}/></label><label className="fc-setting-field">Start label<input value={q.minLabel??''} placeholder="Optional" onChange={e=>patch({minLabel:e.target.value||null})}/></label><label className="fc-setting-field">End label<input value={q.maxLabel??''} placeholder="Optional" onChange={e=>patch({maxLabel:e.target.value||null})}/></label></div>:null}
   <label className="fc-setting-field">Guidance <span className="fc-optional">Optional</span><input value={q.helpText??''} placeholder="Add a useful hint for participants" onChange={e=>patch({helpText:e.target.value||null})}/></label>
-  <div className="fc-inline-settings-footer"><button type="button" onClick={()=>setAdvanced(true)}>Advanced settings</button><button type="button" onClick={onClose}>Done</button></div>
-  {advanced?<CanvasSheet title={`Question ${index+1} advanced settings`} onClose={()=>setAdvanced(false)}>
-
+  <details className="fc-advanced"><summary>More settings</summary>
    <label className="fc-setting-field">Section heading<input value={q.sectionTitle??''} placeholder="Group related questions" onChange={e=>patch({sectionTitle:e.target.value||null})}/></label>
    {(type==='text'||type==='textarea')&&isSurveyQuestion(q)?<label className="fc-setting-field">Answer placeholder<input value={q.placeholder??''} placeholder="Write your response here" onChange={e=>patch({placeholder:e.target.value||null})}/></label>:null}
    <label className="fc-setting-toggle"><span>Ask for evidence, reservations and confidence</span><input type="checkbox" checked={!isSurveyQuestion(q)} onChange={e=>patch({requireEvidence:e.target.checked,requireCounterarguments:e.target.checked,requireConfidence:e.target.checked})}/></label>
    <div className="fc-sheet-order"><button type="button" disabled={first} onClick={()=>onMove(-1)}>Move up</button><button type="button" disabled={last} onClick={()=>onMove(1)}>Move down</button></div>
-
-  </CanvasSheet>:null}
- </div>;
+  </details>
+  <button type="button" className="fc-delete" onClick={onRemove}>Delete question</button>
+ </CanvasSheet>;
 }
-
-export default InlineQuestionSettings;
