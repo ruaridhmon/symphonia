@@ -579,3 +579,19 @@ def test_quoted_response_ids_keep_attribution_and_inference_context():
     assert graph["flows"][0]["response_number"] == 1
     assert graph["claims"][1]["based_on_responses"] == [1]
     assert graph["response_coverage"][0]["response_number"] == 1
+
+
+def test_native_final_provenance_comes_from_frozen_claim_origin():
+    from core.grounded_generation import validate_final
+    material = {"groups": {"consensus": [{"id": "inferred_claim", "origin": "inferred"},
+                                            {"id": "explicit_claim", "origin": "explicit"}],
+                            "disagreement": []}}
+    output = {"consensus": {"inferred_claim": "The experts expressed reservations about this proposal.",
+                             "explicit_claim": "The experts support retaining oversight."}, "disagreement": {}}
+    paragraphs = validate_final(json.dumps(output), material)[0]["paragraphs"]
+    assert paragraphs[0]["text"].startswith("Inferred · unconfirmed. ")
+    assert paragraphs[1]["text"] == output["consensus"]["explicit_claim"]
+    for bad_text in ("", "90% agree.", "The panel broadly supported this account."):
+        output["consensus"]["inferred_claim"] = bad_text
+        with pytest.raises(ValueError):
+            validate_final(json.dumps(output), material)

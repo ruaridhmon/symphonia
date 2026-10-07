@@ -88,7 +88,7 @@ ratings; do not call those active disputes without evidence.
 Within each section, compose connected, elegant paragraphs that explain the substantive
 positions and the reasons, reservations or unresolved differences that the experts actually
 gave. Group related claims naturally while retaining distinct qualifications and minority
-reasoning. Every reviewed claim must be covered once through claim_ids; do not merely repeat
+reasoning. Every reviewed claim must be covered once under its frozen record ID; do not merely repeat
 claim wording or say 'The panel broadly supported this account'. No generic introductions,
 methodology filler or conclusions. Do not invent reasons when none were supplied. Use opening
 material only as attributed context; it cannot establish final agreement. Do not invent links,
@@ -102,7 +102,7 @@ Return the two section objects in the supplied schema. Every required claim ID m
 a substantive paragraph explaining that claim and its recorded reasoning. Write paragraphs
 that form a connected account within the section; avoid repeating the same reasoning.
 {"consensus":{"claim_1_response":"Substantive paragraph"},"disagreement":{}}.
-claim_ids must use the frozen record IDs, belong to their supplied section, and together cover
+The object keys must use the frozen record IDs, belong to their supplied section, and together cover
 every reviewed claim exactly once. The IDs are audit links; they are not displayed in prose."""
 
 
@@ -336,6 +336,7 @@ def final_material(account, threshold):
 def validate_final(content, material):
     data = json_object(content)
     sections = data.get("sections")
+    native_keyed = sections is None and all(isinstance(data.get(key), dict) for key in ("consensus", "disagreement"))
     if sections is None:
         sections = [{"id": key, "paragraphs": ([{"text": text, "claim_ids": [claim_id]}
                     for claim_id, text in data[key].items()] if isinstance(data[key], dict) else data[key])}
@@ -364,15 +365,18 @@ def validate_final(content, material):
                 or len(set(ids)) != len(ids)
             ):
                 raise ValueError("Wrong or duplicate claim attribution")
-            if any(claims[i]["origin"] == "inferred" for i in ids) and not (
-                re.search(r"\binferred\b", text, re.IGNORECASE)
-                and re.search(r"\bunconfirmed\b", text, re.IGNORECASE)
-            ):
-                raise ValueError("Inference presented without provenance")
             if re.search(r"\d\s*%|\bpercent(?:age)?\b", text, re.IGNORECASE):
                 raise ValueError("Model-generated percentage in prose")
             if text.strip().lower() == "the panel broadly supported this account.":
                 raise ValueError("Generic filler")
+            if any(claims[i]["origin"] == "inferred" for i in ids) and not (
+                re.search(r"\binferred\b", text, re.IGNORECASE)
+                and re.search(r"\bunconfirmed\b", text, re.IGNORECASE)
+            ):
+                if not native_keyed:
+                    raise ValueError("Inference presented without provenance")
+                # Provenance comes from the frozen claim record, never the model.
+                text = "Inferred · unconfirmed. " + text
             seen.update(ids)
             paragraphs.append({"text": text.strip(), "claim_ids": ids})
         if seen != set(claims):
