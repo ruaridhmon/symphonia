@@ -1,3 +1,4 @@
+import {SYNTHESIS_MODELS, DEFAULT_SYNTHESIS_MODEL} from './utils/synthesisModels';
 import { draftError } from "./utils/draftError";
 import FinalSynthesisPanel from "./components/summary/FinalSynthesisPanel";
 import * as WorkspaceReact from 'react';
@@ -149,16 +150,8 @@ class SectionErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const DEV_FAST_MODEL = 'google/gemini-2.5-flash-lite';
-
-const MODELS = [
-	DEV_FAST_MODEL,
-	'openai/gpt-5.6-terra',
-	'anthropic/claude-sonnet-5',
-	'google/gemini-2.5-pro',
-	'deepseek/deepseek-v3.2',
-	'openai/gpt-oss-120b',
-];
+const DEV_FAST_MODEL = DEFAULT_SYNTHESIS_MODEL;
+const MODELS: string[] = SYNTHESIS_MODELS.map(model => model.id);
 const SYNTHESIS_ANALYSTS = 3;
 const SYNTHESIS_RUN_TTL_MS = 30 * 60 * 1000;
 const SUMMARY_COMPOSITION_DEFAULTS = {
@@ -242,7 +235,7 @@ interface StoredSynthesisRun {
 }
 
 function isBlockedModel(model: string): boolean {
-	return model.startsWith('anthropic/');
+	return !MODELS.includes(model);
 }
 
 function isDevelopmentHost(): boolean {
@@ -880,7 +873,7 @@ function SummaryPageContent() {
 		[synthesisVersions, selectedVersionId]
 	);
 	const availableModels = useMemo(
-		() => Array.from(new Set([sanitizeModel(selectedModel), ...MODELS].filter(Boolean))),
+		() => MODELS,
 		[selectedModel]
 	);
 	const synthesisEstimateLabel = useMemo(() => {

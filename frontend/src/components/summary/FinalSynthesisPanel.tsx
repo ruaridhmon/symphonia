@@ -1,3 +1,4 @@
+import {SYNTHESIS_MODELS, DEFAULT_SYNTHESIS_MODEL, normalizeSynthesisModel} from '../../utils/synthesisModels';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
 import {groupFinalClaims,groupedFinalMarkdown,finalPercent,normalizeConsensusThreshold} from '../../utils/finalGrouping';
@@ -14,11 +15,11 @@ export interface FinalSynthesisProps{formId:number;questions?:string[];onComplet
 export default function FinalSynthesisPanel({formId,questions=[],onComplete}:FinalSynthesisProps){
  const [result,setResult]=React.useState<Result|null>(null),[error,setError]=React.useState(''),[busy,setBusy]=React.useState(false),[showCurrent,setShowCurrent]=React.useState(false);
  const preferenceKey=`symphonia:final-view:v1:${formId}`;
- const readPreferences=()=>{try{const value=JSON.parse(localStorage.getItem(preferenceKey)||'null');return {threshold:normalizeConsensusThreshold(value?.threshold??60),view:value?.view==='table'?'table' as const:'text' as const};}catch{return {threshold:60,view:'text' as const};}};
+ const readPreferences=()=>{try{const value=JSON.parse(localStorage.getItem(preferenceKey)||'null');return {model:normalizeSynthesisModel(value?.model),threshold:normalizeConsensusThreshold(value?.threshold??60),view:value?.view==='table'?'table' as const:'text' as const};}catch{return {model:DEFAULT_SYNTHESIS_MODEL as string,threshold:60,view:'text' as const};}};
  const [preferences,setPreferences]=React.useState(readPreferences);
  React.useEffect(()=>{setPreferences(readPreferences());},[formId]);
  const changePreferences=(patch:Partial<typeof preferences>)=>{const value={...preferences,...patch};setPreferences(value);try{localStorage.setItem(preferenceKey,JSON.stringify(value));}catch{}};
- const {threshold,view}=preferences;
+ const {threshold,view,model}=preferences;
  const thresholdMenu=React.useRef<HTMLDetailsElement>(null);
  React.useEffect(()=>{const outside=(event:PointerEvent)=>{const menu=thresholdMenu.current;if(menu?.open&&!menu.contains(event.target as Node))menu.open=false;};const escape=(event:KeyboardEvent)=>{const menu=thresholdMenu.current;if(event.key==='Escape'&&menu?.open){menu.open=false;menu.querySelector('summary')?.focus();}};document.addEventListener('pointerdown',outside);document.addEventListener('keydown',escape);return()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',escape);};},[]);
  const graph=React.useRef<HTMLDivElement>(null);
@@ -38,7 +39,7 @@ export default function FinalSynthesisPanel({formId,questions=[],onComplete}:Fin
  async function generate(){
   if(!result)return;
   setBusy(true);setError('');
-  try{setResult(await api.post<Result>(`/forms/${formId}/final_synthesis/generate`,{expected_revision:result.preview.revision,threshold}));setShowCurrent(true);}
+  try{setResult(await api.post<Result>(`/forms/${formId}/final_synthesis/generate`,{expected_revision:result.preview.revision,threshold,model}));setShowCurrent(true);}
   catch(e){setError(getApiErrorDetail(e)||'Could not generate the draft. The previous draft has been kept.');}
   finally{setBusy(false);}
  }
@@ -48,6 +49,7 @@ export default function FinalSynthesisPanel({formId,questions=[],onComplete}:Fin
  }
  const actions=<div className="fs-menu-actions" onClick={event=>{if((event.target as HTMLElement).closest('button')&&actionsHost){const menu=actionsHost.closest<HTMLDetailsElement>('details');if(menu){menu.open=false;menu.querySelector<HTMLElement>('summary')?.focus();}}}}>
   {account&&<div className="fs-menu-meta"><span>{account.completed?'Completed':result?.saved&&!showCurrent?'Saved snapshot':'Preview · not yet saved'}{account.saved_at?` · ${new Date(account.saved_at).toLocaleString()}`:''}</span><span>{account.round_two_count} Round 2 responses · {account.round_three_count} Round 3 responses</span></div>}
+  <label className="synthesis-field"><span>Model</span><select aria-label="Final draft model" value={model} onChange={event=>changePreferences({model:event.target.value})} disabled={busy}>{SYNTHESIS_MODELS.map(choice=><option key={choice.id} value={choice.id}>{choice.label}</option>)}</select></label>
   <button type="button" onClick={()=>void refresh()} disabled={busy}>Refresh synthesis</button>
   {account&&<><button type="button" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save()}>Save snapshot</button>
    {result?.collection_open&&<button type="button" disabled={busy || !!(result?.stale&&!showCurrent)} onClick={()=>void save(true)}>Finish study</button>}

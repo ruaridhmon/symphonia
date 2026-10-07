@@ -3,7 +3,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {parse} from '@babel/parser';
-const code=readFileSync(new URL('../dist/assets/SummaryPage-workspace-v50.js',import.meta.url),'utf8');
+const code=readFileSync(new URL('../dist/assets/SummaryPage-workspace-v51.js',import.meta.url),'utf8');
 function find(node,predicate){if(!node||typeof node!=='object')return; if(predicate(node))return node;for(const value of Object.values(node)){for(const child of Array.isArray(value)?value:[value]){const found=find(child,predicate);if(found)return found;}}}
 const generate=find(parse(code,{sourceType:'module'}),n=>n.type==='FunctionDeclaration'&&n.id?.name==='Xe');
 test('starts model request immediately without waiting for version history; blocks repeat clicks',()=>{
@@ -52,4 +52,15 @@ test('a saved draft refreshes the maintained claim view immediately',async()=>{
  dom.window.dispatchEvent(new dom.window.CustomEvent('symphonia:draft-start'));
  assert.equal(dom.window.document.querySelector('[role=alert]'),null);
  dom.window.close();
+});
+
+
+test('four current models preserve Claude and reject stale stored model IDs', async()=>{
+ const {SYNTHESIS_MODELS,normalizeSynthesisModel}=await import('../dist/synthesis-models.js');
+ assert.equal(SYNTHESIS_MODELS.length,4);
+ assert.equal(new Set(SYNTHESIS_MODELS.map(m=>m.id)).size,4);
+ for(const model of SYNTHESIS_MODELS)assert.equal(normalizeSynthesisModel(model.id),model.id);
+ assert.equal(normalizeSynthesisModel('openai/gpt-4o'),SYNTHESIS_MODELS[0].id);
+ assert.equal(normalizeSynthesisModel('google/gemini-2.5-flash-lite'),SYNTHESIS_MODELS[0].id);
+ assert.equal(normalizeSynthesisModel('anthropic/claude-opus-5.5'),'anthropic/claude-opus-5.5');
 });

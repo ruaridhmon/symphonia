@@ -1484,7 +1484,7 @@ def _resolve_synthesis_model(db: Session, payload_model: str | None = None) -> s
     if os.getenv("K_SERVICE", "").strip() == "symphonia-dev":
         return os.getenv(
             "DEV_SYNTHESIS_MODEL",
-            "google/gemini-2.5-flash-lite",
+            "google/gemini-3.8-flash",
         ).strip()
     db_setting = db.query(Setting).filter(Setting.key == "synthesis_model").first()
     if db_setting and db_setting.value:
@@ -4082,6 +4082,12 @@ def _format_custom_claim_list(
     return formatted if any(sections.get(heading) for heading in section_order) else markdown.strip()
 
 
+CURATED_SYNTHESIS_MODELS = {
+    "google/gemini-3.8-flash", "openai/gpt-6.1-sol",
+    "anthropic/claude-opus-5.5", "openai/gpt-6-astra",
+}
+
+
 def _grounded_provider_options(model: str) -> dict[str, Any]:
     options = {
         "response_format": {"type": "json_object"},
@@ -4089,17 +4095,25 @@ def _grounded_provider_options(model: str) -> dict[str, Any]:
     }
     if model == "google/gemini-2.5-flash-lite":
         options["extra_body"]["reasoning"] = {"effort": "none"}
+    elif model in CURATED_SYNTHESIS_MODELS:
+        options["extra_body"]["reasoning"] = {"effort": "low"}
+        options["extra_body"]["provider"]["require_parameters"] = True
     return options
 
 
 async def _complete_grounded_draft(api_key: str, options: dict[str, Any]):
+    # Flagships can take longer; keep the same single-request cancellation protection.
+    deadline = DRAFT_REQUEST_TIMEOUT_SECONDS * (2 if options.get("model") in CURATED_SYNTHESIS_MODELS else 1)
+    # These OpenAI models do not accept temperature; do not require an unsupported parameter.
+    if str(options.get("model", "")).startswith("openai/gpt-6"):
+        options = {key: value for key, value in options.items() if key != "temperature"}
     # Shared cancellation and connection cleanup for opening, review and final drafts.
     async with AsyncOpenAI(
         base_url="https://openrouter.ai/api/v1", api_key=api_key,
-        timeout=Timeout(40, connect=5, write=10, pool=5), max_retries=0,
+        timeout=Timeout(max(0.01, deadline - 5), connect=5, write=10, pool=5), max_retries=0,
     ) as client:
         return await asyncio.wait_for(
-            client.chat.completions.create(**options), timeout=DRAFT_REQUEST_TIMEOUT_SECONDS,
+            client.chat.completions.create(**options), timeout=deadline,
         )
 
 
@@ -4201,7 +4215,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     request_options = {}
     if grounded:
         request_options = _grounded_provider_options(resolved_model)
-        if resolved_model == "google/gemini-2.5-flash-lite":
+        if resolved_model == "google/gemini-2.5-flash-lite" or resolved_model in CURATED_SYNTHESIS_MODELS:
             if round_number == 1:
                 request_options["response_format"] = opening_response_format(response_dicts)
                 request_options["extra_body"]["provider"]["require_parameters"] = True

@@ -20,7 +20,32 @@ await build({entryPoints:['src/components/summary/ManualResponseSheet.tsx'],outf
  await build({entryPoints:['src/components/summary/FinalSynthesisPanel.tsx'],outfile:'dist/final-synthesis.js',bundle:true,format:'esm',target:'es2022',minify:true,jsx:'automatic',loader:{'.css':'empty'},define:{'process.env.NODE_ENV':'"production"'},plugins:[{name:'host',setup(b){b.onResolve({filter:/^\/assets\//},a=>({path:a.path,external:true}));b.onResolve({filter:/^(react|react\/jsx-runtime|react-dom)$/},a=>({path:a.path,namespace:'host'}));b.onResolve({filter:/api\/client$/},()=>({path:'api',namespace:'host'}));b.onLoad({filter:/.*/,namespace:'host'},a=>({contents:shim[a.path],loader:'js'}));}}]});
  for(const [entry,name] of [['src/utils/responseWorkspace.ts','response-workspace'],['src/utils/consultationWorkspace.ts','consultation-workspace'],['src/utils/delphiRoundTwo.ts','claim-review'],['src/legacy/delphiProgress.ts','delphi-progress'],['src/legacy/productUI.ts','product-ui'],['src/legacy/delphiDemo.ts','delphi-demo']])buildSync({entryPoints:[entry],outfile:`dist/${name}.js`,bundle:true,format:'esm',target:'es2022',loader:{'.css':'empty'}});
  await build({entryPoints:['src/components/summary/AISynthesisPanel.tsx'],outfile:'dist/grounded-generation.js',bundle:true,format:'esm',target:'es2022',minify:true,jsx:'automatic',define:{'process.env.NODE_ENV':'"production"'},plugins:[{name:'host',setup(b){b.onResolve({filter:/^\/assets\//},a=>({path:a.path,external:true}));b.onResolve({filter:/^(react|react\/jsx-runtime)$/},a=>({path:a.path,namespace:'host'}));b.onLoad({filter:/.*/,namespace:'host'},a=>({contents:shim[a.path],loader:'js'}));}}]});
+ await build({entryPoints:['src/utils/synthesisModels.ts'],outfile:'dist/synthesis-models.js',bundle:true,format:'esm',target:'es2022'});
+ await build({entryPoints:['src/AdminSettings.tsx'],outfile:'dist/assets/AdminSettings-workspace-v1.js',bundle:true,format:'esm',target:'es2022',minify:true,jsx:'automatic',define:{'process.env.NODE_ENV':'"production"','import.meta.env':'{}'},plugins:[{name:'settings-host',setup(b){
+   b.onResolve({filter:/^\/assets\//},a=>({path:a.path,external:true}));
+   b.onResolve({filter:/layouts\/Container$/},()=>({path:'container',namespace:'host'}));
+   b.onResolve({filter:/\/components$/},()=>({path:'components',namespace:'host'}));
+   b.onResolve({filter:/hooks\/useDocumentTitle$/},()=>({path:'title',namespace:'host'}));
+   b.onResolve({filter:/^(react|react\/jsx-runtime)$/},a=>({path:a.path,namespace:'host'}));
+   b.onResolve({filter:/api\/client$/},()=>({path:'api',namespace:'host'}));
+   b.onResolve({filter:/AuthContext$/},()=>({path:'auth',namespace:'host'}));
+   b.onLoad({filter:/.*/,namespace:'host'},a=>({contents:a.path==='container'?'export {C as default} from "/assets/Container-iJHOlK7N.js";':a.path==='components'?'export {L as LoadingButton} from "/assets/LoadingButton-BY3_YyQC.js";export {B as BackLink} from "/assets/BackLink-DhQy02Z6.js";':a.path==='title'?'export {u as useDocumentTitle} from "/assets/useDocumentTitle-CGW9c1LF.js";':a.path==='auth'?'export {a as useAuth} from "/assets/index-HJquNmhn.js";':a.path==='react'?manualShim.react:shim[a.path],loader:'js'}));
+ }}]});
  let code=fs.readFileSync('dist/assets/SummaryPage-workspace-v9.js','utf8');
+ const modelTree=parse(code,{sourceType:'module'}).program.body;
+ const modelEdits=[];
+ for(const statement of modelTree){
+   if(statement.type==='VariableDeclaration')for(const decl of statement.declarations){
+     if(decl.id.name==='os')modelEdits.push({start:decl.init.start,end:decl.init.end,text:'SYNTHESIS_MODELS.map(model=>model.id)'});
+     if(decl.id.name==='ct')modelEdits.push({start:decl.init.start,end:decl.init.end,text:'Object.fromEntries(SYNTHESIS_MODELS.map(model=>[model.id,model.label]))'});
+     if(decl.id.name==='kn')modelEdits.push({start:decl.init.start,end:decl.init.end,text:'Object.fromEntries(SYNTHESIS_MODELS.map(model=>[model.id,model.id]))'});
+   }
+   if(statement.type==='FunctionDeclaration'&&statement.id.name==='Dn')modelEdits.push({start:statement.start,end:statement.end,text:'function Dn(model){return !os.includes(model);}'});
+ }
+ if(modelEdits.length!==4)throw Error('Unsupported maintained model catalog');
+ for(const edit of modelEdits.sort((a,b)=>b.start-a.start))code=code.slice(0,edit.start)+edit.text+code.slice(edit.end);
+ code=code.replace('!s||Dn()?os[0]:s','!s||Dn(s)?os[0]:s');
+
  const generator=parse(code,{sourceType:'module'}).program.body.filter(n=>n.type==='FunctionDeclaration'&&code.slice(n.start,n.end).includes('Thorough analysis'));
  if(generator.length!==1)throw Error('Unsupported maintained generator shape');
  const node=generator[0];
@@ -44,13 +69,16 @@ await build({entryPoints:['src/components/summary/ManualResponseSheet.tsx'],outf
  code=code.replace('e.jsx(Xr,{stage:K,step:ae,totalSteps:Te,visible:ge||K==="complete",elapsedSeconds:$e,estimateSeconds:he})','ge?e.jsx("p",{role:"status",children:"Writing draft…"}):null');
  const errorModule=buildSync({entryPoints:['src/utils/draftError.ts'],bundle:true,format:'esm',write:false}).outputFiles[0].text;
  fs.writeFileSync('dist/draft-error.js',errorModule);
+ code='import {SYNTHESIS_MODELS} from "/synthesis-models.js?v=1";'+code;
  code='import {draftError} from "/draft-error.js?v=1";'+code;
- code='import GroundedSynthesisGenerator from "/grounded-generation.js?v=1";'+code;
+ code='import GroundedSynthesisGenerator from "/grounded-generation.js?v=2";'+code;
  const host='const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet);';
  if(!code.includes(host))throw Error('Unsupported maintained summary shape');
- code='import FinalSynthesisPanel from "/final-synthesis.js?v=24";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/manual-response-sheet.js?v=2','/manual-response-sheet.js?v=5').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=27').replace('/response-workspace.js?v=4','/response-workspace.js?v=5');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v50.js',code);
+ code='import FinalSynthesisPanel from "/final-synthesis.js?v=25";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/manual-response-sheet.js?v=2','/manual-response-sheet.js?v=5').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=27').replace('/response-workspace.js?v=4','/response-workspace.js?v=5');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v51.js',code);
  fs.copyFileSync('src/legacy/delphiRoundSetup.js','dist/delphi-round-two-ui.js');fs.copyFileSync('src/workspace.css','dist/workspace.css');fs.copyFileSync('src/reasoning-flow.css','dist/reasoning-flow.css');
- let html=fs.readFileSync('dist/index.html','utf8').replace(/\/assets\/SummaryPage-workspace-v(?:9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49)\.js/,'/assets/SummaryPage-workspace-v50.js').replace(/\/workspace\.css\?v=\d+/,'/workspace.css?v=48').replace(/\/minimal-dashboard\.js\?v=\d+/,'/minimal-dashboard.js?v=14');
+ let html=fs.readFileSync('dist/index.html','utf8').replace(/\/assets\/SummaryPage-workspace-v(?:9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50)\.js/,'/assets/SummaryPage-workspace-v51.js').replace(/\/workspace\.css\?v=\d+/,'/workspace.css?v=48').replace(/\/minimal-dashboard\.js\?v=\d+/,'/minimal-dashboard.js?v=14');
  for(const name of ['delphi-progress','product-ui','delphi-demo','delphi-round-two-ui'])html=html.replace(new RegExp(`/${name}\\.js\\?v=[^"']+`,'g'),`/${name}.js?v=${name==='delphi-round-two-ui'?'workflow-4':name==='delphi-progress'?'workflow-30':name==='product-ui'?'workflow-29':'workflow-27'}`);
+ html=html.replace('"/assets/AdminSettings-CGsTm0hx.js":"/assets/AdminSettings-workspace-v1.js",','');
+ html=html.replace('"imports":{','"imports":{"/assets/AdminSettings-CGsTm0hx.js":"/assets/AdminSettings-workspace-v1.js",');
  fs.writeFileSync('dist/index.html',html);
 })().catch(e=>{console.error(e);process.exitCode=1;});
