@@ -145,10 +145,9 @@ def test_fast_model_requests_constrained_sources_and_relationships(
     properties = response_format["json_schema"]["schema"]["properties"]
     relations = properties["claim_edges"]["items"]["properties"]["relation"]["enum"]
     assert relations == ["supports", "qualifies", "challenges", "motivates"]
-    flow = properties["reasoning_flows"]["items"]["anyOf"][0]["properties"]
-    assert flow["response_number"]["enum"] == ["1"]
-    stated = flow["nodes"]["items"]["anyOf"][0]["properties"]
-    assert stated["source_id"]["enum"] == ["r1_a1"]
+    group = properties["reasoning_flows"]["properties"]["response_1"]
+    node = group["items"]["properties"]["nodes"]["items"]["properties"]
+    assert node["source_id"]["enum"] == ["r1_a1", ""]
 
 
 @pytest.mark.parametrize("failure", ["quote", "coverage", "flow", "truncated"])
@@ -409,6 +408,22 @@ def test_quoted_response_ids_keep_attribution_and_inference_context():
     assert graph["flows"][0]["response_number"] == 1
     assert graph["claims"][1]["based_on_responses"] == [1]
     assert graph["response_coverage"][0]["response_number"] == 1
+
+
+def test_response_argument_groups_resolve_only_their_own_sources():
+    output = opening_output()
+    flow = output["reasoning_flows"][0]
+    flow.pop("response_number")
+    flow["nodes"][0]["source_id"] = "r1_a1"
+    output["reasoning_flows"] = {"response_1": [flow], "response_2": []}
+    output["response_coverage"].append({"response_number": "2", "status": "no_substantive_claim", "reason": "Off topic"})
+    responses = [{"response_id": 91, "answers": {"q1": SOURCE}},
+                 {"response_id": 92, "answers": {"q1": "Off-topic answer."}}]
+    graph = parse_opening(json.dumps(output), responses)
+    assert graph["flows"][0]["response_number"] == 1
+    flow["nodes"][0]["source_id"] = "r2_a1"
+    with pytest.raises(ValueError, match="another response"):
+        parse_opening(json.dumps(output), responses)
 
 
 @pytest.mark.parametrize("source_id", ["r9_a1", "r2_a1"])
