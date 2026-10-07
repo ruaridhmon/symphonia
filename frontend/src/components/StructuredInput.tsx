@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import DictationField from './DictationField';
+import { useState, useEffect, useCallback, useRef, type ReactElement } from 'react';
 import { ChevronDown, ChevronRight, Plus, X, Lightbulb, Scale, Shield, BookOpen, Users } from 'lucide-react';
 import type { StructuredResponse } from '../types/structured-input';
 import { emptyStructuredResponse, autoSaveKey } from '../types/structured-input';
@@ -22,6 +23,7 @@ interface StructuredInputProps {
   showCounterarguments?: boolean;
   /** Whether to use localStorage autosave/restore */
   persistDraft?: boolean;
+  dictation?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -69,6 +71,7 @@ export default function StructuredInput({
   showConfidence = true,
   showCounterarguments = true,
   persistDraft = true,
+  dictation = false,
 }: StructuredInputProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [newCitation, setNewCitation] = useState('');
@@ -118,6 +121,8 @@ export default function StructuredInput({
   function update(patch: Partial<StructuredResponse>) {
     onChange({ ...value, ...patch });
   }
+
+  const spokenField=(field:ReactElement,key:'position'|'evidence'|'counterarguments'|'confidenceJustification')=>dictation?<DictationField disabled={readOnly} onTranscript={text=>update({[key]:text})}>{field}</DictationField>:field;
 
   function addCitation() {
     const trimmed = newCitation.trim();
@@ -250,7 +255,7 @@ export default function StructuredInput({
     <div style={styles.container}>
       {/* ── Position (required) ── */}
       <Section icon={<Lightbulb size={14} />} label={primaryLabel} required>
-        <textarea
+        {spokenField(<textarea
           ref={autoResize}
           rows={2}
           placeholder={primaryPlaceholder}
@@ -258,13 +263,13 @@ export default function StructuredInput({
           value={value.position}
           onChange={e => update({ position: e.target.value })}
           onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-        />
+        />, 'position')}
       </Section>
 
       {/* ── Evidence ── */}
       {showEvidence && (
         <Section icon={<BookOpen size={14} />} label="Evidence & Reasoning">
-          <textarea
+          {spokenField(<textarea
             ref={autoResize}
             rows={3}
             placeholder="What data, research, or experience supports your position? Include references where possible…"
@@ -272,7 +277,7 @@ export default function StructuredInput({
             value={value.evidence}
             onChange={e => update({ evidence: e.target.value })}
             onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-          />
+          />, 'evidence')}
         </Section>
       )}
 
@@ -281,7 +286,7 @@ export default function StructuredInput({
           {/* ── Counterarguments ── */}
           {showCounterarguments && (
             <Section icon={<Shield size={14} />} label="Counterarguments">
-              <textarea
+              {spokenField(<textarea
                 ref={autoResize}
                 rows={2}
                 placeholder="What are the strongest arguments against your position?"
@@ -289,7 +294,7 @@ export default function StructuredInput({
                 value={value.counterarguments}
                 onChange={e => update({ counterarguments: e.target.value })}
                 onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-              />
+              />, 'counterarguments')}
             </Section>
           )}
 
@@ -323,7 +328,7 @@ export default function StructuredInput({
                   <span style={{ ...styles.confidenceBadgeLabel, color: conf.color }}>{conf.label}</span>
                 </div>
               </div>
-              <textarea
+              {spokenField(<textarea
                 ref={autoResize}
                 rows={1}
                 placeholder="Why this confidence level? What would change your mind?"
@@ -332,7 +337,7 @@ export default function StructuredInput({
                 value={value.confidenceJustification}
                 onChange={e => update({ confidenceJustification: e.target.value })}
                 onInput={e => autoResize(e.target as HTMLTextAreaElement)}
-              />
+              />, 'confidenceJustification')}
             </Section>
           )}
 
