@@ -1,0 +1,42 @@
+name: Diagnose dev draft generation
+on:
+  push:
+    branches: [develop]
+    paths: [.github/workflows/diagnose-draft-dev.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SYMPHONIA_DEV }}'
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Read service settings and error diagnostics without source data
+        run: |
+          gcloud run services describe symphonia-dev --project=symphonia-dev-488613 --region=europe-west2 --format=json > /tmp/service.json
+          gcloud logging read 'resource.type="cloud_run_revision" AND resource.labels.service_name="symphonia-dev" AND severity>=ERROR' --project=symphonia-dev-488613 --freshness=30m --limit=20 --format=json > /tmp/errors.json
+          python3 - <<'PY'
+          import json,re
+          service=json.load(open('/tmp/service.json'))
+          spec=service['spec']['template']['spec']
+          print('Request timeout:',spec.get('timeoutSeconds'))
+          for container in spec['containers']:
+              print('Image:',container.get('image'))
+              for env in container.get('env',[]):
+                  name=env.get('name','')
+                  if name in ('SYNTHESIS_MODE','DEV_SYNTHESIS_MODEL','SYNTHESIS_MODEL'):
+                      print(name,env.get('value','secret reference'))
+                  elif name=='OPENROUTER_API_KEY':
+                      print(name,'configured:',bool(env.get('value') or env.get('valueFrom')))
+          for entry in json.load(open('/tmp/errors.json')):
+              print('Error at',entry.get('timestamp'),'request status',entry.get('httpRequest',{}).get('status'),'latency',entry.get('httpRequest',{}).get('latency'))
+              message=entry.get('textPayload','') or str(entry.get('jsonPayload',{}).get('message',''))
+              for line in message.splitlines():
+                  if re.search(r'(Error|Exception|Timeout|Custom synthesis failed|Draft generation)',line):
+                      line=re.sub(r'sk-[A-Za-z0-9_-]+','[redacted]',line)
+                      print(line[:500])
+          PY
