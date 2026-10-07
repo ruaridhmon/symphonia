@@ -24,6 +24,7 @@ jobs:
           service=json.load(open('/tmp/service.json'))
           spec=service['spec']['template']['spec']
           print('Request timeout:',spec.get('timeoutSeconds'))
+          print('Ready revision:', service.get('status',{}).get('latestReadyRevisionName'))
           for container in spec['containers']:
               print('Image:',container.get('image'))
               for env in container.get('env',[]):

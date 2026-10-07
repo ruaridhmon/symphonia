@@ -286,9 +286,23 @@ function enhanceSynthesisControls(main) {
       menu.append(items);
       nav.append(menu);
       for (const detail of toolbar.querySelectorAll(":scope > details.summary-disclosure")) {
+        const draft = detail.querySelector(".synthesis-generate-footer button");
+        if (draft) {
+          const generate = document.createElement("button");
+          generate.type = "button";
+          generate.textContent = "Generate draft";
+          generate.dataset.draftAction = "true";
+          generate.onclick = () => {
+            menu.open = false;
+            detail.open = false;
+            if (!draft.disabled) draft.click();
+          };
+          items.append(generate);
+        }
         const action = document.createElement("button");
         action.type = "button";
         action.textContent = detail.querySelector("summary span")?.textContent || "Summary settings";
+        if (draft) action.textContent = "Draft settings";
         action.onclick = () => {
           menu.open = false;
           toolbar.querySelectorAll("details.summary-disclosure").forEach((other) => other.open = other === detail ? !detail.open : false);
@@ -350,6 +364,12 @@ function enhanceSynthesisControls(main) {
       }
       menu.hidden = true;
       nav.querySelector(".summary-generate-empty")?.setAttribute("hidden", "");
+      const draft = toolbar.querySelector(".synthesis-generate-footer button");
+      for (const action of group.querySelectorAll("button")) if (action.textContent === "Generate draft" || action.textContent === "Writing draft\u2026") {
+        const disabled = !!draft?.disabled, label = draft?.textContent === "Generating\u2026" ? "Writing draft\u2026" : "Generate draft";
+        if (action.disabled !== disabled) action.disabled = disabled;
+        if (action.textContent !== label) action.textContent = label;
+      }
     }
   } else toolbar.classList.remove("summary-actions-panel");
   if (bound.has(toolbar)) return;

@@ -36,3 +36,15 @@ it('shares summary actions with the consultation menu and removes stale proxies'
  main.querySelector<HTMLButtonElement>('.cw-summary-actions button')!.click();expect(main.querySelector<HTMLDetailsElement>('.cw-options')?.open).toBe(false);expect(main.querySelector<HTMLDetailsElement>('.summary-disclosure')?.open).toBe(true);expect(main.querySelector('input')?.value).toBe('Exact prompt');
  main.querySelector('aside')!.remove();enhanceSynthesisControls(main);expect(main.querySelector('.cw-summary-actions')).toBeNull();
 });
+
+it('starts generation directly from the consultation menu and keeps settings separate',()=>{
+ document.body.innerHTML='<main><section class="consultation-workspace"><details class="cw-options" open><summary>Options</summary><div></div></details></section><nav class="summary-switch"></nav><section id="delphi-recorded-progress"><article class="di-claim"></article></section><aside aria-label="Synthesis controls"><details class="summary-disclosure"><summary><span>Generate synthesis</span></summary><div class="card"><select><option>Selected model</option></select><div class="synthesis-generate-footer"><button>Generate draft</button></div></div></details></aside></main>';
+ const main=document.querySelector('main')!;const draft=main.querySelector<HTMLButtonElement>('.synthesis-generate-footer button')!;let calls=0;draft.onclick=()=>{calls++;draft.disabled=true;draft.textContent='Generating…';};
+ enhanceSynthesisControls(main);
+ const actions=Array.from(main.querySelectorAll<HTMLButtonElement>('.cw-summary-actions button'));
+ const direct=actions.find(button=>button.textContent==='Generate draft')!;direct.click();
+ expect(calls).toBe(1);expect(main.querySelector<HTMLDetailsElement>('.summary-disclosure')!.open).toBe(false);
+ enhanceSynthesisControls(main);expect(direct.disabled).toBe(true);expect(direct.textContent).toBe('Writing draft…');direct.click();expect(calls).toBe(1);
+ draft.disabled=false;draft.textContent='Generate draft';enhanceSynthesisControls(main);
+ expect(direct.disabled).toBe(false);actions.find(button=>button.textContent==='Draft settings')!.click();expect(main.querySelector<HTMLDetailsElement>('.summary-disclosure')!.open).toBe(true);expect(calls).toBe(1);
+});
