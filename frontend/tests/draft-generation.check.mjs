@@ -3,7 +3,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {parse} from '@babel/parser';
-const code=readFileSync(new URL('../dist/assets/SummaryPage-workspace-v45.js',import.meta.url),'utf8');
+const code=readFileSync(new URL('../dist/assets/SummaryPage-workspace-v46.js',import.meta.url),'utf8');
 function find(node,predicate){if(!node||typeof node!=='object')return; if(predicate(node))return node;for(const value of Object.values(node)){for(const child of Array.isArray(value)?value:[value]){const found=find(child,predicate);if(found)return found;}}}
 const generate=find(parse(code,{sourceType:'module'}),n=>n.type==='FunctionDeclaration'&&n.id?.name==='Xe');
 test('starts model request immediately without waiting for version history; blocks repeat clicks',()=>{

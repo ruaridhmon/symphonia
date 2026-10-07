@@ -99,6 +99,8 @@ def test_opening_one_call_saves_validated_source_map(
     assert "confidence_map" not in data["synthesis_json"]
     call.assert_called_once()
     assert constructor.call_args.kwargs["max_retries"] == 0
+    assert call.call_args.kwargs["response_format"] == {"type": "json_object"}
+    assert call.call_args.kwargs["extra_body"]["provider"]["sort"] == "latency"
     assert "Committee" not in call.call_args.kwargs["messages"][1]["content"]
     with TestingSessionLocal() as db:
         assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 1
@@ -333,3 +335,36 @@ def test_opening_generation_cannot_rewrite_claims_after_review_starts(
     )
     assert got.status_code == 409, got.text
     call.assert_not_called()
+
+
+def test_source_ids_attach_exact_answers_without_model_copying():
+    output = opening_output()
+    output["normalized_claims"][0]["sources"] = [
+        {"source_id": "r1_a1", "stance": "support"}
+    ]
+    node = output["reasoning_flows"][0]["nodes"][0]
+    node.pop("quote")
+    node["source_id"] = "r1_a1"
+    graph = parse_opening(
+        json.dumps(output), [{"response_id": 91, "answers": {"q1": SOURCE}}]
+    )
+    assert graph["claims"][0]["sources"][0]["quote"] == SOURCE
+    assert graph["flows"][0]["nodes"][0]["quote"] == SOURCE
+
+
+@pytest.mark.parametrize("source_id", ["r9_a1", "r2_a1"])
+def test_flow_source_ids_cannot_cross_responses(source_id):
+    output = opening_output()
+    node = output["reasoning_flows"][0]["nodes"][0]
+    node["source_id"] = source_id
+    with pytest.raises((KeyError, ValueError)):
+        parse_opening(
+            json.dumps(output),
+            [
+                {"response_id": 91, "answers": {"q1": SOURCE}},
+                {
+                    "response_id": 92,
+                    "answers": {"q1": "A different answer from another expert."},
+                },
+            ],
+        )
