@@ -27,7 +27,7 @@ await build({entryPoints:['src/components/summary/ManualResponseSheet.tsx'],outf
  code=code.slice(0,node.start)+`function ${node.id.name}(props){return o.createElement(GroundedSynthesisGenerator,props);}`+code.slice(node.end);
  const oldRequest='const V=Le.length>0?"question_summaries":g,Y=await Pr(n,r.id,{model:x,strategy:V,n_analysts:ws,mode:"human_only",prompt:V==="question_summaries"?$:V==="custom"?localStorage.getItem("symphonia-custom-synthesis-prompt:"+location.pathname)||"":void 0})';
  if(!code.includes(oldRequest))throw Error('Unsupported maintained generation request');
- code=code.replace(oldRequest,'const V="grounded",Y=await Pr(n,r.id,{model:x,strategy:V,mode:"human_only"})');
+ code=code.replace(oldRequest,'const V="grounded",Y=await Pr(n,r.id,{model:x,strategy:V,mode:"human_only"});if(typeof window!=="undefined"&&typeof Y.synthesis==="string")window.dispatchEvent(new CustomEvent("symphonia:draft-saved",{detail:{formId:n,roundId:r.id,synthesis:Y.synthesis,synthesis_json:Y.synthesis_json}}))');
  if(!code.includes('function ss(s){return typeof window'))throw Error('Unsupported maintained model selector');
  code=code.replace('function ss(s){return typeof window','function ss(s,explicit=!1){return !explicit&&typeof window');
  code=code.replace('async function Xe(){const r=J,x=ss(ie);','async function Xe(){const r=J,x=ss(ie,!0);');
@@ -48,9 +48,9 @@ await build({entryPoints:['src/components/summary/ManualResponseSheet.tsx'],outf
  code='import GroundedSynthesisGenerator from "/grounded-generation.js?v=1";'+code;
  const host='const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet);';
  if(!code.includes(host))throw Error('Unsupported maintained summary shape');
- code='import FinalSynthesisPanel from "/final-synthesis.js?v=24";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/manual-response-sheet.js?v=2','/manual-response-sheet.js?v=5').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=27').replace('/response-workspace.js?v=4','/response-workspace.js?v=5');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v48.js',code);
+ code='import FinalSynthesisPanel from "/final-synthesis.js?v=24";'+code.replace(host,'const ConsultationWorkspace=createConsultationWorkspace(o,ManualResponseSheet,FinalSynthesisPanel);').replace('/manual-response-sheet.js?v=2','/manual-response-sheet.js?v=5').replace('/consultation-workspace.js?v=2','/consultation-workspace.js?v=27').replace('/response-workspace.js?v=4','/response-workspace.js?v=5');parse(code,{sourceType:'module'});fs.writeFileSync('dist/assets/SummaryPage-workspace-v49.js',code);
  fs.copyFileSync('src/legacy/delphiRoundSetup.js','dist/delphi-round-two-ui.js');fs.copyFileSync('src/workspace.css','dist/workspace.css');fs.copyFileSync('src/reasoning-flow.css','dist/reasoning-flow.css');
- let html=fs.readFileSync('dist/index.html','utf8').replace(/\/assets\/SummaryPage-workspace-v(?:9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47)\.js/,'/assets/SummaryPage-workspace-v48.js').replace(/\/workspace\.css\?v=\d+/,'/workspace.css?v=48').replace(/\/minimal-dashboard\.js\?v=\d+/,'/minimal-dashboard.js?v=14');
- for(const name of ['delphi-progress','product-ui','delphi-demo','delphi-round-two-ui'])html=html.replace(new RegExp(`/${name}\\.js\\?v=[^"']+`,'g'),`/${name}.js?v=${name==='delphi-round-two-ui'?'workflow-4':name==='product-ui'?'workflow-28':'workflow-27'}`);
+ let html=fs.readFileSync('dist/index.html','utf8').replace(/\/assets\/SummaryPage-workspace-v(?:9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48)\.js/,'/assets/SummaryPage-workspace-v49.js').replace(/\/workspace\.css\?v=\d+/,'/workspace.css?v=48').replace(/\/minimal-dashboard\.js\?v=\d+/,'/minimal-dashboard.js?v=14');
+ for(const name of ['delphi-progress','product-ui','delphi-demo','delphi-round-two-ui'])html=html.replace(new RegExp(`/${name}\\.js\\?v=[^"']+`,'g'),`/${name}.js?v=${name==='delphi-round-two-ui'?'workflow-4':name==='product-ui'||name==='delphi-progress'?'workflow-28':'workflow-27'}`);
  fs.writeFileSync('dist/index.html',html);
 })().catch(e=>{console.error(e);process.exitCode=1;});

@@ -1762,6 +1762,9 @@ function SummaryPageContent() {
 			}
 
 			// ── Sync path: immediate result (mock mode) ──
+			window.dispatchEvent(new CustomEvent('symphonia:draft-saved', { detail: {
+				formId, roundId: targetRound.id, synthesis: data.synthesis, synthesis_json: data.synthesis_json,
+			} }));
 			setSynthesisStage('synthesising');
 			setSynthesisStep(2);
 
