@@ -4504,7 +4504,7 @@ async def generate_synthesis_for_round(
         new_version = SynthesisVersion(
             round_id=round_id,
             version=next_version,
-          ynthesis=synthesis_text,
+            synthesis=synthesis_text,
             synthesis_json=synthesis_json_data,
             model_used=payload.model,
             strategy=strategy,
@@ -11507,7 +11507,8 @@ def remove_participant(
         db,
         user=user,
         action="remove_participant",
-        resource_type="form        resource_id=form_id,
+        resource_type="form",
+        resource_id=form_id,
         detail={"removed_user_id": target_user_id},
         request=request,
     )
