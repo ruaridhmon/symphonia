@@ -1824,7 +1824,7 @@ def submit_response(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    form = db.query(FormModel).filter(FormModel.id == form_id).with_for_update().first()
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
     _ensure_user_consent_for_form(db, form, user)
@@ -1984,7 +1984,7 @@ def save_draft(
     user: User = Depends(get_current_user),
 ):
     """Upsert a draft for the active round. Called by the frontend auto-save."""
-    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    form = db.query(FormModel).filter(FormModel.id == form_id).with_for_update().first()
     if not form:
         raise HTTPException(status_code=404, detail="Form not found")
     _ensure_user_consent_for_form(db, form, user)
@@ -4103,6 +4103,27 @@ async def _complete_grounded_draft(api_key: str, options: dict[str, Any]):
         )
 
 
+def _unanswered_review_snapshot(db: Session, form_id: int) -> list[tuple[int, list]]:
+    """Only untouched, standard claim questionnaires may follow a new opening."""
+    from copy import deepcopy
+    from .review_setup import refresh_review_questions
+    rounds = db.query(RoundModel).filter(
+        RoundModel.form_id == form_id, RoundModel.round_number >= 2
+    ).order_by(RoundModel.id).all()
+    ids = [r.id for r in rounds]
+    if not ids:
+        return []
+    for model in (Response, ArchivedResponse, Draft, SynthesisComment, FollowUp, PublicFormSession, SynthesisVersion):
+        if db.query(model).filter(model.round_id.in_(ids)).first():
+            raise HTTPException(status_code=409, detail='Opening claims are fixed once review starts. Generate the final synthesis from the recorded reviews instead.')
+    for r in rounds:
+        try:
+            refresh_review_questions(r.questions or [], [])
+        except ValueError:
+            raise HTTPException(status_code=409, detail='This review has custom questions. Keep its opening claims or create a separate consultation.')
+    return [(r.id, deepcopy(r.questions)) for r in rounds]
+
+
 async def _run_custom_synthesis(
     *,
     form_id: int,
@@ -4118,6 +4139,7 @@ async def _run_custom_synthesis(
     db: Session,
     grounded: bool = False,
 ) -> dict[str, Any]:
+    review_snapshot = _unanswered_review_snapshot(db, form_id) if grounded and round_number == 1 else None
     resolved_model = _resolve_synthesis_model(db, model)
     prompt = custom_prompt.strip()
 
@@ -4286,6 +4308,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
 
     if reasoning_graph is not None or grounded:
         from .reasoning import response_revision
+        db.query(FormModel).filter_by(id=form_id).with_for_update().first()
         db.expire_all()
         latest = db.query(Response).filter_by(form_id=form_id, round_id=round_id).all()
         if response_revision([{'response_id':r.id,'answers':r.answers} for r in latest]) != (reasoning_graph['source_revision'] if reasoning_graph is not None else response_revision(response_dicts)):
@@ -4295,6 +4318,15 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         latest_questions = round_obj.questions or db.get(FormModel, form_id).questions or []
         if list(latest_questions) != questions:
             raise HTTPException(status_code=409, detail='Questions changed while the draft was generated. The previous draft has been kept.')
+        if review_snapshot is not None:
+            if _unanswered_review_snapshot(db, form_id) != review_snapshot:
+                raise HTTPException(status_code=409, detail='Review questions changed while the draft was generated. The previous draft has been kept.')
+            from .review_setup import refresh_review_questions
+            for review_id, review_questions in review_snapshot:
+                review = db.get(RoundModel, review_id)
+                review.questions = refresh_review_questions(review_questions, reasoning_graph['claims'])
+                if review.synthesis == round_obj.synthesis:
+                    review.synthesis = synthesis_text
         # Serialize generation commits and allocate a version from the current record.
         db.query(RoundModel).filter_by(id=round_id).with_for_update().first()
         latest_version = db.query(SynthesisVersion.version).filter_by(round_id=round_id).order_by(SynthesisVersion.version.desc()).first()
@@ -4460,8 +4492,6 @@ async def generate_synthesis_for_round(
     round_number = round_obj.round_number
 
     if strategy == "grounded":
-        if round_number == 1 and db.query(RoundModel).filter(RoundModel.form_id == form_id, RoundModel.round_number >= 2).first():
-            raise HTTPException(status_code=409, detail='Opening claims are fixed once review starts. Generate the final synthesis from the recorded reviews instead.')
         return await _run_custom_synthesis(
             form_id=form_id, round_id=round_id, round_number=round_number,
             questions=list(questions), response_dicts=response_dicts,
@@ -7527,6 +7557,7 @@ async def start_public_form_session(
     if not form:
         raise HTTPException(status_code=404, detail="Public form not found")
 
+    db.query(FormModel).filter_by(id=form.id).with_for_update().first()
     active_round = _get_active_round_for_form(db, form.id)
     if not active_round:
         raise HTTPException(
@@ -7701,6 +7732,7 @@ def continue_public_form_session(request: Request, session_token: str, db: Sessi
     """Issue a round-bound link for the same participant; keep the old link immutable."""
     previous = _get_public_session(db, session_token)
     form = db.get(FormModel, previous.form_id)
+    db.query(FormModel).filter_by(id=previous.form_id).with_for_update().first()
     active = _get_active_round_for_form(db, previous.form_id)
     old_round = db.get(RoundModel, previous.round_id)
     if not form or not form.allow_public_responses:
@@ -7745,7 +7777,7 @@ def save_public_form_draft(
             status_code=400, detail="This response has already been submitted."
         )
 
-    form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
+    form = db.query(FormModel).filter(FormModel.id == session.form_id).with_for_update().first()
     active_round = _get_active_round_for_form(db, session.form_id)
     if not form or not active_round or active_round.id != session.round_id:
         raise HTTPException(
@@ -7819,7 +7851,7 @@ def submit_public_form_response(
             status_code=400, detail="This response has already been submitted."
         )
 
-    form = db.query(FormModel).filter(FormModel.id == session.form_id).first()
+    form = db.query(FormModel).filter(FormModel.id == session.form_id).with_for_update().first()
     active_round = _get_active_round_for_form(db, session.form_id)
     if not form or not active_round or active_round.id != session.round_id:
         raise HTTPException(
@@ -8405,6 +8437,7 @@ def open_next_round(
     db: Session = Depends(get_db),
     user: User = Depends(require_platform_admin),
 ):
+    db.query(FormModel).filter_by(id=form_id).with_for_update().first()
     current = (
         db.query(RoundModel)
         .filter(RoundModel.form_id == form_id, RoundModel.is_active)
@@ -8477,6 +8510,7 @@ def update_round_setup(
     db: Session = Depends(get_db),
     user: User = Depends(require_platform_admin),
 ):
+    db.query(FormModel).filter_by(id=form_id).with_for_update().first()
     round_obj = (
         db.query(RoundModel)
         .filter(RoundModel.id == round_id, RoundModel.form_id == form_id)
@@ -8835,7 +8869,7 @@ def add_admin_response(
     user: User = Depends(require_platform_admin),
 ):
     """Record a separate offline respondent, never replace an existing answer."""
-    form = db.query(FormModel).filter(FormModel.id == form_id).first()
+    form = db.query(FormModel).filter(FormModel.id == form_id).with_for_update().first()
     round_obj = db.query(RoundModel).filter(
         RoundModel.id == round_id, RoundModel.form_id == form_id
     ).first()

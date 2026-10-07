@@ -80,7 +80,8 @@ window.addEventListener('symphonia:draft-saved', event => {
     round.synthesis = detail.synthesis;
     round.synthesis_json = detail.synthesis_json;
     revision += 1;
-  } else lastFetch = 0;
+  }
+  lastFetch = 0; // Refresh unanswered review questionnaires after opening regeneration.
   render();
 });
 render();
