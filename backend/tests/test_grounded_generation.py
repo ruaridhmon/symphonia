@@ -149,9 +149,19 @@ def test_fast_model_requests_constrained_sources_and_relationships(
     stated = flow["nodes"]["items"]["properties"]
     assert stated["source_id"]["enum"] == ["r1_a1", ""]
     assert "anyOf" not in json.dumps(properties)
+    from jsonschema import validate
+    from jsonschema.exceptions import ValidationError
+    claim_id_schema = properties["normalized_claims"]["items"]["properties"]["id"]
+    validate("claim_1", claim_id_schema)
+    for invalid in ["1", "n1", "c1", "claim_", "claim_1 trailing text"]:
+        with pytest.raises(ValidationError):
+            validate(invalid, claim_id_schema)
+    for endpoint in ["from", "to"]:
+        with pytest.raises(ValidationError):
+            validate("n1", properties["claim_edges"]["items"]["properties"][endpoint])
 
 
-@pytest.mark.parametrize("failure", ["quote", "coverage", "flow", "truncated"])
+@pytest.mark.parametrize("failure", ["quote", "coverage", "flow", "truncated", "claim_id"])
 def test_invalid_opening_retains_previous_draft(
     client, admin_headers, participant_headers, monkeypatch, failure
 ):
@@ -161,6 +171,8 @@ def test_invalid_opening_retains_previous_draft(
         row.synthesis = "Previous approved text"
         db.commit()
     output = opening_output()
+    if failure == "claim_id":
+        output["normalized_claims"][0]["id"] = "1"
     if failure == "quote":
         output["normalized_claims"][0]["sources"][0]["quote"] = (
             "Fabricated source quotation"
