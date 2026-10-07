@@ -238,10 +238,15 @@ def test_final_one_call_snapshot_and_context_preservation(
     response_format = call.call_args.kwargs['response_format']
     assert response_format['type'] == 'json_schema'
     from jsonschema import validate
-    native = {section['id']: section['paragraphs'] for section in final_output(account)['sections']}
+    native = {section['id']: {claim_id: paragraph['text'] for paragraph in section['paragraphs'] for claim_id in paragraph['claim_ids']} for section in final_output(account)['sections']}
     validate(native, response_format['json_schema']['schema'])
     from core.grounded_generation import validate_final
     assert validate_final(json.dumps(native), final_material(account, 60)) == draft['sections']
+    from jsonschema.exceptions import ValidationError
+    section = next(value for value in native.values() if value)
+    section.pop(next(iter(section)))
+    with pytest.raises(ValidationError):
+        validate(native, response_format['json_schema']['schema'])
     saved = client.post(
         url,
         headers=admin_headers,
