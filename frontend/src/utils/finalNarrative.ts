@@ -1,14 +1,15 @@
 export type NarrativeClaim = {text:string;origin:string;positions:{label:string;count:number}[]};
 const sentences=(items:NarrativeClaim[])=>items.map(c=>c.text+(/[.!?]$/.test(c.text)?'':'.')).join(' ');
-function stance(c:NarrativeClaim){
- let agree=0,disagree=0,unsure=0,missing=0;
- for(const p of c.positions){const label=p.label.trim().toLowerCase();if(/^(strongly )?agree$/.test(label))agree+=p.count;else if(/^(strongly )?disagree$/.test(label))disagree+=p.count;else if(/unable|unsure|don't know|cannot judge/.test(label))unsure+=p.count;else missing+=p.count;}
- const total=agree+disagree+unsure+missing;
- const kind=total===0?'unrated':agree===total?'agreed':disagree===total?'opposed':agree>total/2?'supported':disagree>total/2?'rejected':agree&&disagree?'divided':'uncertain';
- return {kind,agree,disagree,unsure,missing};
+export function finalPositionCounts(c:NarrativeClaim,thresholdPercent=50){
+ let agree=0,disagree=0,unsure=0,missing=0,other=0;
+ for(const p of c.positions){const label=p.label.trim().toLowerCase();if(/^(strongly )?agree$/.test(label))agree+=p.count;else if(/^(strongly )?disagree$/.test(label))disagree+=p.count;else if(/unable|unsure|don't know|cannot judge/.test(label))unsure+=p.count;else if(!label||/^(not recorded|not answered|unanswered|missing)$/.test(label))missing+=p.count;else other+=p.count;}
+ const total=agree+disagree+unsure+missing+other;
+ const kind=total===0?'unrated':agree===total?'agreed':disagree===total?'opposed':agree>total/2&&agree*100>=total*thresholdPercent?'supported':disagree>total/2&&disagree*100>=total*thresholdPercent?'rejected':agree&&disagree?'divided':'uncertain';
+ return {kind,agree,disagree,unsure,missing,other,total};
 }
 /** Organize recorded positions into prose. Claim wording stays verbatim; no policy conclusion is invented. */
-export function finalNarrative(claims:NarrativeClaim[]):string[]{
+export function finalNarrative(claims:NarrativeClaim[],thresholdPercent=50):string[]{
+ const stance=(claim:NarrativeClaim)=>finalPositionCounts(claim,thresholdPercent);
  const paragraphs:string[]=[];
  const explicit=claims.filter(c=>c.origin!=='inferred');
  const shared=explicit.filter(c=>['agreed','supported'].includes(stance(c).kind));

@@ -1079,3 +1079,43 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
  #root .fc-composer .fc-question-actions select { max-width:125px;min-height:40px; }
  #root .fc-composer .fc-delete span { display:none; }
 }
+/* One consultation canvas: mode changes editability, never the reading geometry. */
+#root .fc-composer .fc-title,#root .fc-composer .fc-introduction h1 {font-size:30px;line-height:1.35;letter-spacing:-.035em;margin:0 0 12px;font-weight:550;}
+#root .fc-composer .fc-empty-title {opacity:.75;}
+#root .fc-composer .fc-question-label,#root .fc-composer .fc-question h2 {font-size:17px!important;font-weight:500;line-height:1.7;margin:0;}
+#root .fc-composer .fc-empty-question {color:var(--muted-foreground);font-weight:400;}
+#root .fc-composer .fc-answer {margin-top:14px;}
+#root .fc-composer .fc-question[data-preview=true] h2 {margin:0;}
+#root .fc-composer .fc-introduction>p.fc-empty-intro {display:block;}
+/* Final synthesis shares one threshold and claim partition across both views. */
+#root .fs-display-controls {display:flex;align-items:center;justify-content:space-between;gap:16px;margin:22px 0 26px;}
+#root .fs-view-switch {display:flex;gap:2px;padding:3px;background:var(--muted);border-radius:9px;}
+#root .fs-view-switch button {border:0;background:transparent;color:var(--muted-foreground);padding:7px 13px;border-radius:6px;font-size:12px;}
+#root .fs-view-switch button[aria-pressed=true] {background:var(--background);color:var(--foreground);box-shadow:0 1px 3px #0001;}
+#root .fs-threshold {position:relative;font-size:12px;}
+#root .fs-threshold>summary {cursor:pointer;list-style:none;color:var(--muted-foreground);padding:8px 0;}
+#root .fs-threshold>summary::after {content:'⌄';margin-left:8px;}
+#root .fs-threshold>div {position:absolute;z-index:12;right:0;top:100%;width:300px;max-width:calc(100vw - 48px);background:var(--background);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 12px 40px #0001;}
+#root .fs-threshold label {display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+#root .fs-threshold input {width:100%;margin:18px 0 8px;accent-color:var(--foreground);}
+#root .fs-threshold p {font-size:12px;line-height:1.65;color:var(--muted-foreground);margin:0;}
+#root .fs-group {margin:0 0 30px;}
+#root .fs-group>h2 {display:flex;align-items:center;gap:10px;font-size:15px;font-weight:550;margin:0 0 10px;letter-spacing:-.01em;}
+#root .fs-group>h2>span {font-size:11px;font-weight:400;color:var(--muted-foreground);}
+#root .fs-group-caption,#root .fs-empty {font-size:12px;line-height:1.65;color:var(--muted-foreground);margin:0 0 16px;}
+#root .fs-group .fs-prose {margin:0;}
+#root .fs-group .fs-prose p {margin-bottom:16px;}
+#root .fs-table-scroll {overflow-x:auto;max-width:100%;border:1px solid var(--border);border-radius:10px;}
+#root .fs-table {width:100%;min-width:650px;border-collapse:collapse;font-size:12px;line-height:1.65;background:var(--background);margin:0;}
+#root .fs-table th,#root .fs-table td {padding:12px 14px;border:0;border-bottom:1px solid var(--border);text-align:right;vertical-align:top;}
+#root .fs-table thead th {font-size:11px;font-weight:500;color:var(--muted-foreground);background:var(--muted);white-space:nowrap;}
+#root .fs-table th:first-child {width:58%;min-width:300px;text-align:left;}
+#root .fs-table tbody th {font-size:13px;font-weight:400;color:var(--foreground);}
+#root .fs-table tbody tr:last-child>* {border-bottom:0;}
+#root .fs-table-inferred {display:block;font-size:11px;color:#b0474e;margin-top:5px;}
+@media(max-width:640px){
+ #root .fc-composer .fc-title,#root .fc-composer .fc-introduction h1 {font-size:26px;}
+ #root .fc-composer .fc-question-label,#root .fc-composer .fc-question h2 {font-size:18px!important;}
+ #root .fs-display-controls {gap:8px;margin:18px 0 24px;}
+ #root .fs-threshold>div {width:280px;}
+}
