@@ -41,7 +41,7 @@ it('uses matching groups in text and table, and regroups without changing saved 
  expect(screen.getByRole('table',{name:'Consensus claims'})).toHaveTextContent('A supported claim.');expect(screen.getByRole('table',{name:'Disagreement claims'})).toHaveTextContent('Inferred · unconfirmed');
  fireEvent.click(screen.getByText('Consensus ≥ 60%'));fireEvent.change(screen.getByRole('slider',{name:'Consensus threshold'}),{target:{value:'80'}});
  expect(screen.queryByRole('table',{name:'Consensus claims'})).not.toBeInTheDocument();expect(screen.getByRole('table',{name:'Disagreement claims'})).toHaveTextContent('A supported claim.');
- expect(client.post).not.toHaveBeenCalled();expect(JSON.parse(localStorage.getItem('symphonia:final-view:v1:4')!)).toEqual({threshold:80,view:'table'});
+ expect(client.post).not.toHaveBeenCalled();expect(JSON.parse(localStorage.getItem('symphonia:final-view:v1:4')!)).toEqual({threshold:80,view:'table',model:'google/gemini-3.8-flash'});
  fireEvent.click(screen.getByRole('button',{name:'Text'}));expect(screen.queryByRole('table')).not.toBeInTheDocument();expect(screen.getByRole('status')).toHaveTextContent('Generate a draft');
 });
 
@@ -53,7 +53,7 @@ it('generates model text once, retains table math, and hides prose after thresho
  client.get.mockResolvedValue(result);client.post.mockResolvedValue({...result,narrative});
  render(<FinalSynthesisPanel formId={5}/>);fireEvent.click(await screen.findByRole('button',{name:'Generate draft'}));
  await screen.findByText(narrative.sections[0].paragraphs[0].text);
- expect(client.post).toHaveBeenCalledTimes(1);expect(client.post).toHaveBeenCalledWith('/forms/5/final_synthesis/generate',{expected_revision:'r1',threshold:60});
+ expect(client.post).toHaveBeenCalledTimes(1);expect(client.post).toHaveBeenCalledWith('/forms/5/final_synthesis/generate',{expected_revision:'r1',threshold:60,model:'google/gemini-3.8-flash'});
  fireEvent.click(screen.getByRole('button',{name:'Table'}));expect(screen.getByRole('table',{name:'Consensus claims'})).toHaveTextContent('60%');
  fireEvent.click(screen.getByRole('button',{name:'Text'}));fireEvent.change(screen.getByRole('slider',{name:'Consensus threshold'}),{target:{value:'80'}});
  expect(screen.queryByText(narrative.sections[0].paragraphs[0].text)).not.toBeInTheDocument();expect(screen.getByRole('status')).toHaveTextContent('Generate a new draft');expect(client.post).toHaveBeenCalledTimes(1);
@@ -62,4 +62,18 @@ it('does not display a narrative written for different recorded judgments',async
  const account={revision:'current',title:'Panel',stage:4,markdown:'Audit',round_two_count:2,round_three_count:2,claims:[]};
  client.get.mockResolvedValue({preview:account,saved:null,stale:false,collection_open:false,narrative:{revision:'old',threshold:60,sections:[{id:'consensus',paragraphs:[{text:'Stale model paragraph',claim_ids:[]}]}]}});
  render(<FinalSynthesisPanel formId={6}/>);await screen.findByRole('button',{name:'Generate draft'});expect(screen.queryByText('Stale model paragraph')).not.toBeInTheDocument();
+});
+
+it('keeps exactly four model choices and sends the selected Claude model',async()=>{
+ const account={revision:'r1',title:'Panel',stage:4,markdown:'Audit',round_two_count:2,round_three_count:2,claims:[]};
+ const result={preview:account,saved:null,stale:false,collection_open:false};
+ client.get.mockResolvedValue(result);client.post.mockResolvedValue(result);
+ render(<FinalSynthesisPanel formId={7}/>);
+ await screen.findByRole('button',{name:'Generate draft'});
+ const picker=screen.getByRole('combobox',{name:'Final draft model'});
+ expect(picker.querySelectorAll('option')).toHaveLength(4);
+ fireEvent.change(picker,{target:{value:'anthropic/claude-opus-5.5'}});
+ fireEvent.click(screen.getByRole('button',{name:'Generate draft'}));
+ await waitFor(()=>expect(client.post).toHaveBeenCalledWith('/forms/7/final_synthesis/generate',{expected_revision:'r1',threshold:60,model:'anthropic/claude-opus-5.5'}));
+ expect(JSON.parse(localStorage.getItem('symphonia:final-view:v1:7')!).model).toBe('anthropic/claude-opus-5.5');
 });

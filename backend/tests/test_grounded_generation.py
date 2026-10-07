@@ -693,3 +693,22 @@ def test_opening_preserves_unanswered_free_text_review(client, admin_headers, pa
     with TestingSessionLocal() as db:
         assert db.get(RoundModel, review_id).questions == questions
         assert db.get(RoundModel, review_id).is_active is False
+
+
+@pytest.mark.parametrize('model', sorted(routes.CURATED_SYNTHESIS_MODELS))
+def test_current_models_use_native_sources_and_compatible_parameters(client, admin_headers, participant_headers, monkeypatch, model):
+    url, rid = opening_fixture(client, admin_headers, participant_headers)
+    call, constructor = provider(monkeypatch, opening_output())
+    got = client.post(url, headers=admin_headers, json={'model': model})
+    assert got.status_code == 200, got.text
+    call.assert_called_once()
+    options = call.call_args.kwargs
+    assert options['model'] == model
+    assert options['response_format']['type'] == 'json_schema'
+    assert options['extra_body']['provider']['require_parameters'] is True
+    assert options['extra_body']['reasoning']['effort'] == 'low'
+    if model.startswith('openai/'):
+        assert 'temperature' not in options
+    else:
+        assert options['temperature'] == 0.2
+    assert constructor.effective().call_args.kwargs['timeout'].read == 85

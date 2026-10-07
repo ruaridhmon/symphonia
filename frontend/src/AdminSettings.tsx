@@ -1,3 +1,4 @@
+import {SYNTHESIS_MODELS, DEFAULT_SYNTHESIS_MODEL, normalizeSynthesisModel} from './utils/synthesisModels';
 import { useState, useEffect } from 'react';
 import { Brain, User, Save, Check } from 'lucide-react';
 import { api } from './api/client';
@@ -8,17 +9,8 @@ import { useDocumentTitle } from './hooks/useDocumentTitle';
 
 /* ── Constants ────────────────────────────────────────────────── */
 
-const AVAILABLE_MODELS = [
-  { id: 'openai/gpt-4o', label: 'GPT-4o (OpenAI, best quality)' },
-  { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini (OpenAI, fast)' },
-  { id: 'google/gemini-flash-1.5', label: 'Gemini Flash 1.5 (Google, fast)' },
-  { id: 'google/gemini-pro-1.5', label: 'Gemini Pro 1.5 (Google, high quality)' },
-];
-
-function sanitizeModel(model: string): string {
-  if (model.startsWith('anthropic/')) return 'openai/gpt-4o';
-  return model;
-}
+const AVAILABLE_MODELS = SYNTHESIS_MODELS;
+const sanitizeModel = normalizeSynthesisModel;
 
 /* ── Settings interface ───────────────────────────────────────── */
 
@@ -29,7 +21,7 @@ interface SettingsState {
 }
 
 const DEFAULTS: SettingsState = {
-  synthesis_model: 'openai/gpt-4o',
+  synthesis_model: DEFAULT_SYNTHESIS_MODEL,
   registration_mode: 'open',
   allowed_domains: '',
 };
