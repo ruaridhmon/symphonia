@@ -146,7 +146,7 @@ def test_fast_model_requests_constrained_sources_and_relationships(
     relations = properties["claim_edges"]["items"]["properties"]["relation"]["enum"]
     assert relations == ["supports", "qualifies", "challenges", "motivates"]
     flow = properties["reasoning_flows"]["items"]["anyOf"][0]["properties"]
-    assert flow["response_number"]["enum"] == [1]
+    assert flow["response_number"]["enum"] == ["1"]
     stated = flow["nodes"]["items"]["anyOf"][0]["properties"]
     assert stated["source_id"]["enum"] == ["r1_a1"]
 
@@ -395,6 +395,20 @@ def test_source_ids_attach_exact_answers_without_model_copying():
     )
     assert graph["claims"][0]["sources"][0]["quote"] == SOURCE
     assert graph["flows"][0]["nodes"][0]["quote"] == SOURCE
+
+
+def test_quoted_response_ids_keep_attribution_and_inference_context():
+    output = opening_output()
+    output["reasoning_flows"][0]["response_number"] = "1"
+    output["response_coverage"][0]["response_number"] = "1"
+    output["normalized_claims"].append({
+        "id": "claim_2", "text": "Exceptions may require review.", "origin": "inferred",
+        "sources": [], "based_on_responses": ["1"], "question": "Is review needed?",
+    })
+    graph = parse_opening(json.dumps(output), [{"response_id": 91, "answers": {"q1": SOURCE}}])
+    assert graph["flows"][0]["response_number"] == 1
+    assert graph["claims"][1]["based_on_responses"] == [1]
+    assert graph["response_coverage"][0]["response_number"] == 1
 
 
 @pytest.mark.parametrize("source_id", ["r9_a1", "r2_a1"])
