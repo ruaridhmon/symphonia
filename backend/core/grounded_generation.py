@@ -160,7 +160,7 @@ def opening_response_format(responses):
                     "text": text, "source_id": enum(own_sources + [""]),
                     "question": text, "condition": text})
         flows[f"r{number}"] = obj({
-            "title": text, "nodes": {**array(node), "maxItems": 30}, "edges": array(edge),
+            "title": text, "nodes": array(node), "edges": array(edge),
             "exclusion_reason": text,
         })
     schema = obj({
