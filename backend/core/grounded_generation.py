@@ -98,9 +98,10 @@ Do not report percentages or numerical vote counts in prose; these are provided 
 Distinguish observed judgments from external truth. Inferred claims must be explicitly described
 as inferred and unconfirmed in their paragraph, even when expert ratings meet consensus.
 Unrated opening claims must not be presented as final reviewed findings.
-Return exactly the two section arrays in the supplied schema, empty for an empty group:
-{"consensus":[{"text":"Substantive paragraph",
- "claim_ids":["claim_1_response"]}],"disagreement":[]}.
+Return the two section objects in the supplied schema. Every required claim ID maps to
+a substantive paragraph explaining that claim and its recorded reasoning. Write paragraphs
+that form a connected account within the section; avoid repeating the same reasoning.
+{"consensus":{"claim_1_response":"Substantive paragraph"},"disagreement":{}}.
 claim_ids must use the frozen record IDs, belong to their supplied section, and together cover
 every reviewed claim exactly once. The IDs are audit links; they are not displayed in prose."""
 
@@ -336,7 +337,9 @@ def validate_final(content, material):
     data = json_object(content)
     sections = data.get("sections")
     if sections is None:
-        sections = [{"id": key, "paragraphs": data[key]} for key in ("consensus", "disagreement")]
+        sections = [{"id": key, "paragraphs": ([{"text": text, "claim_ids": [claim_id]}
+                    for claim_id, text in data[key].items()] if isinstance(data[key], dict) else data[key])}
+                    for key in ("consensus", "disagreement")]
     if not isinstance(sections, list) or [s["id"] for s in sections] != [
         "consensus",
         "disagreement",
@@ -387,12 +390,6 @@ def final_response_format(material):
     groups = {}
     for key in ("consensus", "disagreement"):
         ids = [claim["id"] for claim in material["groups"][key]]
-        attribution = {"type": "string", **({"enum": ids} if ids else {})}
-        groups[key] = {"type": "array", "items": obj({
-            "text": {"type": "string"},
-            "claim_ids": {"type": "array", "items": attribution},
-        })}
-        if not ids:
-            groups[key]["maxItems"] = 0
+        groups[key] = obj({claim_id: {"type": "string"} for claim_id in ids})
     return {"type": "json_schema", "json_schema": {
         "name": "final_consultation_draft", "strict": True, "schema": obj(groups)}}
