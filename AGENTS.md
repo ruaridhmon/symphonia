@@ -351,3 +351,5 @@ Any build pulses for this repo should read this file first. Key rules:
 - Repeated live generation exposed an intermittent provider stall after a 5.8-second success. Grounded opening/review generation now uses native AsyncOpenAI with cancellation/connection cleanup and separate 5-second connect/pool limits; provider routing prefers throughput and p90 startup latency rather than median startup alone. Legacy provider paths remain compatible.
 
 - Model selection correction: generation honors an explicitly selected model on dev instead of silently replacing it with the initial fast default. Initial dev settings still prefer the fast model. Maintained Summary v48; regression check exercises both default initialization and explicit selection.
+
+- Live fast-provider outputs exposed cross-response source IDs and unsupported relationship labels. Grounded Flash Lite opening drafts now send a strict JSON Schema with per-response flow variants, source ID enums, and relationship enums; routing requires parameter support. Server attribution/coverage/acyclic validation remains mandatory. Prompt grounded-draft-v3.

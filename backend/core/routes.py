@@ -4140,6 +4140,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         json_object,
         parse_opening,
         opening_sources,
+        opening_response_format,
     )
     if grounded:
         instruction = OPENING_PROMPT if round_number == 1 else REVIEW_PROMPT
@@ -4160,6 +4161,9 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         request_options["extra_body"] = {"provider": {"sort": "throughput", "preferred_max_latency": {"p90": 3}}}
         if resolved_model == "google/gemini-2.5-flash-lite":
             request_options["extra_body"]["reasoning"] = {"effort": "none"}
+            if round_number == 1:
+                request_options["response_format"] = opening_response_format(response_dicts)
+                request_options["extra_body"]["provider"]["require_parameters"] = True
     completion_options = {
         "model": resolved_model,
         "max_tokens": min(16000, max(4096, len(user_prompt) // 2)) if grounded and round_number == 1 else 12000 if round_number == 1 else 4000,
