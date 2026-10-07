@@ -6,13 +6,10 @@
     "explicit": [
       "Research questions should remain accountable to human scientific judgment.",
       "Independent replication should precede reliance on autonomous discoveries.",
-      "Permit autonomous hypothesis generation within a bounded research programme.",
-      "Require a human decision before an AI changes the research programme.",
-      "Fund human-led exploratory science even when automated projects appear more efficient."
+      "Permit autonomous hypothesis generation within a bounded research programme."
     ],
     "inferred": [
-      "Bounded delegation would preserve meaningful human scientific control.",
-      "Efficiency-based funding would otherwise crowd out valuable human-led exploration."
+      "Bounded delegation would preserve meaningful human scientific control."
     ],
     "roles": [
       "Computational biologist",
@@ -22,7 +19,9 @@
     "scenario": "an AI proposes an unexpected biological mechanism and asks to redirect the laboratory",
     "test": "compare independently reproduced results, missed alternatives and the effort required to challenge a proposal",
     "experts": 3,
-    "word_budget": 100
+    "word_budget": 100,
+    "additional_claims": [],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-02",
@@ -47,7 +46,15 @@
     "scenario": "a robotic laboratory keeps optimizing a measurable output while ignoring an anomalous result",
     "test": "test error recovery, operator intervention and whether trainees can diagnose a failure",
     "experts": 5,
-    "word_budget": 500
+    "word_budget": 500,
+    "additional_claims": [
+      "An accountable operator should be able to interrupt a running experiment.",
+      "Automation evaluations should include experiments that produce unexpected results.",
+      "Laboratories should retain a record of discarded hypotheses.",
+      "Procurement should preserve access to experimental logs when a vendor leaves.",
+      "Safety review should be independent of the team rewarded for laboratory throughput."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-03",
@@ -61,8 +68,7 @@
       "Allocate a protected share of funding to social conditions that affect ageing."
     ],
     "inferred": [
-      "Funding healthy years would favour interventions that preserve everyday functioning.",
-      "A technology-led programme could otherwise displace investment in social conditions."
+      "Funding healthy years would favour interventions that preserve everyday functioning."
     ],
     "roles": [
       "Ageing researcher",
@@ -72,7 +78,13 @@
     "scenario": "a proposed intervention promises longer survival but leaves its effects on independence unresolved",
     "test": "compare functioning, burden on carers, accessibility and the distribution of benefits",
     "experts": 8,
-    "word_budget": 200
+    "word_budget": 200,
+    "additional_claims": [
+      "Research priorities should include outcomes reported by older people themselves.",
+      "Public trials should assess the burden of repeated treatment.",
+      "A lifespan target should not be treated as a substitute for a quality-of-life target."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-04",
@@ -85,10 +97,7 @@
       "Concentrate marginal funding on grids until fusion milestones are independently met.",
       "Reserve funding for energy access rather than only national technology leadership."
     ],
-    "inferred": [
-      "Portfolio funding would retain future options without delaying essential grid work.",
-      "A leadership-focused budget could otherwise neglect communities with unreliable supply."
-    ],
+    "inferred": [],
     "roles": [
       "Fusion researcher",
       "Grid engineer",
@@ -97,7 +106,12 @@
     "scenario": "a budget committee must choose between another experimental facility and neglected transmission upgrades",
     "test": "compare delivery milestones, reliability improvements and communities reached by each allocation",
     "experts": 12,
-    "word_budget": 350
+    "word_budget": 350,
+    "additional_claims": [
+      "Funding milestones should distinguish a scientific demonstration from an affordable power system.",
+      "Grid projects should be evaluated for the communities whose reliability improves."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-05",
@@ -122,7 +136,14 @@
     "scenario": "an emergency creates pressure to turn a limited research programme into an operational intervention",
     "test": "test governance boundaries, accountability for unexpected outcomes and whose objections can change the decision",
     "experts": 20,
-    "word_budget": 100
+    "word_budget": 100,
+    "additional_claims": [
+      "No state should gain unilateral authority to deploy a global climate intervention.",
+      "Outdoor experiments should publish their stop conditions before they begin.",
+      "Affected countries should have a route to challenge proposed experiments.",
+      "Research governance should include who would be responsible for terminating a deployment."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-06",
@@ -136,8 +157,7 @@
       "Exclude public subsidies for removals that mainly prolong an avoidable high-emissions activity."
     ],
     "inferred": [
-      "Separate accounting would prevent removal purchases from weakening reduction obligations.",
-      "Some subsidy designs could extend avoidable emissions rather than address residual emissions."
+      "Separate accounting would prevent removal purchases from weakening reduction obligations."
     ],
     "roles": [
       "Carbon-accounting researcher",
@@ -147,7 +167,12 @@
     "scenario": "a firm requests a subsidy for removals while postponing an available emissions reduction",
     "test": "compare additionality, durability, uncertainty and what the buyer would do without the credit",
     "experts": 4,
-    "word_budget": 500
+    "word_budget": 500,
+    "additional_claims": [
+      "Public purchasing should separate verified removal from promises of future removal.",
+      "Communities hosting removal facilities should be able to contest local burdens."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-07",
@@ -172,7 +197,13 @@
     "scenario": "a neighbourhood must decide whether to rebuild after repeated disruption or accept a relocation offer",
     "test": "compare security, affordability, community continuity and the choices available to renters",
     "experts": 6,
-    "word_budget": 200
+    "word_budget": 200,
+    "additional_claims": [
+      "Relocation offers should cover tenants as well as property owners.",
+      "Compensation should account for the loss of community ties.",
+      "Public authorities should state which services they would maintain during a retreat."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-08",
@@ -185,10 +216,7 @@
       "Delay release until affected communities can challenge the proposed safeguards.",
       "Protect the option of coexistence without requiring every resident to welcome reintroduction."
     ],
-    "inferred": [
-      "Compensation and review would make coexistence practically tolerable.",
-      "A demand for universal enthusiasm would prevent feasible coexistence arrangements."
-    ],
+    "inferred": [],
     "roles": [
       "Conservation ecologist",
       "Rural-economy researcher",
@@ -197,7 +225,11 @@
     "scenario": "a reintroduction proposal promises regional benefits while concentrating immediate concerns in a few farms",
     "test": "compare conflict resolution, compensation delays, monitoring and the distribution of local benefits",
     "experts": 10,
-    "word_budget": 350
+    "word_budget": 350,
+    "additional_claims": [
+      "Rewilding agreements should specify who bears losses if wildlife damages livelihoods."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-09",
@@ -222,7 +254,21 @@
     "scenario": "a public fund must choose between a demonstration facility and scaling familiar lower-impact meals",
     "test": "compare credible production pathways, affordability, access and effects on existing producers",
     "experts": 15,
-    "word_budget": 500
+    "word_budget": 500,
+    "additional_claims": [
+      "Public funding should make pilot results available beyond the funded company.",
+      "Food-safety review should be separate from judgments about consumer appeal.",
+      "Scaling plans should disclose energy and water requirements.",
+      "Animal-free production should not be assumed to settle environmental questions.",
+      "Public investment should preserve routes for small food producers.",
+      "Ingredient labelling should identify the production method without implying unproven benefits.",
+      "Production trials should report the cost of maintaining clean facilities.",
+      "Worker transition plans should accompany support for new production systems.",
+      "Procurement trials should include foods that people would choose to eat repeatedly.",
+      "Public contracts should limit dependence on a single proprietary production process.",
+      "Funding should include a comparison with plant-based alternatives."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-10",
@@ -236,8 +282,7 @@
       "Prohibit entertainment uses that deliberately provoke distress to obtain interpretable signals."
     ],
     "inferred": [
-      "Validated interpretations would track animal welfare rather than only human expectations.",
-      "Commercial incentives could reward deliberately distressing communication displays."
+      "Validated interpretations would track animal welfare rather than only human expectations."
     ],
     "roles": [
       "Animal-behaviour researcher",
@@ -247,7 +292,12 @@
     "scenario": "a model produces convincing human-language descriptions of animal sounds but the evaluation is disputed",
     "test": "compare predictions against independently designed behaviour tests and document ambiguous cases",
     "experts": 7,
-    "word_budget": 100
+    "word_budget": 100,
+    "additional_claims": [
+      "Translation systems should distinguish observed animal signals from human interpretations.",
+      "Public demonstrations should disclose when a translation has not been independently tested."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-11",
@@ -261,8 +311,7 @@
       "Prevent replicas from soliciting money or manipulating an emotionally dependent user."
     ],
     "inferred": [
-      "Visible disclosure would prevent users from mistaking a replica for the represented person.",
-      "Emotional dependence could otherwise become a route to commercial manipulation."
+      "Visible disclosure would prevent users from mistaking a replica for the represented person."
     ],
     "roles": [
       "Bereavement researcher",
@@ -272,7 +321,14 @@
     "scenario": "a family wants a comforting replica while relatives disagree about consent and commercial access",
     "test": "compare consent records, boundaries of use, withdrawal options and responses to emotional dependence",
     "experts": 3,
-    "word_budget": 350
+    "word_budget": 350,
+    "additional_claims": [
+      "A person should be able to prohibit a conversational replica during their lifetime.",
+      "A replica should disclose that its replies are generated rather than remembered.",
+      "Surviving relatives should not automatically inherit the right to alter a replica.",
+      "Providers should offer an exit that does not require continued subscription payments."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-12",
@@ -297,7 +353,17 @@
     "scenario": "a voluntary device collected for one purpose later supports a new inference requested by an employer",
     "test": "compare enforceable purpose controls, refusal consequences and deletion of derived information",
     "experts": 9,
-    "word_budget": 200
+    "word_budget": 200,
+    "additional_claims": [
+      "Brain-data permission should be specific to the proposed use.",
+      "Employers should not make neural monitoring a condition of ordinary work.",
+      "A person should be able to withdraw permission without losing unrelated services.",
+      "Derived inferences should be covered by the same protections as raw recordings.",
+      "Access records should show which organisation used a neural recording.",
+      "Public standards should distinguish medical use from workplace surveillance.",
+      "Data collected for rehabilitation should not be reused for advertising."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-13",
@@ -312,7 +378,8 @@
     ],
     "inferred": [
       "Public authorisation would represent the interests of affected future people.",
-      "An editing option could otherwise reduce support for people living with the targeted trait."
+      "An editing option could otherwise reduce support for people living with the targeted trait.",
+      "Long-term follow-up would make harms to later generations observable before broad use."
     ],
     "roles": [
       "Genetics researcher",
@@ -322,7 +389,22 @@
     "scenario": "a technically persuasive proposal reaches a regulator while families disagree about the social meaning of the intervention",
     "test": "compare consent limits, alternatives, public accountability and protection for existing communities",
     "experts": 12,
-    "word_budget": 500
+    "word_budget": 500,
+    "additional_claims": [
+      "A future child cannot provide consent before a heritable intervention.",
+      "Permission for a clinical trial should not automatically permit commercial rollout.",
+      "Alternatives should be assessed for the specific condition under discussion.",
+      "Public debate should distinguish preventing a severe condition from selecting a preferred trait.",
+      "Long-term monitoring should include who would pay for follow-up care.",
+      "Trial oversight should include people living with the condition being discussed.",
+      "Eligibility rules should not imply that existing disabled lives are less valuable.",
+      "Access rules should be settled before a successful intervention is offered commercially.",
+      "An intervention should not be called reversible when its inherited effects cannot be recalled.",
+      "Parents should receive information about uncertainty without pressure to participate.",
+      "Independent review should consider effects on subsequent generations.",
+      "A clinic should not be able to set the public eligibility standard by itself."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-14",
@@ -335,10 +417,7 @@
       "Allow broader tutor autonomy only after independent evaluation in the relevant setting.",
       "Preserve a non-AI route for students who do not benefit from the system."
     ],
-    "inferred": [
-      "Teacher supervision would remain meaningful when tutoring is highly personalised.",
-      "A default digital route could exclude students who need another form of support."
-    ],
+    "inferred": [],
     "roles": [
       "Learning scientist",
       "Teacher educator",
@@ -347,7 +426,9 @@
     "scenario": "a tutoring system improves a chosen metric while teachers worry that students stop asking independent questions",
     "test": "compare learning transfer, agency, relationships and the experience of students who opt out",
     "experts": 5,
-    "word_budget": 100
+    "word_budget": 100,
+    "additional_claims": [],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-15",
@@ -361,8 +442,7 @@
       "Include contract and shift workers in any sharing of the gains."
     ],
     "inferred": [
-      "A protected trial would prevent nominal time reductions from hiding unpaid work.",
-      "A standard schedule could otherwise allocate the gains mainly to office workers."
+      "A protected trial would prevent nominal time reductions from hiding unpaid work."
     ],
     "roles": [
       "Labour economist",
@@ -372,7 +452,13 @@
     "scenario": "office teams want a shorter week while service coverage depends on shifts and contractors",
     "test": "compare total hours, intensity, coverage, retention and who receives the time benefit",
     "experts": 20,
-    "word_budget": 350
+    "word_budget": 350,
+    "additional_claims": [
+      "Pilots should report whether workload is reduced or merely compressed.",
+      "Assessment should include workers whose shifts cannot be shortened easily.",
+      "Pay protection should be explicit rather than assumed in a four-day offer."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-16",
@@ -397,7 +483,16 @@
     "scenario": "a consumer receives a persuasive risk score and an institution requests access before making an unrelated decision",
     "test": "compare population transfer, uncertainty communication and the real freedom to refuse disclosure",
     "experts": 8,
-    "word_budget": 500
+    "word_budget": 500,
+    "additional_claims": [
+      "A genetic forecast should describe which population informed its interpretation.",
+      "A person should be able to decline a forecast while retaining ordinary care.",
+      "Counselling should distinguish increased risk from a predicted diagnosis.",
+      "Results should not be shared with employers without a separate decision.",
+      "Screening programmes should state how an uncertain result changes clinical action.",
+      "An updated interpretation should not silently replace the original report."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-17",
@@ -410,10 +505,7 @@
       "Retain shared oversight for decisions with irreversible consequences beyond the settlement.",
       "Preserve protected areas even when expansion would be more convenient without them."
     ],
-    "inferred": [
-      "Local democratic control would remain workable under dependence on essential infrastructure.",
-      "Convenience-driven expansion could foreclose future scientific investigation."
-    ],
+    "inferred": [],
     "roles": [
       "Space-governance scholar",
       "Life-support engineer",
@@ -422,7 +514,11 @@
     "scenario": "residents want to expand while scientists dispute whether the proposed area should remain undisturbed",
     "test": "compare infrastructure accountability, contested decisions and preservation of future research options",
     "experts": 6,
-    "word_budget": 200
+    "word_budget": 200,
+    "additional_claims": [
+      "Commercial operators should not have sole authority over essential life-support access."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-18",
@@ -436,8 +532,7 @@
       "Protect public-transport funding rather than assuming private fleets will replace it."
     ],
     "inferred": [
-      "Deployment conditions would remain enforceable when the fleet operator becomes indispensable.",
-      "Private fleet growth could otherwise weaken the political support for public transport."
+      "Deployment conditions would remain enforceable when the fleet operator becomes indispensable."
     ],
     "roles": [
       "Transport planner",
@@ -447,7 +542,12 @@
     "scenario": "a fleet offers convenient journeys in profitable areas while requesting broad access to public road space",
     "test": "compare accessibility, street use, underserved areas and dependency on one operator",
     "experts": 15,
-    "word_budget": 100
+    "word_budget": 100,
+    "additional_claims": [
+      "Operators should publish how passengers can obtain help during a stalled journey.",
+      "Access evaluation should include passengers who cannot use a smartphone."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-19",
@@ -472,7 +572,18 @@
     "scenario": "an assembly receives a beautifully concise AI briefing that participants suspect has omitted a difficult alternative",
     "test": "compare traceability, omissions, time for challenge and the survival of minority reports",
     "experts": 10,
-    "word_budget": 350
+    "word_budget": 350,
+    "additional_claims": [
+      "Citizens should be able to inspect the sources behind an AI briefing.",
+      "Briefing systems should display credible alternatives rather than one recommended answer.",
+      "A facilitator should be able to correct a misleading briefing during deliberation.",
+      "The public record should separate citizen recommendations from AI-written suggestions.",
+      "Participants should be able to deliberate without using the adviser.",
+      "System evaluation should include groups with different levels of digital literacy.",
+      "AI suppliers should disclose conflicts of interest relevant to a policy question.",
+      "A citizens assembly should retain authority over its final recommendation."
+    ],
+    "simulation_version": "source-varied-v2"
   },
   {
     "key": "interesting-20",
@@ -486,8 +597,7 @@
       "Protect legitimate researchers in low-resource settings from blanket exclusion."
     ],
     "inferred": [
-      "Access tiers would reduce the identified risk without simply moving it elsewhere.",
-      "Blanket restrictions could otherwise exclude legitimate work without addressing the risk."
+      "Access tiers would reduce the identified risk without simply moving it elsewhere."
     ],
     "roles": [
       "Biosafety-governance researcher",
@@ -497,6 +607,15 @@
     "scenario": "a useful tool raises contested governance concerns and an access restriction would exclude a small research group",
     "test": "compare proportionality, meaningful appeals and whether the restriction addresses the identified capability",
     "experts": 4,
-    "word_budget": 500
+    "word_budget": 500,
+    "additional_claims": [
+      "Restrictions should distinguish a research result from instructions that enable harmful application.",
+      "A review should state the concrete harm that withholding information is meant to prevent.",
+      "Researchers should have a route to appeal a restriction.",
+      "Restricted results should be reviewed again when circumstances change.",
+      "Access decisions should not depend solely on institutional prestige.",
+      "A public explanation should identify what can still be shared safely."
+    ],
+    "simulation_version": "source-varied-v2"
   }
 ]

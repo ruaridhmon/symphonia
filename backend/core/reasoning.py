@@ -15,7 +15,9 @@ REASONING_PROMPT = '''For round 1, return a single JSON object, with no markdown
 The claims_text must contain only explicitly supported claims, never the inferred assumptions.
 Also return "normalized_claims" and "claim_edges" in the same JSON object.
 normalized_claims is the shared, semantically deduplicated claim set, including minority and
-unique claims. Do not merge statements whose scope, conditions or negation differ. Each item:
+unique claims. Let the number of claims follow the actual responses; there is no fixed
+count or quota per expert. Do not pad sparse responses or compress rich responses to fit
+a standard-sized list. Do not merge statements whose scope, conditions or negation differ. Each item:
 {"id":"claim_1", "text":"Exact normalized claim wording", "origin":"explicit",
  "sources":[{"response_number":1,"quote":"Exact source substring","stance":"support"}]}
 For a logically necessary, reasonably inferable missing step, use origin "inferred", sources [],
