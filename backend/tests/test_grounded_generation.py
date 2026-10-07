@@ -66,7 +66,28 @@ def provider(monkeypatch, output, callback=None, finish="stop"):
         )
     )
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-only-no-network")
+
+    async def async_create(**kwargs):
+        return call(**kwargs)
+
+    class AsyncProvider:
+        chat = SimpleNamespace(completions=SimpleNamespace(create=async_create))
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            return None
+
+    async_constructor = Mock(return_value=AsyncProvider())
     monkeypatch.setattr(routes, "OpenAI", constructor)
+    monkeypatch.setattr(routes, "AsyncOpenAI", async_constructor)
+
+    # Final prose retains its compatible synchronous provider path.
+    def effective_constructor():
+        return async_constructor if async_constructor.called else constructor
+
+    constructor.effective = effective_constructor
     return call, constructor
 
 
@@ -98,9 +119,10 @@ def test_opening_one_call_saves_validated_source_map(
     assert graph["response_coverage"][0]["status"] == "mapped"
     assert "confidence_map" not in data["synthesis_json"]
     call.assert_called_once()
-    assert constructor.call_args.kwargs["max_retries"] == 0
+    assert constructor.effective().call_args.kwargs["max_retries"] == 0
     assert call.call_args.kwargs["response_format"] == {"type": "json_object"}
-    assert call.call_args.kwargs["extra_body"]["provider"]["sort"] == "latency"
+    assert call.call_args.kwargs["extra_body"]["provider"]["sort"] == "throughput"
+    assert constructor.effective().call_args.kwargs["timeout"].connect == 5
     assert "Committee" not in call.call_args.kwargs["messages"][1]["content"]
     with TestingSessionLocal() as db:
         assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 1
@@ -384,3 +406,41 @@ def test_source_catalog_retains_question_field_context():
     assert sources["r1_a1"]["field"] == "q1"
     assert sources["r1_a2"]["field"] == "q2.text"
     assert len(sources) == 2
+
+
+def test_timeout_cancels_native_request_and_closes_connection(
+    client, admin_headers, participant_headers, monkeypatch
+):
+    import asyncio
+
+    url, rid = opening_fixture(client, admin_headers, participant_headers)
+    with TestingSessionLocal() as db:
+        db.get(RoundModel, rid).synthesis = "Previous draft"
+        db.commit()
+    state = {"calls": 0, "cancelled": False, "closed": False}
+
+    async def create(**kwargs):
+        state["calls"] += 1
+        try:
+            await asyncio.Event().wait()
+        finally:
+            state["cancelled"] = True
+
+    class Client:
+        chat = SimpleNamespace(completions=SimpleNamespace(create=create))
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            state["closed"] = True
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-only")
+    monkeypatch.setattr(routes, "AsyncOpenAI", Mock(return_value=Client()))
+    monkeypatch.setattr(routes, "DRAFT_REQUEST_TIMEOUT_SECONDS", 0.01)
+    response = client.post(url, headers=admin_headers, json={})
+    assert response.status_code == 504
+    assert state == {"calls": 1, "cancelled": True, "closed": True}
+    with TestingSessionLocal() as db:
+        assert db.get(RoundModel, rid).synthesis == "Previous draft"
+        assert db.query(SynthesisVersion).filter_by(round_id=rid).count() == 0

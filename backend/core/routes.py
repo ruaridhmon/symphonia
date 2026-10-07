@@ -18,7 +18,7 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 from email.message import EmailMessage
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI, Timeout
 import aiosmtplib
 import html
 import json
@@ -107,6 +107,7 @@ load_dotenv()  # backend/.env takes precedence
 logger = logging.getLogger("symphonia.routes")
 
 
+DRAFT_REQUEST_TIMEOUT_SECONDS = 45
 SYNTHESIS_JOB_TTL_SECONDS = 30 * 60
 _synthesis_jobs: dict[str, dict[str, Any]] = {}
 _synthesis_jobs_by_round: dict[tuple[int, int], str] = {}
@@ -4156,30 +4157,35 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     request_options = {}
     if grounded:
         request_options["response_format"] = {"type": "json_object"}
-        request_options["extra_body"] = {"provider": {"sort": "latency"}}
+        request_options["extra_body"] = {"provider": {"sort": "throughput", "preferred_max_latency": {"p90": 3}}}
         if resolved_model == "google/gemini-2.5-flash-lite":
             request_options["extra_body"]["reasoning"] = {"effort": "none"}
+    completion_options = {
+        "model": resolved_model,
+        "max_tokens": min(16000, max(4096, len(user_prompt) // 2)) if grounded and round_number == 1 else 12000 if round_number == 1 else 4000,
+        "temperature": 0.2,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT if grounded else "You are an expert facilitator writing custom syntheses of structured consultation responses."},
+            {"role": "user", "content": user_prompt},
+        ],
+        **request_options,
+    }
     try:
-        client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key, timeout=40 if grounded else 85, max_retries=0)
-        completion = await asyncio.wait_for(
-            asyncio.to_thread(
-                client.chat.completions.create,
-                model=resolved_model,
-                max_tokens=min(16000, max(4096, len(user_prompt) // 2)) if grounded and round_number == 1 else 12000 if round_number == 1 else 4000,
-                **request_options,
-                temperature=0.2,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            SYSTEM_PROMPT if grounded else "You are an expert facilitator writing custom syntheses of structured consultation responses."
-                        ),
-                    },
-                    {"role": "user", "content": user_prompt},
-                ],
-            ),
-            timeout=45 if grounded else 90 if round_number == 1 else 45,
-        )
+        if grounded:
+            # Native async I/O can be cancelled; no provider thread survives a timeout.
+            async with AsyncOpenAI(
+                base_url="https://openrouter.ai/api/v1", api_key=api_key,
+                timeout=Timeout(40, connect=5, write=10, pool=5), max_retries=0,
+            ) as client:
+                completion = await asyncio.wait_for(
+                    client.chat.completions.create(**completion_options), timeout=DRAFT_REQUEST_TIMEOUT_SECONDS,
+                )
+        else:
+            client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key, timeout=85, max_retries=0)
+            completion = await asyncio.wait_for(
+                asyncio.to_thread(client.chat.completions.create, **completion_options),
+                timeout=90 if round_number == 1 else 45,
+            )
     except TimeoutError as exc:
         raise HTTPException(
             status_code=504,
