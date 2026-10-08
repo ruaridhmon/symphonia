@@ -573,9 +573,11 @@ def test_compact_inference_and_blank_response_keep_provenance():
     output["reasoning_by_response"]["r2"] = {
         "title": "Blank answer", "nodes": [], "edges": [], "exclusion_reason": "The answer is blank.",
     }
-    graph = parse_opening(json.dumps(output), [
+    responses = [
         {"response_id": 91, "answers": {"q1": SOURCE}}, {"response_id": 92, "answers": {"q1": ""}},
-    ])
+    ]
+    graph = parse_opening(json.dumps(output, separators=(",", ":")), responses)
+    assert graph == parse_opening(json.dumps(output, indent=2), responses)
     assert graph["claims"][1]["confirmed"] is False
     assert graph["flows"][0]["nodes"][1]["confirmed"] is False
     assert graph["response_coverage"][1]["status"] == "no_substantive_claim"
@@ -713,9 +715,10 @@ def test_current_models_use_native_sources_and_compatible_parameters(client, adm
     call, constructor = provider(monkeypatch, opening_output())
     got = client.post(url, headers=admin_headers, json={'model': model})
     assert got.status_code == 200, got.text
+    assert got.json()['model_used'] == model
     call.assert_called_once()
     options = call.call_args.kwargs
-    assert options['model'] == model
+    assert options['model'] == model + ':nitro'
     assert options['response_format']['type'] == 'json_schema'
     assert options['extra_body']['provider']['require_parameters'] is True
     assert options['extra_body']['reasoning']['effort'] == 'low'
