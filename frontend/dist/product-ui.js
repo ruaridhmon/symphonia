@@ -190,6 +190,17 @@ function enhanceParticipantPresentation(main) {
 var bound = /* @__PURE__ */ new WeakSet();
 var panelId = 0;
 var proxiedMenus = /* @__PURE__ */ new WeakMap();
+var actionIdentities = /* @__PURE__ */ new WeakMap();
+var actionId = 0;
+function identity(element) {
+  if (!element) return null;
+  let id2 = actionIdentities.get(element);
+  if (!id2) {
+    id2 = ++actionId;
+    actionIdentities.set(element, id2);
+  }
+  return id2;
+}
 function enhanceSynthesisControls(main) {
   const toolbar = main.querySelector('aside[aria-label="Synthesis controls"]');
   if (!toolbar) {
@@ -285,7 +296,29 @@ function enhanceSynthesisControls(main) {
       items.className = "summary-actions-items";
       menu.append(items);
       nav.append(menu);
-      for (const detail of toolbar.querySelectorAll(":scope > details.summary-disclosure")) {
+      menu.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          menu.open = false;
+          trigger.focus();
+        }
+      });
+      const dismiss = (event) => {
+        if (!menu.isConnected) {
+          document.removeEventListener("pointerdown", dismiss);
+          return;
+        }
+        if (!menu.contains(event.target)) menu.open = false;
+      };
+      document.addEventListener("pointerdown", dismiss);
+    }
+    const disclosures = [...toolbar.querySelectorAll(":scope > details.summary-disclosure")];
+    const refresh = toolbar.querySelector(".summary-refresh");
+    const menuSignature = JSON.stringify([disclosures.map((detail) => [identity(detail), detail.querySelector("summary span")?.textContent, identity(detail.querySelector(".synthesis-generate-footer button"))]), identity(refresh)]);
+    if (menu.dataset.signature !== menuSignature) {
+      const items = menu.querySelector(".summary-actions-items");
+      items.replaceChildren();
+      menu.dataset.signature = menuSignature;
+      for (const detail of disclosures) {
         const draft = detail.querySelector(".synthesis-generate-footer button");
         if (draft) {
           const generate = document.createElement("button");
@@ -310,7 +343,6 @@ function enhanceSynthesisControls(main) {
         };
         items.append(action);
       }
-      const refresh = toolbar.querySelector(".summary-refresh");
       if (refresh) {
         const action = document.createElement("button");
         action.type = "button";
@@ -321,20 +353,6 @@ function enhanceSynthesisControls(main) {
         };
         items.append(action);
       }
-      menu.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-          menu.open = false;
-          trigger.focus();
-        }
-      });
-      const dismiss = (event) => {
-        if (!menu.isConnected) {
-          document.removeEventListener("pointerdown", dismiss);
-          return;
-        }
-        if (!menu.contains(event.target)) menu.open = false;
-      };
-      document.addEventListener("pointerdown", dismiss);
     }
     const top = main.querySelector(".cw-options>div");
     if (top) {
@@ -345,7 +363,7 @@ function enhanceSynthesisControls(main) {
         top.append(group);
       }
       const actions = [...menu.querySelectorAll(".summary-actions-items>button")];
-      const signature = actions.map((a) => a.textContent).join("|");
+      const signature = menuSignature + "|" + actions.map((a) => a.textContent).join("|");
       if (group.dataset.signature !== signature || proxiedMenus.get(group) !== menu) {
         proxiedMenus.set(group, menu);
         group.dataset.signature = signature;
