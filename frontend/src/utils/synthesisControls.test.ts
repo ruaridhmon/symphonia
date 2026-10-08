@@ -46,5 +46,5 @@ it('starts generation directly from the consultation menu and keeps settings sep
  expect(calls).toBe(1);expect(main.querySelector<HTMLDetailsElement>('.summary-disclosure')!.open).toBe(false);
  enhanceSynthesisControls(main);expect(direct.disabled).toBe(true);expect(direct.textContent).toBe('Writing draft…');direct.click();expect(calls).toBe(1);
  draft.disabled=false;draft.textContent='Generate draft';enhanceSynthesisControls(main);
- expect(direct.disabled).toBe(false);actions.find(button=>button.textContent==='Draft settings')!.click();expect(main.querySelector<HTMLDetailsElement>('.summary-disclosure')!.open).toBe(true);expect(calls).toBe(1);
+ expect(direct.disabled).toBe(false);actions.find(button=>button.textContent==='Draft settings')!.click();expect(main.querySelector<HTMLDetailsElement>('.summary-disclosure')!.open).toBe(true);expect(calls).toBe(1);expect(document.activeElement).toBe(main.querySelector('select'));
 });

@@ -718,7 +718,8 @@ def test_current_models_use_native_sources_and_compatible_parameters(client, adm
     assert got.json()['model_used'] == model
     call.assert_called_once()
     options = call.call_args.kwargs
-    assert options['model'] == model + ':nitro'
+    assert options['model'] == model
+    assert options['service_tier'] == 'default'
     assert options['response_format']['type'] == 'json_schema'
     assert options['extra_body']['provider']['require_parameters'] is True
     assert options['extra_body']['reasoning']['effort'] == 'low'

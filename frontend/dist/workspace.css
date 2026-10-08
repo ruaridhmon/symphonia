@@ -446,7 +446,7 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 #root .product-summary aside.summary-actions-panel:not(:has(details.summary-disclosure[open])) { display:none!important; }
 #root aside.summary-actions-panel>details.summary-disclosure>summary,#root aside.summary-actions-panel>button,#root aside.summary-actions-panel>.unified-actions { display:none!important; }
 #root aside.summary-actions-panel>details.summary-disclosure[open] { width:100%; }
-#root aside.summary-actions-panel>details.summary-disclosure[open]>.card { position:relative;top:auto;left:auto;right:auto;width:100%;max-width:none;margin:0; }
+#root aside.summary-actions-panel>details.summary-disclosure[open]>.card { position:fixed;top:80px;left:auto;right:24px;width:min(420px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 104px);overflow:auto;margin:0;padding:24px;border:1px solid var(--border);border-radius:14px;background:var(--background);box-shadow:0 12px 48px #0002;z-index:65; }
 #root .di-heading:has(.di-title:empty) { display:none; }
 #root .di-change-overview { font-size:12px;color:var(--muted-foreground);margin:0 0 14px; }
 #root .product-summary .di-claims { border-radius:8px;--rating-width:200px;--claim-gap:24px; }
@@ -599,11 +599,11 @@ body.ux-builder #root textarea { background:var(--muted);border-color:transparen
 #root .summary-generate-empty[aria-expanded=true] { background:var(--muted);color:var(--foreground); }
 #root .summary-actions-menu { margin-left:4px; }
 #root main:has(#delphi-recorded-progress[data-loading=true]) .full-summary-surface { display:none; }
-/* Settings expand below their trigger, never move the trigger off screen. */
+/* Floating settings do not push the claim list down or scroll the page. */
 #root .product-summary div:has(>aside.summary-actions-panel) { display:flex;flex-direction:column;gap:0; }
 #root .product-summary div:has(>aside.summary-actions-panel)>div:has(>.summary-switch) { display:contents; }
 #root .product-summary .summary-switch { order:0; }
-#root .product-summary aside.summary-actions-panel { order:1;margin-bottom:16px!important; }
+#root .product-summary aside.summary-actions-panel { order:1;margin-bottom:0!important; }
 #root .product-summary #delphi-recorded-progress,#root .product-summary .opening-claims,#root .product-summary .full-summary-surface { order:2; }
 /* One document surface in authoring and participant preview. */
 #root .fc-composer .fc-paper { max-width:720px;margin:28px auto; }
@@ -1179,3 +1179,13 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 #root .fs-display-controls .fs-view-switch {margin-left:auto;}
 #root .synthesis-generator .btn-accent {border:0;border-radius:8px;padding:9px 15px;background:var(--foreground);color:var(--background);font-size:13px;white-space:nowrap;}
 #root .synthesis-generator .btn-accent:disabled {opacity:.5;cursor:default;}
+
+/* A compact reminder of the original question across the review rounds. */
+#root .cw-question-context { margin:12px 0 20px;padding-top:12px;border-top:1px solid var(--border);max-width:900px;font-size:13px;line-height:1.6;color:var(--foreground); }
+#root .cw-question-context p { margin:0; }
+#root .cw-question-label { color:var(--muted-foreground);font-size:11px;margin-right:12px; }
+#root .cw-question-context details { margin-top:6px; }
+#root .cw-question-context summary { cursor:pointer;font-size:12px;color:var(--muted-foreground); }
+#root .cw-question-context ol { padding-left:20px;margin:8px 0 0; }
+#root .cw-question-context li + li { margin-top:6px; }
+@media(max-width:640px) { #root aside.summary-actions-panel>details.summary-disclosure[open]>.card { top:64px;right:16px;max-height:calc(100dvh - 88px);padding:20px; } }

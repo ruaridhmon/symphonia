@@ -306,7 +306,7 @@ function enhanceSynthesisControls(main) {
         action.onclick = () => {
           menu.open = false;
           toolbar.querySelectorAll("details.summary-disclosure").forEach((other) => other.open = other === detail ? !detail.open : false);
-          detail.querySelector(".card input,.card select,.summary-panel-close")?.focus();
+          if (detail.open) (detail.querySelector(".card select,.card input") || detail.querySelector(".summary-panel-close"))?.focus({ preventScroll: true });
         };
         items.append(action);
       }

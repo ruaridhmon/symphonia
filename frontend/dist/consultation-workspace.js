@@ -21,7 +21,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
     const [panel, setPanel] = R.useState(null);
     const [finalView, setFinalView] = R.useState(false);
     const opening = p.rounds.find((r) => r.round_number === 1);
-    const openingQuestions = (opening?.questions || p.form.questions).map((q) => typeof q === "string" ? q : String(q.label || q.question || q.text || "")).filter((q) => q.trim());
+    const openingQuestions = (opening?.questions?.length ? opening.questions : p.form.questions).map((q) => typeof q === "string" ? q : String(q.label || q.question || q.text || "")).filter((q) => q.trim());
     const [completed, setCompleted] = R.useState(false);
     const [copyState, setCopyState] = R.useState("");
     const [adding, setAdding] = R.useState(null);
@@ -173,6 +173,12 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
           }, { "aria-pressed": finalView, className: "cw-final-tab", title: "Round 4 \xB7 final synthesis" }) : null
         )
       ),
+      !finalView && p.view === "synthesis" && openingQuestions.length ? h(
+        "div",
+        { className: "cw-question-context", "aria-label": "Consultation question" },
+        h("p", null, h("span", { className: "cw-question-label" }, "Question"), openingQuestions[0]),
+        openingQuestions.length > 1 ? h("details", null, h("summary", null, `${openingQuestions.length - 1} more question${openingQuestions.length === 2 ? "" : "s"}`), h("ol", { start: 2 }, ...openingQuestions.slice(1).map((question, index) => h("li", { key: index }, question)))) : null
+      ) : null,
       finalView && FinalSynthesis ? h(FinalSynthesis, { formId: p.form.id, questions: openingQuestions, onComplete: () => setCompleted(true) }) : null,
       saved ? h("p", { className: "cw-response-saved", role: "status" }, saved) : null,
       adding && ManualResponse ? h(ManualResponse, { form: p.form, round: adding, onClose: () => {

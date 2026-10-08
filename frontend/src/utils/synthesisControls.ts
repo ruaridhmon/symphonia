@@ -1,4 +1,4 @@
-// Keep native disclosure triggers in place; settings float below the toolbar.
+// Keep React-owned controls in place; the open settings panel floats in the viewport.
 const bound=new WeakSet<HTMLElement>();
 let panelId=0;
 const proxiedMenus=new WeakMap<HTMLElement,HTMLElement>();
@@ -49,7 +49,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
     }
     const action=document.createElement('button');action.type='button';action.textContent=detail.querySelector('summary span')?.textContent||'Summary settings';
     if(draft)action.textContent='Draft settings';
-    action.onclick=()=>{menu!.open=false;toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure').forEach(other=>other.open=other===detail?!detail.open:false);detail.querySelector<HTMLElement>('.card input,.card select,.summary-panel-close')?.focus();};items.append(action);
+    action.onclick=()=>{menu!.open=false;toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure').forEach(other=>other.open=other===detail?!detail.open:false);if(detail.open)(detail.querySelector<HTMLElement>('.card select,.card input')||detail.querySelector<HTMLElement>('.summary-panel-close'))?.focus({preventScroll:true});};items.append(action);
    }
    const refresh=toolbar.querySelector<HTMLButtonElement>('.summary-refresh');if(refresh){const action=document.createElement('button');action.type='button';action.textContent='Refresh';action.onclick=()=>{menu!.open=false;refresh.click();};items.append(action);}
    menu.addEventListener('keydown',event=>{if(event.key==='Escape'){menu!.open=false;trigger.focus();}});
