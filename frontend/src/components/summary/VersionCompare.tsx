@@ -3,6 +3,7 @@ import { GitCompareArrows, X, ChevronDown } from 'lucide-react';
 import { MarkdownRenderer } from '../index';
 import type { SynthesisVersion } from '../../types/summary';
 import type { SynthesisData, Agreement, Disagreement } from '../../types/synthesis';
+import { versionComparisonDefaults } from '../../utils/versionComparison';
 
 type Props = {
   versions: SynthesisVersion[];
@@ -31,8 +32,7 @@ export default function VersionCompare({ versions, currentVersionId, onClose }: 
   );
 
   // Default: compare the two most recent versions, or current vs previous
-  const defaultA = sorted.length >= 2 ? sorted[sorted.length - 2].id : sorted[0]?.id ?? null;
-  const defaultB = currentVersionId ?? (sorted.length >= 1 ? sorted[sorted.length - 1].id : null);
+  const {leftId:defaultA,rightId:defaultB} = versionComparisonDefaults(versions,currentVersionId);
 
   const [leftId, setLeftId] = useState<number | null>(defaultA);
   const [rightId, setRightId] = useState<number | null>(defaultB);
