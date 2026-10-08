@@ -4107,10 +4107,8 @@ async def _complete_grounded_draft(api_key: str, options: dict[str, Any]):
     # These OpenAI models do not accept temperature; do not require an unsupported parameter.
     if str(options.get("model", "")).startswith("openai/gpt-6"):
         options = {key: value for key, value in options.items() if key != "temperature"}
-    # Nitro keeps the exact selected model, admitting priority capacity only when
-    # it wins the throughput sort. Standard providers remain available as fallbacks.
-    if options.get("model") in CURATED_SYNTHESIS_MODELS:
-        options = {**options, "model": options["model"] + ":nitro"}
+    # Keep throughput routing within standard capacity; do not opt into paid tiers.
+    options = {**options, "service_tier": "default"}
     # Shared cancellation and connection cleanup for opening, review and final drafts.
     async with AsyncOpenAI(
         base_url="https://openrouter.ai/api/v1", api_key=api_key,

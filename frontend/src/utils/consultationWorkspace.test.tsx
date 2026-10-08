@@ -26,6 +26,19 @@ function props(): WorkspaceProps {
   return {form:{id:7,title:'A panel on research',join_code:'ABC 123',allow_join:true,questions:['Opening question']},rounds:[{id:11,round_number:1,is_active:false,questions:['What matters?'],synthesis:''},{id:12,round_number:2,is_active:true,questions:[{label:'Your response',sectionTitle:'Claim 1: Keep independent review',options:['Agree','Disagree']}],synthesis:''}],selectedRoundId:12,view:'synthesis',onView:vi.fn(),onRound:vi.fn(),onMakeLive:vi.fn(),responses:[{id:12,round_number:2,synthesis:'',is_active:true,responses:[]}]} ;
 }
 describe('consultation workspace', () => {
+  it('keeps original questions above review summaries, with extra questions disclosed', () => {
+    const p=props();p.rounds[0].questions=['What matters?',{label:'What could go wrong?'}];
+    const mounted=render(<Workspace {...p}/>);
+    const context=screen.getByLabelText('Consultation question');
+    expect(context).toHaveTextContent('What matters?');
+    expect(context).not.toHaveTextContent('Your response');
+    expect(context.querySelector('details')).not.toHaveAttribute('open');
+    expect(context).toHaveTextContent('What could go wrong?');
+    mounted.rerender(<Workspace {...p} selectedRoundId={11}/>);
+    expect(screen.getByLabelText('Consultation question')).toHaveTextContent('What matters?');
+    mounted.rerender(<Workspace {...p} view="responses"/>);
+    expect(screen.queryByLabelText('Consultation question')).toBeNull();
+  });
   it('views a previous round without changing the live round', () => {
     const p=props();render(<Workspace {...p}/>);
     fireEvent.click(screen.getByRole('button',{name:'Round 1'}));
