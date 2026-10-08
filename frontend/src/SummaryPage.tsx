@@ -1,3 +1,4 @@
+import { useVersionPublisher, applyPublishedVersion } from './utils/useVersionPublisher';
 import {SYNTHESIS_MODELS, DEFAULT_SYNTHESIS_MODEL} from './utils/synthesisModels';
 import { draftError } from "./utils/draftError";
 import FinalSynthesisPanel from "./components/summary/FinalSynthesisPanel";
@@ -1799,15 +1800,25 @@ function SummaryPageContent() {
 			}
 	}
 
-	async function activateVersion(versionId: number) {
-		try {
-			await apiActivateVersion(versionId);
-			if (displayRound) await loadSynthesisVersions(displayRound.id);
-			await loadAll();
-		} catch (error) {
-			toastError((error as Error).message || 'Failed to activate version');
-		}
-	}
+	const versionPublisher = useVersionPublisher({
+		versions: synthesisVersions,
+		roundId: displayRound?.id ?? null,
+		activate: apiActivateVersion,
+		onPublished: (version, isCurrentRound) => {
+			if (isCurrentRound) {
+				setSynthesisVersions(prev => prev.map(v => ({ ...v, is_active: v.id === version.id })));
+				setSelectedVersionId(version.id);
+			}
+			setRounds(prev => prev.map(r => applyPublishedVersion(r, version)));
+			setActiveRound(prev => prev ? applyPublishedVersion(prev, version) : prev);
+			setSelectedRound(prev => prev ? applyPublishedVersion(prev, version) : prev);
+			if (isCurrentRound && displayRound?.is_active && editor) resetEditorToSaved(version.synthesis || '');
+			window.dispatchEvent(new CustomEvent('symphonia:draft-saved', { detail: { formId, roundId: version.round_id, synthesis: version.synthesis || '', synthesis_json: version.synthesis_json } }));
+			toastSuccess(`Version ${version.version} published.`);
+		},
+		onError: toastError,
+	});
+	const activateVersion = versionPublisher.publish;
 
 	function handleSelectRound(round: Round) {
 		try {
@@ -2550,6 +2561,7 @@ function SummaryPageContent() {
 								onSelectVersion={setSelectedVersionId}
 								selectedVersion={selectedVersion}
 								onActivateVersion={activateVersion}
+								publishingVersionId={versionPublisher.pendingId}
 								resolvedExpertLabels={resolvedExpertLabels}
 								formId={formId}
 								token={token}

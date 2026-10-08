@@ -9,6 +9,7 @@ type Props = {
   onSelectVersion: (id: number) => void;
   selectedVersion: SynthesisVersion | null;
   onActivateVersion: (id: number) => void;
+  publishingVersionId?: number | null;
   resolvedExpertLabels: Record<number, string>;
   formId: number;
   token: string;
@@ -34,6 +35,7 @@ export default function SynthesisVersionPanel({
   onSelectVersion,
   selectedVersion,
   onActivateVersion,
+  publishingVersionId,
   showCompare,
   onToggleCompare,
 }: Props) {
@@ -136,6 +138,9 @@ export default function SynthesisVersionPanel({
               variant="success"
               size="sm"
               onClick={() => onActivateVersion(selectedVersion.id)}
+              loading={publishingVersionId === selectedVersion.id}
+              loadingText="Publishing…"
+              disabled={publishingVersionId != null}
               className="w-full"
             >
               Publish v{selectedVersion.version}

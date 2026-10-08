@@ -3,7 +3,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {parse} from '@babel/parser';
-const code=readFileSync(new URL('../dist/assets/SummaryPage-workspace-v53.js',import.meta.url),'utf8');
+const code=readFileSync(new URL('../dist/assets/SummaryPage-workspace-v54.js',import.meta.url),'utf8');
 function find(node,predicate){if(!node||typeof node!=='object')return; if(predicate(node))return node;for(const value of Object.values(node)){for(const child of Array.isArray(value)?value:[value]){const found=find(child,predicate);if(found)return found;}}}
 const generate=find(parse(code,{sourceType:'module'}),n=>n.type==='FunctionDeclaration'&&n.id?.name==='Xe');
 test('starts model request immediately without waiting for version history; blocks repeat clicks',()=>{
@@ -63,4 +63,22 @@ test('four current models preserve Claude and reject stale stored model IDs', as
  assert.equal(normalizeSynthesisModel('openai/gpt-4o'),SYNTHESIS_MODELS[0].id);
  assert.equal(normalizeSynthesisModel('google/gemini-2.5-flash-lite'),SYNTHESIS_MODELS[0].id);
  assert.equal(normalizeSynthesisModel('anthropic/claude-opus-5.5'),'anthropic/claude-opus-5.5');
+});
+
+test('maintained publishing commits loaded content without reloading history or the consultation',()=>{
+ const ast=parse(code,{sourceType:'module'});
+ const node=find(ast,n=>n.type==='VariableDeclarator'&&n.id?.name==='versionPublisher');
+ assert.ok(node);
+ const published=node.init.arguments[0].properties.find(p=>p.key?.name==='onPublished').value;
+ const state={le:[{id:1,is_active:true},{id:2,is_active:false}],selected:null,rounds:[{id:4,synthesis:'Old'}],round:{id:4,synthesis:'Old'},J:{id:4,is_active:false},X:null,n:79,i:()=>{},Ls:fn=>{state.le=fn(state.le)},Ke:id=>{state.selected=id},Q:fn=>{state.rounds=fn(state.rounds)},j:fn=>{state.round=fn(state.round)},z:()=>{},applyPublishedVersion:(r,v)=>r.id===v.round_id?{...r,synthesis:v.synthesis,synthesis_json:v.synthesis_json}:r,window:{dispatchEvent:()=>{}},CustomEvent:class{},ne:()=>{throw Error('Full consultation reload')},oe:()=>{throw Error('History reload')}};
+ vm.createContext(state);
+ const callback=vm.runInContext('('+code.slice(published.start,published.end)+')',state);
+ callback({id:2,round_id:4,version:2,synthesis:'Saved'},true);
+ assert.equal(state.selected,2);
+ assert.equal(state.le.find(v=>v.id===2).is_active,true);
+ assert.equal(state.le.find(v=>v.id===1).is_active,false);
+ assert.equal(state.round.synthesis,'Saved');
+ assert.equal(state.rounds[0].synthesis,'Saved');
+ assert.match(code,/onActivateVersion:Js,publishingVersionId:versionPublisher.pendingId/);
+ assert.match(code,/loading:pendingId===u.id,loadingText:"Publishing…",disabled:pendingId!=null/);
 });
