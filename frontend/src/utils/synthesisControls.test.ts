@@ -1,6 +1,19 @@
 import {afterEach,expect,it} from 'vitest';
 import {enhanceSynthesisControls} from './synthesisControls';
 afterEach(()=>{document.body.innerHTML='';});
+it('adds late history and replaces stale round actions without duplicate menu entries',()=>{
+ document.body.innerHTML='<main><section class="consultation-workspace"><details class="cw-options"><summary>Options</summary><div></div></details></section><nav class="summary-switch"></nav><aside aria-label="Synthesis controls"><details class="summary-disclosure"><summary><span>Generate synthesis</span></summary><div class="card"><input></div></details></aside></main>';
+ const main=document.querySelector('main')!;const toolbar=main.querySelector('aside')!;
+ enhanceSynthesisControls(main);
+ const history=document.createElement('details');history.className='summary-disclosure';history.innerHTML='<summary><span>Version history</span></summary><div class="card"><button>Version 1</button></div>';toolbar.append(history);
+ enhanceSynthesisControls(main);enhanceSynthesisControls(main);
+ const historyAction=()=>Array.from(main.querySelectorAll<HTMLButtonElement>('.cw-summary-actions button')).filter(button=>button.textContent==='Version history');
+ expect(historyAction()).toHaveLength(1);historyAction()[0].click();expect(history.open).toBe(true);
+ const replacement=history.cloneNode(true) as HTMLDetailsElement;replacement.open=false;history.replaceWith(replacement);
+ enhanceSynthesisControls(main);historyAction()[0].click();expect(replacement.open).toBe(true);
+ replacement.remove();enhanceSynthesisControls(main);expect(historyAction()).toHaveLength(0);
+ expect(main.querySelectorAll('.summary-actions-menu')).toHaveLength(1);
+});
 it('keeps triggers in place and closes settings on Escape or outside interaction',()=>{
  document.body.innerHTML='<main><aside aria-label="Synthesis controls"><details class="summary-disclosure"><summary><span>Generate synthesis</span></summary><div class="card"><input value="Existing instruction"></div></details><details class="summary-disclosure"><summary><span>Version history</span></summary><div class="card"><button>Version 1</button></div></details></aside><p>Claims</p></main>';
  const main=document.querySelector('main')!;const details=Array.from(main.querySelectorAll('details'));const trigger=details[0].querySelector('summary')!;const parent=trigger.parentElement;

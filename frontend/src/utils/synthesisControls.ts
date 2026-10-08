@@ -2,6 +2,9 @@
 const bound=new WeakSet<HTMLElement>();
 let panelId=0;
 const proxiedMenus=new WeakMap<HTMLElement,HTMLElement>();
+const actionIdentities=new WeakMap<HTMLElement,number>();
+let actionId=0;
+function identity(element:HTMLElement|null){if(!element)return null;let id=actionIdentities.get(element);if(!id){id=++actionId;actionIdentities.set(element,id);}return id;}
 export function enhanceSynthesisControls(main:HTMLElement){
  const toolbar=main.querySelector<HTMLElement>('aside[aria-label="Synthesis controls"]');if(!toolbar){main.querySelector('.summary-tools-only')?.remove();main.querySelector('.cw-summary-actions')?.remove();return;}
  const progress=main.querySelector<HTMLElement>('#delphi-recorded-progress');
@@ -40,8 +43,18 @@ export function enhanceSynthesisControls(main:HTMLElement){
    menu=document.createElement('details');menu.className='summary-actions-menu';
    const trigger=document.createElement('summary');trigger.textContent='•••';trigger.setAttribute('aria-label','Summary actions');menu.append(trigger);
    const items=document.createElement('div');items.className='summary-actions-items';menu.append(items);nav.append(menu);
-
-   for(const detail of toolbar.querySelectorAll<HTMLDetailsElement>(':scope > details.summary-disclosure')){
+   menu.addEventListener('keydown',event=>{if(event.key==='Escape'){menu!.open=false;trigger.focus();}});
+   const dismiss=(event:PointerEvent)=>{if(!menu!.isConnected){document.removeEventListener('pointerdown',dismiss);return;}if(!menu!.contains(event.target as Node))menu!.open=false;};document.addEventListener('pointerdown',dismiss);
+  }
+  // History arrives asynchronously and disclosures can be replaced on round changes.
+  // Keep the menu and its proxies attached to the current React-owned controls.
+  const disclosures=[...toolbar.querySelectorAll<HTMLDetailsElement>(':scope > details.summary-disclosure')];
+  const refresh=toolbar.querySelector<HTMLButtonElement>('.summary-refresh');
+  const menuSignature=JSON.stringify([disclosures.map(detail=>[identity(detail),detail.querySelector('summary span')?.textContent,identity(detail.querySelector('.synthesis-generate-footer button'))]),identity(refresh)]);
+  if(menu.dataset.signature!==menuSignature){
+   const items=menu.querySelector<HTMLElement>('.summary-actions-items')!;
+   items.replaceChildren();menu.dataset.signature=menuSignature;
+   for(const detail of disclosures){
     const draft=detail.querySelector<HTMLButtonElement>('.synthesis-generate-footer button');
     if(draft){
      const generate=document.createElement('button');generate.type='button';generate.textContent='Generate draft';generate.dataset.draftAction='true';
@@ -51,9 +64,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
     if(draft)action.textContent='Draft settings';
     action.onclick=()=>{menu!.open=false;toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure').forEach(other=>other.open=other===detail?!detail.open:false);if(detail.open)(detail.querySelector<HTMLElement>('.card select,.card input')||detail.querySelector<HTMLElement>('.summary-panel-close'))?.focus({preventScroll:true});};items.append(action);
    }
-   const refresh=toolbar.querySelector<HTMLButtonElement>('.summary-refresh');if(refresh){const action=document.createElement('button');action.type='button';action.textContent='Refresh';action.onclick=()=>{menu!.open=false;refresh.click();};items.append(action);}
-   menu.addEventListener('keydown',event=>{if(event.key==='Escape'){menu!.open=false;trigger.focus();}});
-   const dismiss=(event:PointerEvent)=>{if(!menu!.isConnected){document.removeEventListener('pointerdown',dismiss);return;}if(!menu!.contains(event.target as Node))menu!.open=false;};document.addEventListener('pointerdown',dismiss);
+   if(refresh){const action=document.createElement('button');action.type='button';action.textContent='Refresh';action.onclick=()=>{menu!.open=false;refresh.click();};items.append(action);}
   }
 
   const top=main.querySelector<HTMLElement>('.cw-options>div');
@@ -61,7 +72,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
    let group=top.querySelector<HTMLElement>('.cw-summary-actions');
    if(!group){group=document.createElement('div');group.className='cw-summary-actions';top.append(group);}
    const actions=[...menu.querySelectorAll<HTMLButtonElement>('.summary-actions-items>button')];
-   const signature=actions.map(a=>a.textContent).join('|');
+   const signature=menuSignature+'|'+actions.map(a=>a.textContent).join('|');
    if(group.dataset.signature!==signature||proxiedMenus.get(group)!==menu){proxiedMenus.set(group,menu);group.dataset.signature=signature;group.replaceChildren();for(const action of actions){const proxy=document.createElement('button');proxy.type='button';proxy.textContent=action.textContent;proxy.onclick=()=>{const options=top.closest<HTMLDetailsElement>('details');if(options)options.open=false;action.click();};group.append(proxy);}}
    menu.hidden=true;nav.querySelector<HTMLElement>('.summary-generate-empty')?.setAttribute('hidden','');
    const draft=toolbar.querySelector<HTMLButtonElement>('.synthesis-generate-footer button');
