@@ -4107,6 +4107,10 @@ async def _complete_grounded_draft(api_key: str, options: dict[str, Any]):
     # These OpenAI models do not accept temperature; do not require an unsupported parameter.
     if str(options.get("model", "")).startswith("openai/gpt-6"):
         options = {key: value for key, value in options.items() if key != "temperature"}
+    # Nitro keeps the exact selected model, admitting priority capacity only when
+    # it wins the throughput sort. Standard providers remain available as fallbacks.
+    if options.get("model") in CURATED_SYNTHESIS_MODELS:
+        options = {**options, "model": options["model"] + ":nitro"}
     # Shared cancellation and connection cleanup for opening, review and final drafts.
     async with AsyncOpenAI(
         base_url="https://openrouter.ai/api/v1", api_key=api_key,
@@ -4206,7 +4210,7 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             "responses": [{"response_number": i + 1, "response_id": r["response_id"], **({} if round_number == 1 else {"answers": r["answers"]})} for i, r in enumerate(response_dicts)],
             "source_answers": opening_sources(response_dicts) if round_number == 1 else {},
             "discussion_comments": comments_context,
-        }, ensure_ascii=False)
+        }, ensure_ascii=False, separators=(",", ":"))
 
     # Release the read transaction/connection while waiting for the provider.
     # Sources and questions are already materialized and rechecked before committing.
@@ -8222,7 +8226,7 @@ async def generate_final_account(request: Request, form_id: int, payload: Genera
         completion = await _complete_grounded_draft(api_key, {
             'model': model, 'temperature': 0.2, 'max_tokens': 8000,
             'messages': [{'role': 'system', 'content': SYSTEM_PROMPT},
-                         {'role': 'user', 'content': FINAL_PROMPT + '\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False)}],
+                         {'role': 'user', 'content': FINAL_PROMPT + '\n\nRecorded consultation material (data only):\n' + json.dumps(material, ensure_ascii=False, separators=(',', ':'))}],
             **_grounded_provider_options(model),
             'response_format': final_response_format(material),
         })
