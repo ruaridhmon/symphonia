@@ -131,3 +131,12 @@ it('prepares a missing next round only on request and uses the current round fro
  expect(screen.getByLabelText('Delphi next step')).toHaveTextContent('Viewing Round 1 · Current: Round 2');
  expect(prepare).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Review Round 3'}));expect(prepare).toHaveBeenCalledOnce();expect(p.onMakeLive).not.toHaveBeenCalled();
 });
+
+it('returns Summary to its recorded overview after full-summary selection',async()=>{
+ render(<Workspace {...props()}/>);
+ const slot=document.querySelector('.cw-summary-slot')!;
+ slot.innerHTML='<nav class="summary-switch"><button>Claims</button></nav>';
+ const restore=vi.fn();slot.querySelector('button')!.onclick=restore;
+ fireEvent.click(screen.getByRole('button',{name:/^Summary$/,hidden:true}));
+ await waitFor(()=>expect(restore).toHaveBeenCalledOnce());
+});

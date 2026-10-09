@@ -158,6 +158,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
               if (canLeave()) {
                 setFinalView(false);
                 p.onView(view);
+                if (view === "synthesis") requestAnimationFrame(() => document.querySelector(".cw-summary-slot .summary-switch>button")?.click());
               }
             }, { key: view, "aria-pressed": !finalView && p.view === view })),
             p.view === "synthesis" && !finalView ? h("div", { className: "cw-summary-slot" }) : null

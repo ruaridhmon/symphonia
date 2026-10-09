@@ -95,7 +95,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
         h('summary',{'aria-label':'Change consultation view'},finalView?'Final synthesis':p.view==='responses'?'Responses':'Summary',h('span',{'aria-hidden':true},'⌄')),
         h('div',{className:'cw-view-popover',onClick:(e:React.MouseEvent<HTMLDivElement>)=>{if((e.target as HTMLElement).closest('button')){const menu=e.currentTarget.closest('details');if(menu){menu.open=false;requestAnimationFrame(()=>menu.querySelector('summary')?.focus());}}}},
         ([['synthesis', 'Summary'], ['responses', 'Responses']] as [View, string][]).map(([view, label]) =>
-          button(label, () => { if (canLeave()) {setFinalView(false);p.onView(view);} }, { key: view, 'aria-pressed': !finalView && p.view === view })),
+          button(label, () => { if (canLeave()) {setFinalView(false);p.onView(view);if(view==='synthesis')requestAnimationFrame(()=>document.querySelector<HTMLButtonElement>('.cw-summary-slot .summary-switch>button')?.click());} }, { key: view, 'aria-pressed': !finalView && p.view === view })),
       p.view==='synthesis'&&!finalView?h('div',{className:'cw-summary-slot'}):null)),
       h('div', { className: 'cw-context cw-simple-context' },
         h('div',{className:'cw-round-tabs','aria-label':'Rounds'},...ordered.map(r=>button(`Round ${r.round_number}`,()=>{if(canLeave()){setFinalView(false);p.onRound(r);}},{key:r.id,'aria-pressed':!finalView&&round?.id===r.id,title:r.is_active?'Current round':`View Round ${r.round_number}`}))),
