@@ -75,11 +75,7 @@ function groupFeedback(claim: DelphiClaim): string {
     claim.notClassified !== null ? `${claim.notClassified} not classified` : null,
   ].filter(Boolean).join(' · ');
 
-  return [
-    counts ? `Previous round: ${counts}.` : 'Review the previous round before re-rating.',
-    'The previous-round summary contains the anonymised original excerpts.',
-    'Consensus is not required: retain your view if the evidence still supports it.',
-  ].join(' ');
+  return counts ? `Previous round: ${counts}.` : '';
 }
 
 function baseQuestion(overrides: Record<string, unknown>): Record<string, unknown> {

@@ -47,7 +47,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
     const [copyState, setCopyState] = R.useState('');
     const [adding, setAdding] = R.useState<Round | null>(null);
     const [saved, setSaved] = R.useState('');
-    const addTrigger = R.useRef<HTMLButtonElement>(null);
+    const addTrigger = R.useRef<HTMLElement>(null);
     const dialog = R.useRef<HTMLDialogElement>(null);
     const titleId = R.useId();
     const invoker = R.useRef<HTMLElement|null>(null);
@@ -84,10 +84,11 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       h('div', { className: 'cw-title-row' },
         h('div', { className: 'cw-identity' }, h('h2', {title:displayTitle}, displayTitle), (simulated&&!p.isDemo)?h('span', { className: 'cw-provenance',title:'Simulated consultation with fictional experts','aria-label':'Demo with fictional experts' }, 'Demo'):null),
         p.isDemo ? h('span', {className:'cw-demo-badge'}, 'Synthetic example') : h('div', { className: 'cw-title-actions' },
-          !finalView && ManualResponse && p.onResponseAdded ? button('Add response',()=>{if(round?.is_active&&!completed&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response','aria-label':'Add response',disabled:!round?.is_active||completed,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response',children:[h('svg',{key:'icon',width:16,height:16,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,'aria-hidden':true},h('path',{d:'M12 5v14M5 12h14'})),h('span',{key:'label'},'Add response')]}) : null,
-          !finalView && stage<3 ? button('Next round →',()=>{if(!canLeave())return;if(nextRound)openPanel('next');else if(p.onPrepareNextRound)p.onPrepareNextRound();else window.dispatchEvent(new CustomEvent('symphonia:prepare-next-round'));},{className:'cw-next-round','aria-label':`Review Round ${stage+1}`,title:`Preview Round ${stage+1} before opening it`,children:[h('span',{key:'wide',className:'cw-next-wide'},'Next round →'),h('span',{key:'compact',className:'cw-next-compact','aria-hidden':true},'Next →')]} ) : null,
-          h('details', { ref:options,className: 'cw-options',onKeyDown:(e:React.KeyboardEvent<HTMLDetailsElement>)=>{if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}} }, h('summary', { 'aria-label': 'Consultation options' }, '•••'),
-            h('div', null, button('Invite people',()=>openPanel('invite')),h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),
+          h('details', { ref:options,className: 'cw-options',onKeyDown:(e:React.KeyboardEvent<HTMLDetailsElement>)=>{if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}} }, h('summary', { ref:addTrigger,'aria-label': 'Consultation options' }, '•••'),
+            h('div', null,
+              !finalView && ManualResponse && p.onResponseAdded ? button('Add response',()=>{if(round?.is_active&&!completed&&canLeave()){if(options.current)options.current.open=false;setSaved('');setAdding(round);}}, {'aria-label':'Add response',disabled:!round?.is_active||completed,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response'}) : null,
+              !finalView && stage<3 ? button(`Review Round ${stage+1}`,()=>{if(!canLeave())return;if(nextRound)openPanel('next');else {if(options.current)options.current.open=false;if(p.onPrepareNextRound)p.onPrepareNextRound();else window.dispatchEvent(new CustomEvent('symphonia:prepare-next-round'));}},{title:`Review the questionnaire before opening Round ${stage+1}`}) : null,
+              button('Invite people',()=>openPanel('invite')),h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),
               p.onDownload ? button('Download', p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? 'Updating…' : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null)))),
       h('nav', { className: 'cw-views', 'aria-label': 'Consultation views' },

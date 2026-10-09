@@ -56,7 +56,7 @@ function page(path = '/') {
   dom.window.close = () => { observers.forEach(observer => observer.disconnect()); close(); };
   dom.window.__roundApi = {g:async()=>[{round_number:1,questions:[],synthesis_json:{reasoning_graph:{claims:[1,2].map(n=>({id:`claim_${n}`,text:`Synthetic claim ${n}`,origin:'explicit'}))}}}]};
   dom.window.__claimBuilder = {buildDelphiRoundTwoQuestions};
-  dom.window.eval(script.replace("import('/assets/rounds-CU08geHs.js')", 'Promise.resolve(window.__roundApi)').replace("import('/claim-review.js?v=3')", 'Promise.resolve(window.__claimBuilder)'));
+  dom.window.eval(script.replace("import('/assets/rounds-CU08geHs.js')", 'Promise.resolve(window.__roundApi)').replace("import('/claim-review.js?v=4')", 'Promise.resolve(window.__claimBuilder)'));
   return dom;
 }
 
@@ -215,4 +215,17 @@ test('confidence alone does not satisfy agreement; new justification remains vis
   const agreement=doc.querySelector('input[name="rating"]');agreement.checked=true;agreement.dispatchEvent(new dom.window.Event('change',{bubbles:true}));
   assert.equal(doc.querySelector('#delphi-round-two-next').disabled,false);
  } finally {dom.window.close();}
+});
+
+test('legacy display removes repeated feedback guidance while preserving recorded information and answers', async()=>{
+ const dom=page('/public/session/feedback');
+ try {
+  participant(dom.window,1);
+  const question=dom.window.document.querySelector('[data-question-key]');
+  const p=dom.window.document.createElement('p');p.className='mb-2 text-sm leading-6';
+  p.textContent='Previous round: 2 support. Review the previous round before re-rating. The previous-round summary contains the anonymised original excerpts. Consensus is not required: retain your view if the evidence still supports it.';question.prepend(p);
+  const answer=dom.window.document.querySelector('textarea');const saved=answer.value;
+  await settle();
+  assert.equal(p.textContent,'Previous round: 2 support.');assert.equal(p.hidden,false);assert.equal(answer.value,saved);
+ }finally{dom.window.close();}
 });

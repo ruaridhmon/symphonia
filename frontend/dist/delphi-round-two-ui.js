@@ -1,3 +1,38 @@
+"use strict";
+var SymphoniaDelphiFeedback = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // src/utils/delphiFeedback.ts
+  var delphiFeedback_exports = {};
+  __export(delphiFeedback_exports, {
+    compactDelphiFeedback: () => compactDelphiFeedback
+  });
+  function compactDelphiFeedback(text) {
+    return [
+      "Review the previous round before re-rating.",
+      "The previous-round summary contains the anonymised original excerpts.",
+      "Consensus is not required: retain your view if the evidence still supports it."
+    ].reduce((value, sentence) => value.split(sentence).join(""), text).replace(/[ \t]{2,}/g, " ").trim();
+  }
+  return __toCommonJS(delphiFeedback_exports);
+})();
+
 (function () {
   'use strict';
 
@@ -7,6 +42,7 @@
 
   var BUTTON_ID = 'delphi-round-two-prepare';
   var MODAL_ID = 'delphi-round-two-modal';
+  var modalReturnFocus = null;
 
   function clean(value) {
     return (value || '').replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
@@ -74,11 +110,16 @@
   }
 
   function closeModal() {
-    document.getElementById(MODAL_ID)?.remove();
+    var modal=document.getElementById(MODAL_ID);
+    if(!modal)return;
+    modal.remove();
+    if(modalReturnFocus?.isConnected)modalReturnFocus.focus();
   }
 
   async function openModal() {
     if (!isSummaryPath()) return;
+    var opener=document.activeElement;
+    var returnTarget=opener?.closest('.cw-options')?.querySelector('summary') || opener;
     var claims = claimData();
     var formId = window.location.pathname.match(/\/admin\/form\/(\d+)\/summary/)?.[1];
     var frozenQuestions = null;
@@ -95,7 +136,7 @@
         claims = frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId === q.questionId.replace(/_response$/, '_confidence');}) || {}).options};});
       } else {
         var opening=rounds.find(function(r){return r.round_number===1;});
-        var claimBuilder=await import('/claim-review.js?v=3');
+        var claimBuilder=await import('/claim-review.js?v=4');
         frozenQuestions=claimBuilder.buildDelphiRoundTwoQuestions(opening?.synthesis || '',opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null);
         claims=frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,origin:q.claimOrigin,feedback:q.groupPrompt,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId===q.questionId.replace(/_response$/,'_confidence');}) || {}).options};});
       }
@@ -108,6 +149,7 @@
     }
 
     closeModal();
+    modalReturnFocus=returnTarget;
     var overlay = document.createElement('div');
     overlay.id = MODAL_ID;
     overlay.className = 'cw-round-setup';
@@ -482,7 +524,7 @@
       return;
     }
     question.classList.add('delphi-r2-composer');
-    var reasonLabel = document.createElement('p'); reasonLabel.className = 'delphi-reason-label'; reasonLabel.className='cw-preview-field'; reasonLabel.textContent = 'Explain your position (optional)'; reasonLabel.style.cssText = 'font-size:15px;line-height:1.5;margin:12px 0 6px;font-weight:600'; textarea.before(reasonLabel);
+    var reasonLabel = document.createElement('p'); reasonLabel.className = 'delphi-reason-label'; reasonLabel.textContent = 'Explain your position (optional)'; reasonLabel.style.cssText = 'font-size:15px;line-height:1.5;margin:12px 0 6px;font-weight:600'; textarea.before(reasonLabel);
     textarea.rows = 2;
     textarea.placeholder = 'Why do you agree or disagree? Share the reasoning or evidence behind your answer.';
     textarea.setAttribute('aria-label', 'Explain your position (optional)');
@@ -538,6 +580,12 @@
       cleanupUi();
       return;
     }
+
+    document.querySelectorAll('[data-question-key] > p.mb-2.text-sm.leading-6').forEach(function(paragraph){
+      var cleaned=SymphoniaDelphiFeedback.compactDelphiFeedback(paragraph.textContent || '');
+      if(paragraph.textContent!==cleaned)paragraph.textContent=cleaned;
+      paragraph.hidden=!cleaned;
+    });
 
     var buttons = sectionButtons();
     if (!buttons.length) return;

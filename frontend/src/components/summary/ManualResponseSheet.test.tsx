@@ -14,6 +14,7 @@ it('keeps failed entries and retries the same request without using participant 
  mocks.get.mockResolvedValue({...props.form,consent_required:false});mocks.post.mockRejectedValueOnce(new Error('Offline')).mockResolvedValueOnce({ok:true});
  render(<ManualResponseSheet {...props}/>);
  await screen.findByRole('textbox',{name:'What matters?'});
+ expect(screen.getByRole('dialog',{name:'Add response'})).toBeInTheDocument();
  fireEvent.change(screen.getByRole('textbox',{name:'Respondent name'}),{target:{value:'Alex'}});
  fireEvent.click(screen.getByRole('button',{name:'Save response'}));
  expect(await screen.findByRole('alert')).toHaveTextContent('Please answer');expect(mocks.post).not.toHaveBeenCalled();

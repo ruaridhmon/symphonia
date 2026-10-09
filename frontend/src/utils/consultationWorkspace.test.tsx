@@ -14,14 +14,19 @@ it('adds entries only to the current round from Responses and refreshes after sa
  const AdminWorkspace=createConsultationWorkspace(React,Sheet);
  const p={...props(),view:'responses' as const,onResponseAdded:vi.fn()};
  const mounted=render(<AdminWorkspace {...p}/>);
- fireEvent.click(screen.getByRole('button',{name:'Add response'}));
+ fireEvent.click(menuAction('Add response'));
  expect(screen.getByText('Adding to 12')).toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Save entry'}));
  await waitFor(()=>expect(screen.getByRole('status')).toHaveTextContent('Response saved'));
  expect(p.onResponseAdded).toHaveBeenCalledOnce();
  mounted.rerender(<AdminWorkspace {...p} selectedRoundId={11}/>);
- expect(screen.getByRole('button',{name:'Add response'})).toBeDisabled();
+ expect(menuAction('Add response')).toBeDisabled();
 });
+function menuAction(name:string) {
+ const summary=screen.getByLabelText('Consultation options');
+ if(!(summary.closest('details') as HTMLDetailsElement).open)fireEvent.click(summary);
+ return screen.getByRole('button',{name});
+}
 function props(): WorkspaceProps {
   return {form:{id:7,title:'A panel on research',join_code:'ABC 123',allow_join:true,questions:['Opening question']},rounds:[{id:11,round_number:1,is_active:false,questions:['What matters?'],synthesis:''},{id:12,round_number:2,is_active:true,questions:[{label:'Your response',sectionTitle:'Claim 1: Keep independent review',options:['Agree','Disagree']}],synthesis:''}],selectedRoundId:12,view:'synthesis',onView:vi.fn(),onRound:vi.fn(),onMakeLive:vi.fn(),responses:[{id:12,round_number:2,synthesis:'',is_active:true,responses:[]}]} ;
 }
@@ -46,7 +51,7 @@ describe('consultation workspace', () => {
     fireEvent.click(screen.getByRole('button',{name:'Responses'}));expect(p.onView).toHaveBeenCalledWith('responses');
   });
   it('previews the actual questions and options', async () => {
-    const p=props();p.rounds[0].is_active=true;p.rounds[1].is_active=false;render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
+    const p=props();p.rounds[0].is_active=true;p.rounds[1].is_active=false;render(<Workspace {...p}/>);fireEvent.click(menuAction('Review Round 2'));
     expect(await screen.findByRole('dialog',{name:'Review Round 2'})).toBeTruthy();
     expect(screen.getByText('Claim 1: Keep independent review')).toBeTruthy();expect(screen.getByText('Agree · Disagree')).toBeTruthy();
   });
@@ -74,7 +79,7 @@ it('groups rating and explanation under one claim without repeating the scale',(
  const questions=[{sectionTitle:claim,label:'Your response',inputType:'single_select',options:['Agree','Disagree']},{sectionTitle:claim,label:'Explain your position',inputType:'textarea'}];
  const round={id:22,round_number:2,is_active:true,synthesis:'',questions};
  render(<Workspace form={{id:1,title:'Panel',questions,allow_join:true,join_code:'abc'}} rounds={[{id:21,round_number:1,is_active:true,synthesis:'',questions:['Opening question']},{...round,is_active:false}]} selectedRoundId={22} view="synthesis" onView={()=>{}} onRound={()=>{}}/>);
- fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
+ fireEvent.click(menuAction('Review Round 2'));
  expect(screen.getAllByRole('heading',{name:claim})).toHaveLength(1);
  expect(screen.getAllByText('Rating',{exact:true}).length).toBeGreaterThan(0);
  expect(screen.getByText('Written explanation',{exact:false})).toBeInTheDocument();
@@ -90,7 +95,7 @@ it('offers only Summary and Responses with directly selectable rounds',()=>{
 it('makes Add response available from Summary and places invitations inside the options menu',()=>{
  const AdminWorkspace=createConsultationWorkspace(React,()=>null);
  render(<AdminWorkspace {...props()} onResponseAdded={()=>{}}/>);
- expect(screen.getByRole('button',{name:'Add response'})).toBeEnabled();
+ expect(menuAction('Add response')).toBeEnabled();
  const invite=screen.getByRole('button',{name:'Invite people',hidden:true});
  expect(invite.closest('details')).toHaveClass('cw-options');
  fireEvent.click(invite);
@@ -121,7 +126,7 @@ it('keeps the right menu focused on study actions and removes the duplicate map 
 
 it('reviews the saved next questionnaire before making it current',async()=>{
  const p=props();p.rounds[0].is_active=true;p.rounds[1].is_active=false;p.selectedRoundId=11;
- render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
+ render(<Workspace {...p}/>);fireEvent.click(menuAction('Review Round 2'));
  const dialog=await screen.findByRole('dialog',{name:'Review Round 2'});
  expect(dialog).toHaveTextContent('Keep independent review');expect(p.onMakeLive).not.toHaveBeenCalled();
  fireEvent.click(screen.getByRole('button',{name:'Open Round 2'}));expect(p.onMakeLive).toHaveBeenCalledWith(p.rounds[1]);
@@ -129,7 +134,7 @@ it('reviews the saved next questionnaire before making it current',async()=>{
 it('prepares a missing next round only on request and uses the current round from historical views',()=>{
  const p=props(),prepare=vi.fn();render(<Workspace {...p} selectedRoundId={11} onPrepareNextRound={prepare}/>);
  expect(screen.getByLabelText('Delphi next step')).toHaveTextContent('Viewing Round 1 · Round 2 is current');
- expect(prepare).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Review Round 3'}));expect(prepare).toHaveBeenCalledOnce();expect(p.onMakeLive).not.toHaveBeenCalled();
+ expect(prepare).not.toHaveBeenCalled();fireEvent.click(menuAction('Review Round 3'));expect(prepare).toHaveBeenCalledOnce();expect(p.onMakeLive).not.toHaveBeenCalled();
 });
 
 it('returns Summary to its recorded overview after full-summary selection',async()=>{
@@ -143,8 +148,9 @@ it('returns Summary to its recorded overview after full-summary selection',async
 
 it('keeps one next-round action without redundant options',()=>{
  render(<Workspace {...props()}/>);
- const next=screen.getByRole('button',{name:'Review Round 3'});
- expect(next.closest('.cw-title-actions')).not.toBeNull();expect(next).toHaveTextContent('Next round');
+ const next=menuAction('Review Round 3');
+ expect(next.closest('.cw-options')).not.toBeNull();expect(next).toHaveTextContent('Review Round 3');
+ expect(document.querySelectorAll('.cw-title-actions>button')).toHaveLength(0);
  expect(document.querySelector('.cw-workflow')).toBeNull();
  expect(screen.queryByText('How rounds work')).toBeNull();
  expect(screen.queryByRole('button',{name:'View questions',hidden:true})).toBeNull();
@@ -154,7 +160,7 @@ it('shows identical claim fields once and retains different fields for review',(
  const p=props();p.rounds[0].is_active=true;p.rounds[1].is_active=false;
  const fields=['Agree','Neither agree nor disagree','Disagree'];
  p.rounds[1].questions=[1,2].flatMap(n=>[{sectionTitle:`Claim ${n}: Exact claim ${n}`,label:'Do you agree with this statement?',options:fields,optional:false},{sectionTitle:`Claim ${n}: Exact claim ${n}`,label:'Confidence in your rating',options:['Low','High'],optional:false},{sectionTitle:`Claim ${n}: Exact claim ${n}`,label:'Justification',optional:true}]);
- render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
+ render(<Workspace {...p}/>);fireEvent.click(menuAction('Review Round 2'));
  expect(screen.getByLabelText('Response fields for every claim')).toHaveTextContent('Agree · Neither agree nor disagree · Disagree');
  expect(screen.getAllByText('Confidence in your rating')).toHaveLength(1);
  expect(screen.getByRole('heading',{name:'Claim 2: Exact claim 2'})).toBeInTheDocument();
