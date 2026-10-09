@@ -39,7 +39,7 @@ export function questionOutline(questions: Round['questions']) {
 export function createConsultationWorkspace(R: typeof React, ManualResponse?: React.ComponentType<ManualResponseProps>, FinalSynthesis?:React.ComponentType<FinalSynthesisProps>) {
   const h = R.createElement;
   return function ConsultationWorkspace(p: WorkspaceProps) {
-    const [panel, setPanel] = R.useState<'invite' | 'questions' | 'next' | null>(null);
+    const [panel, setPanel] = R.useState<'invite' | 'next' | null>(null);
     const [finalView,setFinalView] = R.useState(false);
     const opening=p.rounds.find(r=>r.round_number===1);
     const openingQuestions=(opening?.questions?.length ? opening.questions : p.form.questions).map(q=>typeof q==='string'?q:String(q.label||q.question||q.text||'')).filter(q=>q.trim());
@@ -52,7 +52,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
     const titleId = R.useId();
     const invoker = R.useRef<HTMLElement|null>(null);
     const options = R.useRef<HTMLDetailsElement>(null);
-    const openPanel = (next:'invite'|'questions'|'next') => {invoker.current=options.current?.contains(document.activeElement)?options.current.querySelector('summary') || null:document.activeElement as HTMLElement;if(options.current)options.current.open=false;setCopyState('');setPanel(next);};
+    const openPanel = (next:'invite'|'next') => {invoker.current=options.current?.contains(document.activeElement)?options.current.querySelector('summary') || null:document.activeElement as HTMLElement;if(options.current)options.current.open=false;setCopyState('');setPanel(next);};
     const ordered = [...p.rounds].sort((a, b) => a.round_number - b.round_number);
     const round = ordered.find(r => r.id === p.selectedRoundId) || ordered.find(r => r.is_active) || ordered[0];
     const joinUrl = new URL(`/share/${encodeURIComponent(p.form.join_code)}`, window.location.origin).href;
@@ -68,7 +68,6 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
     R.useEffect(()=>{const changed=(e:Event)=>{const d=(e as CustomEvent).detail;if(d?.id===p.form.id)setCurrentTitle(d.title);};document.addEventListener('symphonia:consultations-changed',changed);return()=>document.removeEventListener('symphonia:consultations-changed',changed);},[p.form.id]);
     const simulated=/^SIMULATED PANEL\s*[—–-]\s*/i.test(currentTitle);
     const displayTitle=currentTitle.replace(/^SIMULATED PANEL\s*[—–-]\s*/i,'');
-    const hint = round?.round_number === 1 ? 'Collect independent views, then draw out the claims.' : round?.round_number === 2 ? 'Review the claims and where the panel agrees or differs.' : 'Review final ratings alongside the reasons behind them.';
     R.useEffect(() => {
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
       if (!panel && dialog.current?.open) dialog.current.close();
@@ -88,7 +87,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
           !finalView && ManualResponse && p.onResponseAdded ? button('Add response',()=>{if(round?.is_active&&!completed&&canLeave()){setSaved('');setAdding(round);}}, {ref:addTrigger,className:'cw-add-response','aria-label':'Add response',disabled:!round?.is_active||completed,title:round?.is_active?'Record a response received outside Symphonia':'Select the current round to add a response',children:[h('svg',{key:'icon',width:16,height:16,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.7,'aria-hidden':true},h('path',{d:'M12 5v14M5 12h14'})),h('span',{key:'label'},'Add response')]}) : null,
           !finalView && stage<3 ? button('Next round →',()=>{if(!canLeave())return;if(nextRound)openPanel('next');else if(p.onPrepareNextRound)p.onPrepareNextRound();else window.dispatchEvent(new CustomEvent('symphonia:prepare-next-round'));},{className:'cw-next-round','aria-label':`Review Round ${stage+1}`,title:`Preview Round ${stage+1} before opening it`,children:[h('span',{key:'wide',className:'cw-next-wide'},'Next round →'),h('span',{key:'compact',className:'cw-next-compact','aria-hidden':true},'Next →')]} ) : null,
           h('details', { ref:options,className: 'cw-options',onKeyDown:(e:React.KeyboardEvent<HTMLDetailsElement>)=>{if(e.key==='Escape'){e.currentTarget.open=false;e.currentTarget.querySelector('summary')?.focus();}} }, h('summary', { 'aria-label': 'Consultation options' }, '•••'),
-            h('div', null, button('Invite people',()=>openPanel('invite')),h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),button('View questions',()=>openPanel('questions'),{'aria-label':'View questions',disabled:!round}),h('details',{className:'cw-process'},h('summary',null,'How rounds work'),h('p',null,nextHint)),
+            h('div', null, button('Invite people',()=>openPanel('invite')),h('a', { href: `/admin/form/${p.form.id}` }, 'Edit consultation'),
               p.onDownload ? button('Download', p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? 'Updating…' : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null)))),
       h('nav', { className: 'cw-views', 'aria-label': 'Consultation views' },
@@ -110,7 +109,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       adding && ManualResponse ? h(ManualResponse,{form:p.form,round:adding,onClose:()=>{setAdding(null);requestAnimationFrame(()=>addTrigger.current?.focus());},onSaved:async()=>{await p.onResponseAdded?.();setSaved('Response saved');}}) : null,
       h('dialog', { ref: dialog, className: `cw-dialog ${panel==='next'?'cw-round-review':''}`, 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => {setPanel(null);requestAnimationFrame(()=>invoker.current?.focus());}, onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
         h('div', { className: 'cw-dialog-body' },
-          h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Invite people' : panel==='next'?`Review Round ${previewRound?.round_number}`:`Round ${previewRound?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
+          h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Invite people' : `Review Round ${previewRound?.round_number}`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
           panel === 'invite' ? h(R.Fragment, null,
             h('p', { className: 'cw-dialog-intro' }, 'Share one link. Each person joins the consultation and responds in their own space.'),
             !p.form.allow_join ? h('p', { role: 'status', className: 'cw-notice' }, 'Joining is currently closed. Review access settings before inviting new participants.') : null,
@@ -120,7 +119,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
             h('div', { className: 'cw-invite-note' }, h('strong', null, 'One panel, every round'), h('p', null, 'Participants use this link again when the next round opens. Existing sign-in and consent requirements still apply.')),
             h('a', { className: 'cw-settings-link', href: `/admin/form/${p.form.id}` }, 'Manage access and consultation settings →')) :
             h(R.Fragment, null,
-              h('p', { className: 'cw-dialog-intro' }, panel==='next'?`${outline.groups.length} ${savedCustom?(outline.groups.length===1?'question group':'question groups'):(outline.groups.length===1?'claim':'claims')} · Review before opening for participants.`:hint),
+              h('p', { className: 'cw-dialog-intro' }, `${outline.groups.length} ${savedCustom?(outline.groups.length===1?'question group':'question groups'):(outline.groups.length===1?'claim':'claims')} · Review before opening for participants.`),
               panel==='next'?h('details',{className:'cw-round-details'},h('summary',null,'Round details'),h('p',null,nextHint)):null,
               outline.sharedFields?h('details',{className:'cw-common-fields','aria-label':'Response fields for every claim'},h('summary',null,'Participant response'),...outline.sharedFields.map((field,i)=>h('p',{key:i},h('strong',null,field.label),h('span',null,field.optional?'Optional':'Required'),field.options.length?h('small',null,field.options.join(' · ')):null))):null,
               !outline.sharedFields&&outline.sharedScale?h('details',{className:'cw-shared-scale'},h('summary',null,'Rating scale used for every rated claim'),h('p',null,outline.sharedScale.join(' · '))):null,

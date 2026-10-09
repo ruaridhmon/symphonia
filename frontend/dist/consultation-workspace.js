@@ -62,7 +62,6 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
     }, [p.form.id]);
     const simulated = /^SIMULATED PANEL\s*[—–-]\s*/i.test(currentTitle);
     const displayTitle = currentTitle.replace(/^SIMULATED PANEL\s*[—–-]\s*/i, "");
-    const hint = round?.round_number === 1 ? "Collect independent views, then draw out the claims." : round?.round_number === 2 ? "Review the claims and where the panel agrees or differs." : "Review final ratings alongside the reasons behind them.";
     R.useEffect(() => {
       if (panel && dialog.current && !dialog.current.open) dialog.current.showModal();
       if (!panel && dialog.current?.open) dialog.current.close();
@@ -128,8 +127,6 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
               null,
               button("Invite people", () => openPanel("invite")),
               h("a", { href: `/admin/form/${p.form.id}` }, "Edit consultation"),
-              button("View questions", () => openPanel("questions"), { "aria-label": "View questions", disabled: !round }),
-              h("details", { className: "cw-process" }, h("summary", null, "How rounds work"), h("p", null, nextHint)),
               p.onDownload ? button("Download", p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? "Updating\u2026" : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null
             )
@@ -215,7 +212,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
         h(
           "div",
           { className: "cw-dialog-body" },
-          h("header", null, h("h2", { id: titleId }, panel === "invite" ? "Invite people" : panel === "next" ? `Review Round ${previewRound?.round_number}` : `Round ${previewRound?.round_number} questions`), button("\xD7", () => setPanel(null), { "aria-label": "Close dialog", className: "cw-close" })),
+          h("header", null, h("h2", { id: titleId }, panel === "invite" ? "Invite people" : `Review Round ${previewRound?.round_number}`), button("\xD7", () => setPanel(null), { "aria-label": "Close dialog", className: "cw-close" })),
           panel === "invite" ? h(
             R.Fragment,
             null,
@@ -231,7 +228,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
           ) : h(
             R.Fragment,
             null,
-            h("p", { className: "cw-dialog-intro" }, panel === "next" ? `${outline.groups.length} ${savedCustom ? outline.groups.length === 1 ? "question group" : "question groups" : outline.groups.length === 1 ? "claim" : "claims"} \xB7 Review before opening for participants.` : hint),
+            h("p", { className: "cw-dialog-intro" }, `${outline.groups.length} ${savedCustom ? outline.groups.length === 1 ? "question group" : "question groups" : outline.groups.length === 1 ? "claim" : "claims"} \xB7 Review before opening for participants.`),
             panel === "next" ? h("details", { className: "cw-round-details" }, h("summary", null, "Round details"), h("p", null, nextHint)) : null,
             outline.sharedFields ? h("details", { className: "cw-common-fields", "aria-label": "Response fields for every claim" }, h("summary", null, "Participant response"), ...outline.sharedFields.map((field, i) => h("p", { key: i }, h("strong", null, field.label), h("span", null, field.optional ? "Optional" : "Required"), field.options.length ? h("small", null, field.options.join(" \xB7 ")) : null))) : null,
             !outline.sharedFields && outline.sharedScale ? h("details", { className: "cw-shared-scale" }, h("summary", null, "Rating scale used for every rated claim"), h("p", null, outline.sharedScale.join(" \xB7 "))) : null,

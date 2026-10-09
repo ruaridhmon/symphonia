@@ -46,8 +46,8 @@ describe('consultation workspace', () => {
     fireEvent.click(screen.getByRole('button',{name:'Responses'}));expect(p.onView).toHaveBeenCalledWith('responses');
   });
   it('previews the actual questions and options', async () => {
-    render(<Workspace {...props()}/>);fireEvent.click(screen.getByRole('button',{name:'View questions',hidden:true}));
-    expect(await screen.findByRole('dialog',{name:'Round 2 questions'})).toBeTruthy();
+    const p=props();p.rounds[0].is_active=true;p.rounds[1].is_active=false;render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
+    expect(await screen.findByRole('dialog',{name:'Review Round 2'})).toBeTruthy();
     expect(screen.getByText('Claim 1: Keep independent review')).toBeTruthy();expect(screen.getByText('Agree · Disagree')).toBeTruthy();
   });
   it('copies an encoded invitation without opening access or sending invitations', async () => {
@@ -73,8 +73,8 @@ it('groups rating and explanation under one claim without repeating the scale',(
  const claim='Claim 1: An exact claim';
  const questions=[{sectionTitle:claim,label:'Your response',inputType:'single_select',options:['Agree','Disagree']},{sectionTitle:claim,label:'Explain your position',inputType:'textarea'}];
  const round={id:22,round_number:2,is_active:true,synthesis:'',questions};
- render(<Workspace form={{id:1,title:'Panel',questions,allow_join:true,join_code:'abc'}} rounds={[round]} selectedRoundId={22} view="synthesis" onView={()=>{}} onRound={()=>{}}/>);
- fireEvent.click(screen.getByRole('button',{name:'View questions',hidden:true}));
+ render(<Workspace form={{id:1,title:'Panel',questions,allow_join:true,join_code:'abc'}} rounds={[{id:21,round_number:1,is_active:true,synthesis:'',questions:['Opening question']},{...round,is_active:false}]} selectedRoundId={22} view="synthesis" onView={()=>{}} onRound={()=>{}}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
  expect(screen.getAllByRole('heading',{name:claim})).toHaveLength(1);
  expect(screen.getAllByText('Rating',{exact:true}).length).toBeGreaterThan(0);
  expect(screen.getByText('Written explanation',{exact:false})).toBeInTheDocument();
@@ -141,13 +141,13 @@ it('returns Summary to its recorded overview after full-summary selection',async
  await waitFor(()=>expect(restore).toHaveBeenCalledOnce());
 });
 
-it('keeps next-round guidance in options and uses one compact header action',()=>{
+it('keeps one next-round action without redundant options',()=>{
  render(<Workspace {...props()}/>);
  const next=screen.getByRole('button',{name:'Review Round 3'});
  expect(next.closest('.cw-title-actions')).not.toBeNull();expect(next).toHaveTextContent('Next round');
  expect(document.querySelector('.cw-workflow')).toBeNull();
- const process=screen.getByText('How rounds work').closest('details')!;
- expect(process.open).toBe(false);expect(process).toHaveTextContent('Round 3 reuses the Round 2 claims');
+ expect(screen.queryByText('How rounds work')).toBeNull();
+ expect(screen.queryByRole('button',{name:'View questions',hidden:true})).toBeNull();
 });
 
 it('shows identical claim fields once and retains different fields for review',()=>{
