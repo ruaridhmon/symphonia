@@ -122,7 +122,7 @@ it('keeps the right menu focused on study actions and removes the duplicate map 
 it('reviews the saved next questionnaire before making it current',async()=>{
  const p=props();p.rounds[0].is_active=true;p.rounds[1].is_active=false;p.selectedRoundId=11;
  render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
- const dialog=await screen.findByRole('dialog',{name:'Round 2 questions'});
+ const dialog=await screen.findByRole('dialog',{name:'Review Round 2'});
  expect(dialog).toHaveTextContent('Keep independent review');expect(p.onMakeLive).not.toHaveBeenCalled();
  fireEvent.click(screen.getByRole('button',{name:'Open Round 2'}));expect(p.onMakeLive).toHaveBeenCalledWith(p.rounds[1]);
 });
@@ -148,4 +148,15 @@ it('keeps next-round guidance in options and uses one compact header action',()=
  expect(document.querySelector('.cw-workflow')).toBeNull();
  const process=screen.getByText('How rounds work').closest('details')!;
  expect(process.open).toBe(false);expect(process).toHaveTextContent('Round 3 reuses the Round 2 claims');
+});
+
+it('shows identical claim fields once and retains different fields for review',()=>{
+ const p=props();p.rounds[0].is_active=true;p.rounds[1].is_active=false;
+ const fields=['Agree','Neither agree nor disagree','Disagree'];
+ p.rounds[1].questions=[1,2].flatMap(n=>[{sectionTitle:`Claim ${n}: Exact claim ${n}`,label:'Do you agree with this statement?',options:fields,optional:false},{sectionTitle:`Claim ${n}: Exact claim ${n}`,label:'Confidence in your rating',options:['Low','High'],optional:false},{sectionTitle:`Claim ${n}: Exact claim ${n}`,label:'Justification',optional:true}]);
+ render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
+ expect(screen.getByLabelText('Response fields for every claim')).toHaveTextContent('Agree · Neither agree nor disagree · Disagree');
+ expect(screen.getAllByText('Confidence in your rating')).toHaveLength(1);
+ expect(screen.getByRole('heading',{name:'Claim 2: Exact claim 2'})).toBeInTheDocument();
+ expect(p.onMakeLive).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Cancel'}));expect(p.onMakeLive).not.toHaveBeenCalled();
 });
