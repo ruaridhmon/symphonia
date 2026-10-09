@@ -16,6 +16,7 @@ export interface WorkspaceProps {
   onMakeLive?: (round: Round) => void;
   makingLiveId?: number | null;
   onDownload?: () => void;
+  onPrepareNextRound?: () => void;
   onResponseAdded?: () => void | Promise<void>;
 }
 
@@ -37,7 +38,7 @@ export function questionOutline(questions: Round['questions']) {
 export function createConsultationWorkspace(R: typeof React, ManualResponse?: React.ComponentType<ManualResponseProps>, FinalSynthesis?:React.ComponentType<FinalSynthesisProps>) {
   const h = R.createElement;
   return function ConsultationWorkspace(p: WorkspaceProps) {
-    const [panel, setPanel] = R.useState<'invite' | 'questions' | null>(null);
+    const [panel, setPanel] = R.useState<'invite' | 'questions' | 'next' | null>(null);
     const [finalView,setFinalView] = R.useState(false);
     const opening=p.rounds.find(r=>r.round_number===1);
     const openingQuestions=(opening?.questions?.length ? opening.questions : p.form.questions).map(q=>typeof q==='string'?q:String(q.label||q.question||q.text||'')).filter(q=>q.trim());
@@ -50,11 +51,18 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
     const titleId = R.useId();
     const invoker = R.useRef<HTMLElement|null>(null);
     const options = R.useRef<HTMLDetailsElement>(null);
-    const openPanel = (next:'invite'|'questions') => {invoker.current=options.current?.contains(document.activeElement)?options.current.querySelector('summary') || null:document.activeElement as HTMLElement;if(options.current)options.current.open=false;setCopyState('');setPanel(next);};
+    const openPanel = (next:'invite'|'questions'|'next') => {invoker.current=options.current?.contains(document.activeElement)?options.current.querySelector('summary') || null:document.activeElement as HTMLElement;if(options.current)options.current.open=false;setCopyState('');setPanel(next);};
     const ordered = [...p.rounds].sort((a, b) => a.round_number - b.round_number);
     const round = ordered.find(r => r.id === p.selectedRoundId) || ordered.find(r => r.is_active) || ordered[0];
     const joinUrl = new URL(`/share/${encodeURIComponent(p.form.join_code)}`, window.location.origin).href;
-    const outline=questionOutline(round?.questions || p.form.questions);
+    const current=ordered.find(r=>r.is_active) || ordered.at(-1);
+    const nextRound=ordered.find(r=>r.round_number===(current?.round_number||1)+1);
+    const previewRound=panel==='next'?nextRound:round;
+    const outline=questionOutline(previewRound?.questions || p.form.questions);
+    const stage=current?.round_number||1;
+    const stageText=stage===1?'Round 1 · Independent input':stage===2?'Round 2 · Claim review':'Round 3 · Reconsideration';
+    const savedCustom=nextRound&&!nextRound.questions.some(q=>typeof q==='object'&&typeof q.questionId==='string'&&q.questionId.endsWith('_response'));
+    const nextHint=savedCustom?'The next round already has a saved questionnaire. Review its questions before opening it; existing questions are preserved.':stage===1?'Round 2 is prepared from the saved claims, with separate agreement, confidence and optional justification fields. Review the questions before opening it.':stage===2?'Round 3 reuses the Round 2 claims and scales, with recorded positions, confidence and reasons as feedback. Participants can keep or revise their views.':'After reviewing the final responses, open Final synthesis to draft the collective account. There is no fourth participant questionnaire.';
     const [currentTitle,setCurrentTitle]=R.useState(p.form.title);
     R.useEffect(()=>{setCurrentTitle(p.form.title);},[p.form.id,p.form.title]);
     R.useEffect(()=>{const changed=(e:Event)=>{const d=(e as CustomEvent).detail;if(d?.id===p.form.id)setCurrentTitle(d.title);};document.addEventListener('symphonia:consultations-changed',changed);return()=>document.removeEventListener('symphonia:consultations-changed',changed);},[p.form.id]);
@@ -96,11 +104,14 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
         h('p',null,h('span',{className:'cw-question-label'},'Question'),openingQuestions[0]),
         openingQuestions.length>1 ? h('details',null,h('summary',null,`${openingQuestions.length-1} more question${openingQuestions.length===2?'':'s'}`),h('ol',{start:2},...openingQuestions.slice(1).map((question,index)=>h('li',{key:index},question)))) : null) : null,
       finalView && FinalSynthesis ? h(FinalSynthesis,{formId:p.form.id,questions:openingQuestions,onComplete:()=>setCompleted(true)}) : null,
+      !finalView ? h('section',{className:'cw-workflow','aria-label':'Delphi next step'},
+        h('div',null,h('strong',null,round?.id!==current?.id?`Viewing Round ${round?.round_number} · Current: ${stageText}`:stageText),h('p',null,nextHint)),
+        stage<3 ? button(`Review Round ${stage+1}`,()=>{if(!canLeave())return;if(nextRound)openPanel('next');else if(p.onPrepareNextRound)p.onPrepareNextRound();else window.dispatchEvent(new CustomEvent('symphonia:prepare-next-round'));},{className:'cw-next-round'}) : FinalSynthesis ? button('Open Final synthesis',()=>{if(canLeave()){p.onView('synthesis');setFinalView(true);}}) : null) : null,
       saved ? h('p',{className:'cw-response-saved',role:'status'},saved) : null,
       adding && ManualResponse ? h(ManualResponse,{form:p.form,round:adding,onClose:()=>{setAdding(null);requestAnimationFrame(()=>addTrigger.current?.focus());},onSaved:async()=>{await p.onResponseAdded?.();setSaved('Response saved');}}) : null,
       h('dialog', { ref: dialog, className: 'cw-dialog', 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => {setPanel(null);requestAnimationFrame(()=>invoker.current?.focus());}, onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
         h('div', { className: 'cw-dialog-body' },
-          h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Invite people' : `Round ${round?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
+          h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Invite people' : `Round ${previewRound?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
           panel === 'invite' ? h(R.Fragment, null,
             h('p', { className: 'cw-dialog-intro' }, 'Share one link. Each person joins the consultation and responds in their own space.'),
             !p.form.allow_join ? h('p', { role: 'status', className: 'cw-notice' }, 'Joining is currently closed. Review access settings before inviting new participants.') : null,
@@ -110,7 +121,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
             h('div', { className: 'cw-invite-note' }, h('strong', null, 'One panel, every round'), h('p', null, 'Participants use this link again when the next round opens. Existing sign-in and consent requirements still apply.')),
             h('a', { className: 'cw-settings-link', href: `/admin/form/${p.form.id}` }, 'Manage access and consultation settings →')) :
             h(R.Fragment, null,
-              h('p', { className: 'cw-dialog-intro' }, hint),
+              h('p', { className: 'cw-dialog-intro' }, panel==='next'?nextHint:hint),
               outline.sharedScale?h('details',{className:'cw-shared-scale'},h('summary',null,'Rating scale used for every rated claim'),h('p',null,outline.sharedScale.join(' · '))):null,
               h('ol',{className:'cw-questions cw-question-outline'},...outline.groups.map((group,i)=>h('li',{key:i},
                 h('h3',null,group.title),
@@ -119,7 +130,8 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
                   h('span',null,field.optional?' · Optional':' · Required'),
                   !outline.sharedScale&&field.options.length?h('small',null,field.options.join(' · ')):null
                 )))
-              )))
+              ))),
+              panel==='next'&&nextRound&&p.onMakeLive? h('div',{className:'cw-invite-actions'},button(p.makingLiveId===nextRound.id?'Opening…':`Open Round ${nextRound.round_number}`,()=>{p.onMakeLive?.(nextRound);setPanel(null);},{className:'cw-primary',disabled:p.makingLiveId===nextRound.id}),h('p',{className:'cw-dialog-intro'},'Opening this round makes it current for participants. Previous responses are preserved.')):null
             ))));
   };
 }

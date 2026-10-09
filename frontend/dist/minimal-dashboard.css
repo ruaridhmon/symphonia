@@ -147,3 +147,8 @@
 .rename-actions button[type=submit]{background:var(--foreground);color:var(--background)}
 .rename-error{font:12px system-ui;color:var(--destructive,#b42318)}
 @media(hover:none){.symphonia-navigation-menu>summary{opacity:1}}
+
+/* Reserve the fixed navigation control's space in every collapsed layout. */
+#root .symphonia-shell:not(.symphonia-consultation-open)>main.product-dashboard,
+#root .symphonia-shell.symphonia-sidebar-collapsed>main.product-dashboard {padding-top:72px!important;}
+#root .symphonia-sidebar-collapsed .cw-title-row {padding-left:48px;}

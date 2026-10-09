@@ -118,3 +118,16 @@ it('keeps the right menu focused on study actions and removes the duplicate map 
  expect(menu.textContent).toContain('Invite people');
  expect(screen.queryByRole('button',{name:'Claim map',hidden:true})).toBeNull();
 });
+
+it('reviews the saved next questionnaire before making it current',async()=>{
+ const p=props();p.rounds[0].is_active=true;p.rounds[1].is_active=false;p.selectedRoundId=11;
+ render(<Workspace {...p}/>);fireEvent.click(screen.getByRole('button',{name:'Review Round 2'}));
+ const dialog=await screen.findByRole('dialog',{name:'Round 2 questions'});
+ expect(dialog).toHaveTextContent('Keep independent review');expect(p.onMakeLive).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole('button',{name:'Open Round 2'}));expect(p.onMakeLive).toHaveBeenCalledWith(p.rounds[1]);
+});
+it('prepares a missing next round only on request and uses the current round from historical views',()=>{
+ const p=props(),prepare=vi.fn();render(<Workspace {...p} selectedRoundId={11} onPrepareNextRound={prepare}/>);
+ expect(screen.getByLabelText('Delphi next step')).toHaveTextContent('Viewing Round 1 · Current: Round 2');
+ expect(prepare).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Review Round 3'}));expect(prepare).toHaveBeenCalledOnce();expect(p.onMakeLive).not.toHaveBeenCalled();
+});

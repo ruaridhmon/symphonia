@@ -51,3 +51,13 @@ it('puts summary and source controls in the header without replacing handlers',(
  const picker=progress.querySelector<HTMLSelectElement>('select')!,changed=vi.fn();picker.onchange=changed;quietSummary(main);quietSummary(main);expect(slot.querySelector('select')).toBe(picker);expect(progress.querySelector('select')).toBeNull();picker.dispatchEvent(new Event('change'));expect(changed).toHaveBeenCalledOnce();
  slot.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();expect(picker.hidden).toBe(true);slot.querySelector<HTMLButtonElement>('button')!.click();expect(picker.hidden).toBe(false);
 });
+
+it('shows the full matched synthesis and closes its menu without replacing original content',()=>{
+ const main=fixture(),card=main.querySelector<HTMLElement>('.card')!;
+ card.classList.add('unified-synthesis');
+ const menu=document.createElement('details');menu.className='cw-view-menu';menu.open=true;menu.innerHTML='<summary tabindex="0">Summary</summary><div class="cw-summary-slot"></div>';main.prepend(menu);
+ quietSummary(main);menu.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!.click();
+ expect(menu.open).toBe(false);expect(card).toHaveClass('full-summary-visible');expect(card.hidden).toBe(false);
+ menu.open=true;menu.querySelector<HTMLButtonElement>('.summary-switch button')!.click();
+ expect(menu.open).toBe(false);expect(card).not.toHaveClass('full-summary-visible');expect(card.hidden).toBe(true);
+});

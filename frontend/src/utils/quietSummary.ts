@@ -58,16 +58,18 @@ export function quietSummary(main:HTMLElement){
  const previous=current.nav.querySelector<HTMLSelectElement>('.rf-source-picker');
  if(picker&&picker!==previous){previous?.remove();current.nav.append(picker);}else if(!hasReasoning)previous?.remove();
  function sync(){
-  const text=hasReasoning?'Claims & full summary':empty?'Write a summary':'Full summary';
+  const text=empty?'Write a summary':'Full summary';
   if(current.button.textContent!==text)current.button.textContent=text;
   const expanded=String(current.open);if(current.button.getAttribute('aria-expanded')!==expanded)current.button.setAttribute('aria-expanded',expanded);
   if(card!.hidden===current.open)card!.hidden=!current.open;
   current.button.hidden=false;current.nav.hidden=false;
   current.claims.setAttribute('aria-pressed',String(!current.open));current.button.setAttribute('aria-pressed',String(current.open));
   if(progress)progress.hidden=current.open;
+  card!.classList.toggle('full-summary-visible',current.open);
   const source=current.nav.querySelector<HTMLSelectElement>('.rf-source-picker');if(source)source.hidden=current.open;
  }
- current.claims.onclick=()=>{current.open=false;sync();};
- current.button.onclick=()=>{current.open=true;sync();};
+ const choose=(open:boolean)=>{current.open=open;sync();const menu=current.nav.closest<HTMLDetailsElement>('.cw-view-menu');if(menu){menu.open=false;menu.querySelector<HTMLElement>('summary')?.focus({preventScroll:true});}};
+ current.claims.onclick=()=>choose(false);
+ current.button.onclick=()=>choose(true);
  sync();
 }
