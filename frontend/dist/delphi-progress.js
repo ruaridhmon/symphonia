@@ -140,9 +140,14 @@ function buildFixedDelphiRound(round, rounds, responses) {
     if (typeof q === "string") return q;
     const row = rows.find((r) => r.key === String(q.questionId));
     if (row) {
-      const distribution = row.options.map((option) => `${row.evidence.filter((e) => e.position === option).length} ${option.toLowerCase()}`).join(" \xB7 ");
-      const confidence = ["Not at all confident", "Slightly confident", "Moderately confident", "Very confident", "Extremely confident"].map((level) => `${row.evidence.filter((e) => e.confidence === level).length} ${level.toLowerCase()}`).join(" \xB7 ");
-      return { ...q, groupPrompt: [q.claimOrigin === "inferred" ? `Inferred \xB7 unconfirmed. Not directly stated by an expert. ${q.inferenceQuestion || ""}` : "", `Round 2 positions: ${distribution}. ${row.votes[5]} not answered; ${row.votes[4]} unrecognised.`, row.hasConfidence ? `Separate confidence: ${confidence}. ${row.evidence.filter((e) => !e.confidence).length} not recorded.` : "Separate confidence was not collected in this questionnaire.", "Keep or revise your position and confidence after considering the panel. Persistent disagreement is valid.", ...row.evidence.map((e) => `${e.participant}: ${e.position || "Not answered"}; confidence: ${e.confidence || "not recorded"}. ${e.comment || "No justification supplied."}`)].filter(Boolean).join("\n") };
+      const distribution = row.options.map((option) => ({ count: row.evidence.filter((e) => e.position === option).length, label: option.toLowerCase() })).filter((item) => item.count).map((item) => `${item.count} ${item.label}`);
+      if (row.votes[5]) distribution.push(`${row.votes[5]} unanswered`);
+      if (row.votes[4]) distribution.push(`${row.votes[4]} other response${row.votes[4] === 1 ? "" : "s"}`);
+      const levels = [...new Set(row.evidence.map((e) => e.confidence).filter(Boolean))];
+      const confidence = levels.map((level) => `${row.evidence.filter((e) => e.confidence === level).length} ${level.toLowerCase()}`).join(" \xB7 ");
+      const reasons = row.evidence.filter((e) => e.comment.trim()).map((e) => `${e.participant}${e.position ? " \xB7 " + e.position : ""}${e.confidence ? " \xB7 " + e.confidence : ""}
+${e.comment}`);
+      return { ...q, groupPrompt: [q.claimOrigin === "inferred" ? `Inferred \xB7 unconfirmed. Not directly stated by an expert. ${q.inferenceQuestion || ""}` : "", distribution.length ? `Round 2: ${distribution.join(" \xB7 ")}.` : "", confidence ? `Confidence: ${confidence}.` : "", ...reasons].filter(Boolean).join("\n") };
     }
     if (/comment|clarification|justify|what led|explain your position/i.test(String(q.label))) return { ...q, label: "Explain your position", placeholder: "Why do you agree or disagree? Share the reasoning or evidence behind your answer." };
     return { ...q };
