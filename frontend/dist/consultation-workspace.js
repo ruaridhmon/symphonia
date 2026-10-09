@@ -40,7 +40,14 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
     const ordered = [...p.rounds].sort((a, b) => a.round_number - b.round_number);
     const round = ordered.find((r) => r.id === p.selectedRoundId) || ordered.find((r) => r.is_active) || ordered[0];
     const joinUrl = new URL(`/share/${encodeURIComponent(p.form.join_code)}`, window.location.origin).href;
-    const outline = questionOutline(round?.questions || p.form.questions);
+    const current = ordered.find((r) => r.is_active) || ordered.at(-1);
+    const nextRound = ordered.find((r) => r.round_number === (current?.round_number || 1) + 1);
+    const previewRound = panel === "next" ? nextRound : round;
+    const outline = questionOutline(previewRound?.questions || p.form.questions);
+    const stage = current?.round_number || 1;
+    const stageText = stage === 1 ? "Round 1 \xB7 Independent input" : stage === 2 ? "Round 2 \xB7 Claim review" : "Round 3 \xB7 Reconsideration";
+    const savedCustom = nextRound && !nextRound.questions.some((q) => typeof q === "object" && typeof q.questionId === "string" && q.questionId.endsWith("_response"));
+    const nextHint = savedCustom ? "The next round already has a saved questionnaire. Review its questions before opening it; existing questions are preserved." : stage === 1 ? "Round 2 is prepared from the saved claims, with separate agreement, confidence and optional justification fields. Review the questions before opening it." : stage === 2 ? "Round 3 reuses the Round 2 claims and scales, with recorded positions, confidence and reasons as feedback. Participants can keep or revise their views." : "After reviewing the final responses, open Final synthesis to draft the collective account. There is no fourth participant questionnaire.";
     const [currentTitle, setCurrentTitle] = R.useState(p.form.title);
     R.useEffect(() => {
       setCurrentTitle(p.form.title);
@@ -180,6 +187,22 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
         openingQuestions.length > 1 ? h("details", null, h("summary", null, `${openingQuestions.length - 1} more question${openingQuestions.length === 2 ? "" : "s"}`), h("ol", { start: 2 }, ...openingQuestions.slice(1).map((question, index) => h("li", { key: index }, question)))) : null
       ) : null,
       finalView && FinalSynthesis ? h(FinalSynthesis, { formId: p.form.id, questions: openingQuestions, onComplete: () => setCompleted(true) }) : null,
+      !finalView ? h(
+        "section",
+        { className: "cw-workflow", "aria-label": "Delphi next step" },
+        h("div", null, h("strong", null, round?.id !== current?.id ? `Viewing Round ${round?.round_number} \xB7 Current: ${stageText}` : stageText), h("p", null, nextHint)),
+        stage < 3 ? button(`Review Round ${stage + 1}`, () => {
+          if (!canLeave()) return;
+          if (nextRound) openPanel("next");
+          else if (p.onPrepareNextRound) p.onPrepareNextRound();
+          else window.dispatchEvent(new CustomEvent("symphonia:prepare-next-round"));
+        }, { className: "cw-next-round" }) : FinalSynthesis ? button("Open Final synthesis", () => {
+          if (canLeave()) {
+            p.onView("synthesis");
+            setFinalView(true);
+          }
+        }) : null
+      ) : null,
       saved ? h("p", { className: "cw-response-saved", role: "status" }, saved) : null,
       adding && ManualResponse ? h(ManualResponse, { form: p.form, round: adding, onClose: () => {
         setAdding(null);
@@ -199,7 +222,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
         h(
           "div",
           { className: "cw-dialog-body" },
-          h("header", null, h("h2", { id: titleId }, panel === "invite" ? "Invite people" : `Round ${round?.round_number} questions`), button("\xD7", () => setPanel(null), { "aria-label": "Close dialog", className: "cw-close" })),
+          h("header", null, h("h2", { id: titleId }, panel === "invite" ? "Invite people" : `Round ${previewRound?.round_number} questions`), button("\xD7", () => setPanel(null), { "aria-label": "Close dialog", className: "cw-close" })),
           panel === "invite" ? h(
             R.Fragment,
             null,
@@ -215,7 +238,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
           ) : h(
             R.Fragment,
             null,
-            h("p", { className: "cw-dialog-intro" }, hint),
+            h("p", { className: "cw-dialog-intro" }, panel === "next" ? nextHint : hint),
             outline.sharedScale ? h("details", { className: "cw-shared-scale" }, h("summary", null, "Rating scale used for every rated claim"), h("p", null, outline.sharedScale.join(" \xB7 "))) : null,
             h("ol", { className: "cw-questions cw-question-outline" }, ...outline.groups.map((group, i) => h(
               "li",
@@ -228,7 +251,11 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
                 h("span", null, field.optional ? " \xB7 Optional" : " \xB7 Required"),
                 !outline.sharedScale && field.options.length ? h("small", null, field.options.join(" \xB7 ")) : null
               )))
-            )))
+            ))),
+            panel === "next" && nextRound && p.onMakeLive ? h("div", { className: "cw-invite-actions" }, button(p.makingLiveId === nextRound.id ? "Opening\u2026" : `Open Round ${nextRound.round_number}`, () => {
+              p.onMakeLive?.(nextRound);
+              setPanel(null);
+            }, { className: "cw-primary", disabled: p.makingLiveId === nextRound.id }), h("p", { className: "cw-dialog-intro" }, "Opening this round makes it current for participants. Previous responses are preserved.")) : null
           )
         )
       )

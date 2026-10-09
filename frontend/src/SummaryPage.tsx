@@ -1598,9 +1598,9 @@ function SummaryPageContent() {
 		});
 	}
 
-	function prepareDelphiRoundTwo() {
-		if (!displayRound || displayRound.round_number >= 3) { toastWarning('This Delphi ends after round 3.'); return; }
-		const questions = displayRound.round_number === 2 ? buildFixedDelphiRound(displayRound, rounds, structuredRounds) : buildDelphiRoundTwoQuestions(displayRound.synthesis || '', displayRound.synthesis_json?.narrative === displayRound.synthesis ? displayRound.synthesis_json?.reasoning_graph : null);
+	function prepareDelphiRoundTwo(targetRound = displayRound) {
+		if (!targetRound || targetRound.round_number >= 3) { toastWarning('This Delphi ends after round 3.'); return; }
+		const questions = targetRound.round_number === 2 ? buildFixedDelphiRound(targetRound, rounds, structuredRounds) : buildDelphiRoundTwoQuestions(targetRound.synthesis || '', targetRound.synthesis_json?.narrative === targetRound.synthesis ? targetRound.synthesis_json?.reasoning_graph : null);
 		if (!questions.length) {
 			toastWarning('No structured claims were found in this synthesis.');
 			return;
@@ -2222,6 +2222,7 @@ function SummaryPageContent() {
 				<div>
 				<BackLink to="/" label={t('common.backToDashboard')} className="mb-4 sm:mb-5" />
 				<ConsultationWorkspace
+                    onPrepareNextRound={() => {setSelectedRound(null);setActiveWorkspaceTab('synthesis');prepareDelphiRoundTwo(activeRound);requestAnimationFrame(() => {const heading=Array.from(document.querySelectorAll("h2")).find(h=>h.textContent?.includes("Round setup"));heading?.scrollIntoView({block:"center"});});}}
                         form={form} rounds={rounds} responses={structuredRounds}
                         selectedRoundId={displayRound?.id || null}
                         view={activeWorkspaceTab} onView={view => { void handleWorkspaceTabChange(view); }}
@@ -2291,7 +2292,7 @@ function SummaryPageContent() {
 										onStartNextRound={startNextRound}
 										delphiClaimCount={delphiClaims.length}
 										preparedQuestionCount={preparedDelphiQuestions?.length || 0}
-										onPrepareDelphiRoundTwo={prepareDelphiRoundTwo}
+										onPrepareDelphiRoundTwo={() => prepareDelphiRoundTwo()}
 										onClearDelphiRoundTwo={() => setPreparedDelphiQuestions(null)}
 										loading={loading}
 										saving={isSavingRoundSetup}

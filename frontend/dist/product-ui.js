@@ -131,7 +131,7 @@ function quietSummary(main) {
     current.nav.append(picker);
   } else if (!hasReasoning) previous2?.remove();
   function sync() {
-    const text = hasReasoning ? "Claims & full summary" : empty ? "Write a summary" : "Full summary";
+    const text = empty ? "Write a summary" : "Full summary";
     if (current.button.textContent !== text) current.button.textContent = text;
     const expanded = String(current.open);
     if (current.button.getAttribute("aria-expanded") !== expanded) current.button.setAttribute("aria-expanded", expanded);
@@ -141,17 +141,21 @@ function quietSummary(main) {
     current.claims.setAttribute("aria-pressed", String(!current.open));
     current.button.setAttribute("aria-pressed", String(current.open));
     if (progress) progress.hidden = current.open;
+    card.classList.toggle("full-summary-visible", current.open);
     const source = current.nav.querySelector(".rf-source-picker");
     if (source) source.hidden = current.open;
   }
-  current.claims.onclick = () => {
-    current.open = false;
+  const choose = (open) => {
+    current.open = open;
     sync();
+    const menu = current.nav.closest(".cw-view-menu");
+    if (menu) {
+      menu.open = false;
+      menu.querySelector("summary")?.focus({ preventScroll: true });
+    }
   };
-  current.button.onclick = () => {
-    current.open = true;
-    sync();
-  };
+  current.claims.onclick = () => choose(false);
+  current.button.onclick = () => choose(true);
   sync();
 }
 
@@ -218,6 +222,7 @@ function enhanceSynthesisControls(main) {
     if (refresh) {
       toolbar.querySelector(".summary-refresh")?.remove();
       refresh.classList.add("summary-refresh");
+      refresh.hidden = true;
       toolbar.append(refresh);
     }
     const actions = toolbar.querySelector(".unified-actions");
@@ -340,16 +345,6 @@ function enhanceSynthesisControls(main) {
           menu.open = false;
           toolbar.querySelectorAll("details.summary-disclosure").forEach((other) => other.open = other === detail ? !detail.open : false);
           if (detail.open) (detail.querySelector(".card select,.card input") || detail.querySelector(".summary-panel-close"))?.focus({ preventScroll: true });
-        };
-        items.append(action);
-      }
-      if (refresh) {
-        const action = document.createElement("button");
-        action.type = "button";
-        action.textContent = "Refresh";
-        action.onclick = () => {
-          menu.open = false;
-          refresh.click();
         };
         items.append(action);
       }

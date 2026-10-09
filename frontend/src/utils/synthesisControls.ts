@@ -12,7 +12,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
  if(progress){
   main.classList.add('summary-with-results');
   const refresh=progress.querySelector<HTMLButtonElement>('.di-title > button');
-  if(refresh){toolbar.querySelector('.summary-refresh')?.remove();refresh.classList.add('summary-refresh');toolbar.append(refresh);}
+  if(refresh){toolbar.querySelector('.summary-refresh')?.remove();refresh.classList.add('summary-refresh');refresh.hidden=true;toolbar.append(refresh);}
   const actions=toolbar.querySelector('.unified-actions');if(actions&&actions!==toolbar.lastElementChild)toolbar.append(actions);
  }else{main.classList.remove('summary-with-results');toolbar.querySelector('.summary-refresh')?.remove();}
  for(const detail of toolbar.querySelectorAll<HTMLDetailsElement>(':scope > details.summary-disclosure')){
@@ -64,7 +64,7 @@ export function enhanceSynthesisControls(main:HTMLElement){
     if(draft)action.textContent='Draft settings';
     action.onclick=()=>{menu!.open=false;toolbar.querySelectorAll<HTMLDetailsElement>('details.summary-disclosure').forEach(other=>other.open=other===detail?!detail.open:false);if(detail.open)(detail.querySelector<HTMLElement>('.card select,.card input')||detail.querySelector<HTMLElement>('.summary-panel-close'))?.focus({preventScroll:true});};items.append(action);
    }
-   if(refresh){const action=document.createElement('button');action.type='button';action.textContent='Refresh';action.onclick=()=>{menu!.open=false;refresh.click();};items.append(action);}
+
   }
 
   const top=main.querySelector<HTMLElement>('.cw-options>div');

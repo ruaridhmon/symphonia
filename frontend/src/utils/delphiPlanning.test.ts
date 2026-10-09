@@ -26,6 +26,7 @@ it('carries agreement and separate confidence unchanged into round three',()=>{
 
 it('shows full strength, independent confidence, and anonymised reasons before reconsideration',()=>{
  const q=buildDelphiRoundTwoQuestions('<p>Claim 1: <strong>Keep this claim.</strong></p>');
+ (q[0] as Record<string,unknown>).options=questions[0].options; // Historical strength scale remains frozen.
  const round={...r,questions:q} as Round;
  const answers=[{q1:{position:'Strongly agree'},q2:{position:'Slightly confident'},q3:{position:'Weak evidence supports a cautious approach.'}},{q1:{position:'Disagree'},q2:{position:'Very confident'},q3:{position:'A minority objection.'}}];
  const data={id:2,round_number:2,is_active:true,synthesis:'',responses:answers.map((a,i)=>({id:i,round_id:2,email:'private-'+i,timestamp:'',version:1,answers:a}))};

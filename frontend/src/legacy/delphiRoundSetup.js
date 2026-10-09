@@ -118,9 +118,9 @@
     dialog.style.cssText = 'max-width:640px;max-height:94vh;margin:2vh auto;background:var(--card);color:var(--foreground);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 80px rgba(15,23,42,.3);overflow:auto;';
     dialog.innerHTML =
       '<div style="display:flex;justify-content:space-between;gap:1rem;padding:1rem 1.1rem;border-bottom:1px solid var(--border)">' +
-        '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.1rem">Set up next Delphi round</h2>' +
+        '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.1rem">Review Round ' + (expectedRound + 1) + '</h2>' +
         '<p style="margin:.3rem 0 0;color:var(--muted-foreground);font-size:.85rem">' +
-          claims.length + ' claims ready to review</p></div>' +
+          claims.length + ' claims · agreement, separate confidence and optional justification</p><p style="font-size:.85rem;line-height:1.6">' + (expectedRound===1?'Questions are prepared automatically from the saved claim set. Nothing opens until you choose Open Round 2.':'The Round 2 claims and scales stay unchanged. Recorded positions, confidence and reasons are added as feedback; experts may keep or revise their views.') + '</p></div>' +
         '<button type="button" data-close aria-label="Close" style="flex:0 0 auto;height:36px;width:36px;border:1px solid var(--border);border-radius:9px;background:var(--background);color:var(--foreground);font-size:1.25rem">×</button>' +
       '</div>' +
       '<div style="display:grid;gap:1rem;padding:1rem 1.1rem">' +
@@ -131,7 +131,7 @@
       '</div>' +
       '<div style="display:flex;justify-content:flex-end;gap:.65rem;padding:1rem 1.1rem;border-top:1px solid var(--border)">' +
         '<button type="button" data-close style="padding:.65rem .9rem;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--foreground);font-weight:700">Cancel</button>' +
-        '<button type="button" data-start style="padding:.65rem .95rem;border:1px solid var(--accent);border-radius:10px;background:var(--accent);color:white;font-weight:800">Open next round</button>' +
+        '<button type="button" data-start style="padding:.65rem .95rem;border:1px solid var(--accent);border-radius:10px;background:var(--accent);color:white;font-weight:800">Open Round ' + (expectedRound + 1) + '</button>' +
       '</div>';
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
@@ -257,7 +257,7 @@
         window.location.reload();
       } catch (error) {
         button.disabled = false;
-        button.textContent = 'Open next round';
+        button.textContent = 'Open Round ' + (expectedRound + 1);
         window.alert(error instanceof Error ? error.message : 'Unable to open the next round');
       }
     });
@@ -290,6 +290,8 @@
       openModal();
     }, true);
   }
+
+  window.addEventListener('symphonia:prepare-next-round', openModal);
 
   var timer = 0;
   var observer = new MutationObserver(function () {
