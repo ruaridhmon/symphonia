@@ -45,7 +45,6 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
     const previewRound = panel === "next" ? nextRound : round;
     const outline = questionOutline(previewRound?.questions || p.form.questions);
     const stage = current?.round_number || 1;
-    const stageText = stage === 1 ? "Round 1 \xB7 Independent input" : stage === 2 ? "Round 2 \xB7 Claim review" : "Round 3 \xB7 Reconsideration";
     const savedCustom = nextRound && !nextRound.questions.some((q) => typeof q === "object" && typeof q.questionId === "string" && q.questionId.endsWith("_response"));
     const nextHint = savedCustom ? "The next round already has a saved questionnaire. Review its questions before opening it; existing questions are preserved." : stage === 1 ? "Round 2 is prepared from the saved claims, with separate agreement, confidence and optional justification fields. Review the questions before opening it." : stage === 2 ? "Round 3 reuses the Round 2 claims and scales, with recorded positions, confidence and reasons as feedback. Participants can keep or revise their views." : "After reviewing the final responses, open Final synthesis to draft the collective account. There is no fourth participant questionnaire.";
     const [currentTitle, setCurrentTitle] = R.useState(p.form.title);
@@ -108,6 +107,12 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
               setAdding(round);
             }
           }, { ref: addTrigger, className: "cw-add-response", "aria-label": "Add response", disabled: !round?.is_active || completed, title: round?.is_active ? "Record a response received outside Symphonia" : "Select the current round to add a response", children: [h("svg", { key: "icon", width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, "aria-hidden": true }, h("path", { d: "M12 5v14M5 12h14" })), h("span", { key: "label" }, "Add response")] }) : null,
+          !finalView && stage < 3 ? button("Next round \u2192", () => {
+            if (!canLeave()) return;
+            if (nextRound) openPanel("next");
+            else if (p.onPrepareNextRound) p.onPrepareNextRound();
+            else window.dispatchEvent(new CustomEvent("symphonia:prepare-next-round"));
+          }, { className: "cw-next-round", "aria-label": `Review Round ${stage + 1}`, title: `Preview Round ${stage + 1} before opening it`, children: [h("span", { key: "wide", className: "cw-next-wide" }, "Next round \u2192"), h("span", { key: "compact", className: "cw-next-compact", "aria-hidden": true }, "Next \u2192")] }) : null,
           h(
             "details",
             { ref: options, className: "cw-options", onKeyDown: (e) => {
@@ -123,6 +128,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
               button("Invite people", () => openPanel("invite")),
               h("a", { href: `/admin/form/${p.form.id}` }, "Edit consultation"),
               button("View questions", () => openPanel("questions"), { "aria-label": "View questions", disabled: !round }),
+              h("details", { className: "cw-process" }, h("summary", null, "How rounds work"), h("p", null, nextHint)),
               p.onDownload ? button("Download", p.onDownload) : null,
               round && !round.is_active && p.onMakeLive ? button(p.makingLiveId === round.id ? "Updating\u2026" : `Make Round ${round.round_number} current`, () => p.onMakeLive?.(round), { disabled: p.makingLiveId === round.id }) : null
             )
@@ -188,22 +194,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
         openingQuestions.length > 1 ? h("details", null, h("summary", null, `${openingQuestions.length - 1} more question${openingQuestions.length === 2 ? "" : "s"}`), h("ol", { start: 2 }, ...openingQuestions.slice(1).map((question, index) => h("li", { key: index }, question)))) : null
       ) : null,
       finalView && FinalSynthesis ? h(FinalSynthesis, { formId: p.form.id, questions: openingQuestions, onComplete: () => setCompleted(true) }) : null,
-      !finalView ? h(
-        "section",
-        { className: "cw-workflow", "aria-label": "Delphi next step" },
-        h("div", null, h("strong", null, round?.id !== current?.id ? `Viewing Round ${round?.round_number} \xB7 Current: ${stageText}` : stageText), h("p", null, nextHint)),
-        stage < 3 ? button(`Review Round ${stage + 1}`, () => {
-          if (!canLeave()) return;
-          if (nextRound) openPanel("next");
-          else if (p.onPrepareNextRound) p.onPrepareNextRound();
-          else window.dispatchEvent(new CustomEvent("symphonia:prepare-next-round"));
-        }, { className: "cw-next-round" }) : FinalSynthesis ? button("Open Final synthesis", () => {
-          if (canLeave()) {
-            p.onView("synthesis");
-            setFinalView(true);
-          }
-        }) : null
-      ) : null,
+      !finalView && round?.id !== current?.id ? h("p", { className: "cw-viewing-note", "aria-label": "Delphi next step" }, `Viewing Round ${round?.round_number} \xB7 Round ${stage} is current`) : null,
       saved ? h("p", { className: "cw-response-saved", role: "status" }, saved) : null,
       adding && ManualResponse ? h(ManualResponse, { form: p.form, round: adding, onClose: () => {
         setAdding(null);

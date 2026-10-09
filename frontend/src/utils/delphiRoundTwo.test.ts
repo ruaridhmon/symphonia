@@ -30,7 +30,7 @@ describe('Delphi Round 2 builder', () => {
     }]);
   });
 
-  it('creates a balanced response and separate optional confidence and comment', () => {
+  it('creates a balanced response and required separate confidence and optional justification', () => {
     const questions = buildDelphiRoundTwoQuestions(SYNTHESIS) as Record<string, unknown>[];
     expect(questions).toHaveLength(3);
     expect(questions[0]).toMatchObject({
@@ -45,9 +45,9 @@ describe('Delphi Round 2 builder', () => {
       inputType: 'textarea',
       optional: true,
     });
-    expect(questions[1]).toMatchObject({questionId:'claim_1_confidence',inputType:'single_select',optional:true,options:['Not at all confident','Slightly confident','Moderately confident','Very confident','Extremely confident']});
+    expect(questions[1]).toMatchObject({questionId:'claim_1_confidence',inputType:'single_select',optional:false,options:['Not at all confident','Slightly confident','Moderately confident','Very confident','Extremely confident']});
     expect(questions[1]).not.toHaveProperty('defaultValue');
-    expect(questions[0].options).toEqual(['Agree', 'Disagree', 'Unable to judge']);
+    expect(questions[0].options).toEqual(['Agree', 'Neither agree nor disagree', 'Disagree', 'Unable to judge']);
     expect(questions.every(q => !q.conditionalOnQuestionId)).toBe(true);
   });
 
