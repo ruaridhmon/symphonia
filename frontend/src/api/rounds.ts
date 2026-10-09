@@ -37,6 +37,8 @@ export interface NextRoundResult {
 }
 
 export interface RoundConfig {
+  expected_questions?: (string | Record<string, unknown>)[];
+  require_unanswered?: boolean;
   expected_round_number?: number;
   questions?: (string | Record<string, unknown>)[];
   context_settings?: RoundContextSettings;

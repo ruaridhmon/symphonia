@@ -8267,6 +8267,8 @@ def _delphi_claim_signature(questions):
 
 
 class RoundConfig(BaseModel):
+    expected_questions: list[Any] | None = None
+    require_unanswered: bool = False
     expected_round_number: int | None = None
     questions: list[Any] | None = None
     context_settings: dict[str, Any] | None = None
@@ -8534,10 +8536,24 @@ def update_round_setup(
     )
     if not round_obj:
         raise HTTPException(status_code=404, detail="Round not found")
+    if payload.require_unanswered:
+        if payload.expected_questions is None or payload.expected_questions != (round_obj.questions or []):
+            raise HTTPException(status_code=409, detail="The questions changed. Reopen Add response.")
+        occupied = (db.query(Response).filter_by(round_id=round_id).first()
+                    or db.query(ArchivedResponse).filter_by(round_id=round_id).first()
+                    or db.query(Draft).filter_by(round_id=round_id).first())
+        later = db.query(RoundModel).filter(RoundModel.form_id == form_id, RoundModel.round_number > 2).first()
+        if round_obj.round_number != 2 or not round_obj.is_active or occupied or later:
+            raise HTTPException(status_code=409, detail="This questionnaire is already in use. Reopen Add response to use its saved questions.")
     if payload.questions is not None:
         fixed = _delphi_claim_signature(round_obj.questions)
         if round_obj.round_number >= 2 and fixed and _delphi_claim_signature(payload.questions) != fixed:
-            raise HTTPException(status_code=409, detail="The Delphi claim set is fixed after round 1.")
+            # An empty R2 can change its scale, but never its existing claim identities or wording.
+            def claim_identity(questions):
+                return [(q.get("questionId"), q.get("sectionTitle"), q.get("claimText"), q.get("claimOrigin"), q.get("inferenceQuestion"))
+                        for q in questions if isinstance(q, dict) and str(q.get("questionId", "")).endswith("_response")]
+            if not payload.require_unanswered or claim_identity(round_obj.questions) != claim_identity(payload.questions):
+                raise HTTPException(status_code=409, detail="The Delphi claim set is fixed after round 1.")
         round_obj.questions = payload.questions
     if payload.context_settings is not None:
         protected = {k: v for k, v in (round_obj.context_settings or {}).items() if k in {"final_synthesis", "final_narrative"}}

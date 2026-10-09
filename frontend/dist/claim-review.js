@@ -1,6 +1,6 @@
 // src/utils/delphiRoundTwo.ts
 var CONFIDENCE_OPTIONS = ["Not at all confident", "Slightly confident", "Moderately confident", "Very confident", "Extremely confident"];
-var RATING_OPTIONS = ["Agree", "Neither agree nor disagree", "Disagree", "Unable to judge"];
+var RATING_OPTIONS = ["Agree", "Neither agree nor disagree", "Disagree"];
 function detailCount(container, label) {
   const detail = Array.from(container.querySelectorAll("details")).find(
     (item) => item.querySelector("summary")?.textContent?.toLowerCase().includes(label)

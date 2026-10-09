@@ -101,6 +101,13 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
         p.isDemo ? h("span", { className: "cw-demo-badge" }, "Synthetic example") : h(
           "div",
           { className: "cw-title-actions" },
+          !finalView && ManualResponse && p.onResponseAdded ? button("Add response", () => {
+            if (round?.is_active && !completed && canLeave()) {
+              if (options.current) options.current.open = false;
+              setSaved("");
+              setAdding(round);
+            }
+          }, { ref: addTrigger, className: "cw-record-response", "aria-label": "Add response", disabled: !round?.is_active || completed, title: round?.is_active ? "Record a response received outside Symphonia" : "Select the current round to add a response" }) : null,
           h(
             "details",
             { ref: options, className: "cw-options", onKeyDown: (e) => {
@@ -109,17 +116,10 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
                 e.currentTarget.querySelector("summary")?.focus();
               }
             } },
-            h("summary", { ref: addTrigger, "aria-label": "Consultation options" }, "\u2022\u2022\u2022"),
+            h("summary", { "aria-label": "Consultation options" }, "\u2022\u2022\u2022"),
             h(
               "div",
               null,
-              !finalView && ManualResponse && p.onResponseAdded ? button("Add response", () => {
-                if (round?.is_active && !completed && canLeave()) {
-                  if (options.current) options.current.open = false;
-                  setSaved("");
-                  setAdding(round);
-                }
-              }, { "aria-label": "Add response", disabled: !round?.is_active || completed, title: round?.is_active ? "Record a response received outside Symphonia" : "Select the current round to add a response" }) : null,
               !finalView && stage < 3 ? button(`Review Round ${stage + 1}`, () => {
                 if (!canLeave()) return;
                 if (nextRound) openPanel("next");
@@ -198,7 +198,7 @@ function createConsultationWorkspace(R, ManualResponse, FinalSynthesis) {
       finalView && FinalSynthesis ? h(FinalSynthesis, { formId: p.form.id, questions: openingQuestions, onComplete: () => setCompleted(true) }) : null,
       !finalView && round?.id !== current?.id ? h("p", { className: "cw-viewing-note", "aria-label": "Delphi next step" }, `Viewing Round ${round?.round_number} \xB7 Round ${stage} is current`) : null,
       saved ? h("p", { className: "cw-response-saved", role: "status" }, saved) : null,
-      adding && ManualResponse ? h(ManualResponse, { form: p.form, round: adding, onClose: () => {
+      adding && ManualResponse ? h(ManualResponse, { form: p.form, round: adding, onQuestionnaireUpdated: p.onResponseAdded, onClose: () => {
         setAdding(null);
         requestAnimationFrame(() => addTrigger.current?.focus());
       }, onSaved: async () => {

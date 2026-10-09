@@ -1,6 +1,7 @@
 import {DictationProvider} from '../DictationField';
 import { useEffect, useRef, useState } from 'react';
 import { api, getApiErrorDetail } from '../../api/client';
+import { prepareRoundTwoEntry } from '../../utils/prepareRoundTwoEntry';
 import { getForm, type FormDetail } from '../../api/forms';
 import type { Form, Round } from '../../types/summary';
 import { emptyStructuredResponse, type StructuredResponse } from '../../types/structured-input';
@@ -12,10 +13,10 @@ import SurveyQuestionInput from '../SurveyQuestionInput';
 import StructuredInput from '../StructuredInput';
 import DocumentTemplateResponse from '../DocumentTemplateResponse';
 
-export type ManualResponseProps = { form: Form; round: Round; onClose: () => void; onSaved: () => void | Promise<void> };
+export type ManualResponseProps = { form: Form; round: Round; onClose: () => void; onQuestionnaireUpdated?: () => void | Promise<void>; onSaved: () => void | Promise<void> };
 
 /** Uses the participant controls, but records a separate, explicitly attributed offline entry. */
-export default function ManualResponseSheet({ form, round, onClose, onSaved }: ManualResponseProps) {
+export default function ManualResponseSheet({ form, round, onClose, onSaved, onQuestionnaireUpdated }: ManualResponseProps) {
   const dialog = useRef<HTMLDialogElement>(null);
   const nameInput = useRef<HTMLInputElement>(null);
   const requestId = useRef(crypto.randomUUID());
@@ -29,15 +30,15 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
   const [dictating,setDictating]=useState(false);
   const [error, setError] = useState('');
   const [missing, setMissing] = useState<string | null>(null);
-  const questions = round.questions;
+  const [questions, setQuestions] = useState(round.questions);
   const dirty = !!name.trim() || Object.values(answers).some(a => a.position.trim() || a.evidence.trim());
-  const template = details?.document_template;
+  const template = round.round_number === 1 ? details?.document_template : null;
   const update = (key: string, value: StructuredResponse) => { setAnswers(old => ({ ...old, [key]: value })); setError(''); setMissing(null); };
   const close = () => { if (!saving && (!dirty || window.confirm('Discard this unsaved response?'))) onClose(); };
   useEffect(() => {
     mounted.current = true;
     dialog.current?.showModal(); nameInput.current?.focus();
-    getForm(form.id).then(data => { if (mounted.current) setDetails(data); }).catch(err => { if (mounted.current) setLoadError(getApiErrorDetail(err) || 'Could not load the form. Close this sheet and try again.'); });
+    Promise.all([getForm(form.id), prepareRoundTwoEntry(form.id, round)]).then(async ([data, prepared]) => { if (mounted.current) { setQuestions(prepared); setDetails(data); if (prepared !== round.questions) await onQuestionnaireUpdated?.(); } }).catch(err => { if (mounted.current) setLoadError(getApiErrorDetail(err) || 'Could not load the form. Close this sheet and try again.'); });
     return () => { mounted.current = false; };
   }, [form.id]);
 

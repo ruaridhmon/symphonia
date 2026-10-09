@@ -14,13 +14,13 @@ it('adds entries only to the current round from Responses and refreshes after sa
  const AdminWorkspace=createConsultationWorkspace(React,Sheet);
  const p={...props(),view:'responses' as const,onResponseAdded:vi.fn()};
  const mounted=render(<AdminWorkspace {...p}/>);
- fireEvent.click(menuAction('Add response'));
+ fireEvent.click(screen.getByRole('button',{name:'Add response'}));
  expect(screen.getByText('Adding to 12')).toBeInTheDocument();
  fireEvent.click(screen.getByRole('button',{name:'Save entry'}));
  await waitFor(()=>expect(screen.getByRole('status')).toHaveTextContent('Response saved'));
  expect(p.onResponseAdded).toHaveBeenCalledOnce();
  mounted.rerender(<AdminWorkspace {...p} selectedRoundId={11}/>);
- expect(menuAction('Add response')).toBeDisabled();
+ expect(screen.getByRole('button',{name:'Add response'})).toBeDisabled();
 });
 function menuAction(name:string) {
  const summary=screen.getByLabelText('Consultation options');
@@ -95,7 +95,7 @@ it('offers only Summary and Responses with directly selectable rounds',()=>{
 it('makes Add response available from Summary and places invitations inside the options menu',()=>{
  const AdminWorkspace=createConsultationWorkspace(React,()=>null);
  render(<AdminWorkspace {...props()} onResponseAdded={()=>{}}/>);
- expect(menuAction('Add response')).toBeEnabled();
+ expect(screen.getByRole('button',{name:'Add response'})).toBeEnabled();
  const invite=screen.getByRole('button',{name:'Invite people',hidden:true});
  expect(invite.closest('details')).toHaveClass('cw-options');
  fireEvent.click(invite);
