@@ -34,7 +34,15 @@ var SymphoniaDelphiFeedback = (() => {
         if (/^Previous round: \d+ (?:support|oppose|uncertain|not classified)(?: · \d+ (?:support|oppose|uncertain|not classified))*\.$/.test(counts)) return counts;
       }
     }
-    return text;
+    const legacy = text.match(/^([\s\S]*?)Round 2 positions: ([^\n]+?)\. (\d+) not answered; (\d+) unrecognised\.\s+(?:Separate confidence: ([^\n]+?)\. (\d+) not recorded\.|Separate confidence was not collected in this questionnaire\.)\s+Keep or revise your position and confidence after considering the panel\. Persistent disagreement is valid\.([\s\S]*)$/);
+    if (!legacy || legacy[1].trim() && !legacy[1].trim().startsWith("Inferred \xB7 unconfirmed. Not directly stated by an expert.")) return text;
+    const positive = (counts) => counts.split(" \xB7 ").filter((item) => /^[1-9]\d* /.test(item));
+    const positions = positive(legacy[2]);
+    if (Number(legacy[3])) positions.push(`${legacy[3]} unanswered`);
+    if (Number(legacy[4])) positions.push(`${legacy[4]} other response${legacy[4] === "1" ? "" : "s"}`);
+    const confidence = legacy[5] ? positive(legacy[5]).join(" \xB7 ") : "";
+    const reasons = legacy[7].trim().split("\n").filter((line) => !/^Response \d+: [^\n]+; confidence: [^\n]+\. No justification supplied\.$/.test(line)).join("\n");
+    return [legacy[1].trim(), positions.length ? `Round 2: ${positions.join(" \xB7 ")}.` : "", confidence ? `Confidence: ${confidence}.` : "", reasons].filter(Boolean).join("\n");
   }
   return __toCommonJS(delphiFeedback_exports);
 })();
@@ -137,14 +145,14 @@ var SymphoniaDelphiFeedback = (() => {
       expectedRound = Math.max.apply(null,rounds.map(function(r){return r.round_number;}));
       var baseline = rounds.find(function(r){return r.round_number === 2;});
       if (baseline) {
-        var planner = await import('/delphi-progress.js?v=workflow-2');
+        var planner = await import('/delphi-progress.js?v=workflow-32');
         frozenQuestions = planner.buildFixedDelphiRound(baseline, rounds, await api.a(Number(formId)));
         claims = frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId === q.questionId.replace(/_response$/, '_confidence');}) || {}).options};});
       } else {
         var opening=rounds.find(function(r){return r.round_number===1;});
         var claimBuilder=await import('/claim-review.js?v=5');
         frozenQuestions=claimBuilder.buildDelphiRoundTwoQuestions(opening?.synthesis || '',opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null);
-        claims=frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,origin:q.claimOrigin,feedback:q.groupPrompt,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId===q.questionId.replace(/_response$/,'_confidence');}) || {}).options};});
+        claims=frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,origin:q.claimOrigin,feedback:SymphoniaDelphiFeedback.compactDelphiFeedback(q.groupPrompt || ''),confidenceOptions:(frozenQuestions.find(function(c){return c.questionId===q.questionId.replace(/_response$/,'_confidence');}) || {}).options};});
       }
     } catch (error) {window.alert('Could not load the fixed claim set. Please retry.');return;}
 
@@ -591,6 +599,7 @@ var SymphoniaDelphiFeedback = (() => {
       var cleaned=SymphoniaDelphiFeedback.compactDelphiFeedback(paragraph.textContent || '');
       if(paragraph.textContent!==cleaned)paragraph.textContent=cleaned;
       paragraph.hidden=!cleaned;
+      if(/^Round 2:|\nRound 2:/.test(cleaned))paragraph.style.whiteSpace='pre-line';
     });
 
     var buttons = sectionButtons();

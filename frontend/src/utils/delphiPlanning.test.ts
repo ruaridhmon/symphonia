@@ -36,3 +36,14 @@ it('shows full strength, independent confidence, and anonymised reasons before r
  expect(result[0].groupPrompt).toContain('A minority objection.');
  expect(result[0].groupPrompt).not.toContain('private-');
 });
+
+it('shows only recorded counts and supplied reasons, without repeated advice or empty ballots',()=>{
+ const q=buildDelphiRoundTwoQuestions('<p>Claim 1: <strong>Keep this claim.</strong></p>');
+ const round={...r,questions:q} as Round;
+ const data={id:2,round_number:2,is_active:true,synthesis:'',responses:[{id:1,round_id:2,email:'private',timestamp:'',version:1,answers:{q1:{position:'Disagree'},q2:{position:'Very confident'},q3:{position:''}}}]};
+ const result=buildFixedDelphiRound(round,[round],[data]) as Record<string,unknown>[];
+ expect(result[0].groupPrompt).toBe('Round 2: 1 disagree.\nConfidence: 1 very confident.');
+ expect(result[0].options).toEqual((q[0] as Record<string,unknown>).options);
+ data.responses[0].answers.q3.position='No justification supplied.';
+ expect((buildFixedDelphiRound(round,[round],[data])[0] as Record<string,unknown>).groupPrompt).toContain('No justification supplied.');
+});
