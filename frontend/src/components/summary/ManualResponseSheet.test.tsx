@@ -48,3 +48,23 @@ it('waits for the final dictation result before saving the editable transcript',
  fireEvent.click(screen.getByRole('button',{name:'Save response'}));await waitFor(()=>expect(mocks.post).toHaveBeenCalledOnce());
  expect(mocks.post.mock.calls[0][1].answers.q1.position).toBe('Independent review.');unmount();delete (window as any).webkitSpeechRecognition;
 });
+
+it('uses Round 2 agreement and separate confidence instead of the first-round document template',async()=>{
+ const { buildDelphiRoundTwoQuestions } = await import('../../utils/delphiRoundTwo');
+ const questions=buildDelphiRoundTwoQuestions('<div><p>Claim 1: <strong>Humans set research priorities.</strong></p></div>');
+ mocks.get.mockResolvedValue({...props.form,document_template:'{{long:Opening response}}',consent_required:false});
+ render(<ManualResponseSheet {...props} round={{...props.round,round_number:2,questions}}/>);
+ await screen.findByRole('radio',{name:'Agree'});
+ expect(screen.getAllByRole('radio')).toHaveLength(8);
+ expect(screen.getByRole('radio',{name:'Neither agree nor disagree'})).toBeInTheDocument();
+ expect(screen.queryByRole('radio',{name:'Strongly agree'})).toBeNull();
+ fireEvent.change(screen.getByRole('textbox',{name:'Respondent name'}),{target:{value:'Alex'}});
+ fireEvent.click(screen.getByRole('radio',{name:'Agree'}));
+ fireEvent.click(screen.getByRole('button',{name:'Save response'}));
+ expect(await screen.findByRole('alert')).toHaveTextContent('Confidence');expect(mocks.post).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByRole('radio',{name:'Very confident'}));
+ mocks.post.mockResolvedValue({ok:true});fireEvent.click(screen.getByRole('button',{name:'Save response'}));
+ await waitFor(()=>expect(mocks.post).toHaveBeenCalledOnce());
+ expect(mocks.post.mock.calls[0][1].answers.q1.position).toBe('Agree');
+ expect(mocks.post.mock.calls[0][1].answers.q2.position).toBe('Very confident');
+});

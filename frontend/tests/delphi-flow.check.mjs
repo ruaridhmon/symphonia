@@ -56,7 +56,7 @@ function page(path = '/') {
   dom.window.close = () => { observers.forEach(observer => observer.disconnect()); close(); };
   dom.window.__roundApi = {g:async()=>[{round_number:1,questions:[],synthesis_json:{reasoning_graph:{claims:[1,2].map(n=>({id:`claim_${n}`,text:`Synthetic claim ${n}`,origin:'explicit'}))}}}]};
   dom.window.__claimBuilder = {buildDelphiRoundTwoQuestions};
-  dom.window.eval(script.replace("import('/assets/rounds-CU08geHs.js')", 'Promise.resolve(window.__roundApi)').replace("import('/claim-review.js?v=4')", 'Promise.resolve(window.__claimBuilder)'));
+  dom.window.eval(script.replace("import('/assets/rounds-CU08geHs.js')", 'Promise.resolve(window.__roundApi)').replace("import('/claim-review.js?v=5')", 'Promise.resolve(window.__claimBuilder)'));
   return dom;
 }
 
@@ -142,7 +142,7 @@ test('setup activates on internal navigation and creates separate agreement, con
     assert.ok(modal);
     assert.match(modal.textContent, /Review Round 2/);
     assert.doesNotMatch(modal.textContent, /Add question/);
-    assert.equal(modal.querySelectorAll('input[type=radio]').length, 9);
+    assert.equal(modal.querySelectorAll('input[type=radio]').length, 8);
     assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 1/);
     Array.from(modal.querySelectorAll('button')).find(button => button.textContent === 'Continue').click();
     assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 2/);
@@ -153,7 +153,7 @@ test('setup activates on internal navigation and creates separate agreement, con
     assert.equal(request.url, '/api/forms/14/next_round');
     assert.equal(request.body.expected_round_number, 1);
     assert.equal(request.body.questions.length, 6);
-    assert.deepEqual(Array.from(request.body.questions[0].options), ['Agree', 'Neither agree nor disagree', 'Disagree', 'Unable to judge']);
+    assert.deepEqual(Array.from(request.body.questions[0].options), ['Agree', 'Neither agree nor disagree', 'Disagree']);
     assert.equal(request.body.questions[0].label, 'Do you agree with this statement?');
     assert.equal(request.body.questions[1].optional, false);
     assert.equal(request.body.questions[1].questionId, 'claim_1_confidence');

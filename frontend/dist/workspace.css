@@ -1291,3 +1291,9 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 .cw-setup-dialog .cw-preview-track {margin-bottom:16px!important;}
 .cw-setup-dialog .cw-preview-field {margin-top:16px!important;}
 .cw-setup-dialog .cw-preview-confidence {gap:0 8px;}
+
+/* Keep offline entry as a visible, labelled action beside consultation options. */
+.consultation-workspace .cw-title-actions>.cw-record-response{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:auto;min-height:34px;padding:6px 12px;border:1px solid var(--border-color,#dededb);border-radius:8px;background:var(--card-bg,#fff);color:var(--text-primary,#292927);font-size:13px;font-weight:500;white-space:nowrap}
+.consultation-workspace .cw-record-response:hover:not(:disabled){background:var(--bg-secondary,#f5f5f2)}
+.consultation-workspace .cw-record-response:disabled{opacity:.45;cursor:default}
+@media(max-width:480px){.consultation-workspace .cw-title-actions>.cw-record-response{padding:5px 9px;font-size:12px}}
