@@ -31,7 +31,7 @@ export function questionOutline(questions: Round['questions']) {
     group.fields.push({label:section?label:'',options:Array.isArray(config.options)?config.options.map(String):[],optional:config.optional===true});
   }
   const scales=[...new Set(groups.flatMap(group=>group.fields.filter(field=>field.options.length).map(field=>JSON.stringify(field.options))))];
-  const sharedFields=groups.length>1&&groups.every(group=>JSON.stringify(group.fields)===JSON.stringify(groups[0].fields))?groups[0].fields:null;
+  const sharedFields=groups.length>1&&groups[0].fields.every(field=>field.label)&&groups[0].fields.some(field=>field.options.length)&&groups.every(group=>JSON.stringify(group.fields)===JSON.stringify(groups[0].fields))?groups[0].fields:null;
   return {groups,sharedFields,sharedScale:scales.length===1?JSON.parse(scales[0]) as string[]:null};
 }
 

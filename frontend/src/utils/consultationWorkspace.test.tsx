@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { createConsultationWorkspace, type WorkspaceProps } from './consultationWorkspace';
+import { createConsultationWorkspace, questionOutline, type WorkspaceProps } from './consultationWorkspace';
 const Workspace = createConsultationWorkspace(React);
 beforeAll(() => {
   HTMLDialogElement.prototype.showModal = function () { this.open = true; };
@@ -160,3 +160,5 @@ it('shows identical claim fields once and retains different fields for review',(
  expect(screen.getByRole('heading',{name:'Claim 2: Exact claim 2'})).toBeInTheDocument();
  expect(p.onMakeLive).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Cancel'}));expect(p.onMakeLive).not.toHaveBeenCalled();
 });
+
+it('keeps ordinary written questions separate from shared claim fields',()=>{expect(questionOutline(['First question','Second question']).sharedFields).toBeNull();});
