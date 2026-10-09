@@ -1,3 +1,4 @@
+import { compactDelphiFeedback } from './delphiFeedback';
 export interface QuestionOptions {
   requireEvidence: boolean;
   requireCounterarguments: boolean;
@@ -105,7 +106,7 @@ export function normalizeQuestion(q: QuestionInput): ConfigurableQuestion {
     questionId: obj && typeof obj.questionId === 'string' ? obj.questionId : null,
     sectionTitle: obj && typeof obj.sectionTitle === 'string' ? obj.sectionTitle : null,
     helpText: obj && typeof obj.helpText === 'string' ? obj.helpText : null,
-    groupPrompt: obj && typeof obj.groupPrompt === 'string' ? obj.groupPrompt : null,
+    groupPrompt: obj && typeof obj.groupPrompt === 'string' ? compactDelphiFeedback(obj.groupPrompt) : null,
     optional: obj && typeof obj.optional === 'boolean' ? obj.optional : null,
     conditionalOnQuestionId:
       obj && typeof obj.conditionalOnQuestionId === 'string' ? obj.conditionalOnQuestionId : null,

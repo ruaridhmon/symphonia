@@ -47,11 +47,7 @@ function groupFeedback(claim) {
     claim.uncertain !== null ? `${claim.uncertain} uncertain` : null,
     claim.notClassified !== null ? `${claim.notClassified} not classified` : null
   ].filter(Boolean).join(" \xB7 ");
-  return [
-    counts ? `Previous round: ${counts}.` : "Review the previous round before re-rating.",
-    "The previous-round summary contains the anonymised original excerpts.",
-    "Consensus is not required: retain your view if the evidence still supports it."
-  ].join(" ");
+  return counts ? `Previous round: ${counts}.` : "";
 }
 function baseQuestion(overrides) {
   return {

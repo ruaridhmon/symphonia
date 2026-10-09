@@ -61,7 +61,6 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
   }
   const configs = questions.map(normalizeQuestion);
   const singleQuestion = configs.length === 1;
-  const heading = singleQuestion ? configs[0].label : round.context_settings?.intro_title || `Round ${round.round_number} responses`;
   const visible = (index: number) => {
     const q = configs[index]; const allowed = q.conditionalOnOptions?.length ? q.conditionalOnOptions : q.conditionalOnOption ? [q.conditionalOnOption] : [];
     if (!q.conditionalOnQuestionId || !allowed.length) return true;
@@ -69,7 +68,7 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
     return parent >= 0 && allowed.some(option => (answers[`q${parent + 1}`]?.position || '').split('\n').includes(option));
   };
   return <dialog ref={dialog} className="manual-response-sheet" aria-labelledby="manual-response-title" data-dirty={dirty ? 'true' : 'false'} onCancel={event => { event.preventDefault(); close(); }}>
-    <div className="manual-response-heading"><div><h2 id="manual-response-title">{heading}</h2><p>Round {round.round_number} · Recorded response</p></div><button type="button" aria-label="Close add response" onClick={close} disabled={saving}>×</button></div>
+    <div className="manual-response-heading"><div><h2 id="manual-response-title">Add response</h2><p>Round {round.round_number} · Record a response received outside Symphonia.</p></div><button type="button" aria-label="Close add response" onClick={close} disabled={saving}>×</button></div>
     <DictationProvider onActiveChange={setDictating}><form onSubmit={event => { event.preventDefault(); void save(); }}>
       <div className="manual-response-content">
         <label className="manual-response-name">Respondent name<input ref={nameInput} value={name} onChange={e => setName(e.target.value)} maxLength={160} autoComplete="off" disabled={saving} /></label>
@@ -78,6 +77,7 @@ export default function ManualResponseSheet({ form, round, onClose, onSaved }: M
           return <section key={key} className={`manual-response-question ${missing === key ? 'manual-response-missing' : ''}`}>
             {question.sectionTitle && question.sectionTitle !== configs[index - 1]?.sectionTitle ? <h3>{question.sectionTitle}</h3> : null}
             {question.groupPrompt && question.groupPrompt !== configs[index - 1]?.groupPrompt ? <p className="manual-response-feedback">{question.groupPrompt}</p> : null}
+            {singleQuestion ? <h3>{question.label}</h3> : null}
             {!singleQuestion ? <h4>{question.label}<span>{question.optional ? ' · Optional' : ''}</span></h4> : question.optional ? <p className="manual-response-note">Optional</p> : null}
             {isTypedSurveyQuestion(question) ? <SurveyQuestionInput dictation={true} question={question} value={answers[key] || emptyStructuredResponse()} onChange={value => update(key, value)} readOnly={saving} /> : <StructuredInput questionIndex={index} formId={form.id} value={answers[key] || emptyStructuredResponse()} onChange={value => update(key, value)} showEvidence={question.requireEvidence} showConfidence={question.requireConfidence} showCounterarguments={question.requireCounterarguments} persistDraft={false} readOnly={saving} dictation={true} />}
           </section>;

@@ -68,3 +68,5 @@ it('preserves an inferred label when a saved claim list is used without graph me
  const q=buildDelphiRoundTwoQuestions('<div><p>Claim 1: <strong>An unstated bridge.</strong></p><p>Inferred · unconfirmed. Not directly stated by an expert.</p></div>') as Record<string,unknown>[];
  expect(q[0].claimOrigin).toBe('inferred');expect(q[0].groupPrompt).toContain('not directly stated');
 });
+
+it('omits repeated instructions when normalized claims have no prior stance counts',()=>{const q=buildDelphiRoundTwoQuestions('<p>Claim 1: <strong>An exact claim.</strong></p>') as Record<string,unknown>[];expect(q[0].groupPrompt).toBe('');});
