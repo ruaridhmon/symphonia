@@ -110,29 +110,31 @@
     closeModal();
     var overlay = document.createElement('div');
     overlay.id = MODAL_ID;
+    overlay.className = 'cw-round-setup';
     overlay.style.cssText = 'position:fixed;inset:0;z-index:120;background:rgba(15,23,42,.48);padding:1rem;overflow:auto;';
     var dialog = document.createElement('div');
+    dialog.className = 'cw-setup-dialog';
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
     dialog.setAttribute('aria-labelledby', 'delphi-round-two-title');
     dialog.style.cssText = 'max-width:640px;max-height:94vh;margin:2vh auto;background:var(--card);color:var(--foreground);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 80px rgba(15,23,42,.3);overflow:auto;';
     dialog.innerHTML =
-      '<div style="display:flex;justify-content:space-between;gap:1rem;padding:1rem 1.1rem;border-bottom:1px solid var(--border)">' +
+      '<header class="cw-setup-header">' +
         '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.1rem">Review Round ' + (expectedRound + 1) + '</h2>' +
         '<p style="margin:.3rem 0 0;color:var(--muted-foreground);font-size:.85rem">' +
-          claims.length + ' claims · agreement, separate confidence and optional justification</p><p style="font-size:.85rem;line-height:1.6">' + (expectedRound===1?'Questions are prepared automatically from the saved claim set. Nothing opens until you choose Open Round 2.':'The Round 2 claims and scales stay unchanged. Recorded positions, confidence and reasons are added as feedback; experts may keep or revise their views.') + '</p></div>' +
+          claims.length + ' claims · Preview before opening for participants.</p><details class="cw-round-details"><summary>Round details</summary><p>' + (expectedRound===1?'Questions are prepared automatically from the saved claim set. Nothing opens until you choose Open Round 2.':'The Round 2 claims and scales stay unchanged. Recorded positions, confidence and reasons are added as feedback; experts may keep or revise their views.') + '</p></details></div>' +
         '<button type="button" data-close aria-label="Close" style="flex:0 0 auto;height:36px;width:36px;border:1px solid var(--border);border-radius:9px;background:var(--background);color:var(--foreground);font-size:1.25rem">×</button>' +
-      '</div>' +
-      '<div style="display:grid;gap:1rem;padding:1rem 1.1rem">' +
+      '</header>' +
+      '<div class="cw-setup-body">' +
         '<div data-preview aria-label="Participant preview"></div>' +
         '<details><summary style="cursor:pointer;font-size:.85rem">Introduction (optional)</summary>' +
           '<textarea data-intro rows="2" aria-label="Optional introduction" placeholder="Add a short message for participants" style="width:100%;box-sizing:border-box;padding:.7rem;border:1px solid var(--border);border-radius:10px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px"></textarea>' +
         '</details>' +
       '</div>' +
-      '<div style="display:flex;justify-content:flex-end;gap:.65rem;padding:1rem 1.1rem;border-top:1px solid var(--border)">' +
+      '<footer class="cw-setup-footer"><p>Makes this round current. Previous responses are kept.</p><div>' +
         '<button type="button" data-close style="padding:.65rem .9rem;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--foreground);font-weight:700">Cancel</button>' +
         '<button type="button" data-start style="padding:.65rem .95rem;border:1px solid var(--accent);border-radius:10px;background:var(--accent);color:white;font-weight:800">Open Round ' + (expectedRound + 1) + '</button>' +
-      '</div>';
+      '</div></footer>';
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
 
@@ -144,37 +146,42 @@
       preview.replaceChildren();
       var progress = document.createElement('p');
       progress.style.cssText = 'display:flex;justify-content:space-between;color:var(--muted-foreground);font-size:.8rem;margin:0 0 .6rem';
-      progress.textContent = 'Participant preview · ' + (previewIndex + 1) + ' of ' + claims.length;
+      progress.className='cw-preview-count';
+      progress.textContent = 'Claim ' + (previewIndex + 1) + ' of ' + claims.length;
       preview.appendChild(progress);
       var track = document.createElement('div');
+      track.className='cw-preview-track';
       track.style.cssText = 'height:8px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:1rem';
       var fill = document.createElement('div');
-      fill.style.cssText = 'height:100%;background:#58cc02;width:' + ((previewIndex + 1) / claims.length * 100) + '%';
+      fill.style.cssText = 'height:100%;background:var(--foreground);width:' + ((previewIndex + 1) / claims.length * 100) + '%';
       track.appendChild(fill);
       preview.appendChild(track);
       var heading = document.createElement('h3');
+      heading.className='cw-preview-claim';
       heading.textContent = claim.title;
       heading.style.cssText = 'font-size:1.1rem;line-height:1.45;margin:0 0 1rem';
       preview.appendChild(heading);
       if(claim.origin==='inferred'){var origin=document.createElement('p');origin.textContent=claim.feedback || 'Inferred · unconfirmed. Not directly stated by an expert.';origin.style.cssText='font-size:13px;line-height:1.6;border-left:2px dashed #aa92ba;padding-left:12px';preview.appendChild(origin);}
+      var ratingLabel=document.createElement('p');ratingLabel.className='cw-preview-field';ratingLabel.textContent='Do you agree with this statement?';preview.appendChild(ratingLabel);
       (claim.options || questionsFor([claim])[0].options).forEach(function (option) {
         var label = document.createElement('label');
+        label.className='cw-preview-option';
         label.style.cssText = 'display:flex;align-items:center;gap:.7rem;min-height:48px;padding:.5rem .8rem;box-sizing:border-box;border:2px solid var(--border);border-radius:13px;margin:.45rem 0;font-size:16px;cursor:pointer';
         var input = document.createElement('input');
         input.type = 'radio';
         input.name = 'delphi-preview-rating';
         input.checked = previewAnswers[previewIndex] === option;
-        input.style.accentColor = '#58cc02';
+        input.style.accentColor = 'var(--foreground)';
         function highlight() {
-          label.style.borderColor = input.checked ? '#58cc02' : 'var(--border)';
-          label.style.background = input.checked ? 'color-mix(in srgb,#58cc02 8%,var(--background))' : 'var(--background)';
+          label.style.borderColor = input.checked ? 'var(--foreground)' : 'var(--border)';
+          label.style.background = input.checked ? 'var(--muted)' : 'var(--background)';
         }
         input.addEventListener('change', function () {
           previewAnswers[previewIndex] = option;
           preview.querySelectorAll('label:has(input[name="delphi-preview-rating"])').forEach(function (item) {
             var selected = item.querySelector('input').checked;
-            item.style.borderColor = selected ? '#58cc02' : 'var(--border)';
-            item.style.background = selected ? 'color-mix(in srgb,#58cc02 8%,var(--background))' : 'var(--background)';
+            item.style.borderColor = selected ? 'var(--foreground)' : 'var(--border)';
+            item.style.background = selected ? 'var(--muted)' : 'var(--background)';
           });
         });
         label.append(input, document.createTextNode(option));
@@ -186,31 +193,36 @@
         var confidenceHeading = document.createElement('p');
         var confidenceQuestion = frozenQuestions && frozenQuestions.find(function(q){return q.questionId === frozenQuestions.filter(function(q){return /_response$/.test(q.questionId);})[previewIndex]?.questionId.replace(/_response$/, '_confidence');});
         confidenceHeading.textContent = 'Confidence in your rating' + (confidenceQuestion?.optional ? ' (optional)' : ' (required)');
+        confidenceHeading.className='cw-preview-field';
         confidenceHeading.style.cssText = 'font-size:15px;font-weight:600;margin:20px 0 6px';
         preview.appendChild(confidenceHeading);
+        var confidenceGroup=document.createElement('div');confidenceGroup.className='cw-preview-confidence';preview.appendChild(confidenceGroup);
         confidenceChoices.forEach(function(option) {
           var label = document.createElement('label');
           label.style.cssText = 'display:flex;align-items:center;gap:10px;min-height:44px;font-size:15px';
           var radio = document.createElement('input');radio.type='radio';radio.name='delphi-preview-confidence';
           radio.checked=previewAnswers['confidence-'+previewIndex]===option;
           radio.addEventListener('change',function(){previewAnswers['confidence-'+previewIndex]=option;});
-          label.append(radio,document.createTextNode(option));preview.appendChild(label);
+          label.className='cw-preview-option';label.append(radio,document.createTextNode(option));confidenceGroup.appendChild(label);
         });
       }
       var comment = document.createElement('textarea');
-      comment.rows = 1;
+      comment.rows = 2;
+      comment.value=previewAnswers['comment-'+previewIndex]||'';
+      comment.addEventListener('input',function(){previewAnswers['comment-'+previewIndex]=comment.value;});
       comment.placeholder = 'Why do you agree or disagree? Share the reasoning or evidence behind your answer.';
       comment.setAttribute('aria-label', 'Explain your position — preview only');
       comment.style.cssText = 'width:100%;box-sizing:border-box;min-height:52px;padding:14px 16px;margin:.7rem 0;border:1px solid var(--border);border-radius:22px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px;resize:none';
-      var reasonLabel = document.createElement('p'); reasonLabel.textContent = 'Explain your position (optional)'; reasonLabel.style.cssText = 'font-size:15px;margin:14px 0 0;font-weight:600'; preview.appendChild(reasonLabel);
+      var reasonLabel = document.createElement('p'); reasonLabel.className='cw-preview-field'; reasonLabel.textContent = 'Explain your position (optional)'; reasonLabel.style.cssText = 'font-size:15px;margin:14px 0 0;font-weight:600'; preview.appendChild(reasonLabel);
       preview.appendChild(comment);
       var navigation = document.createElement('div');
+      navigation.className='cw-preview-navigation';
       navigation.style.cssText = 'display:flex;gap:.65rem';
       ['Back', previewIndex + 1 === claims.length ? 'Preview complete' : 'Continue'].forEach(function (text, index) {
         var button = document.createElement('button');
         button.type = 'button';
         button.textContent = text;
-        button.style.cssText = 'min-height:48px;padding:.65rem 1rem;border:2px solid var(--border);border-radius:13px;font:inherit;font-weight:750;flex:' + (index ? '2' : '1') + ';background:' + (index ? '#58cc02' : 'var(--background)') + ';color:' + (index ? '#102800' : 'var(--foreground)');
+        button.style.cssText = 'min-height:48px;padding:.65rem 1rem;border:2px solid var(--border);border-radius:13px;font:inherit;font-weight:750;flex:' + (index ? '2' : '1') + ';background:' + (index ? 'var(--foreground)' : 'var(--background)') + ';color:' + (index ? 'var(--background)' : 'var(--foreground)');
         button.disabled = index ? previewIndex + 1 === claims.length : previewIndex === 0;
         if (button.disabled) button.style.opacity = '.45';
         button.addEventListener('click', function () { previewIndex += index ? 1 : -1; renderPreview(); });
@@ -415,7 +427,7 @@
       'body.' + ROOT_CLASS + ' [data-question-key] label{min-height:54px!important;padding:.65rem .85rem!important;border-width:2px!important;border-radius:13px!important;align-items:center!important;transition:box-shadow .12s ease,border-color .12s ease,background-color .12s ease}',
       'body.' + ROOT_CLASS + ' [data-question-key] label span{font-size:1rem!important;line-height:1.35!important}',
       'body.' + ROOT_CLASS + ' .delphi-r2-meta,body.' + ROOT_CLASS + ' .delphi-r2-selected,body.' + ROOT_CLASS + ' .delphi-r2-helper,body.' + ROOT_CLASS + ' .delphi-r2-empty-selection,body.' + ROOT_CLASS + ' .delphi-r2-extra-explanation{display:none!important}',
-      'body.' + ROOT_CLASS + ' [data-question-key] label:has(input:checked){border-color:#58cc02!important;background:color-mix(in srgb,#58cc02 8%,var(--background))!important;box-shadow:inset 0 0 0 1px #58cc02!important;transform:none!important}',
+      'body.' + ROOT_CLASS + ' [data-question-key] label:has(input:checked){border-color:#58cc02!important;background:var(--muted)!important;box-shadow:inset 0 0 0 1px #58cc02!important;transform:none!important}',
       'body.' + ROOT_CLASS + ' [data-question-key] input[type="radio"]{accent-color:#58cc02!important;width:18px;height:18px;margin-top:1px}',
       'body.' + ROOT_CLASS + ' [data-question-key] textarea:focus{outline:none!important;border-color:#58cc02!important;box-shadow:0 0 0 3px color-mix(in srgb,#58cc02 16%,transparent)!important}',
       'body.' + ROOT_CLASS + ' input,body.' + ROOT_CLASS + ' textarea,body.' + ROOT_CLASS + ' select{font-size:16px!important}',
@@ -430,11 +442,11 @@
       '.delphi-r2-progress-label{color:var(--foreground)}',
       '.delphi-r2-progress-count{color:var(--muted-foreground);white-space:nowrap;flex-shrink:0}',
       '.delphi-r2-track{height:12px;border-radius:999px;background:color-mix(in srgb,var(--foreground) 9%,transparent);overflow:hidden}',
-      '.delphi-r2-fill{height:100%;border-radius:inherit;background:#58cc02;box-shadow:inset 0 -2px 0 rgba(47,125,0,.22);transition:width .24s ease}',
+      '.delphi-r2-fill{height:100%;border-radius:inherit;background:var(--foreground);box-shadow:inset 0 -2px 0 rgba(47,125,0,.22);transition:width .24s ease}',
       '#' + ACTIONS_ID + '{position:fixed;left:50%;right:auto;bottom:0;transform:translateX(-50%);width:min(100%,896px);z-index:40;display:grid;grid-template-columns:minmax(86px,.3fr) minmax(170px,1fr);gap:.65rem;margin:0;padding:.7rem max(1rem,env(safe-area-inset-left)) calc(.7rem + env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-right));background:color-mix(in srgb,var(--card) 95%,transparent);border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(15,23,42,.08);backdrop-filter:blur(14px)}',
       '#' + ACTIONS_ID + ' button{min-height:48px;border-radius:13px;padding:.65rem .9rem;font:inherit;font-weight:850;cursor:pointer;transition:transform .1s ease,box-shadow .1s ease}',
       '#delphi-round-two-back{border:2px solid var(--border);background:var(--background);color:var(--foreground);box-shadow:0 3px 0 color-mix(in srgb,var(--border) 78%,var(--foreground))}',
-      '#delphi-round-two-next{border:2px solid #58cc02;background:#58cc02;color:#102800;box-shadow:0 4px 0 #46a302}',
+      '#delphi-round-two-next{border:2px solid #58cc02;background:var(--foreground);color:#102800;box-shadow:0 4px 0 #46a302}',
       '#' + ACTIONS_ID + ' button:active:not(:disabled){transform:translateY(3px);box-shadow:none}',
       '#' + ACTIONS_ID + ' button:disabled{cursor:not-allowed;opacity:.42;box-shadow:none}',
       '@keyframes delphi-r2-comment-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}',
@@ -474,7 +486,7 @@
       return;
     }
     question.classList.add('delphi-r2-composer');
-    var reasonLabel = document.createElement('p'); reasonLabel.className = 'delphi-reason-label'; reasonLabel.textContent = 'Explain your position (optional)'; reasonLabel.style.cssText = 'font-size:15px;line-height:1.5;margin:12px 0 6px;font-weight:600'; textarea.before(reasonLabel);
+    var reasonLabel = document.createElement('p'); reasonLabel.className = 'delphi-reason-label'; reasonLabel.className='cw-preview-field'; reasonLabel.textContent = 'Explain your position (optional)'; reasonLabel.style.cssText = 'font-size:15px;line-height:1.5;margin:12px 0 6px;font-weight:600'; textarea.before(reasonLabel);
     textarea.rows = 2;
     textarea.placeholder = 'Why do you agree or disagree? Share the reasoning or evidence behind your answer.';
     textarea.setAttribute('aria-label', 'Explain your position (optional)');
@@ -835,7 +847,7 @@
       var button = document.createElement('button');
       button.type = 'button';
       button.textContent = 'Continue to next round';
-      button.style.cssText = 'min-height:48px;padding:.65rem 1rem;background:#58cc02;color:#102800;border:0;border-radius:13px;font:inherit;font-weight:750';
+      button.style.cssText = 'min-height:48px;padding:.65rem 1rem;background:var(--foreground);color:#102800;border:0;border-radius:13px;font:inherit;font-weight:750';
       button.addEventListener('click', async function () {
         button.disabled = true;
         try {

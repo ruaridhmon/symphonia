@@ -31,7 +31,8 @@ export function questionOutline(questions: Round['questions']) {
     group.fields.push({label:section?label:'',options:Array.isArray(config.options)?config.options.map(String):[],optional:config.optional===true});
   }
   const scales=[...new Set(groups.flatMap(group=>group.fields.filter(field=>field.options.length).map(field=>JSON.stringify(field.options))))];
-  return {groups,sharedScale:scales.length===1?JSON.parse(scales[0]) as string[]:null};
+  const sharedFields=groups.length>1&&groups.every(group=>JSON.stringify(group.fields)===JSON.stringify(groups[0].fields))?groups[0].fields:null;
+  return {groups,sharedFields,sharedScale:scales.length===1?JSON.parse(scales[0]) as string[]:null};
 }
 
 /** Shared by source and the deployed compatibility build. Uses the existing state and callbacks. */
@@ -107,9 +108,9 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
       !finalView && round?.id!==current?.id ? h('p',{className:'cw-viewing-note','aria-label':'Delphi next step'},`Viewing Round ${round?.round_number} · Round ${stage} is current`) : null,
       saved ? h('p',{className:'cw-response-saved',role:'status'},saved) : null,
       adding && ManualResponse ? h(ManualResponse,{form:p.form,round:adding,onClose:()=>{setAdding(null);requestAnimationFrame(()=>addTrigger.current?.focus());},onSaved:async()=>{await p.onResponseAdded?.();setSaved('Response saved');}}) : null,
-      h('dialog', { ref: dialog, className: 'cw-dialog', 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => {setPanel(null);requestAnimationFrame(()=>invoker.current?.focus());}, onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
+      h('dialog', { ref: dialog, className: `cw-dialog ${panel==='next'?'cw-round-review':''}`, 'aria-labelledby': titleId, onCancel: () => setPanel(null), onClose: () => {setPanel(null);requestAnimationFrame(()=>invoker.current?.focus());}, onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (event.target === event.currentTarget) setPanel(null); } },
         h('div', { className: 'cw-dialog-body' },
-          h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Invite people' : `Round ${previewRound?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
+          h('header', null, h('h2', { id: titleId }, panel === 'invite' ? 'Invite people' : panel==='next'?`Review Round ${previewRound?.round_number}`:`Round ${previewRound?.round_number} questions`), button('×', () => setPanel(null), { 'aria-label': 'Close dialog', className: 'cw-close' })),
           panel === 'invite' ? h(R.Fragment, null,
             h('p', { className: 'cw-dialog-intro' }, 'Share one link. Each person joins the consultation and responds in their own space.'),
             !p.form.allow_join ? h('p', { role: 'status', className: 'cw-notice' }, 'Joining is currently closed. Review access settings before inviting new participants.') : null,
@@ -119,17 +120,19 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
             h('div', { className: 'cw-invite-note' }, h('strong', null, 'One panel, every round'), h('p', null, 'Participants use this link again when the next round opens. Existing sign-in and consent requirements still apply.')),
             h('a', { className: 'cw-settings-link', href: `/admin/form/${p.form.id}` }, 'Manage access and consultation settings →')) :
             h(R.Fragment, null,
-              h('p', { className: 'cw-dialog-intro' }, panel==='next'?nextHint:hint),
-              outline.sharedScale?h('details',{className:'cw-shared-scale'},h('summary',null,'Rating scale used for every rated claim'),h('p',null,outline.sharedScale.join(' · '))):null,
+              h('p', { className: 'cw-dialog-intro' }, panel==='next'?`${outline.groups.length} ${savedCustom?(outline.groups.length===1?'question group':'question groups'):(outline.groups.length===1?'claim':'claims')} · Review before opening for participants.`:hint),
+              panel==='next'?h('details',{className:'cw-round-details'},h('summary',null,'Round details'),h('p',null,nextHint)):null,
+              outline.sharedFields?h('section',{className:'cw-common-fields','aria-label':'Response fields for every claim'},h('h3',null,'For each claim'),...outline.sharedFields.map((field,i)=>h('p',{key:i},h('strong',null,field.label),h('span',null,field.optional?'Optional':'Required'),field.options.length?h('small',null,field.options.join(' · ')):null))):null,
+              !outline.sharedFields&&outline.sharedScale?h('details',{className:'cw-shared-scale'},h('summary',null,'Rating scale used for every rated claim'),h('p',null,outline.sharedScale.join(' · '))):null,
               h('ol',{className:'cw-questions cw-question-outline'},...outline.groups.map((group,i)=>h('li',{key:i},
                 h('h3',null,group.title),
-                h('div',{className:'cw-field-outline'},...group.fields.map((field,j)=>h('p',{key:j},
+                !outline.sharedFields?h('details',{className:'cw-claim-fields'},h('summary',null,'Response fields'),h('div',{className:'cw-field-outline'},...group.fields.map((field,j)=>h('p',{key:j},
                   field.options.length&&/^your (response|position)$/i.test(field.label)?'Rating':/^explain your position$/i.test(field.label)?'Written explanation':field.label||'Written response',
                   h('span',null,field.optional?' · Optional':' · Required'),
                   !outline.sharedScale&&field.options.length?h('small',null,field.options.join(' · ')):null
-                )))
+                )))):null
               ))),
-              panel==='next'&&nextRound&&p.onMakeLive? h('div',{className:'cw-invite-actions'},button(p.makingLiveId===nextRound.id?'Opening…':`Open Round ${nextRound.round_number}`,()=>{p.onMakeLive?.(nextRound);setPanel(null);},{className:'cw-primary',disabled:p.makingLiveId===nextRound.id}),h('p',{className:'cw-dialog-intro'},'Opening this round makes it current for participants. Previous responses are preserved.')):null
+              panel==='next'&&nextRound&&p.onMakeLive? h('footer',{className:'cw-round-footer'},h('p',null,'Makes this round current. Previous responses are kept.'),h('div',null,button('Cancel',()=>setPanel(null)),button(p.makingLiveId===nextRound.id?'Opening…':`Open Round ${nextRound.round_number}`,()=>{p.onMakeLive?.(nextRound);setPanel(null);},{className:'cw-primary',disabled:p.makingLiveId===nextRound.id}))):null
             ))));
   };
 }
