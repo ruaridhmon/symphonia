@@ -1276,3 +1276,18 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
  .cw-preview-confidence {grid-template-columns:1fr;}
  .cw-setup-body textarea {font-size:16px!important;}
 }
+
+/* Opening a round is a short review, without extra authoring decisions. */
+#root .cw-common-fields {padding:0;background:none;border-radius:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:0 0 20px;}
+#root .cw-common-fields>summary {padding:13px 0;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted-foreground);}
+#root .cw-common-fields[open] {padding-bottom:14px;}
+#root .cw-round-review .cw-question-outline li:first-child {border-top:0;}
+.cw-setup-header>div>p {line-height:1.6;}
+.cw-setup-body {padding-top:16px;}
+.cw-setup-dialog .cw-preview-option {min-height:36px!important;padding:8px 12px!important;}
+.cw-setup-dialog .cw-preview-navigation button {border-color:transparent!important;}
+.cw-setup-dialog .cw-preview-navigation button:hover:not(:disabled) {background:var(--muted)!important;}
+.cw-setup-dialog .cw-preview-claim {margin-bottom:16px!important;}
+.cw-setup-dialog .cw-preview-track {margin-bottom:16px!important;}
+.cw-setup-dialog .cw-preview-field {margin-top:16px!important;}
+.cw-setup-dialog .cw-preview-confidence {gap:0 8px;}

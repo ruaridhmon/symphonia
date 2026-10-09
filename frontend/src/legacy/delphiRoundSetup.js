@@ -122,14 +122,11 @@
       '<header class="cw-setup-header">' +
         '<div><h2 id="delphi-round-two-title" style="margin:0;font-size:1.1rem">Review Round ' + (expectedRound + 1) + '</h2>' +
         '<p style="margin:.3rem 0 0;color:var(--muted-foreground);font-size:.85rem">' +
-          claims.length + ' claims · Preview before opening for participants.</p><details class="cw-round-details"><summary>Round details</summary><p>' + (expectedRound===1?'Questions are prepared automatically from the saved claim set. Nothing opens until you choose Open Round 2.':'The Round 2 claims and scales stay unchanged. Recorded positions, confidence and reasons are added as feedback; experts may keep or revise their views.') + '</p></details></div>' +
+          claims.length + ' claims · Agreement, confidence and optional justification.</p>' + (expectedRound===1?'':'<details class="cw-round-details"><summary>Round 2 feedback</summary><p>The same claims and scales are retained, with recorded positions, confidence and reasons as feedback.</p></details>') + '</div>' +
         '<button type="button" data-close aria-label="Close" style="flex:0 0 auto;height:36px;width:36px;border:1px solid var(--border);border-radius:9px;background:var(--background);color:var(--foreground);font-size:1.25rem">×</button>' +
       '</header>' +
       '<div class="cw-setup-body">' +
         '<div data-preview aria-label="Participant preview"></div>' +
-        '<details><summary style="cursor:pointer;font-size:.85rem">Introduction (optional)</summary>' +
-          '<textarea data-intro rows="2" aria-label="Optional introduction" placeholder="Add a short message for participants" style="width:100%;box-sizing:border-box;padding:.7rem;border:1px solid var(--border);border-radius:10px;background:var(--background);color:var(--foreground);font:inherit;font-size:16px"></textarea>' +
-        '</details>' +
       '</div>' +
       '<footer class="cw-setup-footer"><p>Makes this round current. Previous responses are kept.</p><div>' +
         '<button type="button" data-close style="padding:.65rem .9rem;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--foreground);font-weight:700">Cancel</button>' +
@@ -158,7 +155,7 @@
       preview.appendChild(track);
       var heading = document.createElement('h3');
       heading.className='cw-preview-claim';
-      heading.textContent = claim.title;
+      heading.textContent = claim.title.replace(/^Claim\s+\d+\s*:\s*/i,'');
       heading.style.cssText = 'font-size:1.1rem;line-height:1.45;margin:0 0 1rem';
       preview.appendChild(heading);
       if(claim.origin==='inferred'){var origin=document.createElement('p');origin.textContent=claim.feedback || 'Inferred · unconfirmed. Not directly stated by an expert.';origin.style.cssText='font-size:13px;line-height:1.6;border-left:2px dashed #aa92ba;padding-left:12px';preview.appendChild(origin);}
@@ -240,7 +237,6 @@
     });
     dialog.querySelector('[data-start]').addEventListener('click', async function (event) {
       var button = event.currentTarget;
-      var intro = clean(dialog.querySelector('[data-intro]')?.value || '');
       button.disabled = true;
       button.textContent = 'Opening next round…';
       var formId = window.location.pathname.match(/\/admin\/form\/(\d+)\/summary/)?.[1];
@@ -260,7 +256,7 @@
             questions: frozenQuestions || questionsFor(claims),
             context_settings: {
               intro_title: 'Review the claims',
-              intro_body: intro || 'Review the previous-round opinions, rate the same claims and explain your reasoning. You do not need to agree with the group.',
+              intro_body: 'Review the previous-round opinions, rate the same claims and explain your reasoning. You do not need to agree with the group.',
               delphi_protocol: 'fixed-three-rounds',
               show_previous_response: true,
             },

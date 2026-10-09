@@ -146,7 +146,8 @@ test('setup activates on internal navigation and creates separate agreement, con
     assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 1/);
     Array.from(modal.querySelectorAll('button')).find(button => button.textContent === 'Continue').click();
     assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 2/);
-    modal.querySelector('[data-intro]').value = 'Review the previous feedback.';
+    assert.equal(modal.querySelector('[data-intro]'), null);
+    assert.doesNotMatch(modal.textContent, /Introduction \(optional\)/);
     modal.querySelector('[data-start]').click();
     await settle();
     assert.equal(request.url, '/api/forms/14/next_round');
@@ -158,7 +159,7 @@ test('setup activates on internal navigation and creates separate agreement, con
     assert.equal(request.body.questions[1].questionId, 'claim_1_confidence');
     assert.equal(request.body.questions[1].options.length, 5);
     assert.equal(request.body.questions[2].questionId, 'claim_1_comment');
-    assert.equal(request.body.context_settings.intro_body, 'Review the previous feedback.');
+    assert.match(request.body.context_settings.intro_body, /You do not need to agree with the group/);
     assert.equal(modal.querySelector('[data-start]').disabled, false);
   } finally { dom.window.close(); }
 });

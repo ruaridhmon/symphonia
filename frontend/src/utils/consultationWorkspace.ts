@@ -122,7 +122,7 @@ export function createConsultationWorkspace(R: typeof React, ManualResponse?: Re
             h(R.Fragment, null,
               h('p', { className: 'cw-dialog-intro' }, panel==='next'?`${outline.groups.length} ${savedCustom?(outline.groups.length===1?'question group':'question groups'):(outline.groups.length===1?'claim':'claims')} · Review before opening for participants.`:hint),
               panel==='next'?h('details',{className:'cw-round-details'},h('summary',null,'Round details'),h('p',null,nextHint)):null,
-              outline.sharedFields?h('section',{className:'cw-common-fields','aria-label':'Response fields for every claim'},h('h3',null,'For each claim'),...outline.sharedFields.map((field,i)=>h('p',{key:i},h('strong',null,field.label),h('span',null,field.optional?'Optional':'Required'),field.options.length?h('small',null,field.options.join(' · ')):null))):null,
+              outline.sharedFields?h('details',{className:'cw-common-fields','aria-label':'Response fields for every claim'},h('summary',null,'Participant response'),...outline.sharedFields.map((field,i)=>h('p',{key:i},h('strong',null,field.label),h('span',null,field.optional?'Optional':'Required'),field.options.length?h('small',null,field.options.join(' · ')):null))):null,
               !outline.sharedFields&&outline.sharedScale?h('details',{className:'cw-shared-scale'},h('summary',null,'Rating scale used for every rated claim'),h('p',null,outline.sharedScale.join(' · '))):null,
               h('ol',{className:'cw-questions cw-question-outline'},...outline.groups.map((group,i)=>h('li',{key:i},
                 h('h3',null,group.title),
