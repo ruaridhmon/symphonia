@@ -62,7 +62,7 @@ export function quietSummary(main:HTMLElement){
   if(current.button.textContent!==text)current.button.textContent=text;
   const expanded=String(current.open);if(current.button.getAttribute('aria-expanded')!==expanded)current.button.setAttribute('aria-expanded',expanded);
   if(card!.hidden===current.open)card!.hidden=!current.open;
-  current.button.hidden=false;current.nav.hidden=false;
+  current.button.hidden=true;current.claims.hidden=true;current.button.dataset.redundantSummaryView='true';current.claims.dataset.redundantSummaryView='true';current.nav.hidden=false;
   current.claims.setAttribute('aria-pressed',String(!current.open));current.button.setAttribute('aria-pressed',String(current.open));
   if(progress)progress.hidden=current.open;
   card!.classList.toggle('full-summary-visible',current.open);

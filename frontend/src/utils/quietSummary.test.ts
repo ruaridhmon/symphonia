@@ -7,7 +7,7 @@ it('collapses duplicate prose while retaining the original editor and publicatio
  const publish=main.querySelector<HTMLButtonElement>('.card button')!;const click=vi.fn();publish.onclick=click;
  const editor=main.querySelector('[contenteditable]');quietSummary(main);
  const toggle=main.querySelector<HTMLButtonElement>('.quiet-synthesis-toggle')!;
- expect(card.hidden).toBe(true);expect(toggle.textContent).toBe('Full summary');
+ expect(card.hidden).toBe(true);expect(toggle.hidden).toBe(true);expect(main.querySelector<HTMLButtonElement>('.summary-switch>button')!.hidden).toBe(true);
  toggle.click();expect(main.querySelector<HTMLElement>('#delphi-recorded-progress')!.hidden).toBe(true);expect(card.hidden).toBe(false);expect(toggle.getAttribute('aria-expanded')).toBe('true');
  expect(main.querySelector('[contenteditable]')).toBe(editor);publish.click();expect(click).toHaveBeenCalledOnce();
  quietSummary(main);expect(card.hidden).toBe(false);expect(main.querySelectorAll('.quiet-synthesis-toggle')).toHaveLength(1);

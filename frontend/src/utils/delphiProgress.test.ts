@@ -33,7 +33,7 @@ describe('recorded Delphi progress', () => {
   });
   it('labels empty and copied summaries on historical as well as live rounds', () => {
     const r={...makeRound(2),is_active:false,response_count:0,synthesis:'Earlier result'};
-    expect(synthesisProvenanceNote(r,[r])).toContain('not a result from this round');
+    expect(synthesisProvenanceNote(r,[r])).toBeNull();
     const p={...makeRound(1),synthesis:'Earlier result'};
     expect(synthesisProvenanceNote({...r,response_count:10},[p,r])).toContain('matches Round 1');
   });
