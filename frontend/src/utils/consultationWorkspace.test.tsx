@@ -128,7 +128,7 @@ it('reviews the saved next questionnaire before making it current',async()=>{
 });
 it('prepares a missing next round only on request and uses the current round from historical views',()=>{
  const p=props(),prepare=vi.fn();render(<Workspace {...p} selectedRoundId={11} onPrepareNextRound={prepare}/>);
- expect(screen.getByLabelText('Delphi next step')).toHaveTextContent('Viewing Round 1 · Current: Round 2');
+ expect(screen.getByLabelText('Delphi next step')).toHaveTextContent('Viewing Round 1 · Round 2 is current');
  expect(prepare).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Review Round 3'}));expect(prepare).toHaveBeenCalledOnce();expect(p.onMakeLive).not.toHaveBeenCalled();
 });
 
@@ -139,4 +139,13 @@ it('returns Summary to its recorded overview after full-summary selection',async
  const restore=vi.fn();slot.querySelector('button')!.onclick=restore;
  fireEvent.click(screen.getByRole('button',{name:/^Summary$/,hidden:true}));
  await waitFor(()=>expect(restore).toHaveBeenCalledOnce());
+});
+
+it('keeps next-round guidance in options and uses one compact header action',()=>{
+ render(<Workspace {...props()}/>);
+ const next=screen.getByRole('button',{name:'Review Round 3'});
+ expect(next.closest('.cw-title-actions')).not.toBeNull();expect(next).toHaveTextContent('Next round');
+ expect(document.querySelector('.cw-workflow')).toBeNull();
+ const process=screen.getByText('How rounds work').closest('details')!;
+ expect(process.open).toBe(false);expect(process).toHaveTextContent('Round 3 reuses the Round 2 claims');
 });

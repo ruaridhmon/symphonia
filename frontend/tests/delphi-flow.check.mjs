@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { JSDOM } from 'jsdom';
+import { buildDelphiRoundTwoQuestions } from '../dist/claim-review.js';
 
 const script = readFileSync(new URL('../dist/delphi-round-two-ui.js', import.meta.url), 'utf8');
 const settle = () => new Promise(resolve => setTimeout(resolve, 180));
@@ -53,8 +54,9 @@ function page(path = '/') {
   };
   const close = dom.window.close.bind(dom.window);
   dom.window.close = () => { observers.forEach(observer => observer.disconnect()); close(); };
-  dom.window.__roundApi = {g:async()=>[{round_number:1,questions:[]}]};
-  dom.window.eval(script.replace("import('/assets/rounds-CU08geHs.js')", 'Promise.resolve(window.__roundApi)'));
+  dom.window.__roundApi = {g:async()=>[{round_number:1,questions:[],synthesis_json:{reasoning_graph:{claims:[1,2].map(n=>({id:`claim_${n}`,text:`Synthetic claim ${n}`,origin:'explicit'}))}}}]};
+  dom.window.__claimBuilder = {buildDelphiRoundTwoQuestions};
+  dom.window.eval(script.replace("import('/assets/rounds-CU08geHs.js')", 'Promise.resolve(window.__roundApi)').replace("import('/claim-review.js?v=3')", 'Promise.resolve(window.__claimBuilder)'));
   return dom;
 }
 
@@ -138,9 +140,9 @@ test('setup activates on internal navigation and creates separate agreement, con
     await settle();
     const modal = window.document.querySelector('[role="dialog"]');
     assert.ok(modal);
-    assert.match(modal.textContent, /Set up next Delphi round/);
-    assert.doesNotMatch(modal.textContent, /Round Two|Round 2|Add question/);
-    assert.equal(modal.querySelectorAll('input[type=radio]').length, 11);
+    assert.match(modal.textContent, /Review Round 2/);
+    assert.doesNotMatch(modal.textContent, /Add question/);
+    assert.equal(modal.querySelectorAll('input[type=radio]').length, 9);
     assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 1/);
     Array.from(modal.querySelectorAll('button')).find(button => button.textContent === 'Continue').click();
     assert.match(modal.querySelector('[data-preview]').textContent, /Synthetic claim 2/);
@@ -150,8 +152,9 @@ test('setup activates on internal navigation and creates separate agreement, con
     assert.equal(request.url, '/api/forms/14/next_round');
     assert.equal(request.body.expected_round_number, 1);
     assert.equal(request.body.questions.length, 6);
-    assert.equal(request.body.questions[0].options.length, 6);
-    assert.equal(request.body.questions[1].optional, true);
+    assert.deepEqual(Array.from(request.body.questions[0].options), ['Agree', 'Neither agree nor disagree', 'Disagree', 'Unable to judge']);
+    assert.equal(request.body.questions[0].label, 'Do you agree with this statement?');
+    assert.equal(request.body.questions[1].optional, false);
     assert.equal(request.body.questions[1].questionId, 'claim_1_confidence');
     assert.equal(request.body.questions[1].options.length, 5);
     assert.equal(request.body.questions[2].questionId, 'claim_1_comment');

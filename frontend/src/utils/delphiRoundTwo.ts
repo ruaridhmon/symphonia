@@ -14,7 +14,7 @@ export interface DelphiClaim {
 
 export const CONFIDENCE_OPTIONS = ['Not at all confident', 'Slightly confident', 'Moderately confident', 'Very confident', 'Extremely confident'];
 
-const RATING_OPTIONS = ['Agree', 'Disagree', 'Unable to judge'];
+const RATING_OPTIONS = ['Agree', 'Neither agree nor disagree', 'Disagree', 'Unable to judge'];
 
 function detailCount(container: Element, label: string): number | null {
   const detail = Array.from(container.querySelectorAll('details')).find((item) =>
@@ -101,7 +101,7 @@ export function buildDelphiRoundTwoQuestions(synthesisHtml: string, graph?: Reas
     return [
       baseQuestion({
         ...metadata,
-        label: 'Your view',
+        label: 'Do you agree with this statement?',
         questionId: `${prefix}_response`,
         sectionTitle,
         groupPrompt: claim.origin === "inferred" ? `Inferred · unconfirmed. This claim was not directly stated by an expert. ${claim.inferenceQuestion || "Check this interpretation independently."} Agreement does not establish that the original expert stated it.` : groupFeedback(claim),
@@ -116,7 +116,7 @@ export function buildDelphiRoundTwoQuestions(synthesisHtml: string, graph?: Reas
         sectionTitle,
         inputType: 'single_select',
         options: [...CONFIDENCE_OPTIONS],
-        optional: true,
+        optional: false,
       }),
       baseQuestion({
         ...metadata,

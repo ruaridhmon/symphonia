@@ -34,13 +34,13 @@
   var confidenceOptions = ['Not at all confident', 'Slightly confident', 'Moderately confident', 'Very confident', 'Extremely confident'];
 
   function questionsFor(claims) {
-    var responseOptions = ['Agree', 'Disagree', 'Unable to judge'];
+    var responseOptions = ['Agree', 'Neither agree nor disagree', 'Disagree', 'Unable to judge'];
     return claims.reduce(function (questions, claim) {
       var prefix = 'claim_' + claim.number;
       var sectionTitle = 'Claim ' + claim.number + ': ' + claim.title;
       return questions.concat([
         baseQuestion({
-          label: 'Your view',
+          label: 'Do you agree with this statement?',
           questionId: prefix + '_response',
           sectionTitle: sectionTitle,
           inputType: 'single_select',
@@ -53,7 +53,7 @@
           sectionTitle: sectionTitle,
           inputType: 'single_select',
           options: confidenceOptions.slice(),
-          optional: true,
+          optional: false,
         }),
         baseQuestion({
           label: 'Explain your position',
@@ -95,7 +95,7 @@
         claims = frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId === q.questionId.replace(/_response$/, '_confidence');}) || {}).options};});
       } else {
         var opening=rounds.find(function(r){return r.round_number===1;});
-        var claimBuilder=await import('/claim-review.js?v=2');
+        var claimBuilder=await import('/claim-review.js?v=3');
         frozenQuestions=claimBuilder.buildDelphiRoundTwoQuestions(opening?.synthesis || '',opening?.synthesis_json?.narrative===opening?.synthesis?opening?.synthesis_json?.reasoning_graph:null);
         claims=frozenQuestions.filter(function(q){return q && /_response$/.test(q.questionId) && Array.isArray(q.options);}).map(function(q,i){return {number:i+1,title:q.sectionTitle || q.label,options:q.options,origin:q.claimOrigin,feedback:q.groupPrompt,confidenceOptions:(frozenQuestions.find(function(c){return c.questionId===q.questionId.replace(/_response$/,'_confidence');}) || {}).options};});
       }
@@ -184,7 +184,8 @@
       var confidenceChoices = frozenQuestions ? claim.confidenceOptions : confidenceOptions;
       if (confidenceChoices) {
         var confidenceHeading = document.createElement('p');
-        confidenceHeading.textContent = 'Confidence in your rating (optional)';
+        var confidenceQuestion = frozenQuestions && frozenQuestions.find(function(q){return q.questionId === frozenQuestions.filter(function(q){return /_response$/.test(q.questionId);})[previewIndex]?.questionId.replace(/_response$/, '_confidence');});
+        confidenceHeading.textContent = 'Confidence in your rating' + (confidenceQuestion?.optional ? ' (optional)' : ' (required)');
         confidenceHeading.style.cssText = 'font-size:15px;font-weight:600;margin:20px 0 6px';
         preview.appendChild(confidenceHeading);
         confidenceChoices.forEach(function(option) {
