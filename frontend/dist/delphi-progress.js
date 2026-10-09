@@ -124,7 +124,7 @@ function ratingProgress(round, rounds, responses) {
 }
 function synthesisProvenanceNote(round, rounds) {
   if (!round?.synthesis?.trim()) return null;
-  if (round.response_count === 0) return `No responses have been submitted in Round ${round.round_number}. This text is background or a draft, not a result from this round.`;
+  if (round.response_count === 0) return null;
   const previous = rounds.find((r) => r.round_number === round.round_number - 1);
   if (previous?.synthesis?.trim() === round.synthesis.trim()) return `This text matches Round ${previous.round_number}. Review it against this round\u2019s responses before treating it as an updated result.`;
   return null;
@@ -324,48 +324,6 @@ function renderReasoningFlow(root, graph, selectedNode) {
   show(selectedNode ? 0 : Math.max(0, flows.findIndex((f) => f.id === remembered)));
 }
 
-// src/utils/renderDelphiPlanner.ts
-var el2 = (tag, text = "") => {
-  const n = document.createElement(tag);
-  n.textContent = text;
-  return n;
-};
-function renderDelphiPlanner(root, round, rounds, responses, publish) {
-  if (round.round_number >= 3) return;
-  const box = el2("div");
-  box.className = "di-planner";
-  root.append(box);
-  if (round.round_number !== 2) return;
-  const detail = el2("details");
-  detail.append(el2("summary", "Preview round 3 \xB7 Final ratings"), el2("p", "All claims, wording and rating options stay unchanged. Participants review the previous opinions, rate each claim again and explain their reasoning."));
-  box.append(detail);
-  try {
-    const questions = buildFixedDelphiRound(round, rounds.filter((r) => r.round_number <= 2), responses);
-    questions.filter((q) => typeof q === "object" && Array.isArray(q.options)).forEach((q) => {
-      if (typeof q === "string") return;
-      const item = el2("details");
-      item.append(el2("summary", String(q.sectionTitle || q.label)), el2("p", String(q.groupPrompt)), el2("p", q.options.join(" \xB7 ")), el2("p", "Explain your position \u2014 why do you agree or disagree? Share the reasoning or evidence behind your answer."));
-      detail.append(item);
-    });
-    if (publish && !rounds.some((r) => r.round_number >= 3)) {
-      const open = el2("button", "Open round 3");
-      open.type = "button";
-      open.onclick = async () => {
-        open.disabled = true;
-        try {
-          await publish(questions);
-        } catch (e) {
-          detail.append(el2("p", e.message));
-          open.disabled = false;
-        }
-      };
-      detail.append(open);
-    } else detail.append(el2("p", rounds.some((r) => r.round_number >= 3) ? "Round 3 already exists." : "Simulation preview only."));
-  } catch (e) {
-    detail.append(el2("p", e.message));
-  }
-}
-
 // src/utils/renderDelphiInsights.ts
 var colors = ["#137c70", "#b34d60", "#94a3b8", "#c28a2a", "#8b5fbf", "#e2e8f0"];
 var node = (tag, text = "", cls = "") => {
@@ -394,8 +352,6 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
   const rows = ratingProgress(round, rounds, responses);
   const priorOpen = new Set(Array.from(root.querySelectorAll("details[open]")).map((d) => d.dataset.key));
   delete root.dataset.filter;
-  const existingPlanner = root.dataset.plannerRound === String(round.id) ? root.querySelector(".di-planner") : null;
-  root.dataset.plannerRound = String(round.id);
   root.replaceChildren();
   root.className = "card delphi-insights";
   root.dataset.review = String(round.round_number > 1);
@@ -710,8 +666,6 @@ function renderDelphiInsights(root, round, rounds, responses, refresh, publish) 
     archived.append(node("p", `${row.label} \u2014 last rated Round ${r.round_number}: ${row.percent === null ? "no ratings" : Math.round(row.percent) + "% agree"} (${row.answered} answered). Not re-rated; no current-round result.`));
   }));
   if (archived.childElementCount > 1) root.append(archived);
-  if (existingPlanner) root.append(existingPlanner);
-  else if (round.is_active || !refresh) renderDelphiPlanner(root, round, rounds, responses, publish);
 }
 
 // src/legacy/delphiProgress.ts
@@ -722,7 +676,7 @@ var lastFetch = 0;
 var failed = false;
 var revision = 0;
 var savedRevision = 0;
-function el3(tag, text, className) {
+function el2(tag, text, className) {
   const node2 = document.createElement(tag);
   if (text) node2.textContent = text;
   if (className) node2.className = className;
@@ -779,7 +733,7 @@ function render() {
   let panel = document.getElementById("delphi-recorded-progress");
   if (panel?.dataset.signature === signature) return;
   if (!panel) {
-    panel = el3("section", "", "card");
+    panel = el2("section", "", "card");
     panel.id = "delphi-recorded-progress";
     card.before(panel);
   }
@@ -787,7 +741,7 @@ function render() {
   panel.setAttribute("aria-label", "Delphi round progress");
   panel.dataset.loading = String(!cache && !failed);
   if (!round || !cache) {
-    panel.replaceChildren(el3("p", failed ? "Recorded response data could not be loaded." : "Loading recorded responses\u2026"));
+    panel.replaceChildren(el2("p", failed ? "Recorded response data could not be loaded." : "Loading recorded responses\u2026"));
     return;
   }
   renderDelphiInsights(panel, round, cache.rounds, cache.responses, () => {
@@ -819,7 +773,7 @@ window.addEventListener("symphonia:draft-error", (event) => {
   document.getElementById("draft-generation-error")?.remove();
   const panel = document.getElementById("delphi-recorded-progress");
   if (!panel) return;
-  const alert = el3("p", detail.message, "card");
+  const alert = el2("p", detail.message, "card");
   alert.id = "draft-generation-error";
   alert.setAttribute("role", "alert");
   panel.before(alert);

@@ -1297,3 +1297,6 @@ html:has(.fc-composer) { scrollbar-gutter:stable; }
 .consultation-workspace .cw-record-response:hover:not(:disabled){background:var(--bg-secondary,#f5f5f2)}
 .consultation-workspace .cw-record-response:disabled{opacity:.45;cursor:default}
 @media(max-width:480px){.consultation-workspace .cw-title-actions>.cw-record-response{padding:5px 9px;font-size:12px}}
+
+/* Summary is the single view; keep the native editing callbacks available internally. */
+#root .summary-switch>button[data-redundant-summary-view]{display:none!important}

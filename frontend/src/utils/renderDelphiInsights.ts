@@ -1,7 +1,6 @@
 import {focusClaim} from './focusClaim';
 import { renderReasoningFlow, clearReasoningFlow } from './reasoningFlow';
 import '../reasoning-flow.css';
-import { renderDelphiPlanner } from './renderDelphiPlanner';
 import type { Round, RoundWithResponses } from '../types/summary';
 import { confidenceLabels, ratingProgress, stanceLabels, synthesisProvenanceNote } from './delphiProgress';
 const colors = ['#137c70','#b34d60','#94a3b8','#c28a2a','#8b5fbf','#e2e8f0'];
@@ -22,8 +21,6 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   const rows=ratingProgress(round,rounds,responses);
   const priorOpen=new Set(Array.from(root.querySelectorAll('details[open]')).map(d=>(d as HTMLElement).dataset.key));
   delete root.dataset.filter;
-  const existingPlanner=root.dataset.plannerRound===String(round.id)?root.querySelector('.di-planner'):null;
-  root.dataset.plannerRound=String(round.id);
   root.replaceChildren();root.className='card delphi-insights';root.dataset.review=String(round.round_number>1);
   root.dataset.claimLabels=JSON.stringify(rows.map(r=>r.label.replace(/^Claim\s+\d+:\s*/i,'').replace(/\s+/g,' ').trim()));
   const head=node('div','','di-heading');
@@ -152,6 +149,4 @@ export function renderDelphiInsights(root:HTMLElement, round:Round, rounds:Round
   const seen=new Set(rows.map(r=>r.key));
   [...ordered].reverse().filter(r=>r.id!==round.id).forEach(r=>ratingProgress(r,rounds,responses).forEach(row=>{if(seen.has(row.key))return;seen.add(row.key);archived.append(node('p',`${row.label} — last rated Round ${r.round_number}: ${row.percent===null?'no ratings':Math.round(row.percent)+'% agree'} (${row.answered} answered). Not re-rated; no current-round result.`));}));
   if(archived.childElementCount>1)root.append(archived);
-  if(existingPlanner)root.append(existingPlanner);
-  else if(round.is_active || !refresh)renderDelphiPlanner(root,round,rounds,responses,publish);
 }

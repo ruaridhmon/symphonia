@@ -88,7 +88,7 @@ export function ratingProgress(round: Round, rounds: Round[], responses: RoundWi
 }
 export function synthesisProvenanceNote(round: Round | null, rounds: Round[]): string | null {
   if (!round?.synthesis?.trim()) return null;
-  if (round.response_count === 0) return `No responses have been submitted in Round ${round.round_number}. This text is background or a draft, not a result from this round.`;
+  if (round.response_count === 0) return null;
   const previous = rounds.find(r => r.round_number === round.round_number - 1);
   if (previous?.synthesis?.trim() === round.synthesis.trim()) return `This text matches Round ${previous.round_number}. Review it against this round’s responses before treating it as an updated result.`;
   return null;
