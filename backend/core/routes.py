@@ -4085,7 +4085,109 @@ def _format_custom_claim_list(
 CURATED_SYNTHESIS_MODELS = {
     "google/gemini-3.8-flash", "openai/gpt-6.1-sol",
     "anthropic/claude-opus-5.5", "openai/gpt-6-astra",
+    "google/gemini-4-argon", "xiaomi/mimo-v2.6-pro",
 }
+
+
+class ClaimEvaluationPayload(BaseModel):
+    task: str
+    model: str
+    request_id: UUID
+    reference: dict[str, Any] | None = None
+    candidates: list[dict[str, Any]] | None = None
+    synthesis_version_id: int | None = None
+
+
+@router.post('/dev/forms/{form_id}/claim-evaluation', tags=['Synthesis'])
+@limiter.limit(SYNTHESIS_LIMIT)
+async def evaluate_claims(
+    request: Request, form_id: int, payload: ClaimEvaluationPayload,
+    db: Session = Depends(get_db), user: User = Depends(require_platform_admin),
+):
+    """Bounded source-first audits on isolated synthetic dev copies; no ballot writes."""
+    from .claim_evaluation import MODELS, VERSION, prompt, validate_reference, validate_audit
+    import hashlib
+    if os.getenv('K_SERVICE', '').strip() != 'symphonia-dev':
+        raise HTTPException(404, 'Not found')
+    if payload.model not in MODELS or payload.task not in {'reference', 'reconcile', 'judge'}:
+        raise HTTPException(400, 'Unsupported evaluation model or task')
+    form = db.query(FormModel).filter_by(id=form_id).with_for_update().first()
+    if not form or not form.title.startswith('EXPERIMENT 2026-10-17 — SYNTHETIC — '):
+        raise HTTPException(400, 'Evaluation requires an isolated synthetic experiment copy')
+    rd = db.query(RoundModel).filter_by(form_id=form_id, round_number=1).first()
+    if not rd:
+        raise HTTPException(400, 'Missing opening round')
+    rows = db.query(Response).filter_by(round_id=rd.id).order_by(Response.created_at.asc()).all()
+    if not 1 <= len(rows) <= 25:
+        raise HTTPException(400, 'Evaluation requires 1–25 opening responses')
+    sources = []
+    for row in rows:
+        answers = json.loads(row.answers) if isinstance(row.answers, str) else row.answers
+        value = (answers or {}).get('q1', {})
+        value = value.get('position', '') if isinstance(value, dict) else value
+        if not isinstance(value, str): raise HTTPException(400, 'Invalid source text')
+        sources.append({'response_id':str(row.id), 'text':value})
+    if sum(len(s['text']) for s in sources) > 150000:
+        raise HTTPException(400, 'Source text exceeds evaluation limit')
+    claims = None
+    try:
+        if payload.task == 'reconcile':
+            if not payload.candidates or len(payload.candidates) != 2: raise ValueError('Two reference drafts required')
+            for candidate in payload.candidates: validate_reference(candidate, sources)
+        if payload.task == 'judge':
+            validate_reference(payload.reference, sources)
+            version = db.query(SynthesisVersion).filter_by(id=payload.synthesis_version_id, round_id=rd.id).first()
+            if not version: raise ValueError('Missing saved candidate version')
+            if version.model_used == payload.model: raise ValueError('Self-judging is not allowed')
+            graph = (version.synthesis_json or {}).get('reasoning_graph', {})
+            claims = [{k:v for k,v in c.items() if k in {'id','text','origin','inference_question','assumption_context'}} |
+                      {'sources':[{'response_id':str(s.get('response_id','')), 'response_number':s.get('response_number'), 'stance':s.get('stance')} for s in c.get('sources',[])]}
+                      for c in graph.get('claims',[])]
+            if not claims: raise ValueError('Candidate has no saved claims')
+        messages = prompt(payload.task, sources, rd.questions, payload.reference, payload.candidates, claims)
+    except (ValueError, TypeError, KeyError) as exc:
+        raise HTTPException(400, str(exc)) from exc
+    if len(json.dumps(messages)) > 250000: raise HTTPException(400, 'Evaluation prompt too large')
+    fingerprint = hashlib.sha256(json.dumps({'messages':messages,'model':payload.model},sort_keys=True).encode()).hexdigest()
+    ctx = dict(rd.context_settings or {}); runs = dict(ctx.get('claim_evaluation_runs', {})); key = str(payload.request_id)
+    if key in runs:
+        previous = runs[key]
+        if previous.get('fingerprint') != fingerprint: raise HTTPException(409, 'Request ID has different input')
+        if previous.get('status') == 'complete': return previous['result']
+        raise HTTPException(409, 'Prior call is unresolved or failed; inspect before a new request')
+    if len(runs) >= 16: raise HTTPException(429, 'Isolated study evaluation call ceiling reached')
+    api_key = os.getenv('OPENROUTER_API_KEY', '')
+    if not api_key: raise HTTPException(503, 'Model service is not configured')
+    runs[key] = {'status':'reserved','fingerprint':fingerprint,'model':payload.model,'task':payload.task}
+    ctx['claim_evaluation_runs'] = runs; rd.context_settings = ctx
+    rid = rd.id; db.commit()
+    options = {'model':payload.model,'messages':messages,'max_tokens':16000,'response_format':{'type':'json_object'},
+               'extra_body':{'reasoning':{'effort':'low'},'provider':{'sort':'throughput'}}}
+    raw = None
+    completion = None
+    try:
+        async with AsyncOpenAI(base_url='https://openrouter.ai/api/v1',api_key=api_key,timeout=Timeout(175,connect=5),max_retries=0) as client:
+            completion = await asyncio.wait_for(client.chat.completions.create(**options),timeout=180)
+        raw = completion.choices[0].message.content or ''
+        if completion.choices[0].finish_reason != 'stop': raise ValueError('Incomplete output')
+        value = json.loads(raw)
+        if payload.task == 'judge': validate_audit(value,payload.reference,claims)
+        else: validate_reference(value,sources)
+        result = {'status':'complete','annotation_status':'provisional_model_judgments','task':payload.task,'model':payload.model,
+                  'resolved_model':completion.model,'generation_id':completion.id,'prompt_version':VERSION,'fingerprint':fingerprint,
+                  'messages':messages,'raw_output':raw,'output':value,'usage':completion.usage.model_dump() if completion.usage else None}
+    except Exception as exc:
+        status = getattr(exc,'status_code',None)
+        safe = {'status':'failed','error_type':type(exc).__name__,'provider_status':status if isinstance(status,int) else None,
+                'raw_output':raw,'messages':messages,'usage':completion.usage.model_dump() if completion and completion.usage else None}
+        db.query(FormModel).filter_by(id=form_id).with_for_update().first(); db.expire_all()
+        rd = db.get(RoundModel,rid); ctx = dict(rd.context_settings or {}); runs = dict(ctx.get('claim_evaluation_runs',{}))
+        runs[key] = {**runs[key],**safe};ctx['claim_evaluation_runs']=runs;rd.context_settings=ctx;db.commit()
+        raise HTTPException(502, safe) from exc
+    db.query(FormModel).filter_by(id=form_id).with_for_update().first(); db.expire_all()
+    rd = db.get(RoundModel,rid); ctx = dict(rd.context_settings or {}); runs = dict(ctx.get('claim_evaluation_runs',{}))
+    runs[key] = {**runs[key],'status':'complete','result':result};ctx['claim_evaluation_runs']=runs;rd.context_settings=ctx;db.commit()
+    return result
 
 
 def _grounded_provider_options(model: str) -> dict[str, Any]:
@@ -4105,7 +4207,8 @@ async def _complete_grounded_draft(api_key: str, options: dict[str, Any]):
     # Flagships can take longer; keep the same single-request cancellation protection.
     deadline = DRAFT_REQUEST_TIMEOUT_SECONDS * (2 if options.get("model") in CURATED_SYNTHESIS_MODELS else 1)
     # These OpenAI models do not accept temperature; do not require an unsupported parameter.
-    if str(options.get("model", "")).startswith("openai/gpt-6"):
+    if (str(options.get("model", "")).startswith("openai/gpt-6")
+            or options.get("model") == "anthropic/claude-opus-5.5"):
         options = {key: value for key, value in options.items() if key != "temperature"}
     # Keep throughput routing within standard capacity; do not opt into paid tiers.
     options = {**options, "service_tier": "default"}
@@ -11696,3 +11799,4 @@ def magic_join(
         db.commit()
 
     return {"message": "Joined.", "form_id": form.id, "title": form.title}
+
