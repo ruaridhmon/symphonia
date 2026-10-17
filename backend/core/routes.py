@@ -4258,13 +4258,18 @@ def _grounded_provider_options(model: str) -> dict[str, Any]:
 
 async def _complete_grounded_draft(api_key: str, options: dict[str, Any]):
     # Flagships can take longer; keep the same single-request cancellation protection.
+    options = dict(options)
+    benchmark = options.pop('_benchmark', False)
     deadline = DRAFT_REQUEST_TIMEOUT_SECONDS * (2 if options.get("model") in CURATED_SYNTHESIS_MODELS else 1)
+    if benchmark:
+        deadline = 180
     # These OpenAI models do not accept temperature; do not require an unsupported parameter.
     if (str(options.get("model", "")).startswith("openai/gpt-6")
             or options.get("model") == "anthropic/claude-opus-5.5"):
         options = {key: value for key, value in options.items() if key != "temperature"}
     # Keep throughput routing within standard capacity; do not opt into paid tiers.
-    options = {**options, "service_tier": "default"}
+    if not benchmark:
+        options = {**options, "service_tier": "default"}
     # Shared cancellation and connection cleanup for opening, review and final drafts.
     async with AsyncOpenAI(
         base_url="https://openrouter.ai/api/v1", api_key=api_key,
@@ -4387,6 +4392,20 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         ],
         **request_options,
     }
+    # Fixed, identical provider options for the isolated four-model experiment.
+    # Keep the deployed prompt and semantic/source validators; avoid comparing
+    # different provider-specific constrained-decoding implementations.
+    experiment_form = db.get(FormModel, form_id) if grounded and round_number == 1 else None
+    if (experiment_form is not None
+            and experiment_form.title.startswith('EXPERIMENT 2026-10-17 — SYNTHETIC — ')
+            and os.getenv('K_SERVICE', '').strip() == 'symphonia-dev'):
+        completion_options.update(
+            response_format={'type':'json_object'},
+            extra_body={'reasoning':{'effort':'low'},'provider':{'sort':'throughput'}},
+            _benchmark=True,
+        )
+        completion_options.pop('temperature',None)
+        db.rollback()
     try:
         if grounded:
             completion = await _complete_grounded_draft(api_key, completion_options)
