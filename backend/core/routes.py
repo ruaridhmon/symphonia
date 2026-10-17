@@ -3446,6 +3446,7 @@ async def _launch_synthesis_job(task_job_id: str, **job_kwargs: Any) -> None:
 
 class GenerateSynthesisVersionPayload(BaseModel):
     model: str | None = None
+    experiment_budget: str = "standard"
     strategy: str = "grounded"  # Single-request workflow; legacy strategies remain API-compatible
     n_analysts: int = 3
     mode: str = "human_only"
@@ -4262,7 +4263,7 @@ async def _complete_grounded_draft(api_key: str, options: dict[str, Any]):
     benchmark = options.pop('_benchmark', False)
     deadline = DRAFT_REQUEST_TIMEOUT_SECONDS * (2 if options.get("model") in CURATED_SYNTHESIS_MODELS else 1)
     if benchmark:
-        deadline = 180
+        deadline = 270 if benchmark == 'extended' else 180
     # These OpenAI models do not accept temperature; do not require an unsupported parameter.
     if (str(options.get("model", "")).startswith("openai/gpt-6")
             or options.get("model") == "anthropic/claude-opus-5.5"):
@@ -4315,6 +4316,7 @@ async def _run_custom_synthesis(
     summary_options: dict[str, bool] | None,
     db: Session,
     grounded: bool = False,
+    experiment_budget: str = "standard",
 ) -> dict[str, Any]:
     review_snapshot = _unanswered_review_snapshot(db, form_id) if grounded and round_number == 1 else None
     resolved_model = _resolve_synthesis_model(db, model)
@@ -4396,14 +4398,22 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
     # Keep the deployed prompt and semantic/source validators; avoid comparing
     # different provider-specific constrained-decoding implementations.
     experiment_form = db.get(FormModel, form_id) if grounded and round_number == 1 else None
-    if (experiment_form is not None
+    isolated_experiment = (experiment_form is not None
             and experiment_form.title.startswith('EXPERIMENT 2026-10-17 — SYNTHETIC — ')
-            and os.getenv('K_SERVICE', '').strip() == 'symphonia-dev'):
+            and os.getenv('K_SERVICE', '').strip() == 'symphonia-dev')
+    from .claim_evaluation import extraction_budget
+    try:
+        extended_budget = extraction_budget(experiment_budget, isolated_experiment)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    if isolated_experiment:
         completion_options.update(
             response_format={'type':'json_object'},
             extra_body={'reasoning':{'effort':'low'},'provider':{'sort':'throughput'}},
-            _benchmark=True,
+            _benchmark='extended' if extended_budget else True,
         )
+        if extended_budget:
+            completion_options['max_tokens'] = extended_budget['max_tokens']
         completion_options.pop('temperature',None)
         db.rollback()
     try:
@@ -4436,9 +4446,18 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
             len(completion.choices[0].message.content or ""),
             getattr(getattr(getattr(completion, "usage", None), "completion_tokens_details", None), "reasoning_tokens", None),
         )
-    if grounded and completion.choices[0].finish_reason != "stop":
-        raise HTTPException(status_code=502, detail="The draft was incomplete. The previous synthesis has been kept. Try generating again.")
     output = completion.choices[0].message.content or ""
+    def extended_failure(kind):
+        return {'status':'failed','failure_kind':kind,'budget_profile':'extended',
+                'finish_reason':completion.choices[0].finish_reason,
+                'resolved_model':completion.model,'generation_id':completion.id,
+                'usage':completion.usage.model_dump() if completion.usage else None,
+                'request':{k:v for k,v in completion_options.items() if k != '_benchmark'},
+                'raw_output':output}
+    if grounded and completion.choices[0].finish_reason != "stop":
+        if completion_options.get('_benchmark') == 'extended':
+            raise HTTPException(502, extended_failure('non_stop_finish'))
+        raise HTTPException(status_code=502, detail="The draft was incomplete. The previous synthesis has been kept. Try generating again.")
     reasoning_graph = None
     if round_number == 1:
         try:
@@ -4450,6 +4469,8 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                 raise ValueError("Missing normalized claim map")
         except (ValueError, TypeError, KeyError) as exc:
             logger.warning("Grounded draft validation failed for round %d: %s", round_id, str(exc))
+            if completion_options.get('_benchmark') == 'extended':
+                raise HTTPException(502, extended_failure('schema_or_source_validation')) from exc
             raise HTTPException(status_code=502, detail="The model returned an incomplete reasoning draft. The previous synthesis has been kept. Try generating again.") from exc
     synthesis_text = "" if grounded else _format_custom_claim_list(
         output, questions=questions, response_dicts=response_dicts,
@@ -4489,6 +4510,8 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
                 "custom_prompt": prompt,
                 "baseline_prompt": (OPENING_PROMPT if round_number == 1 else REVIEW_PROMPT) if grounded else CUSTOM_SYNTHESIS_BASELINE_PROMPT,
                 **({'benchmark_call': {
+                    'budget_profile':experiment_budget,
+                    'timeout_seconds':270 if experiment_budget == 'extended' else 180,
                     'requested_model':resolved_model,
                     'resolved_model':completion.model,
                     'generation_id':completion.id,
@@ -4658,6 +4681,8 @@ async def generate_synthesis_for_round(
 
     payload.model = _resolve_synthesis_model(db, payload.model)
     strategy = payload.strategy.lower()
+    if payload.experiment_budget != 'standard' and strategy != 'grounded':
+        raise HTTPException(400, 'Experiment budgets apply only to grounded opening extraction')
     if strategy not in {"grounded", "simple", "committee", "ttd", "custom", "question_summaries"}:
         raise HTTPException(
             status_code=400,
@@ -4698,7 +4723,7 @@ async def generate_synthesis_for_round(
             questions=list(questions), response_dicts=response_dicts,
             comments_context=round_comments_context, next_version=next_version,
             model=payload.model, custom_prompt="", summary_options=summary_options, db=db,
-            grounded=True,
+            grounded=True, experiment_budget=payload.experiment_budget,
         )
 
     if (strategy == "custom" or (round_number == 1 and strategy == "simple")) and synthesis_mode_env != "mock" and api_key:

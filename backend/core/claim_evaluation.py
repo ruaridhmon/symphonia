@@ -6,6 +6,15 @@ MODELS = {'openai/gpt-6-astra', 'google/gemini-4-argon',
           'anthropic/claude-opus-5.5', 'xiaomi/mimo-v2.6-pro'}
 
 
+def extraction_budget(profile, isolated_dev):
+    """Explicit sensitivity budget, restricted to isolated development experiments."""
+    if profile == 'standard':
+        return None
+    if profile != 'extended' or not isolated_dev:
+        raise ValueError('Extended extraction budgets require an isolated development experiment')
+    return {'max_tokens': 32768, 'timeout_seconds': 270}
+
+
 def provider_error_info(exc):
     """Expose only numeric status and known parameter labels, never provider text."""
     status = getattr(exc, 'status_code', None)

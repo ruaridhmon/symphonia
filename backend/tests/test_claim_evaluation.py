@@ -1,6 +1,6 @@
 import copy
 import unittest
-from core.claim_evaluation import validate_reference, validate_audit, prompt, provider_error_info
+from core.claim_evaluation import validate_reference, validate_audit, prompt, provider_error_info, extraction_budget
 
 
 class ClaimEvaluationTests(unittest.TestCase):
@@ -40,6 +40,14 @@ class ClaimEvaluationTests(unittest.TestCase):
     def test_provider_error_never_exposes_raw_message(self):
         exc=ValueError('secret-value and private source; temperature unsupported')
         self.assertEqual(provider_error_info(exc),{'provider_status':None,'parameter_hints':['temperature']})
+
+    def test_extended_budget_is_restricted_to_isolated_dev(self):
+        self.assertEqual(extraction_budget('extended',True),{'max_tokens':32768,'timeout_seconds':270})
+        with self.assertRaises(ValueError):extraction_budget('extended',False)
+
+    def test_unknown_budget_rejected_and_standard_unchanged(self):
+        with self.assertRaises(ValueError):extraction_budget('unbounded',True)
+        self.assertIsNone(extraction_budget('standard',False))
 
 
 if __name__=='__main__':unittest.main()
