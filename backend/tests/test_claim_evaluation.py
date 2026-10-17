@@ -1,6 +1,6 @@
 import copy
 import unittest
-from core.claim_evaluation import validate_reference, validate_audit, prompt
+from core.claim_evaluation import validate_reference, validate_audit, prompt, provider_error_info
 
 
 class ClaimEvaluationTests(unittest.TestCase):
@@ -36,6 +36,10 @@ class ClaimEvaluationTests(unittest.TestCase):
     def test_source_flags_must_be_booleans(self):
         bad=copy.deepcopy(self.ref);bad['units'][0]['conditional']='true'
         with self.assertRaises(ValueError):validate_reference(bad,self.sources)
+
+    def test_provider_error_never_exposes_raw_message(self):
+        exc=ValueError('secret-value and private source; temperature unsupported')
+        self.assertEqual(provider_error_info(exc),{'provider_status':None,'parameter_hints':['temperature']})
 
 
 if __name__=='__main__':unittest.main()

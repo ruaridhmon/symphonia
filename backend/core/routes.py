@@ -4403,9 +4403,10 @@ Use only the consultation material below. Preserve disagreement and uncertainty.
         ) from exc
     except Exception as exc:
         logger.exception("Custom synthesis failed for round %d", round_id)
+        from .claim_evaluation import provider_error_info
         raise HTTPException(
             status_code=500,
-            detail="Draft generation failed. The previous draft has been kept.",
+            detail="Draft generation failed. The previous draft has been kept. " + json.dumps(provider_error_info(exc)),
         ) from exc
 
     if grounded:
