@@ -4098,6 +4098,59 @@ class ClaimEvaluationPayload(BaseModel):
     synthesis_version_id: int | None = None
 
 
+class ClaimExperimentCopyPayload(BaseModel):
+    expected_texts: list[str]
+
+
+@router.post('/dev/forms/{form_id}/claim-experiment-copy', tags=['Synthesis'])
+@limiter.limit(CRUD_LIMIT)
+def copy_claim_experiment(
+    request: Request, form_id: int, payload: ClaimExperimentCopyPayload,
+    db: Session = Depends(get_db), user: User = Depends(require_platform_admin),
+):
+    """Idempotently copy only frozen synthetic R1 sources, in one transaction."""
+    from collections import Counter
+    from copy import deepcopy
+    if os.getenv('K_SERVICE', '').strip() != 'symphonia-dev': raise HTTPException(404,'Not found')
+    if form_id not in range(57,77): raise HTTPException(400,'Not a benchmark source study')
+    original = db.query(FormModel).filter_by(id=form_id).with_for_update().first()
+    if not original or not original.title.startswith('SIMULATED PANEL — '): raise HTTPException(400,'Not a synthetic source')
+    rd = db.query(RoundModel).filter_by(form_id=form_id,round_number=1).first()
+    rows = db.query(Response).filter_by(round_id=rd.id).order_by(Response.created_at.asc()).all()
+    def source_text(row):
+        a=json.loads(row.answers) if isinstance(row.answers,str) else row.answers
+        return a['q1']['position']
+    if Counter(source_text(r) for r in rows) != Counter(payload.expected_texts): raise HTTPException(409,'Source snapshot changed')
+    title='EXPERIMENT 2026-10-17 — SYNTHETIC — '+original.title.removeprefix('SIMULATED PANEL — ')
+    copies=db.query(FormModel).filter_by(title=title,owner_id=user.id).all()
+    if len(copies)>1: raise HTTPException(409,'Ambiguous experiment copies')
+    if copies:
+        target=copies[0]
+        target_round=db.query(RoundModel).filter_by(form_id=target.id,round_number=1).first()
+        if db.query(RoundModel).filter(RoundModel.form_id==target.id,RoundModel.round_number>1).first(): raise HTTPException(409,'Copy already has review rounds')
+    else:
+        code=generate_join_code()
+        while db.query(FormModel).filter_by(join_code=code).first():code=generate_join_code()
+        target=FormModel(title=title,questions=deepcopy(rd.questions),allow_join=False,allow_public_responses=False,require_consent=False,join_code=code,owner_id=user.id)
+        db.add(target);db.flush()
+        target_round=RoundModel(form_id=target.id,round_number=1,is_active=True,questions=deepcopy(rd.questions))
+        db.add(target_round);db.flush()
+        db.add(InviteCode(form_id=target.id,code=code,form_role='expert',created_by=user.id))
+    saved=db.query(Response).filter_by(round_id=target_round.id).order_by(Response.created_at.asc()).all()
+    if Counter(source_text(r) for r in saved)-Counter(payload.expected_texts): raise HTTPException(409,'Copy has changed or additional responses')
+    remaining=list(saved); mapping={}
+    for row in rows:
+        match=next((r for r in remaining if source_text(r)==source_text(row)),None)
+        if match is not None:remaining.remove(match)
+        else:
+            match=Response(form_id=target.id,round_id=target_round.id,user_id=row.user_id,answers=deepcopy(row.answers))
+            db.add(match);db.flush()
+        mapping[str(row.id)]=match.id
+    ctx=dict(target_round.context_settings or {});ctx['evaluation_original_form_id']=form_id;ctx['evaluation_response_mapping']=mapping
+    target_round.context_settings=ctx;db.commit()
+    return {'form_id':target.id,'round_id':target_round.id,'submitted':mapping,'origin':'authored_synthetic'}
+
+
 @router.post('/dev/forms/{form_id}/claim-evaluation', tags=['Synthesis'])
 @limiter.limit(SYNTHESIS_LIMIT)
 async def evaluate_claims(
